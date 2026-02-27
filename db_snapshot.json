@@ -1,0 +1,37 @@
+{
+  "counts": {
+    "userCount": 1,
+    "customerCount": 4,
+    "tenantUserCount": 2
+  },
+  "users": [
+    {
+      "id": "70313a6c-0a3a-4a0b-986a-7c84a9f7dc8e",
+      "email": "xm@live.fr",
+      "name": "ee",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    }
+  ],
+  "customers": [
+    {
+      "id": "4bda4666-1b2a-431b-a17f-8c1088a3a70c",
+      "name": "HMD",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    },
+    {
+      "id": "41cb198c-abb8-4548-abc9-f2f85e9feb09",
+      "name": "said",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    },
+    {
+      "id": "6f9d34cf-b3fc-4e2b-a7a0-d36a912903ec",
+      "name": "DIVERS",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    },
+    {
+      "id": "3b6c2259-b4f1-47fb-a945-64084198fb69",
+      "name": "omar",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    }
+  ]
+}
