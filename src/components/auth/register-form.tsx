@@ -28,6 +28,7 @@ export const RegisterForm = () => {
             email: "",
             password: "",
             name: "",
+            phone: "",
         },
     })
 
