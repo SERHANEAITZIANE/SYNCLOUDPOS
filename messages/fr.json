@@ -10,6 +10,7 @@
     "Navigation": {
         "dashboard": "Tableau de bord",
         "pos": "Caisse (POS)",
+        "users": "Utilisateurs",
         "products": "Produits",
         "sales": "Ventes",
         "settings": "Paramètres",

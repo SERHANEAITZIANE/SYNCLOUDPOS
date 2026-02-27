@@ -10,6 +10,7 @@
   "Navigation": {
     "dashboard": "Dashboard",
     "pos": "POS",
+    "users": "Users",
     "products": "Products",
     "sales": "Sales",
     "settings": "Settings",
