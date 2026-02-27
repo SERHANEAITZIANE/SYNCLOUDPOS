@@ -51,23 +51,14 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             }
         })
 
-        // ─── 4. Purchase Orders (supplier costs) ──────────────────────────
-        const purchases = await db.purchaseOrder.findMany({
-            where: {
-                tenantId,
-                status: "COMPLETED",
-                createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
-            }
-        })
-
-        // ─── 5. All Customers (for outstanding debt) ──────────────────────
+        // ─── 4. All Customers (for outstanding debt) ──────────────────────
         const customers = await db.customer.findMany({
             where: { tenantId },
             select: { id: true, name: true, balance: true },
             orderBy: { balance: "asc" } // most negative first = biggest debtors
         })
 
-        // ─── 6. Low Stock Products ────────────────────────────────────────
+        // ─── 5. Low Stock Products ────────────────────────────────────────
         const lowStockProducts = await db.product.findMany({
             where: {
                 tenantId,
@@ -82,8 +73,15 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const invoiceRevenue = salesOrders.reduce((acc: number, o: any) => acc + Number(o.total), 0)
         const totalRevenue = posRevenue + invoiceRevenue
         const totalExpenses = expenses.reduce((acc: number, e: any) => acc + Number(e.amount), 0)
-        const totalPurchaseCost = purchases.reduce((acc: number, p: any) => acc + Number(p.total), 0)
-        const netProfit = totalRevenue - totalExpenses - totalPurchaseCost
+
+        // COGS = cost of goods actually sold (qty × product.cost per item)
+        const calcCOGS = (orders: any[]) =>
+            orders.reduce((acc: number, o: any) =>
+                acc + o.items.reduce((iAcc: number, item: any) =>
+                    iAcc + (item.quantity * Number(item.product?.cost ?? 0)), 0), 0)
+        const totalCOGS = calcCOGS(posOrders) + calcCOGS(salesOrders)
+
+        const netProfit = totalRevenue - totalExpenses - totalCOGS
         const ordersCount = posOrders.length
         const salesCount = salesOrders.length
         // Outstanding debt = customers with negative balance (they owe money)
@@ -181,7 +179,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             posRevenue,
             invoiceRevenue,
             totalExpenses,
-            totalPurchaseCost,
+            totalCOGS,
             netProfit,
             ordersCount,
             salesCount,
@@ -198,7 +196,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         console.error("[GET_ANALYTICS]", error)
         return {
             totalRevenue: 0, posRevenue: 0, invoiceRevenue: 0,
-            totalExpenses: 0, totalPurchaseCost: 0, netProfit: 0,
+            totalExpenses: 0, totalCOGS: 0, netProfit: 0,
             ordersCount: 0, salesCount: 0, outstandingDebt: 0,
             revenueOverTime: [], topProducts: [], categoryPerformance: [],
             recentOrders: [], topCustomers: [], lowStock: [], debtors: []

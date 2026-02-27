@@ -156,3 +156,84 @@ export const registerSupplierPayment = async (data: {
         return { error: error instanceof Error ? error.message : "Erreur lors de l'enregistrement du paiement" }
     }
 }
+
+export const registerSupplierLoan = async (data: { supplierId: string; amount: number; notes?: string; date?: Date | string }) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    // @ts-expect-error tenantId
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing" }
+
+    try {
+        const supplier = await db.supplier.findUnique({ where: { id: data.supplierId } })
+
+        // Increase supplier balance (we owe them more — they gave us an advance)
+        // Also append a tagged note entry for loan history tracking
+        await db.supplier.update({
+            where: { id: data.supplierId },
+            data: {
+                balance: { increment: data.amount },
+                notes: [
+                    supplier?.notes,
+                    `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance reçue"}`
+                ].filter(Boolean).join("\n")
+            }
+        })
+
+        revalidatePath("/(dashboard)/suppliers")
+        revalidatePath("/(dashboard)/emprunt-fournisseur")
+        return { success: "Emprunt fournisseur enregistré avec succès" }
+    } catch (error) {
+        console.error("registerSupplierLoan error:", error)
+        return { error: "Failed to register supplier loan" }
+    }
+}
+
+export const getSupplierLoans = async (supplierId?: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return []
+    // @ts-expect-error tenantId
+    const tenantId = session.user.tenantId
+    if (!tenantId) return []
+
+    try {
+        const where: any = { tenantId }
+        if (supplierId && supplierId !== "ALL") {
+            where.id = supplierId
+        }
+
+        const suppliers = await db.supplier.findMany({
+            where,
+            select: { id: true, name: true, notes: true }
+        })
+
+        const loans: { id: string; date: string; amount: number; description: string; supplierName: string; supplierId: string }[] = []
+
+        suppliers.forEach(s => {
+            if (!s.notes) return
+            const lines = s.notes.split("\n")
+            lines.forEach((line, idx) => {
+                const match = line.match(/\[EMPRUNT (\d{2}\/\d{2}\/\d{4})\]\s+(\d+(?:\.\d+)?)\s+DA\s*-\s*(.*)/)
+                if (match) {
+                    const [, dateStr, amount, desc] = match
+                    const [day, month, year] = dateStr.split("/")
+                    loans.push({
+                        id: `${s.id}-${idx}`,
+                        date: new Date(`${year}-${month}-${day}`).toISOString(),
+                        amount: parseFloat(amount),
+                        description: desc.trim(),
+                        supplierName: s.name,
+                        supplierId: s.id
+                    })
+                }
+            })
+        })
+
+        loans.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        return loans
+    } catch (error) {
+        console.error("getSupplierLoans error:", error)
+        return []
+    }
+}
+

@@ -153,3 +153,85 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
         return { error: "Failed to register payment" }
     }
 }
+
+export const registerCustomerLoan = async (data: { customerId: string; amount: number; notes?: string; date?: Date | string }) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    // @ts-expect-error tenantId
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing" }
+
+    try {
+        // Get the customer info for the description
+        const customer = await db.customer.findUnique({ where: { id: data.customerId } })
+
+        // Increase customer balance (adds to their debt — they now owe more)
+        await db.customer.update({
+            where: { id: data.customerId },
+            data: {
+                balance: { increment: data.amount },
+                notes: [
+                    customer?.notes,
+                    `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance accordée"}`
+                ].filter(Boolean).join("\n")
+            }
+        })
+
+        revalidatePath("/(dashboard)/customers")
+        revalidatePath("/(dashboard)/emprunt")
+        return { success: "Loan registered successfully" }
+    } catch (error) {
+        console.error("registerCustomerLoan error:", error)
+        return { error: "Failed to register loan" }
+    }
+}
+
+export const getCustomerLoans = async (customerId?: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return []
+    // @ts-expect-error tenantId
+    const tenantId = session.user.tenantId
+    if (!tenantId) return []
+
+    // Loans are tracked via customer notes — parse loan entries from all customers
+    try {
+        const where: any = { tenantId }
+        if (customerId && customerId !== "ALL") {
+            where.id = customerId
+        }
+
+        const customers = await db.customer.findMany({
+            where,
+            select: { id: true, name: true, notes: true }
+        })
+
+        const loans: { id: string; date: string; amount: number; description: string; customerName: string; customerId: string }[] = []
+
+        customers.forEach(c => {
+            if (!c.notes) return
+            const lines = c.notes.split("\n")
+            lines.forEach((line, idx) => {
+                const match = line.match(/\[EMPRUNT (\d{2}\/\d{2}\/\d{4})\]\s+(\d+(?:\.\d+)?)\s+DA\s*-\s*(.*)/)
+                if (match) {
+                    const [, dateStr, amount, desc] = match
+                    const [day, month, year] = dateStr.split("/")
+                    loans.push({
+                        id: `${c.id}-${idx}`,
+                        date: new Date(`${year}-${month}-${day}`).toISOString(),
+                        amount: parseFloat(amount),
+                        description: desc.trim(),
+                        customerName: c.name,
+                        customerId: c.id
+                    })
+                }
+            })
+        })
+
+        // Sort most recent first
+        loans.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        return loans
+    } catch (error) {
+        console.error("getCustomerLoans error:", error)
+        return []
+    }
+}

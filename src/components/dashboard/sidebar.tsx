@@ -16,7 +16,10 @@ import {
     Truck,
     ShoppingBag,
     LineChart,
-    ShieldCheck
+    ShieldCheck,
+    Landmark,
+    CreditCard,
+    Building2
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -47,7 +50,8 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
         fetchData();
     }, []);
 
-    const routes = [
+    // Routes visible to all authenticated users (default set)
+    const allRoutes = [
         {
             label: t("dashboard"),
             icon: LayoutDashboard,
@@ -126,7 +130,61 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             href: "/analytics",
             color: "text-blue-600",
         },
+        {
+            label: "Paiements",
+            icon: CreditCard,
+            href: "/payments",
+            color: "text-green-600",
+        },
+        {
+            label: "Emprunt Client",
+            icon: Landmark,
+            href: "/emprunt",
+            color: "text-red-500",
+        },
+        {
+            label: "Emprunt Fournisseur",
+            icon: Building2,
+            href: "/emprunt-fournisseur",
+            color: "text-orange-500",
+        },
     ];
+
+    // Routes for VENDEUR role: limited access only
+    const vendeurRoutes = [
+        {
+            label: t("pos"),
+            icon: Store,
+            href: "/pos",
+            color: "text-emerald-500",
+        },
+        {
+            label: t("sales"),
+            icon: ShoppingCart,
+            href: "/sales",
+            color: "text-violet-500",
+        },
+        {
+            label: t("customers"),
+            icon: Users,
+            href: "/customers",
+            color: "text-orange-700",
+        },
+        {
+            label: "Paiements",
+            icon: CreditCard,
+            href: "/payments",
+            color: "text-green-600",
+        },
+        {
+            label: "Emprunt Client",
+            icon: Landmark,
+            href: "/emprunt",
+            color: "text-red-500",
+        },
+    ];
+
+    const routes = role === "VENDEUR" ? vendeurRoutes : [...allRoutes];
 
     if (role === "ADMIN" || isSuperadmin) {
         routes.push(

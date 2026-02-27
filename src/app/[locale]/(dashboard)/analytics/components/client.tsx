@@ -24,7 +24,7 @@ interface AnalyticsData {
     posRevenue: number
     invoiceRevenue: number
     totalExpenses: number
-    totalPurchaseCost: number
+    totalCOGS: number
     netProfit: number
     ordersCount: number
     salesCount: number
@@ -114,9 +114,9 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 />
                 <KpiCard
                     title="Charges totales"
-                    value={formatter.format(data.totalExpenses + data.totalPurchaseCost)}
+                    value={formatter.format(data.totalExpenses + data.totalCOGS)}
                     icon={TrendingDown}
-                    sub={`Dépenses: ${formatter.format(data.totalExpenses)} · Achats: ${formatter.format(data.totalPurchaseCost)}`}
+                    sub={`Dépenses: ${formatter.format(data.totalExpenses)} · Coût ventes: ${formatter.format(data.totalCOGS)}`}
                     color="red"
                 />
                 <KpiCard

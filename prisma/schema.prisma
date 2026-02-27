@@ -178,6 +178,7 @@ model Supplier {
   phone         String?
   address       String?
   taxId         String?
+  notes         String?  // Used for tracking loan history entries
   balance       Decimal  @default(0)  // Outstanding amount owed to supplier
   tenantId      String
   tenant        Tenant   @relation(fields: [tenantId], references: [id])
