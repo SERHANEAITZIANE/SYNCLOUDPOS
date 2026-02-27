@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ImagePlus, Trash } from "lucide-react"
 import Image from "next/image"
+import imageCompression from "browser-image-compression";
 
 
 interface ImageUploadProps {
@@ -30,11 +31,22 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         if (!e.target.files || e.target.files.length === 0) return;
 
         const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append("file", file);
 
         try {
             setIsLoading(true);
+
+            // Compress the image before uploading
+            const options = {
+                maxSizeMB: 0.5, // 500KB max
+                maxWidthOrHeight: 1200, // 1200px max width/height
+                useWebWorker: true,
+            };
+
+            const compressedFile = await imageCompression(file, options);
+
+            const formData = new FormData();
+            formData.append("file", compressedFile, compressedFile.name);
+
             const response = await fetch("/api/upload", {
                 method: "POST",
                 body: formData,
