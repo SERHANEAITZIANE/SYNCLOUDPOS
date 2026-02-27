@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
-import { getActiveTenant } from "@/actions/get-active-tenant";
+import { getActiveTenantId } from "@/actions/get-active-tenant";
 import { TreasuryReportClient } from "./components/client";
 import { redirect } from "next/navigation";
 
 export default async function TreasuryReportPage() {
-    const tenantId = await getActiveTenant();
+    const tenantId = await getActiveTenantId();
 
     if (!tenantId) {
         redirect("/login");

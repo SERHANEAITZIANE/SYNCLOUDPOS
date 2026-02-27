@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
-import { getActiveTenant } from "@/actions/get-active-tenant";
+import { getActiveTenantId } from "@/actions/get-active-tenant";
 import { InventoryReportClient } from "./components/client";
 import { redirect } from "next/navigation";
 
 export default async function InventoryReportPage() {
-    const tenantId = await getActiveTenant();
+    const tenantId = await getActiveTenantId();
 
     if (!tenantId) {
         redirect("/login");
