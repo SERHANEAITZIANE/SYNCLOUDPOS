@@ -1,0 +1,23 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.2s
+  Running TypeScript ...
+Failed to compile.
+
+./src/actions/barcode.ts:53:25
+Type error: Parameter 'b' implicitly has an 'any' type.
+
+[0m [90m 51 |[39m         [36mif[39m (latestProduct [33m&&[39m latestProduct[33m.[39mbarcodes) {
+ [90m 52 |[39m             [36mconst[39m autoBarcodes [33m=[39m latestProduct[33m.[39mbarcodes
+[31m[1m>[22m[39m[90m 53 |[39m                 [33m.[39mfilter(b [33m=>[39m b[33m.[39mvalue[33m.[39mstartsWith([33mBARCODE_PREFIX[39m) [33m&&[39m b[33m.[39mvalue[33m.[39mlength [33m===[39m [33mBARCODE_LENGTH[39m)
+ [90m    |[39m                         [31m[1m^[22m[39m
+ [90m 54 |[39m                 [33m.[39mmap(b [33m=>[39m {
+ [90m 55 |[39m                     [90m// Extract the middle sequence (ignoring the last checksum digit)[39m
+ [90m 56 |[39m                     [36mconst[39m sequenceStr [33m=[39m b[33m.[39mvalue[33m.[39msubstring([33mBARCODE_PREFIX[39m[33m.[39mlength[33m,[39m [33mBARCODE_LENGTH[39m [33m-[39m [35m1[39m)[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

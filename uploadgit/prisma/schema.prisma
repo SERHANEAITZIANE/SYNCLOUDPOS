@@ -1,0 +1,323 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
+}
+
+// Enums removed for SQLite compatibility
+// Role: ADMIN, MANAGER, CASHIER
+// OrderStatus: PENDING, COMPLETED, CANCELLED
+
+// Models
+
+model Tenant {
+  id          String   @id @default(uuid())
+  name        String
+  ownerName   String?   // Nom
+  activity    String?   // Activité
+  address     String?   // Adresse
+  wilaya      String?   // Wilaya
+  commune     String?   // Commune
+  phone       String?   // Téléphone
+  fax         String?   // Fax
+  email       String?   // E-Mail
+  nif         String?   // Nif
+  rc          String?   // N° Rc
+  artImposition String? // Article d'imposition
+  nis         String?   // NIS
+  bankAccount String?   // Compte bancaire
+  logo        String?   // Photo
+  headerText  String?   // Entête
+  blTemplate  String?   @default("standard") // Template for Bon de Livraison
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  users       User[]
+  tenantUsers TenantUser[]
+  products    Product[]
+  brands      Brand[]
+  categories  Category[]
+  orders      Order[]
+  customers   Customer[]
+  suppliers   Supplier[]
+  purchaseOrders PurchaseOrder[]
+  salesOrders    SalesOrder[]
+  expenses       Expense[]
+  expenseCategories ExpenseCategory[]
+  treasuryAccounts TreasuryAccount[]
+  treasuryTransactions TreasuryTransaction[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("CASHIER")
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders      Order[]
+  tenantUsers TenantUser[]
+}
+
+model TenantUser {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, tenantId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal
+  cost        Decimal?
+  wholesalePrice Decimal?
+  dealerPrice    Decimal?
+  isFeatured  Boolean   @default(false)
+  isArchived  Boolean   @default(false)
+  stock       Int      @default(0)
+  minStock    Int      @default(0)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  brandId     String?
+  brand       Brand?    @relation(fields: [brandId], references: [id])
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orderItems  OrderItem[]
+  purchaseItems PurchaseOrderItem[]
+  salesItems    SalesOrderItem[]
+  images      Image[]
+  barcodes    Barcode[]
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Barcode {
+  id        String   @id @default(uuid())
+  value     String
+  label     String?  // e.g. "EAN-13", "UPC", "Internal"
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Brand {
+  id        String    @id @default(uuid())
+  name      String
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  taxId     String?  // NIF/NIS
+  notes     String?
+  barcode   String?  @unique
+  loyaltyPoints Int @default(0)
+  balance       Decimal @default(0)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  orders    Order[]
+  salesOrders SalesOrder[]
+  clientType String @default("RETAIL")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Supplier {
+  id            String   @id @default(uuid())
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?
+  taxId         String?
+  balance       Decimal  @default(0)  // Outstanding amount owed to supplier
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  purchaseOrders PurchaseOrder[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  total       Decimal
+  paidAmount  Decimal     @default(0)
+  status      String      @default("COMPLETED")
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  customerId  String?
+  customer    Customer?   @relation(fields: [customerId], references: [id])
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  items       OrderItem[]
+  accountId   String?
+  account     TreasuryAccount? @relation(fields: [accountId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal
+}
+
+model PurchaseOrder {
+  id          String      @id @default(uuid())
+  supplierId  String
+  supplier    Supplier    @relation(fields: [supplierId], references: [id])
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  total       Decimal
+  status      String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  items       PurchaseOrderItem[]
+  accountId   String?
+  account     TreasuryAccount? @relation(fields: [accountId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(uuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  quantity        Int
+  costPrice       Decimal
+}
+
+model SalesOrder {
+  id              String        @id @default(uuid())
+  tenantId        String
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  customerId      String
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  type            String        @default("ORDER") // QUOTE, ORDER, INVOICE
+  status          String        @default("DRAFT") // DRAFT, VALIDATED, PAID, CANCELLED
+  receiptNumber   String?       // Custom receipt number (e.g. BL0023/02/2026)
+  total           Decimal
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  items           SalesOrderItem[]
+}
+
+model SalesOrderItem {
+  id              String        @id @default(uuid())
+  salesOrderId    String
+  salesOrder      SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPrice       Decimal
+}
+
+model ExpenseCategory {
+  id        String    @id @default(uuid())
+  name      String
+  type      String    @default("VARIABLE") // FIXED, VARIABLE
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  expenses  Expense[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  description String
+  amount      Decimal
+  date        DateTime        @default(now())
+  categoryId  String
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  accountId   String?
+  account     TreasuryAccount? @relation(fields: [accountId], references: [id])
+}
+
+model TreasuryAccount {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // CAISSE, BANK
+  balance     Decimal  @default(0)
+  rib         String?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  transactions TreasuryTransaction[]
+  orders       Order[]
+  purchases    PurchaseOrder[]
+  expenses     Expense[]
+}
+
+model TreasuryTransaction {
+  id            String   @id @default(uuid())
+  accountId     String
+  account       TreasuryAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type          String   // CREDIT, DEBIT
+  amount        Decimal
+  balanceBefore Decimal
+  balanceAfter  Decimal
+  source        String   // SALE, PURCHASE, EXPENSE, MANUAL_IN, MANUAL_OUT, TRANSFER, INITIAL_BALANCE
+  referenceId   String?  // ID of the related order, purchase, or expense
+  description   String?
+  date          DateTime @default(now())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime @default(now())
+}
+

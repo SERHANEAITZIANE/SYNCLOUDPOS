@@ -1,0 +1,28 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 20.2s
+  Running TypeScript ...
+Failed to compile.
+
+./src/actions/analytics.ts:81:46
+Type error: Parameter 'acc' implicitly has an 'any' type.
+
+[0m [90m 79 |[39m
+ [90m 80 |[39m         [90m// ─── Calculations ─────────────────────────────────────────────────[39m
+[31m[1m>[22m[39m[90m 81 |[39m         [36mconst[39m posRevenue [33m=[39m posOrders[33m.[39mreduce((acc[33m,[39m o) [33m=>[39m acc [33m+[39m [33mNumber[39m(o[33m.[39mtotal)[33m,[39m [35m0[39m)
+ [90m    |[39m                                              [31m[1m^[22m[39m
+ [90m 82 |[39m         [36mconst[39m invoiceRevenue [33m=[39m salesOrders[33m.[39mreduce((acc[33m,[39m o) [33m=>[39m acc [33m+[39m [33mNumber[39m(o[33m.[39mtotal)[33m,[39m [35m0[39m)
+ [90m 83 |[39m         [36mconst[39m totalRevenue [33m=[39m posRevenue [33m+[39m invoiceRevenue
+ [90m 84 |[39m         [36mconst[39m totalExpenses [33m=[39m expenses[33m.[39mreduce((acc[33m,[39m e) [33m=>[39m acc [33m+[39m [33mNumber[39m(e[33m.[39mamount)[33m,[39m [35m0[39m)[0m
+Next.js build worker exited with code: 1 and signal: null

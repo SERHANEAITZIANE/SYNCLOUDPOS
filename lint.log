@@ -1,0 +1,346 @@
+
+> syncloudpos@0.1.0 lint
+> eslint
+
+
+C:\Users\tre\Documents\SYNCLOUDPOS\prisma\seed.ts
+  22:11  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\scripts\seed-admin.ts
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\actions\customers.ts
+  32:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  70:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  85:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\actions\purchase-orders.ts
+  41:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  63:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\actions\sales-orders.ts
+  105:19  warning  'pointsEarned' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+  131:9   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  133:13  error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\actions\suppliers.ts
+  31:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  71:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  86:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\analytics\components\client.tsx
+   6:5   warning  'CartesianGrid' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   7:5   warning  'Legend' is defined but never used                                                                                                  @typescript-eslint/no-unused-vars
+   8:5   warning  'Line' is defined but never used                                                                                                    @typescript-eslint/no-unused-vars
+   9:5   warning  'LineChart' is defined but never used                                                                                               @typescript-eslint/no-unused-vars
+  14:5   warning  'PieChart' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+  15:5   warning  'Pie' is defined but never used                                                                                                     @typescript-eslint/no-unused-vars
+  16:5   warning  'Cell' is defined but never used                                                                                                    @typescript-eslint/no-unused-vars
+  23:34  warning  'Package' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+  49:39  error    React Hook "React.useState" is called conditionally. React Hooks must be called in the exact same order in every component render   react-hooks/rules-of-hooks
+  51:5   error    React Hook "React.useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\analytics\page.tsx
+  10:13  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\analytics\page.tsx:10:13
+   8 |
+   9 |         return (
+> 10 |             <div className="flex-col">
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 11 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 12 |                     <AnalyticsClient data={analyticsData} />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 13 |                 </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 14 |             </div>
+     | ^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  15 |         )
+  16 |     } catch (error) {
+  17 |         console.error("Failed to load analytics data:", error)  react-hooks/error-boundaries
+  11:17  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\analytics\page.tsx:11:17
+   9 |         return (
+  10 |             <div className="flex-col">
+> 11 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 12 |                     <AnalyticsClient data={analyticsData} />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 13 |                 </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  14 |             </div>
+  15 |         )
+  16 |     } catch (error) {                                                                                                                                                                                           react-hooks/error-boundaries
+  12:21  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\analytics\page.tsx:12:21
+  10 |             <div className="flex-col">
+  11 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+> 12 |                     <AnalyticsClient data={analyticsData} />
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  13 |                 </div>
+  14 |             </div>
+  15 |         )                                                                                                                                                                                                                                                                                                                                                  react-hooks/error-boundaries
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\customers\page.tsx
+   2:10  warning  'format' is defined but never used           @typescript-eslint/no-unused-vars
+  20:13  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\dashboard\page.tsx
+  16:13  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\dashboard\page.tsx:16:13
+  14 |
+  15 |         return (
+> 16 |             <div className="flex-col">
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 17 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 18 |                     <AnalyticsClient data={analyticsData} />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 19 |                 </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 20 |             </div>
+     | ^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  21 |         );
+  22 |     } catch (error) {
+  23 |         console.error("Dashboard error:", error);  react-hooks/error-boundaries
+  17:17  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\dashboard\page.tsx:17:17
+  15 |         return (
+  16 |             <div className="flex-col">
+> 17 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 18 |                     <AnalyticsClient data={analyticsData} />
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 19 |                 </div>
+     | ^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  20 |             </div>
+  21 |         );
+  22 |     } catch (error) {                                                                                                                                                                              react-hooks/error-boundaries
+  18:21  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\dashboard\page.tsx:18:21
+  16 |             <div className="flex-col">
+  17 |                 <div className="flex-1 space-y-4 p-8 pt-6">
+> 18 |                     <AnalyticsClient data={analyticsData} />
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  19 |                 </div>
+  20 |             </div>
+  21 |         );                                                                                                                                                                                                                                                                                                                                     react-hooks/error-boundaries
+  29:33  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react/no-unescaped-entities
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\expenses\components\client.tsx
+  22:11  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\sales\[salesId]\page.tsx
+  12:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  63:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\sales\components\client.tsx
+  35:11  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\sales\page.tsx
+  17:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\suppliers\page.tsx
+   2:10  warning  'format' is defined but never used           @typescript-eslint/no-unused-vars
+  21:13  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(pos)\layout.tsx
+  2:10  warning  'Toaster' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\app\api\upload\route.ts
+  22:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\auth\login-form.tsx
+  33:12  warning  'error' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  34:12  warning  'success' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\auth\register-form.tsx
+  34:12  warning  'error' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  35:12  warning  'success' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\brands\cell-action.tsx
+   3:10  warning  'Copy' is defined but never used              @typescript-eslint/no-unused-vars
+  37:11  warning  'params' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  38:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  47:18  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\brands\client.tsx
+  22:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  23:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\categories\cell-action.tsx
+  27:11  warning  'params' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  28:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\categories\client.tsx
+  22:11  warning  'router' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  23:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\customers\cell-action.tsx
+  28:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  36:18  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\customers\customer-form.tsx
+  36:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  78:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+  96:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\header.tsx
+  2:10  warning  'ModeToggle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\language-switcher.tsx
+  16:11  warning  'locale' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  17:11  warning  'router' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  23:15  warning  'segments' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\mobile-sidebar.tsx
+  16:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\mobile-sidebar.tsx:16:9
+  14 |     // Close sidebar when route changes
+  15 |     useEffect(() => {
+> 16 |         setOpen(false);
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  17 |     }, [pathname]);
+  18 |
+  19 |     return (  react-hooks/set-state-in-effect
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\sidebar.tsx
+  20:10  warning  'useTranslations' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\dashboard\store-switcher.tsx
+  29:5  warning  'DialogTrigger' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\expenses\cell-action.tsx
+   3:16  warning  'Edit' is defined but never used             @typescript-eslint/no-unused-vars
+  27:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  42:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\expenses\expense-form.tsx
+   7:16  warning  'Trash' is defined but never used            @typescript-eslint/no-unused-vars
+  52:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  79:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+  94:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\modals\alert-modal.tsx
+  24:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\modals\alert-modal.tsx:24:9
+  22 |
+  23 |     useEffect(() => {
+> 24 |         setIsMounted(true)
+     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |     }, [])
+  26 |
+  27 |     if (!isMounted) {  react-hooks/set-state-in-effect
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\pos\cart-sidebar.tsx
+  3:20  warning  'useEffect' is defined but never used     @typescript-eslint/no-unused-vars
+  4:10  warning  'Trash' is defined but never used         @typescript-eslint/no-unused-vars
+  4:30  warning  'ShoppingCart' is defined but never used  @typescript-eslint/no-unused-vars
+  4:47  warning  'PlusCircle' is defined but never used    @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\pos\pos-client.tsx
+  9:10  warning  'cn' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\pos\product-card.tsx
+  8:23  warning  'CartItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\products\cell-action.tsx
+   3:10  warning  'Copy' is defined but never used              @typescript-eslint/no-unused-vars
+  27:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  28:12  warning  'open' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\products\client.tsx
+  21:11  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\products\product-form.tsx
+   64:10  warning  'AlertModal' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   89:11  warning  'params' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+   91:12  warning  'open' is assigned a value but never used                                                                            @typescript-eslint/no-unused-vars
+  148:17  error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  150:21  error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  165:11  warning  'onDelete' is assigned a value but never used                                                                        @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\purchases\cell-action.tsx
+   3:16  warning  'Edit' is defined but never used                 @typescript-eslint/no-unused-vars
+   3:38  warning  'Trash' is defined but never used                @typescript-eslint/no-unused-vars
+  26:12  warning  'loading' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  26:21  warning  'setLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\purchases\purchase-form.tsx
+   4:20  warning  'useEffect' is defined but never used        @typescript-eslint/no-unused-vars
+  49:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  99:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\sales\cell-action.tsx
+   3:16  warning  'Edit' is defined but never used                 @typescript-eslint/no-unused-vars
+  26:12  warning  'loading' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  26:21  warning  'setLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\sales\sales-form.tsx
+   25:10  warning  'AlertModal' is defined but never used       @typescript-eslint/no-unused-vars
+   61:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   64:12  warning  'open' is assigned a value but never used    @typescript-eslint/no-unused-vars
+   65:11  warning  'locale' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  165:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\suppliers\cell-action.tsx
+  28:12  warning  'loading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  36:18  warning  'error' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\suppliers\supplier-form.tsx
+  36:11  warning  'params' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  77:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+  95:18  warning  'error' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\ui\data-table.tsx
+  42:19  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\ui\data-table.tsx:42:19
+  40 |     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  41 |
+> 42 |     const table = useReactTable({
+     |                   ^^^^^^^^^^^^^ TanStack Table's `useReactTable()` API returns functions that cannot be memoized safely
+  43 |         data,
+  44 |         columns,
+  45 |         getCoreRowModel: getCoreRowModel(),  react-hooks/incompatible-library
+
+C:\Users\tre\Documents\SYNCLOUDPOS\src\components\ui\date-range-picker.tsx
+  4:10  warning  'addDays' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 114 problems (20 errors, 94 warnings)
+

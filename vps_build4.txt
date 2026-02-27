@@ -1,0 +1,23 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 18.4s
+  Running TypeScript ...
+Failed to compile.
+
+./src/actions/analytics.ts:101:29
+Type error: Parameter 'o' implicitly has an 'any' type.
+
+[0m [90m  99 |[39m             revenueMap[33m.[39m[36mset[39m(date[33m,[39m { [33m...[39mcur[33m,[39m revenue[33m:[39m cur[33m.[39mrevenue [33m+[39m [33mNumber[39m(o[33m.[39mtotal) })
+ [90m 100 |[39m         })
+[31m[1m>[22m[39m[90m 101 |[39m         salesOrders[33m.[39mforEach(o [33m=>[39m {
+ [90m     |[39m                             [31m[1m^[22m[39m
+ [90m 102 |[39m             [36mconst[39m date [33m=[39m format(o[33m.[39mcreatedAt [36mas[39m [33mDate[39m[33m,[39m [32m"MMM dd"[39m)
+ [90m 103 |[39m             [36mconst[39m cur [33m=[39m revenueMap[33m.[39m[36mget[39m(date) [33m||[39m { revenue[33m:[39m [35m0[39m[33m,[39m expenses[33m:[39m [35m0[39m }
+ [90m 104 |[39m             revenueMap[33m.[39m[36mset[39m(date[33m,[39m { [33m...[39mcur[33m,[39m revenue[33m:[39m cur[33m.[39mrevenue [33m+[39m [33mNumber[39m(o[33m.[39mtotal) })[0m
+Next.js build worker exited with code: 1 and signal: null

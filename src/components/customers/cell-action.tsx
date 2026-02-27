@@ -1,0 +1,73 @@
+"use client"
+
+import { Edit, MoreHorizontal, Trash, ScrollText, QrCode } from "lucide-react"
+import { useRouter } from "@/i18n/routing"
+import { useState } from "react"
+import { toast } from "react-hot-toast"
+import { useTranslations } from "next-intl"
+
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuLabel, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { CustomerColumn } from "./types"
+import { deleteCustomer } from "@/actions/customers"
+import { CustomerQrModal } from "./customer-qr-modal"
+
+interface CellActionProps {
+    data: CustomerColumn
+}
+
+export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [qrOpen, setQrOpen] = useState(false)
+    const tCommon = useTranslations("Common")
+
+    const onConfirm = async () => {
+        try {
+            setLoading(true)
+            await deleteCustomer(data.id)
+            toast.success("Client supprimé.")
+            router.refresh()
+        } catch {
+            toast.error("Erreur lors de la suppression.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <>
+            <CustomerQrModal
+                isOpen={qrOpen}
+                onClose={() => setQrOpen(false)}
+                customer={data}
+            />
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">{tCommon("actions")}</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setQrOpen(true)}>
+                        <QrCode className="mr-2 h-4 w-4" /> Afficher Code QR
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}/ledger`)}>
+                        <ScrollText className="mr-2 h-4 w-4" /> Voir Historique (Log)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}`)}>
+                        <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onConfirm} className="text-red-600">
+                        <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
+    )
+}

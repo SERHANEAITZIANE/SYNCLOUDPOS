@@ -1,0 +1,65 @@
+[TAILING] Tailing last 50 lines for [syncloudpos] process (change the value with --lines option)
+/root/.pm2/logs/syncloudpos-out.log last 50 lines:
+0|syncloud | 
+0|syncloud | > syncloudpos@0.1.0 start
+0|syncloud | > next start
+0|syncloud | 
+0|syncloud | ▲ Next.js 16.1.6
+0|syncloud | - Local:         http://localhost:3000
+0|syncloud | - Network:       http://155.133.26.217:3000
+0|syncloud | 
+0|syncloud | ✓ Starting...
+0|syncloud | ✓ Ready in 767ms
+
+/root/.pm2/logs/syncloudpos-error.log last 50 lines:
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+0|syncloud | ⨯ TypeError: Invalid URL
+0|syncloud |     at fv (.next/server/chunks/ssr/_e5869d89._.js:415:50686)
+0|syncloud |     at fH (.next/server/chunks/ssr/_e5869d89._.js:415:59287)
+0|syncloud |     at async g (.next/server/chunks/ssr/[root-of-the-server]__35a5af57._.js:2:518)
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+0|syncloud | ⨯ TypeError: Invalid URL
+0|syncloud |     at fv (.next/server/chunks/ssr/_e5869d89._.js:415:50686)
+0|syncloud |     at fH (.next/server/chunks/ssr/_e5869d89._.js:415:59287)
+0|syncloud |     at async g (.next/server/chunks/ssr/[root-of-the-server]__35a5af57._.js:2:518)
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+0|syncloud | ⨯ TypeError: Invalid URL
+0|syncloud |     at fv (.next/server/chunks/ssr/_e5869d89._.js:415:50686)
+0|syncloud |     at fH (.next/server/chunks/ssr/_e5869d89._.js:415:59287)
+0|syncloud |     at async g (.next/server/chunks/ssr/[root-of-the-server]__35a5af57._.js:2:518)
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+0|syncloud | ⨯ TypeError: Invalid URL
+0|syncloud |     at fv (.next/server/chunks/ssr/_e5869d89._.js:415:50686)
+0|syncloud |     at fH (.next/server/chunks/ssr/_e5869d89._.js:415:59287)
+0|syncloud |     at async g (.next/server/chunks/ssr/[root-of-the-server]__35a5af57._.js:2:518)
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+0|syncloud | ⨯ TypeError: Invalid URL
+0|syncloud |     at fv (.next/server/chunks/ssr/_e5869d89._.js:415:50686)
+0|syncloud |     at fH (.next/server/chunks/ssr/_e5869d89._.js:415:59287)
+0|syncloud |     at async g (.next/server/chunks/ssr/[root-of-the-server]__35a5af57._.js:2:518)
+0|syncloud |     at async m (.next/server/chunks/ssr/_91620fc3._.js:1:7361) {
+0|syncloud |   code: 'ERR_INVALID_URL',
+0|syncloud |   input: '155.133.26.217',
+0|syncloud |   digest: '3964981727'
+0|syncloud | }
+

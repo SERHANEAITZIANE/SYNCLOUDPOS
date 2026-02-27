@@ -1,0 +1,35 @@
+Command 'pm2' not found, did you mean:
+  command 'tpm2' from deb tpm2-tools (5.2-1build1)
+  command 'wm2' from deb wm2 (4+svn20090216-4build1)
+  command 'pmi' from deb powermanagement-interface (0.3.21)
+  command 'pom2' from deb libpod-pom-perl (2.01-3)
+  command 'pmc' from deb linuxptp (3.1.1-3)
+  command 'pm' from deb powerman (2.3.5-1build2)
+  command 'pmw' from deb pmw (1:4.50-1)
+  command 'gm2' from deb gm2 (4:11.2.0-1ubuntu1)
+  command 'pms' from deb pms (0.42-1build4)
+  command 'pmg' from deb python3-pymatgen (2022.0.17+dfsg1-1build1)
+Try: apt install <deb name>
+Command 'node' not found, but can be installed with:
+apt install nodejs
+total 16
+drwxr-xr-x  4 root root 4096 Feb 26 01:30 .
+drwxr-xr-x 14 root root 4096 Feb 26 01:04 ..
+drwxr-xr-x  2 root root 4096 Feb 26 01:30 html
+drwxr-xr-x  4 root root 4096 Feb 26 01:45 syncloudpos
+total 60
+drwx------  8 root root 4096 Feb 26 02:34 .
+drwxr-xr-x 19 root root 4096 Feb 14 21:37 ..
+-rw-------  1 root root   55 Feb 26 00:30 .bash_history
+-rw-r--r--  1 root root 3106 Oct 15  2021 .bashrc
+drwx------  2 root root 4096 Feb 26 00:06 .cache
+drwx------  3 root root 4096 Feb 26 00:38 .docker
+-rw-------  1 root root   20 Feb 26 01:42 .lesshst
+drwxr-xr-x  3 root root 4096 Feb 26 00:35 .local
+-rw-r--r--  1 root root  161 Jul  9  2019 .profile
+drwx------  2 root root 4096 Feb 14 21:37 .ssh
+drwxr-xr-x  3 root root 4096 Feb 26 00:33 apps
+-rw-r--r--  1 root root 2412 Feb 26 02:33 debug.txt
+-rw-r--r--  1 root root  847 Feb 26 02:34 debug2.txt
+drwx------  3 root root 4096 Feb 14 21:37 snap
+-rw-r--r--  1 root root 2278 Feb 26 02:32 status.txt

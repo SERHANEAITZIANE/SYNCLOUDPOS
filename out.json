@@ -1,0 +1,49 @@
+{
+  "users": [
+    {
+      "email": "xm@live.fr",
+      "role": "ADMIN",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9"
+    },
+    {
+      "email": "coucou.store.44@gmail.com",
+      "role": "ADMIN",
+      "tenantId": "ecb4c32c-cd8c-46d2-b672-4cc5bbac97d1"
+    },
+    {
+      "email": "yh@jk.ji",
+      "role": "ADMIN",
+      "tenantId": "9209af92-56ba-4400-893d-4017e488055e"
+    }
+  ],
+  "tenantUsers": [
+    {
+      "id": "e260ea16-feeb-4496-ab6c-2a2f39249601",
+      "userId": "70313a6c-0a3a-4a0b-986a-7c84a9f7dc8e",
+      "tenantId": "340f6b22-785c-4fd8-99d5-2a1fe81f76e2",
+      "role": "ADMIN",
+      "createdAt": "2026-02-22T00:28:43.486Z"
+    },
+    {
+      "id": "03291f65-84aa-4a93-8f08-78b7971f40e1",
+      "userId": "70313a6c-0a3a-4a0b-986a-7c84a9f7dc8e",
+      "tenantId": "f5c42f7f-00c9-4cea-aaa1-52a71b2985f9",
+      "role": "ADMIN",
+      "createdAt": "2026-02-22T00:29:04.890Z"
+    },
+    {
+      "id": "0f21a96b-f0ae-4a95-9614-1b554c74993c",
+      "userId": "0cd4a242-d2d8-4619-930e-aff8450af25e",
+      "tenantId": "ecb4c32c-cd8c-46d2-b672-4cc5bbac97d1",
+      "role": "ADMIN",
+      "createdAt": "2026-02-26T20:05:15.022Z"
+    },
+    {
+      "id": "9e740717-bfb5-4778-adb5-4c6dc0fcc09f",
+      "userId": "0cd4a242-d2d8-4619-930e-aff8450af25e",
+      "tenantId": "0a46f169-f188-480b-bbfd-f52cec8aa094",
+      "role": "ADMIN",
+      "createdAt": "2026-02-26T23:46:09.257Z"
+    }
+  ]
+}

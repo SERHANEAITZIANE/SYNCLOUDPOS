@@ -1,0 +1,21 @@
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Account registered.
+Requesting a certificate for chirpedbeo.online and www.chirpedbeo.online
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/chirpedbeo.online/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/chirpedbeo.online/privkey.pem
+This certificate expires on 2026-05-27.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+Deploying certificate
+Successfully deployed certificate for chirpedbeo.online to /etc/nginx/sites-enabled/default
+Successfully deployed certificate for www.chirpedbeo.online to /etc/nginx/sites-enabled/default
+Congratulations! You have successfully enabled HTTPS on https://chirpedbeo.online and https://www.chirpedbeo.online
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

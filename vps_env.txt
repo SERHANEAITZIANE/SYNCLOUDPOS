@@ -1,0 +1,9 @@
+# Database
+DATABASE_URL="file:./dev.db"
+
+# Auth
+NEXTAUTH_URL="155.133.26.217"
+NEXTAUTH_SECRET="fkrf848fj348fjf48fh84h8f48fh4"
+
+# App
+NEXT_PUBLIC_APP_URL="155.133.26.217"

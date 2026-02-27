@@ -1,0 +1,27 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.4s
+  Skipping validation of types
+  Collecting page data using 5 workers ...
+Error: @prisma/client did not initialize yet. Please run "prisma generate" and try to import it again.
+    at instantiateModule (.next/server/chunks/[turbopack]_runtime.js:740:9)
+    at instantiateRuntimeModule (.next/server/chunks/[turbopack]_runtime.js:768:12)
+    at getOrInstantiateRuntimeModule (.next/server/chunks/[turbopack]_runtime.js:781:12)
+    at Object.m (.next/server/chunks/[turbopack]_runtime.js:790:18)
+    at Object.<anonymous> (.next/server/app/api/auth/[...nextauth]/route.js:6:3)
+
+> Build error occurred
+Error: Failed to collect page data for /api/auth/[...nextauth]
+    at ignore-listed frames {
+  type: 'Error'
+}

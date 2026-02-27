@@ -1,0 +1,34 @@
+﻿#!/bin/bash
+TARGET="/var/www/syncloudpos"
+GIT_DIR="/var/repo/syncloudpos.git"
+BRANCH="master"
+
+while read oldrev newrev ref
+do
+    if [[ $ref = refs/heads/$BRANCH ]]; then
+        echo "Ref $ref received. Deploying $BRANCH branch to production..."
+        
+        # Deploy code
+        git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f $BRANCH
+
+        echo "Running build scripts..."
+        cd $TARGET
+        
+        # Install dependencies if package.json has changed
+        npm ci
+
+        # Prisma generate and db push
+        npx prisma generate
+        npx prisma db push --accept-data-loss
+        
+        # Build the Next.js app
+        npm run build
+
+        # Restart PM2
+        pm2 restart syncloudpos
+        
+        echo "Deployment completed successfully!"
+    else
+        echo "Ref $ref successfully received. Doing nothing: only the $BRANCH branch may be deployed on this server."
+    fi
+done

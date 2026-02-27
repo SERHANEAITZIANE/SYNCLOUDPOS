@@ -1,0 +1,281 @@
+{
+  "HomePage": {
+    "title": "Welcome to SYNCLOUDPOS",
+    "subtitle": "Premium POS & Commercial Management"
+  },
+  "Auth": {
+    "login": "Login",
+    "register": "Register"
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "pos": "POS",
+    "products": "Products",
+    "sales": "Sales",
+    "settings": "Settings",
+    "customers": "Customers",
+    "suppliers": "Suppliers",
+    "purchases": "Purchases",
+    "expenses": "Expenses",
+    "categories": "Categories",
+    "brands": "Brands",
+    "reports": "Reports",
+    "treasury": "Treasury",
+    "analytics": "Analytics",
+    "company": "My Company",
+    "systemSettings": "System Settings"
+  },
+  "Common": {
+    "quantity": "Quantity",
+    "addNew": "Add New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "search": "Search",
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "save": "Save",
+    "creating": "Creating...",
+    "updating": "Updating...",
+    "success": "Success",
+    "error": "Error",
+    "print": "Print",
+    "close": "Close",
+    "back": "Go Back",
+    "new": "New",
+    "total": "Total",
+    "date": "Date",
+    "status": "Status",
+    "yes": "Yes",
+    "no": "No",
+    "name": "Name",
+    "description": "Description",
+    "amount": "Amount",
+    "notes": "Notes",
+    "type": "Type"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your activity",
+    "totalRevenue": "Total Revenue",
+    "totalOrders": "Orders",
+    "totalProducts": "Products",
+    "totalCustomers": "Customers",
+    "recentSales": "Recent Sales"
+  },
+  "Sales": {
+    "title": "Sales Orders",
+    "subtitle": "Manage sales orders, quotes, and invoices",
+    "newSale": "New Order",
+    "fields": {
+      "type": "Type",
+      "customer": "Customer",
+      "date": "Date",
+      "total": "Total",
+      "status": "Status",
+      "receiptNumber": "Reference No.",
+      "balance": "Outstanding Balance"
+    },
+    "filters": {
+      "filterByType": "Filter by Type",
+      "allTypes": "All Types",
+      "quote": "Quote",
+      "order": "Delivery Note",
+      "invoice": "Invoice"
+    },
+    "status": {
+      "draft": "Draft",
+      "validated": "Validated",
+      "paid": "Paid",
+      "cancelled": "Cancelled"
+    }
+  },
+  "Products": {
+    "title": "Products",
+    "subtitle": "Manage products for your store",
+    "newProduct": "New Product",
+    "fields": {
+      "name": "Name",
+      "category": "Category",
+      "price": "Retail Price",
+      "purchasePrice": "Purchase Price",
+      "wholesalePrice": "Wholesale Price",
+      "dealerPrice": "Dealer Price",
+      "stock": "Stock",
+      "minStock": "Min Stock",
+      "archived": "Archived",
+      "featured": "Featured",
+      "barcode": "Barcode",
+      "description": "Description",
+      "images": "Images",
+      "brand": "Brand",
+      "featuredDesc": "This product will appear on the home page",
+      "archivedDesc": "This product will not appear anywhere in the store"
+    }
+  },
+  "Suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Manage suppliers",
+    "newSupplier": "New Supplier",
+    "fields": {
+      "name": "Name / Company",
+      "contact": "Contact Person",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "taxId": "Tax ID",
+      "balance": "Outstanding Balance"
+    }
+  },
+  "Customers": {
+    "title": "Customers",
+    "subtitle": "Manage customers",
+    "newCustomer": "New Customer",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "city": "City",
+      "orders": "Orders",
+      "taxId": "Tax ID",
+      "balance": "Outstanding Balance",
+      "loyaltyPoints": "Loyalty Points"
+    }
+  },
+  "Purchases": {
+    "title": "Purchases",
+    "subtitle": "Manage purchase orders and supplier orders",
+    "newPurchase": "New Purchase Order",
+    "fields": {
+      "supplier": "Supplier",
+      "status": "Status",
+      "total": "Total",
+      "date": "Date",
+      "account": "Payment Account",
+      "items": "Items"
+    },
+    "status": {
+      "pending": "Draft",
+      "bonCommande": "Purchase Order",
+      "bonLivraison": "Delivery Note",
+      "facture": "Invoice",
+      "completed": "Paid",
+      "cancelled": "Cancelled"
+    }
+  },
+  "Expenses": {
+    "title": "Expenses",
+    "subtitle": "Manage business expenses",
+    "newExpense": "New Expense",
+    "fields": {
+      "description": "Description",
+      "amount": "Amount",
+      "category": "Category",
+      "account": "Account",
+      "date": "Date",
+      "notes": "Notes"
+    }
+  },
+  "Categories": {
+    "title": "Categories",
+    "subtitle": "Manage product categories",
+    "newCategory": "New Category",
+    "fields": {
+      "name": "Name",
+      "products": "Products"
+    }
+  },
+  "Brands": {
+    "title": "Brands",
+    "subtitle": "Manage product brands",
+    "newBrand": "New Brand",
+    "fields": {
+      "name": "Name",
+      "products": "Products"
+    }
+  },
+  "Treasury": {
+    "title": "Treasury",
+    "subtitle": "Manage accounts, transfers, and transactions",
+    "newAccount": "New Account",
+    "transfer": "Transfer",
+    "transaction": "Manual Entry",
+    "fields": {
+      "name": "Account Name",
+      "type": "Type",
+      "balance": "Balance",
+      "rib": "Bank Account Number"
+    },
+    "types": {
+      "caisse": "Cash Register",
+      "bank": "Bank Account"
+    }
+  },
+  "Analytics": {
+    "title": "Analytics",
+    "subtitle": "Performance statistics and analysis",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "profit": "Net Profit",
+    "topProducts": "Top Products",
+    "salesByCategory": "Sales by Category"
+  },
+  "Reports": {
+    "title": "Reports",
+    "subtitle": "Detailed activity reports"
+  },
+  "POS": {
+    "title": "Point of Sale",
+    "subtitle": "Cash Register",
+    "search": "Search product...",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "total": "Total",
+    "discount": "Discount",
+    "tax": "Tax",
+    "payment": "Payment",
+    "cash": "Cash",
+    "card": "Card",
+    "receipt": "Receipt",
+    "newSale": "New Sale",
+    "customer": "Customer"
+  },
+  "Settings": {
+    "title": "Store Settings",
+    "subtitle": "Manage your store preferences and details",
+    "fields": {
+      "storeName": "Store Name",
+      "storeNamePlaceholder": "E.g. My Awesome Shop",
+      "contactPhone": "Contact Phone",
+      "phonePlaceholder": "Phone number",
+      "storeAddress": "Store Address",
+      "addressPlaceholder": "123 Example St, City, Country",
+      "taxId": "Tax ID",
+      "currency": "Currency",
+      "logo": "Logo",
+      "saveChanges": "Save Changes"
+    },
+    "messages": {
+      "success": "Store settings updated.",
+      "error": "Something went wrong."
+    }
+  },
+  "Receipt": {
+    "title": "RECEIPT",
+    "date": "Date",
+    "ticketNo": "Receipt No",
+    "customer": "Customer",
+    "item": "Item",
+    "qty": "Qty",
+    "price": "Price",
+    "oldBalance": "Old Balance",
+    "total": "Total",
+    "payment": "Paid Amount",
+    "newBalance": "New Balance",
+    "thanks": "Thank you for your visit!"
+  }
+}

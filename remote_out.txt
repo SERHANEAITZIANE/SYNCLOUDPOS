@@ -1,0 +1,337 @@
+
+--- Executing: unzip -o /root/update_v3.zip -d /var/www/syncloudpos ---
+Archive:  /root/update_v3.zip
+  inflating: /var/www/syncloudpos/src/auth.ts  
+  inflating: /var/www/syncloudpos/src/proxy.ts  
+  inflating: /var/www/syncloudpos/src/actions/analytics.ts  
+  inflating: /var/www/syncloudpos/src/actions/barcode.ts  
+  inflating: /var/www/syncloudpos/src/actions/brands.ts  
+  inflating: /var/www/syncloudpos/src/actions/categories.ts  
+  inflating: /var/www/syncloudpos/src/actions/create-store.ts  
+  inflating: /var/www/syncloudpos/src/actions/create-user.ts  
+  inflating: /var/www/syncloudpos/src/actions/customers.ts  
+  inflating: /var/www/syncloudpos/src/actions/expenses.ts  
+  inflating: /var/www/syncloudpos/src/actions/get-active-tenant.ts  
+  inflating: /var/www/syncloudpos/src/actions/get-tenant-users.ts  
+  inflating: /var/www/syncloudpos/src/actions/get-tenants.ts  
+  inflating: /var/www/syncloudpos/src/actions/ledger.ts  
+  inflating: /var/www/syncloudpos/src/actions/login.ts  
+  inflating: /var/www/syncloudpos/src/actions/orders.ts  
+  inflating: /var/www/syncloudpos/src/actions/payments.ts  
+  inflating: /var/www/syncloudpos/src/actions/products.ts  
+  inflating: /var/www/syncloudpos/src/actions/purchase-orders.ts  
+  inflating: /var/www/syncloudpos/src/actions/register.ts  
+  inflating: /var/www/syncloudpos/src/actions/sales-orders.ts  
+  inflating: /var/www/syncloudpos/src/actions/settings.ts  
+  inflating: /var/www/syncloudpos/src/actions/superadmin.ts  
+  inflating: /var/www/syncloudpos/src/actions/suppliers.ts  
+  inflating: /var/www/syncloudpos/src/actions/switch-store.ts  
+  inflating: /var/www/syncloudpos/src/actions/system-settings.ts  
+  inflating: /var/www/syncloudpos/src/actions/treasury.ts  
+  inflating: /var/www/syncloudpos/src/app/favicon.ico  
+  inflating: /var/www/syncloudpos/src/app/global-error.tsx  
+  inflating: /var/www/syncloudpos/src/app/globals.css  
+  inflating: /var/www/syncloudpos/src/app/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/api/auth/[...nextauth]/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/upload/route.ts  
+  inflating: /var/www/syncloudpos/src/app/[locale]/error.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/layout.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/not-found.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/error/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/login/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/register/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/error.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/layout.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/brands/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/categories/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/components/company-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/unpaid/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/[customerId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/[customerId]/ledger/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/dashboard/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/payments/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/inventory/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/[productId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/purchases/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/purchases/[purchaseId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/[salesId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/general-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/system-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/[supplierId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/[supplierId]/ledger/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/account-modal.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/columns.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/mouvements-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/mouvements-columns.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/transaction-modal.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/transfer-modal.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/types.ts  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/columns.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/types.ts  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/users/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/layout.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/pos/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/layout.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/theme-provider.tsx  
+  inflating: /var/www/syncloudpos/src/components/auth/login-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/auth/register-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/auth/subscription-guard.tsx  
+  inflating: /var/www/syncloudpos/src/components/brands/brand-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/brands/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/brands/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/brands/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/categories/category-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/categories/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/categories/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/categories/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/customer-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/customer-qr-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/ledger-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/ledger-columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/types.ts  
+  inflating: /var/www/syncloudpos/src/components/customers/unpaid-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/expiration-alert.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/global-shortcuts.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/header.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/language-switcher.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/mobile-sidebar.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/mode-toggle.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/sidebar.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/store-switcher.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/user-nav.tsx  
+  inflating: /var/www/syncloudpos/src/components/expenses/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/expenses/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/expenses/expense-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/expenses/types.ts  
+  inflating: /var/www/syncloudpos/src/components/modals/alert-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/payments/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/payments/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/cart-sidebar.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/payment-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/pos-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/pos-header.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/product-card.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/receipt.tsx  
+  inflating: /var/www/syncloudpos/src/components/pos/sales-order-search-dialog.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/barcode-label.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/fast-create-brand.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/fast-create-category.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/low-stock-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/print-barcode-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/product-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/missing-products-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/ocr-receipt-uploader.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/purchase-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/purchases/types.ts  
+  inflating: /var/www/syncloudpos/src/components/sales/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/sales/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/sales/sales-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/sales/types.ts  
+  inflating: /var/www/syncloudpos/src/components/suppliers/cell-action.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/ledger-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/ledger-columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/supplier-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/suppliers/types.ts  
+  inflating: /var/www/syncloudpos/src/components/ui/avatar.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/badge.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/button.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/calendar.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/card.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/checkbox.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/command.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/data-table.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/date-range-picker.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/dialog.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/dropdown-menu.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/form.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/heading.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/image-upload.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/input.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/label.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/popover.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/product-search-combobox.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/progress.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/radio-group.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/resizable.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/scroll-area.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/select.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/separator.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/sheet.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/switch.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/table.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/textarea.tsx  
+  inflating: /var/www/syncloudpos/src/components/users/add-user-modal.tsx  
+  inflating: /var/www/syncloudpos/src/data/user.ts  
+  inflating: /var/www/syncloudpos/src/hooks/use-barcode-scanner.ts  
+  inflating: /var/www/syncloudpos/src/hooks/use-pos-store.ts  
+  inflating: /var/www/syncloudpos/src/i18n/request.ts  
+  inflating: /var/www/syncloudpos/src/i18n/routing.ts  
+  inflating: /var/www/syncloudpos/src/lib/db.ts  
+  inflating: /var/www/syncloudpos/src/lib/utils.ts  
+  inflating: /var/www/syncloudpos/src/schemas/index.ts  
+  inflating: /var/www/syncloudpos/src/schemas/settings.ts  
+  inflating: /var/www/syncloudpos/prisma/dev.db  
+  inflating: /var/www/syncloudpos/prisma/import-off-dz.ts  
+  inflating: /var/www/syncloudpos/prisma/schema.prisma  
+  inflating: /var/www/syncloudpos/prisma/schema.prisma.backup  
+  inflating: /var/www/syncloudpos/prisma/seed.ts  
+  inflating: /var/www/syncloudpos/prisma/dist/import-off-dz.js  
+  inflating: /var/www/syncloudpos/prisma/migrations/migration_lock.toml  
+  inflating: /var/www/syncloudpos/prisma/migrations/20260221200350_add_supplier_balance/migration.sql  
+  inflating: /var/www/syncloudpos/components.json  
+STDERR:
+warning:  /root/update_v3.zip appears to use backslashes as path separators
+
+Exit status: 1
+
+--- Executing: cd /var/www/syncloudpos && npx prisma generate ---
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 625ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+Exit status: 0
+
+--- Executing: cd /var/www/syncloudpos && npx prisma db push --accept-data-loss ---
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+
+The database is already in sync with the Prisma schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 437ms
+
+Exit status: 0
+
+--- Executing: cd /var/www/syncloudpos && npm run build ---
+
+> syncloudpos@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 25.2s
+  Skipping validation of types
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/5) ...
+  Generating static pages using 5 workers (1/5) 
+  Generating static pages using 5 workers (2/5) 
+  Generating static pages using 5 workers (3/5) 
+✓ Generating static pages using 5 workers (5/5) in 241.8ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/analytics
+├ ƒ /[locale]/brands
+├ ƒ /[locale]/categories
+├ ƒ /[locale]/company
+├ ƒ /[locale]/customers
+├ ƒ /[locale]/customers/[customerId]
+├ ƒ /[locale]/customers/[customerId]/ledger
+├ ƒ /[locale]/customers/new
+├ ƒ /[locale]/customers/unpaid
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/error
+├ ƒ /[locale]/expenses
+├ ƒ /[locale]/expenses/new
+├ ƒ /[locale]/login
+├ ƒ /[locale]/payments
+├ ƒ /[locale]/pos
+├ ƒ /[locale]/products
+├ ƒ /[locale]/products/[productId]
+├ ƒ /[locale]/products/inventory
+├ ƒ /[locale]/products/new
+├ ƒ /[locale]/purchases
+├ ƒ /[locale]/purchases/[purchaseId]
+├ ƒ /[locale]/register
+├ ƒ /[locale]/reports
+├ ƒ /[locale]/sales
+├ ƒ /[locale]/sales/[salesId]
+├ ƒ /[locale]/settings
+├ ƒ /[locale]/superadmin
+├ ƒ /[locale]/suppliers
+├ ƒ /[locale]/suppliers/[supplierId]
+├ ƒ /[locale]/suppliers/[supplierId]/ledger
+├ ƒ /[locale]/suppliers/new
+├ ƒ /[locale]/treasury
+├ ƒ /[locale]/treasury/[accountId]
+├ ƒ /[locale]/users
+├ ƒ /api/auth/[...nextauth]
+└ ƒ /api/upload
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+STDERR:
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+
+Exit status: 0
+
+--- Executing: pm2 restart syncloudpos ---
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 0 ])
+[PM2] [syncloudpos](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ syncloudpos    │ default     │ N/A     │ fork    │ 30950    │ 0s     │ 9    │ online    │ 0%       │ 22.7mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Exit status: 0

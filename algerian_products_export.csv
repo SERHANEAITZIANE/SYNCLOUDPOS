@@ -1,0 +1,982 @@
+Name,Category,Brand,Barcode,Price,Cost,Stock
+"Lait en poudre Celia 500g","Produits Laitiers","Celia",6111222333444,350,300,50
+"Café moulu Bonal 250g","Café & Thé","Bonal",6130000123456,280,240,100
+"Thé vert El Taj 200g","Café & Thé","El Taj",6131111222333,320,270,80
+"Huile de Tournesol Elio 2L","Épicerie","Elio",6132222333444,250,210,150
+"Sucre blanc Cevital 1kg","Épicerie","Cevital",6133333444555,95,85,300
+"Farine Extra 1kg","Épicerie","Extra",6134444555666,55,45,200
+"Couscous Dari Moyen 1kg","Épicerie","Dari",6115555666777,140,110,120
+"Pâtes Spaghettis Amor Benamor 500g","Épicerie","Amor Benamor",6136666777888,60,48,180
+"Tomate concentrée CAB 400g","Conserves","CAB",6137777888999,110,90,150
+"Thon entier à l'huile végétale El Manar 160g","Conserves","El Manar",6138888999000,180,150,100
+"Sardines à la tomate Titi 125g","Conserves","Titi",6139999000111,90,75,120
+"Fromage fondu La Vache Qui Rit (16 portions)","Produits Laitiers","La Vache Qui Rit",3073781062601,320,280,80
+"Fromage Tartiner Président 200g","Produits Laitiers","Président",3228020050720,280,240,60
+"Yaourt brassé Soummam Fraise 125g","Produits Laitiers","Soummam",6130001112223,25,20,250
+"Yaourt Bifi Hodna Nature 100g","Produits Laitiers","Hodna",6130002223334,20,16,200
+"Eau minérale naturelle Ifri 1.5L","Boissons","Ifri",6130003334445,35,28,499
+"Eau minérale Guedila 1.5L","Boissons","Guedila",6130004445556,35,28,399
+"Soda Hamoud Boualem Blanche 1L","Boissons","Hamoud Boualem",6130005556667,80,65,250
+"Soda Selecto Hamoud Boualem 1L","Boissons","Hamoud Boualem",6130006667778,80,65,249
+"Jus Rouiba Orange Sans Sucre Ajouté 1L","Boissons","Rouiba",6130007778889,130,105,148
+"Jus Toudja Multi-fruits 1L","Boissons","Toudja",6130008889990,120,95,120
+"Margarine Fleurial 250g","Épicerie","Fleurial",6130009990001,95,75,100
+"Margarine Labelle 500g","Épicerie","Labelle",6130010001112,180,150,80
+"Chocolat au lait Ambassadeur 100g","Biscuits & Chocolats","Ambassadeur",6130011112223,110,85,150
+"Chocolat noir Maxon 100g","Biscuits & Chocolats","Maxon",6130012223334,120,95,100
+"Biscuits Bimo Cacao 200g","Biscuits & Chocolats","Bimo",6130013334445,60,45,200
+"Gaufrettes Flash Vanille 150g","Biscuits & Chocolats","Flash",6130014445556,50,38,180
+"Chips Mahbouba Sel 50g","Snacks","Mahbouba",6130015556667,30,22,300
+"Mayonnaise Lesieur 500ml","Épicerie","Lesieur",3011310004513,350,290,60
+"Moutarde Amora 440g","Épicerie","Amora",8712100803522,320,270,50
+"Sel fin iodé Enasel 1kg","Épicerie","Enasel",6130016667778,20,15,200
+"Lentilles ordinaires 1kg","Légumes Secs","Sans Marque",6130017778889,220,180,150
+"Pois chiches gros calibre 1kg","Légumes Secs","Sans Marque",6130018889990,280,230,120
+"Papier toilette Trèfle (Paquet de 6)","Hygiène & Entretien","Trèfle",6130019990001,250,200,80
+"Liquide vaisselle Isis Citron 1.25L","Hygiène & Entretien","Isis",6130020001112,140,115,97
+"Lessive poudre Omo Matic 1.5kg","Hygiène & Entretien","Omo",6130021112223,450,380,59
+"Savon de Marseille Le Chat 200g","Hygiène & Entretien","Le Chat",3178040683058,70,55,148
+"Shampooing Venus Aloe Vera 400ml","Hygiène Beauté","Venus",6130022223334,280,230,80
+"Dentifrice Signal Protection Caries 75ml","Hygiène Beauté","Signal",8712561914285,150,120,97
+"Déodorant Narta Homme 200ml","Hygiène Beauté","Narta",3600550858100,380,320,50
+"Prince Goût Chocolat","Snacks","LU",7622210449283,213,164,199
+"Edelbitterschokolade Mild 90%","Botanas","Lindt EXCELLENCE",3046920029759,345,266,156
+"Coca Cola Original Taste","Beverages and beverages preparations","Coca-Cola",5449000054227,315,243,50
+"Excellence Noir Intense 70% Cacao","Produits fermentés","Lindt",3046920022651,521,401,79
+"Nutella","Petit-déjeuners","Ferrero",3017620425035,659,507,169
+"Tartine Doux","Aliments et boissons à base de végétaux","Primevère",3155251205296,215,166,166
+"Nutella","en:breakfasts","Ferrero",3017620429484,395,304,93
+"Nescafé Classic","Boissons et préparations de boissons","Nescafé",6111018903161,94,73,38
+"Biscuits croquants au coeur onctueux de Nutella®","Botanas","nutella",8000500310427,404,311,42
+"Coca Cola Original taste","Boissons et préparations de boissons","Coca-Cola",5449000000439,124,96,171
+"Chocolate con leche y almendras","Snacks","Maruja",8425197712024,543,418,75
+"1848 Chocolat en poudre","Boissons et préparations de boissons","Poulain",16256866,596,459,111
+"Poulain","Breakfasts","Poulain",16256163,380,293,140
+"Chocolat au lait","snacks","Milka",3045140105502,304,234,14
+"180G C OR NOIR NOISETTE","Snacks","Côte D’Or",7622210995087,487,375,68
+"Nutella","Breakfasts","Ferrero",8000500179864,347,267,53
+"El Mordjene Crème De Noisettes Grillées","Produits laitiers","Cebon",6132500711040,648,499,45
+"Pâte à tartiner Nutella noisettes et cacao - 750g","Petit-déjeuners","Ferrero",3017620421006,364,280,131
+"180G LT NOISETTE COTE D OR","Snacks","Côte d'Or",7622210995063,551,424,121
+"Véritable Petit Écolier Chocolat au Lait","Snacks","LU",7622210421968,245,189,194
+"Coca-Cola original taste","boissons","maroc",90338243,284,219,114
+"Sour Cream & Onion","Przekąski","Pringles",5053990101597,234,180,107
+"NESQUIK Cacao","Boissons et préparations de boissons","Nestlé",3033710065967,560,431,175
+"Nutella pâte à tartiner aux noisettes et au cacao","Groceries","Ferrero",3017620420702,98,76,106
+"Ferrero Rocher","Snacks","Ferrero",8000500273296,100,77,95
+"Milk Chocolate with Honey and Almond Nougat","Botanas","Toblerone",7614500010013,594,457,66
+"Nescafe classic","en:instant-coffees","Nescafé",6111018903185,598,460,45
+"Noir amandes entières","Snacks","Côte d'or",7622210995100,262,202,138
+"Coulommiers Doux et Crémeux","Dairies","CF&R",3176582033563,157,121,129
+"Digestive Avena","Lanches comida","Gullón",8410376033267,230,177,148
+"Lala kheddidja","Boissons","cevital",6130234001147,289,223,44
+"Kinder Bueno","Snacks","Kinder",8000500037560,471,363,134
+"Hemani Coconut Oil Pure & Natural (400ML)","Plant-based foods and beverages","Hemani",8964000577066,562,433,203
+"Magnesium","en:health-beauty","Mivolis",4058172309250,517,398,103
+"100G COTE D'OR NOIR ORIGINAL","Snacks","Côte d'Or",5410081201039,627,483,55
+"lipton yellow label tea x25","Boissons et préparations de boissons","Lipton",8720608632633,317,244,12
+"Guedila","Boissons","Guedila",6130758000022,344,265,189
+"kinder 4pk","Snacks","Kinder",80177609,535,412,147
+"جبن طازج","Produits laitiers","Soummam",6130760003349,348,268,173
+"Multivitamin","Nahrungsergänzungsmittel","Mivolis",4058172309519,166,128,11
+"Nature","Produits laitiers","Soummam",6130760000102,491,378,196
+"Go fresh","Non food products","Dove",8717163004869,453,349,193
+"Milka Tablette Noisette","Snacks","Milka",3045140118502,123,95,205
+"L'ben","Produits laitiers fermentés","Soummam",6130760003769,638,491,45
+"حليب كونديا 1 لتر","Produits laitiers","Candia",6130433000019,347,267,33
+"Eau minérale Ifri","Boissons","Ifri",6130093010045,651,501,165
+"Biscoff à tartiner","Produits à tartiner sucrés","Lotus",5410126006957,510,393,114
+"Voda","Boissons","Essalsabil",6130576000020,455,350,140
+"Nescafé Gold","Boissons et préparations de boissons","Nestlé",8445290204417,146,113,107
+"Crème chantilly","desserts","idéal",6111180006059,664,511,85
+"LOTUS Gaufre de Liège Chocolat 363g (7x1p)","Snacks","Lotus",5410126832372,696,536,86
+"Familial","Aliments et boissons à base de végétaux","Grand’mère",8711000892091,687,529,100
+"Kinder Chocolate","Snacks","Kinder",80177616,399,307,72
+"Lion cereal with caramel and chocolate","Aliments et boissons à base de végétaux","Nestlé",7613031370641,149,115,186
+"Bounty","Snacks","Bounty",5000159558280,421,324,50
+"Colgate","Toothpaste","Colgate",6281001112013,453,349,10
+"Soumam Fat Partly Removed","Produits laitiers","soummam",6130760003189,547,421,98
+"Ketchup","en:Condiments","Heinz",87157239,352,271,19
+"Micronised Creatine Powder","Dietary supplements","Optimum Nutrition",5060245605397,440,339,148
+"La Belle Margarine 500g","Aliments et boissons à base de végétaux","LA BELLE 220da",6132004000022,170,131,98
+"Miswak","Hygiene","Dabur",8901009111631,451,347,154
+"Créatine monohydrate","Suplementos dietéticos","BioTechUSA",5999076227426,380,293,170
+"Nescafé classic","Aliments et boissons à base de végétaux","Nescafe",6111018903208,221,170,96
+"HuLaLa","Tejtermékek","Hulalà",8007990406982,71,55,164
+"Saida eau minérale","Mineral waters","Saida",6133275000018,201,155,12
+"Mini mix","Snacks","Gullón",8410376013191,520,400,155
+"Safia","Boissons et préparations de boissons","Safia",6194001800111,345,266,142
+"Ambassadeur noir précieux 70% cacao","Snacks","Bimo",6130014350120,84,65,187
+"Gold corn flakes miel","en:corn-flakes","Sans Marque",8690632706672,319,246,71
+"كوكا كولا 1 لتر","Beverages","Coca-Cola",6130003000029,336,259,151
+"Organic Honey","Breakfasts","Naturoney",0055828910017,626,482,144
+"Guedila","Boissons et préparations de boissons","giba",6130758000015,326,251,171
+"löslichen Kaffee","Beverages and beverages preparations","Maxwell House",8711000522967,430,331,128
+"تجميل","Général","Sans Marque",3337871323622,444,342,23
+"GREEC Nature","fr:Yaourte","Soummam",6130760007224,315,243,168
+"Lalla Khedidja","Beverages","Cevital",6130234001161,114,88,89
+"Premium Omega-3","Matières grasses","Ocean's Essentials",8718836397110,490,377,46
+"Caprice des Dieux","Produits laitiers","Caprice des Dieux",3161716031003,111,86,185
+"NESCAFE SPECIAL FILTRE L'Original, Café Soluble, Flacon de 200g","Boissons et préparations de boissons","Nestlé",7613036451253,557,429,50
+"Déo","Aliments d'origine végétale","Dov",8717163676721,159,123,115
+"Besbassa","Beverages","Sarl diar ezarga",6134082000017,399,307,201
+"Chicorée-café soluble","Aliments et boissons à base de végétaux","Carrefour",3560070330515,417,321,79
+"بنينة","Produits laitiers","Soummam",6130760001482,557,429,93
+"ayris","fr:1.5","eau",6130534000031,292,225,40
+"Coca-Cola Plastic","Boissons","Coca cola",90338052,192,148,29
+"Original","en:non-food-products","Briseis",8410751030911,687,529,129
+"Galette senior","Snacks","Bimo",6130015060035,676,520,202
+"Chocolate et Soja","Snacks","Gullón",8410376037821,655,504,185
+"Ifri pétillante aromatisée aux arômes naturels de citron & citron vert","fr:Ifri pétillante","Ifri",6130093068206,466,359,119
+"STORY Chocolat noir 70% Cacao - 100g","Chocolat noir à moins de 70% de cacao en tablette","Bifa",6132175403165,516,397,102
+"Soummam ص","Produits laitiers","Soummam 20da",6130760002809,382,294,17
+"Margarine supérieure végétale 100%","en:Plant-based foods and beverages","la belle 120da",6132004000015,322,248,27
+"Eux de source nestlè pure life","Beverages and beverages preparations","Nestlè pure life",6130794000314,365,281,176
+"Lindt Chocolat au lait praliné noisettes","Snacks","Lindt",3046920020206,66,51,13
+"skor","Édulcorants","cevital. da100",6130234002366,419,323,193
+"Nescafe Gold","Aliments et boissons à base de végétaux","Nescafe",4600680000640,243,187,38
+"El Mordjene pâte à tartiner","Breakfasts","CEBON",6132500710371,455,350,29
+"طرتينو","Dairies","Sans Marque",6130413002286,466,359,26
+"Eau de source non gazeux","Boissons","Ovitale",6130142000201,297,229,18
+"Dolca chocolate negro","Botanas","Dolca",7613036723671,637,490,72
+"صول  مرغرين","Matières grasses","Mateg",6130788000023,223,172,86
+"دايلي صغيرة","Aliments et boissons à base de végétaux","Bifa..",6132501549512,210,162,174
+"25","en:mineral-waters","ayris sghira",6130534000116,152,117,76
+"6132480500269","Général","Sans Marque",6132480500269,562,433,188
+"Ambassadeur","Snacks","bimo",6130014080119,607,467,196
+"SARL VITA WATER","Boissons","Ariaf",6135829000017,605,466,37
+"shampooing","en:open-beauty-facts","head",5011321360945,573,441,182
+"Optilla","Général","amiral",6133337001250,521,401,183
+"Fresh Power","Hygiene","Nivea",4005808532452,426,328,193
+"premium story chocolat pistache","Incorrect product type","Bifa",6132175402564,113,87,18
+"سيليكتو","selecto","حمود بوعلام",6130695111331,644,496,50
+"Café","Aliments et boissons à base de végétaux","Jacobs Douwe Egberts",8711000523124,356,274,148
+"Blackhead clearing daily scrub","en:open-beauty-facts","Clean & clear",3574660149807,521,401,130
+"Crème De Noisettes Grillées","Breakfasts","Cebon",6132500711033,533,410,206
+"Lait frais demi-écrémé","Produits laitiers","CMI (Carrefour Marchandises Internationales)",3560070475711,659,507,31
+"Rajčatová omáčka s bazalkou a olivami","Condiments","Panzani",3038354251103,338,260,183
+"Huile elio","Huile de soja","cevital",6130234001024,211,163,68
+"Dentifrice","Toothpaste","Unilever",6221048407819,84,65,204
+"تيب توب","Dairies","tammy",6130818000023,356,274,25
+"Nature","fr:Yaourt naturel","oikos nature",6130646006990,470,362,20
+"Binto","Snacks","Kif",6194002510071,414,319,101
+"Déodorant Nivea black & white invisible","en:open-beauty-facts","Nivea",4005900371935,392,302,123
+"elio","Aliments et boissons à base de végétaux","Cevital",6130234001031,492,379,164
+"Activia meille","Dairies","Danone",6130646002428,403,310,188
+"Cookies con chips de chocolate","Botanas","Florbú",8411414012220,663,510,44
+"Ouwis 0.5l","Boissons","MANBAA OUWIS",6135240000030,113,87,80
+"Bouglez","Boissons","Ain Bouglez",6130576000044,520,400,91
+"Chocolat Dubai crème pistache & kunafa","Snacks","Momentum Brands",6133414013640,332,256,17
+"Margarine","Matières grasses","Many",6133566000079,712,548,66
+"Lait pour nourrissons","Dairies","Blédina",3041091282866,484,373,98
+"yago","Beverages","Soummam",6130760001864,351,270,127
+"lotion","Produit cosmétique","Unilever",8712561482318,401,309,201
+"Rouiba cocktail petit","Aliments et boissons à base de végétaux","rouiba",6130002001690,568,437,23
+"Coca cola","Beverages and beverages preparations","Coca-Cola",6130003002023,475,366,110
+"Greek","Général","Soummam",6130760007132,540,416,130
+"Candy Choco 1L","Boissons et préparations de boissons","candia",6130433000262,518,399,179
+"Daily joy","Boissons et préparations de boissons","Bifa",6134427000122,230,177,184
+"Eau","Beverages","EL KANTARA",6130131000014,178,137,176
+"Ifri pétillante","Beverages","ifri",6130093010335,178,137,186
+"El Mordjene miel","Honey of sugar","Sans Marque",6132500710425,544,419,104
+"Lait candia viva","Dairies","Candia",6130433000385,373,287,181
+"Mega Duo Doble Cacao","Snacks","Gullón",8410376044409,470,362,170
+"Eau minérale","Beverages","messerghine",6130127000035,549,423,61
+"Eau de source","Eaux de sources","arwa",6133489001504,230,177,89
+"Eau de source Djurdjura","Beverages and beverages preparations","Mont-Djurdjura 100da",6130517000430,179,138,47
+"ICHEMOUL","en:mineral-waters","ICHEMOUL",6135534000036,118,91,138
+"Miel el mordjen","Sweeteners","Cebon",6132500710272,378,291,156
+"Nova","Beverages","nova",6130206200059,81,63,90
+"Crunchy spread","朝食","Lotus",5410126646924,670,516,132
+"Tiptop","Formage fondu en portion au moin 46 MG","Tip Top",6130818000030,462,356,133
+"Brino","Snacks","Bifa",6132501540311,308,237,69
+"Fourres au chocolat noir bio","Snacks","Bjorg",3229820786100,192,148,39
+"Soumame cereilo","Produits laitiers","soummam 30da",6130760000256,330,254,47
+"Activia","Dairies","Activia",6130646002930,296,228,23
+"CEDFCت","en:mineral-waters","Sans Marque",6130131000021,279,215,181
+"LeLait sans lactose","Produits laitiers","Candia",6130433000972,587,452,80
+"Manbaa","Beverages and beverages preparations","Manbaa al ghezlane",6133211000065,256,197,26
+"Maxon biscuit fourré à la crème de cacao","Snacks","maxon",6133414003115,700,539,102
+"مايوناز ليسيور كبيرة","fr:Mayounnaise","lesieur",6135345000027,640,493,38
+"Flan caramel soummam","Produits laitiers","SOUMMAM",6130760000171,657,506,72
+"Eau","Eaux minérales","Guedila",6130758000091,406,313,206
+"Magnesium Brausetabletten","Nahrungsergänzungsmittel","Vitalis",4061458007696,669,515,64
+"Chips","en:potato-crisps","Lay's",6221031497872,150,116,111
+"Gâteau","Snacks","Sans Marque",6134082000024,417,321,48
+"ReXona","Général","rexona",8714100019733,161,124,54
+"Moutarde de Dijon forte","Condiments","Emile Noël",3291960011862,569,438,154
+"Gingembre au miel","Boissons","KABIR",6132508340013,163,126,136
+"Boisson au lait srérilisé U.H.T Goût Chocolat","Beverages","Candia 40da",6130433000583,577,444,49
+"Chocolate spread","Pâtes à tartiner","Palmary",6133414001173,221,170,74
+"Ifruit","en:fruit-juices","Sans Marque",6132360100169,210,162,133
+"Happy choco kids","Snacks","Sans Marque",6133414006932,295,227,25
+"قهوة1001","الأطعمة والمشروبات النباتية","Sans Marque",6132528200014,161,124,209
+"Croustille","Snacks","Lu",6132011100395,146,113,149
+"Double concentré de tomates","Aliments et boissons à base de végétaux","Izdihar",6130382000160,97,75,32
+"Cofiture d'abricot","Aliments et boissons à base de végétaux","telloise",6133212000088,429,330,61
+"Fort en calcium","Produits laitiers","Soummam",6130760001130,438,337,151
+"سيدنا","en:حلال","Sans Marque",6130214300642,465,358,123
+"Céréalo","Dairies","ort 170da",6130760006746,289,223,160
+"Amiral","Général","Moon biscuit",6133337004459,334,257,169
+"Chocolat Djazaïr","Snacks","Palmary Moment",6133414013107,663,510,48
+"Président","Produits laitiers","Camembert",6130759000410,235,181,22
+"Pure Life","Boissons","Nestlé",6130794000116,513,395,133
+"Crisp hazelnut and milk chocolates","snack","Ferrero",8000500167113,620,477,31
+"Activia fraise","Dairies","Activia",6130646002954,635,489,151
+"Levure Chimique Nouara","Additifs alimentaires","7.5 DA",6130763000130,388,299,85
+"Ovitale","Beverages","Ovitale 25da",6130142000218,332,256,190
+"Charbet","boisson","Trafle",6130834001172,204,157,123
+"Pain de mie","Aliments et boissons à base de végétaux","Rayane",6132338000187,80,62,159
+"steak","Beef-steaks","Sans Marque",4800888221896,260,200,43
+"مايوناز لزيور","en:mayonnaises","Lesieur",6135345000041,182,140,87
+"Ifruit","Jus de fruits rouges","Sans Marque",6130093068008,107,83,80
+"ايليوElio","Aliments et boissons à base de végétaux","سوفيتالcevital",6130234001017,692,533,16
+"Le lait entier","Produits laitiers","Candia",6130433000217,685,527,103
+"Selecto Hamoud boualem 2ل","Beverages","حمود",6130695111393,379,292,143
+"Flan","Cooking helpers","Nouara",6130763000017,309,238,164
+"Sol mimi","Plant-based foods and beverages","Sans Marque",6130788000016,390,300,187
+"Saida Eau Minérale Naturelle Non Gazeuse","Boissons","Eau minérale naturelle non gazeuse",6133275000025,448,345,107
+"بيمو كاسكروط","Snacks","Groupe Bimo",6130015061933,374,288,103
+"RICORE Nestlé","Beverages and beverages preparations","Nestlé",7613033332883,555,427,149
+"Beurre","Aliments et boissons à base de végétaux","cevital",6130234000607,76,59,72
+"FORT","Produits laitiers","SOUMMAM 25da",6130760000812,274,211,55
+"اروما","en:coffees","240da",6130194000037,633,487,89
+"Pate à tartiner aux noisettes et cacao","Petit-déjeuners","CEBON",6132500710388,547,421,170
+"Confiture d'abricot","Aliments et boissons à base de végétaux","CAB",6130384000571,439,338,108
+"Eau de source","Général","Sans Marque",6132296000021,591,455,174
+"fromage","Dairies","amir 120da",6133477000076,188,145,178
+"miswak herbal toothpaste","Toothpaste","dabur indialimited",6291069701951,321,247,125
+"فاميكو","en:coffees","El asfour",6132485500011,221,170,123
+"Farine de blé tendre","Aliments et boissons à base de végétaux","Sim 100da",6130351001891,491,378,18
+"Atun","Produits de la mer","Maratun",6130504000023,509,392,92
+"Raib au bifidus actif","Beverages","Soumam",6130760004247,449,346,147
+"ATUN THON TOMATE","Seafood","ATUN",6130504000900,565,435,196
+"كوكا كانيط كبيرة","Beverages","coca cola",6130003000258,184,142,70
+"Maxon galette","en:biscuits","Penny",6135812000260,522,402,48
+"Beurre de cacahuète","Plant-based foods and beverages","Tartinella",6135847000211,687,529,27
+"Crème Légère","Produits laitiers","Soummam 250da",6130760005848,274,211,58
+"Dudu Osum صابون الوجه","Général","Sans Marque",6156000043821,555,427,104
+"Strawberry breakfast cereal bar","Snacks","Nestle",5900020005038,302,233,117
+"Hamoud Boualem La gazouz blanche","Beverages and beverages preparations","Hamoud Boualem",6130695111348,620,477,70
+"La zeina","Additifs alimentaires","La zeina",6133190000018,273,210,72
+"Nursie confort","Aliments pour bébé","blédina",3041091283054,68,53,155
+"Eau mansoura","Eaux","mansourah",6130364000058,568,437,154
+"Yaourt aromatise","Produits laitiers","Trefle",6130551002988,468,360,69
+"Tomato Conserve Cab","Conserve","160da",6130384000182,106,82,63
+"Schweppes grenadine","en:Beverages","Sans Marque",6130003014385,306,236,52
+"Ifruit 100% Naturel","Plant-based foods and beverages","IFRUIT",6130093065892,383,295,64
+"moments","Snacks","palmary",6133414009070,512,394,82
+"Maxo wafer","Snacks","palmary",6133414009568,353,272,100
+"Fromage Fondu","Dairies","Sans Marque",6132242600145,261,201,17
+"Celebrity - Nougat barre aux arachides et au chocolat","Snacks","Bifa",6132501547112,592,456,109
+"President 24","en:cheeses","President",6130759001738,102,79,135
+"creme equilibre de jour","Général","CALLIDERM",6130072000463,322,248,110
+"anti-transpirant","Déodorants anti-transpirants","nivea men",42345503,369,284,101
+"Eau de source","Général","Noua",6132389300014,309,238,202
+"Triple active","Général","L'Oréal",3600521719749,666,513,147
+"حمود 2ل","Plant-based foods and beverages","Sans Marque",6130695111409,546,420,89
+"Chupa chups sour belt","Snacks","Milka",8901393017045,426,328,182
+"double mix vanille chocolat","Snacks","Groupe Bimo",6130014300422,149,115,26
+"Digestive","Snacks","Gullón",8410376055498,92,71,105
+"Chocolat au lait Ambassadeur","Snacks","bimo",6130014080010,335,258,181
+"El mordjene","Breakfasts","CEBON",11325006,501,386,148
+"هريسة","Condiments","90 da",6130234005640,603,464,181
+"Tuna  sauce tomate","Seafood","Sans Marque",6130504000108,184,142,29
+"Oikos Grecque (Fraise)","Dairies","Danone",6130646005870,159,123,148
+"Jus d'orange","Boissons et préparations de boissons","IFruit",6130093065878,154,119,202
+"SPF 50+","Général","Eau Thermale Avene",3282770149128,590,454,120
+"Blédine fruit et lait","Frozen foods","Blédina",3041091606273,317,244,171
+"vqr 16p orig","Général","Sans Marque",6134261001873,305,235,113
+"Sel de mer fin","Condiments","La Baleine",3183280020320,315,243,172
+"Fourres au chocolat au lait bio","Snacks","Bjorg",3229820786094,425,327,134
+"La Gaufrette Praliné noisette","Snacks","P'tit Déli",3564700543412,231,178,140
+"ياڨو","Boissons","SOUMMAM",6130760004353,122,94,22
+"Kool","en:biscuits","Sans Marque",6133414001999,206,159,209
+"Kool","1k","kool",6133414002002,128,99,151
+"Flacon d'avoine - coeur de céréale","Aliments et boissons à base de végétaux","coeur de céréale",6132108100086,473,364,152
+"Yaourt liquide peche","Boissons","Soummam 150da",6130760001871,664,511,209
+"Biscuits à base de blé sur digestif ELWAFI","fr:Biscuits à base de blé dur","Sans Marque",6130426001245,421,324,102
+"Camembert","Produits laitiers","Tassili",6130803000052,691,532,172
+"Moment noisettes entiéres","Snacks","palmary",6133414004051,362,279,47
+"Fromage fondu Walid","Dairies","150 DA",6131575000011,222,171,94
+"Cherchell","Snacks","25da",6130619003049,367,283,182
+"Mayonnaise","Condiments","Lesieur",6135345000058,479,369,196
+"شكولة ماريجا","Snacks","Sans Marque",6132516860060,371,286,21
+"Milka Oreo","snacks","Milka",7622210262202,321,247,96
+"Sel de mer iodé","Condiments","La Baleine",3183280020412,331,255,201
+"Biscuits fourrés P'tit Deli Noisette","Snacks","Marque Repère",3564700759349,608,468,41
+"Lait Écrémé Silhouette","Produits laitiers","Candia",6130433000200,418,322,111
+"زنجبيل الكبير","Boissons","Kabir 170da",6132508340051,101,78,167
+"Crème Dual à base végétale","Crèmes","Meggle",8585002507594,477,367,164
+"Qaâda Biscuit Lait Chocolat","Snacks","qaada",6135129000014,423,326,88
+"Beurre doux","Produits laitiers","Fleurial",6130234000676,689,530,19
+"Soummam fort","Dairies","Soummam",6130760000966,145,112,20
+"Eau","Beverages and beverages preparations","Guedila",6130758000077,286,220,202
+"Dolca chocolate con leche","Botanas","Nestlé",7613036723701,427,329,74
+"Optilla","Végécao pâte a tartiner","Amiral",6133337000970,234,180,184
+"Yaourt mamzoudj noix de coco","Produits laitiers","Soummam 25da",6130760000263,522,402,36
+"Soumame acti plus","fr:Soummam acti+","Soummam",6130760002991,495,381,30
+"Casbah Premium","Général","casbah",6130632000841,143,110,16
+"Mayonnaise aux œufs frais 710g","Condiments","Sans Marque",6135345000034,178,137,96
+"Baby oil","Général","Johnson's",3574669909136,323,249,151
+"Nescafé","Beverages and beverages preparations","Sans Marque",8445290906847,92,71,112
+"CORN FLAKES","en:Plant-based foods and beverages","Cornflakes",4003994110010,620,477,148
+"Colgate Herbal","Hygiene","Colgate",7891024133545,395,304,92
+"بريل ازيس","Général","Pril",6130430006281,240,185,72
+"Chicorée café solubles","fr:chicorée café","Sans Marque",6133977000071,551,424,100
+"Greek fraise","Général","Soummam",6130760007194,535,412,64
+"Ifruit raisin 1 ل","Aliments et boissons à base de végétaux","Ifri",6130093056975,557,429,184
+"ifruit Jus d'orange carotte citron","Plant-based foods and beverages","ifri",6130093057088,305,235,69
+"Eau minerale naturelle","Boissons","toudja",6130217010036,657,506,36
+"Cevital Smen 500g","Plant-based foods and beverages","Medina",6130234001666,335,258,24
+"Nouara","Préparations pour flans","Nouara",6130763000024,156,120,22
+"Twins chocolate","Snacks","Gullón",8410376028423,421,324,206
+"Qaada Biscuit figue & miel","Snacks","Qaada",6135129000038,159,123,195
+"Izem Energy","Boissons","Ifri",6130093063706,92,71,130
+"Soumame faise tarte","Produits laitiers","Soummam 30da",6130760000515,479,369,39
+"Soummam Mamzoudj","Produits laitiers","Soummam 25da",6130760001512,613,472,98
+"Gros Sel de Mer Iodé","en:sea-salts","La Baleine",3183280020382,520,400,27
+"Fleurial","Aliments et boissons à base de végétaux","Cevital",6130234003790,202,156,142
+"Ariaf","Beverages and beverages preparations","Sans Marque",6135829000024,431,332,103
+"Yago رمان","Plant-based foods and beverages","Soummam.   150da",6130760006067,487,375,58
+"Margarine many","Spreads","Sans Marque",6133566000062,447,344,45
+"Lait","Produits laitiers","Soummam",6130760003592,542,417,73
+"Special digestive blé complet","Snacks","bifa",6132501543893,484,373,43
+"Aptamil 1","Laits pour bébé","Sans Marque",3041091814227,278,214,107
+"Qaada","fr:Biscuit aux céréales","B'S",6135129000304,443,341,206
+"Natribifluor","Non food products","SAIDAL",6130004210144,92,71,110
+"Oikos","Yogurt","Danone",6130646005986,266,205,71
+"Kool 9 Winners","Snacks","Palmary",6133414008677,91,70,153
+"6130433001825","fr:Fromage fondu a tartiner","Ramdy",6130433001825,304,234,15
+"crème dessert protéinée","Snacks","Food & health F&H",6135794000395,651,501,80
+"BIMBIES","Open Beauty Facts","BIMBIES Fresh",6130552003793,529,407,17
+"Cookies premium coeur fondant à la noisette","Snacks","Marque Repère",3564700564431,637,490,204
+"Sprite","Bevande","Sprite",5449000050939,165,127,132
+"Biscuits Tango au chocolat","Snacks","bimo",6130015060837,522,402,101
+"افروي 1 لتر","Beverages and beverages preparations","Ifri",6130093056968,102,79,197
+"Boisson au jus d'orange citron carotte  iFruit","en:fruit-juices","Ifri",6130093057002,479,369,38
+"Moutarde de Dijon FORTE","Condiments","Sidna",6130214300239,200,154,39
+"yoghourt soumam jnina","Produits laitiers","soumam",6130760002533,351,270,84
+"Soummam Fort","Produits laitiers","Soummam 25da",6130760000836,617,475,160
+"Actif +","Produits laitiers","soummam",6130760002984,501,386,171
+"Soumame faise","Dairies","Soummam",6130760001505,620,477,79
+"Salsabil","en:Beverages","Sans Marque",6130669000012,100,77,95
+"Gel nettoyant moussant","Général","Venus",6130024165288,629,484,51
+"Moutarde","en:Condiments","فلوريال",6130234004919,66,51,64
+"Fromage fondu a tartiner","Produits laitiers","walid cheese",6132242600084,487,375,57
+"blédilait croissance","en:growth-milks","bédina",5900852057915,318,245,87
+"Afia oil","Fats","AFIA",6133136000386,170,131,139
+"Fanta lemon","fr:Boisson  fanta","Fanta",6130003014828,117,90,106
+"Snickers","Candy chocolate bars","Snickers",5000159461122,607,467,20
+"Dialna (Chocolat)","Produits laitiers","Soummam",6130760002410,347,267,53
+"25","Boissons","mnssora sghira",6130364000072,547,421,68
+"Maxon galette","en:biscuits","Sans Marque",6133414010212,354,273,196
+"yaourt grec","Dairies","danone",6130646005887,590,454,191
+"Yaourt danone","en:yogurts","danone",6130646006426,179,138,133
+"Ifruit","en:fruit-juices","Sans Marque",6130093067926,80,62,87
+"Snakbar","Snacks","Tymo",6132175400195,183,141,18
+"LFB","Général","Sans Marque",6130791001239,312,240,61
+"فرماج شيزي","Général","Cheezy",6130413004914,68,53,40
+"Bellarom","Snacks","Fin Carré",20892302,89,69,105
+"Levure Instantanée","Surgelés","SAF INSTANT",30028203,211,163,78
+"Топено сирене специалитет","Dairies","Fromageries Bel",3073780839631,373,287,60
+"Nova chocolat","en:chocolate-powders","Sans Marque",6130206200042,497,383,21
+"Crème Dessert (Goût Vanille)","Cooking helpers","Dr. Oetker",6191402800153,549,423,37
+"Tchibo Coffee Gold Selection","Plantaardige levensmiddelen en dranken","Tchibo",4046234767599,566,436,156
+"Minceur","Produits laitiers","soumam",6130760003585,422,325,203
+"Acti+ Vanille","Dairies","Soummam",6130760003011,345,266,25
+"Energie Drink","Boissons","Sans Marque",6130822000538,377,290,36
+"Coca-Cola","Beverages and beverages preparations","Coca-Cola",5449000226662,120,93,132
+"L'eau","en:spring-waters","Sans Marque",6130217050711,349,269,29
+"Macao","Snacks","Bimo",6130015061834,707,544,162
+"RICAMAR Premium Thon entier à l'huile végétale","Produits de la mer","Ricamar",6130816010048,458,353,157
+"Candia le lait partiellement écrémé","Produits laitiers","Candia. 9000",6130433000026,423,326,150
+"cevital beurre matina","Produits laitiers","cevital",6130234004667,188,145,89
+"Yago","Beverages","Soummam 150da",6130760004896,682,525,155
+"Thon a la tomate","en:tunas","Sans Marque",6130816010031,668,514,86
+"Sugarfee gums","en:confectioneries","Mentos",8935001723707,453,349,97
+"Moubyd","Non food products","Alphyt 220da",6130099000057,159,123,68
+"Fromage  frais","Produits laitiers","Lactel",6130759000748,222,171,154
+"Tartino","en:cheeses","Sans Marque",6130413000923,414,319,133
+"Cammembert ptite tiger","Produits laitiers","ملبنة تيفرا حليب",6130784000171,475,366,44
+"شكولا نايس كراميل","Général","NICE",6132500980132,364,280,123
+"Thon Entier À L’huile","Produits de la mer","Maratun",6130504000894,608,468,123
+"Ben Haroun","Boissons et préparations de boissons","Sans Marque",6130732003414,401,309,116
+"Danao","Aliments et boissons à base de végétaux","Danone",6130646006020,464,357,125
+"Farine complète T150","Plant-based foods and beverages","Mama",6130492000807,509,392,101
+"دايلي 1 لتر","Boissons","daily 80da",6134427001136,351,270,159
+"لويا","en:milks","Loya",6132480500320,703,541,122
+"HARIBO ROULLETE","en:candies","Haribo",8691216019805,162,125,143
+"Acti+","Produits laitiers","Soummam",6130760003004,653,503,84
+"3308","Général","Skor",6130234009082,452,348,52
+"greek yogurt peach","Général","Soummam",6130760007217,287,221,21
+"Gâteaux à base de yaourt","Snacks","Marque Repère",3564700555347,419,323,29
+"Boudoirs 400G Eco+","Snacks","Eco +",3450970006460,94,73,92
+"Smen","Plant-based foods and beverages","Cevital",6130234002168,418,322,40
+"Slim orange 2 ل","en:sodas","Hamoud Boualem",6130695111416,282,217,43
+"Slim ananas 2ل","Général","Sans Marque",6130695112550,677,521,73
+"Yago ص","Boissons","Soummam",6130760000430,608,468,158
+"Le fermier","Produits laitiers","EURL STLD",6132503530013,452,348,119
+"Qniaa قنيعة","Boissons","Qniaa",6133848000056,458,353,178
+"Mermelada de arándanos","Plant-based foods and beverages","Helios",8410095001967,552,425,108
+"Coca Cola","Beverages","Coca-Cola",8888002076009,496,382,88
+"Qaada Biscuit sésames","Snacks","B'S",6135129000120,650,500,168
+"Pain de mie complet","Aliments et boissons à base de végétaux","Sans Marque",6134602000022,371,286,132
+"Moutarde de Dijon Forte","Condiments","Sans Marque",61302495,117,90,183
+"Maxon chocolate","Snacks","maxon",6133414000831,328,253,145
+"Pate a tartiner","Petit-déjeuners","Sans Marque",6133414001395,358,276,139
+"Nescafe gold","Aliments et boissons à base de végétaux","Nestlé",7613036309493,627,483,55
+"RAÏB - LAIT CAILLÉ","Produits laitiers","Sans Marque",6132501941231,223,172,149
+"Fromage portions","Produits laitiers","président",6130759000892,564,434,99
+"Creme chocolat","Produits laitiers","Yaourt",6130760000140,107,83,16
+"sel de table fin","Condiments","Tornado",6132506960015,154,119,119
+"El mordjene","Pâtes à tartiner aux noisettes","El Mordjene",6132500711125,592,456,151
+"كوكا ميني","Beverages and beverages preparations","60da",6133166000745,97,75,97
+"Coke","en:Beverages","Coca Cola",6133166000011,672,517,53
+"Pandorino","en:Snacks","Gateau",6134961000336,569,438,68
+"Maxon xl vanille","Biscuits","Sans Marque",6133414010052,244,188,204
+"Thon au naturel","Seafood","ricamar",6130816010932,607,467,77
+"Ginseng de miel","en:honeys","Sans Marque",6281073152641,670,516,139
+"Opta cookie","Général","Sans Marque",6133337004718,306,236,11
+"Proteinated Desert - Choco Peanut","Général","F&H",6132500901892,256,197,60
+"Dédicace","Snacks","مصنع الشكولاطة الفيصل الذهبي",6132500980071,694,534,157
+"Soummam greek","Desserts","Sans Marque",6130760007200,538,414,208
+"Jet Gum Liquids Peppermint","Snacks","JETgum",20389253,67,52,85
+"Hamoud Limonade 1.5L PET","Aliments et boissons à base de végétaux","Hamoud boualem",3248710510106,479,369,27
+"Tartelettes à l'abricot","Snacks","Eco+",3450970056649,669,515,52
+"Biscuits Fourrés Cacao","Snacks","Eco+",3450970149754,215,166,22
+"Milka Whole Hazelnuts","Snacks","Milka",3800005103075,423,326,119
+"Rouiba cocktail","Aliments et boissons à base de végétaux","Rouiba 110da",6130002000136,358,276,14
+"Harissa","Condiments","Cab.  60da",6130384000083,197,152,155
+"Jnina fraise","Beverages","Soummam",6130760002434,319,246,33
+"Hamoud Boualem Boisson gazeuse","Boissons","Hamoud Boualem",6130695111126,297,229,50
+"Gaufrette Croustillé au Goût de crème Noisette","Snacks","LU",6132011100814,135,104,77
+"Mentos white","en:confectioneries","Mentos",8935001721529,98,76,153
+"Cab sauce tomate","Condiments","Amar benamor",6130384000809,292,225,150
+"mozzarella","Produits laitiers","Chaima",6134557000047,275,212,188
+"Magi light","Sweeteners","magimix",6130728000229,569,438,94
+"Fromage blanc 0%","fr:fromages-blancs-natures","Lactel",6130759000953,682,525,23
+"Smooth Blend Maxwell House","Aliments et boissons à base de végétaux","Maxwell house",8714599310625,469,361,198
+"Azro","Général","Sans Marque",6130093058344,118,91,77
+"Gaufrettes au cacao","Snacks","Bifa",6132501540632,477,367,135
+"L'ben","Dairies","lactel",6130759001776,373,287,160
+"Atun en Aceite végétal","Produits de la mer","Maratun",6130504000856,504,388,144
+"Cérégal","chocolate wheat shells","ceregal",6133839001024,219,169,49
+"Cola","Dranken en drankbereidingen","Sans Marque",6130003014583,136,105,56
+"Blédine","Aliments pour bébé","Blédina",3041091606280,336,259,177
+"Citronnade L'originale","Boissons et préparations de boissons","ifri",6130093066202,98,76,121
+"Raisin Rouge","Aliments et boissons à base de végétaux","ifruit",6130093065885,364,280,62
+"brut chocolat au lait","Snacks","Qaada",6135129000441,664,511,108
+"6130433001832","Fromage fondu en portions environ 20% MG","Sans Marque",6130433001832,553,426,153
+"Gauffrettes Pilot","Snacks","Perle du Sud",6133113001016,162,125,167
+"ارز سيلا بسمتي هندي","Général","الوسام",6281074342331,627,483,108
+"Snow Ball","Snacks","Bifa",6134427001297,452,348,195
+"Nectar d'orange","Beverages and beverages preparations","Rouiba",6130002005766,575,443,106
+"Fit Oat","Général","Ollagro",6132339900196,361,278,200
+"Selecto","D","Hamoud Boualem",6130695113892,222,171,205
+"جنينة فواكه و حبوب","Cow milk yogurts","Sans Marque",6130760006999,412,317,72
+"kiri 220da","Général","Sans Marque",6134261001699,425,327,187
+"papier mouchoirs cotex","Général","cotex",6130552012061,522,402,108
+"pomroderma pot 100ml glyc","Général","Sans Marque",6131736001024,98,76,13
+"Sel fin de mer","Condiments","Top Budget",3410280024653,323,249,53
+"Citronnade","Boissons","Ifri",6130093059204,96,74,141
+"Ifruit","Beverages and beverages preparations","Ifri",6130093057057,657,506,208
+"Slim orange","Beverages and beverages preparations","Slim",6130695111355,581,447,126
+"طماطم الحارة","5","270da",6132003300383,68,53,134
+"Yellow Label Tea","Aliments et boissons à base de végétaux","Lipton",6221048700705,551,424,118
+"Duo","fr:Barres chocolatées biscuitées type Twix","SAÏDA",6191544100609,704,542,52
+"Mayonnaise","Condiments","cevital",6130234004957,195,150,63
+"Azro","en:isotonic drink","IFRI",6130093056807,464,357,197
+"Best of Bimo","Snacks","bimo",6130014300224,514,396,141
+"Twist orange ananas boissons au lait et au jus de fruit","Aliments et boissons à base de végétaux","Candia",6130433000323,687,529,17
+"Mayonnaise","Condiments","Fleurial",6130234005077,535,412,77
+"Lait اوبي","Dairies","14000",6130560001002,384,296,141
+"Eau de source Sidi Rached","Boissons","sidi rached",6133683000013,222,171,128
+"Ta3ami","Général","Sim",6130351001433,243,187,157
+"Seven up","Boissons","7up",6130743016762,262,202,83
+"Davidoff Café, Arome Riche, 100g","Aliments et boissons à base de végétaux","Sans Marque",4006067084225,443,341,150
+"Biscuit noix de coco","Général","Sans Marque",6135129000168,68,53,36
+"Cafe soluble Maxwell House","الأطعمة والمشروبات النباتية","Jacobs",8714599310601,319,246,149
+"Ail semoule","Plant-based foods and beverages","Ducros",3166291525503,273,210,180
+"Tartinella beurre aux cacahuètes","Petit-déjeuners","Tartinella",6135847000051,299,230,101
+"El Mordjene graisse végétale pure","Plant-based foods and beverages","CEBON",6132500710395,344,265,117
+"Biscuit fitness max proteine","fr:fitness","Sans Marque",6132263100020,451,347,104
+"Badwa lait partiellement écrémé","Produits laitiers","Sans Marque",6132501942788,431,332,169
+"LABEN","Boissons","Hodna Lait",6132501941224,423,326,175
+"يومي","Dairies","Danone",6130646005092,266,205,10
+"Eau minérale batna","Boissons","Sans Marque",6130683000159,427,329,136
+"Yaourt Ala adin","en:yogurts","Soummam",6130760002915,284,219,96
+"Edam Mild","Produits laitiers","Frico",6132002900461,271,209,87
+"PAPILLON HALWA CHAMIA","Snacks","Papillon",61325012,560,431,124
+"Izem Energy","Boissons","Ifri",6130093063720,447,344,81
+"Sprite","Beverages","Coca-Cola",5449000226686,500,385,139
+"Fanta Fraise","Général","Coca Cola",6130003006038,204,157,76
+"danone","Dairies","Danone",6130646005443,221,170,161
+"Bnina chocolat","Produits laitiers","Soumam",6130760006715,354,273,25
+"شنبوان فنيس","Général","Sans Marque",6130024071237,305,235,89
+"6133079000337","snacks","Sans Marque",6133079000337,289,223,106
+"choco bars","Snacks","qaadaa",6135129000403,158,122,200
+"Cocoa wafer filled with cream","en:Snacks","Maxon",6133414009834,559,430,30
+"قوستي","Général","Bifa",6134427001266,306,236,80
+"Camanbert","Camemberts","Sidi Saada",6130834000038,286,220,142
+"Pain de mie","en:sliced-breads","Rayane",6132338000217,406,313,132
+"Fromage fondu à tartiner","Dairies","société bichari",6132242600077,540,416,52
+"Ela crème fraîche légère","Dairies","sarl b2l pro",6135414002372,590,454,173
+"6130413003528","Général","Sans Marque",6130413003528,159,123,102
+"فرماج لافاش كيري","Produits laitiers","La vache qui rit",6134261001255,230,177,72
+"Double concentré de tomatr","Général","160da",6132003300376,236,182,91
+"F&H crème dessert protéinée","Crème caramel rayon frais","F&h fitness & health",6135794000388,378,291,150
+"Jus","en:fruit-juices","Danao",6130646006037,283,218,134
+"Lestello Rice cakes","en:puffed-rice-cakes","Lestello",5902609000557,557,429,193
+"Volants Stop, Insecticide","insecticide","Cophyd",6130445006634,80,62,181
+"Danone yaoumi","Général","Danone",6130646006808,231,178,184
+"Gold Marlboro Original","Cigarettes","Marlboro",6132360100176,577,444,110
+"celebrity bar cake","Snacks","Sans Marque",6132175402687,257,198,15
+"Danner maxi","Général","danone",6130646007119,110,85,140
+"Mamma Mia","Graines de tournesol grillées et salées","Mamma Mia",6134932000136,224,173,186
+"Dosettes de sucre en poudre","Édulcorants","Marque Repère",3564700476383,573,441,88
+"Rouiba Orange","Beverages and beverages preparations","Rouiba",6130002000075,260,200,126
+"ifruit orange 2ل","Plant-based foods and beverages","ifri",6130093057040,473,364,84
+"Medina 100% végétal","Aliments et boissons à base de végétaux","Cevital",6130234000614,418,322,111
+"ميراندا 0٫33 ل","Boissons","Pepsi",6130743016786,666,513,98
+"تيانتي","Boissons","70da",6131189000308,278,214,30
+"Croustille goût Lait carousel","en:biscuits","lu",6132011100401,237,183,104
+"Feuilles de brick","Brick sheets","El Ayla",6132503030094,84,65,26
+"Boisson au jus d'orange","Aliments et boissons à base de végétaux","Tazej",6132504570711,399,307,179
+"Qaada","Snacks","QAADA",6135129000045,223,172,50
+"Nescafe gold","Aliments et boissons à base de végétaux","Nescafe",7613036445818,705,543,117
+"مايوناز فلوريال  زجاج 220غ","Condiments","Cevital",6130234004964,653,503,41
+"MAXON x4 38 gr","Snacks","Palmary",6133414001708,561,432,205
+"ananas golden smile","Aliments et boissons à base de végétaux","Golden Smile",7791273000707,507,390,197
+"Frico fromage rapé","Produits laitiers","frico",6132002900041,287,221,109
+"1.25L BOISSON GAZOUZ ANANAS","Boissons et préparations de boissons","ifri",6130093062853,232,179,152
+"Isispharma teen derm gel 150ml","Général","Sans Marque",3031500311423,477,367,134
+"1.25L BOISSON GAZOUZ ORANGE","Beverages and beverages preparations","Ifri",6130093062792,405,312,185
+"Coffee","Aliments et boissons à base de végétaux","BONAL",6130711000076,644,496,185
+"Coca-Cola Zero","Boissons","Coca-Cola",5449000665881,604,465,167
+"Soumame mamzouj","Produits laitiers","Soummam 25da",6130760001529,483,372,142
+"NaturGreen Organic Chia seeds","Plant-based foods and beverages","NaturGreen",8436542193290,200,154,64
+"J'nina","Produits laitiers","Soummam",6130760001642,559,430,141
+"Potato chips classic taste","Snacks","mahboul",6130336002615,283,218,109
+"Crème hydratante","Général","Nivea soft",42195245,299,230,193
+"Yago ص","Dairies","Soummam",6130760000355,542,417,194
+"Bango","Condiments","Daily Sauce",6132507370912,218,168,11
+"اشمول","en:spring-waters","25da",6135534000029,417,321,149
+"Tartino 16","Plant-based foods and beverages","Tartino",6130413000046,391,301,139
+"Préparation culinaire liquide","Dairies","Maître Cuisiner",6130433001184,642,494,48
+"Pain de Mie Format Géant","Plant-based foods and beverages","Rayane",6132338000194,189,146,116
+"Riz","en:rices","Basmati",6281074975539,573,441,39
+"6135231000964","Général","Sans Marque",6135231000964,351,270,35
+"Danao","Boisson lactée au jus de fruits","Danone",6130646005313,71,55,50
+"Bledilait croissance","Général","Blédina",5900852057922,536,413,17
+"Sprite 30 ml","Général","Sans Marque",6130003015283,404,311,120
+"Nature Hodna","Général","Sans Marque",6132501940722,391,301,180
+"كوكا كولا 2 لتر","Général","Coca Cola",6132007700080,430,331,192
+"Walid fondu","Dairies","Sans Marque",6131575000028,568,437,189
+"EAU DE JAVEL BREF","fr:Eau de Javel","Sans Marque",6130430005413,161,124,171
+"eau de Vichy","Boissons","mouzaia",6130732003391,85,66,81
+"Pepsi","Boissons","Pepsi",6130743018254,351,270,172
+"Préparation pour Chantilly.","Produits laitiers","Cebon",6132500711163,677,521,14
+"Fort","Général","Soummam",6130760000096,551,424,23
+"Mayonnaise","Général","Sans Marque",6132507375870,198,153,161
+"MEDJANA 0.5 L","Boissons","MEDJANA",6135617000021,260,200,113
+"Confiture Extra d’Abricot","Confitures d'abricot","N'Gaous",6132457700074,396,305,40
+"Primalac premium","Laits infantiles en poudre","Sans Marque",7613200213236,700,539,81
+"Cuisine & sandwich","Cheese spreads","le Mont d'Or",6135231000766,548,422,187
+"Ifruit pêche orange","en:multifruit-juices","ifri",6130093058993,466,359,120
+"mouchoirs","Non food products","co tex",6130552001225,149,115,185
+"Sauce soja salée","fr:C","ASIA GREEN GARDEN",2006050132966,426,328,94
+"بريملاك","Général","Sans Marque",7613200213335,87,67,25
+"Desodorante invisible black + white antimanchas","Général","Rexona",8710447492208,686,528,123
+"activia fibres","fr:Yagou","Danone",6130646006709,443,341,151
+"Danette vanille","Général","Danone",6130646006693,422,325,73
+"Nescafé 190g","en:instant-coffees","Sans Marque",8445290906816,302,233,68
+"6130072000166","Général","Sans Marque",6130072000166,517,398,142
+"Fh fras","Crèmes dessert","Sans Marque",6132500901885,412,317,118
+"Mundo cafe","café","11324",6135359000310,187,144,175
+"جنينة مكسرات","Général","Sans Marque",6130760006982,81,63,70
+"iFruit","Général","Sans Marque",6130093066110,456,351,137
+"Bonbons tendres dragéifiés aux goûts fruits","Bonbons","Skittles",4009900546225,592,456,64
+"Antitranspirant Narta Homme Nord-Extrême","Hygiene","Narta",3600550964714,396,305,192
+"toffia caramel","Général","Sans Marque",6131044000221,695,535,24
+"Ritadj ريتاج  1.5ل","Boisson non gazeuse aromatisée a l'arome cocktail ","Ritadj",6132522411034,638,491,63
+"cheezy p24","Général","Sans Marque",6130413004921,128,99,176
+"F&h beurre de cacahuète chocolat","Beurre de cacahouète","F&h",6134395000346,474,365,74
+"Palmiers nappe chocolat lait","Snacks","Marque Repère",3564700521274,81,63,63
+"Gaufrette roulée nappée de chocolat au lait","en:chocolate-biscuits","Marque Repère",3564700785492,663,510,197
+"Gold Selection","Növényi alapú élelmiszerek és italok","Tchibo",4046234767650,282,217,39
+"Petit BIMO","Snacks","Bimo",6130015061131,484,373,176
+"Les biscuits cookies","Snacks","Bimo",6130015061537,286,220,134
+"fraidou","salted spreads","Président",6130759000595,223,172,121
+"J'nina fruits & grains","Yaourts aux fruits","Soummam 30da",6130760001635,338,260,189
+"Eau minerale","Beverages","Sans Marque",6133489001498,673,518,121
+"THÉ VERT DE CHINE - Safinet E'Sahraa","en:Plant-based foods and beverages","SAFINET E ´ SAHRAA",6930922500347,600,462,156
+"Tic Tac - Spearmint","Snacks","Tic Tac",80050780,117,90,58
+"Vitamilk","Dairies","Soummam",6130760003578,479,369,23
+"Moutarde de Dijon","Condiments","fleurial",6130234004926,239,184,52
+"Maxon biscuits cacaoté","Snacks","Sans Marque",6133414002552,161,124,52
+"Soummam","Dairies","Soummam",6130760001116,94,73,138
+"Pate a tartiner","Breakfasts","Optilla 1kg",6133337000987,81,63,48
+"Rouiba nature energie","en:orange-juices","Rouiba",6130002001676,466,359,46
+"Beurre de cacahuètes","Aliments et boissons à base de végétaux","FIT AND STRONG",6132119200034,556,428,60
+"Rouiba","Juce","Rouiba",6130002001713,556,428,170
+"Soumame tarte","Beverages","Soummam. 170da",6130760003196,287,221,138
+"Ifri Eau minerale gazeuse","Boissons","ifri",6130093060644,464,357,163
+"mama","Général","Sans Marque",6130492000388,409,315,155
+"Toudja","fr:Boissons à base de jus d'orange et de citron","Gadouche Boualem",6130720000623,410,316,117
+"Boisson gazeuse","en:sodas","Sans Marque",6131643000028,660,508,192
+"yaourt","Produits laitiers","Soummam",6130760000652,406,313,74
+"Chocolat noir à tartiner","Breakfasts","Dziriya",6134067001152,267,206,146
+"MILKA  Alune intregi ceo lesnik","Snacks","Milka",7622210999597,308,237,163
+"مبيد الحشرات الطائرة","fr:action foudroyant","stop",6130445001493,594,457,204
+"cheezy slices","Général","Sans Marque",6133329000070,286,220,142
+"Selecto light","Boissons","Hamoud boualem",6130695111515,640,493,97
+"- Sidi Saada","Dairies","Sidi Saada",61305038,620,477,176
+"Chicoree","Aliments et boissons à base de végétaux","Granior",0745125960531,84,65,110
+"Taya eau de source","en:spring-waters","Sans Marque",6135366000013,495,381,80
+"Fraidou","Général","Président",6130759000588,217,167,105
+"Ichemoul eau de source","Général","Sans Marque",6135534000043,513,395,202
+"Thé menthe","Beverages and beverages preparations","Sans Marque",6132314700063,149,115,84
+"Alladin","Dairies","25da",6130760002939,146,113,66
+"Fromage frais","Produits laitiers","Soummam",6130760006043,503,387,177
+"Jenina","en:fruit-yogurts","Soummam",6130760001659,196,151,98
+"Thon à l'huile","en:tunas-in-oil","l'Escale",6135912000344,85,66,14
+"Djenina","Produits laitiers","Soummam",6130760005985,542,417,174
+"Fromage fondu","Dairies","GIPLAIT Laiterue Aures Batna",6131110000155,656,505,187
+"Moment","Général","Sans Marque",6133414008066,520,400,35
+"Bicouche","Général","Soummam",6130760001604,534,411,54
+"Sel de cuisine","Général","Chemsi",6130265210013,226,174,99
+"ifruit","en:fruit-juices","Ifri",6130093065861,218,168,156
+"فانتا أناناس","Alimentos y bebidas de origen vegetal","Sans Marque",6130003014804,497,383,148
+"cigarettes","Cigarettes","lucky strike",6131548000161,260,200,142
+"fromage fondue à tartiner en portions 16 portions  tifra lait","Produits laitiers","tifra lait",6130784001802,141,109,154
+"la vache qui rit l'original","fr:Préparation fromagère","bel",6134261001354,143,110,100
+"Shweppes Gold pêche","Beverages","Schweppes",6130003016129,703,541,91
+"جبن طري للطلي","Dairies","Président",6130759002391,679,523,25
+"Kool Supreme","Snacks","Kool",6133414007113,358,276,178
+"Oikos maxi fr","fr:Laitage yaourt","Danone",6130646006617,403,310,192
+"Danone kids b","Général","Danone",6130646006655,260,200,179
+"Sardines à la tomate","Seafood","Ricamar",6130816001404,474,365,75
+"Berbere16","Dairies","promasidor",6132480500061,179,138,30
+"BRUT","Snacks","Qaada",6135129000458,234,180,95
+"Primalac pré 2","Laits pour bébé","Sans Marque",7613200213281,65,50,116
+"Oikos max pech","en:greek-style-yogurts","Danone",6130646006648,171,132,195
+"Boisson au jus de  fruits","Général","Ifruit",6130093066233,704,542,138
+"Végécao Mina","Snacks","Essalem سلام",6130391000359,479,369,97
+"Kool Winners","en:biscuits","Palmary 70 Da",6133414007137,280,216,193
+"Hamoud cola","Boissons","Hamoud Boualem",6130695113519,500,385,169
+"Dialna caramel","Desserts","Soummam",6130760002427,158,122,141
+"Yago Banane ص","Produits laitiers","Soummam",6130760004360,373,287,196
+"Yaourt light","Boissons","Soummam",6130760000843,284,219,148
+"Danone","br:yaourt","Danone",6130646006112,674,519,174
+"Jus orange pêche fraise","Artificially sweetened beverages","Ramy",6132502910571,692,533,124
+"Extreme cheese taste","Général","Brunchy",6130336004596,408,314,171
+"A good product for you","Broccoli","Open Food Facts",93270067481501,161,124,93
+"جنينة مكسرات","Général","Sans Marque",6130760006975,497,383,40
+"Coco Mademoiselle 100 ml","Perfumes","Chanel",3145891165203,429,330,188
+"Ifruit","fr:Boisson au jus fruits et légumes","ifri",6130093066325,650,500,130
+"تونة العافية","Général","Sans Marque",6133136000508,283,218,165
+"FEtH","fr:sante","Sans Marque",6132500902264,575,443,183
+"évasion praline","Général","Sans Marque",6133414012841,180,139,191
+"Excellence - Nectar de mangue","Plant-based foods and beverages","Rouiba",6130002003625,334,257,67
+"Nectar de poire","Aliments et boissons à base de végétaux","Rouiba Excellence",6130002003649,624,480,135
+"Bissousse","Snacks","Bimo",6130015061032,352,271,151
+"Beurre de feuilletage","Aliments et boissons à base de végétaux","Cevital",6130234000645,614,473,181
+"Pâtes","en:pastas","Petit Coude 70da",6130351001419,252,194,144
+"Twist","Général","Candia",6130433000484,694,534,30
+"Préparation culinaire maître cuisinier","Dairies","Maître Cuisiner. 15000",6130433000958,361,278,116
+"Soumame cerise","Dairies","soummam",6130760002519,79,61,18
+"Eau minerale","Boissons","Youkous",6130686000170,296,228,29
+"Slim citron","en:sodas","Hamoud Boualem",6130695111362,395,304,112
+"Mirinda framboise","Carbonated fruit soft drink with sugar","Mirinda",6130743012269,140,108,74
+"Galettes de riz soufflé au chocolat","Aliments et boissons à base de végétaux","Sans Marque",6132139600012,295,227,185
+"Chocolat","Snacks","Maxon",6133414000824,145,112,40
+"Jus de citron","fr:Boisson citron","vitamine drink",6133701000018,123,95,93
+"Pain de mie","Plant-based foods and beverages","Arruapan",6134602000015,462,356,33
+"Rani Three jewels","Plant-based foods and beverages","Sans Marque",6281034015022,533,410,160
+"Pot de creme chocolat","Produits laitiers","soummam",6130760003776,488,376,27
+"Tchina","Aliments et boissons à base de végétaux","Cevital",6130234004124,344,265,16
+"Mayonnaise aux oeufs frais","Condiments","Fleurial",6130234004988,473,364,51
+"4 Chico","Snacks","Bimo",6130015060615,94,73,101
+"Pois chiches","Plant-based foods and beverages","Bono",6134196000019,663,510,42
+"TCHINA 2ل سيفتال","Aliments et boissons à base de végétaux","Sans Marque",6130234004032,440,339,24
+"Halwa chamia","Snacks","Papillon",6132501549871,371,286,19
+"Thon en morceaux à la tomate","Seafood","ricamar",6130816010062,117,90,122
+"Thon a l'huile végétale","Général","Sans Marque",6130816010147,214,165,43
+"Choco Brownie Bifa","Snacks","bifa",6132501541608,630,485,87
+"Crème fraiche","en:fermented-creams","Sans Marque",6132508070019,296,228,189
+"Boisson Fruitée au jus de Mangue","ar:مشروب ثمري بعصير المنغا","Sans Marque",6132504570452,93,72,144
+"Pâte à tartiner aux noisettes","Petit-déjeuners","Palmary",6133414001593,494,380,50
+"Selecto 33 سل","Boissons","Hamoud Boualem",6130695111270,384,296,104
+"J'nina à boire","Boissons","Soummam",6130760004643,85,66,159
+"Sucre glace","Sucres glaces","Sans Marque",6132500710128,419,323,187
+"Sauce sweet chili","Condiments","Sans Marque",8718836395338,477,367,139
+"Jus d'ananas et d'orange","en:fruit-juices","Sans Marque",6130093064413,338,260,118
+"Sucre blanc en morceaux","Édulcorants","Skore",6130234003349,638,491,131
+"Galettes de Riz ou Chocolat","Puffed rice cakes","Mon Jardin Bio",6135321000171,379,292,87
+"Le Lait en poudre","Boissons","Candia",6130433000279,712,548,146
+"Beurre","en:butters","Sans Marque",6132505350251,286,220,203
+"ifruit","Boissons","ifruit",6130093057033,367,283,94
+"Beurre de cacahuète","Aliments et boissons à base de végétaux","Sans Marque",6135847000068,696,536,11
+"Vinaigre de cidre","Condiments","Leader Price",3267281849347,513,395,133
+"Kabir","Général","Sans Marque",6132508340167,608,468,151
+"حليب صومام 500 مل","منتجات`الألبان","soummam",6130760004230,334,257,125
+"Moment Chocolat noir","Snacks","Palmary",6133414006154,88,68,186
+"Crok biscuits","Aliments et boissons à base de végétaux","Him food industry",6135938000014,421,324,158
+"Potato chips classic taste","Aliments et boissons à base de végétaux","mahboul",6130336000475,462,356,38
+"Nouille piquante au fromage","zh:植物性食物与饮品","samyang",8801073113268,252,194,119
+"Pâte a tartiner El Mordjane","en:Breakfasts","cebon",6132500711101,265,204,50
+"Boisson enrichie en zinc + vitamines C & D3 goût Orange","Beverages","Fitness & Health Defender",6132507375337,474,365,66
+"Jnina bicouche","Général","Soummam",6130760001628,477,367,156
+"Master Chips ماستر شيبس","en:crisps","Master Chips ماستر شيبس",6133079000436,161,124,34
+"نوفيد بلوس","بهار محمص للتتبيل","Sans Marque",6132506780033,557,429,22
+"Soumame lighte","Produits laitiers","Soummam 25da",6130760000850,486,374,166
+"Activia abrico","Dairies","Activia",6130646005474,163,126,54
+"Huile d'Olive Vierge Extra","Plant-based foods and beverages","Baghlia",6134383000082,419,323,144
+"Somy lait et chocolate","Boissons","Soummam chocolate 200da",6130760003905,325,250,26
+"Galettes de riz","en:puffed-rice-cakes","Sans Marque",6131972000225,278,214,109
+"Caprice liquide","Général","Sans Marque",6130742000526,293,226,12
+"Camembert président PM","Général","President",6130759001011,575,443,33
+"Thika gold","Général","Sans Marque",6132503573560,357,275,37
+"Tip Top goût edam","Général","Sans Marque",6130273001115,471,363,192
+"Okids 16","Général","Sans Marque",6130783000462,373,287,188
+"Algerienne sauce","Condiments","Sans Marque",6132507375573,651,501,98
+"Junior fromage fondu","Général","Le Mont d'Or",6135231001190,687,529,60
+"Ifruit","en:fruit-juices","Sans Marque",6130093065854,287,221,187
+"فانتا 1ل","en:sweetened-beverages","Fanta",6133166000219,633,487,166
+"طماطم","Aliments et boissons à base de végétaux","CAB",6130384000434,326,251,34
+"شنبوان هواي","Général","Sans Marque",6131600000016,188,145,84
+"HARISSA","Harissas","Sans Marque",6130470001109,570,439,113
+"danone","Dairies","Danone",6130646006297,378,291,180
+"VASELINE","Général","Sans Marque",6001087357043,349,269,119
+"h","Général","Coca",6132407100015,617,475,52
+"Datteln getrocknet & entsteint","Pflanzliche Lebensmittel und Getränke","Eden Fruits",4311532438268,149,115,159
+"chicorée","Plant-based foods and beverages","granior",0745125960548,128,99,22
+"dima","margarine","sarl margal",6130807000157,652,502,128
+"Chocolat Végécao au lait Dada","en:dark-chocolates","320da",6131680000050,590,454,120
+"fromage","fr:Fromage président portion","président",6130759000885,67,52,141
+"Danone","Général","Activia Sbah caramel",6130646006372,639,492,23
+"أرز بسمتي سيلا","Général","Sans Marque",6132397800018,683,526,187
+"Saf instant original","Additifs alimentaires","375",3267793000007,104,80,119
+"Gingembre au miel","Général","Sans Marque",11325086,183,141,13
+"SOUMY","en:milks","Soummam",6130760005268,140,108,157
+"Nutri Rizos","Incorrect product type","Garnier",3600542024181,690,531,124
+"Slim ananas","Général","Sans Marque",6130695113830,639,492,188
+"soummam","Général","soummam",6130760005251,84,65,193
+"Ananas","Boissons aux fruits","Ramy",6134091916163,492,379,32
+"Boisson gazeuse classique d'Orange","Beverages and beverages preparations","N'Gaous",6132457700296,137,106,102
+"Fromage inovalim","fromage","Sans Marque",6130879003391,161,124,80
+"Izem Energy Watermelon","en:energy-drinks","Ifri",6130093067629,431,332,173
+"ماء ورد","Général","Sans Marque",6131645002204,330,254,41
+"Schweppes 33cl","Général","Sans Marque",6130003016150,318,245,205
+"ماكسون ڨوفراث","Général","Sans Marque",6133414009551,253,195,207
+"walid lmjati","Général","Sans Marque",6135499000027,250,193,199
+"ramdy 32","Général","Sans Marque",6130433001849,473,364,49
+"Sigaro","Snacks","Flipi",6132501704898,178,137,58
+"oul replacement","Général","care",6130548016516,409,315,30
+"Pain de mie complet sans sucre ajouté","Pains de mie complet","Arruapan",6134602000565,694,534,50
+"izem 33cl","Général","Sans Marque",6130093068961,403,310,105
+"Lala  Louiza","Waters","Sans Marque",6133983000140,115,89,100
+"vqr extra 16p","Général","Sans Marque",6134261001965,260,200,103
+"Crème solaire","Crèmes solaire","Dermab",6132360000032,130,100,43
+"Gel douche","Général","Venus",6130024165806,302,233,145
+"Barres granola avoine et miel","Snacks","Nature Valley • General Mills",0065633071308,617,475,161
+"Double mix","Général","Bimo",6130014300446,666,513,193
+"ifruit orange mangue au lait","en:fruit-juices","ifri",6130093056999,165,127,66
+"Iferoui 1ل","Général","null",6130093058986,312,240,113
+"Ifruit Citronnade","Aliments et boissons à base de végétaux","ifri",6130093059211,75,58,109
+"Macaroni vermicelle","Pastas","Sim",6130351001495,400,308,88
+"Laymouna","Aliments et boissons à base de végétaux","Soummam",6130760002694,683,526,51
+"Crème de riz","Général","Krima",6130672000184,267,206,39
+"Boisson slim","Beverages","Hamoud Boualem",6130695111423,466,359,192
+"Vegecao noir","Snacks","Chocodada 320da",6131680000029,189,146,114
+"El moutamayez","منتجات`الألبان","El Moutamayez",6132508000146,626,482,130
+"Bonbon arabe","Plant-based foods and beverages","Sans Marque",6134446000202,273,210,156
+"Pain de mie aux céréales","Aliments et boissons à base de végétaux","Sans Marque",6134602000039,505,389,76
+"Caramel et noisette","Snacks","Milka",7622210200402,85,66,119
+"oreo peanut","en:filled-biscuits","kraft",8992760121090,178,137,91
+"mina","Nappages","essalem",6130391000441,521,401,15
+"Banakota","Dairies","Soummam",6130760002526,392,302,50
+"Sucre roux","Édulcorants","Cevital",6130234003547,283,218,126
+"Mayonnaise","Condiments","Sans Marque",6130234004971,399,307,135
+"Ramy extra 30cl","en:orange-juices","Sans Marque",6134091000015,157,121,163
+"Sauce Pizza","Condiments","CAB",6130384000861,449,346,45
+"J'nina","en:yogurts","Soummam",6130760001680,690,531,132
+"Lurpak Lightly Salted","Dairies","Lurpak",5740900400894,696,536,116
+"Ketchup","Condiments","Fleurial",6130234004940,707,544,94
+"Chewing-gum Florida Chlorophylle","Snacks","Florida",6194017500968,146,113,81
+"Ifri framboise et fruits rouges","Aliments et boissons à base de végétaux","Ifri",6130093062846,542,417,158
+"Caramello","Crèmes dessert lactées","Rabha",6130049000038,427,329,132
+"Amine","Snacks","El Khould",6132500893487,383,295,35
+"Al motamayez 16","مشتقات الحليب","المتميز",6132508000177,330,254,206
+"Normandie Or","Fats","Fléchard",3256760097201,80,62,152
+"Sebaou","fromage à tartine","Sans Marque",6130803000854,94,73,171
+"Lait de suite","Milks (liquid and powder)","Novalac",3518070022398,92,71,162
+"The vert de Chine","Aliments et boissons à base de végétaux","Sans Marque",6131058000026,111,86,132
+"Lait ramy","Général","RAMY",6132502916498,184,142,35
+"Potato chips","Aliments et boissons à base de végétaux","Sans Marque",6130336001977,522,402,45
+"flan choco","Produits laitiers","SOUMMAM",6130760005541,414,319,161
+"Pralinés Classic","Imbiss","Lindt&Sprüngli",4000539103063,213,164,62
+"Spaghetti  au blé complet","Aliments et boissons à base de végétaux","Sans Marque",6130403000407,689,530,173
+"Ambassadeur fourré","Général","Bimo",6130014350069,604,465,62
+"Jnina soummam","en:yogurts","Soummam 25 da",6130760001703,468,360,102
+"Beurre de cacahuète","Aliments et boissons à base de végétaux","Jumpy Nuts",6132119200027,382,294,106
+"Max crème","Snacks","Bifa",6132501543138,642,494,177
+"Choco le regal","Général","Sans Marque",6130432000027,221,170,11
+"Corne flakes","Aliments et boissons à base de végétaux","Kellogg's",5050083450082,629,484,85
+"compote de pommes","Aliments et boissons à base de végétaux","Soummam",6130760000560,568,437,118
+"Fitness oat biscuit","Snacks","green oats",6132263100013,211,163,49
+"Slim","Sodas","Hamoud Boualem",6130695113595,226,174,112
+"Aqua fine","Général","Sans Marque",6132504574481,523,403,59
+"soummam","Général","Soummam",6130760000867,135,104,99
+"Tartino Junior","en:cheeses","Sans Marque",6130413000978,704,542,13
+"Ouwis","Boissons et préparations de boissons","EURL MANBAA OUWIS",6135240000016,595,458,132
+"Beurre El Raie","Seafood","Sans Marque",6132505350350,481,370,171
+"Chicorée","Plant-based foods and beverages","Granior",0745125960555,418,322,49
+"Boisson au jus d'ananas","Beverages and beverages preparations","Ifruit",6130093064406,265,204,124
+"Chargement…","Aliments et boissons à base de végétaux","Nouara",6130763000284,110,85,42
+"Pate a tartiner","Petit-déjeuners","Dziriya",6134067001169,547,421,55
+"Thon à la tomate","Produits de la mer","Ricamar",6130816010154,410,316,73
+"Vinaigre d'Alcool","Condiments","Sidna 80da",6130214300307,96,74,22
+"Fraidou","Dairies","President",6130759000632,669,515,55
+"Primalak premium","Général","Sans Marque",7613200027000,357,275,150
+"Slices tiptop","Général","Tiptop",6130273001085,457,352,68
+"President fines herbes","Général","President",6130759001486,117,90,86
+"Biscuits fourrés à la crème de noisette et cacao","Snacks","Regalo",6133414005355,96,74,100
+"Soumame lait frais","Yaourt","Soummam",6130760004070,348,268,192
+"Lait","Produits laitiers","Sans Marque",6130803000014,88,68,122
+"Wafer Choco","Snacks","Bifa 30da",6132501543077,405,312,117
+"karisens","Général","style",6132221400605,275,212,132
+"tartino fromage","Produits laitiers","tartino",6130413000190,648,499,37
+"Coca-Cola 30cl","en:Beverages and beverages preparations","Coca-cola",6130003014743,275,212,156
+"CASBAH","Général","Casbah",6130632000018,196,151,16
+"Famelio","Snacks","Bifa",6132501547600,417,321,193
+"Confiture d’abricots","Aliments et boissons à base de végétaux","Sans Marque",6130766703588,594,457,89
+"Pro d’ail","Général","250da. ثوم مرحي",6132139200021,89,69,66
+"كوكا كولا 2ل","en:Beverages","Coca-Cola",6133166000028,89,69,132
+"coca cola","Beverages and beverages preparations","coca cola",6132007700073,588,453,66
+"Yaourt DANONE KIDS","en:Dairies","23 DA",6130646005566,696,536,149
+"Lait pasteurisé partiellement écrémé","Produits laitiers","Sans Marque",6130761000743,351,270,133
+"Eau de source","Boissons","Qniaa",6133848000049,339,261,68
+"Huile 5L","Aliments et boissons à base de végétaux","AFIA",6133136000393,620,477,168
+"shopping","Général","Sans Marque",6130184002942,709,546,207
+"spaghetti","Aliments et boissons à base de végétaux","el-baraja",6134971000326,136,105,106
+"Kool","Général","Palmary",6133414003023,258,199,90
+"Fanta pomme","Boissons","Sans Marque",6130003007035,536,413,172
+"Dialna brassé mini","Général","Soummam",6130760003646,617,475,181
+"amour","Général","150da",6130766703557,211,163,85
+"Plume","Pâtes alimentaires de céréales","Al baraka",6134971000180,503,387,113
+"Ifren eau","Boissons","Sans Marque",6133561000036,354,273,10
+"Flan Noura","Général","Sans Marque",61302938,169,130,167
+"Dziria","Général","Sans Marque",6134067000872,75,58,52
+"dalitun","Produits de la mer","Dalitun",6134945000062,682,525,74
+"Biscuit complet","Général","Sans Marque",6132950124049,423,326,115
+"TRIX","en:Algeria","TRIX",6131090000039,529,407,199
+"Cookies fourré","Général","Bifa",6132501543763,157,121,33
+"Alvityl Multi Vitamins Effervescent","Dietary supplements","Natur Produkt Pharma",3664492001487,547,421,192
+"coulommiers","Général","President",6130759002148,201,155,198
+"Activia cerise","Général","Act",6130646005832,156,120,23
+"Лешников какаов крем","Hazelnut spreads","Lindt",8013108006548,150,116,36
+"أوبي فراز","Général","Sans Marque",6130560002023,403,310,83
+"Thon entier naturel","Général","Ricamar",6130816010949,512,394,207
+"Izem Energy","Boissons","ifri",6130093067261,253,195,79
+"Moment  RAISINS SECS & ECLATS DE NOISETTES","Snacks","Sans Marque",6133414008981,382,294,12
+"Danone yaourt fruits des bois","Boissons","Danone",6130646006242,676,520,123
+"Beurre de cacahuètes","Aliments et boissons à base de végétaux","Tartinella",6135847000143,630,485,169
+"شكولة طلنت","en:chocolates","Sans Marque",6132501544371,430,331,86
+"Caprice liquide","Général","Sans Marque",6130742000519,70,54,20
+"6135535001360","Général","Sans Marque",6135535001360,406,313,94
+"Céréales TINFO 170 DA","Plant-based foods and beverages","170 DA",6132108100482,653,503,74
+"Activia","en:bifidus-yogurts","Activia",6130646006365,89,69,60
+"6133414008219","Général","Sans Marque",6133414008219,689,530,21
+"Céréales","Plant-based foods and beverages","Céréale",6133839001031,604,465,118
+"Gofri praliné","Général","Gateau",6132533250042,358,276,68
+"maxon cookies","Snacks","Maxon",6133414005935,435,335,168
+"Dulcesol magdalenas NOIRE","Général","Sans Marque",6134961001432,322,248,194
+"Florida","Général","Sans Marque",6136360000016,80,62,201
+"GARNIeR","Général","Sans Marque",3600542358941,588,453,176
+"J'nina a boire","Produits laitiers","SOUMMAM",6130760006784,370,285,106
+"Ramy orange 2L","juice","Sans Marque",6134091915920,167,129,163
+"brino","Général","biscuit",6132501541462,126,97,169
+"El Taco","Général","Sans Marque",6135226000061,249,192,148
+"بتسويس","Général","Soummam 25da",6130760000324,356,274,173
+"Chakib biscots","Général","Sans Marque",6132521800013,703,541,83
+"Maxon Loumja","Général","Palmary",6133414011585,87,67,135
+"ارز مفور لابال","Général","La Belle",6132002800815,274,211,187
+"innovit","Général","Sans Marque",8723300710814,403,310,87
+"Kool Maxy Break","Snacks","Palmary",6133414012537,427,329,124
+"Scorpion gel","Général","Sans Marque",6182000105368,516,397,52
+"قهوة","Cafe","MUNDO",6135359000549,679,523,39
+"Ifri 30cl","Général","Ifri",6130093067988,169,130,170
+"danette pistache","en:fermented-dairy-desserts-with-fruits","Danone",6130646006839,587,452,133
+"Black Opium 90 ml","Général","Yves Saint Laurent",3365440787971,374,288,133
+"Café instantané","Café instantané","BONAL",6130711000823,412,317,142
+"Dulcesol","Général","Pandorino",6134961000343,315,243,32
+"DANONe grende","Général","danone",6130646007010,256,197,150
+"vqr 16p","en:cheeses","Sans Marque",6134261001859,653,503,179
+"تون طماطم","Général","Sans Marque",6135793000143,310,239,191
+"Diet Cola","Général","Hamoud",6130695114318,414,319,124
+"Skyr recette islandaise","Dairies","Soummam",6130760007156,87,67,11
+"iFruit mangue 2L","Général","Sans Marque",6130093067230,117,90,22
+"Gohnson's","Général","Champu",3574669907880,276,213,204
+"Boisson au thé aromatisé mangue","Boissons","Marque Repère",3564700702659,231,178,209
+"Biomile 1","Aliments pour bébé","fasska",5412996100506,81,63,160
+"Lait de poudre","Boissons","Loya",6008155000498,197,152,45
+"Twisco Chocolat En Poudre","en:Beverages and beverages preparations","Twisco",6008155003673,707,544,45
+"Galette","Général","Sans Marque",6130329000079,119,92,100
+"طعام ماما","Plant-based foods and beverages","Mama    da180         متوسط",6130492000029,559,430,200
+"Ben Haroun","fr:eau minérale naturelle gazeuse","Vichy",6130494000010,118,91,85
+"Ayris","Boissons","Eau de source",6130534000048,689,530,54
+"SARL casba","Général","Casba",6130632000049,378,291,72
+"Hamoud Boualem Gazouz Blanc 33 سل","Boissons","Hamoud Boualem",6130695111287,652,502,190
+"Couscous d orge","معجنات","الصنوبر",6133964000039,265,204,166
+"Eau de source","Boissons","Sans Marque",6134318000040,360,277,168
+"Tutku","en:biscuits","Sans Marque",8690526033426,679,523,149
+"Halwa Chamia aux Amandes","Snacks","papillon",6132501549888,647,498,24
+"Jus d'orange","Aliments et boissons à base de végétaux","Jufré",6130813602222,608,468,163
+"Slim ananas 1ل","Beverages","hamoud boualem",6130695112543,230,177,80
+"Cooking Bicarbonate","Condiments","عنتر",6130347000419,432,333,95
+"Aromatisé 10 دج","Produits laitiers","trefle",6130551003534,383,295,119
+"Spaghetti","Aliments et boissons à base de végétaux","SIM 70da",6130351001457,256,197,103
+"Gusti","Snacks","Bifa",6132501540786,84,65,50
+"Ifri Agrumes","Beverages","ifri",6130093062860,678,522,161
+"Acti+ et fruit au bifidus","Produits laitiers","Soummam",6130760002953,165,127,34
+"Sauce tomate","Condiments","jumbo",6133320000130,180,139,103
+"Crunchy mahboul","Général","Sans Marque",6130336003261,292,225,71
+"Ferrero rocher","snacks","Ferrero",06202945,193,149,83
+"شاي السهم حجم 100غ","Boissons et préparations de boissons","Sans Marque",6954362900369,569,438,131
+"Double mix","Général","Sans Marque",6130505000213,637,490,13
+"Gros Sel de Mer","Sel de mer iodé","la Baleine",3183280025004,161,124,29
+"Galettes de riz","Général","Mon jardin Bio",6131972000164,556,428,84
+"Soumy","Boissons et préparations de boissons","Soummam",6130760005275,422,325,88
+"Macon, Milk & Almond chips","Snacks","Palmary",6133414001388,300,231,44
+"Buggles","Snacks","Bugles",6130336002325,267,206,143
+"Double choc","Snacks","Loacker",80972969,655,504,170
+"Pate a glacee","fr:pâte à glacer","el wejdene",6132131100015,608,468,188
+"Purée de tomates double concentrée","Plant-based foods and beverages","Jumbo",6133320000307,287,221,141
+"Kazamie goue poulet","en:meals-with-chicken","Sans Marque",6135603000073,479,369,50
+"La grappe d’or","Général","Sans Marque",3000000000458,128,99,160
+"Potato chips","Général","Sans Marque",6130336001991,189,146,56
+"panino","en:Plant-based foods and beverages","panino",6132508620122,565,435,193
+"Petit B el wafi","en:biscuits","Sans Marque",6130426000026,128,99,28
+"Koolbreak","Snacks","palmary",6133414005607,483,372,90
+"Beurre de cacahuete","Plant-based foods and beverages","jumpy",6132119200270,213,164,78
+"Obei lait gout fraise","en:milks","Sans Marque",6130560002030,74,57,39
+"Corn cakes imp","Général","Sans Marque",5902609001608,512,394,97
+"Sardines à la tomate","Produits de la mer","viva",6135535000202,240,185,100
+"guerioune","Boissons","guerioune",6135344000028,79,61,155
+"Moment éclat d’amandes","Général","Sans Marque",6133414006987,614,473,24
+"Ifruit","en:fruit-juices","Ifri",6130093065298,72,56,202
+"Dattes Deglet Nour d'Algérie","en:dried-fruits","Dalia",3770022240001,572,440,146
+"sel rose d'himalaya","Condiments","Sans Marque",0745178643290,152,117,180
+"Coffee","Général","Mövenpick",4006581018126,128,99,207
+"Désserna","Général","Sans Marque",6132501946038,613,472,136
+"Atun en trozos con tomate","Produits de la mer","Sans Marque",6130504002164,132,102,159
+"Zaim soda","Sodas","Sans Marque",6134337000267,284,219,145
+"coke","en:Beverages and beverages preparations","cocacola",6130003014606,678,522,204
+"Jufré","مشروب بالفواكه","Setifis",6130813608347,453,349,107
+"hello","Général","160da",6130384000489,349,269,117
+"Rouiba","Général","Rouiba",6130002005254,384,296,77
+"Biscuit complet cacao-orange","Oatmeal-cookies","hiltho",6132950124063,482,371,44
+"Spaghetti Integrale","Cibi e bevande a base vegetale","Garrido",6130492000777,474,365,83
+"biscotte","en:rusks","coeur de céréale",6132108100079,300,231,106

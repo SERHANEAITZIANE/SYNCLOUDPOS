@@ -1,0 +1,69 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.9s
+  Skipping validation of types
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/5) ...
+  Generating static pages using 5 workers (1/5) 
+  Generating static pages using 5 workers (2/5) 
+  Generating static pages using 5 workers (3/5) 
+✓ Generating static pages using 5 workers (5/5) in 267.1ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/analytics
+├ ƒ /[locale]/brands
+├ ƒ /[locale]/categories
+├ ƒ /[locale]/company
+├ ƒ /[locale]/customers
+├ ƒ /[locale]/customers/[customerId]
+├ ƒ /[locale]/customers/[customerId]/ledger
+├ ƒ /[locale]/customers/new
+├ ƒ /[locale]/customers/unpaid
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/error
+├ ƒ /[locale]/expenses
+├ ƒ /[locale]/expenses/new
+├ ƒ /[locale]/login
+├ ƒ /[locale]/payments
+├ ƒ /[locale]/pos
+├ ƒ /[locale]/products
+├ ƒ /[locale]/products/[productId]
+├ ƒ /[locale]/products/inventory
+├ ƒ /[locale]/products/new
+├ ƒ /[locale]/purchases
+├ ƒ /[locale]/purchases/[purchaseId]
+├ ƒ /[locale]/register
+├ ƒ /[locale]/reports
+├ ƒ /[locale]/sales
+├ ƒ /[locale]/sales/[salesId]
+├ ƒ /[locale]/settings
+├ ƒ /[locale]/suppliers
+├ ƒ /[locale]/suppliers/[supplierId]
+├ ƒ /[locale]/suppliers/[supplierId]/ledger
+├ ƒ /[locale]/suppliers/new
+├ ƒ /[locale]/treasury
+├ ƒ /[locale]/treasury/[accountId]
+├ ƒ /[locale]/users
+├ ƒ /api/auth/[...nextauth]
+└ ƒ /api/upload
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

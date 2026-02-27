@@ -1,0 +1,15 @@
+total 524
+drwxr-xr-x 4 root root   4096 Feb 26 01:45 .
+drwxr-xr-x 4 root root   4096 Feb 26 01:30 ..
+-rw-r--r-- 1 root root    139 Feb 26 01:13 .dockerignore
+-rw-r--r-- 1 root root    170 Feb 26 01:45 .env
+drwxr-xr-x 8 root root   4096 Feb 26 01:44 .git
+-rw-r--r-- 1 root root   1848 Feb 26 01:13 Dockerfile
+-rw-r--r-- 1 root root    467 Feb 26 01:13 components.json
+-rw-r--r-- 1 root root    418 Feb 26 01:13 docker-compose.yml
+-rw-r--r-- 1 root root    260 Feb 26 01:13 next.config.ts
+-rw-r--r-- 1 root root 480962 Feb 26 01:13 package-lock.json
+-rw-r--r-- 1 root root   1540 Feb 26 01:13 package.json
+-rw-r--r-- 1 root root     94 Feb 26 01:13 postcss.config.mjs
+drwxr-xr-x 2 root root   4096 Feb 26 01:23 prisma
+-rw-r--r-- 1 root root    717 Feb 26 01:13 tsconfig.json

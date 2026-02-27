@@ -1,0 +1,23 @@
+
+> syncloudpos@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 18.2s
+  Running TypeScript ...
+Failed to compile.
+
+./src/actions/analytics.ts:91:21
+Type error: Parameter 'c' implicitly has an 'any' type.
+
+[0m [90m 89 |[39m         [90m// Outstanding debt = customers with negative balance (they owe money)[39m
+ [90m 90 |[39m         [36mconst[39m outstandingDebt [33m=[39m customers
+[31m[1m>[22m[39m[90m 91 |[39m             [33m.[39mfilter(c [33m=>[39m [33mNumber[39m(c[33m.[39mbalance) [33m<[39m [35m0[39m)
+ [90m    |[39m                     [31m[1m^[22m[39m
+ [90m 92 |[39m             [33m.[39mreduce((acc[33m:[39m number[33m,[39m c[33m:[39m any) [33m=>[39m acc [33m+[39m [33mMath[39m[33m.[39mabs([33mNumber[39m(c[33m.[39mbalance))[33m,[39m [35m0[39m)
+ [90m 93 |[39m
+ [90m 94 |[39m         [90m// ─── Revenue Over Time (POS + Invoice combined) ───────────────────[39m[0m
+Next.js build worker exited with code: 1 and signal: null
