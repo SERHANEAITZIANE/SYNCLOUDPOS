@@ -42,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (token.sub && session.user) {
                 session.user.id = token.sub
             }
-            if (token.tenantId && session.user) {
+            if (token.role && session.user) {
                 // @ts-expect-error custom fields
                 session.user.tenantId = token.tenantId
                 // @ts-expect-error custom fields
@@ -53,6 +53,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.isBlocked = token.isBlocked
                 // @ts-expect-error custom fields
                 session.user.role = token.role
+            } else if (token.sub && session.user && !token.role) {
+                // Backward compatibility for users with old session cookies
+                // If the token lacks a role, we fetch it dynamically from the DB
+                const existingUser = await db.user.findUnique({
+                    where: { id: token.sub },
+                    include: { tenant: true }
+                });
+                if (existingUser) {
+                    // @ts-expect-error custom fields
+                    session.user.tenantId = existingUser.tenantId;
+                    // @ts-expect-error custom fields
+                    session.user.isSuperadmin = existingUser.isSuperadmin;
+                    // @ts-expect-error custom fields
+                    session.user.role = existingUser.role;
+                    // @ts-expect-error custom fields
+                    session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
+                    // @ts-expect-error custom fields
+                    session.user.isBlocked = existingUser.tenant?.isBlocked;
+                }
             }
             return session
         },
