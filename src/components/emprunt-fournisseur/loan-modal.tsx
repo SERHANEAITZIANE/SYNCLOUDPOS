@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useForm } from "react-hook-form"
-import { toast } from "sonner"
+import { toast } from "react-hot-toast"
 import { Building2 } from "lucide-react"
 import { registerSupplierLoan } from "@/actions/suppliers"
 import { Button } from "@/components/ui/button"
