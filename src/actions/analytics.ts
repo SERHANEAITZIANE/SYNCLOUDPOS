@@ -51,6 +51,18 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             }
         })
 
+        // ─── 3.5 Purchases (Supplier Orders) ──────────────────────────────
+        const purchases = await db.purchaseOrder.findMany({
+            where: {
+                tenantId,
+                status: { in: ["COMPLETED", "PAID", "DELIVERED", "PENDING"] }, // Include all that are valid purchases
+                createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+            },
+            include: {
+                items: true
+            }
+        })
+
         // ─── 4. All Customers (for outstanding debt) ──────────────────────
         const customers = await db.customer.findMany({
             where: { tenantId },
@@ -73,6 +85,13 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const invoiceRevenue = salesOrders.reduce((acc: number, o: any) => acc + Number(o.total), 0)
         const totalRevenue = posRevenue + invoiceRevenue
         const totalExpenses = expenses.reduce((acc: number, e: any) => acc + Number(e.amount), 0)
+        const totalPurchases = purchases.reduce((acc: number, o: any) => acc + Number(o.total), 0)
+
+        // Cash actually collected vs abstract revenue
+        // posOrders has `paidAmount`, salesOrders with status PAID are fully paid (or we can assume paidAmount = total if missing)
+        const posCash = posOrders.reduce((acc: number, o: any) => acc + Number(o.paidAmount || 0), 0)
+        const invoiceCash = salesOrders.reduce((acc: number, o: any) => acc + Number(o.total), 0) // Assume PAID means fully paid, adjust if `paidAmount` exists
+        const cashCollected = posCash + invoiceCash
 
         // COGS = cost of goods actually sold (qty × product.cost per item)
         const calcCOGS = (orders: any[]) =>
@@ -179,6 +198,8 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             posRevenue,
             invoiceRevenue,
             totalExpenses,
+            totalPurchases,
+            cashCollected,
             totalCOGS,
             netProfit,
             ordersCount,
@@ -196,7 +217,8 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         console.error("[GET_ANALYTICS]", error)
         return {
             totalRevenue: 0, posRevenue: 0, invoiceRevenue: 0,
-            totalExpenses: 0, totalCOGS: 0, netProfit: 0,
+            totalExpenses: 0, totalPurchases: 0, cashCollected: 0,
+            totalCOGS: 0, netProfit: 0,
             ordersCount: 0, salesCount: 0, outstandingDebt: 0,
             revenueOverTime: [], topProducts: [], categoryPerformance: [],
             recentOrders: [], topCustomers: [], lowStock: [], debtors: []
