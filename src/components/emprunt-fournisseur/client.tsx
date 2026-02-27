@@ -20,9 +20,10 @@ import { SupplierLoanModal } from "./loan-modal"
 interface EmpruntFournisseurClientProps {
     data: SupplierLoanColumn[]
     suppliers: { id: string; name: string }[]
+    treasuryAccounts: { id: string; name: string; balance: number }[]
 }
 
-export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> = ({ data, suppliers }) => {
+export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> = ({ data, suppliers, treasuryAccounts }) => {
     const columns = useSupplierLoanColumns()
     const [filteredData, setFilteredData] = React.useState(data)
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
@@ -101,6 +102,7 @@ export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> =
                 open={open}
                 onClose={() => setOpen(false)}
                 suppliers={suppliers}
+                treasuryAccounts={treasuryAccounts}
             />
         </>
     )

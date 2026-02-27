@@ -21,9 +21,10 @@ import { LoanModal } from "./loan-modal"
 interface EmpruntClientProps {
     data: LoanColumn[]
     customers: { id: string; name: string }[]
+    treasuryAccounts: { id: string; name: string; balance: number }[]
 }
 
-export const EmpruntClient: React.FC<EmpruntClientProps> = ({ data, customers }) => {
+export const EmpruntClient: React.FC<EmpruntClientProps> = ({ data, customers, treasuryAccounts }) => {
     const columns = useLoanColumns()
     const [filteredData, setFilteredData] = React.useState(data)
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
@@ -102,6 +103,7 @@ export const EmpruntClient: React.FC<EmpruntClientProps> = ({ data, customers })
                 open={open}
                 onClose={() => setOpen(false)}
                 customers={customers}
+                treasuryAccounts={treasuryAccounts}
             />
         </>
     )

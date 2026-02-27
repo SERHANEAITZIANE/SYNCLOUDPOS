@@ -157,7 +157,7 @@ export const registerSupplierPayment = async (data: {
     }
 }
 
-export const registerSupplierLoan = async (data: { supplierId: string; amount: number; notes?: string; date?: Date | string }) => {
+export const registerSupplierLoan = async (data: { supplierId: string; amount: number; accountId: string; notes?: string; date?: Date | string }) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     // @ts-expect-error tenantId
@@ -165,19 +165,49 @@ export const registerSupplierLoan = async (data: { supplierId: string; amount: n
     if (!tenantId) return { error: "Tenant ID missing" }
 
     try {
-        const supplier = await db.supplier.findUnique({ where: { id: data.supplierId } })
+        const result = await db.$transaction(async (tx) => {
+            const supplier = await tx.supplier.findUnique({ where: { id: data.supplierId } })
 
-        // Increase supplier balance (we owe them more — they gave us an advance)
-        // Also append a tagged note entry for loan history tracking
-        await db.supplier.update({
-            where: { id: data.supplierId },
-            data: {
-                balance: { increment: data.amount },
-                notes: [
-                    supplier?.notes,
-                    `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance reçue"}`
-                ].filter(Boolean).join("\n")
-            }
+            // Get the treasury account
+            const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
+            if (!account) throw new Error("Compte de trésorerie introuvable")
+
+            // Increase supplier balance (we owe them more — they gave us an advance)
+            // Also append a tagged note entry for loan history tracking
+            await tx.supplier.update({
+                where: { id: data.supplierId },
+                data: {
+                    balance: { increment: data.amount },
+                    notes: [
+                        supplier?.notes,
+                        `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance reçue"}`
+                    ].filter(Boolean).join("\n")
+                }
+            })
+
+            // Increment treasury account balance
+            const updatedAccount = await tx.treasuryAccount.update({
+                where: { id: data.accountId },
+                data: {
+                    balance: { increment: data.amount }
+                }
+            })
+
+            // Create Treasury transaction
+            await tx.treasuryTransaction.create({
+                data: {
+                    accountId: data.accountId,
+                    type: "CREDIT",
+                    amount: data.amount,
+                    balanceBefore: account.balance,
+                    balanceAfter: updatedAccount.balance,
+                    source: "MANUAL_IN",
+                    description: `Avance reçue du fournisseur: ${supplier?.name || "Inconnu"}`,
+                    tenantId
+                }
+            })
+
+            return { success: "Emprunt fournisseur enregistré avec succès" }
         })
 
         revalidatePath("/(dashboard)/suppliers")

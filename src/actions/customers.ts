@@ -154,7 +154,7 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
     }
 }
 
-export const registerCustomerLoan = async (data: { customerId: string; amount: number; notes?: string; date?: Date | string }) => {
+export const registerCustomerLoan = async (data: { customerId: string; amount: number; accountId: string; notes?: string; date?: Date | string }) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     // @ts-expect-error tenantId
@@ -162,19 +162,54 @@ export const registerCustomerLoan = async (data: { customerId: string; amount: n
     if (!tenantId) return { error: "Tenant ID missing" }
 
     try {
-        // Get the customer info for the description
-        const customer = await db.customer.findUnique({ where: { id: data.customerId } })
+        const result = await db.$transaction(async (tx) => {
+            // Get the customer info for the description
+            const customer = await tx.customer.findUnique({ where: { id: data.customerId } })
 
-        // Increase customer balance (adds to their debt — they now owe more)
-        await db.customer.update({
-            where: { id: data.customerId },
-            data: {
-                balance: { increment: data.amount },
-                notes: [
-                    customer?.notes,
-                    `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance accordée"}`
-                ].filter(Boolean).join("\n")
+            // Get the treasury account
+            const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
+            if (!account) throw new Error("Compte de trésorerie introuvable")
+
+            // Ensure there are enough funds
+            if (Number(account.balance) < data.amount) {
+                throw new Error("Fonds insuffisants dans la caisse/banque sélectionnée")
             }
+
+            // Increase customer balance (adds to their debt — they now owe more)
+            await tx.customer.update({
+                where: { id: data.customerId },
+                data: {
+                    balance: { increment: data.amount },
+                    notes: [
+                        customer?.notes,
+                        `[EMPRUNT ${new Date().toLocaleDateString("fr-FR")}] ${data.amount} DA - ${data.notes || "Avance accordée"}`
+                    ].filter(Boolean).join("\n")
+                }
+            })
+
+            // Decrement treasury account balance
+            const updatedAccount = await tx.treasuryAccount.update({
+                where: { id: data.accountId },
+                data: {
+                    balance: { decrement: data.amount }
+                }
+            })
+
+            // Create Treasury transaction
+            await tx.treasuryTransaction.create({
+                data: {
+                    accountId: data.accountId,
+                    type: "DEBIT",
+                    amount: data.amount,
+                    balanceBefore: account.balance,
+                    balanceAfter: updatedAccount.balance,
+                    source: "MANUAL_OUT",
+                    description: `Prêt accordé au client: ${customer?.name || "Inconnu"}`,
+                    tenantId
+                }
+            })
+
+            return { success: "Emprunt enregistré avec succès" }
         })
 
         revalidatePath("/(dashboard)/customers")

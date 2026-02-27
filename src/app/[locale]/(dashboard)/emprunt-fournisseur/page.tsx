@@ -1,9 +1,10 @@
-import { getSupplierLoans } from "@/actions/suppliers"
-import { getSuppliers } from "@/actions/suppliers"
+import { getSupplierLoans, getSuppliers } from "@/actions/suppliers"
+import { getTreasuryAccounts } from "@/actions/treasury"
 import { EmpruntFournisseurClient } from "@/components/emprunt-fournisseur/client"
 
 export default async function EmpruntFournisseurPage() {
     const loans = await getSupplierLoans()
+    const treasuryAccounts = await getTreasuryAccounts()
 
     const suppliersResponse = await getSuppliers()
     let suppliersList: { id: string; name: string }[] = []
@@ -17,7 +18,7 @@ export default async function EmpruntFournisseurPage() {
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-                <EmpruntFournisseurClient data={loans as any[]} suppliers={suppliersList} />
+                <EmpruntFournisseurClient data={loans as any[]} suppliers={suppliersList} treasuryAccounts={treasuryAccounts} />
             </div>
         </div>
     )

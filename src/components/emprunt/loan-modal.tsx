@@ -35,21 +35,24 @@ interface LoanModalProps {
     open: boolean
     onClose: () => void
     customers: { id: string; name: string }[]
+    treasuryAccounts: { id: string; name: string; balance: number }[]
 }
 
 interface LoanFormValues {
     customerId: string
+    accountId: string
     amount: string
     notes: string
 }
 
-export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers }) => {
+export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers, treasuryAccounts }) => {
     const router = useRouter()
     const [loading, setLoading] = React.useState(false)
 
     const form = useForm<LoanFormValues>({
         defaultValues: {
             customerId: "",
+            accountId: "",
             amount: "",
             notes: "",
         }
@@ -58,6 +61,10 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers }
     const onSubmit = async (values: LoanFormValues) => {
         if (!values.customerId) {
             toast.error("Veuillez sélectionner un client")
+            return
+        }
+        if (!values.accountId) {
+            toast.error("Veuillez sélectionner une caisse/banque")
             return
         }
         const amount = parseFloat(values.amount)
@@ -70,6 +77,7 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers }
         try {
             const result = await registerCustomerLoan({
                 customerId: values.customerId,
+                accountId: values.accountId,
                 amount,
                 notes: values.notes || undefined,
             })
@@ -117,6 +125,31 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers }
                                         <SelectContent>
                                             {customers.map(c => (
                                                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="accountId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Caisse / Banque</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Sélectionner une caisse/banque..." />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {treasuryAccounts.map(account => (
+                                                <SelectItem key={account.id} value={account.id}>
+                                                    {account.name} ({account.balance} DA)
+                                                </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
