@@ -61,19 +61,27 @@ export async function POST(req: Request) {
             // Note: We do NOT delete Tenant, User or TenantUser
 
             // --- 2. INSERT BACKUP DATA ---
-            // Helper function to safely map and sanitize arrays from JSON
+            // Helper function to safely map arrays and force the current tenantId onto all restored records
             const safeArray = (arr: any) => Array.isArray(arr) ? arr : [];
+            const withTenant = (arr: any) => safeArray(arr).map((item: any) => ({ ...item, tenantId }));
 
             // Insert Base Entities
-            if (safeArray(body.categories).length > 0) await tx.category.createMany({ data: body.categories });
-            if (safeArray(body.brands).length > 0) await tx.brand.createMany({ data: body.brands });
-            if (safeArray(body.customers).length > 0) await tx.customer.createMany({ data: body.customers });
-            if (safeArray(body.suppliers).length > 0) await tx.supplier.createMany({ data: body.suppliers });
-            if (safeArray(body.treasuryAccounts).length > 0) await tx.treasuryAccount.createMany({ data: body.treasuryAccounts });
-            if (safeArray(body.expenseCategories).length > 0) await tx.expenseCategory.createMany({ data: body.expenseCategories });
+            const categories = withTenant(body.categories);
+            const brands = withTenant(body.brands);
+            const customers = withTenant(body.customers);
+            const suppliers = withTenant(body.suppliers);
+            const treasuryAccounts = withTenant(body.treasuryAccounts);
+            const expenseCategories = withTenant(body.expenseCategories);
+
+            if (categories.length > 0) await tx.category.createMany({ data: categories });
+            if (brands.length > 0) await tx.brand.createMany({ data: brands });
+            if (customers.length > 0) await tx.customer.createMany({ data: customers });
+            if (suppliers.length > 0) await tx.supplier.createMany({ data: suppliers });
+            if (treasuryAccounts.length > 0) await tx.treasuryAccount.createMany({ data: treasuryAccounts });
+            if (expenseCategories.length > 0) await tx.expenseCategory.createMany({ data: expenseCategories });
 
             // Insert Products (without relations in createMany)
-            const products = safeArray(body.products);
+            const products = withTenant(body.products);
             const pureProducts = products.map((p: any) => {
                 const { images, barcodes, ...rest } = p;
                 return rest;
@@ -88,27 +96,29 @@ export async function POST(req: Request) {
 
             // Insert Orders and complex tree items
             // Expenses
-            if (safeArray(body.expenses).length > 0) await tx.expense.createMany({ data: body.expenses });
+            const expenses = withTenant(body.expenses);
+            if (expenses.length > 0) await tx.expense.createMany({ data: expenses });
 
             // Treasury transactions
-            if (safeArray(body.treasuryTransactions).length > 0) await tx.treasuryTransaction.createMany({ data: body.treasuryTransactions });
+            const treasuryTransactions = withTenant(body.treasuryTransactions);
+            if (treasuryTransactions.length > 0) await tx.treasuryTransaction.createMany({ data: treasuryTransactions });
 
             // Sales Orders
-            const salesOrders = safeArray(body.salesOrders);
+            const salesOrders = withTenant(body.salesOrders);
             const pureSalesOrders = salesOrders.map((o: any) => { const { items, ...rest } = o; return rest; });
             const allSalesItems = salesOrders.flatMap((o: any) => safeArray(o.items));
             if (pureSalesOrders.length > 0) await tx.salesOrder.createMany({ data: pureSalesOrders });
             if (allSalesItems.length > 0) await tx.salesOrderItem.createMany({ data: allSalesItems });
 
             // Purchase Orders
-            const purchaseOrders = safeArray(body.purchaseOrders);
+            const purchaseOrders = withTenant(body.purchaseOrders);
             const purePO = purchaseOrders.map((o: any) => { const { items, ...rest } = o; return rest; });
             const allPOItems = purchaseOrders.flatMap((o: any) => safeArray(o.items));
             if (purePO.length > 0) await tx.purchaseOrder.createMany({ data: purePO });
             if (allPOItems.length > 0) await tx.purchaseOrderItem.createMany({ data: allPOItems });
 
-            // Standard Orders (POS transactions)
-            const orders = safeArray(body.orders);
+            // Standard Orders (POS transactions) - We also force userId to avoid foreign key failures on different servers
+            const orders = safeArray(body.orders).map((o: any) => ({ ...o, tenantId, userId: session.user.id }));
             const pureOrders = orders.map((o: any) => { const { items, ...rest } = o; return rest; });
             const allOrderItems = orders.flatMap((o: any) => safeArray(o.items));
             if (pureOrders.length > 0) await tx.order.createMany({ data: pureOrders });
