@@ -6,8 +6,10 @@ import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-f
 
 export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
     try {
+        console.time("getAnalyticsData - Auth");
         const session = await auth();
         if (!session?.user?.id) throw new Error("Unauthorized");
+        console.timeEnd("getAnalyticsData - Auth");
 
         const tenantId = session.user.tenantId;
         const toDate = dateRange?.to || new Date();
@@ -15,6 +17,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
 
         // ─── OPTIMIZED AGGREGATIONS (DATABASE LEVEL) ───────────────────────
 
+        console.time("getAnalyticsData - Initial Aggregations");
         // 1. Total Revenue & Cash (Orders)
         const posAgg = await db.order.aggregate({
             where: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
@@ -40,6 +43,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             where: { tenantId, status: { in: ["COMPLETED", "PAID", "DELIVERED", "PENDING"] }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
             _sum: { total: true }
         });
+        console.timeEnd("getAnalyticsData - Initial Aggregations");
 
         // Compute high-level metrics
         const posRevenue = Number(posAgg._sum.total || 0);
@@ -56,8 +60,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const salesCount = salesAgg._count.id;
 
         // ─── COGS (Cost of Goods Sold) using DB groupBy ───────────────────────
-        // Instead of fetching all order items (which could be millions), we group by productId.
-        // This returns at most max(products) rows, which is extremely safe for memory.
+        console.time("getAnalyticsData - COGS");
         const posItemsSum = await db.orderItem.groupBy({
             by: ['productId'],
             where: { order: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
@@ -83,11 +86,12 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         let totalCOGS = 0;
         posItemsSum.forEach(i => totalCOGS += (i._sum.quantity || 0) * (costMap.get(i.productId) || 0));
         salesItemsSum.forEach(i => totalCOGS += (i._sum.quantity || 0) * (costMap.get(i.productId) || 0));
+        console.timeEnd("getAnalyticsData - COGS");
 
         const netProfit = totalRevenue - totalExpenses - totalCOGS;
 
         // ─── DEBTORS & OUTSTANDING DEBT ──────────────────────────────────
-        // Instead of fetching all customers, we only fetch those with balance < 0
+        console.time("getAnalyticsData - Debtors");
         const debtorsAgg = await db.customer.aggregate({
             where: { tenantId, balance: { lt: 0 } },
             _sum: { balance: true }
@@ -101,9 +105,10 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             take: 5
         });
         const formattedDebtors = topDebtors.map(c => ({ id: c.id, name: c.name, balance: Math.abs(Number(c.balance)) }));
+        console.timeEnd("getAnalyticsData - Debtors");
 
         // ─── LOW STOCK PRODUCTS ───────────────────────────────────────────
-        // Only fetch items where stock <= 10 (heuristic) to reduce memory
+        console.time("getAnalyticsData - Low Stock");
         const lowStockProducts = await db.product.findMany({
             where: { tenantId, isArchived: false, stock: { lte: 10 } },
             select: { id: true, name: true, stock: true, minStock: true },
@@ -113,8 +118,10 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const lowStock = lowStockProducts
             .filter(p => p.stock <= p.minStock)
             .slice(0, 8);
+        console.timeEnd("getAnalyticsData - Low Stock");
 
         // ─── RECENT ORDERS ────────────────────────────────────────────────
+        console.time("getAnalyticsData - Recent Orders");
         const recentOrdersRaw = await db.order.findMany({
             where: { tenantId, status: "COMPLETED" },
             include: { customer: { select: { name: true } } },
@@ -128,26 +135,67 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             paidAmount: Number(o.paidAmount),
             date: format(o.createdAt, "dd/MM HH:mm")
         }));
+        console.timeEnd("getAnalyticsData - Recent Orders");
 
-        // ─── REVENUE OVER TIME (Zero Memory Footprint Iteration) ─────────────────
-        // Execute 1 tiny aggregate query per day in parallel.
+        // ─── REVENUE OVER TIME (Optimized FindMany Mapping) ─────────────────
+        console.time("getAnalyticsData - Revenue Over Time");
+        // Instead of 90 parallel queries (which locks SQLite), we do 3 fast flat queries 
+        // selecting ONLY the date and total, then group them in JS over the interval.
+        const [ordersForChart, salesForChart, expensesForChart] = await Promise.all([
+            db.order.findMany({
+                where: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                select: { createdAt: true, total: true }
+            }),
+            db.salesOrder.findMany({
+                where: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                select: { createdAt: true, total: true }
+            }),
+            db.expense.findMany({
+                where: { tenantId, date: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                select: { date: true, amount: true }
+            })
+        ]);
+
+        const revenueMap = new Map<string, { revenue: number; expenses: number }>();
+
+        // Initialize the map with 0s for every day in the interval
         const days = eachDayOfInterval({ start: fromDate, end: toDate });
-        const revenuePromises = days.map(day => {
-            const start = startOfDay(day);
-            const end = endOfDay(day);
-            return Promise.all([
-                db.order.aggregate({ where: { tenantId, status: "COMPLETED", createdAt: { gte: start, lte: end } }, _sum: { total: true } }),
-                db.salesOrder.aggregate({ where: { tenantId, status: "PAID", createdAt: { gte: start, lte: end } }, _sum: { total: true } }),
-                db.expense.aggregate({ where: { tenantId, date: { gte: start, lte: end } }, _sum: { amount: true } })
-            ]).then(([pos, sales, exp]) => ({
-                date: format(day, "MMM dd"),
-                revenue: Number(pos._sum.total || 0) + Number(sales._sum.total || 0),
-                expenses: Number(exp._sum.amount || 0)
-            }));
+        days.forEach(day => {
+            revenueMap.set(format(day, "MMM dd"), { revenue: 0, expenses: 0 });
         });
-        const revenueOverTime = await Promise.all(revenuePromises);
+
+        // O(N) mapping, very fast in JS. N is number of transactions in 30 days, not all time.
+        ordersForChart.forEach(o => {
+            const dateStr = format(o.createdAt, "MMM dd");
+            if (revenueMap.has(dateStr)) {
+                const cur = revenueMap.get(dateStr)!;
+                cur.revenue += Number(o.total);
+            }
+        });
+
+        salesForChart.forEach(o => {
+            const dateStr = format(o.createdAt, "MMM dd");
+            if (revenueMap.has(dateStr)) {
+                const cur = revenueMap.get(dateStr)!;
+                cur.revenue += Number(o.total);
+            }
+        });
+
+        expensesForChart.forEach(e => {
+            const dateStr = format(e.date, "MMM dd");
+            if (revenueMap.has(dateStr)) {
+                const cur = revenueMap.get(dateStr)!;
+                cur.expenses += Number(e.amount);
+            }
+        });
+
+        const revenueOverTime = Array.from(revenueMap.entries())
+            .map(([date, vals]) => ({ date, ...vals }));
+
+        console.timeEnd("getAnalyticsData - Revenue Over Time");
 
         // ─── TOP CUSTOMERS & TOP PRODUCTS (Minimal Fetch) ───────────────
+        console.time("getAnalyticsData - Top Customers");
         const topCustomersData = await db.order.groupBy({
             by: ['customerId'],
             where: { tenantId, status: "COMPLETED", customerId: { not: null }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
@@ -162,6 +210,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             const c = await db.customer.findUnique({ where: { id: tc.customerId }, select: { name: true } });
             if (c) topCustomers.push({ name: c.name, spent: Number(tc._sum.total || 0) });
         }
+        console.timeEnd("getAnalyticsData - Top Customers");
 
         const topProducts: any[] = [];
         const categoryPerformance: any[] = [];
