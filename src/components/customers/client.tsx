@@ -6,43 +6,17 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"
 
 import { Button } from "@/components/ui/button"
-import { DataTable } from "@/components/ui/data-table"
-import { Heading } from "@/components/ui/heading"
-import { Separator } from "@/components/ui/separator"
-import { useCustomerColumns } from "./columns"
-import { CustomerColumn } from "./types"
-import { Link, useRouter } from "@/i18n/routing"
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { registerCustomerPayment, importCustomers } from "@/actions/customers"
-import { ExcelImportModal } from "@/components/ui/excel-import-modal"
-import { Edit, MoreHorizontal, Trash, ScrollText, HandCoins } from "lucide-react"
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { deleteCustomer } from "@/actions/customers"
+import { ServerDataTable } from "@/components/ui/server-data-table"
 
 interface CustomerClientProps {
     data: CustomerColumn[]
     accounts: { id: string, name: string, type: string }[]
+    totalCount: number
+    pageCount: number
+    currentPage: number
 }
 
-export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }) => {
+export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, totalCount, pageCount, currentPage }) => {
     const t = useTranslations("Customers")
     const tCommon = useTranslations("Common")
     const router = useRouter()
@@ -158,7 +132,7 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }
         <>
             <div className="flex items-center justify-between">
                 <Heading
-                    title={`${t("title")} (${data.length})`}
+                    title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
                 <div className="flex flex-row flex-wrap gap-2">
@@ -179,7 +153,7 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }
                 </div>
             </div>
             <Separator />
-            <DataTable searchKey="name" columns={columns} data={data} />
+            <ServerDataTable searchKey="name" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
 
             {/* Advance Payment Modal Overlay */}
             <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>

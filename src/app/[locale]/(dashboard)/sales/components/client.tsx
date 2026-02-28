@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import { Plus } from "lucide-react"
-import { useRouter } from "@/i18n/routing"
+import { useRouter, usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { DateRange } from "react-day-picker"
-import { startOfDay, endOfDay, isWithinInterval } from "date-fns"
+import { useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
-import { DataTable } from "@/components/ui/data-table"
+import { ServerDataTable } from "@/components/ui/server-data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 import { useSalesColumns } from "@/components/sales/columns"
@@ -24,64 +24,74 @@ import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 
 interface SalesOrderClientProps {
     data: SalesOrderColumn[]
+    totalCount: number
+    pageCount: number
+    currentPage: number
 }
 
 export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
-    data
+    data,
+    totalCount,
+    pageCount,
+    currentPage
 }) => {
     const t = useTranslations("Sales")
     const tCommon = useTranslations("Common")
     const router = useRouter()
-    const locale = useLocale()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
     const columns = useSalesColumns()
-    const [filteredData, setFilteredData] = React.useState(data)
-    const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-        from: undefined,
-        to: undefined,
-    })
-    const [typeFilter, setTypeFilter] = React.useState<string>("ALL")
 
-    React.useEffect(() => {
-        let result = data
+    const typeFilter = searchParams.get("type") || "ALL"
+    const fromStr = searchParams.get("from")
+    const toStr = searchParams.get("to")
 
-        // Filter by Date
-        if (dateRange?.from) {
-            result = result.filter(item => {
-                if (!item.originalDate) return true
-                const itemDate = new Date(item.originalDate)
-
-                if (dateRange.to) {
-                    return isWithinInterval(itemDate, {
-                        start: startOfDay(dateRange.from!),
-                        end: endOfDay(dateRange.to)
-                    })
-                }
-
-                // If only start date is selected, assume >= start date
-                return itemDate >= startOfDay(dateRange.from!)
-            })
+    const dateRange = React.useMemo(() => {
+        return {
+            from: fromStr ? new Date(fromStr) : undefined,
+            to: toStr ? new Date(toStr) : undefined
         }
+    }, [fromStr, toStr])
 
-        // Filter by Type
-        if (typeFilter !== "ALL") {
-            result = result.filter(item => item.type === typeFilter)
+    const setTypeFilter = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value && value !== "ALL") {
+            params.set("type", value)
+        } else {
+            params.delete("type")
         }
+        params.set("page", "1")
+        router.push(pathname + "?" + params.toString())
+    }
 
-        setFilteredData(result)
-    }, [data, dateRange, typeFilter])
+    const setDateRange = (range: DateRange | undefined) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (range?.from) {
+            params.set("from", range.from.toISOString())
+        } else {
+            params.delete("from")
+        }
+        if (range?.to) {
+            params.set("to", range.to.toISOString())
+        } else {
+            params.delete("to")
+        }
+        params.set("page", "1")
+        router.push(pathname + "?" + params.toString())
+    }
 
     return (
         <>
             <div className="flex items-center justify-between">
                 <Heading
-                    title={`${t("title")} (${filteredData.length})`}
+                    title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
                 <div className="flex flex-row space-x-2">
-                    <Button variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:hover:bg-emerald-900/50" onClick={() => router.push(`/payments`)}>
+                    <Button variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:hover:bg-emerald-900/50" onClick={() => router.push(`/${useLocale()}/payments`)}>
                         Paiements
                     </Button>
-                    <Button onClick={() => router.push(`/sales/new`)}>
+                    <Button onClick={() => router.push(`/${useLocale()}/sales/new`)}>
                         <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
                     </Button>
                 </div>
@@ -106,7 +116,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
                 <DatePickerWithRange date={dateRange} setDate={setDateRange} />
             </div>
 
-            <DataTable searchKey="customer" columns={columns} data={filteredData} />
+            <ServerDataTable searchKey="search" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
         </>
     )
 }

@@ -1,33 +1,66 @@
-import { getProducts } from "@/actions/products"
 import { getCategories } from "@/actions/categories"
-import { getCustomers } from "@/actions/customers"
 import { getTreasuryAccounts } from "@/actions/treasury"
 import { PosClient } from "@/components/pos/pos-client"
 import { db } from "@/lib/db"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
+import { auth } from "@/auth"
 
 const PosPage = async () => {
-    const products = await getProducts()
-    const categories = await getCategories()
-    const customersRes = await getCustomers()
-    const customers = customersRes && 'customers' in customersRes ? customersRes.customers : []
-    const accounts = await getTreasuryAccounts()
+    const session = await auth()
+    if (!session?.user?.id) return <div>Unauthorized</div>
 
     const tenantId = await getActiveTenantId()
-    let storeName = "Premium POS"
-    if (tenantId) {
-        const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
-        if (tenant?.name) storeName = tenant.name
-    }
+    if (!tenantId) return <div>No tenant configured</div>
 
-    // Ensure Decimals are serialized to Numbers so Client Components don't crash
-    const formattedCustomers = (customers || []).map((c: any) => ({
+    let storeName = "Premium POS"
+    const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
+    if (tenant?.name) storeName = tenant.name
+
+    const categories = await getCategories()
+    const accounts = await getTreasuryAccounts()
+
+    // 1. Fetch Lightweight Customers Array
+    const rawCustomers = await db.customer.findMany({
+        where: { tenantId },
+        select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            address: true,
+            balance: true,
+            clientType: true,
+            createdAt: true
+        }
+    })
+
+    const formattedCustomers = rawCustomers.map(c => ({
         ...c,
-        balance: c.balance ? Number(c.balance) : 0
+        balance: c.balance ? Number(c.balance) : 0,
+        createdAt: c.createdAt.toISOString()
     }))
 
-    // Transform products to include image url string for the grid
-    const formattedProducts = (products as any[]).map((item) => ({
+    // 2. Fetch Lightweight Products Array
+    const rawProducts = await db.product.findMany({
+        where: { tenantId },
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            cost: true,
+            stock: true,
+            minStock: true,
+            categoryId: true,
+            category: { select: { name: true } },
+            wholesalePrice: true,
+            dealerPrice: true,
+            barcodes: { select: { value: true } },
+            images: { select: { url: true }, take: 1 }
+        }
+    })
+
+    const formattedProducts = rawProducts.map((item) => ({
         id: item.id,
         name: item.name,
         description: item.description || "",
@@ -40,12 +73,12 @@ const PosPage = async () => {
         wholesalePrice: Number(item.wholesalePrice || item.price),
         dealerPrice: Number(item.dealerPrice || item.price),
         imageUrl: item.images?.[0]?.url || "",
-        barcodes: (item as any).barcodes?.map((b: any) => b.value) || []
+        barcodes: item.barcodes?.map(b => b.value) || []
     }))
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} products={formattedProducts} categories={categories} customers={formattedCustomers} accounts={accounts} />
+            <PosClient storeName={storeName} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} />
         </div>
     )
 }

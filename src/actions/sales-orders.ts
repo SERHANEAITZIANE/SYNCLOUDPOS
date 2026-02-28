@@ -107,23 +107,61 @@ export async function createSalesOrder(data: {
     }
 }
 
-export async function getSalesOrders(type?: string) {
+export async function getSalesOrders(
+    page: number = 1,
+    pageSize: number = 20,
+    search?: string,
+    type?: string,
+    from?: string,
+    to?: string
+) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
         // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
-        const salesOrders = await db.salesOrder.findMany({
-            where: { tenantId, ...(type ? { type } : {}) },
-            include: { customer: true, items: { include: { product: true } } },
-            orderBy: { createdAt: "desc" }
-        })
+        const where: any = { tenantId }
 
-        return JSON.parse(JSON.stringify(salesOrders))
+        if (type && type !== "ALL") {
+            where.type = type
+        }
+
+        if (search) {
+            where.OR = [
+                { receiptNumber: { contains: search, mode: "insensitive" } },
+                { customer: { name: { contains: search, mode: "insensitive" } } }
+            ]
+        }
+
+        if (from || to) {
+            where.createdAt = {}
+            if (from) where.createdAt.gte = new Date(from)
+            if (to) {
+                const toDate = new Date(to)
+                toDate.setHours(23, 59, 59, 999)
+                where.createdAt.lte = toDate
+            }
+        }
+
+        const [salesOrders, totalCount] = await Promise.all([
+            db.salesOrder.findMany({
+                where,
+                include: { customer: true, items: { include: { product: true } } },
+                orderBy: { createdAt: "desc" },
+                skip: (page - 1) * pageSize,
+                take: pageSize
+            }),
+            db.salesOrder.count({ where })
+        ])
+
+        return {
+            salesOrders: JSON.parse(JSON.stringify(salesOrders)),
+            totalCount
+        }
     } catch (error) {
         console.error("[GET_SALES_ORDERS]", error)
-        return []
+        return { salesOrders: [], totalCount: 0 }
     }
 }
 

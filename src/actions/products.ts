@@ -81,38 +81,52 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     }
 }
 
-export const getProducts = async () => {
+export const getProducts = async (page: number = 1, pageSize: number = 20, search?: string) => {
     const session = await auth()
     // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
-        return []
+        return { items: [], totalCount: 0 }
     }
 
     try {
-        const products = await db.product.findMany({
-            where: {
-                tenantId
-            },
-            include: {
-                category: true,
-                brand: true,
-                images: true,
-                barcodes: true,
-                _count: {
-                    select: { orderItems: true }
-                }
-            } as any,
-            orderBy: {
-                orderItems: {
-                    _count: 'desc'
-                }
-            }
-        })
-        return products
+        const whereClause: any = { tenantId }
+
+        if (search) {
+            whereClause.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+                { barcodes: { some: { value: { contains: search, mode: 'insensitive' } } } }
+            ]
+        }
+
+        const [products, totalCount] = await Promise.all([
+            db.product.findMany({
+                where: whereClause,
+                include: {
+                    category: true,
+                    brand: true,
+                    images: true,
+                    barcodes: true,
+                    _count: {
+                        select: { orderItems: true }
+                    }
+                } as any,
+                orderBy: {
+                    orderItems: {
+                        _count: 'desc'
+                    }
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            db.product.count({ where: whereClause })
+        ]);
+
+        return { items: products, totalCount }
     } catch {
-        return []
+        return { items: [], totalCount: 0 }
     }
 }
 

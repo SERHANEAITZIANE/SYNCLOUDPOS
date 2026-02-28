@@ -18,23 +18,40 @@ interface SupplierData {
     rib?: string
 }
 
-export const getSuppliers = async () => {
+export const getSuppliers = async (page: number = 1, pageSize: number = 20, search?: string) => {
     const session = await auth()
-    if (!session?.user?.id) return { error: "Unauthorized" }
+    if (!session?.user?.id) return { error: "Unauthorized", suppliers: [], totalCount: 0 }
 
     // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
-    if (!tenantId) return { error: "Tenant ID missing from session" }
+    if (!tenantId) return { error: "Tenant ID missing from session", suppliers: [], totalCount: 0 }
 
     try {
-        const suppliers = await db.supplier.findMany({
-            where: { tenantId },
-            orderBy: { createdAt: "desc" }
-        })
-        return { suppliers }
+        const whereClause: any = { tenantId }
+
+        if (search) {
+            whereClause.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { contactPerson: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+            ]
+        }
+
+        const [suppliers, totalCount] = await Promise.all([
+            db.supplier.findMany({
+                where: whereClause,
+                orderBy: { createdAt: "desc" },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            db.supplier.count({ where: whereClause })
+        ])
+
+        return { suppliers, totalCount }
     } catch (_error) {
-        return { error: "Failed to fetch suppliers" }
+        return { error: "Failed to fetch suppliers", suppliers: [], totalCount: 0 }
     }
 }
 

@@ -5,14 +5,13 @@ import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
 
+import { ServerDataTable } from "@/components/ui/server-data-table"
 import { Button } from "@/components/ui/button"
-import { DataTable } from "@/components/ui/data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 import { useSupplierColumns } from "./columns"
 import { SupplierColumn } from "./types"
 import { Link, useRouter } from "@/i18n/routing"
-
 import {
     Dialog,
     DialogContent,
@@ -27,7 +26,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { registerSupplierPayment, deleteSupplier, importSuppliers } from "@/actions/suppliers"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { Edit, MoreHorizontal, Trash, HandCoins, ScrollText } from "lucide-react"
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -39,9 +37,12 @@ import {
 interface SupplierClientProps {
     data: SupplierColumn[]
     accounts: { id: string, name: string, type: string }[]
+    totalCount: number
+    pageCount: number
+    currentPage: number
 }
 
-export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }) => {
+export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, totalCount, pageCount, currentPage }) => {
     const t = useTranslations("Suppliers")
     const tCommon = useTranslations("Common")
     const router = useRouter()
@@ -157,7 +158,7 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }
         <>
             <div className="flex items-center justify-between">
                 <Heading
-                    title={`${t("title")} (${data.length})`}
+                    title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
                 <div className="flex flex-row flex-wrap gap-2">
@@ -173,7 +174,7 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }
                 </div>
             </div>
             <Separator />
-            <DataTable searchKey="name" columns={columns} data={data} />
+            <ServerDataTable searchKey="name" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
 
             {/* Advance Payment Modal Overlay */}
             <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>

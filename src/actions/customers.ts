@@ -21,23 +21,40 @@ interface CustomerData {
     clientType?: string
 }
 
-export const getCustomers = async () => {
+export const getCustomers = async (page: number = 1, pageSize: number = 20, search?: string) => {
     const session = await auth()
-    if (!session?.user?.id) return { error: "Unauthorized" }
+    if (!session?.user?.id) return { error: "Unauthorized", customers: [], totalCount: 0 }
 
     // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
-    if (!tenantId) return { error: "Tenant ID missing from session" }
+    if (!tenantId) return { error: "Tenant ID missing from session", customers: [], totalCount: 0 }
 
     try {
-        const customers = await db.customer.findMany({
-            where: { tenantId },
-            orderBy: { createdAt: "desc" }
-        })
-        return { customers }
+        const whereClause: any = { tenantId }
+
+        if (search) {
+            whereClause.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { nif: { contains: search, mode: 'insensitive' } }
+            ]
+        }
+
+        const [customers, totalCount] = await Promise.all([
+            db.customer.findMany({
+                where: whereClause,
+                orderBy: { createdAt: "desc" },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            db.customer.count({ where: whereClause })
+        ])
+
+        return { customers, totalCount }
     } catch (_error) {
-        return { error: "Failed to fetch customers" }
+        return { error: "Failed to fetch customers", customers: [], totalCount: 0 }
     }
 }
 
