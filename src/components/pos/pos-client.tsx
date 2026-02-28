@@ -36,6 +36,7 @@ interface PosClientProps {
         category: string
         categoryId: string
         stock: number
+        tvaRate: number
         barcodes: string[]
     }[]
     categories: {
@@ -118,6 +119,8 @@ export const PosClient: FC<PosClientProps> = ({
                 price: Number(item.unitPrice), // Keep historical order unit price
                 retailPrice: Number(item.unitPrice),
                 cost: Number(item.product.cost || 0),
+                tvaRate: Number(item.tvaRate || 19),
+                priceHt: Number(item.priceHt || item.unitPrice),
                 quantity: item.quantity,
                 image: item.product.images?.[0]?.url
             })
@@ -187,6 +190,8 @@ export const PosClient: FC<PosClientProps> = ({
                 wholesalePrice: product.wholesalePrice,
                 dealerPrice: product.dealerPrice,
                 cost: product.cost,
+                tvaRate: product.tvaRate,
+                priceHt: currentPrice / (1 + (product.tvaRate ?? 19) / 100),
                 quantity: 1,
                 image: product.imageUrl
             })
@@ -361,6 +366,8 @@ export const PosClient: FC<PosClientProps> = ({
                                                 wholesalePrice: product.wholesalePrice,
                                                 dealerPrice: product.dealerPrice,
                                                 cost: product.cost,
+                                                tvaRate: product.tvaRate,
+                                                priceHt: currentPrice / (1 + (product.tvaRate ?? 19) / 100),
                                                 quantity: 1,
                                                 image: product.imageUrl
                                             })

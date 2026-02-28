@@ -10,7 +10,6 @@ import { generateReceiptNumber } from "./sales-orders"
 export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const session = await auth()
     const userId = session?.user?.id
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session?.user?.tenantId
 
     if (!userId || !tenantId) {
@@ -24,7 +23,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { items, total, paidAmount, customerId, accountId, status, originalOrderId } = validatedFields.data
+    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId } = validatedFields.data
 
     try {
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
@@ -125,13 +124,19 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     customerId: customerId || undefined,
                     accountId: accountId || undefined,
                     total,
+                    subtotal,
+                    tvaAmount,
+                    stampTax,
+                    paymentMethod,
                     paidAmount: paidAmount ?? total, // If not provided, assume paid in full
                     status,
                     items: {
                         create: items.map((item) => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            price: item.price
+                            price: item.price,
+                            priceHt: item.priceHt ?? item.price,
+                            tvaRate: item.tvaRate ?? 19
                         }))
                     }
                 }

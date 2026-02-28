@@ -25,6 +25,7 @@ const formSchema = z.object({
     customerId: z.string().min(1, "Client requis"),
     type: z.enum(["QUOTE", "ORDER", "INVOICE"]),
     status: z.enum(["DRAFT", "VALIDATED", "PAID", "CANCELLED"]),
+    paymentMethod: z.enum(["CASH", "CARD", "TRANSFER", "CHECK", "TERM"]),
     receiptNumber: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
@@ -114,6 +115,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             customerId: initialData.customerId,
             type: initialData.type,
             status: initialData.status,
+            paymentMethod: initialData.paymentMethod || "CASH",
             receiptNumber: initialData.receiptNumber || "",
             items: initialData.items.map((item: any) => ({
                 productId: item.productId,
@@ -124,6 +126,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             customerId: "",
             type: "QUOTE",
             status: "DRAFT",
+            paymentMethod: "CASH",
             receiptNumber: "",
             items: [{ productId: "", quantity: 1, unitPrice: 0 }]
         }
@@ -133,42 +136,88 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
     const watchItems = form.watch("items")
     const watchCustomerId = form.watch("customerId")
     const watchType = form.watch("type")
+    const watchPaymentMethod = form.watch("paymentMethod")
 
     const selectedCustomer = customers.find(c => c.id === watchCustomerId)
-    const total = watchItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0)
+
+    // Tax calculations
+    const enrichedItems = watchItems.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        const tvaRate = product?.tvaRate ? Number(product.tvaRate) : 19;
+        const priceHt = item.unitPrice / (1 + (tvaRate / 100));
+        return {
+            ...item,
+            tvaRate,
+            priceHt,
+            lineTotalTTC: item.quantity * item.unitPrice,
+            lineTotalHT: item.quantity * priceHt,
+        };
+    });
+
+    const subtotalHT = enrichedItems.reduce((acc, item) => acc + item.lineTotalHT, 0);
+    const totalTVA = enrichedItems.reduce((acc, item) => acc + (item.lineTotalTTC - item.lineTotalHT), 0);
+    const totalItemsTTC = enrichedItems.reduce((acc, item) => acc + item.lineTotalTTC, 0);
+
+    const getStampTaxAmount = (amount: number) => {
+        if (amount <= 300) return 0;
+        if (amount <= 30000) return Math.max(5, Math.ceil(amount / 100) * 1);
+        if (amount <= 100000) return Math.max(5, Math.ceil(amount / 100) * 1.5);
+        return Math.min(10000, Math.ceil(amount / 100) * 2);
+    }
+
+    const stampTax = watchPaymentMethod === "CASH" ? getStampTaxAmount(totalItemsTTC) : 0;
+    const finalTotalTTC = totalItemsTTC + stampTax;
 
     let previousBalance = 0;
     let newBalance = Number(selectedCustomer?.balance || 0);
     let paymentAmount = 0;
 
     if (currentStatus === "PAID") {
-        paymentAmount = total;
+        paymentAmount = finalTotalTTC;
         previousBalance = newBalance;
     } else if (currentStatus === "VALIDATED") {
         paymentAmount = 0;
-        previousBalance = newBalance - total;
+        previousBalance = newBalance - finalTotalTTC;
     } else {
         paymentAmount = 0;
         previousBalance = newBalance;
-        newBalance = previousBalance + total;
+        newBalance = previousBalance + finalTotalTTC;
     }
 
     const paymentAmountStr = paymentAmount.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
     const newBalanceStr = newBalance.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
-    const totalHTStr = total.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
+    const subtotalHTStr = subtotalHT.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
+    const tvaAmountStr = totalTVA.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
+    const stampTaxStr = stampTax.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
+    const finalTotalTTCStr = finalTotalTTC.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
     const previousBalanceStr = previousBalance.toLocaleString("fr-DZ", { minimumFractionDigits: 2 });
 
 
     const onSubmit = async (values: SalesOrderFormValues) => {
         try {
             setLoading(true)
+            const submissionData = {
+                ...values,
+                subtotal: subtotalHT,
+                tvaAmount: totalTVA,
+                stampTax: stampTax,
+                total: finalTotalTTC,
+                items: enrichedItems.map(i => ({
+                    productId: i.productId,
+                    quantity: i.quantity,
+                    unitPrice: i.unitPrice,
+                    tvaRate: i.tvaRate,
+                    priceHt: i.priceHt
+                }))
+            }
+
             if (!isEditMode) {
-                await createSalesOrder({ ...values, total })
+                await createSalesOrder(submissionData)
                 toast.success("Bon créé avec succès.")
                 router.push("/sales")
                 router.refresh()
             } else {
-                const result = await updateSalesOrder(initialData.id, { ...values, total })
+                const result = await updateSalesOrder(initialData.id, submissionData)
                 if (result?.error) { toast.error(result.error); return }
                 toast.success("Bon modifié.")
                 router.refresh()
@@ -304,8 +353,11 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         <div className="flex justify-between items-end mb-16">
                             <div className="w-1/2 pr-8">
                                 <div className="bg-blue-50 text-blue-900 p-5 rounded-xl border border-blue-100">
-                                    <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-70">Arrêtée à la somme de</p>
-                                    <p className="italic font-medium leading-relaxed">{numberToFrenchWords(total)}</p>
+                                    <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-70">Arrêtée à la somme de {finalTotalTTCStr} DA</p>
+                                    <p className="italic font-medium leading-relaxed">{numberToFrenchWords(finalTotalTTC)}</p>
+                                </div>
+                                <div className="mt-4 text-xs text-gray-500">
+                                    Paiement: <span className="font-semibold text-gray-700">{watchPaymentMethod}</span>
                                 </div>
                             </div>
 
@@ -313,19 +365,19 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-gray-500 px-4">
                                         <span>Total HT</span>
-                                        <span className="font-medium text-gray-800">{totalHTStr}</span>
+                                        <span className="font-medium text-gray-800">{subtotalHTStr}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-500 px-4">
-                                        <span>TVA (0%)</span>
-                                        <span className="font-medium text-gray-800">0,00</span>
+                                        <span>TVA</span>
+                                        <span className="font-medium text-gray-800">{tvaAmountStr}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-500 px-4">
-                                        <span>Timbre</span>
-                                        <span className="font-medium text-gray-800">0,00</span>
+                                        <span>Timbre ({watchPaymentMethod})</span>
+                                        <span className="font-medium text-gray-800">{stampTaxStr}</span>
                                     </div>
                                     <div className="flex justify-between items-center bg-gray-900 text-white p-4 rounded-xl mt-4 shadow-md">
                                         <span className="font-bold uppercase tracking-wider text-xs text-gray-300">Net à Payer</span>
-                                        <span className="font-extrabold text-xl">{totalHTStr} <span className="text-sm font-medium text-gray-400">DA</span></span>
+                                        <span className="font-extrabold text-xl">{finalTotalTTCStr} <span className="text-sm font-medium text-gray-400">DA</span></span>
                                     </div>
                                 </div>
                             </div>
@@ -387,7 +439,9 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                 {currentType === "ORDER" && selectedCustomer && (
                                     <div className="self-end w-64 mt-4 border border-black p-3 space-y-1 bg-gray-50 text-xs">
                                         <div className="flex justify-between"><span>Ancien Solde:</span> <span>{previousBalanceStr}</span></div>
-                                        <div className="flex justify-between font-bold"><span>Total:</span> <span>{totalHTStr}</span></div>
+                                        <div className="flex justify-between font-bold"><span>Total TTC:</span> <span>{finalTotalTTCStr}</span></div>
+                                        <div className="flex justify-between text-gray-500"><span>(Timbre:</span> <span>{stampTaxStr})</span></div>
+                                        <div className="flex justify-between text-gray-500"><span>(TVA:</span> <span>{tvaAmountStr})</span></div>
                                         <div className="flex justify-between"><span>Paiement:</span> <span>{paymentAmountStr}</span></div>
                                         <div className="flex justify-between border-t border-black pt-1 mt-1 font-bold"><span>Nouveau Solde:</span> <span>{newBalanceStr}</span></div>
                                     </div>
@@ -447,7 +501,9 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                     <div className="flex justify-end mt-4">
                                         <div className="w-[300px] border border-black text-[12px]">
                                             <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Ancien Solde:</span><span className="w-1/2 text-right">{previousBalanceStr}</span></div>
-                                            <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Total:</span><span className="w-1/2 text-right">{totalHTStr}</span></div>
+                                            <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Total TTC:</span><span className="w-1/2 text-right">{finalTotalTTCStr}</span></div>
+                                            <div className="flex p-1.5 border-b border-gray-300 text-gray-500"><span className="w-1/2">Timbre:</span><span className="w-1/2 text-right">{stampTaxStr}</span></div>
+                                            <div className="flex p-1.5 border-b border-gray-300 text-gray-500"><span className="w-1/2">TVA:</span><span className="w-1/2 text-right">{tvaAmountStr}</span></div>
                                             <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Paiement:</span><span className="w-1/2 text-right">{paymentAmountStr}</span></div>
                                             <div className="flex p-1.5 bg-gray-100 font-bold"><span className="w-1/2">Nouveau Solde:</span><span className="w-1/2 text-right">{newBalanceStr}</span></div>
                                         </div>
@@ -500,8 +556,16 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                                     <td className="border border-gray-300 p-2 text-right">{previousBalanceStr} DA</td>
                                                 </tr>
                                                 <tr className="font-semibold bg-white">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">MONTANT TOTAL</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{totalHTStr} DA</td>
+                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">MONTANT TOTAL TTC</td>
+                                                    <td className="border border-gray-300 p-2 text-right">{finalTotalTTCStr} DA</td>
+                                                </tr>
+                                                <tr className="text-gray-500 bg-white">
+                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">DONT TIMBRE</td>
+                                                    <td className="border border-gray-300 p-2 text-right">{stampTaxStr} DA</td>
+                                                </tr>
+                                                <tr className="text-gray-500 bg-white">
+                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">DONT TVA</td>
+                                                    <td className="border border-gray-300 p-2 text-right">{tvaAmountStr} DA</td>
                                                 </tr>
                                                 <tr className="font-semibold bg-white">
                                                     <td colSpan={3} className="border border-gray-300 p-2 text-right">PAIEMENT</td>
@@ -514,8 +578,8 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                             </>
                                         ) : (
                                             <tr className="font-bold bg-gray-100">
-                                                <td colSpan={3} className="border border-gray-300 p-2 text-right">TOTAL</td>
-                                                <td className="border border-gray-300 p-2 text-right py-3">{totalHTStr} DA</td>
+                                                <td colSpan={3} className="border border-gray-300 p-2 text-right">TOTAL TTC</td>
+                                                <td className="border border-gray-300 p-2 text-right py-3">{finalTotalTTCStr} DA</td>
                                             </tr>
                                         )}
                                     </tfoot>
@@ -590,14 +654,14 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-muted-foreground uppercase font-semibold mb-0.5">Total ce bon</p>
-                            <p className="text-3xl font-bold">{total.toLocaleString()} DA</p>
+                            <p className="text-3xl font-bold">{finalTotalTTC.toLocaleString()} DA</p>
                         </div>
                     </div>
                 )}
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                             <FormField control={form.control} name="receiptNumber" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>N° Référence</FormLabel>
@@ -651,6 +715,24 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                             <SelectItem value="DRAFT">Brouillon</SelectItem>
                                             <SelectItem value="VALIDATED">Validé</SelectItem>
                                             <SelectItem value="PAID">Payé</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={form.control} name="paymentMethod" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Règlement</FormLabel>
+                                    <Select disabled={loading || !canEdit} onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="CASH">Espèce</SelectItem>
+                                            <SelectItem value="CARD">Carte Bancaire</SelectItem>
+                                            <SelectItem value="TRANSFER">Virement</SelectItem>
+                                            <SelectItem value="CHECK">Chèque</SelectItem>
+                                            <SelectItem value="TERM">À Terme</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -746,10 +828,24 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         </div>
 
                         {/* Total */}
-                        <div className="flex justify-end">
-                            <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Total TTC</p>
-                                <p className="text-3xl font-bold">{total.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</p>
+                        <div className="flex justify-end mt-4">
+                            <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 flex flex-col md:flex-row items-end md:items-center gap-6 md:gap-12 min-w-full md:min-w-fit">
+                                <div className="text-right flex flex-col items-end">
+                                    <span className="text-xs text-muted-foreground uppercase font-semibold">Total HT</span>
+                                    <span className="font-medium text-lg">{subtotalHTStr}</span>
+                                </div>
+                                <div className="text-right flex flex-col items-end">
+                                    <span className="text-xs text-muted-foreground uppercase font-semibold">TVA</span>
+                                    <span className="font-medium text-lg">{tvaAmountStr}</span>
+                                </div>
+                                <div className="text-right flex flex-col items-end">
+                                    <span className="text-xs text-muted-foreground uppercase font-semibold">Timbre ({watchPaymentMethod})</span>
+                                    <span className="font-medium text-lg">{stampTaxStr}</span>
+                                </div>
+                                <div className="text-right flex flex-col items-end pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-primary/20 md:pl-8">
+                                    <p className="text-xs text-primary uppercase font-bold tracking-widest mb-1">Total à Payer</p>
+                                    <p className="text-3xl font-extrabold tracking-tight text-primary">{finalTotalTTCStr} <span className="text-sm font-medium opacity-50">DA</span></p>
+                                </div>
                             </div>
                         </div>
 

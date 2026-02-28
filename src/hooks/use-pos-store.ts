@@ -13,6 +13,8 @@ export interface CartItem {
     wholesalePrice?: number | null
     dealerPrice?: number | null
     cost?: number
+    tvaRate?: number
+    priceHt?: number
     quantity: number
     image?: string
     discount?: number

@@ -14,6 +14,7 @@ interface Product {
     wholesalePrice?: number | null; dealerPrice?: number | null; cost?: number | null
     stock: number; minStock: number; barcodes?: { id?: string; value: string; label?: string | null }[]
     description?: string | null; colorId?: string | null; sizeId?: string | null
+    tvaRate?: number | null
     createdAt: Date; updatedAt: Date; tenantId: string
 }
 interface Brand { id: string; name: string }
@@ -69,6 +70,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
             dealerPrice: initialData.dealerPrice ? parseFloat(String(initialData.dealerPrice)) : 0,
             stock: initialData.stock,
             minStock: initialData.minStock,
+            tvaRate: initialData.tvaRate ?? 19,
             barcodes: initialData.barcodes?.map(b => ({ value: b.value, label: b.label || "" })) || [],
             description: initialData.description || "",
             categoryId: initialData.categoryId || "",
@@ -79,7 +81,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
         } : {
             name: "", images: [], price: 0, cost: 0, wholesalePrice: 0, dealerPrice: 0,
             stock: 0, minStock: 0, categoryId: "", brandId: "", description: "", barcodes: [],
-            isFeatured: false, isArchived: false,
+            isFeatured: false, isArchived: false, tvaRate: 19,
         }
     } as any)
 
@@ -292,6 +294,31 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                         {renderPriceInput({ name: "price", label: "Prix détaillant", description: "Prix de vente au détail", icon: Store, color: "blue" })}
                                         {renderPriceInput({ name: "wholesalePrice", label: "Prix en gros", description: "Pour achat de grande quantité", icon: Package, color: "green" })}
                                         {renderPriceInput({ name: "dealerPrice", label: "Prix revendeur", description: "Pour partenaires et revendeurs", icon: Users, color: "purple" })}
+                                    </div>
+                                    <div className="mt-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="tvaRate"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel className="text-sm font-semibold text-indigo-700">Taux de TVA (%)</FormLabel>
+                                                    <Select disabled={loading} onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Sélectionnez un taux de TVA" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="19">TVA 19% (Générale)</SelectItem>
+                                                            <SelectItem value="9">TVA 9% (Réduite)</SelectItem>
+                                                            <SelectItem value="0">TVA 0% (Exonéré)</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormDescription className="text-xs">Taux applicable en Algérie</FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
 
                                     {/* Visual margin helper */}

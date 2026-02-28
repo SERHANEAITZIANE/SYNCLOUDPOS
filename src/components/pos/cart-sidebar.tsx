@@ -59,7 +59,7 @@ export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps)
     // But we also have cart.total() which uses get()... let's strictly use the items derived above for rendering
     const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
-    const onCheckout = async (method: "CASH" | "CARD", paidAmount: number, accountId?: string) => {
+    const onCheckout = async (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => {
         setLoading(true)
         try {
             const response = await createOrder({
@@ -67,9 +67,15 @@ export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps)
                 items: items.map((item) => ({
                     productId: item.productId,
                     quantity: item.quantity,
-                    price: item.price
+                    price: item.price,
+                    tvaRate: item.tvaRate,
+                    priceHt: item.priceHt
                 })),
-                total: total,
+                total: totalTTC,
+                subtotal: subtotal,
+                tvaAmount: tvaAmount,
+                stampTax: stampTax,
+                paymentMethod: method,
                 paidAmount: paidAmount,
                 customerId: activeSession?.customerId || null,
                 accountId: accountId || undefined,
@@ -143,7 +149,7 @@ export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps)
             <PaymentModal
                 isOpen={open}
                 onClose={() => setOpen(false)}
-                onConfirm={(method, paidAmount, accountId) => onCheckout(method, paidAmount, accountId)}
+                onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC) => onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC)}
                 loading={loading}
                 total={total}
                 items={items}

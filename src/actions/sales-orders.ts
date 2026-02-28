@@ -42,14 +42,17 @@ export async function createSalesOrder(data: {
     customerId: string
     type: string
     status: string
-    items: { productId: string; quantity: number; unitPrice: number }[]
+    paymentMethod: string
+    subtotal: number
+    tvaAmount: number
+    stampTax: number
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
     total: number
     receiptNumber?: string
 }) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
         if (!tenantId) throw new Error("Tenant ID missing")
 
@@ -62,13 +65,19 @@ export async function createSalesOrder(data: {
                     customerId: data.customerId,
                     type: data.type,
                     status: data.status,
+                    paymentMethod: data.paymentMethod,
+                    subtotal: data.subtotal,
+                    tvaAmount: data.tvaAmount,
+                    stampTax: data.stampTax,
                     total: data.total,
                     receiptNumber,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            unitPrice: item.unitPrice
+                            unitPrice: item.unitPrice,
+                            tvaRate: item.tvaRate,
+                            priceHt: item.priceHt
                         }))
                     }
                 }
@@ -118,7 +127,6 @@ export async function getSalesOrders(
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const where: any = { tenantId }
@@ -189,7 +197,6 @@ export async function getSalesOrderByReceipt(receiptNumber: string) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const salesOrder = await db.salesOrder.findFirst({
@@ -211,7 +218,6 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const salesOrders = await db.salesOrder.findMany({
@@ -242,13 +248,16 @@ export async function updateSalesOrder(id: string, data: {
     customerId: string
     type: string
     status: string
-    items: { productId: string; quantity: number; unitPrice: number }[]
+    paymentMethod: string
+    subtotal: number
+    tvaAmount: number
+    stampTax: number
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
     total: number
 }) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const existing = await db.salesOrder.findUnique({ where: { id, tenantId }, include: { items: true } })
@@ -262,12 +271,18 @@ export async function updateSalesOrder(id: string, data: {
                 data: {
                     customerId: data.customerId,
                     type: data.type,
+                    paymentMethod: data.paymentMethod,
+                    subtotal: data.subtotal,
+                    tvaAmount: data.tvaAmount,
+                    stampTax: data.stampTax,
                     total: data.total,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            unitPrice: item.unitPrice
+                            unitPrice: item.unitPrice,
+                            tvaRate: item.tvaRate,
+                            priceHt: item.priceHt
                         }))
                     }
                 }
@@ -286,7 +301,6 @@ export async function updateSalesOrderStatus(id: string, newStatus: string) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const salesOrder = await db.salesOrder.findUnique({
@@ -367,7 +381,6 @@ export async function deleteSalesOrder(id: string) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         await db.salesOrder.delete({ where: { id, tenantId } })

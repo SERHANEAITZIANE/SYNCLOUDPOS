@@ -94,6 +94,7 @@ model Product {
   cost        Decimal?
   wholesalePrice Decimal?
   dealerPrice    Decimal?
+  tvaRate     Decimal   @default(19) // 0, 9, or 19%
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
   stock       Int      @default(0)
@@ -203,9 +204,13 @@ model Supplier {
 
 model Order {
   id          String      @id @default(uuid())
-  total       Decimal
+  subtotal    Decimal     @default(0)  // Total HT
+  tvaAmount   Decimal     @default(0)  // Total TVA
+  stampTax    Decimal     @default(0)  // Droit de Timbre (Cash only)
+  total       Decimal                  // Total TTC = subtotal + tvaAmount + stampTax
   paidAmount  Decimal     @default(0)
-  status      String      @default("COMPLETED")
+  status      String      @default("COMPLETED") // COMPLETED, PROFORMA, CANCELLED
+  paymentMethod String    @default("CASH") // CASH, TRANSFER, CHECK, TERM
   userId      String
   user        User        @relation(fields: [userId], references: [id])
   customerId  String?
@@ -226,7 +231,9 @@ model OrderItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Decimal
+  price     Decimal  // Unit Price TTC at the time of sale
+  priceHt   Decimal  @default(0) // Unit Price HT at the time of sale
+  tvaRate   Decimal  @default(0) // TVA Rate at the time of sale
 }
 
 model PurchaseOrder {
@@ -263,7 +270,11 @@ model SalesOrder {
   type            String        @default("ORDER") // QUOTE, ORDER, INVOICE
   status          String        @default("DRAFT") // DRAFT, VALIDATED, PAID, CANCELLED
   receiptNumber   String?       // Custom receipt number (e.g. BL0023/02/2026)
-  total           Decimal
+  paymentMethod   String        @default("CASH") // CASH, TRANSFER, CHECK, TERM
+  subtotal        Decimal       @default(0) // Total HT
+  tvaAmount       Decimal       @default(0) // Total TVA
+  stampTax        Decimal       @default(0) // Droit de Timbre
+  total           Decimal       // Devient Subtotal + TVA + Timbre
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -278,6 +289,8 @@ model SalesOrderItem {
   product         Product       @relation(fields: [productId], references: [id])
   quantity        Int
   unitPrice       Decimal
+  tvaRate         Decimal       @default(0) // TVA Rate at the time of sale
+  priceHt         Decimal       @default(0) // Unit Price HT at the time of sale
 }
 
 model ExpenseCategory {

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight } from "lucide-react"
+import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileText, Clock } from "lucide-react"
 import { useReactToPrint } from "react-to-print"
 
 import { Modal } from "@/components/ui/modal"
@@ -15,10 +15,10 @@ import { Label } from "@/components/ui/label"
 interface PaymentModalProps {
     isOpen: boolean
     onClose: () => void
-    onConfirm: (method: "CASH" | "CARD", paidAmount: number, accountId: string | undefined) => Promise<{ success: boolean; data?: any } | void>
+    onConfirm: (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => Promise<{ success: boolean; data?: any } | void>
     loading: boolean
     total: number
-    items?: { name: string; quantity: number; price: number }[]
+    items?: { name: string; quantity: number; price: number; tvaRate?: number; priceHt?: number }[]
     customerName?: string
     hasCustomer?: boolean
     accounts?: any[]
@@ -35,9 +35,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     hasCustomer = false,
     accounts = []
 }) => {
-    const [method, setMethod] = useState<"CASH" | "CARD">("CASH")
+    const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
-    const [tenderedStr, setTenderedStr] = useState(total.toString())
+
+    // Core Math
+    const subtotal = items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + (item.tvaRate ?? 19) / 100))) * item.quantity, 0)
+    const tvaAmount = total - subtotal
+
+    const getStampTaxAmount = (amount: number) => {
+        if (amount <= 300) return 0;
+        if (amount <= 30000) return Math.max(5, Math.ceil(amount / 100) * 1);
+        if (amount <= 100000) return Math.max(5, Math.ceil(amount / 100) * 1.5);
+        return Math.min(10000, Math.ceil(amount / 100) * 2);
+    }
+
+    const stampTax = method === "CASH" ? getStampTaxAmount(total) : 0
+    const finalTotalTTC = total + stampTax
+
+    const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
     const [success, setSuccess] = useState(false)
     const [orderData, setOrderData] = useState<any>(null)
     const [finalItems, setFinalItems] = useState<any[]>([])
@@ -47,7 +62,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const componentRef = useRef<HTMLDivElement>(null)
 
     const tenderedAmount = tenderedStr ? parseInt(tenderedStr, 10) : 0
-    const changeAmount = Math.max(0, tenderedAmount - total)
+    const changeAmount = Math.max(0, tenderedAmount - finalTotalTTC)
 
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
@@ -55,10 +70,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const handleConfirm = async () => {
         const finalAccountId = accountId === "none" ? undefined : accountId
-        const result = await onConfirm(method, method === "CASH" ? tenderedAmount : total, finalAccountId)
+        const result = await onConfirm(method, method === "CASH" ? tenderedAmount : finalTotalTTC, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC)
         if (result && result.success) {
             setFinalItems(items)
-            setFinalTotal(total)
+            setFinalTotal(finalTotalTTC)
             setFinalCustomerName(customerName)
             if (result.data) setOrderData(result.data)
             setSuccess(true)
@@ -83,9 +98,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             isPristineRef.current = true
-            setTenderedStr(total.toString())
+            setTenderedStr(finalTotalTTC.toString())
         }
-    }, [isOpen, total])
+    }, [isOpen, finalTotalTTC])
 
     const handleNumpad = React.useCallback((val: string) => {
         setTenderedStr(prev => {
@@ -121,7 +136,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 handleNumpad("DEL")
             } else if (e.key === "Enter") {
                 e.preventDefault()
-                const isMethodCashAndInsufficient = method === "CASH" && tenderedAmount < total && !hasCustomer
+                const isMethodCashAndInsufficient = method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer
                 if (!loading && !isMethodCashAndInsufficient) {
                     handleConfirm()
                 }
@@ -136,7 +151,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen, success, handleNumpad, loading, method, tenderedAmount, total, hasCustomer])
+    }, [isOpen, success, handleNumpad, loading, method, tenderedAmount, finalTotalTTC, hasCustomer])
 
     // Auto-print effect
     React.useEffect(() => {
@@ -180,7 +195,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div className="text-center space-y-2">
                         <p className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest text-sm">Amount Paid</p>
                         <h3 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
-                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
+                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
                             <span className="text-xl font-bold text-gray-400 ml-2">DA</span>
                         </h3>
                         {orderData?.receiptNumber && (
@@ -237,8 +252,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const roundedUp2000 = Math.ceil(total / 2000) * 2000
 
     const quickCashOptions = Array.from(new Set([
-        total,
-        roundedUp100 > total ? roundedUp100 : null,
+        finalTotalTTC,
+        roundedUp100 > finalTotalTTC ? roundedUp100 : null,
         roundedUp500 > roundedUp100 ? roundedUp500 : null,
         roundedUp1000 > roundedUp500 ? roundedUp1000 : null,
         roundedUp2000 > roundedUp1000 ? roundedUp2000 : null,
@@ -265,33 +280,78 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                         <div
                             className={cn(
-                                "flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer border-2 transition-all duration-200",
+                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
                                 method === "CASH"
                                     ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
                                     : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
                             )}
                             onClick={() => setMethod("CASH")}
                         >
-                            <Banknote className="h-8 w-8 mb-3" strokeWidth={1.5} />
-                            <span className="font-bold text-sm">CASH</span>
+                            <Banknote className="h-6 w-6 mb-2" strokeWidth={1.5} />
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">ESPÈCES</span>
                         </div>
                         <div
                             className={cn(
-                                "flex flex-col items-center justify-center p-6 rounded-3xl cursor-pointer border-2 transition-all duration-200",
+                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
                                 method === "CARD"
                                     ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
                                     : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
                             )}
                             onClick={() => {
                                 setMethod("CARD")
-                                setTenderedStr(total.toString())
+                                setTenderedStr(finalTotalTTC.toString())
                             }}
                         >
-                            <CreditCard className="h-8 w-8 mb-3" strokeWidth={1.5} />
-                            <span className="font-bold text-sm">CARD / TPE</span>
+                            <CreditCard className="h-6 w-6 mb-2" strokeWidth={1.5} />
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">CARTE / TPE</span>
+                        </div>
+                        <div
+                            className={cn(
+                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
+                                method === "TRANSFER"
+                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
+                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
+                            )}
+                            onClick={() => {
+                                setMethod("TRANSFER")
+                                setTenderedStr(finalTotalTTC.toString())
+                            }}
+                        >
+                            <Landmark className="h-6 w-6 mb-2" strokeWidth={1.5} />
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">VIREMENT</span>
+                        </div>
+                        <div
+                            className={cn(
+                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
+                                method === "CHECK"
+                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
+                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
+                            )}
+                            onClick={() => {
+                                setMethod("CHECK")
+                                setTenderedStr(finalTotalTTC.toString())
+                            }}
+                        >
+                            <FileText className="h-6 w-6 mb-2" strokeWidth={1.5} />
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">CHÈQUE</span>
+                        </div>
+                        <div
+                            className={cn(
+                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
+                                method === "TERM"
+                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
+                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
+                            )}
+                            onClick={() => {
+                                setMethod("TERM")
+                                setTenderedStr(finalTotalTTC.toString())
+                            }}
+                        >
+                            <Clock className="h-6 w-6 mb-2" strokeWidth={1.5} />
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">À TERME</span>
                         </div>
                     </div>
 

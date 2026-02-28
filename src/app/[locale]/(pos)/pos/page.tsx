@@ -55,6 +55,7 @@ const PosPage = async () => {
             category: { select: { name: true } },
             wholesalePrice: true,
             dealerPrice: true,
+            tvaRate: true,
             barcodes: { select: { value: true } },
             images: { select: { url: true }, take: 1 }
         }
@@ -72,6 +73,7 @@ const PosPage = async () => {
         categoryId: item.categoryId || "",
         wholesalePrice: Number(item.wholesalePrice || item.price),
         dealerPrice: Number(item.dealerPrice || item.price),
+        tvaRate: Number(item.tvaRate ?? 19),
         imageUrl: item.images?.[0]?.url || "",
         barcodes: item.barcodes?.map(b => b.value) || []
     }))

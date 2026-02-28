@@ -10,7 +10,24 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Mount the prisma directory to host so the SQLite database is persistent across rebuilds
       - ./prisma:/app/prisma
     env_file:
       - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: syncloudpos_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: syncloudpos_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

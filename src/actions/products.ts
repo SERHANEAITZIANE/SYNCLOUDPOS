@@ -9,7 +9,6 @@ import { revalidatePath } from "next/cache"
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
 
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -36,7 +35,8 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         description,
         wholesalePrice,
         dealerPrice,
-        cost
+        cost,
+        tvaRate
     } = validatedFields.data
 
     try {
@@ -46,6 +46,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
                 price,
                 stock,
                 minStock,
+                tvaRate,
                 description,
                 cost: cost ?? undefined,
                 wholesalePrice: wholesalePrice ?? undefined,
@@ -83,7 +84,6 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
 
 export const getProducts = async (page: number = 1, pageSize: number = 20, search?: string) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -132,7 +132,6 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
 
 export const getLowStockProducts = async () => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -235,7 +234,8 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
         description,
         wholesalePrice,
         dealerPrice,
-        cost
+        cost,
+        tvaRate
     } = validatedFields.data
 
     try {
@@ -247,6 +247,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
             data: {
                 name,
                 price,
+                tvaRate,
                 categoryId,
                 brandId,
                 stock,
