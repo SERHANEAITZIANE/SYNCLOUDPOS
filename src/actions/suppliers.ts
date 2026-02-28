@@ -11,6 +11,11 @@ interface SupplierData {
     email?: string
     address?: string
     taxId?: string
+    nif?: string
+    nis?: string
+    artImposition?: string
+    rc?: string
+    rib?: string
 }
 
 export const getSuppliers = async () => {
@@ -86,6 +91,42 @@ export const deleteSupplier = async (id: string) => {
     } catch (_error) {
         return { error: "Failed to delete supplier" }
     }
+}
+
+export const importSuppliers = async (rows: SupplierData[]) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    // @ts-expect-error tenantId not typed in session yet
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
+    let created = 0
+    let errors = 0
+
+    for (const row of rows) {
+        if (!row.name?.trim()) { errors++; continue; }
+        try {
+            await db.supplier.create({
+                data: {
+                    name: row.name.trim(),
+                    contactPerson: row.contactPerson || undefined,
+                    phone: row.phone || undefined,
+                    email: row.email || undefined,
+                    address: row.address || undefined,
+                    nif: row.nif || undefined,
+                    nis: row.nis || undefined,
+                    artImposition: row.artImposition || undefined,
+                    rc: row.rc || undefined,
+                    rib: row.rib || undefined,
+                    tenantId
+                }
+            })
+            created++
+        } catch { errors++ }
+    }
+
+    revalidatePath("/(dashboard)/suppliers")
+    return { success: `${created} fournisseurs importés`, errors }
 }
 
 export const registerSupplierPayment = async (data: {

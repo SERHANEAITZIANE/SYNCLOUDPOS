@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { BrandColumn } from "./columns"
 import { BrandModal } from "./brand-modal"
+import { useSession } from "next-auth/react"
 import { deleteBrand } from "@/actions/brands"
 
 interface CellActionProps {
@@ -23,6 +24,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const [editOpen, setEditOpen] = useState(false)
     const tCommon = useTranslations("Common")
+    const { data: session } = useSession()
 
     const onDelete = async () => {
         try {
@@ -51,12 +53,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                        <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onDelete} className="text-red-600">
-                        <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                    </DropdownMenuItem>
+
+                    {session?.user?.canEdit && (
+                        <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                        </DropdownMenuItem>
+                    )}
+
+                    {session?.user?.canDelete && (
+                        <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         </>

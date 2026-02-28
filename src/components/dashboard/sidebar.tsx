@@ -77,6 +77,12 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             color: "text-pink-700",
         },
         {
+            label: "Avaries",
+            icon: Package,
+            href: "/avaries",
+            color: "text-red-500",
+        },
+        {
             label: t("categories"),
             icon: List,
             href: "/categories",

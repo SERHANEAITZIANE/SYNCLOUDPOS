@@ -17,6 +17,8 @@ import { ProductColumn } from "./columns"
 
 import { deleteProduct } from "@/actions/products"
 
+import { useSession } from "next-auth/react"
+
 interface CellActionProps {
     data: ProductColumn
 }
@@ -25,6 +27,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const params = useParams()
     const [loading, setLoading] = useState(false)
+    const { data: session } = useSession()
 
     const onConfirm = async () => {
         try {
@@ -49,12 +52,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => router.push(`/products/${data.id}`)}>
-                        <Edit className="mr-2 h-4 w-4" /> Update
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onConfirm}>
-                        <Trash className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
+
+                    {session?.user?.canEdit && (
+                        <DropdownMenuItem onClick={() => router.push(`/products/${data.id}`)}>
+                            <Edit className="mr-2 h-4 w-4" /> Update
+                        </DropdownMenuItem>
+                    )}
+
+                    {session?.user?.canDelete && (
+                        <DropdownMenuItem onClick={onConfirm}>
+                            <Trash className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         </>

@@ -272,3 +272,68 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
         return { error: "Failed to update product!" }
     }
 }
+
+export const importProducts = async (rows: Record<string, string>[]) => {
+    const session = await auth()
+    // @ts-expect-error tenantId is not in session type yet
+    const tenantId = session?.user?.tenantId
+    if (!tenantId) return { error: "Unauthorized" }
+
+    let created = 0
+    let errors = 0
+
+    for (const row of rows) {
+        const name = row["name"] || row["nom"] || row["Nom"] || row["Name"] || ""
+        if (!name.trim()) { errors++; continue }
+
+        try {
+            const price = parseFloat(row["price"] || row["prix"] || row["Prix Vente"] || "0") || 0
+            const cost = parseFloat(row["cost"] || row["cout"] || row["Prix Achat"] || "0") || undefined
+            const wholesalePrice = parseFloat(row["wholesalePrice"] || row["Prix Gros"] || "0") || undefined
+            const stock = parseInt(row["stock"] || row["Stock"] || "0") || 0
+            const minStock = parseInt(row["minStock"] || row["Stock Min"] || "0") || 0
+            const description = row["description"] || row["Description"] || undefined
+            const barcode = row["barcode"] || row["Barcode"] || row["Code-barres"] || undefined
+            const categoryName = row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || ""
+            const brandName = row["brand"] || row["marque"] || row["Marque"] || ""
+
+            // Resolve or create category
+            let categoryId: string | undefined
+            if (categoryName.trim()) {
+                let cat = await db.category.findFirst({ where: { name: { equals: categoryName.trim() }, tenantId } })
+                if (!cat) cat = await db.category.create({ data: { name: categoryName.trim(), tenantId } })
+                categoryId = cat.id
+            }
+
+            // Resolve or create brand
+            let brandId: string | undefined
+            if (brandName.trim()) {
+                let br = await db.brand.findFirst({ where: { name: { equals: brandName.trim() }, tenantId } })
+                if (!br) br = await db.brand.create({ data: { name: brandName.trim(), tenantId } })
+                brandId = br.id
+            }
+
+            await db.product.create({
+                data: {
+                    name: name.trim(),
+                    price,
+                    cost,
+                    wholesalePrice,
+                    stock,
+                    minStock,
+                    description,
+                    categoryId,
+                    brandId,
+                    tenantId,
+                    ...(barcode ? {
+                        barcodes: { create: [{ value: barcode }] }
+                    } : {})
+                } as any
+            })
+            created++
+        } catch { errors++ }
+    }
+
+    revalidatePath("/[locale]/dashboard/products", "page")
+    return { success: `${created} produit(s) importé(s)`, errors }
+}

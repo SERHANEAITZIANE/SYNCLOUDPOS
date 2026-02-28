@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus } from "lucide-react"
+import { Plus, FileSpreadsheet } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -24,7 +24,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { registerCustomerPayment } from "@/actions/customers"
+import { registerCustomerPayment, importCustomers } from "@/actions/customers"
+import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { Edit, MoreHorizontal, Trash, ScrollText, HandCoins } from "lucide-react"
 
 import {
@@ -54,6 +55,7 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }
     const [notes, setNotes] = useState<string>("")
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [importOpen, setImportOpen] = useState(false)
 
     // Base Columns
     const baseColumns = useCustomerColumns()
@@ -159,7 +161,10 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }
                     title={`${t("title")} (${data.length})`}
                     description={t("subtitle")}
                 />
-                <div className="flex flex-row space-x-2">
+                <div className="flex flex-row flex-wrap gap-2">
+                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
+                        <FileSpreadsheet className="mr-2 h-4 w-4" /> Import Excel
+                    </Button>
                     <Link href="/customers/unpaid">
                         <Button variant="outline" className="text-red-600 border-red-200 bg-red-50 hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:hover:bg-red-900/50">
                             Impayés
@@ -239,6 +244,27 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts }
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            {/* Excel Import Modal */}
+            <ExcelImportModal
+                isOpen={importOpen}
+                onClose={() => setImportOpen(false)}
+                title="Importer des Clients depuis Excel"
+                description="Téléchargez le modèle, remplissez-le, puis importez."
+                columns={[
+                    { key: "name", label: "Nom" },
+                    { key: "phone", label: "Téléphone" },
+                    { key: "email", label: "Email" },
+                    { key: "address", label: "Adresse" },
+                    { key: "city", label: "Ville" },
+                    { key: "nif", label: "NIF" },
+                    { key: "nis", label: "NIS" },
+                    { key: "artImposition", label: "Article Imposition" },
+                    { key: "rc", label: "NRC" },
+                    { key: "rib", label: "RIB" },
+                ]}
+                onImport={importCustomers as any}
+                templateFileName="clients_template"
+            />
         </>
     )
 }

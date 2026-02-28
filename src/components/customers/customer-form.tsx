@@ -54,6 +54,11 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             address: initialData.address || "",
             city: initialData.city || "",
             taxId: initialData.taxId || "",
+            nif: initialData.nif || "",
+            nis: initialData.nis || "",
+            artImposition: initialData.artImposition || "",
+            rc: initialData.rc || "",
+            rib: initialData.rib || "",
             notes: initialData.notes || "",
             clientType: initialData.clientType || "RETAIL"
         } : {
@@ -63,6 +68,11 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             address: "",
             city: "",
             taxId: "",
+            nif: "",
+            nis: "",
+            artImposition: "",
+            rc: "",
+            rib: "",
             notes: "",
             clientType: "RETAIL",
             barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString()
@@ -112,6 +122,22 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
         }
     }
 
+    const renderField = (name: keyof z.infer<typeof CustomerSchema>, label: string, placeholder?: string) => (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <Input disabled={loading} placeholder={placeholder || label} {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    )
+
     return (
         <>
             <AlertModal
@@ -136,134 +162,74 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             <Separator />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.name")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.name")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.phone")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.phone")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.email")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.email")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.address")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.address")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.city")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.city")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="taxId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.taxId")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.taxId")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="barcode"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Code-barres / Barcode</FormLabel>
-                                    <FormControl>
-                                        <div className="flex items-center gap-2">
-                                            <Input disabled={loading} placeholder="Scan or type barcode" {...field} />
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => {
-                                                    const newBarcode = Math.floor(100000000000 + Math.random() * 900000000000).toString()
-                                                    form.setValue('barcode', newBarcode)
-                                                }}
-                                            >
-                                                <RefreshCcw className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="clientType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Type de Client</FormLabel>
-                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                    {/* General Info */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations générales</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {renderField("name", t("fields.name"))}
+                            {renderField("phone", t("fields.phone"))}
+                            {renderField("email", t("fields.email"))}
+                            {renderField("address", t("fields.address"))}
+                            {renderField("city", t("fields.city"))}
+                            <FormField
+                                control={form.control}
+                                name="clientType"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Type de Client</FormLabel>
+                                        <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Sélectionnez un type" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="RETAIL">Détaillant</SelectItem>
+                                                <SelectItem value="RESELLER">Revendeur</SelectItem>
+                                                <SelectItem value="WHOLESALE">Grossiste</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="barcode"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Code-barres</FormLabel>
                                         <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionnez un type" />
-                                            </SelectTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <Input disabled={loading} placeholder="Scan ou saisir" {...field} value={field.value ?? ""} />
+                                                <Button type="button" variant="outline" size="icon" onClick={() => {
+                                                    form.setValue('barcode', Math.floor(100000000000 + Math.random() * 900000000000).toString())
+                                                }}>
+                                                    <RefreshCcw className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="RETAIL">Détaillant</SelectItem>
-                                            <SelectItem value="RESELLER">Revendeur</SelectItem>
-                                            <SelectItem value="WHOLESALE">Grossiste</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
+
+                    <Separator />
+
+                    {/* Fiscal Info */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations fiscales</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {renderField("nif", "NIF", "Numéro d'Identification Fiscale")}
+                            {renderField("nis", "NIS", "Numéro d'Identifiant Statistique")}
+                            {renderField("artImposition", "Article d'Imposition", "Article d'Imposition")}
+                            {renderField("rc", "NRC", "Numéro de Registre de Commerce")}
+                            {renderField("rib", "RIB Banque", "Relevé d'Identité Bancaire")}
+                        </div>
+                    </div>
+
                     <Button id="global-save-button" disabled={loading} className="ml-auto" type="submit">
                         {action}
                         <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>

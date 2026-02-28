@@ -15,6 +15,8 @@ import { AlertModal } from "@/components/modals/alert-modal"
 import { deleteExpense } from "@/actions/expenses"
 import { ExpenseColumn } from "./types"
 
+import { useSession } from "next-auth/react"
+
 interface CellActionProps {
     data: ExpenseColumn
 }
@@ -24,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const tCommon = useTranslations("Common")
+    const { data: session } = useSession()
 
     const onDelete = async () => {
         try {
@@ -51,9 +54,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => setOpen(true)} className="text-red-600">
-                        <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                    </DropdownMenuItem>
+
+                    {session?.user?.canDelete && (
+                        <DropdownMenuItem onClick={() => setOpen(true)} className="text-red-600">
+                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         </>

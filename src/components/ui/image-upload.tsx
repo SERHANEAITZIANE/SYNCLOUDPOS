@@ -35,10 +35,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         try {
             setIsLoading(true);
 
-            // Compress the image before uploading
+            // Compress and resize to max 300x300 for performance
             const options = {
-                maxSizeMB: 0.5, // 500KB max
-                maxWidthOrHeight: 1200, // 1200px max width/height
+                maxSizeMB: 0.2, // 200KB max
+                maxWidthOrHeight: 300, // 300px max width/height
                 useWebWorker: true,
             };
 

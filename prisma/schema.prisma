@@ -52,6 +52,7 @@ model Tenant {
   expenseCategories ExpenseCategory[]
   treasuryAccounts TreasuryAccount[]
   treasuryTransactions TreasuryTransaction[]
+  spoilages      Spoilage[]
 }
 
 model User {
@@ -61,6 +62,8 @@ model User {
   password  String
   phone     String?
   isSuperadmin Boolean @default(false)
+  canEdit   Boolean  @default(false)
+  canDelete Boolean  @default(false)
   role      String   @default("CASHIER")
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
@@ -69,6 +72,7 @@ model User {
   
   orders      Order[]
   tenantUsers TenantUser[]
+  spoilages   Spoilage[]
 }
 
 model TenantUser {
@@ -107,6 +111,7 @@ model Product {
   orderItems  OrderItem[]
   purchaseItems PurchaseOrderItem[]
   salesItems    SalesOrderItem[]
+  spoilages   Spoilage[]
   images      Image[]
   barcodes    Barcode[]
 }
@@ -156,7 +161,12 @@ model Customer {
   email     String?
   address   String?
   city      String?
-  taxId     String?  // NIF/NIS
+  taxId     String?  // legacy field
+  nif       String?  // Numéro d'Identification Fiscale
+  nis       String?  // Numéro d'Identifiant Statistique
+  artImposition String?  // Article d'Imposition
+  rc        String?  // Registre de Commerce (NRC)
+  rib       String?  // Relevé d'Identité Bancaire
   notes     String?
   barcode   String?  @unique
   loyaltyPoints Int @default(0)
@@ -177,7 +187,12 @@ model Supplier {
   email         String?
   phone         String?
   address       String?
-  taxId         String?
+  taxId         String?  // legacy field
+  nif           String?  // Numéro d'Identification Fiscale
+  nis           String?  // Numéro d'Identifiant Statistique
+  artImposition String?  // Article d'Imposition
+  rc            String?  // Registre de Commerce (NRC)
+  rib           String?  // Relevé d'Identité Bancaire
   notes         String?  // Used for tracking loan history entries
   balance       Decimal  @default(0)  // Outstanding amount owed to supplier
   tenantId      String
@@ -326,3 +341,22 @@ model TreasuryTransaction {
   createdAt     DateTime @default(now())
 }
 
+
+model Spoilage {
+  id        String   @id @default(uuid())
+  date      DateTime @default(now())
+  reason    String?
+  quantity  Int
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

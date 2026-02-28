@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SyncloudPOS – Centre de Formation</title>
+    <link rel="stylesheet" href="landing-style.css">
+</head>
+
+<body>
+
+    <nav id="nav" style="position:relative;margin-bottom:0">
+        <a href="landing.html" class="logo">
+            <div class="logo-icon">S</div>
+            <span class="logo-text">SyncloudPOS</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="landing.html" data-t="btn_back">← Accueil</a></li>
+            <li><a href="#" onclick="goTrial();return false;" class="btn btn-primary" style="padding:10px 22px"
+                    data-t="btn_open">Ouvrir l'app</a></li>
+            <li>
+                <div class="lang-switch">
+                    <button class="lang-btn lb active" data-l="fr" onclick="setLang('fr')">FR</button>
+                    <button class="lang-btn lb" data-l="en" onclick="setLang('en')">EN</button>
+                    <button class="lang-btn lb" data-l="ar" onclick="setLang('ar')">AR</button>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <section class="section" style="padding-top:60px;max-width:900px;margin:0 auto">
+        <div class="tc fade-in" style="margin-bottom:60px">
+            <span class="s-tag s-tag-purple">Formation</span>
+            <h1 class="s-title" data-t="tr_title">Centre de Formation</h1>
+            <p class="s-desc" data-t="tr_desc"></p>
+        </div>
+
+        <div class="tr-step fade-in">
+            <div class="tr-icon">⚙️</div>
+            <div>
+                <h3 data-t="tr1" style="font-size:1.3rem;margin-bottom:10px"></h3>
+                <p style="color:var(--tm);line-height:1.7" data-t="tr1d"></p>
+            </div>
+        </div>
+        <div class="tr-step fade-in">
+            <div class="tr-icon">📦</div>
+            <div>
+                <h3 data-t="tr2" style="font-size:1.3rem;margin-bottom:10px"></h3>
+                <p style="color:var(--tm);line-height:1.7" data-t="tr2d"></p>
+            </div>
+        </div>
+        <div class="tr-step fade-in">
+            <div class="tr-icon">📥</div>
+            <div>
+                <h3 data-t="tr3" style="font-size:1.3rem;margin-bottom:10px"></h3>
+                <p style="color:var(--tm);line-height:1.7" data-t="tr3d"></p>
+            </div>
+        </div>
+        <div class="tr-step fade-in">
+            <div class="tr-icon">🛒</div>
+            <div>
+                <h3 data-t="tr4" style="font-size:1.3rem;margin-bottom:10px"></h3>
+                <p style="color:var(--tm);line-height:1.7" data-t="tr4d"></p>
+            </div>
+        </div>
+        <div class="tr-step fade-in">
+            <div class="tr-icon">📊</div>
+            <div>
+                <h3 data-t="tr5" style="font-size:1.3rem;margin-bottom:10px"></h3>
+                <p style="color:var(--tm);line-height:1.7" data-t="tr5d"></p>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:48px" class="fade-in">
+            <a href="landing.html" class="btn btn-outline" data-t="btn_back">← Retour à l'accueil</a>
+            <a href="#" onclick="goTrial();return false;" class="btn btn-primary" data-t="btn_open">🚀 Ouvrir
+                l'application</a>
+            <a href="https://wa.me/213696928227" class="btn btn-wa" data-t="btn_wa">📲 Aide sur WhatsApp</a>
+        </div>
+    </section>
+
+    <a href="https://wa.me/213696928227" class="wa-float">💬</a>
+
+    <script src="landing-lang.js"></script>
+    <script>
+        const obs = new IntersectionObserver(e => e.forEach(x => { if (x.isIntersecting) x.target.classList.add('visible'); }), { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+    </script>
+</body>
+
+</html>

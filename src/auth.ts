@@ -53,6 +53,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.isBlocked = token.isBlocked
                 // @ts-expect-error custom fields
                 session.user.role = token.role
+                // @ts-expect-error custom fields
+                session.user.canEdit = token.canEdit
+                // @ts-expect-error custom fields
+                session.user.canDelete = token.canDelete
             } else if (token.sub && session.user && !token.role) {
                 // Backward compatibility for users with old session cookies
                 // If the token lacks a role, we fetch it dynamically from the DB
@@ -67,6 +71,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     session.user.isSuperadmin = existingUser.isSuperadmin;
                     // @ts-expect-error custom fields
                     session.user.role = existingUser.role;
+                    // @ts-expect-error custom fields
+                    session.user.canEdit = existingUser.canEdit;
+                    // @ts-expect-error custom fields
+                    session.user.canDelete = existingUser.canDelete;
                     // @ts-expect-error custom fields
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
                     // @ts-expect-error custom fields
@@ -88,6 +96,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.tenantId = existingUser.tenantId;
             token.isSuperadmin = existingUser.isSuperadmin;
             token.role = existingUser.role;
+            token.canEdit = existingUser.canEdit;
+            token.canDelete = existingUser.canDelete;
             token.subscriptionEndsAt = existingUser.tenant.subscriptionEndsAt;
             token.isBlocked = existingUser.tenant.isBlocked;
             return token

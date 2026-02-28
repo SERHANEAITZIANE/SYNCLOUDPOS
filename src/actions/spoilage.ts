@@ -1,0 +1,101 @@
+"use server"
+
+import { db } from "@/lib/db"
+import { getActiveTenantId } from "@/actions/get-active-tenant"
+import { revalidatePath } from "next/cache"
+import { auth } from "@/auth"
+
+interface SpoilageData {
+    date: Date
+    reason: string
+    quantity: number
+    productId: string
+}
+
+export async function createSpoilage(data: SpoilageData) {
+    try {
+        const tenantId = await getActiveTenantId()
+        const session = await auth()
+
+        if (!tenantId || !session?.user?.id) {
+            return { error: "Non autorisé" }
+        }
+
+        const { date, reason, quantity, productId } = data
+
+        // Check if product exists and belongs to the current tenant
+        const product = await db.product.findFirst({
+            where: {
+                id: productId,
+                tenantId
+            }
+        })
+
+        if (!product) {
+            return { error: "Produit introuvable" }
+        }
+
+        if (Number(product.stock) < quantity) {
+            return { error: "Quantité avariée supérieure au stock disponible" }
+        }
+
+        // 1. Create the Spoilage record
+        // 2. Decrement the product stock in a transaction to ensure atomicity
+        await db.$transaction([
+            db.spoilage.create({
+                data: {
+                    date,
+                    reason,
+                    quantity,
+                    productId,
+                    tenantId,
+                    userId: session.user.id
+                }
+            }),
+            db.product.update({
+                where: {
+                    id: productId
+                },
+                data: {
+                    stock: {
+                        decrement: quantity
+                    }
+                }
+            })
+        ])
+
+        revalidatePath("/avaries")
+        revalidatePath("/products")
+
+        return { success: "Avarie enregistrée avec succès" }
+
+    } catch (error) {
+        console.error("[CREATE_SPOILAGE]", error)
+        return { error: "Erreur lors de la création de l'avarie" }
+    }
+}
+
+export async function getSpoilages() {
+    try {
+        const tenantId = await getActiveTenantId()
+        if (!tenantId) return []
+
+        const spoilages = await db.spoilage.findMany({
+            where: {
+                tenantId
+            },
+            include: {
+                product: true,
+                user: true
+            },
+            orderBy: {
+                date: 'desc'
+            }
+        })
+
+        return spoilages
+    } catch (error) {
+        console.error("[GET_SPOILAGES]", error)
+        return []
+    }
+}

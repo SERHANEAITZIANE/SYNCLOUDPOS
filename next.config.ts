@@ -11,6 +11,32 @@ const nextConfig: import('next').NextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    images: {
+        localPatterns: [
+            {
+                pathname: '/uploads/**',
+                search: '',
+            },
+        ],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: '**',
+            },
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+            }
+        ],
+    },
+    async rewrites() {
+        return [
+            {
+                source: '/',
+                destination: '/landing.html',
+            },
+        ]
+    },
 };
 
 export default withNextIntl(nextConfig);

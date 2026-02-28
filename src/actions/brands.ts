@@ -122,3 +122,23 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
         return { error: "Failed to update brand!" }
     }
 }
+
+export const importBrands = async (rows: { name: string }[]) => {
+    const session = await auth()
+    // @ts-expect-error tenantId is not in session type yet
+    const tenantId = session?.user?.tenantId
+    if (!tenantId) return { error: "Unauthorized" }
+
+    let created = 0
+    let errors = 0
+    for (const row of rows) {
+        if (!row.name?.trim()) { errors++; continue }
+        try {
+            await db.brand.create({ data: { name: row.name.trim(), tenantId } })
+            created++
+        } catch { errors++ }
+    }
+
+    revalidatePath("/[locale]/dashboard/brands", "page")
+    return { success: `${created} marque(s) importée(s)`, errors }
+}

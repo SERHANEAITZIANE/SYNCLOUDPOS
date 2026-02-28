@@ -75,6 +75,11 @@ export const CustomerSchema = z.object({
     address: z.string().optional(),
     city: z.string().optional(),
     taxId: z.string().optional(),
+    nif: z.string().optional(),
+    nis: z.string().optional(),
+    artImposition: z.string().optional(),
+    rc: z.string().optional(),
+    rib: z.string().optional(),
     barcode: z.string().optional(),
     notes: z.string().optional(),
     clientType: z.enum(["RETAIL", "RESELLER", "WHOLESALE"]).default("RETAIL")
@@ -86,7 +91,12 @@ export const SupplierSchema = z.object({
     phone: z.string().optional(),
     email: z.string().optional(),
     address: z.string().optional(),
-    taxId: z.string().optional()
+    taxId: z.string().optional(),
+    nif: z.string().optional(),
+    nis: z.string().optional(),
+    artImposition: z.string().optional(),
+    rc: z.string().optional(),
+    rib: z.string().optional()
 })
 
 export const TreasuryAccountSchema = z.object({

@@ -45,13 +45,30 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
 
     const form = useForm<z.infer<typeof SupplierSchema>>({
         resolver: zodResolver(SupplierSchema),
-        defaultValues: initialData || {
+        defaultValues: initialData ? {
+            ...initialData,
+            contactPerson: initialData.contactPerson || "",
+            phone: initialData.phone || "",
+            email: initialData.email || "",
+            address: initialData.address || "",
+            taxId: initialData.taxId || "",
+            nif: initialData.nif || "",
+            nis: initialData.nis || "",
+            artImposition: initialData.artImposition || "",
+            rc: initialData.rc || "",
+            rib: initialData.rib || "",
+        } : {
             name: "",
             contactPerson: "",
             phone: "",
             email: "",
             address: "",
-            taxId: ""
+            taxId: "",
+            nif: "",
+            nis: "",
+            artImposition: "",
+            rc: "",
+            rib: "",
         }
     })
 
@@ -98,6 +115,22 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
         }
     }
 
+    const renderField = (name: keyof z.infer<typeof SupplierSchema>, label: string, placeholder?: string) => (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <Input disabled={loading} placeholder={placeholder || label} {...field} value={field.value ?? ""} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    )
+
     return (
         <>
             <AlertModal
@@ -122,86 +155,32 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
             <Separator />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.name")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.name")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="contactPerson"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.contact")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.contact")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.phone")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.phone")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.email")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.email")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.address")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.address")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="taxId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>{t("fields.taxId")}</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} placeholder={t("fields.taxId")} {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                    {/* General Info */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations générales</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {renderField("name", t("fields.name"))}
+                            {renderField("contactPerson", t("fields.contact"))}
+                            {renderField("phone", t("fields.phone"))}
+                            {renderField("email", t("fields.email"))}
+                            {renderField("address", t("fields.address"))}
+                        </div>
                     </div>
+
+                    <Separator />
+
+                    {/* Fiscal Info */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations fiscales</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {renderField("nif", "NIF", "Numéro d'Identification Fiscale")}
+                            {renderField("nis", "NIS", "Numéro d'Identifiant Statistique")}
+                            {renderField("artImposition", "Article d'Imposition", "Article d'Imposition")}
+                            {renderField("rc", "NRC", "Numéro de Registre de Commerce")}
+                            {renderField("rib", "RIB Banque", "Relevé d'Identité Bancaire")}
+                        </div>
+                    </div>
+
                     <Button id="global-save-button" disabled={loading} className="ml-auto" type="submit">
                         {action}
                         <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>

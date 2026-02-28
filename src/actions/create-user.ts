@@ -11,6 +11,8 @@ const CreateUserSchema = z.object({
     email: z.string().email("Invalid email"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER"]),
+    canEdit: z.boolean().optional(),
+    canDelete: z.boolean().optional(),
 })
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
@@ -26,7 +28,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Invalid fields" }
     }
 
-    const { name, email, password, role } = validatedFields.data
+    const { name, email, password, role, canEdit, canDelete } = validatedFields.data
 
     // Get current user's tenant
     const currentUser = await db.user.findUnique({
@@ -47,6 +49,10 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
+    // Only CASHIERs get granular permissions, admins have full by default
+    const finalCanEdit = role === "CASHIER" ? (canEdit ?? false) : true
+    const finalCanDelete = role === "CASHIER" ? (canDelete ?? false) : true
+
     try {
         await db.user.create({
             data: {
@@ -54,6 +60,8 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
                 email,
                 password: hashedPassword,
                 role,
+                canEdit: finalCanEdit,
+                canDelete: finalCanDelete,
                 tenantId: currentUser.tenantId
             }
         })

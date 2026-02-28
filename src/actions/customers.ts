@@ -11,6 +11,11 @@ interface CustomerData {
     address?: string
     city?: string
     taxId?: string
+    nif?: string
+    nis?: string
+    artImposition?: string
+    rc?: string
+    rib?: string
     barcode?: string
     notes?: string
     clientType?: string
@@ -87,6 +92,44 @@ export const deleteCustomer = async (id: string) => {
     } catch (_error) {
         return { error: "Failed to delete customer" }
     }
+}
+
+export const importCustomers = async (rows: CustomerData[]) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    // @ts-expect-error tenantId not typed in session yet
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
+    let created = 0
+    let errors = 0
+
+    for (const row of rows) {
+        if (!row.name?.trim()) { errors++; continue; }
+        try {
+            await db.customer.create({
+                data: {
+                    name: row.name.trim(),
+                    phone: row.phone || undefined,
+                    email: row.email || undefined,
+                    address: row.address || undefined,
+                    city: row.city || undefined,
+                    nif: row.nif || undefined,
+                    nis: row.nis || undefined,
+                    artImposition: row.artImposition || undefined,
+                    rc: row.rc || undefined,
+                    rib: row.rib || undefined,
+                    clientType: row.clientType || "RETAIL",
+                    barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
+                    tenantId
+                }
+            })
+            created++
+        } catch { errors++ }
+    }
+
+    revalidatePath("/(dashboard)/customers")
+    return { success: `${created} clients importés`, errors }
 }
 
 export const getUnpaidCustomers = async () => {

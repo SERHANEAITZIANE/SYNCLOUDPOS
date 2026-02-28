@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus } from "lucide-react"
+import { Plus, FileSpreadsheet } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -24,7 +24,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { registerSupplierPayment, deleteSupplier } from "@/actions/suppliers"
+import { registerSupplierPayment, deleteSupplier, importSuppliers } from "@/actions/suppliers"
+import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { Edit, MoreHorizontal, Trash, HandCoins, ScrollText } from "lucide-react"
 
 import {
@@ -53,6 +54,7 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }
     const [notes, setNotes] = useState<string>("")
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [importOpen, setImportOpen] = useState(false)
 
     // Base Columns
     const baseColumns = useSupplierColumns()
@@ -158,12 +160,17 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }
                     title={`${t("title")} (${data.length})`}
                     description={t("subtitle")}
                 />
-                <Link href="/suppliers/new">
-                    <Button id="global-add-new">
-                        <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
-                        <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F3]</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
+                        <FileSpreadsheet className="mr-2 h-4 w-4" /> Import Excel
                     </Button>
-                </Link>
+                    <Link href="/suppliers/new">
+                        <Button id="global-add-new">
+                            <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
+                            <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F3]</span>
+                        </Button>
+                    </Link>
+                </div>
             </div>
             <Separator />
             <DataTable searchKey="name" columns={columns} data={data} />
@@ -231,6 +238,28 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts }
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Excel Import Modal */}
+            <ExcelImportModal
+                isOpen={importOpen}
+                onClose={() => setImportOpen(false)}
+                title="Importer des Fournisseurs depuis Excel"
+                description="Téléchargez le modèle, remplissez-le, puis importez."
+                columns={[
+                    { key: "name", label: "Nom" },
+                    { key: "contactPerson", label: "Contact" },
+                    { key: "phone", label: "Téléphone" },
+                    { key: "email", label: "Email" },
+                    { key: "address", label: "Adresse" },
+                    { key: "nif", label: "NIF" },
+                    { key: "nis", label: "NIS" },
+                    { key: "artImposition", label: "Article Imposition" },
+                    { key: "rc", label: "NRC" },
+                    { key: "rib", label: "RIB" },
+                ]}
+                onImport={importSuppliers as any}
+                templateFileName="fournisseurs_template"
+            />
         </>
     )
 }

@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { SupplierColumn } from "./types"
 import { deleteSupplier } from "@/actions/suppliers"
 
+import { useSession } from "next-auth/react"
+
 interface CellActionProps {
     data: SupplierColumn
 }
@@ -22,6 +24,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const tCommon = useTranslations("Common")
+    const { data: session } = useSession()
 
     const onConfirm = async () => {
         try {
@@ -46,12 +49,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => router.push(`/suppliers/${data.id}`)}>
-                    <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onConfirm} className="text-red-600">
-                    <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                </DropdownMenuItem>
+
+                {session?.user?.canEdit && (
+                    <DropdownMenuItem onClick={() => router.push(`/suppliers/${data.id}`)}>
+                        <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                    </DropdownMenuItem>
+                )}
+
+                {session?.user?.canDelete && (
+                    <DropdownMenuItem onClick={onConfirm} className="text-red-600">
+                        <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     )

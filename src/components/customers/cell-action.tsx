@@ -15,6 +15,8 @@ import { CustomerColumn } from "./types"
 import { deleteCustomer } from "@/actions/customers"
 import { CustomerQrModal } from "./customer-qr-modal"
 
+import { useSession } from "next-auth/react"
+
 interface CellActionProps {
     data: CustomerColumn
 }
@@ -24,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const [qrOpen, setQrOpen] = useState(false)
     const tCommon = useTranslations("Common")
+    const { data: session } = useSession()
 
     const onConfirm = async () => {
         try {
@@ -60,12 +63,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}/ledger`)}>
                         <ScrollText className="mr-2 h-4 w-4" /> Voir Historique (Log)
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}`)}>
-                        <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onConfirm} className="text-red-600">
-                        <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                    </DropdownMenuItem>
+
+                    {session?.user?.canEdit && (
+                        <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}`)}>
+                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                        </DropdownMenuItem>
+                    )}
+
+                    {session?.user?.canDelete && (
+                        <DropdownMenuItem onClick={onConfirm} className="text-red-600">
+                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         </>
