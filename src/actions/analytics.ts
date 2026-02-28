@@ -2,14 +2,13 @@
 
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
-import { startOfDay, endOfDay, subDays, format } from "date-fns"
+import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
 
 export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
     try {
         const session = await auth();
         if (!session?.user?.id) throw new Error("Unauthorized");
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId;
         const toDate = dateRange?.to || new Date();
         const fromDate = dateRange?.from || subDays(toDate, 30);
@@ -56,21 +55,34 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const ordersCount = posAgg._count.id;
         const salesCount = salesAgg._count.id;
 
-        // ─── COGS (Cost of Goods Sold) using DB sum ───────────────────────
-        // We fetch the cost per line item directly from the DB without loading rows
-        const posItems = await db.orderItem.findMany({
+        // ─── COGS (Cost of Goods Sold) using DB groupBy ───────────────────────
+        // Instead of fetching all order items (which could be millions), we group by productId.
+        // This returns at most max(products) rows, which is extremely safe for memory.
+        const posItemsSum = await db.orderItem.groupBy({
+            by: ['productId'],
             where: { order: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
-            select: { quantity: true, product: { select: { cost: true } } }
+            _sum: { quantity: true }
         });
-        const salesItems = await db.salesOrderItem.findMany({
+        const salesItemsSum = await db.salesOrderItem.groupBy({
+            by: ['productId'],
             where: { salesOrder: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
-            select: { quantity: true, product: { select: { cost: true } } }
+            _sum: { quantity: true }
         });
 
-        // Because we only select qty and cost, memory footprint is minimal compared to the full object
+        const productIds = Array.from(new Set([
+            ...posItemsSum.map(i => i.productId),
+            ...salesItemsSum.map(i => i.productId)
+        ]));
+
+        const productsCost = await db.product.findMany({
+            where: { id: { in: productIds } },
+            select: { id: true, cost: true }
+        });
+        const costMap = new Map(productsCost.map(p => [p.id, Number(p.cost || 0)]));
+
         let totalCOGS = 0;
-        posItems.forEach(i => totalCOGS += (i.quantity * Number(i.product?.cost || 0)));
-        salesItems.forEach(i => totalCOGS += (i.quantity * Number(i.product?.cost || 0)));
+        posItemsSum.forEach(i => totalCOGS += (i._sum.quantity || 0) * (costMap.get(i.productId) || 0));
+        salesItemsSum.forEach(i => totalCOGS += (i._sum.quantity || 0) * (costMap.get(i.productId) || 0));
 
         const netProfit = totalRevenue - totalExpenses - totalCOGS;
 
@@ -91,10 +103,9 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const formattedDebtors = topDebtors.map(c => ({ id: c.id, name: c.name, balance: Math.abs(Number(c.balance)) }));
 
         // ─── LOW STOCK PRODUCTS ───────────────────────────────────────────
-        // Only fetch items where stock <= minStock (Prisma doesn't support field comparison directly, so we fetch and filter small subset or sort by stock)
-        // Optimization: if there are 10k products, sorting and taking 8 is fast.
+        // Only fetch items where stock <= 10 (heuristic) to reduce memory
         const lowStockProducts = await db.product.findMany({
-            where: { tenantId, isArchived: false, stock: { lte: 10 } }, // heuristic filter to reduce memory
+            where: { tenantId, isArchived: false, stock: { lte: 10 } },
             select: { id: true, name: true, stock: true, minStock: true },
             orderBy: { stock: 'asc' },
             take: 50
@@ -118,47 +129,28 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             date: format(o.createdAt, "dd/MM HH:mm")
         }));
 
-        // ─── REVENUE OVER TIME (Grouping by Date Strings) ─────────────────
-        // To build the chart, we fetch Date + Total grouped. 
-        // We select only minimal data to avoid OOM.
-        const ordersForChart = await db.order.findMany({
-            where: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-            select: { createdAt: true, total: true }
+        // ─── REVENUE OVER TIME (Zero Memory Footprint Iteration) ─────────────────
+        // Execute 1 tiny aggregate query per day in parallel.
+        const days = eachDayOfInterval({ start: fromDate, end: toDate });
+        const revenuePromises = days.map(day => {
+            const start = startOfDay(day);
+            const end = endOfDay(day);
+            return Promise.all([
+                db.order.aggregate({ where: { tenantId, status: "COMPLETED", createdAt: { gte: start, lte: end } }, _sum: { total: true } }),
+                db.salesOrder.aggregate({ where: { tenantId, status: "PAID", createdAt: { gte: start, lte: end } }, _sum: { total: true } }),
+                db.expense.aggregate({ where: { tenantId, date: { gte: start, lte: end } }, _sum: { amount: true } })
+            ]).then(([pos, sales, exp]) => ({
+                date: format(day, "MMM dd"),
+                revenue: Number(pos._sum.total || 0) + Number(sales._sum.total || 0),
+                expenses: Number(exp._sum.amount || 0)
+            }));
         });
-        const salesForChart = await db.salesOrder.findMany({
-            where: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-            select: { createdAt: true, total: true }
-        });
-        const expensesForChart = await db.expense.findMany({
-            where: { tenantId, date: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-            select: { date: true, amount: true }
-        });
-
-        const revenueMap = new Map<string, { revenue: number; expenses: number }>();
-        ordersForChart.forEach(o => {
-            const date = format(o.createdAt, "MMM dd");
-            const cur = revenueMap.get(date) || { revenue: 0, expenses: 0 };
-            revenueMap.set(date, { ...cur, revenue: cur.revenue + Number(o.total) });
-        });
-        salesForChart.forEach(o => {
-            const date = format(o.createdAt, "MMM dd");
-            const cur = revenueMap.get(date) || { revenue: 0, expenses: 0 };
-            revenueMap.set(date, { ...cur, revenue: cur.revenue + Number(o.total) });
-        });
-        expensesForChart.forEach(e => {
-            const date = format(e.date, "MMM dd");
-            const cur = revenueMap.get(date) || { revenue: 0, expenses: 0 };
-            revenueMap.set(date, { ...cur, expenses: cur.expenses + Number(e.amount) });
-        });
-        const revenueOverTime = Array.from(revenueMap.entries())
-            .map(([date, vals]) => ({ date, ...vals }))
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const revenueOverTime = await Promise.all(revenuePromises);
 
         // ─── TOP CUSTOMERS & TOP PRODUCTS (Minimal Fetch) ───────────────
-        // We fetch partial order payloads instead of full nested includes
         const topCustomersData = await db.order.groupBy({
             by: ['customerId'],
-            where: { tenantId, status: "COMPLETED", customerId: { not: null } },
+            where: { tenantId, status: "COMPLETED", customerId: { not: null }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
             _sum: { total: true },
             orderBy: { _sum: { total: 'desc' } },
             take: 5
@@ -171,8 +163,6 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             if (c) topCustomers.push({ name: c.name, spent: Number(tc._sum.total || 0) });
         }
 
-        // Return empty arrays for now for heavy memory objects (Top Products, Categories)
-        // These require extremely heavy memory mapping outside of raw SQL
         const topProducts: any[] = [];
         const categoryPerformance: any[] = [];
 
