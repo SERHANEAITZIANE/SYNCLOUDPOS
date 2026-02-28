@@ -15,19 +15,19 @@ const ProductsPage = async ({
     // Explicitly destructure items and totalCount from the updated action
     const { items: products, totalCount } = await getProducts(page, pageSize, search) as { items: any[], totalCount: number }
 
-    const formattedProducts: ProductColumn[] = products.map((item) => ({
+    const formattedProducts: ProductColumn[] = (products || []).map((item) => ({
         id: item.id,
         name: item.name,
-        isFeatured: item.isFeatured,
-        isArchived: item.isArchived,
-        price: Number(item.price).toFixed(2),
+        isFeatured: item.isFeatured || false,
+        isArchived: item.isArchived || false,
+        price: Number(item.price || 0).toFixed(2),
         wholesalePrice: item.wholesalePrice ? Number(item.wholesalePrice).toFixed(2) : "0.00",
         dealerPrice: item.dealerPrice ? Number(item.dealerPrice).toFixed(2) : "0.00",
         category: item.category?.name || "Uncategorized",
         brand: item.brand?.name || "N/A", // Handle optional brand
-        stock: item.stock,
-        minStock: item.minStock,
-        createdAt: format(item.createdAt, "MMMM do, yyyy"),
+        stock: item.stock || 0,
+        minStock: item.minStock || 0,
+        createdAt: item.createdAt ? format(new Date(item.createdAt), "MMMM do, yyyy") : "",
     }))
 
     const pageCount = Math.ceil(totalCount / pageSize)
