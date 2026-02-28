@@ -8,14 +8,15 @@ import { formatter } from "@/lib/utils"
 const SalesPage = async ({
     searchParams
 }: {
-    searchParams: { page?: string, search?: string, type?: string, from?: string, to?: string }
+    searchParams: Promise<{ page?: string, search?: string, type?: string, from?: string, to?: string }>
 }) => {
-    const page = Number(searchParams.page) || 1
+    const params = await searchParams
+    const page = Number(params.page) || 1
     const pageSize = 20
-    const search = searchParams.search || ""
-    const type = searchParams.type || "ALL"
-    const from = searchParams.from || undefined
-    const to = searchParams.to || undefined
+    const search = params.search || ""
+    const type = params.type || "ALL"
+    const from = params.from || undefined
+    const to = params.to || undefined
 
     const { salesOrders, totalCount } = await getSalesOrders(page, pageSize, search, type, from, to) as { salesOrders: any[], totalCount: number }
 

@@ -6,11 +6,12 @@ import { ProductColumn } from "@/components/products/columns"
 const ProductsPage = async ({
     searchParams
 }: {
-    searchParams: { page?: string, name?: string }
+    searchParams: Promise<{ page?: string, name?: string }>
 }) => {
-    const page = Number(searchParams.page) || 1
+    const params = await searchParams
+    const page = Number(params.page) || 1
     const pageSize = 20
-    const search = searchParams.name || ""
+    const search = params.name || ""
 
     // Explicitly destructure items and totalCount from the updated action
     const { items: products, totalCount } = await getProducts(page, pageSize, search) as { items: any[], totalCount: number }

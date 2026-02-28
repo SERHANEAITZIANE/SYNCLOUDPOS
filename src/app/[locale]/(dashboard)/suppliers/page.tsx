@@ -6,11 +6,12 @@ import { getTreasuryAccounts } from "@/actions/treasury"
 export default async function SuppliersPage({
     searchParams
 }: {
-    searchParams: { page?: string, name?: string }
+    searchParams: Promise<{ page?: string, name?: string }>
 }) {
-    const page = Number(searchParams.page) || 1
+    const params = await searchParams
+    const page = Number(params.page) || 1
     const pageSize = 20
-    const search = searchParams.name || ""
+    const search = params.name || ""
 
     const { suppliers, totalCount } = await getSuppliers(page, pageSize, search) as { suppliers: any[], totalCount: number }
     const accounts = await getTreasuryAccounts()
