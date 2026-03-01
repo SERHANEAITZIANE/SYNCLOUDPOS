@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Download, FileText, Settings2, Image as ImageIcon, Loader2 } from "lucide-react"
+import { Download, FileText, Settings2, Image as ImageIcon, Loader2, Copy, Check } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useReactToPrint } from "react-to-print"
 import { format } from "date-fns"
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { getAllProductsForCatalogue } from "@/actions/products"
@@ -31,6 +32,8 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
     const [priceTier, setPriceTier] = useState<"RETAIL" | "WHOLESALE" | "RESELLER">("RETAIL")
     const [includeImages, setIncludeImages] = useState(true)
+    const [textPreview, setTextPreview] = useState<string | null>(null)
+    const [copied, setCopied] = useState(false)
 
     const componentRef = useRef<HTMLDivElement>(null)
 
@@ -62,7 +65,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
         documentTitle: `Catalogue_Prix_${format(new Date(), "yyyy-MM-dd")}`,
     })
 
-    const handleCopyText = () => {
+    const generateText = () => {
         let text = `*CATALOGUE DE PRIX (${format(new Date(), "dd/MM/yyyy")})*\n\n`
 
         // Group by category for text output
@@ -85,8 +88,15 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
             text += `\n`
         })
 
-        navigator.clipboard.writeText(text)
+        setTextPreview(text)
+    }
+
+    const handleCopyActualText = () => {
+        if (!textPreview) return
+        navigator.clipboard.writeText(textPreview)
+        setCopied(true)
         toast.success("Catalogue copié dans le presse-papiers")
+        setTimeout(() => setCopied(false), 2000)
     }
 
     const getPriceLabel = () => {
@@ -119,7 +129,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                     <SelectTrigger>
                                         <SelectValue placeholder="Toutes les catégories" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent position="popper" className="z-[9999]">
                                         <SelectItem value="ALL">Toutes les catégories</SelectItem>
                                         {categories.map(c => (
                                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -134,7 +144,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent position="popper" className="z-[9999]">
                                         <SelectItem value="RETAIL">Détaillant (Prix Vente)</SelectItem>
                                         <SelectItem value="WHOLESALE">Grossiste (Prix Gros)</SelectItem>
                                         <SelectItem value="RESELLER">Revendeur (Prix Revendeur)</SelectItem>
@@ -157,133 +167,153 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                         <div className="mt-auto pt-6 space-y-3">
                             <Button
                                 className="w-full bg-blue-600 hover:bg-blue-700"
-                                onClick={handlePrint}
+                                onClick={() => { setTextPreview(null); handlePrint(); }}
                                 disabled={loading || filteredProducts.length === 0}
                             >
                                 <Download className="h-4 w-4 mr-2" />
                                 Exporter en PDF
                             </Button>
                             <Button
-                                variant="outline"
+                                variant={textPreview ? "secondary" : "outline"}
                                 className="w-full"
-                                onClick={handleCopyText}
+                                onClick={() => textPreview ? setTextPreview(null) : generateText()}
                                 disabled={loading || filteredProducts.length === 0}
                             >
                                 <FileText className="h-4 w-4 mr-2" />
-                                Copier en Texte (Wa/SMS)
+                                {textPreview ? "Voir le PDF" : "Générer Texte (Wa/SMS)"}
                             </Button>
                         </div>
                     </div>
 
                     {/* Preview Area */}
-                    <div className="flex-1 overflow-hidden relative bg-gray-100 p-6 flex items-start justify-center">
-                        <ScrollArea className="h-full w-full rounded-md border shadow-sm bg-white">
-                            {loading ? (
-                                <div className="h-full w-full flex items-center justify-center p-12">
-                                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                    <span className="ml-3 text-gray-500">Chargement des produits...</span>
-                                </div>
-                            ) : (
-                                /* PRINTABLE CONTENT */
-                                <div className="p-8 print-content" ref={componentRef}>
-                                    <div className="text-center mb-8 pb-6 border-b-2 border-gray-100">
-                                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2 uppercase">
-                                            Catalogue de Prix
-                                        </h1>
-                                        <div className="flex items-center justify-center gap-4 text-gray-500 font-medium">
-                                            <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
-                                                {getPriceLabel()}
-                                            </span>
-                                            <span>•</span>
-                                            <span>{format(new Date(), "dd/MM/yyyy")}</span>
-                                        </div>
+                    <div className="flex-1 overflow-hidden relative bg-gray-100 p-6 flex flex-col items-center justify-start">
+                        {textPreview !== null ? (
+                            <div className="w-full h-full max-w-4xl flex flex-col bg-white rounded-xl shadow-sm border p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 className="font-bold text-lg">Aperçu du texte</h3>
+                                        <p className="text-xs text-gray-500">Prêt à être envoyé par WhatsApp ou SMS</p>
                                     </div>
-
-                                    {filteredProducts.length === 0 ? (
-                                        <div className="text-center text-gray-500 py-12">
-                                            Aucun produit trouvé pour ces critères.
+                                    <Button onClick={handleCopyActualText} variant={copied ? "default" : "outline"} className={copied ? "bg-green-600" : ""}>
+                                        {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
+                                        {copied ? "Copié !" : "Copier le texte"}
+                                    </Button>
+                                </div>
+                                <Textarea
+                                    readOnly
+                                    className="flex-1 font-mono text-sm resize-none focus-visible:ring-0"
+                                    value={textPreview}
+                                />
+                            </div>
+                        ) : (
+                            <ScrollArea className="h-full w-full max-w-[1000px] rounded-md border shadow-sm bg-white">
+                                {loading ? (
+                                    <div className="h-full w-full flex items-center justify-center p-12">
+                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                                        <span className="ml-3 text-gray-500">Chargement des produits...</span>
+                                    </div>
+                                ) : (
+                                    /* PRINTABLE CONTENT */
+                                    <div className="p-8 print-content" ref={componentRef}>
+                                        <div className="text-center mb-8 pb-6 border-b-2 border-gray-100">
+                                            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2 uppercase">
+                                                Catalogue de Prix
+                                            </h1>
+                                            <div className="flex items-center justify-center gap-4 text-gray-500 font-medium">
+                                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                                    {getPriceLabel()}
+                                                </span>
+                                                <span>•</span>
+                                                <span>{format(new Date(), "dd/MM/yyyy")}</span>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <div className={includeImages ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-0"}>
-                                            {includeImages ? (
-                                                /* Grid Layout with Images */
-                                                filteredProducts.map(product => {
-                                                    let price = product.price
-                                                    if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
-                                                    if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
 
-                                                    return (
-                                                        <div key={product.id} className="border border-gray-100 rounded-xl p-3 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
-                                                            <div className="h-32 w-full bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
-                                                                {product.images && product.images[0] ? (
-                                                                    <img src={product.images[0].url} alt={product.name} className="object-contain h-full w-full p-2" />
-                                                                ) : (
-                                                                    <ImageIcon className="h-8 w-8 text-gray-300" />
-                                                                )}
-                                                                <div className="absolute top-2 left-2">
-                                                                    <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded shadow-sm text-gray-600">
-                                                                        {product.category?.name || "Autres"}
-                                                                    </span>
+                                        {filteredProducts.length === 0 ? (
+                                            <div className="text-center text-gray-500 py-12">
+                                                Aucun produit trouvé pour ces critères.
+                                            </div>
+                                        ) : (
+                                            <div className={includeImages ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-0"}>
+                                                {includeImages ? (
+                                                    /* Grid Layout with Images */
+                                                    filteredProducts.map(product => {
+                                                        let price = product.price
+                                                        if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
+                                                        if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
+
+                                                        return (
+                                                            <div key={product.id} className="border border-gray-100 rounded-xl p-3 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
+                                                                <div className="h-32 w-full bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
+                                                                    {product.images && product.images[0] ? (
+                                                                        <img src={product.images[0].url} alt={product.name} className="object-contain h-full w-full p-2" />
+                                                                    ) : (
+                                                                        <ImageIcon className="h-8 w-8 text-gray-300" />
+                                                                    )}
+                                                                    <div className="absolute top-2 left-2">
+                                                                        <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded shadow-sm text-gray-600">
+                                                                            {product.category?.name || "Autres"}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex-1 flex flex-col">
+                                                                    <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight flex-1">
+                                                                        {product.name}
+                                                                    </h3>
+                                                                    <div className="mt-2 pt-2 border-t border-gray-100 flex items-end justify-between">
+                                                                        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Prix</span>
+                                                                        <span className="font-extrabold text-[#111] text-lg">
+                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-500 font-medium uppercase">DA</span>
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex-1 flex flex-col">
-                                                                <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight flex-1">
-                                                                    {product.name}
-                                                                </h3>
-                                                                <div className="mt-2 pt-2 border-t border-gray-100 flex items-end justify-between">
-                                                                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Prix</span>
-                                                                    <span className="font-extrabold text-[#111] text-lg">
-                                                                        {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-500 font-medium uppercase">DA</span>
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })
-                                            ) : (
-                                                /* Minimal List Layout without Images */
-                                                <table className="w-full text-left text-sm border-collapse">
-                                                    <thead>
-                                                        <tr className="border-b-2 border-gray-200 text-gray-500">
-                                                            <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Produit</th>
-                                                            <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Catégorie</th>
-                                                            <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider text-right">Prix</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-gray-100">
-                                                        {filteredProducts.map(product => {
-                                                            let price = product.price
-                                                            if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
-                                                            if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
+                                                        )
+                                                    })
+                                                ) : (
+                                                    /* Minimal List Layout without Images */
+                                                    <table className="w-full text-left text-sm border-collapse">
+                                                        <thead>
+                                                            <tr className="border-b-2 border-gray-200 text-gray-500">
+                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Produit</th>
+                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Catégorie</th>
+                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider text-right">Prix</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {filteredProducts.map(product => {
+                                                                let price = product.price
+                                                                if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
+                                                                if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
 
-                                                            return (
-                                                                <tr key={product.id} className="break-inside-avoid">
-                                                                    <td className="py-3 px-2 font-bold text-gray-900">{product.name}</td>
-                                                                    <td className="py-3 px-2 text-gray-500 text-xs">
-                                                                        <span className="bg-gray-100 px-2 py-1 rounded-md">{product.category?.name || "Autres"}</span>
-                                                                    </td>
-                                                                    <td className="py-3 px-2 text-right font-extrabold text-base">
-                                                                        {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-400 font-medium ml-1">DA</span>
-                                                                    </td>
-                                                                </tr>
-                                                            )
-                                                        })}
-                                                    </tbody>
-                                                </table>
-                                            )}
-                                        </div>
-                                    )}
+                                                                return (
+                                                                    <tr key={product.id} className="break-inside-avoid">
+                                                                        <td className="py-3 px-2 font-bold text-gray-900">{product.name}</td>
+                                                                        <td className="py-3 px-2 text-gray-500 text-xs">
+                                                                            <span className="bg-gray-100 px-2 py-1 rounded-md">{product.category?.name || "Autres"}</span>
+                                                                        </td>
+                                                                        <td className="py-3 px-2 text-right font-extrabold text-base">
+                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-400 font-medium ml-1">DA</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                )}
+                                            </div>
+                                        )}
 
-                                    <style dangerouslySetInnerHTML={{
-                                        __html: `
+                                        <style dangerouslySetInnerHTML={{
+                                            __html: `
                                         @media print {
                                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                                             .print-content { padding: 0 !important; }
                                         }
                                     `}} />
-                                </div>
-                            )}
-                        </ScrollArea>
+                                    </div>
+                                )}
+                            </ScrollArea>
+                        )}
                     </div>
                 </div>
             </DialogContent>
