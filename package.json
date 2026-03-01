@@ -29,6 +29,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "react-hot-toast": "^2.6.0",
+    "react-markdown": "^10.1.0",
     "react-qr-code": "^2.0.18",
     "react-resizable-panels": "^4.6.4",
     "react-to-print": "^3.2.0",

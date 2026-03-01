@@ -19,7 +19,8 @@ import {
     ShieldCheck,
     Landmark,
     CreditCard,
-    Building2
+    Building2,
+    Sparkles
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -153,6 +154,12 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             icon: Building2,
             href: "/emprunt-fournisseur",
             color: "text-orange-500",
+        },
+        {
+            label: "Intelligence IA",
+            icon: Sparkles,
+            href: "/ai",
+            color: "text-violet-400",
         },
     ];
 

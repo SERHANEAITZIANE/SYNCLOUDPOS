@@ -122,7 +122,7 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers, 
                                                 <SelectValue placeholder="Sélectionner un client..." />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper" className="z-[9999]">
                                             {customers.map(c => (
                                                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                                             ))}
@@ -145,7 +145,7 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers, 
                                                 <SelectValue placeholder="Sélectionner une caisse/banque..." />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper" className="z-[9999]">
                                             {treasuryAccounts.map(account => (
                                                 <SelectItem key={account.id} value={account.id}>
                                                     {account.name} ({account.balance} DA)

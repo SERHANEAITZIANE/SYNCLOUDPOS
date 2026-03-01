@@ -137,7 +137,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, a
                                             <SelectValue placeholder="Compte source" />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContent position="popper" className="z-[9999]">
                                         {accounts.map(a => (
                                             <SelectItem key={a.id} value={a.id}>
                                                 <div className="flex flex-col">
@@ -160,7 +160,7 @@ export const TransferModal: React.FC<TransferModalProps> = ({ isOpen, onClose, a
                                             <SelectValue placeholder="Compte destination" />
                                         </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContent position="popper" className="z-[9999]">
                                         {accounts.map(a => (
                                             <SelectItem key={a.id} value={a.id} disabled={a.id === fromAccountId}>
                                                 <div className="flex flex-col">

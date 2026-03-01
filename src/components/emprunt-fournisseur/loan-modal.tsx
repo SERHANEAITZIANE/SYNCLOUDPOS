@@ -122,7 +122,7 @@ export const SupplierLoanModal: React.FC<SupplierLoanModalProps> = ({ open, onCl
                                                 <SelectValue placeholder="Sélectionner un fournisseur..." />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper" className="z-[9999]">
                                             {suppliers.map(s => (
                                                 <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                                             ))}
@@ -145,7 +145,7 @@ export const SupplierLoanModal: React.FC<SupplierLoanModalProps> = ({ open, onCl
                                                 <SelectValue placeholder="Sélectionner une caisse/banque..." />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent position="popper" className="z-[9999]">
                                             {treasuryAccounts.map(account => (
                                                 <SelectItem key={account.id} value={account.id}>
                                                     {account.name} ({account.balance} DA)
