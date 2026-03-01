@@ -114,9 +114,7 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
                     }
                 } as any,
                 orderBy: {
-                    orderItems: {
-                        _count: 'desc'
-                    }
+                    createdAt: 'desc'
                 },
                 skip: (page - 1) * pageSize,
                 take: pageSize,
