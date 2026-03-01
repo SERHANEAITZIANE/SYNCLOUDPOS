@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  return <DialogPrimitive.Root modal={false} data-slot="dialog" {...props} />
 }
 
 function DialogTrigger({
