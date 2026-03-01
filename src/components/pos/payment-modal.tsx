@@ -266,9 +266,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             description="Complete the payment for this order."
             isOpen={isOpen}
             onClose={handleClose}
-            className="sm:max-w-4xl p-8 rounded-[32px] bg-slate-100 shadow-2xl dark:bg-zinc-950"
+            className="sm:max-w-4xl p-4 sm:p-8 rounded-2xl sm:rounded-[32px] bg-slate-100 shadow-2xl dark:bg-zinc-950 max-h-[90vh] overflow-y-auto"
         >
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
 
                 {/* Left Side: Payment Method & Totals */}
                 <div className="flex-1 space-y-6">
@@ -396,7 +396,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
 
                 {/* Right Side: Numpad (Only for Cash) */}
-                <div className="w-full lg:w-[340px] flex flex-col mt-6 lg:mt-0 relative">
+                <div className="w-full lg:w-[340px] flex flex-col mt-2 lg:mt-0 relative">
 
                     <div className={cn(
                         "transition-all duration-500 flex flex-col h-full",
@@ -410,37 +410,37 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
 
                         {changeAmount > 0 ? (
-                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3">
-                                <span className="text-gray-400 font-bold text-lg">Change</span>
-                                <span className="text-2xl font-black text-green-500">+{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}</span>
+                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30">
+                                <span className="text-gray-500 font-bold text-sm sm:text-lg">Change</span>
+                                <span className="text-xl sm:text-2xl font-black text-green-500">+{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}</span>
                             </div>
                         ) : (
-                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3">
-                                <span className="text-gray-400 font-bold text-lg">Balance</span>
-                                <span className="text-2xl font-bold text-gray-400">
+                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                                <span className="text-gray-500 font-bold text-sm sm:text-lg">Balance</span>
+                                <span className="text-xl sm:text-2xl font-bold text-gray-400">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, total - tenderedAmount))}
                                 </span>
                             </div>
                         )}
 
-                        <div className="grid grid-cols-3 gap-3 flex-1">
+                        <div className="grid grid-cols-3 gap-2 sm:gap-3 flex-1">
                             {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
                                 <Button
                                     key={num}
                                     variant="outline"
-                                    className="h-16 sm:h-16 rounded-2xl text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-900 dark:text-white"
+                                    className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-900 dark:text-white"
                                     onClick={() => handleNumpad(num)}
                                 >
                                     {num}
                                 </Button>
                             ))}
-                            <Button variant="outline" className="h-16 sm:h-16 rounded-2xl text-2xl font-black text-red-500 hover:bg-red-50 hover:text-red-600 border-gray-100 shadow-sm bg-white transition-all uppercase" onClick={() => handleNumpad("C")}>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black text-red-500 hover:bg-red-50 hover:text-red-600 border-gray-100 shadow-sm bg-white transition-all uppercase" onClick={() => handleNumpad("C")}>
                                 C
                             </Button>
-                            <Button variant="outline" className="h-16 sm:h-16 rounded-2xl text-2xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>
                                 0
                             </Button>
-                            <Button variant="outline" className="h-16 sm:h-16 rounded-2xl text-xl font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>
                                 00
                             </Button>
                         </div>
@@ -448,18 +448,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4 pt-10 mt-6 md:-mr-4">
-                <Button disabled={loading} variant="ghost" className="h-14 px-6 rounded-2xl font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col items-center justify-center" onClick={handleClose}>
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-6 sm:pt-10 mt-4 sm:mt-6 md:-mr-4">
+                <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl sm:rounded-2xl font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col items-center justify-center" onClick={handleClose}>
                     <span>Cancel</span>
-                    <span className="text-[9px] opacity-50 uppercase tracking-widest mt-0.5">Esc</span>
+                    <span className="text-[9px] opacity-50 uppercase tracking-widest mt-0.5 hidden sm:block">Esc</span>
                 </Button>
                 <Button
                     disabled={loading || (method === "CASH" && tenderedAmount < total && !hasCustomer)}
-                    className="h-16 px-10 rounded-[20px] font-black text-xl bg-[#0f0f0f] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5"
+                    className="w-full sm:w-auto h-14 sm:h-16 px-10 rounded-xl sm:rounded-[20px] font-black text-lg sm:text-xl bg-[#0f0f0f] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5"
                     onClick={handleConfirm}
                 >
                     <span>{loading ? "Processing..." : "Complete Order"}</span>
-                    {!loading && <span className="text-[10px] opacity-70 font-bold tracking-widest leading-none mt-1 uppercase">Enter</span>}
+                    {!loading && <span className="text-[10px] opacity-70 font-bold tracking-widest leading-none mt-1 uppercase hidden sm:block">Enter</span>}
                 </Button>
             </div>
         </Modal>
