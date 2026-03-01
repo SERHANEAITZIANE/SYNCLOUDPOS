@@ -35,14 +35,18 @@ export async function getBusinessContext(): Promise<string> {
       _sum: { total: true },
       _count: { id: true },
     }),
-    // Top products by revenue (via OrderItems)
-    db.orderItem.groupBy({
-      by: ["productId"],
-      where: { order: { tenantId, createdAt: { gte: startOfMonth }, status: "COMPLETED" } },
-      _sum: { total: true, quantity: true },
-      orderBy: { _sum: { total: "desc" } },
-      take: 10,
-    }),
+    // Top products by revenue (via OrderItems) — use raw SQL since total is not a stored field
+    db.$queryRaw<{ productId: string; revenue: number; totalQty: number }[]>`
+            SELECT oi."productId", SUM(oi.quantity * oi.price)::float AS revenue, SUM(oi.quantity)::int AS "totalQty"
+            FROM "OrderItem" oi
+            INNER JOIN "Order" o ON o.id = oi."orderId"
+            WHERE o."tenantId" = ${tenantId}
+              AND o."createdAt" >= ${startOfMonth}
+              AND o.status = 'COMPLETED'
+            GROUP BY oi."productId"
+            ORDER BY revenue DESC
+            LIMIT 10
+        `,
     // Low stock products (below min stock)
     db.$queryRaw<{ name: string; stock: number; minStock: number }[]>`
             SELECT name, stock, "minStock"
@@ -99,8 +103,8 @@ export async function getBusinessContext(): Promise<string> {
   const productMap = new Map(products.map(p => [p.id, p]));
 
   const topProductLines = topOrderItems.map(p => {
-    const prod = productMap.get(p.productId!);
-    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p._sum.total ?? 0).toFixed(2)} DA (Qté: ${p._sum.quantity ?? 0}, Stock restant: ${prod?.stock ?? "?"})`;
+    const prod = productMap.get(p.productId);
+    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p.revenue ?? 0).toFixed(2)} DA (Qté: ${p.totalQty ?? 0}, Stock restant: ${prod?.stock ?? "?"})`;
   }).join("\n");
 
   const lowStockLines = lowStockProducts.map(p =>
