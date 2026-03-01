@@ -2,7 +2,7 @@ import { getCustomers } from "@/actions/customers";
 import { CustomersReportClient } from "./components/client";
 
 export default async function CustomersReportPage() {
-    const { customers } = await getCustomers();
+    const { customers } = await getCustomers(1, 10000);
 
     const formattedData = ((customers as any) || []).map((item: any) => ({
         id: item.id,

@@ -24,7 +24,7 @@ const SalesOrderPage = async ({
         return JSON.parse(JSON.stringify(obj))
     }
 
-    const customersData = await getCustomers()
+    const customersData = await getCustomers(1, 10000)
     const rawCustomers = ('customers' in customersData ? customersData.customers : []) || []
 
     // Explicitly safe mapping for customers
@@ -44,9 +44,10 @@ const SalesOrderPage = async ({
         updatedAt: c.updatedAt ? new Date(c.updatedAt).toISOString() : null,
     }))
 
-    const productsData = await getProducts()
+    const productsData = await getProducts(1, 10000)
+    const rawProducts = ('items' in productsData ? productsData.items : productsData) || []
     // Explicitly safe mapping for products
-    const products = productsData.map((p: any) => ({
+    const products = rawProducts.map((p: any) => ({
         id: p.id,
         name: p.name,
         description: p.description || "",

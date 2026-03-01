@@ -13,7 +13,7 @@ export default async function PaymentsPage() {
     const payments = await getCustomerPayments()
 
     // 2. Fetch customers for the filter dropdown
-    const customersResponse = await getCustomers()
+    const customersResponse = await getCustomers(1, 10000)
     let customersList: { id: string; name: string }[] = []
     if (customersResponse && 'customers' in customersResponse) {
         customersList = (customersResponse.customers as any[]).map(c => ({

@@ -10,7 +10,7 @@ export default async function CustomerLedgerPage({
 }) {
     const { customerId, locale } = await params;
 
-    const { customers } = await getCustomers()
+    const { customers } = await getCustomers(1, 10000)
     const customer = (customers as any[]).find((c: any) => c.id === customerId)
 
     if (!customer) {

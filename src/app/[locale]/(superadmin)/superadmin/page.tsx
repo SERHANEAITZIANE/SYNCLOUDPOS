@@ -11,6 +11,7 @@ export default async function SuperadminPage() {
         name: t.name,
         phone: t.phone,
         subscriptionEndsAt: t.subscriptionEndsAt,
+        isBlocked: false,
         createdAt: t.createdAt,
         ownerDetails: t.ownerDetails
     }));

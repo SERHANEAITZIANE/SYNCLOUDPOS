@@ -6,7 +6,7 @@ export default async function EmpruntFournisseurPage() {
     const loans = await getSupplierLoans()
     const treasuryAccounts = await getTreasuryAccounts()
 
-    const suppliersResponse = await getSuppliers()
+    const suppliersResponse = await getSuppliers(1, 10000)
     let suppliersList: { id: string; name: string }[] = []
     if (suppliersResponse && "suppliers" in suppliersResponse) {
         suppliersList = (suppliersResponse.suppliers as any[]).map(s => ({

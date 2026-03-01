@@ -112,7 +112,7 @@ export const InventoryReportClient: React.FC<InventoryReportProps> = ({ data }) 
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <DataTable searchKey="name" columns={columns} data={lowStockItems} searchPlaceholder="Filtrer les produits critiques..." />
+                    <DataTable searchKey="name" columns={columns} data={lowStockItems} />
                 </CardContent>
             </Card>
         </div>

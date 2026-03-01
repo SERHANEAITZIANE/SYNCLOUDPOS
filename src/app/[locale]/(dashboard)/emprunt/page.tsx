@@ -6,7 +6,7 @@ export default async function EmpruntPage() {
     const loans = await getCustomerLoans()
     const treasuryAccounts = await getTreasuryAccounts()
 
-    const customersResponse = await getCustomers()
+    const customersResponse = await getCustomers(1, 10000)
     let customersList: { id: string; name: string }[] = []
     if (customersResponse && "customers" in customersResponse) {
         customersList = (customersResponse.customers as any[]).map(c => ({

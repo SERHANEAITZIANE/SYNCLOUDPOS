@@ -11,7 +11,7 @@ export default async function SupplierLedgerPage({
     // Await params to fix Next15 async-route warning
     const { supplierId, locale } = await params;
 
-    const { suppliers } = await getSuppliers()
+    const { suppliers } = await getSuppliers(1, 10000)
     const supplier = (suppliers as any[]).find((c: any) => c.id === supplierId)
 
     if (!supplier) {

@@ -110,7 +110,7 @@ export const CustomersReportClient: React.FC<CustomerReportProps> = ({ data }) =
                     <CardTitle>Détail des soldes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable searchKey="name" columns={columns} data={data} searchPlaceholder="Rechercher un client..." />
+                    <DataTable searchKey="name" columns={columns} data={data} />
                 </CardContent>
             </Card>
         </div>

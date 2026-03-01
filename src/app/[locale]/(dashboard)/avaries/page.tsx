@@ -5,7 +5,7 @@ import { columns } from "@/components/avaries/columns"
 
 export default async function AvariesPage() {
     const spoilages = await getSpoilages()
-    const products = await getProducts()
+    const products = await getProducts(1, 10000)
 
     // Format data for the table
     const formattedSpoilages = spoilages.map((item) => ({
@@ -17,7 +17,8 @@ export default async function AvariesPage() {
         userName: item.user.name || "Inconnu",
     }))
 
-    const formattedProducts = products.map((product) => ({
+    const rawProducts = ('items' in products ? products.items : products) || []
+    const formattedProducts = rawProducts.map((product: any) => ({
         id: product.id,
         name: product.name,
         quantity: Number(product.quantity),
