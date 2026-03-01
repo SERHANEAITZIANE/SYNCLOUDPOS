@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ImagePlus, Trash } from "lucide-react"
 import Image from "next/image"
@@ -22,6 +22,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
     const [isMounted, setIsMounted] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const inputId = useId()
 
     useEffect(() => {
         setIsMounted(true)
@@ -94,13 +95,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                     type="button"
                     variant="secondary"
                     disabled={disabled || isLoading}
-                    onClick={() => document.getElementById("file-upload")?.click()}
+                    onClick={() => document.getElementById(inputId)?.click()}
                 >
                     <ImagePlus className="h-4 w-4 mr-2" />
                     {isLoading ? "Uploading..." : "Upload Image"}
                 </Button>
                 <input
-                    id="file-upload"
+                    id={inputId}
                     type="file"
                     accept="image/*"
                     className="hidden"

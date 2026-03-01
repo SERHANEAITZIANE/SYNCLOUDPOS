@@ -159,8 +159,20 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         return () => window.removeEventListener("keydown", handler)
     }, [append, ocrItems.length])
 
-    const handleOcrExtracted = (items: { name: string, price: number, quantity: number }[]) => {
+    const handleOcrExtracted = (items: { name: string, price: number, quantity: number }[], supplierName?: string) => {
         setOcrItems(items)
+        // Auto-select supplier if Gemini detected one
+        if (supplierName && supplierName.trim()) {
+            const lower = supplierName.trim().toLowerCase()
+            const match = suppliers.find(s =>
+                s.name.toLowerCase() === lower ||
+                s.name.toLowerCase().includes(lower) ||
+                lower.includes(s.name.toLowerCase())
+            )
+            if (match) {
+                form.setValue("supplierId", match.id)
+            }
+        }
     }
 
     const handleMissingProductsComplete = (matchedItems: { productId: string, quantity: number, costPrice: number }[]) => {

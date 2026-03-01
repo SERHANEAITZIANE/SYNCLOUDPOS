@@ -1,6 +1,7 @@
 "use client"
 
 import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
@@ -16,8 +17,6 @@ import { Button } from "@/components/ui/button"
 import { ProductColumn } from "./columns"
 
 import { deleteProduct } from "@/actions/products"
-
-import { useSession } from "next-auth/react"
 
 interface CellActionProps {
     data: ProductColumn
@@ -55,13 +54,16 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
                     {session?.user?.canEdit && (
                         <DropdownMenuItem onClick={() => router.push(`/products/${data.id}`)}>
-                            <Edit className="mr-2 h-4 w-4" /> Update
+                            <Edit className="mr-2 h-4 w-4" /> Modifier
                         </DropdownMenuItem>
                     )}
 
                     {session?.user?.canDelete && (
-                        <DropdownMenuItem onClick={onConfirm}>
-                            <Trash className="mr-2 h-4 w-4" /> Delete
+                        <DropdownMenuItem
+                            onClick={onConfirm}
+                            className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                        >
+                            <Trash className="mr-2 h-4 w-4" /> Supprimer
                         </DropdownMenuItem>
                     )}
                 </DropdownMenuContent>
