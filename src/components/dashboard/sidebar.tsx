@@ -20,7 +20,8 @@ import {
     Landmark,
     CreditCard,
     Building2,
-    Sparkles
+    Sparkles,
+    BookOpen
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -160,6 +161,12 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             icon: Sparkles,
             href: "/ai",
             color: "text-violet-400",
+        },
+        {
+            label: "Formation ERP",
+            icon: BookOpen,
+            href: "/formation",
+            color: "text-pink-500",
         },
     ];
 
