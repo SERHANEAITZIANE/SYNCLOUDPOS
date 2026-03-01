@@ -89,12 +89,14 @@ export async function createSalesOrder(data: {
                 STOCK_STATUSES.includes(data.status)
 
             if (shouldDeductStock) {
-                for (const item of data.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
-                }
+                await Promise.all(
+                    data.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Add to customer balance if validated (not yet paid)
@@ -321,22 +323,26 @@ export async function updateSalesOrderStatus(id: string, newStatus: string) {
             const isStockType = salesOrder.type === "ORDER" || salesOrder.type === "INVOICE"
 
             if (!hadStock && getsStock && isStockType) {
-                for (const item of salesOrder.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
-                }
+                await Promise.all(
+                    salesOrder.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Restore stock if cancelling
             if (hadStock && newStatus === "CANCELLED" && isStockType) {
-                for (const item of salesOrder.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { increment: item.quantity } }
-                    })
-                }
+                await Promise.all(
+                    salesOrder.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Customer balance:

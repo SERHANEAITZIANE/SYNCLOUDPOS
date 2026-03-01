@@ -8,6 +8,7 @@ interface SystemSettingsClientProps {
     initialData: {
         blTemplate: string;
         databaseUrl: string;
+        geminiApiKey: string | null;
     }
 }
 

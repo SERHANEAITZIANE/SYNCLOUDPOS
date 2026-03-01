@@ -29,12 +29,13 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "@/i18n/routing"
 import { Separator } from "@/components/ui/separator"
-import { AlertCircle, Database } from "lucide-react"
+import { Network, Sparkles, AlertCircle, Database } from "lucide-react"
 
 interface SystemSettingsFormProps {
     initialData: {
         blTemplate: string;
         databaseUrl: string;
+        geminiApiKey: string | null;
     }
 }
 
@@ -47,6 +48,7 @@ export const SystemSettingsForm: React.FC<SystemSettingsFormProps> = ({ initialD
         defaultValues: {
             blTemplate: initialData.blTemplate || "standard",
             databaseUrl: initialData.databaseUrl || "",
+            geminiApiKey: initialData.geminiApiKey || "",
         }
     })
 
@@ -66,7 +68,10 @@ export const SystemSettingsForm: React.FC<SystemSettingsFormProps> = ({ initialD
             }
 
             // 2. Update System Configs (blTemplate, etc into DB)
-            const result = await updateSystemSettings({ blTemplate: values.blTemplate || "standard" });
+            const result = await updateSystemSettings({
+                blTemplate: values.blTemplate || "standard",
+                geminiApiKey: values.geminiApiKey || undefined
+            });
             if (result.error) {
                 toast.error(result.error)
             } else {
@@ -123,7 +128,41 @@ export const SystemSettingsForm: React.FC<SystemSettingsFormProps> = ({ initialD
 
                 <Separator />
 
-                {/* 2. Base de données */}
+                {/* 2. Intelligence Artificielle (OCR) */}
+                <div>
+                    <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-indigo-500" /> Intelligence Artificielle (OCR)
+                    </h3>
+                    <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900 rounded-lg space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="geminiApiKey"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Clé API Google Gemini</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            disabled={loading}
+                                            type="password"
+                                            placeholder="AIzaSy..."
+                                            className="font-mono text-sm"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Nécessaire pour utiliser la numérisation automatique des factures (OCR). Obtenez votre clé sur <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Google AI Studio</a>.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+
+                <Separator />
+
+                {/* 3. Base de données */}
                 <div>
                     <h3 className="text-lg font-medium mb-4 text-red-500 flex items-center gap-2">
                         <Database className="w-5 h-5" /> Zone Sensible : Base de Données
@@ -172,3 +211,4 @@ export const SystemSettingsForm: React.FC<SystemSettingsFormProps> = ({ initialD
         </Form>
     )
 }
+

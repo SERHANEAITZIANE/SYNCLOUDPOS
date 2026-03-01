@@ -57,6 +57,9 @@ export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps)
 
     // Calculate total for active session manually since hook might lag or we want direct control
     // But we also have cart.total() which uses get()... let's strictly use the items derived above for rendering
+    // User requested NO TVA and NO TIMBRE on POS/Bon de Livraison. We will set tvaAmount=0 and stampTax=0
+    // so we just sum up the raw price entered in the POS cart. Wait, the prices entered in the cart are TTC usually. 
+    // If there is no TVA, then TTC = HT.
     const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
 
     const onCheckout = async (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => {

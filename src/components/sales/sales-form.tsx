@@ -155,7 +155,10 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
     });
 
     const subtotalHT = enrichedItems.reduce((acc, item) => acc + item.lineTotalHT, 0);
-    const totalTVA = enrichedItems.reduce((acc, item) => acc + (item.lineTotalTTC - item.lineTotalHT), 0);
+    const totalTVA = (watchType === "INVOICE" || watchType === "QUOTE")
+        ? enrichedItems.reduce((acc, item) => acc + (item.lineTotalTTC - item.lineTotalHT), 0)
+        : 0;
+
     const totalItemsTTC = enrichedItems.reduce((acc, item) => acc + item.lineTotalTTC, 0);
 
     const getStampTaxAmount = (amount: number) => {
@@ -165,8 +168,13 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         return Math.min(10000, Math.ceil(amount / 100) * 2);
     }
 
-    const stampTax = watchPaymentMethod === "CASH" ? getStampTaxAmount(totalItemsTTC) : 0;
-    const finalTotalTTC = totalItemsTTC + stampTax;
+    const stampTax = (watchPaymentMethod === "CASH" && (watchType === "INVOICE" || watchType === "QUOTE"))
+        ? getStampTaxAmount(totalItemsTTC)
+        : 0;
+
+    const finalTotalTTC = (watchType === "INVOICE" || watchType === "QUOTE")
+        ? totalItemsTTC + stampTax
+        : subtotalHT; // If it's not an Invoice or Quote (i.e. Bon de Livraison), total is without taxes.
 
     let previousBalance = 0;
     let newBalance = Number(selectedCustomer?.balance || 0);

@@ -56,16 +56,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     return (
         <Card className={cn(
-            "group cursor-pointer overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-primary/20 transition-all duration-200 flex flex-col p-4 h-32 justify-between relative",
+            "group cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-primary/20 transition-all duration-200 flex flex-col p-2.5 lg:p-4 h-[100px] lg:h-32 justify-between relative",
             data.stock <= 0 ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10" : ""
         )} onClick={onAddToCart}>
             {/* Top row: Name and Stock */}
             <div className="relative w-full">
-                <h3 className="font-bold text-gray-800 dark:text-slate-200 text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors duration-200 pr-8" title={data.name}>
+                <h3 className="font-bold text-gray-800 dark:text-slate-200 text-[11px] lg:text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors duration-200 pr-7" title={data.name}>
                     {data.name}
                 </h3>
                 <div className={cn(
-                    "absolute -top-1 right-0 shrink-0 text-[10px] font-bold px-2 py-1 rounded-md border",
+                    "absolute -top-0.5 right-0 shrink-0 text-[9px] lg:text-[10px] font-bold px-1.5 py-0.5 rounded-md border",
                     data.stock > 0
                         ? "bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-900/50"
                         : "bg-red-100/80 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-900/50"
@@ -75,9 +75,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
 
             {/* Bottom row: Price */}
-            <div className="flex justify-end items-end mt-2">
+            <div className="flex justify-end items-end">
                 <div className="flex items-baseline gap-1 text-gray-900 dark:text-white">
-                    <span className="font-black text-xl leading-none">
+                    <span className="font-black text-sm lg:text-xl leading-none">
                         {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
                     </span>
                 </div>

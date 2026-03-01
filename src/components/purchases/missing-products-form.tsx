@@ -205,7 +205,7 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                 <div className="space-y-4">
                     <h4 className="font-semibold text-sm">Ou créer un nouveau produit</h4>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmitNew as any)} className="space-y-4">
+                        <div className="space-y-4">
                             <FormField control={form.control} name="name" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Nom final du produit</FormLabel>
@@ -283,14 +283,14 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                             </div>
 
                             <div className="flex items-center gap-3 pt-4">
-                                <Button type="submit" disabled={isCreating} className="flex-1">
+                                <Button type="button" onClick={form.handleSubmit(onSubmitNew as any)} disabled={isCreating} className="flex-1">
                                     {isCreating ? "Création..." : "Créer et lier"}
                                 </Button>
                                 <Button type="button" variant="outline" onClick={onSkip} disabled={isCreating}>
                                     Ignorer cet article
                                 </Button>
                             </div>
-                        </form>
+                        </div>
                     </Form>
                 </div>
 

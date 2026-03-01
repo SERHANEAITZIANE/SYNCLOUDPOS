@@ -225,23 +225,22 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
     }
 
     return (
-        <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
-            <div className="px-3 py-2 flex-1">
-                <Link href="/dashboard" className="flex items-center pl-3 mb-8">
-                    <div className="relative w-8 h-8 mr-4">
-                        {/* Logo placeholder */}
-                        <div className="bg-white rounded-full w-full h-full flex items-center justify-center text-black font-bold">S</div>
+        <div className="flex flex-col h-full bg-[#111827] text-white min-h-0">
+            <div className="px-3 py-2 flex-1 overflow-y-auto">
+                <Link href="/dashboard" className="flex items-center pl-3 mb-6 pt-2">
+                    <div className="relative w-7 h-7 mr-3">
+                        <div className="bg-white rounded-full w-full h-full flex items-center justify-center text-black font-bold text-sm">S</div>
                     </div>
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-xl font-bold">
                         SYNCLOUD<span className="text-primary text-blue-400">POS</span>
                     </h1>
                 </Link>
 
-                <div className="mb-6 px-3">
+                <div className="mb-4 px-3">
                     <StoreSwitcher items={tenants} activeTenantId={activeTenantId} />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                     {routes.map((route) => {
                         const isActive = pathname.includes(route.href);
 
@@ -250,12 +249,12 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
                                 key={route.href}
                                 href={route.href}
                                 className={cn(
-                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                                    "text-sm group flex p-2.5 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
                                     isActive ? "text-white bg-white/10" : "text-zinc-400"
                                 )}
                             >
                                 <div className="flex items-center flex-1">
-                                    <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
+                                    <route.icon className={cn("h-4 w-4 mr-3 shrink-0", route.color)} />
                                     {route.label}
                                 </div>
                             </Link>

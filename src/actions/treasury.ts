@@ -100,7 +100,7 @@ export async function createTreasuryAccount(values: z.infer<typeof TreasuryAccou
             })
         }
 
-        revalidatePath("/[locale]/dashboard/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
         return {
             success: "Account created!",
             account: {
@@ -230,7 +230,7 @@ export async function deleteTreasuryAccount(id: string) {
             where: { id, tenantId }
         })
 
-        revalidatePath("/[locale]/dashboard/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
         return { success: "Account deleted!" }
     } catch (error) {
         console.error("[DELETE_TREASURY_ACCOUNT]", error)
@@ -300,7 +300,7 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
             })
         })
 
-        revalidatePath("/[locale]/dashboard/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
         return { success: "Transfer completed successfully!" }
     } catch (error: any) {
         console.error("[TRANSFER_FUNDS]", error)
@@ -347,7 +347,7 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
             })
         })
 
-        revalidatePath("/[locale]/dashboard/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
         return { success: "Transaction completed!" }
     } catch (error: any) {
         console.error("[MANUAL_TRANSACTION]", error)

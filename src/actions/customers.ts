@@ -118,31 +118,37 @@ export const importCustomers = async (rows: CustomerData[]) => {
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
-    let created = 0
-    let errors = 0
+    const validRows = rows.filter(r => r.name?.trim())
+    const errors = rows.length - validRows.length
 
-    for (const row of rows) {
-        if (!row.name?.trim()) { errors++; continue; }
-        try {
-            await db.customer.create({
-                data: {
-                    name: row.name.trim(),
-                    phone: row.phone || undefined,
-                    email: row.email || undefined,
-                    address: row.address || undefined,
-                    city: row.city || undefined,
-                    nif: row.nif || undefined,
-                    nis: row.nis || undefined,
-                    artImposition: row.artImposition || undefined,
-                    rc: row.rc || undefined,
-                    rib: row.rib || undefined,
-                    clientType: row.clientType || "RETAIL",
-                    barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
-                    tenantId
-                }
-            })
-            created++
-        } catch { errors++ }
+    // Build all create data objects in memory (no DB calls needed)
+    const createData = validRows.map(row => ({
+        name: row.name.trim(),
+        phone: row.phone || undefined,
+        email: row.email || undefined,
+        address: row.address || undefined,
+        city: row.city || undefined,
+        nif: row.nif || undefined,
+        nis: row.nis || undefined,
+        artImposition: row.artImposition || undefined,
+        rc: row.rc || undefined,
+        rib: row.rib || undefined,
+        clientType: row.clientType || "RETAIL",
+        barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
+        tenantId
+    }))
+
+    let created = 0
+    try {
+        // Batch-insert in chunks of 50 for best performance
+        const batchSize = 50
+        for (let i = 0; i < createData.length; i += batchSize) {
+            const batch = createData.slice(i, i + batchSize)
+            const result = await db.customer.createMany({ data: batch, skipDuplicates: true })
+            created += result.count
+        }
+    } catch (error) {
+        console.error("importCustomers error:", error)
     }
 
     revalidatePath("/(dashboard)/customers")

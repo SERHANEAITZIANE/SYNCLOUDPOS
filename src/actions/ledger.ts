@@ -22,53 +22,45 @@ export async function getCustomerLedger(customerId: string) {
         // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
-        // 1. Fetch Sales (Debits - money owed by customer)
-        // Only consider sales that actually affect inventory/debts
-        // In our system, "VALIDATED" and "PAID" SalesOrders mean the goods left and they owe us (or paid us).
-        // (If PAID, the corresponding payment will zero it out below).
-        const sales = await db.salesOrder.findMany({
-            where: {
-                tenantId,
-                customerId,
-                status: { in: ["VALIDATED", "PAID"] },
-            },
-            select: {
-                id: true,
-                createdAt: true,
-                total: true,
-                receiptNumber: true,
-                type: true,
-            },
-        })
-
-        // 2. Fetch Payments (Credits - money given by customer)
-        const payments = await db.treasuryTransaction.findMany({
-            where: {
-                tenantId,
-                type: "CREDIT",
-                OR: [
-                    // Manual payments explicitly linked to this customer
-                    { source: "MANUAL_IN", referenceId: customerId },
-                    // Sale payments linked to any of this customer's Orders
-                    // Note: TreasuryTransaction referenceId for SALES often points to the Order.id, not SalesOrder.id.
-                    // We need to fetch all Orders for this customer to map them.
-                ]
-            },
-            select: {
-                id: true,
-                date: true,
-                amount: true,
-                description: true,
-                source: true,
-                referenceId: true
-            }
-        })
-
-        // To reliably get SALE payments, let's fetch Orders for this customer
-        const customerOrders = await db.order.findMany({
-            where: { tenantId, customerId },
-            select: { id: true, createdAt: true }
-        })
+        // 1. Fetch Sales and payments in parallel, then get order IDs
+        const [sales, payments, customerOrders] = await Promise.all([
+            db.salesOrder.findMany({
+                where: {
+                    tenantId,
+                    customerId,
+                    status: { in: ["VALIDATED", "PAID"] },
+                },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    total: true,
+                    receiptNumber: true,
+                    type: true,
+                },
+            }),
+            // 2. Fetch Payments (Credits - money given by customer)
+            db.treasuryTransaction.findMany({
+                where: {
+                    tenantId,
+                    type: "CREDIT",
+                    OR: [
+                        { source: "MANUAL_IN", referenceId: customerId },
+                    ]
+                },
+                select: {
+                    id: true,
+                    date: true,
+                    amount: true,
+                    description: true,
+                    source: true,
+                    referenceId: true
+                }
+            }),
+            db.order.findMany({
+                where: { tenantId, customerId },
+                select: { id: true, createdAt: true }
+            })
+        ]);
 
         const customerOrderIds = customerOrders.map(o => o.id)
 

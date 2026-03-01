@@ -17,8 +17,25 @@ export interface OcrInvoiceResult {
     error?: string
 }
 
+import { getActiveTenantId } from "./get-active-tenant";
+import { db } from "@/lib/db";
+
 export async function analyzeInvoiceWithGemini(base64Image: string, mimeType: string): Promise<OcrInvoiceResult> {
-    const apiKey = process.env.GEMINI_API_KEY
+    const tenantId = await getActiveTenantId();
+
+    if (!tenantId) {
+        return {
+            supplier: "", items: [], grandTotal: 0, calculatedTotal: 0, isValid: false,
+            error: "No active tenant selected."
+        }
+    }
+
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: { geminiApiKey: true }
+    });
+
+    const apiKey = tenant?.geminiApiKey || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
         return {
@@ -27,7 +44,7 @@ export async function analyzeInvoiceWithGemini(base64Image: string, mimeType: st
             grandTotal: 0,
             calculatedTotal: 0,
             isValid: false,
-            error: "GEMINI_API_KEY not configured in .env"
+            error: "Veuillez configurer votre clé API Gemini dans les paramètres de la boutique."
         }
     }
 
@@ -63,7 +80,7 @@ Rules:
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

@@ -55,13 +55,15 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 if (oldSalesOrder && oldSalesOrder.receiptNumber) {
                     receiptNumber = oldSalesOrder.receiptNumber;
 
-                    // 1. Revert Old Stock
-                    for (const item of oldSalesOrder.items) {
-                        await tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { increment: item.quantity } }
-                        });
-                    }
+                    // 1. Revert Old Stock (Parallelized)
+                    await Promise.all(
+                        oldSalesOrder.items.map(item =>
+                            tx.product.update({
+                                where: { id: item.productId },
+                                data: { stock: { increment: item.quantity } }
+                            })
+                        )
+                    );
 
                     // 2. Clear Old SalesOrderItems (we will recreate them)
                     await tx.salesOrderItem.deleteMany({
@@ -178,17 +180,19 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 })
             }
 
-            // 2. Decrement stock for each item
-            for (const item of items) {
-                await tx.product.update({
-                    where: { id: item.productId },
-                    data: {
-                        stock: {
-                            decrement: item.quantity
+            // 2. Decrement stock for each item (Parallelized)
+            await Promise.all(
+                items.map(item =>
+                    tx.product.update({
+                        where: { id: item.productId },
+                        data: {
+                            stock: {
+                                decrement: item.quantity
+                            }
                         }
-                    }
-                })
-            }
+                    })
+                )
+            );
 
             // 3. Update Customer Balance (Debt)
             let previousBalance = 0;
@@ -247,10 +251,10 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             }
         })
 
-        revalidatePath("/[locale]/dashboard/orders", "page")
-        revalidatePath("/[locale]/dashboard/products", "page") // Update stock in product list
-        revalidatePath("/[locale]/dashboard/treasury", "page") // Update treasury balances
-        revalidatePath("/[locale]/dashboard/sales", "page") // Update sales records
+        revalidatePath("/[locale]/(dashboard)/orders", "page")
+        revalidatePath("/[locale]/(dashboard)/products", "page") // Update stock in product list
+        revalidatePath("/[locale]/(dashboard)/treasury", "page") // Update treasury balances
+        revalidatePath("/[locale]/(dashboard)/sales", "page") // Update sales records
 
         return {
             success: "Commande créée avec succès!",

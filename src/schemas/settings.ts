@@ -22,5 +22,6 @@ export const SettingsSchema = z.object({
 
 export const SystemSettingsSchema = z.object({
     blTemplate: z.string().optional(),
-    databaseUrl: z.string().url("Veuillez entrer une URL de base de données valide.")
+    databaseUrl: z.string().url("Veuillez entrer une URL de base de données valide."),
+    geminiApiKey: z.string().optional()
 })

@@ -82,12 +82,14 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
             // If BON_LIVRAISON or FACTURE or COMPLETED: add stock
             if (["BON_LIVRAISON", "FACTURE", "COMPLETED"].includes(data.status)) {
-                for (const item of data.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { increment: item.quantity }, cost: item.costPrice }
-                    })
-                }
+                await Promise.all(
+                    data.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity }, cost: item.costPrice }
+                        })
+                    )
+                );
             }
 
             // If FACTURE: add to supplier balance (we owe them)
@@ -205,22 +207,26 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
             const getsStock = stockStatuses.includes(newStatus)
 
             if (!hadStock && getsStock) {
-                for (const item of order.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { increment: item.quantity }, cost: item.costPrice }
-                    })
-                }
+                await Promise.all(
+                    order.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity }, cost: item.costPrice }
+                        })
+                    )
+                );
             }
 
             // If cancelling after stock was received: reverse stock
             if (hadStock && newStatus === "CANCELLED") {
-                for (const item of order.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
-                }
+                await Promise.all(
+                    order.items.map(item =>
+                        tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Supplier balance: increment when moving to FACTURE (first time)

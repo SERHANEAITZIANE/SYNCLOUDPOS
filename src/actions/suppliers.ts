@@ -117,29 +117,33 @@ export const importSuppliers = async (rows: SupplierData[]) => {
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
-    let created = 0
-    let errors = 0
+    const validRows = rows.filter(r => r.name?.trim())
+    const errors = rows.length - validRows.length
 
-    for (const row of rows) {
-        if (!row.name?.trim()) { errors++; continue; }
-        try {
-            await db.supplier.create({
-                data: {
-                    name: row.name.trim(),
-                    contactPerson: row.contactPerson || undefined,
-                    phone: row.phone || undefined,
-                    email: row.email || undefined,
-                    address: row.address || undefined,
-                    nif: row.nif || undefined,
-                    nis: row.nis || undefined,
-                    artImposition: row.artImposition || undefined,
-                    rc: row.rc || undefined,
-                    rib: row.rib || undefined,
-                    tenantId
-                }
-            })
-            created++
-        } catch { errors++ }
+    const createData = validRows.map(row => ({
+        name: row.name.trim(),
+        contactPerson: row.contactPerson || undefined,
+        phone: row.phone || undefined,
+        email: row.email || undefined,
+        address: row.address || undefined,
+        nif: row.nif || undefined,
+        nis: row.nis || undefined,
+        artImposition: row.artImposition || undefined,
+        rc: row.rc || undefined,
+        rib: row.rib || undefined,
+        tenantId
+    }))
+
+    let created = 0
+    try {
+        const batchSize = 50
+        for (let i = 0; i < createData.length; i += batchSize) {
+            const batch = createData.slice(i, i + batchSize)
+            const result = await db.supplier.createMany({ data: batch, skipDuplicates: true })
+            created += result.count
+        }
+    } catch (error) {
+        console.error("importSuppliers error:", error)
     }
 
     revalidatePath("/(dashboard)/suppliers")

@@ -59,6 +59,7 @@ export async function updateTenantSettings(data: {
 
 export async function updateSystemSettings(data: {
     blTemplate: string;
+    geminiApiKey?: string;
 }) {
     try {
         const tenantId = await getActiveTenantId();
@@ -72,7 +73,8 @@ export async function updateSystemSettings(data: {
                 id: tenantId
             },
             data: {
-                blTemplate: data.blTemplate || "standard"
+                blTemplate: data.blTemplate || "standard",
+                geminiApiKey: data.geminiApiKey || null
             }
         });
 

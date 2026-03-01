@@ -74,7 +74,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             } as any
         })
 
-        revalidatePath("/[locale]/dashboard/products", "page")
+        revalidatePath("/[locale]/(dashboard)/products", "page")
         return { success: "Product created!" }
     } catch (error) {
         console.error("Error creating product:", error)
@@ -93,13 +93,18 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
     try {
         const whereClause: any = { tenantId }
 
-        if (search) {
+        const safeSearch = typeof search === 'string' ? search : (Array.isArray(search) ? search[0] : '')
+
+        if (safeSearch) {
             whereClause.OR = [
-                { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { barcodes: { some: { value: { contains: search, mode: 'insensitive' } } } }
+                { name: { contains: safeSearch, mode: 'insensitive' } },
+                { description: { contains: safeSearch, mode: 'insensitive' } },
+                { barcodes: { some: { value: { contains: safeSearch, mode: 'insensitive' } } } }
             ]
         }
+
+        const safePage = isNaN(page) ? 1 : page;
+        const safePageSize = isNaN(pageSize) ? 20 : pageSize;
 
         const [products, totalCount] = await Promise.all([
             db.product.findMany({
@@ -113,8 +118,8 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
                 orderBy: {
                     createdAt: 'desc'
                 },
-                skip: (page - 1) * pageSize,
-                take: pageSize,
+                skip: (safePage - 1) * safePageSize,
+                take: safePageSize,
             }),
             db.product.count({ where: whereClause })
         ]);
@@ -179,7 +184,6 @@ export const getProduct = async (productId: string) => {
 
 export const deleteProduct = async (id: string) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -194,7 +198,7 @@ export const deleteProduct = async (id: string) => {
             }
         })
 
-        revalidatePath("/[locale]/dashboard/products", "page")
+        revalidatePath("/[locale]/(dashboard)/products", "page")
         return { success: "Product deleted!" }
     } catch {
         return { error: "Failed to delete product!" }
@@ -203,7 +207,6 @@ export const deleteProduct = async (id: string) => {
 
 export const updateProduct = async (id: string, values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -213,7 +216,8 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
     const validatedFields = ProductSchema.safeParse(values)
 
     if (!validatedFields.success) {
-        return { error: "Invalid fields!" }
+        console.error("Validation failed in updateProduct:", validatedFields.error)
+        return { error: `Invalid fields: ${validatedFields.error.message}` }
     }
 
     const {
@@ -258,7 +262,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
                     deleteMany: {},
                     createMany: {
                         data: [
-                            ...images.map((image: { url: string }) => image)
+                            ...images.map((image: { url: string }) => ({ url: image.url }))
                         ]
                     }
                 },
@@ -276,75 +280,145 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
             } as any
         })
 
-        revalidatePath("/[locale]/dashboard/products", "page")
+        revalidatePath("/[locale]/(dashboard)/products", "page")
         return { success: "Product updated!" }
     } catch (error) {
-        console.error(error)
+        console.error("PRISMA ERROR in updateProduct:", error)
         return { error: "Failed to update product!" }
     }
 }
 
 export const importProducts = async (rows: Record<string, string>[]) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 
     let created = 0
     let errors = 0
 
-    for (const row of rows) {
-        const name = row["name"] || row["nom"] || row["Nom"] || row["Name"] || ""
-        if (!name.trim()) { errors++; continue }
+    try {
+        // Pre-fetch all existing categories and brands to avoid N+1 lookups
+        const [existingCategories, existingBrands] = await Promise.all([
+            db.category.findMany({ where: { tenantId }, select: { id: true, name: true } }),
+            db.brand.findMany({ where: { tenantId }, select: { id: true, name: true } })
+        ])
 
-        try {
-            const price = parseFloat(row["price"] || row["prix"] || row["Prix Vente"] || "0") || 0
-            const cost = parseFloat(row["cost"] || row["cout"] || row["Prix Achat"] || "0") || undefined
-            const wholesalePrice = parseFloat(row["wholesalePrice"] || row["Prix Gros"] || "0") || undefined
-            const stock = parseInt(row["stock"] || row["Stock"] || "0") || 0
-            const minStock = parseInt(row["minStock"] || row["Stock Min"] || "0") || 0
-            const description = row["description"] || row["Description"] || undefined
-            const barcode = row["barcode"] || row["Barcode"] || row["Code-barres"] || undefined
-            const categoryName = row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || ""
-            const brandName = row["brand"] || row["marque"] || row["Marque"] || ""
+        const categoryCache = new Map(existingCategories.map(c => [c.name.toLowerCase().trim(), c.id]))
+        const brandCache = new Map(existingBrands.map(b => [b.name.toLowerCase().trim(), b.id]))
 
-            // Resolve or create category
-            let categoryId: string | undefined
-            if (categoryName.trim()) {
-                let cat = await db.category.findFirst({ where: { name: { equals: categoryName.trim() }, tenantId } })
-                if (!cat) cat = await db.category.create({ data: { name: categoryName.trim(), tenantId } })
-                categoryId = cat.id
-            }
+        // Collect unique category and brand names that need to be created
+        const uniqueCategoryNames = new Set<string>()
+        const uniqueBrandNames = new Set<string>()
 
-            // Resolve or create brand
-            let brandId: string | undefined
-            if (brandName.trim()) {
-                let br = await db.brand.findFirst({ where: { name: { equals: brandName.trim() }, tenantId } })
-                if (!br) br = await db.brand.create({ data: { name: brandName.trim(), tenantId } })
-                brandId = br.id
-            }
+        for (const row of rows) {
+            const catName = (row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || "").trim()
+            const brandName = (row["brand"] || row["marque"] || row["Marque"] || "").trim()
+            if (catName && !categoryCache.has(catName.toLowerCase())) uniqueCategoryNames.add(catName)
+            if (brandName && !brandCache.has(brandName.toLowerCase())) uniqueBrandNames.add(brandName)
+        }
 
-            await db.product.create({
-                data: {
-                    name: name.trim(),
-                    price,
-                    cost,
-                    wholesalePrice,
-                    stock,
-                    minStock,
-                    description,
-                    categoryId,
-                    brandId,
-                    tenantId,
-                    ...(barcode ? {
-                        barcodes: { create: [{ value: barcode }] }
-                    } : {})
-                } as any
-            })
-            created++
-        } catch { errors++ }
+        // Batch-create missing categories and brands in parallel
+        const [newCats, newBrands] = await Promise.all([
+            Promise.all(Array.from(uniqueCategoryNames).map(name =>
+                db.category.create({ data: { name, tenantId }, select: { id: true, name: true } })
+            )),
+            Promise.all(Array.from(uniqueBrandNames).map(name =>
+                db.brand.create({ data: { name, tenantId }, select: { id: true, name: true } })
+            ))
+        ])
+
+        newCats.forEach(c => categoryCache.set(c.name.toLowerCase().trim(), c.id))
+        newBrands.forEach(b => brandCache.set(b.name.toLowerCase().trim(), b.id))
+
+        // Now batch create all products in parallel
+        const createPromises = rows.map(async (row) => {
+            const name = row["name"] || row["nom"] || row["Nom"] || row["Name"] || ""
+            if (!name.trim()) { errors++; return }
+
+            try {
+                const price = parseFloat(row["price"] || row["prix"] || row["Prix Vente"] || "0") || 0
+                const cost = parseFloat(row["cost"] || row["cout"] || row["Prix Achat"] || "0") || undefined
+                const wholesalePrice = parseFloat(row["wholesalePrice"] || row["Prix Gros"] || "0") || undefined
+                const stock = parseInt(row["stock"] || row["Stock"] || "0") || 0
+                const minStock = parseInt(row["minStock"] || row["Stock Min"] || "0") || 0
+                const description = row["description"] || row["Description"] || undefined
+                const barcode = row["barcode"] || row["Barcode"] || row["Code-barres"] || undefined
+                const categoryName = (row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || "").trim()
+                const brandName = (row["brand"] || row["marque"] || row["Marque"] || "").trim()
+
+                const categoryId = categoryName ? categoryCache.get(categoryName.toLowerCase()) : undefined
+                const brandId = brandName ? brandCache.get(brandName.toLowerCase()) : undefined
+
+                await db.product.create({
+                    data: {
+                        name: name.trim(),
+                        price,
+                        cost,
+                        wholesalePrice,
+                        stock,
+                        minStock,
+                        description,
+                        categoryId,
+                        brandId,
+                        tenantId,
+                        ...(barcode ? {
+                            barcodes: { create: [{ value: barcode }] }
+                        } : {})
+                    } as any
+                })
+                created++
+            } catch { errors++ }
+        })
+
+        // Run all creates concurrently (batched to avoid overloading connection pool)
+        const batchSize = 20
+        for (let i = 0; i < createPromises.length; i += batchSize) {
+            await Promise.all(createPromises.slice(i, i + batchSize))
+        }
+    } catch (error) {
+        console.error("importProducts error:", error)
+        return { error: "Erreur lors de l'import" }
     }
 
-    revalidatePath("/[locale]/dashboard/products", "page")
+    revalidatePath("/[locale]/(dashboard)/products", "page")
     return { success: `${created} produit(s) importé(s)`, errors }
+}
+
+export const getAllProductsForCatalogue = async () => {
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
+    if (!tenantId) {
+        return []
+    }
+
+    try {
+        const products = await db.product.findMany({
+            where: {
+                tenantId,
+                isArchived: false,
+                stock: { gt: 0 } // Only include available products
+            },
+            include: {
+                category: true,
+                images: true
+            },
+            orderBy: [
+                { categoryId: 'asc' },
+                { name: 'asc' }
+            ]
+        })
+
+        return products.map(product => ({
+            ...product,
+            price: Number(product.price),
+            cost: Number(product.cost),
+            wholesalePrice: product.wholesalePrice ? Number(product.wholesalePrice) : null,
+            dealerPrice: product.dealerPrice ? Number(product.dealerPrice) : null,
+            tvaRate: product.tvaRate ? Number(product.tvaRate) : null,
+        }))
+    } catch (error) {
+        console.error("getAllProductsForCatalogue error:", error)
+        return []
+    }
 }

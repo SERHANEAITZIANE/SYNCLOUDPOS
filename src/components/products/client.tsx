@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, FileSpreadsheet } from "lucide-react"
+import { Plus, FileSpreadsheet, FileText } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { ProductColumn, useProductColumns } from "./columns"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { importProducts } from "@/actions/products"
+import { PriceListModal } from "@/components/products/price-list-modal"
 
 interface ProductClientProps {
     data: ProductColumn[]
@@ -32,12 +33,16 @@ export const ProductClient: React.FC<ProductClientProps> = ({
     const tCommon = useTranslations("Common")
     const columns = useProductColumns()
     const [importOpen, setImportOpen] = useState(false)
+    const [isPriceListOpen, setIsPriceListOpen] = useState(false)
 
     return (
         <>
             <div className="flex items-center justify-between">
                 <Heading title={`${t("title")} (${totalCount})`} description={t("subtitle")} />
                 <div className="flex flex-row flex-wrap gap-2">
+                    <Button variant="outline" className="text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50" onClick={() => setIsPriceListOpen(true)}>
+                        <FileText className="mr-2 h-4 w-4" /> Catalogue
+                    </Button>
                     <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
                         <FileSpreadsheet className="mr-2 h-4 w-4" /> Import Excel
                     </Button>
@@ -72,6 +77,11 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                 ]}
                 onImport={importProducts as any}
                 templateFileName="produits_template"
+            />
+
+            <PriceListModal
+                isOpen={isPriceListOpen}
+                onClose={() => setIsPriceListOpen(false)}
             />
         </>
     )

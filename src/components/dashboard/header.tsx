@@ -2,6 +2,7 @@ import { UserNav } from "@/components/dashboard/user-nav";
 import { ModeToggle } from "@/components/dashboard/mode-toggle";
 import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
 import { LanguageSwitcher } from "@/components/dashboard/language-switcher";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export function DashboardHeader({ user }: { user: any }) {
     return (
@@ -21,6 +22,7 @@ export function DashboardHeader({ user }: { user: any }) {
                 </form>
             </div>
             <div className="flex items-center gap-4">
+                <NotificationBell />
                 <LanguageSwitcher />
                 <ModeToggle />
                 <UserNav user={user} />
@@ -28,3 +30,4 @@ export function DashboardHeader({ user }: { user: any }) {
         </header>
     );
 }
+

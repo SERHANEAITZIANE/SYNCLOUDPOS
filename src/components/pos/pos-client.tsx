@@ -241,13 +241,13 @@ export const PosClient: FC<PosClientProps> = ({
                 <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-transparent w-full">
 
                     {/* Filter Bar */}
-                    <div className="px-4 lg:px-6 py-4 lg:py-5 space-y-4 lg:space-y-5">
-                        <div className="flex flex-col sm:flex-row items-center gap-3 lg:gap-4 max-w-4xl mx-auto w-full">
+                    <div className="px-3 lg:px-6 py-2 lg:py-4 space-y-2 lg:space-y-4">
+                        <div className="flex flex-col sm:flex-row items-center gap-2 lg:gap-4 max-w-4xl mx-auto w-full">
                             <div className="relative group flex-1 w-full">
-                                <Search className="absolute left-4 lg:left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gray-900 dark:group-focus-within:text-gray-100 transition-colors duration-200" />
+                                <Search className="absolute left-3 lg:left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-gray-900 dark:group-focus-within:text-gray-100 transition-colors duration-200" />
                                 <Input
-                                    placeholder="Search products or scan..."
-                                    className="pl-12 lg:pl-14 h-12 lg:h-14 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-[16px] lg:rounded-[20px] text-base lg:text-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                    placeholder="Rechercher ou scanner..."
+                                    className="pl-9 lg:pl-14 h-10 lg:h-14 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl lg:rounded-[20px] text-sm lg:text-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value)
@@ -263,10 +263,10 @@ export const PosClient: FC<PosClientProps> = ({
                                 />
                             </div>
 
-                            <div className="flex items-center gap-2 w-full sm:w-auto h-12 lg:h-14">
+                            <div className="flex items-center gap-2 w-full sm:w-auto h-10 lg:h-14">
                                 <Button
                                     variant="outline"
-                                    className="flex-1 md:flex-none h-full px-4 lg:px-6 rounded-[16px] lg:rounded-[20px] bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-700 shadow-sm gap-2 font-bold text-sm lg:text-base text-gray-900 dark:text-gray-100"
+                                    className="flex-1 md:flex-none h-full px-3 lg:px-6 rounded-xl lg:rounded-[20px] bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-700 shadow-sm gap-2 font-bold text-xs lg:text-base text-gray-900 dark:text-gray-100"
                                     onClick={() => setIsSearchOrderOpen(true)}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></svg>
@@ -308,16 +308,16 @@ export const PosClient: FC<PosClientProps> = ({
                         </div>
 
                         <ScrollArea className="w-full whitespace-nowrap">
-                            <div className="flex w-max space-x-2 lg:space-x-3 pb-3 px-1">
+                            <div className="flex w-max space-x-1.5 lg:space-x-3 pb-2 px-0.5">
                                 <Button
                                     variant={selectedCategory === null ? "default" : "outline"}
                                     onClick={() => setSelectedCategory(null)}
                                     className={cn(
-                                        "rounded-full px-5 lg:px-6 h-9 lg:h-10 text-xs lg:text-sm font-bold transition-all border",
+                                        "rounded-full px-3 lg:px-6 h-7 lg:h-10 text-xs lg:text-sm font-bold transition-all border",
                                         selectedCategory === null ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-sm" : "bg-white text-gray-600 dark:bg-[#1e293b] dark:text-slate-300 dark:border-slate-700"
                                     )}
                                 >
-                                    All Items
+                                    Tous
                                 </Button>
                                 {categories.map((category) => (
                                     <Button
@@ -325,7 +325,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         variant={selectedCategory === category.id ? "default" : "outline"}
                                         onClick={() => setSelectedCategory(category.id)}
                                         className={cn(
-                                            "rounded-full px-5 lg:px-6 h-9 lg:h-10 text-xs lg:text-sm font-bold transition-all border",
+                                            "rounded-full px-3 lg:px-6 h-7 lg:h-10 text-xs lg:text-sm font-bold transition-all border",
                                             selectedCategory === category.id ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-sm" : "bg-white text-gray-600 dark:bg-[#1e293b] dark:text-slate-300 dark:border-slate-700"
                                         )}
                                     >
@@ -333,14 +333,14 @@ export const PosClient: FC<PosClientProps> = ({
                                     </Button>
                                 ))}
                             </div>
-                            <ScrollBar orientation="horizontal" className="h-1.5" />
+                            <ScrollBar orientation="horizontal" className="h-1" />
                         </ScrollArea>
                     </div>
 
                     {/* Content Area (Grid or List) */}
-                    <ScrollArea className="flex-1 px-4 lg:px-6 pb-24 lg:pb-6">
+                    <ScrollArea className="flex-1 px-3 lg:px-6 pb-20 lg:pb-6">
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 pb-8">
+                            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-3 pb-8">
                                 {renderedProducts.map((product) => (
                                     <ProductCard key={product.id} data={product} />
                                 ))}
@@ -422,27 +422,27 @@ export const PosClient: FC<PosClientProps> = ({
                     </ScrollArea>
 
                     {/* Absolute Mobile Bottom Action Bar */}
-                    <div className="lg:hidden absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-white dark:from-[#0f1115] via-white/90 dark:via-[#0f1115]/90 to-transparent pointer-events-none z-10 flex flex-col justify-end">
+                    <div className="lg:hidden absolute bottom-0 left-0 right-0 p-3 pt-8 bg-gradient-to-t from-white dark:from-[#0f1115] via-white/90 dark:via-[#0f1115]/90 to-transparent pointer-events-none z-10 flex flex-col justify-end">
                         <Button
                             onClick={() => setIsMobileCartOpen(true)}
-                            className="w-full h-14 rounded-2xl shadow-xl pointer-events-auto bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-white flex items-center justify-between px-6 border border-gray-800 dark:border-gray-200"
+                            className="w-full h-12 rounded-2xl shadow-xl pointer-events-auto bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-white flex items-center justify-between px-4 border border-gray-800 dark:border-gray-200"
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2.5">
                                 <div className="relative">
-                                    <ShoppingCart size={20} />
+                                    <ShoppingCart size={18} />
                                     {totalItemsCount > 0 && (
-                                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-gray-900 dark:border-gray-100">
+                                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-gray-900 dark:border-gray-100">
                                             {totalItemsCount}
                                         </div>
                                     )}
                                 </div>
-                                <span className="font-bold text-sm">View Cart</span>
+                                <span className="font-bold text-sm">Voir Panier</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-black text-lg tracking-tight">
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-black text-base tracking-tight">
                                     {formatter.format(cartTotal)}
                                 </span>
-                                <ChevronUp size={20} className="text-gray-400 dark:text-gray-500" />
+                                <ChevronUp size={18} className="text-gray-400 dark:text-gray-500" />
                             </div>
                         </Button>
                     </div>
