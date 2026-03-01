@@ -109,10 +109,7 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
                     brand: true,
                     images: true,
                     barcodes: true,
-                    _count: {
-                        select: { orderItems: true }
-                    }
-                } as any,
+                },
                 orderBy: {
                     createdAt: 'desc'
                 },
@@ -123,7 +120,8 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         ]);
 
         return { items: products, totalCount }
-    } catch {
+    } catch (error) {
+        console.error("getProducts error:", error)
         return { items: [], totalCount: 0 }
     }
 }
