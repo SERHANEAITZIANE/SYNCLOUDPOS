@@ -18,13 +18,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { createSpoilage } from "@/actions/spoilage"
 
 const formSchema = z.object({
@@ -104,25 +98,17 @@ export const AddSpoilageModal: React.FC<AddSpoilageModalProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Produit</FormLabel>
-                                    <Select
-                                        disabled={loading}
-                                        onValueChange={field.onChange}
+                                    <SearchableSelect
+                                        options={products.map(p => ({
+                                            value: p.id,
+                                            label: `${p.name} (${p.quantity} en stock)`
+                                        }))}
                                         value={field.value}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionner un produit" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {products.map((product) => (
-                                                <SelectItem key={product.id} value={product.id}>
-                                                    {product.name} ({product.quantity} en stock)
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        onChange={field.onChange}
+                                        disabled={loading}
+                                        placeholder="Sélectionner un produit"
+                                        searchPlaceholder="Rechercher un produit..."
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )}
