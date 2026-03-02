@@ -20,8 +20,8 @@ export const FormationClient = () => {
 
             <Separator />
 
-            <Tabs defaultValue="dashboard" className="w-full h-full flex flex-col md:flex-row gap-6">
-                <TabsList className="flex md:flex-col h-auto justify-start sticky top-0 md:w-64 space-y-1 bg-transparent p-0">
+            <Tabs defaultValue="dashboard" orientation="vertical" className="w-full flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
+                <TabsList className="flex flex-row md:flex-col h-auto justify-start md:sticky md:top-0 md:w-64 space-x-2 md:space-x-0 md:space-y-1 bg-transparent p-1 overflow-x-auto w-full shrink-0">
                     <TabsTrigger value="dashboard" className="w-full justify-start gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                         <Monitor className="h-4 w-4" /> Tableau de Bord
                     </TabsTrigger>
@@ -47,11 +47,11 @@ export const FormationClient = () => {
                         <BarChart3 className="h-4 w-4" /> Analyses
                     </TabsTrigger>
                     <TabsTrigger value="ai" className="w-full justify-start gap-2 data-[state=active]:bg-violet-50 data-[state=active]:text-violet-700 data-[state=active]:shadow-sm">
-                        <Sparkles className="h-4 w-4" /> Intelligence IA
+                        <Sparkles className="h-4 w-4 shrink-0" /> Intelligence IA
                     </TabsTrigger>
                 </TabsList>
 
-                <ScrollArea className="flex-1 h-[calc(100vh-200px)] rounded-xl border bg-white shadow-sm p-6">
+                <ScrollArea className="flex-1 h-[calc(100vh-250px)] md:h-[calc(100vh-200px)] rounded-xl border bg-white shadow-sm p-4 md:p-6">
                     {/* DASHBOARD */}
                     <TabsContent value="dashboard" className="m-0 space-y-6">
                         <div>
@@ -64,7 +64,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x600/f8fafc/0f172a?text=Capture:+Tableau+de+Bord+Principal"
                             alt="Dashboard"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <Card className="shadow-none border-gray-100 bg-gray-50/50">
@@ -100,7 +100,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x600/f0fdf4/166534?text=Capture:+Interface+de+Caisse+(POS)"
                             alt="POS Interface"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="space-y-6">
                             <h3 className="text-lg font-bold border-b pb-2">Les 3 étapes d'une vente :</h3>
@@ -143,7 +143,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x500/fff7ed/9a3412?text=Capture:+Liste+des+Produits"
                             alt="Products"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="space-y-4">
                             <Card className="shadow-none border-gray-100 bg-gray-50/50">
@@ -170,7 +170,7 @@ export const FormationClient = () => {
                                     <img
                                         src="https://placehold.co/1200x300/ffedd5/c2410c?text=Capture:+Modal+Catalogue+de+Prix"
                                         alt="Pricelist Modal"
-                                        className="rounded border mb-4"
+                                        className="w-full h-auto object-cover rounded border mb-4"
                                     />
                                     <p className="text-sm text-gray-600">Choisissez la cible (Grossiste, Détaillant) et la catégorie, et le système formatte automatiquement le catalogue avec ou sans images.</p>
                                 </CardContent>
@@ -190,7 +190,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x500/eef2ff/3730a3?text=Capture:+Liste+des+Ventes+BL"
                             alt="Sales"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <Card className="shadow-none border-indigo-100 bg-indigo-50/30">
@@ -239,7 +239,7 @@ export const FormationClient = () => {
                                     <img
                                         src="https://placehold.co/1200x400/fef2f2/991b1b?text=Capture:+OCR+Bon+Fournisseur"
                                         alt="OCR"
-                                        className="rounded border"
+                                        className="w-full h-auto object-cover rounded border"
                                     />
                                 </CardContent>
                             </Card>
@@ -267,7 +267,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x500/ecfeff/155e75?text=Capture:+Comptes+de+Trésorerie"
                             alt="Treasury"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <Card className="shadow-none border-gray-100 bg-gray-50/50">
@@ -306,7 +306,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x500/faf5ff/6b21a8?text=Capture:+Liste+des+Clients"
                             alt="Contacts"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="space-y-4 pt-4">
                             <div className="p-4 bg-purple-50/50 border border-purple-100 rounded-lg">
@@ -332,7 +332,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x600/f8fafc/0f172a?text=Capture:+Page+Analytics"
                             alt="Analytics"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <Card className="shadow-none border-gray-100 bg-gray-50/50 mt-6">
                             <CardContent className="pt-6 space-y-4">
@@ -358,7 +358,7 @@ export const FormationClient = () => {
                         <img
                             src="https://placehold.co/1200x500/f5f3ff/5b21b6?text=Capture:+Page+IA+(Chat)"
                             alt="AI"
-                            className="rounded-lg shadow border"
+                            className="w-full h-auto object-cover rounded-lg shadow border"
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <Card className="shadow-none border-gray-100 bg-violet-50/30">
