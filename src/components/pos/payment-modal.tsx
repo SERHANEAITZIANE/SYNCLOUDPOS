@@ -365,7 +365,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             <SelectTrigger className="mt-1 h-12 rounded-xl bg-white border-gray-200">
                                 <SelectValue placeholder="Select Caisse / Bank" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[99999]">
                                 <SelectItem value="none">None / Default</SelectItem>
                                 {accounts.map((acc) => (
                                     <SelectItem key={acc.id} value={acc.id}>
