@@ -1,7 +1,7 @@
 "use client"
 
-import { Plus, FileSpreadsheet, FileText } from "lucide-react"
-import { useState } from "react"
+import { Plus, FileSpreadsheet, FileText, LayoutGrid, List } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useRouter } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
 
@@ -10,7 +10,9 @@ import { ServerDataTable } from "@/components/ui/server-data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 import { ProductColumn, useProductColumns } from "./columns"
+import { ProductGridView } from "./product-grid-view"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
+import { cn } from "@/lib/utils"
 import { importProducts } from "@/actions/products"
 import { PriceListModal } from "@/components/products/price-list-modal"
 
@@ -34,12 +36,43 @@ export const ProductClient: React.FC<ProductClientProps> = ({
     const columns = useProductColumns()
     const [importOpen, setImportOpen] = useState(false)
     const [isPriceListOpen, setIsPriceListOpen] = useState(false)
+    const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
+
+    // Load saved preference on mount
+    useEffect(() => {
+        const savedView = localStorage.getItem("productCatalogView") as "grid" | "table"
+        if (savedView) setViewMode(savedView)
+    }, [])
+
+    const toggleViewMode = (mode: "grid" | "table") => {
+        setViewMode(mode)
+        localStorage.setItem("productCatalogView", mode)
+    }
 
     return (
         <>
             <div className="flex items-center justify-between">
                 <Heading title={`${t("title")} (${totalCount})`} description={t("subtitle")} />
                 <div className="flex flex-row flex-wrap gap-2">
+                    <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1 mr-2 border border-border/50">
+                        <Button
+                            variant={viewMode === "grid" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => toggleViewMode("grid")}
+                            className={cn("h-8 px-2.5", viewMode === "grid" ? "shadow-sm" : "text-muted-foreground")}
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant={viewMode === "table" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => toggleViewMode("table")}
+                            className={cn("h-8 px-2.5", viewMode === "table" ? "shadow-sm" : "text-muted-foreground")}
+                        >
+                            <List className="h-4 w-4" />
+                        </Button>
+                    </div>
+
                     <Button variant="outline" className="text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50" onClick={() => setIsPriceListOpen(true)}>
                         <FileText className="mr-2 h-4 w-4" /> Catalogue
                     </Button>
@@ -56,7 +89,15 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                 </div>
             </div>
             <Separator />
-            <ServerDataTable searchKey="name" columns={columns} data={data} pageCount={pageCount} currentPage={currentPage} />
+
+            {viewMode === "grid" ? (
+                <div className="mt-6">
+                    <ProductGridView data={data} />
+                    {/* Pagination will eventually need to be wired up for grid but relying on server-data-table pagination logic right now is tricky. We'll show the grid for the current page. */}
+                </div>
+            ) : (
+                <ServerDataTable searchKey="name" columns={columns} data={data} pageCount={pageCount} currentPage={currentPage} />
+            )}
 
             <ExcelImportModal
                 isOpen={importOpen}

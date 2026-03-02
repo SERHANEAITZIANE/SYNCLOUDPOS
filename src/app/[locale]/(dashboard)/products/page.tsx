@@ -29,6 +29,7 @@ const ProductsPage = async ({
         stock: item.stock || 0,
         minStock: item.minStock || 0,
         createdAt: item.createdAt ? format(new Date(item.createdAt), "MMMM do, yyyy") : "",
+        images: item.images ? item.images.map((img: any) => ({ url: img.url })) : []
     }))
 
     const pageCount = Math.ceil(totalCount / pageSize)

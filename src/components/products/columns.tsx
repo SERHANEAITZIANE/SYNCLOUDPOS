@@ -18,6 +18,7 @@ export type ProductColumn = {
     stock: number
     minStock: number
     createdAt: string
+    images: { url: string }[]
 }
 
 export function useProductColumns(): ColumnDef<ProductColumn>[] {
