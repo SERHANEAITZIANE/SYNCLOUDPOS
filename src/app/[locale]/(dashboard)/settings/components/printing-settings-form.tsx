@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
-import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2 } from "lucide-react"
+import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info } from "lucide-react"
 import Bcode from "react-barcode"
 import { cn } from "@/lib/utils"
 
@@ -28,17 +28,110 @@ export interface PrintingPrefs {
 }
 
 const defaults: PrintingPrefs = {
-    printerA4: "",
-    printerReceipt: "",
-    printerBarcode: "",
+    printerA4: "default",
+    printerReceipt: "default",
+    printerBarcode: "default",
     barcodeModel: "classic",
     showBarcodeOnReceipt: true,
     showLogoOnBL: true,
 }
 
-// ─────────────────────────────────────────────
-// Barcode Model Definitions
-// ─────────────────────────────────────────────
+// ─── Printer presets (cannot enumerate browser printers — security restriction) ───
+const PRINTERS_A4 = [
+    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+    { value: "HP LaserJet Pro", label: "HP LaserJet Pro" },
+    { value: "HP DeskJet", label: "HP DeskJet" },
+    { value: "Canon LBP", label: "Canon LBP" },
+    { value: "Brother HL", label: "Brother HL" },
+    { value: "Samsung Xpress", label: "Samsung Xpress" },
+    { value: "Epson EcoTank", label: "Epson EcoTank" },
+    { value: "Gprinter GP-2120TL", label: "Gprinter GP-2120TL" },
+    { value: "custom", label: "✏️ Saisir manuellement..." },
+]
+
+const PRINTERS_THERMAL = [
+    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+    { value: "Xprinter XP-58IIH", label: "Xprinter XP-58IIH (58mm)" },
+    { value: "Xprinter XP-80C", label: "Xprinter XP-80C (80mm)" },
+    { value: "Xprinter XP-480B", label: "Xprinter XP-480B" },
+    { value: "Gprinter GP-58130", label: "Gprinter GP-58130 (58mm)" },
+    { value: "Gprinter GP-80160", label: "Gprinter GP-80160 (80mm)" },
+    { value: "Epson TM-T20", label: "Epson TM-T20" },
+    { value: "Epson TM-T88", label: "Epson TM-T88" },
+    { value: "Star TSP100", label: "Star TSP100" },
+    { value: "custom", label: "✏️ Saisir manuellement..." },
+]
+
+const PRINTERS_BARCODE = [
+    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+    { value: "Zebra ZD220", label: "Zebra ZD220" },
+    { value: "Zebra ZD421", label: "Zebra ZD421" },
+    { value: "Zebra ZP450", label: "Zebra ZP450" },
+    { value: "Xprinter XP-480B", label: "Xprinter XP-480B" },
+    { value: "Xprinter XP-235B", label: "Xprinter XP-235B" },
+    { value: "Gprinter GP-1324D", label: "Gprinter GP-1324D" },
+    { value: "Brother QL-820", label: "Brother QL-820" },
+    { value: "DYMO LabelWriter", label: "DYMO LabelWriter" },
+    { value: "custom", label: "✏️ Saisir manuellement..." },
+]
+
+// ─── Printer select with optional custom input ───────────────────
+const PrinterSelect = ({
+    label,
+    badge,
+    badgeColor,
+    hint,
+    value,
+    onChange,
+    options,
+}: {
+    label: string; badge: string; badgeColor: string; hint: string;
+    value: string; onChange: (v: string) => void; options: { value: string; label: string }[]
+}) => {
+    const isCustom = value !== "default" && !options.find(o => o.value === value && o.value !== "custom")
+    const selectedInList = options.find(o => o.value === value)
+    const selectValue = isCustom ? "custom" : (value || "default")
+
+    return (
+        <div className="space-y-2.5">
+            <Label className="flex items-center gap-2 text-sm font-semibold">
+                <span className={cn("rounded-md px-2 py-0.5 text-xs font-bold", badgeColor)}>{badge}</span>
+                {label}
+            </Label>
+            <Select
+                value={selectValue}
+                onValueChange={(v) => {
+                    if (v === "custom") {
+                        onChange("")
+                    } else {
+                        onChange(v)
+                    }
+                }}
+            >
+                <SelectTrigger className="w-full">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    {options.map(o => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            {(selectValue === "custom" || isCustom) && (
+                <Input
+                    placeholder="Entrez le nom exact de l'imprimante..."
+                    value={value === "" || isCustom ? value : ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="text-sm"
+                    autoFocus
+                />
+            )}
+            <p className="text-xs text-muted-foreground">{hint}</p>
+        </div>
+    )
+}
+
+// ─── Barcode Model Preview ────────────────────────────────────────
 const DEMO_VALUE = "1234567890"
 const DEMO_NAME = "CASQUE BLUETOOTH"
 const DEMO_PRICE = "12 500"
@@ -105,17 +198,12 @@ const BarcodeModelPreview = ({ model, selected, onClick }: { model: string; sele
                         </div>
                     </div>
                 )
-            default:
-                return null
+            default: return null
         }
     }
 
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={cn(base, selected ? active : inactive, "relative")}
-        >
+        <button type="button" onClick={onClick} className={cn(base, selected ? active : inactive, "relative")}>
             {selected && (
                 <div className="absolute top-1.5 right-1.5">
                     <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" />
@@ -135,9 +223,7 @@ const BARCODE_MODELS = [
     { id: "bold", name: "Bold" },
 ]
 
-// ─────────────────────────────────────────────
-// Main Form
-// ─────────────────────────────────────────────
+// ─── Main Form ───────────────────────────────────────────────────
 interface PrintingSettingsFormProps {
     initialBlTemplate: string
 }
@@ -172,54 +258,46 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
 
     return (
         <div className="space-y-8">
+            {/* Info Banner */}
+            <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800">
+                <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
+                <span>
+                    Les préférences d&apos;imprimantes sont sauvegardées sur <strong>cet appareil uniquement</strong>. Sélectionnez <em>«Défaut»</em> pour utiliser l&apos;imprimante configurée dans Windows. Lors de l&apos;impression, le navigateur ouvrira la boîte de dialogue système si nécessaire.
+                </span>
+            </div>
+
             {/* ── 1. Printer Assignments ── */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <Printer className="w-5 h-5 text-blue-500" />
                     <h3 className="text-base font-semibold">Imprimantes</h3>
-                    <span className="text-xs text-muted-foreground ml-1">— Entrez les noms exactes de vos imprimantes</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/40 p-5 rounded-xl border">
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-semibold">
-                            <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-md px-2 py-0.5 text-xs font-bold">A4</span>
-                            Imprimante A4
-                        </Label>
-                        <Input
-                            placeholder="Ex: HP LaserJet Pro"
-                            value={prefs.printerA4}
-                            onChange={(e) => setPrefs(p => ({ ...p, printerA4: e.target.value }))}
-                        />
-                        <p className="text-xs text-muted-foreground">Utilisée pour les Bons de Livraison A4</p>
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-semibold">
-                            <span className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-md px-2 py-0.5 text-xs font-bold">REÇU</span>
-                            Imprimante Reçu
-                        </Label>
-                        <Input
-                            placeholder="Ex: Xprinter XP-80C"
-                            value={prefs.printerReceipt}
-                            onChange={(e) => setPrefs(p => ({ ...p, printerReceipt: e.target.value }))}
-                        />
-                        <p className="text-xs text-muted-foreground">Imprimante thermique pour les reçus POS</p>
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-sm font-semibold">
-                            <span className="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 rounded-md px-2 py-0.5 text-xs font-bold">CB</span>
-                            Imprimante Code-Barre
-                        </Label>
-                        <Input
-                            placeholder="Ex: Zebra ZD220"
-                            value={prefs.printerBarcode}
-                            onChange={(e) => setPrefs(p => ({ ...p, printerBarcode: e.target.value }))}
-                        />
-                        <p className="text-xs text-muted-foreground">Imprimante dédiée aux étiquettes</p>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-muted/40 p-5 rounded-xl border">
+                    <PrinterSelect
+                        label="Imprimante A4"
+                        badge="A4" badgeColor="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                        hint="Utilisée pour les Bons de Livraison et Factures"
+                        value={prefs.printerA4}
+                        onChange={(v) => setPrefs(p => ({ ...p, printerA4: v }))}
+                        options={PRINTERS_A4}
+                    />
+                    <PrinterSelect
+                        label="Imprimante Reçu"
+                        badge="REÇU" badgeColor="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
+                        hint="Imprimante thermique pour les reçus POS"
+                        value={prefs.printerReceipt}
+                        onChange={(v) => setPrefs(p => ({ ...p, printerReceipt: v }))}
+                        options={PRINTERS_THERMAL}
+                    />
+                    <PrinterSelect
+                        label="Imprimante Code-Barre"
+                        badge="CB" badgeColor="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
+                        hint="Imprimante dédiée aux étiquettes produits"
+                        value={prefs.printerBarcode}
+                        onChange={(v) => setPrefs(p => ({ ...p, printerBarcode: v }))}
+                        options={PRINTERS_BARCODE}
+                    />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 px-1">
-                    💡 Ces noms sont sauvegardés sur cet appareil. L&apos;impression utilisera automatiquement la bonne imprimante pour chaque type de document.
-                </p>
             </div>
 
             <Separator />
@@ -238,10 +316,7 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
                                 selected={prefs.barcodeModel === m.id}
                                 onClick={() => setPrefs(p => ({ ...p, barcodeModel: m.id }))}
                             />
-                            <p className={cn(
-                                "text-xs text-center font-semibold transition-colors",
-                                prefs.barcodeModel === m.id ? "text-primary" : "text-muted-foreground"
-                            )}>
+                            <p className={cn("text-xs text-center font-semibold transition-colors", prefs.barcodeModel === m.id ? "text-primary" : "text-muted-foreground")}>
                                 {m.name}
                             </p>
                         </div>
@@ -276,7 +351,7 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
 
             <Separator />
 
-            {/* ── 4. Options ── */}
+            {/* ── 4. Display Options ── */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <MonitorDot className="w-5 h-5 text-purple-500" />
