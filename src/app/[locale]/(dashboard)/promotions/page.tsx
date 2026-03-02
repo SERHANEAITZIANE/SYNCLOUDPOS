@@ -1,13 +1,13 @@
 import { getAllPromotions } from "@/actions/promotions"
 import { getCategories } from "@/actions/categories"
-import { getAllProducts } from "@/actions/products"
+import { getAllProductsForCatalogue } from "@/actions/products"
 import { PromotionsClient } from "./components/client"
 
 const PromotionsPage = async () => {
     const [promotions, categories, products] = await Promise.all([
         getAllPromotions(),
         getCategories(),
-        getAllProducts()
+        getAllProductsForCatalogue()
     ])
 
     return (
