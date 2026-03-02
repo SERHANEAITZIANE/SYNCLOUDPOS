@@ -52,6 +52,8 @@ export default async function SettingsPage() {
                         headerText: store.headerText,
                         blTemplate: store.blTemplate || "standard",
                         geminiApiKey: store.geminiApiKey,
+                        loyaltyPointsPerDa: store.loyaltyPointsPerDa ?? 1,
+                        loyaltyDaPerPoint: store.loyaltyDaPerPoint ?? 100,
                     }}
                     accounts={accounts}
                     databaseUrl={databaseUrl || ""}

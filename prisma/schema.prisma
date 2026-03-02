@@ -33,6 +33,8 @@ model Tenant {
   headerText  String?   // Entête
   blTemplate  String?   @default("standard") // Template for Bon de Livraison
   geminiApiKey String?  // Clé API Gemini pour OCR personnalisé
+  loyaltyPointsPerDa Int @default(1)   // Points earned per DA spent
+  loyaltyDaPerPoint  Int @default(100) // Points required for 1 DA discount
   subscriptionEndsAt DateTime? // End date of current subscription/trial
   isBlocked   Boolean   @default(false)
   createdAt   DateTime @default(now())
@@ -53,6 +55,25 @@ model Tenant {
   treasuryAccounts TreasuryAccount[]
   treasuryTransactions TreasuryTransaction[]
   spoilages      Spoilage[]
+  promotions     Promotion[]
+}
+
+model Promotion {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  name          String
+  type          String   @default("NTH_ITEM_DISCOUNT") // NTH_ITEM_DISCOUNT | BUY_X_GET_Y_FREE
+  targetScope   String   @default("ALL")  // ALL | CATEGORY | PRODUCT
+  scopeId       String?  // categoryId or productId if targeted
+  discountType  String   @default("PERCENT") // PERCENT | FIXED
+  discountValue Decimal  @default(30)   // e.g. 30 for 30%
+  triggerQty    Int      @default(2)    // Apply from Nth item
+  isActive      Boolean  @default(true)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model User {

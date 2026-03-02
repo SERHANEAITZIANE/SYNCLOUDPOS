@@ -28,6 +28,8 @@ export default async function CustomersPage({
         balance: Number(item.balance ?? 0),
         clientType: item.clientType || "RETAIL",
         createdAt: item.createdAt.toISOString(),
+        barcode: item.barcode || null,
+        loyaltyPoints: item.loyaltyPoints ?? 0,
     }))
 
     const pageCount = Math.ceil(totalCount / pageSize)

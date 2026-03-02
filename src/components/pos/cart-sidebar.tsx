@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 
@@ -17,6 +17,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { createOrder } from "@/actions/orders"
 import { PaymentModal } from "./payment-modal"
 import { cn } from "@/lib/utils"
+import { getActivePromotions } from "@/actions/promotions"
+import { applyPromotionsToCart, ActivePromotion } from "@/lib/promotions-engine"
 
 interface CartSidebarProps {
     customers?: any[]
@@ -35,6 +37,9 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
     const [editingItem, setEditingItem] = useState<any>(null)
     const [editQuantity, setEditQuantity] = useState("")
     const [editPrice, setEditPrice] = useState("")
+    const [activePromotions, setActivePromotions] = useState<ActivePromotion[]>([])
+    const [loyaltyPointsToUse, setLoyaltyPointsToUse] = useState(0)
+    const [usePointsMode, setUsePointsMode] = useState(false)
 
     const handleEditItem = (item: any) => {
         setEditingItem(item)
@@ -53,17 +58,43 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         setEditingItem(null)
     }
 
+    useEffect(() => {
+        const fetchPromos = async () => {
+            const promos = await getActivePromotions()
+            setActivePromotions(promos.map(p => ({
+                ...p,
+                discountValue: Number(p.discountValue),
+                scopeId: p.scopeId ?? null
+            })))
+        }
+        fetchPromos()
+    }, [])
+
     // Get active session data
-    // We need to ensure we have a fallback if hydration hasn't finished or something is weird
     const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId)
     const items = activeSession?.items || []
 
-    // Calculate total for active session manually since hook might lag or we want direct control
-    // But we also have cart.total() which uses get()... let's strictly use the items derived above for rendering
-    // User requested NO TVA and NO TIMBRE on POS/Bon de Livraison. We will set tvaAmount=0 and stampTax=0
-    // so we just sum up the raw price entered in the POS cart. Wait, the prices entered in the cart are TTC usually. 
-    // If there is no TVA, then TTC = HT.
-    const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+    // Get selected customer info
+    const selectedCustomer = activeSession?.customerId
+        ? customers.find(c => c.id === activeSession.customerId)
+        : null
+    const customerLoyaltyPoints = selectedCustomer?.loyaltyPoints ?? 0
+
+    // Apply promotions engine to items
+    const { items: promotedItems, totalDiscount } = useMemo(() => {
+        return applyPromotionsToCart(
+            items.map(item => ({ ...item, categoryId: item.categoryId || undefined })),
+            activePromotions
+        )
+    }, [items, activePromotions])
+
+    // Loyalty points: 100 pts = 10 DA
+    const POINTS_TO_DA_RATIO = 0.10 // 100 pts = 10 DA
+    const maxUsablePoints = Math.min(customerLoyaltyPoints, usePointsMode ? loyaltyPointsToUse : 0)
+    const pointsDiscount = usePointsMode ? Math.round(maxUsablePoints * POINTS_TO_DA_RATIO) : 0
+
+    const baseTotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+    const total = Math.max(0, baseTotal - totalDiscount - pointsDiscount)
 
     const onCheckout = async (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => {
         setLoading(true)
@@ -77,8 +108,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     tvaRate: item.tvaRate,
                     priceHt: item.priceHt
                 })),
-                total: totalTTC,
-                subtotal: subtotal,
+                total: Math.max(0, totalTTC - totalDiscount - pointsDiscount),
+                subtotal: Math.max(0, subtotal - totalDiscount - pointsDiscount),
                 tvaAmount: tvaAmount,
                 stampTax: stampTax,
                 paymentMethod: method,
@@ -86,7 +117,9 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 customerId: activeSession?.customerId || null,
                 accountId: accountId || undefined,
                 status: "COMPLETED",
-                originalOrderId: activeSession?.originalOrderId || null
+                originalOrderId: activeSession?.originalOrderId || null,
+                discountAmount: totalDiscount + pointsDiscount,
+                loyaltyPointsUsed: usePointsMode ? maxUsablePoints : 0
             })
 
             if (response.error) {
@@ -94,8 +127,9 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 return { success: false }
             } else {
                 toast.success("Commande validée!")
-                // Keep the modal open to show the Success/Print view, but clear the cart behind
                 cart.resetSession()
+                setUsePointsMode(false)
+                setLoyaltyPointsToUse(0)
                 router.refresh()
                 return {
                     success: true,
@@ -221,7 +255,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 </div>
 
 
-                <div className="px-6 pb-6 border-b border-gray-100 dark:border-slate-800 shrink-0 space-y-3">
+                {/* Customer section */}
+                <div className="px-6 pb-2 border-b border-gray-100 dark:border-slate-800 shrink-0 space-y-2">
                     <Popover open={openCustomer} onOpenChange={setOpenCustomer}>
                         <PopoverTrigger asChild>
                             <Button
@@ -250,15 +285,12 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                                 cart.clearCustomer();
                                                 cart.setClientType("RETAIL");
                                                 setOpenCustomer(false);
+                                                setUsePointsMode(false);
+                                                setLoyaltyPointsToUse(0);
                                             }}
                                             className="font-medium cursor-pointer py-3"
                                         >
-                                            <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4",
-                                                    !activeSession?.customerId ? "opacity-100" : "opacity-0"
-                                                )}
-                                            />
+                                            <Check className={cn("mr-2 h-4 w-4", !activeSession?.customerId ? "opacity-100" : "opacity-0")} />
                                             Walking Customer (No Name)
                                         </CommandItem>
                                         {customers.map((c) => (
@@ -273,22 +305,19 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                                         cart.setClientType("RETAIL");
                                                     }
                                                     setOpenCustomer(false);
+                                                    setUsePointsMode(false);
+                                                    setLoyaltyPointsToUse(0);
                                                 }}
                                                 className="font-medium cursor-pointer py-3"
                                             >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        activeSession?.customerId === c.id ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                />
+                                                <Check className={cn("mr-2 h-4 w-4", activeSession?.customerId === c.id ? "opacity-100" : "opacity-0")} />
                                                 <div className="flex flex-col">
                                                     <span>{c.name}</span>
-                                                    {(c.phone || c.barcode) && (
-                                                        <span className="text-xs text-muted-foreground mt-0.5">
-                                                            {c.phone} {c.phone && c.barcode ? '·' : ''} {c.barcode}
-                                                        </span>
-                                                    )}
+                                                    <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                                                        {c.phone}{c.phone && (c.barcode || c.loyaltyPoints) ? ' ·' : ''}
+                                                        {c.barcode && ` ${c.barcode}`}
+                                                        {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
+                                                    </span>
                                                 </div>
                                             </CommandItem>
                                         ))}
@@ -297,6 +326,34 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                             </Command>
                         </PopoverContent>
                     </Popover>
+
+                    {/* Loyalty Points Panel (shown only when a customer with points is selected) */}
+                    {selectedCustomer && customerLoyaltyPoints > 0 && (
+                        <div className={cn(
+                            "flex items-center justify-between rounded-xl px-4 py-2.5 text-sm transition-all",
+                            usePointsMode
+                                ? "bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-700/40"
+                                : "bg-gray-50 border border-gray-100 dark:bg-slate-800/60 dark:border-slate-700/50"
+                        )}>
+                            <div className="flex items-center gap-2">
+                                <Star className="h-4 w-4 text-amber-500 fill-amber-500 shrink-0" />
+                                <span className="font-semibold text-amber-700 dark:text-amber-400">{customerLoyaltyPoints} pts</span>
+                                {usePointsMode && <span className="text-xs text-muted-foreground">→ -{pointsDiscount} DA</span>}
+                            </div>
+                            <Button
+                                size="sm"
+                                variant={usePointsMode ? "default" : "outline"}
+                                className={cn("h-7 text-xs rounded-lg", usePointsMode ? "bg-amber-500 hover:bg-amber-600 text-white" : "")}
+                                onClick={() => {
+                                    setUsePointsMode(!usePointsMode)
+                                    if (!usePointsMode) setLoyaltyPointsToUse(customerLoyaltyPoints)
+                                    else setLoyaltyPointsToUse(0)
+                                }}
+                            >
+                                {usePointsMode ? "Annuler" : "Utiliser les points"}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <ScrollArea className="flex-1 min-h-0 px-5">
@@ -319,7 +376,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                 "bg-purple-50/70 hover:bg-purple-100/70 dark:bg-purple-950/20 dark:hover:bg-purple-900/40",
                                 "bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-950/20 dark:hover:bg-indigo-900/40"
                             ];
-                            return [...items].reverse().map((item, index) => (
+                            return [...promotedItems].reverse().map((item, index) => (
                                 <div key={item.id} className={cn(
                                     "flex flex-col py-4 px-5 rounded-sm border border-transparent transition-all duration-200 group/item",
                                     bgColors[index % bgColors.length]
@@ -330,6 +387,12 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                                 <span className="text-gray-400 dark:text-gray-500 mr-1.5">{index + 1}.</span>
                                                 {item.name}
                                             </h4>
+                                            {/* Promo badge */}
+                                            {item.discountLabel && (
+                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-violet-700 bg-violet-100 dark:bg-violet-900/30 dark:text-violet-400 rounded-full px-2 py-0.5 w-fit">
+                                                    <Tag size={9} /> {item.discountLabel} (-{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(item.discountAmount!)} DA)
+                                                </span>
+                                            )}
                                             <div className="flex items-center gap-1 group/price">
                                                 <input
                                                     type="number"
@@ -388,7 +451,14 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 </ScrollArea>
 
                 <div className="px-6 py-6 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-[#18181b] z-30 shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
-                    <div className="mb-6">
+                    <div className="mb-4 space-y-1">
+                        {/* Discount summary */}
+                        {(totalDiscount > 0 || pointsDiscount > 0) && (
+                            <div className="flex justify-between items-center text-sm text-violet-600 dark:text-violet-400 font-semibold bg-violet-50 dark:bg-violet-900/20 px-3 py-1.5 rounded-lg">
+                                <span className="flex items-center gap-1.5"><Gift size={14} /> Économie promo</span>
+                                <span>-{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(totalDiscount + pointsDiscount)} DA</span>
+                            </div>
+                        )}
                         <div className="flex justify-between items-center text-gray-900 dark:text-slate-100">
                             <span className="text-3xl font-black">Total</span>
                             <div className="text-right flex items-baseline gap-2">

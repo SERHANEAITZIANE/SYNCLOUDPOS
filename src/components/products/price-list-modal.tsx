@@ -1,19 +1,19 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Download, FileText, Settings2, Image as ImageIcon, Loader2, Copy, Check } from "lucide-react"
+import { Download, FileText, Settings2, Image as ImageIcon, Loader2, Copy, Check, Filter, ListChecks, Tag } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useReactToPrint } from "react-to-print"
 import { format } from "date-fns"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { getAllProductsForCatalogue } from "@/actions/products"
 import { getCategories } from "@/actions/categories"
 
@@ -22,16 +22,15 @@ interface PriceListModalProps {
     onClose: () => void
 }
 
-export const PriceListModal: React.FC<PriceListModalProps> = ({
-    isOpen,
-    onClose
-}) => {
+export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose }) => {
     const [loading, setLoading] = useState(false)
     const [products, setProducts] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
     const [priceTier, setPriceTier] = useState<"RETAIL" | "WHOLESALE" | "RESELLER">("RETAIL")
     const [includeImages, setIncludeImages] = useState(true)
+    const [onlyFeatured, setOnlyFeatured] = useState(false)
+    const [onlyInStock, setOnlyInStock] = useState(false)
     const [textPreview, setTextPreview] = useState<string | null>(null)
     const [copied, setCopied] = useState(false)
 
@@ -48,7 +47,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                     ])
                     setProducts(prodData)
                     setCategories(catData)
-                } catch (error) {
+                } catch {
                     toast.error("Erreur lors du chargement des données")
                 } finally {
                     setLoading(false)
@@ -58,7 +57,12 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
         }
     }, [isOpen])
 
-    const filteredProducts = products.filter(p => categoryFilter === "ALL" || p.categoryId === categoryFilter)
+    const filteredProducts = products.filter(p => {
+        if (categoryFilter !== "ALL" && p.categoryId !== categoryFilter) return false
+        if (onlyInStock && (p.stock == null || p.stock <= 0)) return false
+        if (onlyFeatured && !p.isFeatured) return false
+        return true
+    })
 
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
@@ -67,38 +71,30 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
 
     const generateText = () => {
         let text = `*CATALOGUE DE PRIX (${format(new Date(), "dd/MM/yyyy")})*\n\n`
-
-        // Group by category for text output
         const grouped = filteredProducts.reduce((acc, product) => {
             const catName = product.category?.name || "Autres"
             if (!acc[catName]) acc[catName] = []
             acc[catName].push(product)
             return acc
         }, {} as Record<string, any[]>)
-
         Object.keys(grouped).sort().forEach(cat => {
             text += `*--- ${cat.toUpperCase()} ---*\n`
             grouped[cat].forEach((p: any) => {
                 let priceToDisplay = p.price
                 if (priceTier === "WHOLESALE" && p.wholesalePrice != null) priceToDisplay = p.wholesalePrice
                 if (priceTier === "RESELLER" && p.dealerPrice != null) priceToDisplay = p.dealerPrice
-
                 text += `- ${p.name}: ${Number(priceToDisplay).toLocaleString("fr-DZ")} DA\n`
             })
             text += `\n`
         })
-
         setTextPreview(text)
     }
 
-    // Automatically regenerate text preview if user changes tier/category while it's open
     useEffect(() => {
-        if (textPreview !== null) {
-            generateText()
-        }
+        if (textPreview !== null) generateText()
     }, [priceTier, categoryFilter])
 
-    const handleCopyActualText = () => {
+    const handleCopyText = () => {
         if (!textPreview) return
         navigator.clipboard.writeText(textPreview)
         setCopied(true)
@@ -112,43 +108,57 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
         return "Prix Vente"
     }
 
+    const getPrice = (product: any) => {
+        if (priceTier === "WHOLESALE" && product.wholesalePrice != null) return product.wholesalePrice
+        if (priceTier === "RESELLER" && product.dealerPrice != null) return product.dealerPrice
+        return product.price
+    }
+
     return (
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-[95vw] sm:max-w-6xl max-h-[95vh] flex flex-col p-0 overflow-hidden bg-gray-50/50">
-                <DialogHeader className="p-6 bg-white border-b">
-                    <DialogTitle className="text-xl flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        Générer un Catalogue de Prix
-                    </DialogTitle>
-                </DialogHeader>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+            <DialogContent className="!max-w-[96vw] w-[96vw] p-0 overflow-hidden border-border">
+                <DialogTitle className="sr-only">Générer Catalogue Externe</DialogTitle>
+                <DialogDescription className="sr-only">Créez un catalogue PDF ou texte pour vos clients</DialogDescription>
 
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar Controls */}
-                    <div className="w-80 bg-white border-r p-6 space-y-6 flex flex-col">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2text-sm font-semibold text-gray-700">
-                                <Settings2 className="h-4 w-4" /> Filtres & Options
-                            </div>
+                <div className="flex bg-background overflow-hidden h-[92vh]">
 
+                    {/* ── Left Sidebar ── */}
+                    <div className="w-72 shrink-0 bg-card border-r border-border flex flex-col">
+                        <div className="px-5 pt-5 pb-4 border-b border-border">
+                            <h2 className="text-base font-bold flex items-center gap-2">
+                                <Settings2 className="h-4 w-4 text-blue-500" />
+                                Configuration
+                            </h2>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+                            {/* Category Filter */}
                             <div className="space-y-2">
-                                <Label>Catégorie</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Filter className="h-3.5 w-3.5 text-blue-500" />
+                                    Catégorie
+                                </Label>
                                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="h-9 text-sm bg-background">
                                         <SelectValue placeholder="Toutes les catégories" />
                                     </SelectTrigger>
                                     <SelectContent position="popper" className="z-[9999]">
                                         <SelectItem value="ALL">Toutes les catégories</SelectItem>
-                                        {categories.map(c => (
+                                        {categories.map((c) => (
                                             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
 
+                            {/* Price Tier */}
                             <div className="space-y-2">
-                                <Label>Type de Prix</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Tag className="h-3.5 w-3.5 text-orange-500" />
+                                    Tarification
+                                </Label>
                                 <Select value={priceTier} onValueChange={(v: any) => setPriceTier(v)}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="h-9 text-sm bg-background">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent position="popper" className="z-[9999]">
@@ -159,21 +169,41 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                 </Select>
                             </div>
 
-                            <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-                                <div className="space-y-0.5">
-                                    <Label className="flex items-center gap-2">
-                                        <ImageIcon className="h-4 w-4 text-gray-500" />
-                                        Photos
-                                    </Label>
-                                    <p className="text-[10px] text-gray-500">Inclure les images des produits</p>
-                                </div>
-                                <Switch checked={includeImages} onCheckedChange={setIncludeImages} />
+                            {/* Filters */}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <ListChecks className="h-3.5 w-3.5 text-emerald-500" />
+                                    Filtres
+                                </Label>
+                                {[
+                                    { id: "featured", label: "Uniquement En Vedette (★)", checked: onlyFeatured, onChange: setOnlyFeatured },
+                                    { id: "stock", label: "Masquer Rupture de Stock", checked: onlyInStock, onChange: setOnlyInStock },
+                                ].map(({ id, label, checked, onChange }) => (
+                                    <label key={id} htmlFor={id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors">
+                                        <Checkbox id={id} checked={checked} onCheckedChange={(c) => onChange(c === true)} />
+                                        <span className="text-sm">{label}</span>
+                                    </label>
+                                ))}
+                                <label htmlFor="images" className="flex items-center justify-between p-2.5 rounded-lg border border-border hover:bg-muted/50 cursor-pointer transition-colors">
+                                    <span className="flex items-center gap-2 text-sm">
+                                        <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                                        Afficher les photos
+                                    </span>
+                                    <Switch id="images" checked={includeImages} onCheckedChange={setIncludeImages} />
+                                </label>
+                            </div>
+
+                            {/* Count badge */}
+                            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 p-3 text-center">
+                                <p className="text-2xl font-black text-blue-600 dark:text-blue-400">{filteredProducts.length}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">produit{filteredProducts.length !== 1 ? "s" : ""} affiché{filteredProducts.length !== 1 ? "s" : ""}</p>
                             </div>
                         </div>
 
-                        <div className="mt-auto pt-6 space-y-3">
+                        {/* Sidebar footer */}
+                        <div className="px-5 pb-5 pt-3 border-t border-border space-y-2 shrink-0">
                             <Button
-                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10"
                                 onClick={() => { setTextPreview(null); handlePrint(); }}
                                 disabled={loading || filteredProducts.length === 0}
                             >
@@ -182,141 +212,131 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                             </Button>
                             <Button
                                 variant={textPreview ? "secondary" : "outline"}
-                                className="w-full"
+                                className="w-full h-9"
                                 onClick={() => textPreview ? setTextPreview(null) : generateText()}
                                 disabled={loading || filteredProducts.length === 0}
                             >
                                 <FileText className="h-4 w-4 mr-2" />
-                                {textPreview ? "Voir le PDF" : "Générer Texte (Wa/SMS)"}
+                                {textPreview ? "← Voir le Catalogue" : "Texte WhatsApp / SMS"}
                             </Button>
                         </div>
                     </div>
 
-                    {/* Preview Area */}
-                    <div className="flex-1 overflow-hidden relative bg-gray-100 p-6 flex flex-col items-center justify-start">
+                    {/* ── Preview Area ── */}
+                    <div className="flex-1 min-w-0 overflow-hidden flex flex-col bg-muted/30">
+                        {/* Preview header bar */}
+                        <div className="px-6 py-3 border-b border-border bg-card flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold">Aperçu du catalogue</span>
+                                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{filteredProducts.length} article{filteredProducts.length !== 1 ? "s" : ""}</span>
+                            </div>
+                            {textPreview && (
+                                <Button onClick={handleCopyText} size="sm" variant={copied ? "default" : "outline"} className={copied ? "bg-green-600 text-white" : ""}>
+                                    {copied ? <Check className="h-3.5 w-3.5 mr-1.5" /> : <Copy className="h-3.5 w-3.5 mr-1.5" />}
+                                    {copied ? "Copié !" : "Copier"}
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Text mode */}
                         {textPreview !== null ? (
-                            <div className="w-full h-full max-w-4xl flex flex-col bg-white rounded-xl shadow-sm border p-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div>
-                                        <h3 className="font-bold text-lg">Aperçu du texte</h3>
-                                        <p className="text-xs text-gray-500">Prêt à être envoyé par WhatsApp ou SMS</p>
-                                    </div>
-                                    <Button onClick={handleCopyActualText} variant={copied ? "default" : "outline"} className={copied ? "bg-green-600" : ""}>
-                                        {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
-                                        {copied ? "Copié !" : "Copier le texte"}
-                                    </Button>
-                                </div>
+                            <div className="flex-1 p-6 overflow-hidden flex flex-col">
                                 <Textarea
                                     readOnly
-                                    className="flex-1 font-mono text-sm resize-none focus-visible:ring-0"
+                                    className="flex-1 font-mono text-sm resize-none focus-visible:ring-0 bg-card"
                                     value={textPreview}
                                 />
                             </div>
                         ) : (
-                            <ScrollArea className="h-full w-full max-w-[1000px] rounded-md border shadow-sm bg-white">
+                            /* PDF preview */
+                            <ScrollArea className="flex-1">
                                 {loading ? (
-                                    <div className="h-full w-full flex items-center justify-center p-12">
-                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                        <span className="ml-3 text-gray-500">Chargement des produits...</span>
+                                    <div className="h-64 flex items-center justify-center gap-3 text-muted-foreground">
+                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                        <span className="text-sm">Chargement...</span>
                                     </div>
                                 ) : (
-                                    /* PRINTABLE CONTENT */
-                                    <div className="p-8 print-content" ref={componentRef}>
-                                        <div className="text-center mb-8 pb-6 border-b-2 border-gray-100">
-                                            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2 uppercase">
+                                    <div className="p-8 bg-white text-black" ref={componentRef}>
+                                        {/* Catalogue title */}
+                                        <div className="text-center mb-8 pb-5 border-b-2 border-gray-100">
+                                            <h1 className="text-4xl font-black tracking-tight text-gray-900 uppercase mb-2">
                                                 Catalogue de Prix
                                             </h1>
-                                            <div className="flex items-center justify-center gap-4 text-gray-500 font-medium">
-                                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
-                                                    {getPriceLabel()}
-                                                </span>
+                                            <div className="flex items-center justify-center gap-3 text-sm text-gray-400 flex-wrap">
+                                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-semibold">{getPriceLabel()}</span>
                                                 <span>•</span>
                                                 <span>{format(new Date(), "dd/MM/yyyy")}</span>
+                                                <span>•</span>
+                                                <span className="font-semibold">{filteredProducts.length} articles</span>
                                             </div>
                                         </div>
 
                                         {filteredProducts.length === 0 ? (
-                                            <div className="text-center text-gray-500 py-12">
-                                                Aucun produit trouvé pour ces critères.
+                                            <div className="text-center text-gray-400 py-20">
+                                                <ImageIcon className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                                                <p className="text-sm">Aucun produit pour ces critères</p>
+                                            </div>
+                                        ) : includeImages ? (
+                                            /* Grid with images – up to 5 cols */
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                {filteredProducts.map(product => (
+                                                    <div key={product.id} className="border border-gray-100 rounded-xl p-3 flex flex-col shadow-sm bg-white hover:shadow-md transition-shadow">
+                                                        <div className="relative h-28 w-full bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-gray-100">
+                                                            {product.images?.[0] ? (
+                                                                <img src={product.images[0].url} alt={product.name} className="object-contain h-full w-full p-1" />
+                                                            ) : (
+                                                                <ImageIcon className="h-7 w-7 text-gray-200" />
+                                                            )}
+                                                            <span className="absolute top-1.5 left-1.5 bg-white/90 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm text-gray-500">
+                                                                {product.category?.name || "Autres"}
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="font-bold text-[13px] text-gray-900 line-clamp-2 leading-tight flex-1">{product.name}</h3>
+                                                        <div className="mt-2 pt-2 border-t border-gray-100 flex items-end justify-between">
+                                                            <span className="text-[10px] text-gray-400 uppercase tracking-wider">Prix</span>
+                                                            <span className="font-black text-gray-900 text-lg">
+                                                                {Number(getPrice(product)).toLocaleString("fr-DZ")}
+                                                                <span className="text-xs text-gray-400 font-normal ml-0.5">DA</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         ) : (
-                                            <div className={includeImages ? "grid grid-cols-2 md:grid-cols-3 gap-6" : "space-y-0"}>
-                                                {includeImages ? (
-                                                    /* Grid Layout with Images */
-                                                    filteredProducts.map(product => {
-                                                        let price = product.price
-                                                        if (priceTier === "WHOLESALE" && product.wholesalePrice != null) price = product.wholesalePrice
-                                                        if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
-
-                                                        return (
-                                                            <div key={product.id} className="border border-gray-100 rounded-xl p-4 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
-                                                                <div className="h-40 w-full bg-gray-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-gray-100 relative">
-                                                                    {product.images && product.images[0] ? (
-                                                                        <img src={product.images[0].url} alt={product.name} className="object-contain h-full w-full p-2" />
-                                                                    ) : (
-                                                                        <ImageIcon className="h-8 w-8 text-gray-300" />
-                                                                    )}
-                                                                    <div className="absolute top-2 left-2">
-                                                                        <span className="bg-white/90 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-600">
-                                                                            {product.category?.name || "Autres"}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex-1 flex flex-col">
-                                                                    <h3 className="font-bold text-base text-gray-900 line-clamp-2 leading-snug flex-1">
-                                                                        {product.name}
-                                                                    </h3>
-                                                                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-end justify-between">
-                                                                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Prix</span>
-                                                                        <span className="font-extrabold text-[#111] text-2xl">
-                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-sm text-gray-500 font-medium uppercase">DA</span>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )
-                                                    })
-                                                ) : (
-                                                    /* Minimal List Layout without Images */
-                                                    <table className="w-full text-left text-sm border-collapse">
-                                                        <thead>
-                                                            <tr className="border-b-2 border-gray-200 text-gray-500">
-                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider">Produit</th>
-                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider">Catégorie</th>
-                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider text-right">Prix</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100">
-                                                            {filteredProducts.map(product => {
-                                                                let price = product.price
-                                                                if (priceTier === "WHOLESALE" && product.wholesalePrice != null) price = product.wholesalePrice
-                                                                if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
-
-                                                                return (
-                                                                    <tr key={product.id} className="break-inside-avoid hover:bg-gray-50 transition-colors">
-                                                                        <td className="py-4 px-3 font-bold text-base text-gray-900">{product.name}</td>
-                                                                        <td className="py-4 px-3 text-gray-500 text-sm">
-                                                                            <span className="bg-gray-100 px-3 py-1.5 rounded-md">{product.category?.name || "Autres"}</span>
-                                                                        </td>
-                                                                        <td className="py-4 px-3 text-right font-extrabold text-lg">
-                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-400 font-medium ml-1">DA</span>
-                                                                        </td>
-                                                                    </tr>
-                                                                )
-                                                            })}
-                                                        </tbody>
-                                                    </table>
-                                                )}
-                                            </div>
+                                            /* Compact table without images */
+                                            <table className="w-full text-left text-sm border-collapse">
+                                                <thead>
+                                                    <tr className="border-b-2 border-gray-200">
+                                                        <th className="py-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">#</th>
+                                                        <th className="py-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Produit</th>
+                                                        <th className="py-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">Catégorie</th>
+                                                        <th className="py-3 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500 text-right">Prix</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100">
+                                                    {filteredProducts.map((product, idx) => (
+                                                        <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                                            <td className="py-3 px-4 text-gray-400 text-xs">{idx + 1}</td>
+                                                            <td className="py-3 px-4 font-semibold text-gray-900">{product.name}</td>
+                                                            <td className="py-3 px-4">
+                                                                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">{product.category?.name || "Autres"}</span>
+                                                            </td>
+                                                            <td className="py-3 px-4 text-right font-black text-base">
+                                                                {Number(getPrice(product)).toLocaleString("fr-DZ")}
+                                                                <span className="text-xs text-gray-400 font-normal ml-1">DA</span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         )}
 
                                         <style dangerouslySetInnerHTML={{
                                             __html: `
-                                        @media print {
-                                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                                            .print-content { padding: 0 !important; }
-                                        }
-                                    `}} />
+                                            @media print {
+                                                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                                            }
+                                        ` }} />
                                     </div>
                                 )}
                             </ScrollArea>

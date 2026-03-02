@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 export type TreasuryMovementColumn = {
     id: string
     date: string
+    rawDate: Date
     type: string
     amount: string
     balanceAfter: string

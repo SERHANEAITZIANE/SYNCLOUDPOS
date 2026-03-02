@@ -18,6 +18,7 @@ export interface CartItem {
     quantity: number
     image?: string
     discount?: number
+    categoryId?: string
 }
 
 export interface Session {

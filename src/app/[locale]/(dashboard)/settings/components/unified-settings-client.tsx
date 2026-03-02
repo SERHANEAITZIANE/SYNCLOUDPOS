@@ -1,13 +1,14 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Printer, Store, Sparkles, Settings2, HardDrive } from "lucide-react"
+import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star } from "lucide-react"
 import { GeneralForm } from "./general-form"
 import { PrintingSettingsForm } from "./printing-settings-form"
 import { PosDefaultsForm } from "./pos-defaults-form"
 import { AiSettingsForm } from "./ai-settings-form"
 import { AdvancedSettingsForm } from "./advanced-settings-form"
 import { BackupRestoreForm } from "./backup-restore-form"
+import { LoyaltySettingsForm } from "./loyalty-settings-form"
 
 interface TenantData {
     name: string
@@ -28,6 +29,8 @@ interface TenantData {
     headerText: string | null
     blTemplate: string
     geminiApiKey: string | null
+    loyaltyPointsPerDa: number
+    loyaltyDaPerPoint: number
 }
 
 interface Account {
@@ -74,6 +77,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                     <TabsTrigger value="advanced" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Settings2 className="w-4 h-4" />
                         <span>Avancé</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="loyalty" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                        <Star className="w-4 h-4" />
+                        <span>Fidélité</span>
                     </TabsTrigger>
                     <TabsTrigger value="backup" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <HardDrive className="w-4 h-4" />
@@ -161,7 +168,26 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                     </div>
                 </TabsContent>
 
-                {/* Tab 6 — Backup & Restore */}
+                {/* Tab 6 — Loyalty */}
+                <TabsContent value="loyalty" className="mt-0">
+                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                                Programme de Fidélité
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Configurez le taux d&apos;accumulation et de remboursement des points de fidélité client.
+                            </p>
+                        </div>
+                        <LoyaltySettingsForm
+                            loyaltyPointsPerDa={tenant.loyaltyPointsPerDa}
+                            loyaltyDaPerPoint={tenant.loyaltyDaPerPoint}
+                        />
+                    </div>
+                </TabsContent>
+
+                {/* Tab 7 — Backup & Restore */}
                 <TabsContent value="backup" className="mt-0">
                     <div className="bg-card border rounded-xl p-6 shadow-sm">
                         <div className="mb-6">

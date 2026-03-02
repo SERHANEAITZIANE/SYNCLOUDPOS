@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, FileSpreadsheet } from "lucide-react"
+import { Plus, FileSpreadsheet, Star } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -35,6 +35,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { deleteCustomer } from "@/actions/customers"
+import { LoyaltyBadgeModal } from "./loyalty-badge-modal"
 
 interface CustomerClientProps {
     data: CustomerColumn[]
@@ -57,6 +58,8 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
     const [notes, setNotes] = useState<string>("")
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [badgeModalOpen, setBadgeModalOpen] = useState(false)
+    const [badgeCustomer, setBadgeCustomer] = useState<CustomerColumn | null>(null)
 
     // Base Columns
     const baseColumns = useCustomerColumns()
@@ -105,6 +108,13 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
 
                         <DropdownMenuItem onClick={() => router.push(`/customers/${customer.id}`)}>
                             <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => {
+                            setBadgeCustomer(customer)
+                            setBadgeModalOpen(true)
+                        }}>
+                            <Star className="mr-2 h-4 w-4 text-amber-500 fill-amber-500" /> Carte Fidélité
                         </DropdownMenuItem>
 
                         <DropdownMenuItem onClick={onConfirmDelete} className="text-red-600">
@@ -242,6 +252,21 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Loyalty Badge Modal */}
+            {badgeCustomer && (
+                <LoyaltyBadgeModal
+                    isOpen={badgeModalOpen}
+                    onClose={() => { setBadgeModalOpen(false); setBadgeCustomer(null) }}
+                    customer={{
+                        id: badgeCustomer.id,
+                        name: badgeCustomer.name,
+                        phone: badgeCustomer.phone,
+                        barcode: badgeCustomer.barcode,
+                        loyaltyPoints: badgeCustomer.loyaltyPoints ?? 0
+                    }}
+                />
+            )}
         </>
     )
 }

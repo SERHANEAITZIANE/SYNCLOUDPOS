@@ -23,7 +23,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId } = validatedFields.data
+    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId, discountAmount, loyaltyPointsUsed } = validatedFields.data
 
     try {
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
@@ -213,6 +213,20 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         data: {
                             balance: {
                                 increment: debt
+                            }
+                        }
+                    })
+                }
+
+                // Loyalty Points: earn 1 point per DA spent (rounded down), deduct used points
+                const pointsEarned = Math.floor(total)
+                const pointsDelta = pointsEarned - (loyaltyPointsUsed || 0)
+                if (pointsDelta !== 0) {
+                    await tx.customer.update({
+                        where: { id: finalCustomerId },
+                        data: {
+                            loyaltyPoints: {
+                                increment: pointsDelta
                             }
                         }
                     })

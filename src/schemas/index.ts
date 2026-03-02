@@ -72,7 +72,9 @@ export const OrderSchema = z.object({
     customerId: z.string().optional().nullable(),
     accountId: z.string().optional().nullable(),
     status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]).default("COMPLETED"),
-    originalOrderId: z.string().optional().nullable()
+    originalOrderId: z.string().optional().nullable(),
+    discountAmount: z.coerce.number().optional().default(0),
+    loyaltyPointsUsed: z.coerce.number().optional().default(0)
 })
 
 export const CustomerSchema = z.object({

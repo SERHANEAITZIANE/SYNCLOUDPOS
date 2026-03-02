@@ -23,7 +23,7 @@ export async function getCustomerLedger(customerId: string) {
         const tenantId = session.user.tenantId
 
         // 1. Fetch Sales and payments in parallel, then get order IDs
-        const [sales, payments, customerOrders] = await Promise.all([
+        const [sales, credits, debits, customerOrders] = await Promise.all([
             db.salesOrder.findMany({
                 where: {
                     tenantId,
@@ -38,14 +38,31 @@ export async function getCustomerLedger(customerId: string) {
                     type: true,
                 },
             }),
-            // 2. Fetch Payments (Credits - money given by customer)
+            // 2. Fetch Payments RECEIVED (Credits - money given by customer to us)
             db.treasuryTransaction.findMany({
                 where: {
                     tenantId,
                     type: "CREDIT",
                     OR: [
-                        { source: "MANUAL_IN", referenceId: customerId },
+                        { source: "MANUAL_IN", referenceId: customerId }, // Standard payment received
                     ]
+                },
+                select: {
+                    id: true,
+                    date: true,
+                    amount: true,
+                    description: true,
+                    source: true,
+                    referenceId: true
+                }
+            }),
+            // 3. Fetch Loans/Advances GIVEN (Debits - money we gave to the customer)
+            db.treasuryTransaction.findMany({
+                where: {
+                    tenantId,
+                    type: "DEBIT",
+                    source: "MANUAL_OUT",
+                    referenceId: customerId
                 },
                 select: {
                     id: true,
@@ -64,6 +81,7 @@ export async function getCustomerLedger(customerId: string) {
 
         const customerOrderIds = customerOrders.map(o => o.id)
 
+        // Payments directly linked to a POS sale
         const salePayments = await db.treasuryTransaction.findMany({
             where: {
                 tenantId,
@@ -81,14 +99,14 @@ export async function getCustomerLedger(customerId: string) {
             }
         })
 
-        const allPayments = [...payments, ...salePayments]
+        const allCredits = [...credits, ...salePayments]
         // Remove duplicates if any happen to overlap
-        const uniquePayments = Array.from(new Map(allPayments.map(item => [item.id, item])).values())
+        const uniqueCredits = Array.from(new Map(allCredits.map(item => [item.id, item])).values())
 
         // 3. Map into a unified chronological ledger
         const ledgerLines: Omit<LedgerLine, "balance">[] = []
 
-        // Map Sales (Debits)
+        // Map Sales (Debits - increases what they owe us)
         for (const sale of sales) {
             let label = "Vente"
             if (sale.type === "INVOICE") label = "Facture"
@@ -105,8 +123,21 @@ export async function getCustomerLedger(customerId: string) {
             })
         }
 
-        // Map Payments (Credits)
-        for (const pay of uniquePayments) {
+        // Map Loans GIVEN (Debits - increases what they owe us)
+        for (const loan of debits) {
+            ledgerLines.push({
+                id: `loan-${loan.id}`,
+                date: loan.date.toISOString(),
+                type: "SALE", // Treated as a debt increase
+                debit: Number(loan.amount),
+                credit: 0,
+                observation: loan.description || "Emprunt accordé (Avance)",
+                reference: loan.referenceId || ''
+            })
+        }
+
+        // Map Payments RECEIVED (Credits - decreases what they owe us)
+        for (const pay of uniqueCredits) {
             let label = pay.description || "Paiement"
             if (pay.source === "SALE") label = "Paiement (Vente Directe)"
             else if (pay.source === "MANUAL_IN") label = "Règlement de dette"
@@ -178,9 +209,27 @@ export async function getSupplierLedger(supplierId: string) {
                 tenantId,
                 type: "DEBIT",
                 OR: [
-                    { source: "MANUAL_OUT", referenceId: supplierId },
+                    { source: "MANUAL_OUT", referenceId: supplierId }, // Standard payment sent to supplier
                     { source: "PURCHASE", referenceId: { in: purchases.map(p => p.id) } }
                 ]
+            },
+            select: {
+                id: true,
+                date: true,
+                amount: true,
+                description: true,
+                source: true,
+                referenceId: true
+            }
+        })
+
+        // 3. Fetch Inbound Advances (Credits - money they advanced to us)
+        const advances = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                type: "CREDIT",
+                source: "MANUAL_IN",
+                referenceId: supplierId
             },
             select: {
                 id: true,
@@ -200,11 +249,24 @@ export async function getSupplierLedger(supplierId: string) {
             ledgerLines.push({
                 id: `purchase-${purchase.id}`,
                 date: purchase.createdAt.toISOString(),
-                type: "SALE", // Meaning 'Purchase' in UI context (transaction)
+                type: "SALE", // Meaning 'Transaction' increasing debt in UI context
                 debit: Number(purchase.total), // Debit in this context means "our debt increased"
                 credit: 0,
                 observation: `Bon de Réception: ${purchase.id.substring(0, 8)}`,
                 reference: purchase.id
+            })
+        }
+
+        // Map Advances from Supplier (Credits => Increases Supplier Balance, we owe them more)
+        for (const advance of advances) {
+            ledgerLines.push({
+                id: `advance-${advance.id}`,
+                date: advance.date.toISOString(),
+                type: "SALE", // Meaning 'Transaction' increasing debt in UI context
+                debit: Number(advance.amount), // Debt increases
+                credit: 0,
+                observation: advance.description || "Avance reçue du fournisseur",
+                reference: advance.referenceId || ''
             })
         }
 
@@ -231,7 +293,7 @@ export async function getSupplierLedger(supplierId: string) {
         // 5. Calculate Running Balance
         let currentBalance = 0;
         const finalizedLedger: LedgerLine[] = ledgerLines.map(line => {
-            currentBalance += line.debit // Debt increases with purchases
+            currentBalance += line.debit // Debt increases with purchases or advances
             currentBalance -= line.credit // Debt decreases with payments out
             return {
                 ...line,

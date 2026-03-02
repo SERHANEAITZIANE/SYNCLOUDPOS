@@ -27,6 +27,7 @@ const TreasuryPage = async () => {
     const formattedMovements: TreasuryMovementColumn[] = transactions.map((item) => ({
         id: item.id,
         date: format(item.date, "MMMM do, yyyy HH:mm"),
+        rawDate: item.date,
         type: item.type,
         amount: formatter.format(Number(item.amount)),
         balanceAfter: formatter.format(Number(item.balanceAfter)),

@@ -21,7 +21,8 @@ import {
     CreditCard,
     Building2,
     Sparkles,
-    BookOpen
+    BookOpen,
+    Gift
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -167,6 +168,12 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             icon: BookOpen,
             href: "/formation",
             color: "text-pink-500",
+        },
+        {
+            label: "Promotions",
+            icon: Gift,
+            href: "/promotions",
+            color: "text-violet-500",
         },
     ];
 

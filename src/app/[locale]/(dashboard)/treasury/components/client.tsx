@@ -90,7 +90,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
                     <DataTable searchKey="name" columns={columns} data={accounts} />
                 </div>
             ) : (
-                <MouvementsClient data={movements} />
+                <MouvementsClient data={movements} accounts={accounts} />
             )}
         </div>
     )

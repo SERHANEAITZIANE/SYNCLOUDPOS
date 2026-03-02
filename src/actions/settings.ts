@@ -88,3 +88,29 @@ export async function updateSystemSettings(data: {
         return { error: "Failed to update system settings." }
     }
 }
+
+export async function updateLoyaltySettings(data: {
+    loyaltyPointsPerDa: number
+    loyaltyDaPerPoint: number
+}) {
+    try {
+        const tenantId = await getActiveTenantId()
+        if (!tenantId) return { error: "Unauthorized or no active tenant selected." }
+
+        await db.tenant.update({
+            where: { id: tenantId },
+            data: {
+                loyaltyPointsPerDa: data.loyaltyPointsPerDa,
+                loyaltyDaPerPoint: data.loyaltyDaPerPoint
+            }
+        })
+
+        revalidatePath("/settings")
+        revalidatePath("/pos")
+        return { success: "Paramètres de fidélité mis à jour!" }
+    } catch (error) {
+        console.error("[LOYALTY_SETTINGS_UPDATE_ERROR]", error)
+        return { error: "Erreur lors de la mise à jour." }
+    }
+}
+

@@ -270,6 +270,7 @@ export const registerCustomerLoan = async (data: { customerId: string; amount: n
                     balanceBefore: account.balance,
                     balanceAfter: updatedAccount.balance,
                     source: "MANUAL_OUT",
+                    referenceId: data.customerId,
                     description: `Prêt accordé au client: ${customer?.name || "Inconnu"}`,
                     tenantId
                 }
