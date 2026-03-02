@@ -107,6 +107,20 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         </div>
                     )}
 
+                    {(() => {
+                        const sumOriginal = items?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0
+                        const remise = sumOriginal - total
+                        if (remise > 0) {
+                            return (
+                                <div className="flex justify-between font-bold text-sm text-black">
+                                    <span>Remise</span>
+                                    <span>-{formatCurrency(remise)}</span>
+                                </div>
+                            )
+                        }
+                        return null
+                    })()}
+
                     <div className="flex justify-between items-center font-black text-xl py-2 border-y-2 border-dashed border-black my-1">
                         <span>{t("total")}</span>
                         <span>{formatCurrency(total)}</span>

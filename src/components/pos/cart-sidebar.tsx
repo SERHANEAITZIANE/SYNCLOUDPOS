@@ -108,8 +108,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     tvaRate: item.tvaRate,
                     priceHt: item.priceHt
                 })),
-                total: Math.max(0, totalTTC - totalDiscount - pointsDiscount),
-                subtotal: Math.max(0, subtotal - totalDiscount - pointsDiscount),
+                total: totalTTC,
+                subtotal: subtotal,
                 tvaAmount: tvaAmount,
                 stampTax: stampTax,
                 paymentMethod: method,

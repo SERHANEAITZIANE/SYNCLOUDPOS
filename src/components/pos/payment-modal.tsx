@@ -45,7 +45,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
 
-    // Read localStorage POS defaults on first open
+    // Read localStorage POS defaults on first open, fallback to CAISSE PRINCIPALE
     useEffect(() => {
         if (isOpen) {
             try {
@@ -53,14 +53,33 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 if (stored) {
                     const prefs = JSON.parse(stored)
                     if (prefs.defaultPaymentMethod) setMethod(prefs.defaultPaymentMethod)
-                    if (prefs.defaultAccountId && prefs.defaultAccountId !== "none") setAccountId(prefs.defaultAccountId)
+                    if (prefs.defaultAccountId && prefs.defaultAccountId !== "none") {
+                        setAccountId(prefs.defaultAccountId)
+                        return // Exit if valid stored preference exists
+                    }
                 }
-            } catch { /* noop */ }
+
+                // Fallback to CAISSE PRINCIPALE if no stored preference found
+                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                if (defaultAccount) {
+                    setAccountId(defaultAccount.id)
+                } else {
+                    setAccountId("none")
+                }
+            } catch {
+                // Fallback on error
+                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                if (defaultAccount) setAccountId(defaultAccount.id)
+            }
         }
-    }, [isOpen])
+    }, [isOpen, accounts])
 
     // Core Math
-    const subtotal = items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + (item.tvaRate ?? 19) / 100))) * item.quantity, 0)
+    const originalSubtotal = items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + (item.tvaRate ?? 19) / 100))) * item.quantity, 0)
+    const originalTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const discountRatio = originalTotal > 0 ? total / originalTotal : 1
+
+    const subtotal = originalSubtotal * discountRatio
     const tvaAmount = total - subtotal
 
     const getStampTaxAmount = (amount: number) => {
