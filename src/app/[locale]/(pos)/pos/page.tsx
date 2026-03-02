@@ -13,8 +13,12 @@ const PosPage = async () => {
     if (!tenantId) return <div>No tenant configured</div>
 
     let storeName = "Premium POS"
+    let storeAddress = ""
+    let storePhone = ""
     const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
     if (tenant?.name) storeName = tenant.name
+    if (tenant?.address) storeAddress = tenant.address
+    if (tenant?.phone) storePhone = tenant.phone
 
     const categories = await getCategories()
     const accounts = await getTreasuryAccounts()
@@ -80,7 +84,7 @@ const PosPage = async () => {
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} />
+            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} />
         </div>
     )
 }

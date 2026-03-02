@@ -22,6 +22,9 @@ interface PaymentModalProps {
     customerName?: string
     hasCustomer?: boolean
     accounts?: any[]
+    storeName?: string
+    storeAddress?: string
+    storePhone?: string
 }
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -33,7 +36,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     items = [],
     customerName,
     hasCustomer = false,
-    accounts = []
+    accounts = [],
+    storeName,
+    storeAddress,
+    storePhone
 }) => {
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
@@ -234,6 +240,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             total={success ? finalTotal : total}
                             date={new Date()}
                             orderId={orderData?.receiptNumber}
+                            storeName={storeName}
+                            storeAddress={storeAddress}
+                            storePhone={storePhone}
                             customerName={success ? finalCustomerName : customerName}
                             paidAmount={orderData?.paidAmount}
                             previousBalance={orderData?.previousBalance}

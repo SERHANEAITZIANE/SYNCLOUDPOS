@@ -1,6 +1,7 @@
 import React from "react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
+import Barcode from "react-barcode"
 
 interface ReceiptItem {
     name: string
@@ -132,11 +133,18 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                 <p className="font-bold italic">{t("thanks")}</p>
 
                 {/* Barcode Mockup based on orderId */}
-                <div className="mt-4 pt-4 border-t-2 border-black">
-                    <p className="font-mono text-center tracking-[0.3em] font-black text-xl transform scale-y-150">
-                        ||||||| | |||| | |||
-                    </p>
-                    <p className="text-sm font-mono font-bold mt-2">{orderId}</p>
+                <div className="mt-4 pt-4 border-t-2 border-black flex flex-col items-center justify-center">
+                    <Barcode
+                        value={orderId}
+                        height={40}
+                        width={1.5}
+                        fontSize={14}
+                        fontOptions="bold"
+                        displayValue={true}
+                        background="transparent"
+                        lineColor="#000000"
+                        margin={0}
+                    />
                 </div>
 
                 <p className="text-xs text-black font-bold mt-4 uppercase tracking-widest">SYNCLOUDPOS ERP</p>

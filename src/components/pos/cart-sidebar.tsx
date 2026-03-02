@@ -21,9 +21,12 @@ import { cn } from "@/lib/utils"
 interface CartSidebarProps {
     customers?: any[]
     accounts?: any[]
+    storeName?: string
+    storeAddress?: string
+    storePhone?: string
 }
 
-export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps) => {
+export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone }: CartSidebarProps) => {
     const cart = usePosStore()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -159,6 +162,9 @@ export const CartSidebar = ({ customers = [], accounts = [] }: CartSidebarProps)
                 customerName={activeSession?.customerName || undefined}
                 hasCustomer={!!activeSession?.customerId}
                 accounts={accounts}
+                storeName={storeName}
+                storeAddress={storeAddress}
+                storePhone={storePhone}
             />
             <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-l border-gray-200 dark:border-slate-800 overflow-hidden">
 
