@@ -68,14 +68,15 @@ export async function updateSystemSettings(data: {
             return { error: "Unauthorized or no active tenant selected." }
         }
 
+        const updateData: any = {};
+        if (data.blTemplate !== undefined) updateData.blTemplate = data.blTemplate || "standard";
+        if (data.geminiApiKey !== undefined) updateData.geminiApiKey = data.geminiApiKey || null;
+
         const tenant = await db.tenant.update({
             where: {
                 id: tenantId
             },
-            data: {
-                blTemplate: data.blTemplate || "standard",
-                geminiApiKey: data.geminiApiKey || null
-            }
+            data: updateData
         });
 
         revalidatePath("/dashboard")
