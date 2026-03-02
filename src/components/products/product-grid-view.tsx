@@ -69,41 +69,41 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                         </div>
 
                         {/* Content Area */}
-                        <CardContent className="p-4 flex-1 flex flex-col">
+                        <CardContent className="p-5 flex-1 flex flex-col">
                             {/* Tags */}
-                            <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-                                <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-semibold tracking-wider text-indigo-600 border-indigo-200 bg-indigo-50 dark:bg-indigo-950/30 dark:border-indigo-900 dark:text-indigo-400">
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                <Badge variant="outline" className="px-2 py-0.5 text-xs font-semibold tracking-wider text-indigo-700 border-indigo-200 bg-indigo-50 dark:bg-indigo-950/30 dark:border-indigo-900 dark:text-indigo-400">
                                     {product.brand}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium bg-muted/50 px-1.5 py-0.5 rounded-md">
-                                    <TagIcon className="h-3 w-3 inline-block opacity-70" />
+                                <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium bg-muted/50 px-2 py-0.5 rounded-md">
+                                    <TagIcon className="h-3.5 w-3.5 inline-block opacity-70" />
                                     {product.category}
                                 </span>
                             </div>
 
                             {/* Title */}
-                            <h3 className="font-bold text-base leading-tight tracking-tight line-clamp-2 mb-3 text-zinc-900 dark:text-zinc-100 flex-1">
+                            <h3 className="font-bold text-lg leading-tight tracking-tight line-clamp-2 mb-4 text-zinc-900 dark:text-zinc-100 flex-1">
                                 {product.name}
                             </h3>
 
                             {/* Prices Grid */}
-                            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 mb-4 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-border/50">
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-2 mb-5 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-border/50">
                                 <div className="col-span-2">
-                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500 mb-0.5">Prix Détail</p>
-                                    <p className="font-black text-lg text-emerald-600 dark:text-emerald-400 leading-none">
-                                        {product.price} <span className="text-xs font-bold font-sans">DA</span>
+                                    <p className="text-xs uppercase font-bold tracking-widest text-zinc-500 mb-0.5">Prix Détail</p>
+                                    <p className="font-black text-2xl text-emerald-600 dark:text-emerald-400 leading-none">
+                                        {product.price} <span className="text-sm font-bold font-sans text-emerald-700/70 dark:text-emerald-500/70">DA</span>
                                     </p>
                                 </div>
-                                <div>
-                                    <p className="text-[9px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500">Gros</p>
-                                    <p className="font-bold text-xs text-zinc-700 dark:text-zinc-300">
-                                        {product.wholesalePrice}
+                                <div className="pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
+                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Prix Gros</p>
+                                    <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
+                                        {product.wholesalePrice} <span className="text-[10px] font-medium text-zinc-500">DA</span>
                                     </p>
                                 </div>
-                                <div>
-                                    <p className="text-[9px] uppercase font-bold tracking-widest text-zinc-400 dark:text-zinc-500">Revendeur</p>
-                                    <p className="font-bold text-xs text-zinc-700 dark:text-zinc-300">
-                                        {product.dealerPrice}
+                                <div className="pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
+                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Revendeur</p>
+                                    <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
+                                        {product.dealerPrice} <span className="text-[10px] font-medium text-zinc-500">DA</span>
                                     </p>
                                 </div>
                             </div>
@@ -111,16 +111,16 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                             {/* Footer/Stock Area inline */}
                             <div className="flex items-center justify-between mt-auto">
                                 <div className={cn(
-                                    "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm border",
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm border",
                                     isLowStock
                                         ? "bg-red-50 text-red-600 border-red-200 shadow-red-500/10 dark:bg-red-950/30 dark:border-red-900/50"
-                                        : "bg-emerald-50 text-emerald-600 border-emerald-200 shadow-emerald-500/10 dark:bg-emerald-950/30 dark:border-emerald-900/50"
+                                        : "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-500/10 dark:bg-emerald-950/30 dark:border-emerald-900/50"
                                 )}>
-                                    <PackageIcon className="h-3.5 w-3.5" />
-                                    <span>{product.stock} {isLowStock && "⚠"}</span>
+                                    <PackageIcon className="h-4 w-4" />
+                                    <span>Stock: {product.stock} {isLowStock && "⚠"}</span>
                                 </div>
 
-                                <span className="text-[10px] font-medium text-muted-foreground">
+                                <span className="text-xs font-medium text-muted-foreground">
                                     {product.createdAt}
                                 </span>
                             </div>

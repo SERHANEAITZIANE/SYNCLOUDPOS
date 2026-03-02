@@ -240,7 +240,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                 Aucun produit trouvé pour ces critères.
                                             </div>
                                         ) : (
-                                            <div className={includeImages ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-0"}>
+                                            <div className={includeImages ? "grid grid-cols-2 md:grid-cols-3 gap-6" : "space-y-0"}>
                                                 {includeImages ? (
                                                     /* Grid Layout with Images */
                                                     filteredProducts.map(product => {
@@ -249,27 +249,27 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                         if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
 
                                                         return (
-                                                            <div key={product.id} className="border border-gray-100 rounded-xl p-3 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
-                                                                <div className="h-32 w-full bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-gray-100 relative">
+                                                            <div key={product.id} className="border border-gray-100 rounded-xl p-4 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
+                                                                <div className="h-40 w-full bg-gray-50 rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-gray-100 relative">
                                                                     {product.images && product.images[0] ? (
                                                                         <img src={product.images[0].url} alt={product.name} className="object-contain h-full w-full p-2" />
                                                                     ) : (
                                                                         <ImageIcon className="h-8 w-8 text-gray-300" />
                                                                     )}
                                                                     <div className="absolute top-2 left-2">
-                                                                        <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-0.5 rounded shadow-sm text-gray-600">
+                                                                        <span className="bg-white/90 backdrop-blur-sm text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-600">
                                                                             {product.category?.name || "Autres"}
                                                                         </span>
                                                                     </div>
                                                                 </div>
                                                                 <div className="flex-1 flex flex-col">
-                                                                    <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-tight flex-1">
+                                                                    <h3 className="font-bold text-base text-gray-900 line-clamp-2 leading-snug flex-1">
                                                                         {product.name}
                                                                     </h3>
-                                                                    <div className="mt-2 pt-2 border-t border-gray-100 flex items-end justify-between">
-                                                                        <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Prix</span>
-                                                                        <span className="font-extrabold text-[#111] text-lg">
-                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-500 font-medium uppercase">DA</span>
+                                                                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-end justify-between">
+                                                                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Prix</span>
+                                                                        <span className="font-extrabold text-[#111] text-2xl">
+                                                                            {Number(price).toLocaleString("fr-DZ")} <span className="text-sm text-gray-500 font-medium uppercase">DA</span>
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -281,9 +281,9 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                     <table className="w-full text-left text-sm border-collapse">
                                                         <thead>
                                                             <tr className="border-b-2 border-gray-200 text-gray-500">
-                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Produit</th>
-                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider">Catégorie</th>
-                                                                <th className="py-3 px-2 font-semibold uppercase text-xs tracking-wider text-right">Prix</th>
+                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider">Produit</th>
+                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider">Catégorie</th>
+                                                                <th className="py-4 px-3 font-semibold uppercase text-xs tracking-wider text-right">Prix</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-gray-100">
@@ -293,12 +293,12 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                                 if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
 
                                                                 return (
-                                                                    <tr key={product.id} className="break-inside-avoid">
-                                                                        <td className="py-3 px-2 font-bold text-gray-900">{product.name}</td>
-                                                                        <td className="py-3 px-2 text-gray-500 text-xs">
-                                                                            <span className="bg-gray-100 px-2 py-1 rounded-md">{product.category?.name || "Autres"}</span>
+                                                                    <tr key={product.id} className="break-inside-avoid hover:bg-gray-50 transition-colors">
+                                                                        <td className="py-4 px-3 font-bold text-base text-gray-900">{product.name}</td>
+                                                                        <td className="py-4 px-3 text-gray-500 text-sm">
+                                                                            <span className="bg-gray-100 px-3 py-1.5 rounded-md">{product.category?.name || "Autres"}</span>
                                                                         </td>
-                                                                        <td className="py-3 px-2 text-right font-extrabold text-base">
+                                                                        <td className="py-4 px-3 text-right font-extrabold text-lg">
                                                                             {Number(price).toLocaleString("fr-DZ")} <span className="text-xs text-gray-400 font-medium ml-1">DA</span>
                                                                         </td>
                                                                     </tr>
