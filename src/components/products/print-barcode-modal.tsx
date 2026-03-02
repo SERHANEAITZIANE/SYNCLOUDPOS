@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useReactToPrint } from "react-to-print"
 import { Printer } from "lucide-react"
 
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { BarcodeLabel } from "./barcode-label"
+import type { BarcodeLabelModel } from "./barcode-label"
 
 interface PrintBarcodeModalProps {
     productName: string
@@ -30,6 +31,17 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
     const [size, setSize] = useState<"4x2" | "4.5x3.5" | "5x3">("4x2")
     const [copies, setCopies] = useState(1)
     const [selectedBarcodeIndex, setSelectedBarcodeIndex] = useState(0)
+    const [barcodeModel, setBarcodeModel] = useState<BarcodeLabelModel>("classic")
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs")
+            if (stored) {
+                const prefs = JSON.parse(stored)
+                if (prefs.barcodeModel) setBarcodeModel(prefs.barcodeModel)
+            }
+        } catch { /* noop */ }
+    }, [])
 
     const printRef = useRef<HTMLDivElement>(null)
 
@@ -132,6 +144,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                     price={price}
                                     barcodeValue={activeBarcode}
                                     size={size}
+                                    model={barcodeModel}
                                 />
                             </div>
                         </div>
@@ -164,6 +177,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                 price={price}
                                 barcodeValue={activeBarcode}
                                 size={size}
+                                model={barcodeModel}
                             />
                         ))}
                     </div>

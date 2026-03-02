@@ -3,66 +3,146 @@
 import { forwardRef } from "react"
 import Barcode from "react-barcode"
 
+export type BarcodeLabelSize = "4x2" | "4.5x3.5" | "5x3"
+export type BarcodeLabelModel = "classic" | "modern" | "elegant" | "retro" | "minimal" | "bold"
+
 interface BarcodeLabelProps {
     productName: string
     price: number
     barcodeValue: string
-    size: "4x2" | "4.5x3.5" | "5x3"
+    size: BarcodeLabelSize
+    model?: BarcodeLabelModel
+}
+
+// ── size helpers ────────────────────────────────────────────
+const sizeMap: Record<BarcodeLabelSize, {
+    container: string
+    bcHeight: number
+    bcWidth: number
+    bcFontSize: number
+    titleSize: string
+    priceSize: string
+}> = {
+    "4x2": {
+        container: "w-[4cm] h-[2cm]",
+        bcHeight: 20,
+        bcWidth: 1.0,
+        bcFontSize: 7,
+        titleSize: "text-[8px]",
+        priceSize: "text-[10px]",
+    },
+    "4.5x3.5": {
+        container: "w-[4.5cm] h-[3.5cm]",
+        bcHeight: 26,
+        bcWidth: 1.2,
+        bcFontSize: 9,
+        titleSize: "text-[10px]",
+        priceSize: "text-[13px]",
+    },
+    "5x3": {
+        container: "w-[5cm] h-[3cm]",
+        bcHeight: 28,
+        bcWidth: 1.4,
+        bcFontSize: 10,
+        titleSize: "text-[11px]",
+        priceSize: "text-[14px]",
+    },
 }
 
 export const BarcodeLabel = forwardRef<HTMLDivElement, BarcodeLabelProps>(
-    ({ productName, price, barcodeValue, size }, ref) => {
+    ({ productName, price, barcodeValue, size, model = "classic" }, ref) => {
+        const s = sizeMap[size]
 
-        const isSmall = size === "4x2";
-        const isLarge = size === "5x3";
+        const priceFormatted = new Intl.NumberFormat("fr-FR", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(price) + " DA"
 
-        let containerClass = 'w-[4.5cm] h-[3.5cm]'; // Default standard
-        let titleClass = 'text-[10px] leading-tight mb-1';
-        let barcodeScale = 'scale-[0.7] -my-2';
-        let priceClass = 'text-[16px] leading-tight font-black mt-1'; // Bigger price
+        const BcComp = (light = true, displayValue = true) => (
+            <Barcode
+                value={barcodeValue}
+                format="CODE128"
+                width={s.bcWidth}
+                height={s.bcHeight}
+                fontSize={s.bcFontSize}
+                margin={0}
+                displayValue={displayValue}
+                background="transparent"
+                lineColor={light ? "#000" : "#fff"}
+            />
+        )
 
-        if (isSmall) {
-            containerClass = 'w-[4cm] h-[2cm]';
-            titleClass = 'text-[8px] leading-tight mb-0.5';
-            barcodeScale = 'scale-[0.55] -my-3';
-            priceClass = 'text-[14px] leading-tight font-extrabold mt-0.5'; // Bigger price
-        } else if (isLarge) {
-            containerClass = 'w-[5cm] h-[3cm]';
-            titleClass = 'text-[12px] leading-tight mb-1';
-            barcodeScale = 'scale-[0.8] -my-1';
-            priceClass = 'text-[18px] leading-tight font-black mt-1.5'; // Bigger price
+        const renderContent = () => {
+            switch (model) {
+                case "modern":
+                    return (
+                        <div className={`${s.container} bg-gray-900 text-white flex flex-col items-center justify-center p-1`}>
+                            <p className={`${s.titleSize} tracking-widest uppercase opacity-70 truncate w-full text-center`}>{productName}</p>
+                            {BcComp(false, false)}
+                            <p className={`${s.priceSize} font-black tracking-wide mt-0.5`}>{priceFormatted}</p>
+                        </div>
+                    )
+                case "elegant":
+                    return (
+                        <div className={`${s.container} bg-white text-black border border-gray-400 flex flex-col p-1`}>
+                            <div className="flex justify-between items-center border-b border-gray-300 pb-0.5 mb-0.5 w-full">
+                                <p className={`${s.titleSize} font-semibold truncate`}>{productName}</p>
+                                <p className={`${s.priceSize} font-black shrink-0 ml-1`}>{priceFormatted}</p>
+                            </div>
+                            <div className="flex items-center justify-center flex-1">{BcComp(true, false)}</div>
+                            <p className="text-[6px] text-gray-400 text-center tracking-widest">{barcodeValue}</p>
+                        </div>
+                    )
+                case "retro":
+                    return (
+                        <div className={`${s.container} bg-amber-50 border border-amber-400 flex flex-col items-center justify-center p-1`}>
+                            <p className={`${s.titleSize} font-bold uppercase tracking-wider text-amber-900 truncate w-full text-center`}>{productName}</p>
+                            <div>{BcComp(true, true)}</div>
+                            <p className={`${s.priceSize} font-black text-amber-800`}>{priceFormatted}</p>
+                        </div>
+                    )
+                case "minimal":
+                    return (
+                        <div className={`${s.container} bg-white text-black flex flex-col items-center justify-center p-1`}>
+                            <div className="flex-1 flex items-center">{BcComp(true, true)}</div>
+                            <div className="flex justify-between w-full mt-0.5 px-1">
+                                <p className={`${s.titleSize} text-gray-500 truncate`}>{productName}</p>
+                                <p className={`${s.titleSize} font-black`}>{priceFormatted}</p>
+                            </div>
+                        </div>
+                    )
+                case "bold":
+                    return (
+                        <div className={`${s.container} bg-white text-black flex flex-col border-t-4 border-black p-1`}>
+                            <p className={`${s.titleSize} font-black uppercase tracking-tighter text-black text-center w-full`}>{productName}</p>
+                            <div className="flex-1 flex items-center justify-center">{BcComp(true, false)}</div>
+                            <div className="bg-black text-white text-center rounded-sm py-0.5 w-full">
+                                <p className={`${s.priceSize} font-black tracking-wider`}>{priceFormatted}</p>
+                            </div>
+                        </div>
+                    )
+                default: // classic
+                    return (
+                        <div className={`${s.container} bg-white text-black flex flex-col items-center justify-center p-1`}>
+                            <p className={`${s.titleSize} font-bold uppercase text-center truncate w-full`}>{productName}</p>
+                            <div>{BcComp(true, true)}</div>
+                            <p className={`${s.priceSize} font-black text-center`}>{priceFormatted}</p>
+                        </div>
+                    )
+            }
         }
 
         return (
             <div
                 ref={ref}
-                className={`bg-white text-black flex flex-col items-center justify-center p-1 font-sans ${containerClass}`}
                 style={{
                     pageBreakAfter: "always",
                     margin: 0,
                     boxSizing: "border-box",
+                    fontFamily: "sans-serif",
                 }}
             >
-                <div className={`font-bold text-center w-full truncate ${titleClass}`}>
-                    {productName}
-                </div>
-
-                <div className={`flex items-center justify-center ${barcodeScale}`}>
-                    <Barcode
-                        value={barcodeValue}
-                        format="CODE128"
-                        width={2}
-                        height={40}
-                        fontSize={14}
-                        margin={0}
-                        displayValue={true}
-                        background="transparent"
-                    />
-                </div>
-
-                <div className={`text-center ${priceClass}`}>
-                    {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)} DA
-                </div>
+                {renderContent()}
             </div>
         )
     }
