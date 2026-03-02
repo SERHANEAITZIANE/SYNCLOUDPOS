@@ -49,7 +49,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         return Math.min(10000, Math.ceil(amount / 100) * 2);
     }
 
-    const stampTax = method === "CASH" ? getStampTaxAmount(total) : 0
+    const stampTax = 0 // Timbre is not calculated in POS
     const finalTotalTTC = total + stampTax
 
     const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())

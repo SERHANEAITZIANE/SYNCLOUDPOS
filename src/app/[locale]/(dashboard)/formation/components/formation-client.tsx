@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 export const FormationClient = () => {
     return (
-        <div className="h-full flex flex-col space-y-6">
+        <div className="flex flex-col space-y-6 pb-12">
             <div className="flex items-center justify-between">
                 <Heading
                     title="Formation & Guide d'Utilisation"
@@ -20,8 +20,8 @@ export const FormationClient = () => {
 
             <Separator />
 
-            <Tabs defaultValue="dashboard" orientation="vertical" className="w-full flex-1 flex flex-col md:flex-row gap-6 overflow-hidden">
-                <TabsList className="flex flex-row md:flex-col h-auto justify-start md:sticky md:top-0 md:w-64 space-x-2 md:space-x-0 md:space-y-1 bg-transparent p-1 overflow-x-auto w-full shrink-0">
+            <Tabs defaultValue="dashboard" orientation="vertical" className="w-full flex flex-col md:flex-row gap-6">
+                <TabsList className="flex flex-row md:flex-col h-auto justify-start md:sticky md:top-24 md:w-64 space-x-2 md:space-x-0 md:space-y-1 bg-transparent p-1 overflow-x-auto w-full shrink-0 z-10 md:h-min">
                     <TabsTrigger value="dashboard" className="w-full justify-start gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:shadow-sm">
                         <Monitor className="h-4 w-4" /> Tableau de Bord
                     </TabsTrigger>
@@ -51,7 +51,7 @@ export const FormationClient = () => {
                     </TabsTrigger>
                 </TabsList>
 
-                <ScrollArea className="flex-1 h-[calc(100vh-250px)] md:h-[calc(100vh-200px)] rounded-xl border bg-white shadow-sm p-4 md:p-6">
+                <div className="flex-1 rounded-xl border bg-white shadow-sm p-4 md:p-6 mb-8">
                     {/* DASHBOARD */}
                     <TabsContent value="dashboard" className="m-0 space-y-6">
                         <div>
@@ -385,7 +385,7 @@ export const FormationClient = () => {
                             </Card>
                         </div>
                     </TabsContent>
-                </ScrollArea>
+                </div>
             </Tabs>
         </div>
     )
