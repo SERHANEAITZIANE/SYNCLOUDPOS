@@ -54,9 +54,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 // @ts-expect-error custom fields
                 session.user.role = token.role
                 // @ts-expect-error custom fields
-                session.user.canEdit = token.canEdit
+                session.user.canEdit = token.role === "ADMIN" ? true : token.canEdit
                 // @ts-expect-error custom fields
-                session.user.canDelete = token.canDelete
+                session.user.canDelete = token.role === "ADMIN" ? true : token.canDelete
             } else if (token.sub && session.user && !token.role) {
                 // Backward compatibility for users with old session cookies
                 // If the token lacks a role, we fetch it dynamically from the DB
@@ -72,9 +72,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     // @ts-expect-error custom fields
                     session.user.role = existingUser.role;
                     // @ts-expect-error custom fields
-                    session.user.canEdit = existingUser.canEdit;
+                    session.user.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
                     // @ts-expect-error custom fields
-                    session.user.canDelete = existingUser.canDelete;
+                    session.user.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
                     // @ts-expect-error custom fields
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
                     // @ts-expect-error custom fields
@@ -96,8 +96,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.tenantId = existingUser.tenantId;
             token.isSuperadmin = existingUser.isSuperadmin;
             token.role = existingUser.role;
-            token.canEdit = existingUser.canEdit;
-            token.canDelete = existingUser.canDelete;
+            token.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
+            token.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
             token.subscriptionEndsAt = existingUser.tenant.subscriptionEndsAt;
             token.isBlocked = existingUser.tenant.isBlocked;
             return token
