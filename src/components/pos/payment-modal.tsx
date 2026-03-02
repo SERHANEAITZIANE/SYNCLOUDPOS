@@ -44,6 +44,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
 
+    // Read localStorage POS defaults on first open
+    useEffect(() => {
+        if (isOpen) {
+            try {
+                const stored = localStorage.getItem("pos_defaults_prefs")
+                if (stored) {
+                    const prefs = JSON.parse(stored)
+                    if (prefs.defaultPaymentMethod) setMethod(prefs.defaultPaymentMethod)
+                    if (prefs.defaultAccountId && prefs.defaultAccountId !== "none") setAccountId(prefs.defaultAccountId)
+                }
+            } catch { /* noop */ }
+        }
+    }, [isOpen])
+
     // Core Math
     const subtotal = items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + (item.tvaRate ?? 19) / 100))) * item.quantity, 0)
     const tvaAmount = total - subtotal

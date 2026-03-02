@@ -2,40 +2,60 @@ import { getActiveTenantId } from "@/actions/get-active-tenant";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { SystemSettingsClient } from "./components/client";
+import { UnifiedSettingsClient } from "./components/unified-settings-client";
 import { getEnvDatabaseUrl } from "@/actions/system-settings";
 
 export default async function SettingsPage() {
     const session = await auth();
-    // @ts-expect-error custom property
-    if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) {
+    if ((session?.user as any)?.role !== "ADMIN" && !(session?.user as any)?.isSuperadmin) {
         redirect("/dashboard");
     }
 
     const tenantId = await getActiveTenantId();
+    if (!tenantId) redirect("/dashboard");
 
-    if (!tenantId) {
-        redirect("/dashboard");
-    }
+    const store = await db.tenant.findUnique({ where: { id: tenantId } });
+    if (!store) redirect("/dashboard");
 
-    const store = await db.tenant.findUnique({
-        where: { id: tenantId }
+    const rawAccounts = await db.treasuryAccount.findMany({
+        where: { tenantId },
+        select: { id: true, name: true, type: true, balance: true }
     });
 
-    if (!store) {
-        redirect("/dashboard");
-    }
+    const accounts = rawAccounts.map(a => ({
+        ...a,
+        balance: Number(a.balance)
+    }));
 
-    const currentDatabaseUrl = await getEnvDatabaseUrl();
+    const databaseUrl = await getEnvDatabaseUrl();
 
     return (
         <div className="flex-col">
-            <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-                <SystemSettingsClient initialData={{
-                    blTemplate: store!.blTemplate || "standard",
-                    databaseUrl: currentDatabaseUrl || "",
-                    geminiApiKey: store!.geminiApiKey || ""
-                }} />
+            <div className="flex-1 p-4 md:p-8 pt-6">
+                <UnifiedSettingsClient
+                    tenant={{
+                        name: store.name,
+                        ownerName: store.ownerName,
+                        activity: store.activity,
+                        address: store.address,
+                        wilaya: store.wilaya,
+                        commune: store.commune,
+                        phone: store.phone,
+                        fax: store.fax,
+                        email: store.email,
+                        nif: store.nif,
+                        rc: store.rc,
+                        artImposition: store.artImposition,
+                        nis: store.nis,
+                        bankAccount: store.bankAccount,
+                        logo: store.logo,
+                        headerText: store.headerText,
+                        blTemplate: store.blTemplate || "standard",
+                        geminiApiKey: store.geminiApiKey,
+                    }}
+                    accounts={accounts}
+                    databaseUrl={databaseUrl || ""}
+                />
             </div>
         </div>
     );
