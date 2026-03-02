@@ -40,9 +40,9 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("fr-FR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(amount) + ' DA'
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount)
     }
 
     return (
@@ -77,24 +77,22 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
 
             {/* Items */}
             <div className="mb-4">
+                <div className="border-b-2 border-dashed border-black mb-2"></div>
                 <table className="w-full text-sm font-bold">
-                    <thead>
-                        <tr className="border-b-2 border-black text-black">
-                            <th className="text-left font-bold py-2 uppercase tracking-wider">{t("item")}</th>
-                            <th className="text-right font-bold py-2 uppercase tracking-wider">{t("qty")}</th>
-                            <th className="text-right font-bold py-2 uppercase tracking-wider">{t("price")}</th>
-                        </tr>
-                    </thead>
                     <tbody className="font-black">
                         {items?.map((item, index) => (
                             <tr key={index} className="border-b border-gray-100 last:border-0">
-                                <td className="py-2 pr-1 max-w-[40mm] leading-tight break-words">{item.name}</td>
-                                <td className="text-right py-2 align-top">{item.quantity}</td>
-                                <td className="text-right py-2 align-top">{formatCurrency(item.price * item.quantity)}</td>
+                                <td className="py-2 pr-2 leading-tight break-words text-left">
+                                    {item.quantity} X {item.name}
+                                </td>
+                                <td className="text-right py-2 align-top whitespace-nowrap min-w-[20mm]">
+                                    {formatCurrency(item.price * item.quantity)}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                <div className="border-t-2 border-dashed border-black mt-2"></div>
             </div>
 
             {/* Balances & Totals Box */}
