@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ProductSchema } from "@/schemas"
 import { createProduct, deleteProduct, updateProduct } from "@/actions/products"
@@ -242,14 +243,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                         <FormLabel>{t("fields.category")}</FormLabel>
                                                         <FastCreateCategory onSuccess={(id) => field.onChange(id)} />
                                                     </div>
-                                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger><SelectValue placeholder={t("fields.category")} /></SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                                        </SelectContent>
-                                                    </Select>
+                                                    <SearchableSelect
+                                                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        disabled={loading}
+                                                        placeholder={t("fields.category")}
+                                                        searchPlaceholder="Rechercher une catégorie..."
+                                                    />
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -263,14 +264,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                         <FormLabel>{t("fields.brand")}</FormLabel>
                                                         <FastCreateBrand onSuccess={(id) => field.onChange(id)} />
                                                     </div>
-                                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger><SelectValue placeholder={t("fields.brand")} /></SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            {brands.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                                                        </SelectContent>
-                                                    </Select>
+                                                    <SearchableSelect
+                                                        options={brands.map(b => ({ value: b.id, label: b.name }))}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        disabled={loading}
+                                                        placeholder={t("fields.brand")}
+                                                        searchPlaceholder="Rechercher une marque..."
+                                                    />
                                                     <FormMessage />
                                                 </FormItem>
                                             )}

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Receipt } from "./receipt"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Label } from "@/components/ui/label"
 
 interface PaymentModalProps {
@@ -380,23 +381,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                     <div className="space-y-3 pt-2">
                         <Label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Deposit To</Label>
-                        <Select
-                            disabled={loading}
+                        <SearchableSelect
+                            options={[
+                                { value: "none", label: "None / Default" },
+                                ...accounts.map(acc => ({
+                                    value: acc.id,
+                                    label: `${acc.name} (Solde: ${acc.balance})`
+                                }))
+                            ]}
                             value={accountId}
-                            onValueChange={(val) => setAccountId(val)}
-                        >
-                            <SelectTrigger className="mt-1 h-12 rounded-xl bg-white border-gray-200">
-                                <SelectValue placeholder="Select Caisse / Bank" />
-                            </SelectTrigger>
-                            <SelectContent className="z-[99999]">
-                                <SelectItem value="none">None / Default</SelectItem>
-                                {accounts.map((acc) => (
-                                    <SelectItem key={acc.id} value={acc.id}>
-                                        {acc.name} (Solde: {acc.balance})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                            onChange={(val) => setAccountId(val)}
+                            disabled={loading}
+                            placeholder="Select Caisse / Bank"
+                        />
                     </div>
 
                     {method === "CASH" && (

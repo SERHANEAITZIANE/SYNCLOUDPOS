@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ProductSearchCombobox } from "@/components/ui/product-search-combobox"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { createSalesOrder, updateSalesOrder, updateSalesOrderStatus } from "@/actions/sales-orders"
 import { cn } from "@/lib/utils"
 
@@ -681,18 +682,17 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             <FormField control={form.control} name="customerId" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Client</FormLabel>
-                                    <Select disabled={loading || !canEdit} onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {customers.map(c => (
-                                                <SelectItem key={c.id} value={c.id}>
-                                                    {c.name}{Number(c.balance ?? 0) > 0 ? ` — Solde: ${Number(c.balance).toLocaleString()} DA` : ""}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchableSelect
+                                        options={customers.map(c => ({
+                                            value: c.id,
+                                            label: `${c.name}${Number(c.balance ?? 0) > 0 ? ` — Solde: ${Number(c.balance).toLocaleString()} DA` : ""}`
+                                        }))}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={loading || !canEdit}
+                                        placeholder="Sélectionner un client..."
+                                        searchPlaceholder="Rechercher un client..."
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )} />

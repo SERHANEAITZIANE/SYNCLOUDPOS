@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, FileText, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
@@ -255,28 +256,28 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                                 <FormField control={form.control} name="categoryId" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Catégorie</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value} disabled={isCreating}>
-                                            <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        <SearchableSelect
+                                            options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            disabled={isCreating}
+                                            placeholder="Sélectionner une catégorie..."
+                                            searchPlaceholder="Rechercher une catégorie..."
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )} />
                                 <FormField control={form.control} name="brandId" render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Marque</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value} disabled={isCreating}>
-                                            <FormControl>
-                                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {brands.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        <SearchableSelect
+                                            options={brands.map(b => ({ value: b.id, label: b.name }))}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            disabled={isCreating}
+                                            placeholder="Sélectionner une marque..."
+                                            searchPlaceholder="Rechercher une marque..."
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )} />

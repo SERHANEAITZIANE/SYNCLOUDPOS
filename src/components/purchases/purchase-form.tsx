@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ProductSearchCombobox } from "@/components/ui/product-search-combobox"
@@ -313,16 +314,14 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             <FormField control={form.control} name="supplierId" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Fournisseur</FormLabel>
-                                    <Select disabled={loading || !canEdit} onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {suppliers.map(s => (
-                                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchableSelect
+                                        options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={loading || !canEdit}
+                                        placeholder="Sélectionner un fournisseur..."
+                                        searchPlaceholder="Rechercher un fournisseur..."
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -348,17 +347,17 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             <FormField control={form.control} name="accountId" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Compte de paiement</FormLabel>
-                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="none">Aucun / À régler</SelectItem>
-                                            {accounts.map(a => (
-                                                <SelectItem key={a.id} value={a.id}>{a.name} — {a.balance}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <SearchableSelect
+                                        options={[
+                                            { value: "none", label: "Aucun / À régler" },
+                                            ...accounts.map(a => ({ value: a.id, label: `${a.name} — ${a.balance}` }))
+                                        ]}
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        disabled={loading}
+                                        placeholder="Sélectionner un compte..."
+                                        searchPlaceholder="Rechercher un compte..."
+                                    />
                                     <FormMessage />
                                 </FormItem>
                             )} />
