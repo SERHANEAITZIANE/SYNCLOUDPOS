@@ -80,8 +80,8 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
             text += `*--- ${cat.toUpperCase()} ---*\n`
             grouped[cat].forEach((p: any) => {
                 let priceToDisplay = p.price
-                if (priceTier === "WHOLESALE" && p.wholesalePrice) priceToDisplay = p.wholesalePrice
-                if (priceTier === "RESELLER" && p.dealerPrice) priceToDisplay = p.dealerPrice
+                if (priceTier === "WHOLESALE" && p.wholesalePrice != null) priceToDisplay = p.wholesalePrice
+                if (priceTier === "RESELLER" && p.dealerPrice != null) priceToDisplay = p.dealerPrice
 
                 text += `- ${p.name}: ${Number(priceToDisplay).toLocaleString("fr-DZ")} DA\n`
             })
@@ -90,6 +90,13 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
 
         setTextPreview(text)
     }
+
+    // Automatically regenerate text preview if user changes tier/category while it's open
+    useEffect(() => {
+        if (textPreview !== null) {
+            generateText()
+        }
+    }, [priceTier, categoryFilter])
 
     const handleCopyActualText = () => {
         if (!textPreview) return
@@ -238,8 +245,8 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                     /* Grid Layout with Images */
                                                     filteredProducts.map(product => {
                                                         let price = product.price
-                                                        if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
-                                                        if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
+                                                        if (priceTier === "WHOLESALE" && product.wholesalePrice != null) price = product.wholesalePrice
+                                                        if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
 
                                                         return (
                                                             <div key={product.id} className="border border-gray-100 rounded-xl p-3 flex flex-col break-inside-avoid shadow-sm hover:shadow-md transition-shadow bg-white">
@@ -282,8 +289,8 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({
                                                         <tbody className="divide-y divide-gray-100">
                                                             {filteredProducts.map(product => {
                                                                 let price = product.price
-                                                                if (priceTier === "WHOLESALE" && product.wholesalePrice) price = product.wholesalePrice
-                                                                if (priceTier === "RESELLER" && product.dealerPrice) price = product.dealerPrice
+                                                                if (priceTier === "WHOLESALE" && product.wholesalePrice != null) price = product.wholesalePrice
+                                                                if (priceTier === "RESELLER" && product.dealerPrice != null) price = product.dealerPrice
 
                                                                 return (
                                                                     <tr key={product.id} className="break-inside-avoid">
