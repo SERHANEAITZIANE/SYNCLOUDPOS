@@ -6,7 +6,7 @@ import { Camera, Upload, Loader2, FileText, CheckCircle2, AlertTriangle, X, Spar
 import Image from "next/image"
 import { toast } from "react-hot-toast"
 import { Badge } from "@/components/ui/badge"
-import { analyzeInvoiceWithGemini, type OcrInvoiceItem, type OcrInvoiceResult } from "@/actions/ocr-invoice"
+import { analyzeInvoiceWithAI, type OcrInvoiceItem, type OcrInvoiceResult } from "@/actions/ocr-invoice"
 
 interface OcrReceiptUploaderProps {
     onProductsExtracted: (
@@ -45,7 +45,7 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
             const base64 = await fileToBase64(file)
             const mimeType = file.type || "image/jpeg"
 
-            const ocrResult = await analyzeInvoiceWithGemini(base64, mimeType)
+            const ocrResult = await analyzeInvoiceWithAI(base64, mimeType)
             setResult(ocrResult)
 
             if (ocrResult.error) {
@@ -108,7 +108,7 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
                 <div>
                     <h3 className="font-bold text-lg text-indigo-900 dark:text-indigo-100">Scanner un bon de livraison</h3>
                     <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                        IA Gemini détectera automatiquement le <strong>fournisseur</strong>, les <strong>produits</strong>, <strong>quantités</strong> et <strong>prix unitaires</strong>.
+                        L'IA détectera automatiquement le <strong>fournisseur</strong>, les <strong>produits</strong>, <strong>quantités</strong> et <strong>prix unitaires</strong>.
                     </p>
                 </div>
                 <div className="flex gap-3 mt-2">
@@ -147,7 +147,7 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
                         <Sparkles className="h-8 w-8 text-indigo-500 animate-pulse mb-2" />
                         <p className="font-semibold text-sm text-indigo-700 dark:text-indigo-300">Analyse IA en cours...</p>
-                        <p className="text-xs text-muted-foreground mt-1">Gemini Vision détecte les articles</p>
+                        <p className="text-xs text-muted-foreground mt-1">L'IA détecte les articles...</p>
                     </div>
                 </div>
                 <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
