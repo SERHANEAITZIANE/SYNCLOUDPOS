@@ -7,7 +7,7 @@ import { PrintingSettingsForm } from "./printing-settings-form"
 import { PosDefaultsForm } from "./pos-defaults-form"
 import { AiSettingsForm } from "./ai-settings-form"
 import { AdvancedSettingsForm } from "./advanced-settings-form"
-import { BackupRestoreForm } from "./backup-restore-form"
+import { BackupsListClient } from "./backups-list-client"
 import { LoyaltySettingsForm } from "./loyalty-settings-form"
 import { WhatsAppSettingsForm } from "./whatsapp-settings-form"
 
@@ -214,7 +214,7 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                                 Exportez toutes vos données ou restaurez depuis une sauvegarde précédente.
                             </p>
                         </div>
-                        <BackupRestoreForm />
+                        <BackupsListClient />
                     </div>
                 </TabsContent>
                 {/* Tab 8 — WhatsApp */}
