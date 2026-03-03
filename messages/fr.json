@@ -60,7 +60,8 @@
         "analysisGroup": "Analyses",
         "systemGroup": "Système",
         "erpTraining": "Formation ERP",
-        "superAdmin": "Super Admin"
+        "superAdmin": "Super Admin",
+        "dailyClose": "Clôture de Caisse"
     },
     "Common": {
         "quantity": "Quantité",
@@ -777,5 +778,36 @@
             "privacyTitle": "Données Privées",
             "privacyDesc": "Les clés et données restent sécurisées sur votre navigateur."
         }
+    },
+    "DailyClose": {
+        "title": "Clôture de Caisse",
+        "subtitle": "Rapport de fin de journée - totaux par mode de paiement.",
+        "computeToday": "Calculer la Clôture du Jour",
+        "computing": "Calcul en cours...",
+        "reset": "Réinitialiser",
+        "print": "Imprimer",
+        "save": "Enregistrer la Clôture",
+        "saved": "Clôture enregistrée",
+        "emptyTitle": "Aucune clôture en cours",
+        "emptyDesc": "Cliquez sur le bouton pour calculer les totaux de la journée.",
+        "period": "Période",
+        "revenueBreakdown": "Détail des Recettes",
+        "expensesAndNet": "Dépenses & Solde Net",
+        "cash": "Espèces",
+        "transfer": "Virement",
+        "check": "Chèque",
+        "term": "Terme (Crédit)",
+        "cashIn": "Espèces encaissées",
+        "totalRevenue": "Chiffre d'Affaires Total",
+        "totalExpenses": "Total Dépenses",
+        "expenses": "Dépenses (à déduire)",
+        "netCash": "Caisse Nette",
+        "posOrders": "Ventes POS",
+        "blOrders": "Bons de Livraison",
+        "total": "Total",
+        "transactions": "transactions",
+        "notes": "Notes / Observations",
+        "notesPlaceholder": "Ex: écart de caisse de 200 DA, ticket manquant...",
+        "history": "Historique des Clôtures"
     }
 }

@@ -60,6 +60,7 @@ model Tenant {
   spoilages      Spoilage[]
   promotions     Promotion[]
   stockMovements StockMovement[]
+  dailyCloses    DailyClose[]
 }
 
 model Promotion {
@@ -399,6 +400,27 @@ model Spoilage {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DailyClose {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  date            DateTime @default(now())    // The date of the close
+  periodStart     DateTime                    // Start of the period counted
+  periodEnd       DateTime                    // End of the period counted
+  totalRevenue    Decimal  @default(0)        // Sum of all POS + BL sales
+  cashRevenue     Decimal  @default(0)        // Revenue from CASH
+  transferRevenue Decimal  @default(0)        // Revenue from TRANSFER
+  checkRevenue    Decimal  @default(0)        // Revenue from CHECK
+  termRevenue     Decimal  @default(0)        // Revenue from TERM (credit)
+  totalExpenses   Decimal  @default(0)        // Sum of expenses in period
+  netCash         Decimal  @default(0)        // cashRevenue - totalExpenses
+  ordersCount     Int      @default(0)        // Number of POS orders
+  salesCount      Int      @default(0)        // Number of BL orders
+  notes           String?                     // Optional cashier notes
+  closedByUserId  String?                     // Who closed the register
+  createdAt       DateTime @default(now())
 }
 
 model StockMovement {

@@ -60,7 +60,8 @@
     "analysisGroup": "Analysis",
     "systemGroup": "System",
     "erpTraining": "ERP Training",
-    "superAdmin": "Super Admin"
+    "superAdmin": "Super Admin",
+    "dailyClose": "Daily Close"
   },
   "Common": {
     "quantity": "Quantity",
@@ -777,5 +778,36 @@
       "privacyTitle": "Privacy First",
       "privacyDesc": "Keys and data queries remain secure in your browser."
     }
+  },
+  "DailyClose": {
+    "title": "Daily Close",
+    "subtitle": "End-of-day report — revenue breakdown by payment method.",
+    "computeToday": "Compute Today's Close",
+    "computing": "Computing...",
+    "reset": "Reset",
+    "print": "Print",
+    "save": "Save Close Report",
+    "saved": "Report saved",
+    "emptyTitle": "No report yet",
+    "emptyDesc": "Click to compute today's revenue and expense totals.",
+    "period": "Period",
+    "revenueBreakdown": "Revenue Breakdown",
+    "expensesAndNet": "Expenses & Net Cash",
+    "cash": "Cash",
+    "transfer": "Bank Transfer",
+    "check": "Check",
+    "term": "On Account (Credit)",
+    "cashIn": "Cash collected",
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "expenses": "Expenses (deducted)",
+    "netCash": "Net Cash",
+    "posOrders": "POS Sales",
+    "blOrders": "Delivery Notes",
+    "total": "Total",
+    "transactions": "transactions",
+    "notes": "Notes / Observations",
+    "notesPlaceholder": "e.g. cash drawer shortage of 200, missing receipt...",
+    "history": "Closing Report History"
   }
 }
