@@ -24,7 +24,8 @@ import {
     BookOpen,
     Gift,
     LockKeyhole,
-    RefreshCw
+    RefreshCw,
+    ClipboardList
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -106,6 +107,7 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
                 { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: !isVendeur },
                 { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: !isVendeur },
                 { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: !isVendeur },
+                { label: "Audit d'Inventaire", icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: !isVendeur },
             ]
         },
         {
