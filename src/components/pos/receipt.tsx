@@ -2,6 +2,7 @@ import React from "react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
 import Barcode from "react-barcode"
+import { QRCodeSVG } from "qrcode.react"
 
 interface ReceiptItem {
     name: string
@@ -157,6 +158,18 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         lineColor="#000000"
                         margin={0}
                     />
+                </div>
+
+                {/* QR Code — links to online receipt portal */}
+                <div className="mt-4 flex flex-col items-center gap-1">
+                    <QRCodeSVG
+                        value={`${process.env.NEXT_PUBLIC_APP_URL || "https://yourdomain.com"}/receipt/${orderId}`}
+                        size={80}
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                        level="M"
+                    />
+                    <p className="text-[9px] text-black font-bold uppercase tracking-wider mt-1">Scannez pour votre facture</p>
                 </div>
 
                 <p className="text-xs text-black font-bold mt-4 uppercase tracking-widest">SYNCLOUDPOS ERP</p>
