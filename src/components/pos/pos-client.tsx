@@ -72,6 +72,16 @@ export const PosClient: FC<PosClientProps> = ({
     const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0)
     const totalItemsCount = items.reduce((total, item) => total + item.quantity, 0)
 
+    // Auto-select "DIVERS" customer if none is selected
+    useEffect(() => {
+        if (activeSession && !activeSession.customerId) {
+            const diversCustomer = customers.find(c => c.name.toUpperCase() === "DIVERS")
+            if (diversCustomer) {
+                cart.setCustomer(diversCustomer.id, diversCustomer.name)
+            }
+        }
+    }, [activeSessionId, activeSession?.customerId, customers, cart])
+
     // Global POS Shortcuts
     useEffect(() => {
         const handleGlobalKeyDown = (e: KeyboardEvent) => {

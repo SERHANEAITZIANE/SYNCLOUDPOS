@@ -58,8 +58,11 @@ export async function updateTenantSettings(data: {
 }
 
 export async function updateSystemSettings(data: {
-    blTemplate: string;
+    blTemplate?: string;
+    aiProvider?: string;
     geminiApiKey?: string;
+    openaiApiKey?: string;
+    anthropicApiKey?: string;
 }) {
     try {
         const tenantId = await getActiveTenantId();
@@ -70,7 +73,10 @@ export async function updateSystemSettings(data: {
 
         const updateData: any = {};
         if (data.blTemplate !== undefined) updateData.blTemplate = data.blTemplate || "standard";
+        if (data.aiProvider !== undefined) updateData.aiProvider = data.aiProvider || "GEMINI";
         if (data.geminiApiKey !== undefined) updateData.geminiApiKey = data.geminiApiKey || null;
+        if (data.openaiApiKey !== undefined) updateData.openaiApiKey = data.openaiApiKey || null;
+        if (data.anthropicApiKey !== undefined) updateData.anthropicApiKey = data.anthropicApiKey || null;
 
         const tenant = await db.tenant.update({
             where: {

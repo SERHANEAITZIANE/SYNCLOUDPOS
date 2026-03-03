@@ -32,7 +32,10 @@ model Tenant {
   logo        String?   // Photo
   headerText  String?   // Entête
   blTemplate  String?   @default("standard") // Template for Bon de Livraison
-  geminiApiKey String?  // Clé API Gemini pour OCR personnalisé
+  aiProvider  String?   @default("GEMINI") // GEMINI, OPENAI, ANTHROPIC
+  geminiApiKey String?  // Clé API Gemini
+  openaiApiKey String?  // Clé API OpenAI (ChatGPT)
+  anthropicApiKey String? // Clé API Anthropic (Claude)
   loyaltyPointsPerDa Int @default(1)   // Points earned per DA spent
   loyaltyDaPerPoint  Int @default(100) // Points required for 1 DA discount
   subscriptionEndsAt DateTime? // End date of current subscription/trial

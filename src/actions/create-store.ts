@@ -40,6 +40,24 @@ export const createStore = async (name: string) => {
             data: { tenantId: tenant.id }
         })
 
+        // 4. Seed default accounts and customer
+        await Promise.all([
+            db.treasuryAccount.createMany({
+                data: [
+                    { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "TPE", type: "BANK", tenantId: tenant.id }
+                ]
+            }),
+            db.customer.create({
+                data: {
+                    name: "DIVERS",
+                    clientType: "RETAIL",
+                    tenantId: tenant.id
+                }
+            })
+        ])
+
         revalidatePath("/dashboard")
 
         return { success: "Store created", tenant }

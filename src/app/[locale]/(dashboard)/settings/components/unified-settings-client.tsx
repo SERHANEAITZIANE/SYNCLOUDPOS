@@ -28,7 +28,10 @@ interface TenantData {
     logo: string | null
     headerText: string | null
     blTemplate: string
+    aiProvider: string
     geminiApiKey: string | null
+    openaiApiKey: string | null
+    anthropicApiKey: string | null
     loyaltyPointsPerDa: number
     loyaltyDaPerPoint: number
 }
@@ -147,8 +150,15 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             <p className="text-sm text-muted-foreground mt-1">
                                 Configurez vos clés API pour activer la numérisation OCR et les fonctions IA.
                             </p>
+                            <div className="max-w-3xl">
+                                <AiSettingsForm
+                                    initialProvider={tenant.aiProvider}
+                                    initialGeminiApiKey={tenant.geminiApiKey}
+                                    initialOpenaiApiKey={tenant.openaiApiKey}
+                                    initialAnthropicApiKey={tenant.anthropicApiKey}
+                                />
+                            </div>
                         </div>
-                        <AiSettingsForm initialGeminiApiKey={tenant.geminiApiKey} />
                     </div>
                 </TabsContent>
 

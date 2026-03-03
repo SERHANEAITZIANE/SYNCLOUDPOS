@@ -45,6 +45,24 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
             },
         })
 
+        // Seed default accounts and customer
+        await Promise.all([
+            db.treasuryAccount.createMany({
+                data: [
+                    { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "TPE", type: "BANK", tenantId: tenant.id }
+                ]
+            }),
+            db.customer.create({
+                data: {
+                    name: "DIVERS",
+                    clientType: "RETAIL",
+                    tenantId: tenant.id
+                }
+            })
+        ])
+
         return { success: "User created!" }
     } catch (error) {
         console.error("[REGISTER_ACTION_ERROR]", error)
