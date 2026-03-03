@@ -58,7 +58,9 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
     }, []);
 
     const isAdmin = role === "ADMIN" || isSuperadmin;
-    const isVendeur = role === "VENDEUR";
+    const isCASHIER = role === "CASHIER" || role === "VENDEUR";
+    const isACCOUNTANT = role === "ACCOUNTANT";
+    const isSTOCK_MANAGER = role === "STOCK_MANAGER";
 
     type Route = { label: string; icon: any; href: string; color: string; visible: boolean };
     type Group = { label: string; routes: Route[] };
@@ -67,50 +69,50 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
         {
             label: t("overview") || "Vue d'ensemble",
             routes: [
-                { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isVendeur },
-                { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: true },
-                { label: t("aiIntelligence") || "Intelligence IA", icon: Sparkles, href: "/ai", color: "text-violet-400", visible: !isVendeur },
+                { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isCASHIER },
+                { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: isAdmin || isCASHIER },
+                { label: t("aiIntelligence") || "Intelligence IA", icon: Sparkles, href: "/ai", color: "text-violet-400", visible: isAdmin },
             ]
         },
         {
             label: t("transactionsGroup") || "Transactions",
             routes: [
-                { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: true },
-                { label: "Factures Récurrentes", icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: !isVendeur },
-                { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: !isVendeur },
-                { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: !isVendeur },
-                { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: true },
+                { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
+                { label: "Factures Récurrentes", icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
+                { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
             ]
         },
         {
             label: t("catalogGroup") || "Catalogue",
             routes: [
-                { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: !isVendeur },
-                { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: !isVendeur },
-                { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: !isVendeur },
-                { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: !isVendeur },
-                { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: !isVendeur },
+                { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: isAdmin || isSTOCK_MANAGER || isCASHIER },
+                { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER },
             ]
         },
         {
             label: t("partnersGroup") || "Partenaires",
             routes: [
-                { label: t("customers"), icon: Users, href: "/customers", color: "text-orange-400", visible: true },
-                { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: !isVendeur },
-                { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: true },
-                { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: !isVendeur },
+                { label: t("customers"), icon: Users, href: "/customers", color: "text-orange-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
+                { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
+                { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
+                { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
             ]
         },
         {
             label: t("analysisGroup") || "Analyses",
             routes: [
-                { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: !isVendeur },
-                { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: !isVendeur },
-                { label: "Prévisions IA", icon: Sparkles, href: "/analytics/forecast", color: "text-fuchsia-400", visible: !isVendeur },
-                { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: !isVendeur },
-                { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: !isVendeur },
-                { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: !isVendeur },
-                { label: "Audit d'Inventaire", icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: !isVendeur },
+                { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: isAdmin || isACCOUNTANT },
+                { label: "Prévisions IA", icon: Sparkles, href: "/analytics/forecast", color: "text-fuchsia-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
+                { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: "Audit d'Inventaire", icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER },
             ]
         },
         {
@@ -119,7 +121,7 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
                 { label: t("company") || "Mon Entreprise", icon: Store, href: "/company", color: "text-orange-400", visible: isAdmin },
                 { label: t("users") || "Utilisateurs", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
                 { label: t("systemSettings") || t("settings") || "Paramètres", icon: Settings, href: "/settings", color: "text-gray-400", visible: isAdmin },
-                { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isVendeur },
+                { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isCASHIER },
                 { label: t("superAdmin") || "Super Admin", icon: ShieldCheck, href: "/superadmin", color: "text-emerald-400", visible: !!isSuperadmin }
             ]
         }

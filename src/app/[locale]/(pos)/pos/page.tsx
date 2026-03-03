@@ -5,11 +5,16 @@ import { db } from "@/lib/db"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { auth } from "@/auth"
 import { getTranslations } from "next-intl/server"
+import { redirect } from "next/navigation"
 
 const PosPage = async () => {
     const t = await getTranslations("PosPage")
     const session = await auth()
     if (!session?.user?.id) return <div>{t("unauthorized")}</div>
+
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "CASHIER" && !session?.user?.isSuperadmin) {
+        redirect("/dashboard")
+    }
 
     const tenantId = await getActiveTenantId()
     if (!tenantId) return <div>{t("noTenant")}</div>

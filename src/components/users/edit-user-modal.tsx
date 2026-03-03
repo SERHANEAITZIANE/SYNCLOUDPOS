@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { createUser } from "@/actions/create-user"
+import { updateUser } from "@/actions/update-user"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -24,7 +24,6 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import {
     Select,
     SelectContent,
@@ -32,18 +31,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Plus } from "lucide-react"
+import { Pencil } from "lucide-react"
 
 const formSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean(),
     canDelete: z.boolean(),
 })
 
-export function AddUserModal() {
+interface EditUserModalProps {
+    user: {
+        id: string;
+        name: string | null;
+        role: string;
+        canEdit: boolean;
+        canDelete: boolean;
+    }
+}
+
+export function EditUserModal({ user }: EditUserModalProps) {
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
@@ -51,12 +57,9 @@ export function AddUserModal() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            email: "",
-            password: "",
-            role: "CASHIER",
-            canEdit: false,
-            canDelete: false,
+            role: user.role as "ADMIN" | "MANAGER" | "CASHIER" | "ACCOUNTANT" | "STOCK_MANAGER",
+            canEdit: user.canEdit,
+            canDelete: user.canDelete,
         },
     })
 
@@ -66,20 +69,16 @@ export function AddUserModal() {
         setError("")
         startTransition(() => {
             const payload = {
-                name: values.name,
-                email: values.email,
-                password: values.password,
+                id: user.id,
                 role: values.role,
                 canEdit: values.canEdit ?? false,
                 canDelete: values.canDelete ?? false,
             }
-            // @ts-ignore
-            createUser(payload).then((data) => {
+            updateUser(payload).then((data) => {
                 if (data.error) {
                     setError(data.error)
                 } else {
                     setOpen(false)
-                    form.reset()
                 }
             })
         })
@@ -88,68 +87,29 @@ export function AddUserModal() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" /> Add User
+                <Button variant="ghost" size="icon">
+                    <Pencil className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add New User</DialogTitle>
+                    <DialogTitle>Mettre à jour le rôle</DialogTitle>
                     <DialogDescription>
-                        Create a new user for your store.
+                        Modifier les permissions de l'utilisateur {user.name}.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="john@example.com" type="email" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="******" type="password" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
                             name="role"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Role</FormLabel>
+                                    <FormLabel>Rôle</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a role" />
+                                                <SelectValue placeholder="Selectionner le rôle" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -166,7 +126,7 @@ export function AddUserModal() {
                         />
                         {!(selectedRole === "ADMIN" || selectedRole === "MANAGER") && (
                             <div className="flex flex-col gap-3 py-2 border-t pt-4">
-                                <span className="text-sm font-medium text-muted-foreground mb-1">Permissions du Vendeur</span>
+                                <span className="text-sm font-medium text-muted-foreground mb-1">Permissions Spécifiques</span>
                                 <FormField
                                     control={form.control}
                                     name="canEdit"
@@ -180,7 +140,7 @@ export function AddUserModal() {
                                             </FormControl>
                                             <div className="space-y-1 leading-none">
                                                 <FormLabel className="cursor-pointer">Autoriser la modification</FormLabel>
-                                                <p className="text-xs text-muted-foreground">Peut modifier les commandes, clients, etc.</p>
+                                                <p className="text-xs text-muted-foreground">Peut modifier les informations.</p>
                                             </div>
                                         </FormItem>
                                     )}
@@ -207,7 +167,7 @@ export function AddUserModal() {
                         )}
                         {error && <div className="text-sm text-red-500">{error}</div>}
                         <DialogFooter>
-                            <Button type="submit" disabled={isPending}>Create User</Button>
+                            <Button type="submit" disabled={isPending}>Enregistrer</Button>
                         </DialogFooter>
                     </form>
                 </Form>

@@ -3,34 +3,30 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
-import bcrypt from "bcryptjs"
 import { z } from "zod"
 
-const CreateUserSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+const UpdateUserSchema = z.object({
+    id: z.string().min(1, "User ID is required"),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean().optional(),
     canDelete: z.boolean().optional(),
 })
 
-export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
+export const updateUser = async (values: z.infer<typeof UpdateUserSchema>) => {
     const session = await auth()
 
     if (!session?.user?.id) {
         return { error: "Unauthorized" }
     }
 
-    const validatedFields = CreateUserSchema.safeParse(values)
+    const validatedFields = UpdateUserSchema.safeParse(values)
 
     if (!validatedFields.success) {
         return { error: "Invalid fields" }
     }
 
-    const { name, email, password, role, canEdit, canDelete } = validatedFields.data
+    const { id, role, canEdit, canDelete } = validatedFields.data
 
-    // Get current user's tenant
     const currentUser = await db.user.findUnique({
         where: { id: session.user.id }
     })
@@ -39,37 +35,32 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Current user has no tenant" }
     }
 
-    const existingUser = await db.user.findUnique({
-        where: { email }
+    const userToUpdate = await db.user.findUnique({
+        where: { id }
     })
 
-    if (existingUser) {
-        return { error: "User with this email already exists" }
+    if (!userToUpdate || userToUpdate.tenantId !== currentUser.tenantId) {
+        return { error: "User not found" }
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
 
     // Only non-admins get granular permissions, admins have full by default
     const finalCanEdit = (role === "ADMIN" || role === "MANAGER") ? true : (canEdit ?? false)
     const finalCanDelete = (role === "ADMIN" || role === "MANAGER") ? true : (canDelete ?? false)
 
     try {
-        await db.user.create({
+        await db.user.update({
+            where: { id },
             data: {
-                name,
-                email,
-                password: hashedPassword,
                 role,
                 canEdit: finalCanEdit,
                 canDelete: finalCanDelete,
-                tenantId: currentUser.tenantId
             }
         })
 
         revalidatePath("/users")
-        return { success: "User created" }
+        return { success: "User updated successfully" }
     } catch (error) {
-        console.error("Failed to create user", error)
-        return { error: "Failed to create user" }
+        console.error("Failed to update user", error)
+        return { error: "Failed to update user" }
     }
 }

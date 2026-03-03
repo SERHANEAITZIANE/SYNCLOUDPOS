@@ -6,6 +6,8 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { ClipboardList, CheckCircle, XCircle, Clock } from "lucide-react"
 import type { Metadata } from "next"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
     title: "Audit d'Inventaire | SynCloudPOS",
@@ -19,6 +21,12 @@ const statusConfig = {
 }
 
 export default async function InventoryAuditPage() {
+    const session = await auth()
+    // @ts-expect-error custom property
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "STOCK_MANAGER" && !session?.user?.isSuperadmin) {
+        redirect("/dashboard")
+    }
+
     const sessions = await getStockCountSessions()
 
     return (

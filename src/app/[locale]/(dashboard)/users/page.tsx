@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AddUserModal } from "@/components/users/add-user-modal";
+import { EditUserModal } from "@/components/users/edit-user-modal";
 import { format } from "date-fns";
 
 export default async function UsersPage() {
     const session = await auth();
-    // @ts-expect-error custom property
     if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) {
         redirect("/dashboard");
     }
@@ -40,6 +40,7 @@ export default async function UsersPage() {
                             <TableHead>Email</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Joined</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -55,11 +56,20 @@ export default async function UsersPage() {
                                 <TableCell>
                                     {format(new Date(user.createdAt), "MMM d, yyyy")}
                                 </TableCell>
+                                <TableCell className="text-right">
+                                    <EditUserModal user={{
+                                        id: user.id,
+                                        name: user.name,
+                                        role: user.role,
+                                        canEdit: user.canEdit,
+                                        canDelete: user.canDelete
+                                    }} />
+                                </TableCell>
                             </TableRow>
                         ))}
                         {users.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
+                                <TableCell colSpan={5} className="h-24 text-center">
                                     No users found.
                                 </TableCell>
                             </TableRow>

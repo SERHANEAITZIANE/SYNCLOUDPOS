@@ -9,8 +9,16 @@ import { CreditCard, DollarSign, TrendingDown, TrendingUp } from "lucide-react"
 import { TreasuryClient } from "./components/client"
 import { TreasuryAccountColumn } from "./components/types"
 import { TreasuryMovementColumn } from "./components/mouvements-columns"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
 
 const TreasuryPage = async () => {
+    const session = await auth()
+    // @ts-expect-error custom property
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "ACCOUNTANT" && !session?.user?.isSuperadmin) {
+        redirect("/dashboard")
+    }
+
     const summary = await getFinancialSummary()
     const accounts = await getTreasuryAccounts()
     const transactions = await getAllTreasuryTransactions()

@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { TrendingDown, AlertTriangle, Package, ShoppingCart } from "lucide-react"
 import { formatter } from "@/lib/utils"
 import Link from "next/link"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
 
 export const metadata: Metadata = {
     title: "Réapprovisionnement | SynCloudPOS",
@@ -17,6 +19,12 @@ const urgencyConfig = {
 }
 
 export default async function ReorderPage() {
+    const session = await auth()
+    // @ts-expect-error custom property
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "STOCK_MANAGER" && !session?.user?.isSuperadmin) {
+        redirect("/dashboard")
+    }
+
     const suggestions = await getReorderSuggestions(30)
 
     const criticalCount = suggestions.filter(s => s.urgency === "critical").length
