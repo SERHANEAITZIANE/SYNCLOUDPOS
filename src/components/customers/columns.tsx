@@ -36,14 +36,26 @@ export function useCustomerColumns(): ColumnDef<CustomerColumn>[] {
             }
         },
         {
+            accessorKey: "loyaltyPoints",
+            header: "Points de Fidélité",
+            cell: ({ row }) => {
+                const points = Number(row.original.loyaltyPoints ?? 0)
+                return (
+                    <span className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-500">
+                        <span className="text-amber-500 text-[10px]">★</span> {points.toLocaleString()}
+                    </span>
+                )
+            }
+        },
+        {
             accessorKey: "clientType",
             header: "Type",
             cell: ({ row }) => {
                 const type = row.original.clientType;
                 return (
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${type === 'WHOLESALE' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30' :
-                            type === 'RESELLER' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30' :
-                                'bg-slate-100 text-slate-800 dark:bg-slate-800'
+                        type === 'RESELLER' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30' :
+                            'bg-slate-100 text-slate-800 dark:bg-slate-800'
                         }`}>
                         {type === 'WHOLESALE' ? 'Grossiste' : type === 'RESELLER' ? 'Revendeur' : 'Détaillant'}
                     </span>

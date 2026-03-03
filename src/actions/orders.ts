@@ -110,11 +110,30 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         const oldDebt = oldTotal - oldPaidAmount;
 
                         // Revert customer balance
-                        if (oldDebt !== 0 && oldOrder.customerId) {
-                            await tx.customer.update({
-                                where: { id: oldOrder.customerId },
-                                data: { balance: { decrement: oldDebt } }
-                            });
+                        if (oldOrder.customerId) {
+                            if (oldDebt !== 0) {
+                                await tx.customer.update({
+                                    where: { id: oldOrder.customerId },
+                                    data: { balance: { decrement: oldDebt } }
+                                });
+                            }
+
+                            // Edit Mode: Revert Loyalty Points
+                            // Fetch old tenant settings to know what ratio was applied
+                            const oldTenant = await tx.tenant.findUnique({ where: { id: tenantId } });
+                            if (oldTenant) {
+                                const oldPointsEarned = Math.floor(oldTotal * oldTenant.loyaltyPointsPerDa);
+                                // For old orders we don't know exactly how many points were used unless we query it, 
+                                // but the easiest approach is just reverting the earned points to prevent abuse
+                                await tx.customer.update({
+                                    where: { id: oldOrder.customerId },
+                                    data: {
+                                        loyaltyPoints: {
+                                            decrement: oldPointsEarned
+                                        }
+                                    }
+                                });
+                            }
                         }
 
                         // Revert treasury
@@ -252,9 +271,11 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     })
                 }
 
-                // Loyalty Points: earn 1 point per DA spent (rounded down), deduct used points
-                const pointsEarned = Math.floor(total)
-                const pointsDelta = pointsEarned - (loyaltyPointsUsed || 0)
+                // Loyalty Points: calculate using tenant settings
+                const activeTenant = await tx.tenant.findUnique({ where: { id: tenantId } });
+                const pointsEarned = Math.floor(total * (activeTenant?.loyaltyPointsPerDa || 1));
+                const pointsDelta = pointsEarned - (loyaltyPointsUsed || 0);
+
                 if (pointsDelta !== 0) {
                     await tx.customer.update({
                         where: { id: finalCustomerId },

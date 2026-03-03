@@ -1,113 +1,191 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { toast } from "react-hot-toast"
-import { Star, TrendingUp, Gift } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Star, Save, Zap } from "lucide-react"
+
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    FormDescription,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { updateLoyaltySettings } from "@/actions/settings"
+import { useTranslations } from "next-intl"
+
+const loyaltySchema = z.object({
+    loyaltyPointsPerDa: z.coerce.number().min(0, "Must be greater than or equal to 0"),
+    loyaltyDaPerPoint: z.coerce.number().min(1, "Must be at least 1"),
+})
+
+type LoyaltyFormValues = z.infer<typeof loyaltySchema>
 
 interface LoyaltySettingsFormProps {
-    loyaltyPointsPerDa: number
-    loyaltyDaPerPoint: number
+    initialData: {
+        loyaltyPointsPerDa: number
+        loyaltyDaPerPoint: number
+    }
 }
 
-export const LoyaltySettingsForm = ({ loyaltyPointsPerDa, loyaltyDaPerPoint }: LoyaltySettingsFormProps) => {
-    const [loading, setLoading] = useState(false)
-    const [pointsPerDa, setPointsPerDa] = useState(loyaltyPointsPerDa.toString())
-    const [daPerPoint, setDaPerPoint] = useState(loyaltyDaPerPoint.toString())
+export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) => {
+    const t = useTranslations("Settings")
+    const [isLoading, setIsLoading] = useState(false)
 
-    const handleSave = async () => {
-        const pPerDa = parseInt(pointsPerDa)
-        const dPerPt = parseInt(daPerPoint)
-        if (isNaN(pPerDa) || pPerDa < 1 || isNaN(dPerPt) || dPerPt < 1) {
-            toast.error("Les valeurs doivent être des entiers positifs")
-            return
+    const form = useForm<z.infer<typeof loyaltySchema>>({
+        resolver: zodResolver(loyaltySchema),
+        defaultValues: {
+            loyaltyPointsPerDa: initialData?.loyaltyPointsPerDa ?? 1,
+            loyaltyDaPerPoint: initialData?.loyaltyDaPerPoint ?? 100,
         }
-        setLoading(true)
-        const result = await updateLoyaltySettings({ loyaltyPointsPerDa: pPerDa, loyaltyDaPerPoint: dPerPt })
-        if (result.error) toast.error(result.error)
-        else toast.success("Paramètres de fidélité mis à jour !")
-        setLoading(false)
+    })
+
+    const onSubmit = async (data: LoyaltyFormValues) => {
+        setIsLoading(true)
+        try {
+            const res = await updateLoyaltySettings({
+                loyaltyPointsPerDa: data.loyaltyPointsPerDa,
+                loyaltyDaPerPoint: data.loyaltyDaPerPoint
+            })
+
+            if (res.error) {
+                toast.error(res.error)
+            } else {
+                toast.success(res.success || t("settingsUpdated"))
+            }
+        } catch (error) {
+            toast.error(t("errorDefault"))
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    // Calculate a sample conversion for preview
-    const exampleSpend = 1000
-    const examplePoints = exampleSpend * parseInt(pointsPerDa || "1")
-    const exampleReduction = Math.floor(examplePoints / parseInt(daPerPoint || "100"))
+    const currentPointsPerDa = form.watch("loyaltyPointsPerDa")
+    const currentDaPerPoint = form.watch("loyaltyDaPerPoint")
 
     return (
-        <div className="space-y-8">
-
-            <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-amber-500" />
-                        Points gagnés par DA dépensé
-                    </Label>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="number"
-                            min="1"
-                            max="100"
-                            value={pointsPerDa}
-                            onChange={e => setPointsPerDa(e.target.value)}
-                            className="w-28"
-                        />
-                        <span className="text-sm text-muted-foreground">point(s) / DA</span>
+        <Card className="border-none shadow-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
+            <CardHeader className="border-b border-gray-100 dark:border-slate-800 pb-6">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl">
+                        <Star className="h-6 w-6 fill-amber-500" />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                        Combien de points le client gagne pour chaque DA dépensé.
-                    </p>
-                </div>
-
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <Gift className="h-4 w-4 text-violet-500" />
-                        Points nécessaires pour 1 DA de réduction
-                    </Label>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="number"
-                            min="1"
-                            value={daPerPoint}
-                            onChange={e => setDaPerPoint(e.target.value)}
-                            className="w-28"
-                        />
-                        <span className="text-sm text-muted-foreground">pts = 1 DA</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                        Combien de points faut-il pour obtenir 1 DA de remise.
-                    </p>
-                </div>
-            </div>
-
-            {/* Live preview */}
-            <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/40 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2 mb-3">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    Aperçu du programme de fidélité
-                </h3>
-                <div className="grid grid-cols-3 divide-x divide-amber-200 dark:divide-amber-700/40 text-center">
-                    <div className="px-4 space-y-1">
-                        <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{exampleSpend.toLocaleString("fr-FR")}</p>
-                        <p className="text-xs text-muted-foreground">DA dépensés</p>
-                    </div>
-                    <div className="px-4 space-y-1">
-                        <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{examplePoints.toLocaleString("fr-FR")}</p>
-                        <p className="text-xs text-muted-foreground">Points gagnés</p>
-                    </div>
-                    <div className="px-4 space-y-1">
-                        <p className="text-2xl font-black text-amber-700 dark:text-amber-300">{exampleReduction.toLocaleString("fr-FR")}</p>
-                        <p className="text-xs text-muted-foreground">DA de réduction</p>
+                    <div>
+                        <CardTitle className="text-xl font-bold">{t("loyaltyProgram") || "Programme de Fidélité"}</CardTitle>
+                        <CardDescription className="text-gray-500 mt-1">
+                            {t("loyaltyDesc") || "Configurez comment les clients gagnent et dépensent leurs points."}
+                        </CardDescription>
                     </div>
                 </div>
-            </div>
+            </CardHeader>
+            <CardContent className="p-6">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
 
-            <Button onClick={handleSave} disabled={loading} className="bg-amber-500 hover:bg-amber-600 text-white">
-                {loading ? "Enregistrement..." : "Sauvegarder la configuration"}
-            </Button>
-        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4 bg-gray-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                                        <Zap className="h-4 w-4" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("earningPoints") || "Gagner des points"}</h3>
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="loyaltyPointsPerDa"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Points par 1 DA dépensé</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="number"
+                                                        disabled={isLoading}
+                                                        {...field}
+                                                        className="h-11 rounded-xl pr-16 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 focus-visible:ring-emerald-500"
+                                                    />
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">
+                                                        pts/DA
+                                                    </div>
+                                                </div>
+                                            </FormControl>
+                                            <FormDescription className="text-xs">
+                                                Ex: Si vous mettez 1, un achat de 1000 DA = {1000 * (currentPointsPerDa || 1)} points gagnés.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="space-y-4 bg-gray-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg">
+                                        <Star className="h-4 w-4" />
+                                    </div>
+                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("spendingPoints") || "Dépenser des points"}</h3>
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="loyaltyDaPerPoint"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Points requis pour 1 DA de réduction</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="number"
+                                                        disabled={isLoading}
+                                                        {...field}
+                                                        className="h-11 rounded-xl pr-16 bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 focus-visible:ring-amber-500"
+                                                    />
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">
+                                                        pts/DA
+                                                    </div>
+                                                </div>
+                                            </FormControl>
+                                            <FormDescription className="text-xs">
+                                                Ex: Si vous mettez 100, une réduction de 10 DA nécessitera {10 * (currentDaPerPoint || 100)} points.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Summary Widget */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 rounded-xl border border-indigo-100/50 dark:border-indigo-900/50 flex items-center justify-between">
+                            <div className="space-y-1">
+                                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Résumé du programme</p>
+                                <p className="text-xs text-indigo-700/80 dark:text-indigo-300/80">Un client dépensant 10,000 DA obtiendra une réduction future de :</p>
+                            </div>
+                            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 bg-white/50 dark:bg-slate-900/50 px-3 py-1.5 rounded-lg">
+                                {Number(((10000 * (currentPointsPerDa || 1)) / (currentDaPerPoint || 100)).toFixed(2))} DA
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="h-11 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+                            >
+                                <Save className="mr-2 h-4 w-4" />
+                                {t("saveChanges") || "Sauvegarder"}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
     )
 }

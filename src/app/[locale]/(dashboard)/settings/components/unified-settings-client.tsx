@@ -196,8 +196,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             </p>
                         </div>
                         <LoyaltySettingsForm
-                            loyaltyPointsPerDa={tenant.loyaltyPointsPerDa}
-                            loyaltyDaPerPoint={tenant.loyaltyDaPerPoint}
+                            initialData={{
+                                loyaltyPointsPerDa: tenant.loyaltyPointsPerDa,
+                                loyaltyDaPerPoint: tenant.loyaltyDaPerPoint
+                            }}
                         />
                     </div>
                 </TabsContent>
