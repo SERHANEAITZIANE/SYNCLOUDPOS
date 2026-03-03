@@ -106,6 +106,7 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             routes: [
                 { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: !isVendeur },
                 { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: !isVendeur },
+                { label: "Prévisions IA", icon: Sparkles, href: "/analytics/forecast", color: "text-fuchsia-400", visible: !isVendeur },
                 { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: !isVendeur },
                 { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: !isVendeur },
                 { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: !isVendeur },
