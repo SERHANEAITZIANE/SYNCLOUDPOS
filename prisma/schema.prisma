@@ -65,6 +65,41 @@ model Tenant {
   stockMovements StockMovement[]
   dailyCloses    DailyClose[]
   stockCountSessions StockCountSession[]
+  recurringInvoices  RecurringInvoice[]
+}
+
+model RecurringInvoice {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  
+  status          String   @default("ACTIVE") // ACTIVE, PAUSED
+  frequency       String   @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
+  nextRunDate     DateTime
+  lastRunDate     DateTime?
+  
+  subTotal        Decimal  @default(0)
+  tax             Decimal  @default(0)
+  total           Decimal  @default(0)
+  
+  items           RecurringInvoiceItem[]
+  generatedOrders SalesOrder[] // Optional history of BLs generated
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model RecurringInvoiceItem {
+  id                 String   @id @default(uuid())
+  recurringInvoiceId String
+  recurringInvoice   RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id])
+  quantity           Int
+  unitPrice          Decimal
+  subTotal           Decimal
 }
 
 model StockCountSession {
@@ -173,6 +208,7 @@ model Product {
   images      Image[]
   barcodes    Barcode[]
   stockMovements StockMovement[]
+  recurringItems RecurringInvoiceItem[]
 }
 
 model Image {
@@ -234,6 +270,7 @@ model Customer {
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   orders    Order[]
   salesOrders SalesOrder[]
+  recurringInvoices RecurringInvoice[]
   clientType String @default("RETAIL")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -336,6 +373,9 @@ model SalesOrder {
   total           Decimal       // Devient Subtotal + TVA + Timbre
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  recurringInvoiceId String?
+  recurringInvoice   RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
 
   items           SalesOrderItem[]
 }

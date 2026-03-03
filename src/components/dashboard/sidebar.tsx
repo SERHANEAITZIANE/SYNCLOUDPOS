@@ -25,7 +25,8 @@ import {
     Gift,
     LockKeyhole,
     RefreshCw,
-    ClipboardList
+    ClipboardList,
+    Repeat
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -75,6 +76,7 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
             label: t("transactionsGroup") || "Transactions",
             routes: [
                 { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: true },
+                { label: "Factures Récurrentes", icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: !isVendeur },
                 { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: !isVendeur },
                 { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: !isVendeur },
                 { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: true },
