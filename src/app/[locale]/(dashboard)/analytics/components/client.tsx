@@ -108,6 +108,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
     const t = useTranslations("Analytics.kpi")
+    const tDashboard = useTranslations("Dashboard")
+    const tAnalytics = useTranslations("Analytics")
+    const tNav = useTranslations("Navigation")
     const [isMounted, setIsMounted] = React.useState(false)
     React.useEffect(() => { setIsMounted(true) }, [])
     if (!isMounted) return null
@@ -134,7 +137,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 </h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <KpiCard
-                        title={useTranslations("Dashboard")("totalRevenue")}
+                        title={tDashboard("totalRevenue")}
                         value={formatter.format(data.totalRevenue)}
                         icon={DollarSign}
                         color="blue"
@@ -153,14 +156,14 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                         sub={t("cogsDesc")}
                     />
                     <KpiCard
-                        title={useTranslations("Analytics")("expenses")}
+                        title={tAnalytics("expenses")}
                         value={formatter.format(data.totalExpenses)}
                         icon={TrendingDown}
                         color="red"
                         sub={t("expensesDesc")}
                     />
                     <KpiCard
-                        title={useTranslations("Analytics")("profit")}
+                        title={tAnalytics("profit")}
                         value={formatter.format(data.netProfit)}
                         icon={TrendingUp}
                         color={profitColor}
@@ -192,7 +195,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                         }
                     />
                     <KpiCard
-                        title={useTranslations("Navigation")("purchases")}
+                        title={tNav("purchases")}
                         value={formatter.format(data.totalPurchases)}
                         icon={ShoppingCart}
                         color="purple"
