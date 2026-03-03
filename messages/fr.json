@@ -634,5 +634,148 @@
         "noCustomer": "Aucun client",
         "items": "articles",
         "loadOrder": "Charger Commande"
+    },
+    "Formation": {
+        "hero": {
+            "badge": "Guide de Formation",
+            "title": "SynCloudPOS ERP",
+            "desc": "Découvrez toutes les fonctionnalités de votre logiciel. Ce guide couvre chaque module de manière simple et précise.",
+            "tags": [
+                "Caisse POS",
+                "Stocks",
+                "BL / Factures",
+                "Trésorerie",
+                "IA Chat"
+            ]
+        },
+        "tabs": {
+            "dashboard": "Tableau de Bord",
+            "pos": "Caisse POS",
+            "stocks": "Catalogue",
+            "sales": "Ventes (BL)",
+            "purchases": "Achats",
+            "treasury": "Trésorerie",
+            "contacts": "Contacts",
+            "analytics": "Analyses",
+            "ai": "IA"
+        },
+        "dashboard": {
+            "title": "Tableau de Bord",
+            "subtitle": "L'aperçu global de votre commerce en temps réel.",
+            "kpiTitle": "Chiffres Clés",
+            "kpiDesc": "CA, ventes, marge brute — tout visible d'un coup d'œil.",
+            "stockAlertsTitle": "Alertes Stock",
+            "stockAlertsDesc": "Produits sous le seuil d'alerte pour commander sans délai.",
+            "debtorsTitle": "Clients Endettés",
+            "debtorsDesc": "Liste des clients avec balance négative pour le recouvrement.",
+            "shortcutsTitle": "Raccourcis Rapides",
+            "shortcutsDesc": "Accès direct au POS, création de commande ou dépense."
+        },
+        "pos": {
+            "title": "Caisse (POS)",
+            "subtitle": "Réalisez vos ventes de détail rapidement. Optimisé pour les écrans tactiles.",
+            "stepsTitle": "Les 3 étapes d'une vente",
+            "step1Title": "Ajouter les produits",
+            "step1Desc": "Scannez ou cherchez par nom. Quantité négative = retour.",
+            "step2Title": "Valider le paiement [F9]",
+            "step2Desc": "Choisissez le mode (Espèces, Virement). Monnaie calculée.",
+            "step3Title": "Imprimer le ticket",
+            "step3Desc": "Le reçu thermique scannable est généré automatiquement.",
+            "multiSessionTitle": "Multi-Sessions",
+            "multiSessionDesc": "Gérez plusieurs caisses simultanément sans perdre le panier.",
+            "wholesaleTitle": "Mode Grossiste",
+            "wholesaleDesc": "Prix adapté (détail/gros) selon le profil client sélectionné.",
+            "scannableTicketTitle": "Ticket Scannable",
+            "scannableTicketDesc": "Le code-barre du reçu recharge instantanément la commande."
+        },
+        "stocks": {
+            "title": "Catalogue & Stocks",
+            "subtitle": "Gérez vos produits, tarifs et imprimez vos étiquettes.",
+            "productCardTitle": "Fiche Produit",
+            "productCardDesc": "Prix d'achat, détail, gros, TVA, stock, seuil, code-barres.",
+            "catalogTitle": "Catalogue PDF",
+            "catalogDesc": "Exportez votre liste filtrée pour revendeurs et grossistes.",
+            "labelsTitle": "Étiquettes Code-barre",
+            "labelsDesc": "Sélectionnez un modèle et imprimez en masse.",
+            "modelsTitle": "Modèles d'Étiquettes",
+            "modelsDesc": "Configurez le modèle préféré dans les paramètres d'impression."
+        },
+        "sales": {
+            "title": "Ventes (Bons de Livraison)",
+            "subtitle": "Commandes B2B nécessitant des documents officiels et suivi crédit.",
+            "blTitle": "Bon de Livraison (BL)",
+            "blDesc": "Document A4. Diminue le stock. Montant non payé = crédit.",
+            "proformaTitle": "Facture Proforma",
+            "proformaDesc": "Pré-vente / Devis. N'affecte pas le stock. Convertible en BL.",
+            "taxStampTitle": "Timbre Fiscal",
+            "taxStampDesc": "Calcul automatique sur les factures payées en espèces.",
+            "creditTrackingTitle": "Suivi Crédit Client",
+            "creditTrackingDesc": "La dette augmente à chaque vente à crédit. Consultable sur la fiche."
+        },
+        "purchases": {
+            "title": "Achats & Dépenses",
+            "subtitle": "Gérez vos entrées de stock et vos charges courantes.",
+            "ocrTitle": "Saisie IA (OCR)",
+            "ocrDesc": "L'IA détecte le fournisseur, les produits et les prix depuis une photo du bon.",
+            "ocrTags": [
+                "Fournisseur détecté",
+                "Produits listés",
+                "Prix remplis",
+                "Stock mis à jour"
+            ],
+            "stockEntryTitle": "Entrée de Stock",
+            "stockEntryDesc": "Chaque achat validé incrémente automatiquement le stock.",
+            "expensesTitle": "Dépenses (Charges)",
+            "expensesDesc": "Créez des catégories (loyer, salaires) pour analyser vos charges."
+        },
+        "treasury": {
+            "title": "Trésorerie & Comptes",
+            "subtitle": "Le centre névralgique de tous vos flux de liquidités.",
+            "multiAccountTitle": "Multi-Comptes",
+            "multiAccountDesc": "Caisse, Banque, CCP. Chaque mouvement est lié à un compte.",
+            "transferTitle": "Virements Internes",
+            "transferDesc": "Transférez des fonds entre comptes avec traçabilité parfaite.",
+            "historyTitle": "Historique",
+            "historyDesc": "Consultez l'historique complet des mouvements et les soldes."
+        },
+        "contacts": {
+            "title": "Clients & Fournisseurs",
+            "subtitle": "Gérez votre répertoire, le suivi des dettes et les règlements.",
+            "balanceTitle": "Fonctionnement des balances (Dettes)",
+            "step1Title": "1. Vente à crédit",
+            "step1Desc": "La balance diminue (devient négative), le client vous doit de l'argent.",
+            "step2Title": "2. Recouvrement",
+            "step2Desc": "Le client paie → la balance remonte vers zéro.",
+            "step3Title": "3. Fournisseurs",
+            "step3Desc": "Balance négative = vous lui devez de l'argent."
+        },
+        "analytics": {
+            "title": "Rapports & Analyses",
+            "subtitle": "Les mathématiques de votre commerce, claires et nettes.",
+            "stockValueTitle": "Valeur du Stock",
+            "stockValueDesc": "Vos capitaux immobilisés dans le magasin au prix d'achat.",
+            "grossProfitTitle": "Bénéfice Brut",
+            "grossProfitDesc": "Ventes Totales − Coût des marchandises = Marge.",
+            "netProfitTitle": "Bénéfice Net",
+            "netProfitDesc": "Bénéfice Brut − Dépenses = Gain net réel.",
+            "topTitle": "Top Produits & Clients",
+            "topDesc": "Visualisez les éléments générant le plus grand chiffre d'affaires."
+        },
+        "ai": {
+            "title": "Intelligence Artificielle",
+            "subtitle": "Discutez naturellement avec vos données financières.",
+            "capabilitiesTitle": "Points forts de l'IA :",
+            "capabilitiesList": [
+                "Produits en rupture",
+                "Bénéfice mensuel",
+                "Clients endettés",
+                "Dépenses vs Revenus",
+                "Top Ventes"
+            ],
+            "modelsTitle": "Modèles au Choix",
+            "modelsDesc": "Gemini, OpenAI, Claude. Configuration par clé API personnelle.",
+            "privacyTitle": "Données Privées",
+            "privacyDesc": "Les clés et données restent sécurisées sur votre navigateur."
+        }
     }
 }

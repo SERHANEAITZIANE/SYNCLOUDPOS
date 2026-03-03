@@ -1,101 +1,97 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import {
     BookOpen, Monitor, ShoppingCart, Package, Users, Truck, Wallet, BarChart3,
-    Sparkles, Receipt, FileText, Zap, ArrowRight, CheckCircle, Shield, Database
+    Sparkles, Receipt, FileText, Zap, ArrowRight, CheckCircle, Shield, Database,
+    CreditCard, TrendingUp
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // ─────── Reusable sub-components ───────────────────────────────
 
-const FeatureCard = ({ icon: Icon, title, text, iconColor = "text-gray-700" }: {
-    icon: React.FC<any>; title: string; text: string; iconColor?: string
+const FeatureCard = ({ icon: Icon, title, text, iconColor = "text-slate-700", bgAccent = "bg-slate-50" }: {
+    icon: React.FC<any>; title: string; text: string; iconColor?: string; bgAccent?: string
 }) => (
-    <div className="group flex gap-4 p-5 rounded-2xl border border-gray-100 bg-white hover:shadow-md transition-all duration-200 hover:border-gray-200">
-        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-gray-50 group-hover:scale-110 transition-transform", iconColor)}>
-            <Icon className="w-5 h-5" />
-        </div>
-        <div>
-            <h4 className="font-semibold text-gray-900">{title}</h4>
-            <p className="text-sm text-gray-500 mt-1 leading-relaxed">{text}</p>
-        </div>
-    </div>
-)
-
-const Step = ({ n, title, text, bgColor = "#dbeafe", textColor = "#1d4ed8" }: {
-    n: number; title: string; text: string; bgColor?: string; textColor?: string
-}) => (
-    <div className="flex gap-4">
-        <div
-            className="w-9 h-9 rounded-full flex items-center justify-center font-black shrink-0 text-sm"
-            style={{ backgroundColor: bgColor, color: textColor }}
-        >{n}</div>
-        <div>
-            <h4 className="font-semibold text-gray-900">{title}</h4>
-            <p className="text-sm text-gray-500 mt-1 leading-relaxed">{text}</p>
-        </div>
-    </div>
-)
-
-const SectionHeader = ({ icon: Icon, title, subtitle, color }: {
-    icon: React.FC<any>; title: string; subtitle: string; color: string
-}) => (
-    <div className="flex items-start gap-4 mb-8">
-        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white" style={{ backgroundColor: color }}>
+    <div className="group flex flex-col gap-3 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110", bgAccent, iconColor)}>
             <Icon className="w-6 h-6" />
         </div>
         <div>
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-            <p className="text-gray-500 mt-1 leading-relaxed">{subtitle}</p>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-lg">{title}</h4>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">{text}</p>
         </div>
     </div>
 )
 
-const PlaceholderImg = ({ label }: { label: string }) => (
-    <div className="w-full h-48 md:h-56 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-sm font-medium text-gray-400 bg-gray-50">
-        📸 {label}
+const Step = ({ n, title, text, bgColor = "bg-blue-100 dark:bg-blue-900/30", textColor = "text-blue-700 dark:text-blue-400" }: {
+    n: string; title: string; text: string; bgColor?: string; textColor?: string
+}) => (
+    <div className="flex gap-4 p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
+        <div
+            className={cn("w-10 h-10 rounded-full flex items-center justify-center font-black shrink-0 text-sm shadow-inner", bgColor, textColor)}
+        >{n}</div>
+        <div>
+            <h4 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h4>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{text}</p>
+        </div>
     </div>
 )
 
-// ─────── Tab definitions ─────────────────────────────────────────
-const tabs = [
-    { value: "dashboard", label: "Tableau de Bord", icon: Monitor, color: "#2563eb" },
-    { value: "pos", label: "Caisse POS", icon: ShoppingCart, color: "#059669" },
-    { value: "stocks", label: "Catalogue", icon: Package, color: "#ea580c" },
-    { value: "sales", label: "Ventes (BL)", icon: Receipt, color: "#4338ca" },
-    { value: "purchases", label: "Achats", icon: Truck, color: "#dc2626" },
-    { value: "treasury", label: "Trésorerie", icon: Wallet, color: "#0891b2" },
-    { value: "contacts", label: "Contacts", icon: Users, color: "#7c3aed" },
-    { value: "analytics", label: "Analyses", icon: BarChart3, color: "#334155" },
-    { value: "ai", label: "IA", icon: Sparkles, color: "#6d28d9" },
-]
+const SectionHeader = ({ icon: Icon, title, subtitle, color, bg }: {
+    icon: React.FC<any>; title: string; subtitle: string; color: string; bg: string
+}) => (
+    <div className="flex items-start gap-5 mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
+        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", bg, color)}>
+            <Icon className="w-7 h-7" />
+        </div>
+        <div>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{title}</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg leading-relaxed">{subtitle}</p>
+        </div>
+    </div>
+)
 
 // ─────── Main Component ──────────────────────────────────────────
 export const FormationClient = () => {
     const [activeTab, setActiveTab] = useState("dashboard")
+    const t = useTranslations("Formation")
+
+    const tabs = [
+        { value: "dashboard", label: t("tabs.dashboard"), icon: Monitor, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10", activeBg: "bg-blue-600 text-white" },
+        { value: "pos", label: t("tabs.pos"), icon: ShoppingCart, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", activeBg: "bg-emerald-600 text-white" },
+        { value: "stocks", label: t("tabs.stocks"), icon: Package, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-500/10", activeBg: "bg-orange-600 text-white" },
+        { value: "sales", label: t("tabs.sales"), icon: Receipt, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", activeBg: "bg-indigo-600 text-white" },
+        { value: "purchases", label: t("tabs.purchases"), icon: Truck, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", activeBg: "bg-rose-600 text-white" },
+        { value: "treasury", label: t("tabs.treasury"), icon: Wallet, color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-50 dark:bg-cyan-500/10", activeBg: "bg-cyan-600 text-white" },
+        { value: "contacts", label: t("tabs.contacts"), icon: Users, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-500/10", activeBg: "bg-purple-600 text-white" },
+        { value: "analytics", label: t("tabs.analytics"), icon: BarChart3, color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-100 dark:bg-slate-800", activeBg: "bg-slate-800 dark:bg-slate-200 dark:text-slate-900 text-white" },
+        { value: "ai", label: t("tabs.ai"), icon: Sparkles, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-500/10", activeBg: "bg-violet-600 text-white" },
+    ]
 
     return (
-        <div className="min-h-screen pb-16" style={{ fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>
+        <div className="min-h-screen pb-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
             {/* Hero Banner */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 rounded-2xl p-8 md:p-12 mb-8 text-white relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, #3b82f6 0%, transparent 60%)' }} />
-                <div className="relative">
-                    <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-5">
+            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-8 md:p-14 mb-10 text-white relative overflow-hidden shadow-xl border border-slate-700/50">
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #818cf8 0%, transparent 50%)' }} />
+                <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                <div className="relative z-10 max-w-3xl">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-sm font-semibold mb-6 uppercase tracking-wider text-indigo-100">
                         <BookOpen className="w-4 h-4" />
-                        Guide de Formation
+                        {t("hero.badge")}
                     </div>
-                    <h1 className="text-3xl md:text-5xl font-black mb-3 tracking-tight">
-                        SynCloud<span className="text-blue-400">POS</span> ERP
+                    <h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">
+                        {t("hero.title").split(" ")[0]}<span className="text-indigo-400"> {t("hero.title").split(" ")[1]}</span>
                     </h1>
-                    <p className="text-slate-300 text-lg max-w-2xl leading-relaxed">
-                        Découvrez toutes les fonctionnalités de votre logiciel de gestion. Ce guide couvre chaque module avec des exemples pratiques.
+                    <p className="text-slate-300 text-lg md:text-xl leading-relaxed mb-8 font-medium">
+                        {t("hero.desc")}
                     </p>
-                    <div className="flex flex-wrap gap-3 mt-6">
-                        {["Caisse POS", "Stocks", "BL / Factures", "Trésorerie", "IA Chat"].map(tag => (
-                            <span key={tag} className="flex items-center gap-1.5 text-sm bg-white/10 border border-white/15 rounded-full px-3 py-1">
-                                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                    <div className="flex flex-wrap gap-3">
+                        {t.raw("hero.tags").map((tag: string) => (
+                            <span key={tag} className="flex items-center gap-2 text-sm font-medium bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 hover:bg-white/10 transition-colors">
+                                <CheckCircle className="w-4 h-4 text-emerald-400" />
                                 {tag}
                             </span>
                         ))}
@@ -104,26 +100,25 @@ export const FormationClient = () => {
             </div>
 
             {/* Layout: Sidebar + Content */}
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-8">
 
-                {/* ── Sidebar nav (plain buttons, inline style for active color) ── */}
-                <div className="md:w-56 shrink-0 md:sticky md:top-24 md:h-min">
-                    <nav className="flex flex-row md:flex-col bg-white border border-gray-100 rounded-2xl p-2 shadow-sm gap-1 overflow-x-auto md:overflow-visible w-full">
-                        {tabs.map(t => {
-                            const isActive = activeTab === t.value
+                {/* ── Sidebar nav ── */}
+                <div className="md:w-64 shrink-0 md:sticky md:top-24 md:h-min">
+                    <nav className="flex flex-row md:flex-col p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm gap-1.5 overflow-x-auto w-full">
+                        {tabs.map(tab => {
+                            const isActive = activeTab === tab.value
                             return (
                                 <button
-                                    key={t.value}
+                                    key={tab.value}
                                     type="button"
-                                    onClick={() => setActiveTab(t.value)}
+                                    onClick={() => setActiveTab(tab.value)}
                                     className={cn(
-                                        "flex items-center gap-2.5 rounded-xl text-sm font-semibold px-3 py-2.5 transition-all whitespace-nowrap w-full text-left shrink-0",
-                                        isActive ? "text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"
+                                        "flex items-center gap-3 rounded-xl text-sm font-semibold px-4 py-3 transition-all whitespace-nowrap w-full text-left shrink-0",
+                                        isActive ? tab.activeBg + " shadow-md" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                                     )}
-                                    style={isActive ? { backgroundColor: t.color } : {}}
                                 >
-                                    <t.icon className="h-4 w-4 shrink-0" />
-                                    <span className="truncate">{t.label}</span>
+                                    <tab.icon className={cn("h-5 w-5 shrink-0 transition-transform", isActive ? "scale-110" : "opacity-70")} />
+                                    <span className="truncate">{tab.label}</span>
                                 </button>
                             )
                         })}
@@ -131,205 +126,180 @@ export const FormationClient = () => {
                 </div>
 
                 {/* ── Content panels ── */}
-                <div className="flex-1 min-w-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
+                <div className="flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 md:p-10">
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300 fill-mode-forwards">
 
-                    {/* DASHBOARD */}
-                    {activeTab === "dashboard" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Monitor} title="Tableau de Bord" subtitle="L'aperçu global de votre commerce en temps réel." color="#2563eb" />
-                            <PlaceholderImg label="Tableau de Bord principal" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FeatureCard icon={BarChart3} title="Chiffres Clés" iconColor="text-blue-500"
-                                    text="CA journalier/mensuel, nombre de ventes, marge brute — tout visible d'un coup d'œil." />
-                                <FeatureCard icon={Package} title="Alertes Stock" iconColor="text-orange-500"
-                                    text="Produits sous le seuil d'alerte listés pour passer commande sans délai." />
-                                <FeatureCard icon={Users} title="Clients Endettés" iconColor="text-red-500"
-                                    text="Récapitulatif des clients avec balance négative pour faciliter le recouvrement." />
-                                <FeatureCard icon={Zap} title="Raccourcis Rapides" iconColor="text-amber-500"
-                                    text="Accès direct au POS, création de commande ou saisie de dépense depuis le tableau." />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* POS */}
-                    {activeTab === "pos" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={ShoppingCart} title="Caisse (POS)" subtitle="Réalisez vos ventes de détail rapidement. Optimisé pour écrans tactiles et douchettes." color="#059669" />
-                            <PlaceholderImg label="Interface POS en action" />
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-lg text-gray-800 border-b pb-2">Les 3 étapes d&apos;une vente</h3>
-                                <div className="space-y-5">
-                                    <Step n={1} title="Ajouter les produits" bgColor="#d1fae5" textColor="#065f46"
-                                        text="Scannez le code-barre, recherchez par nom, ou cliquez sur les catégories. Ajustez prix, quantité ou remise. Quantité négative = retour marchandise." />
-                                    <Step n={2} title="Valider le paiement [F9]" bgColor="#d1fae5" textColor="#065f46"
-                                        text="Cliquez Paiement ou appuyez F9. Choisissez le mode (Espèces, Virement, Chèque, Terme). La monnaie à rendre est calculée automatiquement." />
-                                    <Step n={3} title="Imprimer le ticket" bgColor="#d1fae5" textColor="#065f46"
-                                        text="Un reçu thermique avec code-barre scannable est généré. Le ticket peut être re-scanné pour modifier la vente." />
+                        {/* DASHBOARD */}
+                        {activeTab === "dashboard" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Monitor} title={t("dashboard.title")} subtitle={t("dashboard.subtitle")} color="text-blue-600 dark:text-blue-400" bg="bg-blue-100 dark:bg-blue-900/30" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={BarChart3} title={t("dashboard.kpiTitle")} text={t("dashboard.kpiDesc")} iconColor="text-blue-600 dark:text-blue-400" bgAccent="bg-blue-50 dark:bg-blue-900/20" />
+                                    <FeatureCard icon={Package} title={t("dashboard.stockAlertsTitle")} text={t("dashboard.stockAlertsDesc")} iconColor="text-orange-600 dark:text-orange-400" bgAccent="bg-orange-50 dark:bg-orange-900/20" />
+                                    <FeatureCard icon={Users} title={t("dashboard.debtorsTitle")} text={t("dashboard.debtorsDesc")} iconColor="text-rose-600 dark:text-rose-400" bgAccent="bg-rose-50 dark:bg-rose-900/20" />
+                                    <FeatureCard icon={Zap} title={t("dashboard.shortcutsTitle")} text={t("dashboard.shortcutsDesc")} iconColor="text-amber-600 dark:text-amber-400" bgAccent="bg-amber-50 dark:bg-amber-900/20" />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FeatureCard icon={Users} title="Multi-Sessions" iconColor="text-emerald-600"
-                                    text="Gérez plusieurs caisses simultanément (onglets). Passez d'un client à l'autre sans perdre le panier." />
-                                <FeatureCard icon={Shield} title="Mode Grossiste" iconColor="text-blue-600"
-                                    text="Prix automatiquement ajusté (détail, gros, revendeur) selon le type du client sélectionné." />
-                                <FeatureCard icon={Receipt} title="Ticket Scannable" iconColor="text-purple-600"
-                                    text="Le code-barre du reçu peut être re-scanné pour recharger la commande et la modifier." />
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* STOCKS */}
-                    {activeTab === "stocks" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Package} title="Catalogue & Stocks" subtitle="Gérez vos produits, codes-barres, tarifs et faites imprimer des étiquettes." color="#ea580c" />
-                            <PlaceholderImg label="Liste des Produits" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FeatureCard icon={Database} title="Fiche Produit Complète" iconColor="text-orange-600"
-                                    text="Prix d'achat · Prix détail · Prix gros · Prix revendeur · TVA · Stock · Seuil d'alerte · Code-barres." />
-                                <FeatureCard icon={FileText} title="Catalogue PDF / WhatsApp" iconColor="text-orange-500"
-                                    text="Exportez votre liste de prix filtrée par catégorie et type de client (Grossiste, Revendeur)." />
-                                <FeatureCard icon={Sparkles} title="Étiquettes Code-barre" iconColor="text-amber-500"
-                                    text="Sélectionnez un modèle d'étiquette (classique, moderne, élégant…) et imprimez en masse." />
-                                <FeatureCard icon={Zap} title="6 Modèles d'Étiquettes" iconColor="text-red-500"
-                                    text="Configurez dans Paramètres > Impression le modèle préféré, appliqué à chaque impression." />
-                            </div>
-                        </div>
-                    )}
+                        {/* POS */}
+                        {activeTab === "pos" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={ShoppingCart} title={t("pos.title")} subtitle={t("pos.subtitle")} color="text-emerald-600 dark:text-emerald-400" bg="bg-emerald-100 dark:bg-emerald-900/30" />
 
-                    {/* VENTES */}
-                    {activeTab === "sales" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Receipt} title="Ventes (Bons de Livraison)" subtitle="Pour les commandes B2B nécessitant des factures A4 officielles et un suivi crédit." color="#4338ca" />
-                            <PlaceholderImg label="Liste des Bons de Livraison" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FeatureCard icon={FileText} title="BL (Bon de Livraison)" iconColor="text-indigo-600"
-                                    text="Document A4 officiel. Diminue le stock. Si montant payé < total, la différence va dans le crédit du client." />
-                                <FeatureCard icon={ArrowRight} title="Facture Proforma / Devis" iconColor="text-indigo-400"
-                                    text="Pré-vente client. N'affecte PAS le stock. Convertible en BL définitif après confirmation." />
-                                <FeatureCard icon={Shield} title="Timbre Fiscal" iconColor="text-indigo-700"
-                                    text="Le Droit de Timbre est calculé automatiquement sur les factures payées en espèces." />
-                                <FeatureCard icon={Users} title="Suivi Crédit Client" iconColor="text-purple-600"
-                                    text="Chaque vente à crédit crée ou augmente la dette du client. Consultable dans la fiche client." />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ACHATS */}
-                    {activeTab === "purchases" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Truck} title="Achats & Dépenses" subtitle="Gérez vos entrées de stock, commandes fournisseurs et charges courantes." color="#dc2626" />
-                            <PlaceholderImg label="Bons d'Achats Fournisseurs" />
-                            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-6 text-white">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <Sparkles className="w-6 h-6" />
-                                    <h3 className="text-lg font-bold">OCR IA — Saisie Automatique</h3>
+                                <div className="bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl p-6 mb-8">
+                                    <h3 className="font-bold text-xl text-emerald-900 dark:text-emerald-400 mb-6 flex items-center gap-2">
+                                        <ShoppingCart className="w-6 h-6" /> {t("pos.stepsTitle")}
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <Step n="1" title={t("pos.step1Title")} text={t("pos.step1Desc")} bgColor="bg-emerald-100 dark:bg-emerald-900/40" textColor="text-emerald-700 dark:text-emerald-400" />
+                                        <Step n="2" title={t("pos.step2Title")} text={t("pos.step2Desc")} bgColor="bg-emerald-100 dark:bg-emerald-900/40" textColor="text-emerald-700 dark:text-emerald-400" />
+                                        <Step n="3" title={t("pos.step3Title")} text={t("pos.step3Desc")} bgColor="bg-emerald-100 dark:bg-emerald-900/40" textColor="text-emerald-700 dark:text-emerald-400" />
+                                    </div>
                                 </div>
-                                <p className="text-white/90 mb-4 leading-relaxed">
-                                    Photographiez votre bon fournisseur papier. L&apos;IA détecte le fournisseur, liste les produits, remplit les quantités et prix en quelques secondes.
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {["Fournisseur auto-détecté", "Produits listés", "Prix remplis", "Stock mis à jour"].map(f => (
-                                        <span key={f} className="bg-white/15 border border-white/20 rounded-full text-xs px-3 py-1 flex items-center gap-1.5">
-                                            <CheckCircle className="w-3 h-3 text-emerald-300" /> {f}
-                                        </span>
-                                    ))}
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <FeatureCard icon={Users} title={t("pos.multiSessionTitle")} text={t("pos.multiSessionDesc")} iconColor="text-teal-600 dark:text-teal-400" bgAccent="bg-teal-50 dark:bg-teal-900/20" />
+                                    <FeatureCard icon={Shield} title={t("pos.wholesaleTitle")} text={t("pos.wholesaleDesc")} iconColor="text-indigo-600 dark:text-indigo-400" bgAccent="bg-indigo-50 dark:bg-indigo-900/20" />
+                                    <FeatureCard icon={Receipt} title={t("pos.scannableTicketTitle")} text={t("pos.scannableTicketDesc")} iconColor="text-purple-600 dark:text-purple-400" bgAccent="bg-purple-50 dark:bg-purple-900/20" />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FeatureCard icon={Package} title="Entrée de Stock" iconColor="text-red-600"
-                                    text="Chaque bon d'achat validé incrémente automatiquement le stock des produits concernés." />
-                                <FeatureCard icon={Wallet} title="Dépenses (Charges)" iconColor="text-red-400"
-                                    text="Loyer, électricité, salaires… Créez des catégories pour analyser vos charges en détail." />
-                            </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* TRÉSORERIE */}
-                    {activeTab === "treasury" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Wallet} title="Trésorerie & Comptes" subtitle="Le centre névralgique de tous vos liquidités, caisses et comptes bancaires." color="#0891b2" />
-                            <PlaceholderImg label="Gestion des Comptes de Trésorerie" />
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FeatureCard icon={Wallet} title="Multi-Comptes" iconColor="text-cyan-600"
-                                    text="Caisse principale, Banque CPA, CCP, etc. Chaque mouvement est rattaché à un compte précis." />
-                                <FeatureCard icon={ArrowRight} title="Virements Internes" iconColor="text-cyan-500"
-                                    text="Transférez des fonds entre vos comptes (ex: caisse → banque) avec traçabilité complète." />
-                                <FeatureCard icon={BarChart3} title="Historique" iconColor="text-cyan-700"
-                                    text="Consultez tout l'historique des mouvements de chaque compte avec soldes avant/après." />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* CONTACTS */}
-                    {activeTab === "contacts" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Users} title="Clients & Fournisseurs" subtitle="Gérez votre répertoire et le suivi des dettes et recouvrements." color="#7c3aed" />
-                            <PlaceholderImg label="Fiche Client avec Balance" />
-                            <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6">
-                                <h3 className="font-bold text-purple-900 text-lg mb-5 flex items-center gap-2">
-                                    <Shield className="w-5 h-5" /> Comment fonctionnent les Balances (Dettes) ?
-                                </h3>
-                                <div className="space-y-5">
-                                    <Step n={1} title="Génération de la dette" bgColor="#ede9fe" textColor="#5b21b6"
-                                        text="Vente à crédit ou paiement partiel → la balance du client devient négative (il vous doit de l'argent)." />
-                                    <Step n={2} title="Recouvrement client" bgColor="#ede9fe" textColor="#5b21b6"
-                                        text="Le client revient payer → Clients > Remboursement Client. Vous encaissez. La balance remonte vers zéro." />
-                                    <Step n={3} title="Dettes Fournisseur" bgColor="#ede9fe" textColor="#5b21b6"
-                                        text="Même principe. Balance fournisseur négative = vous lui devez de l'argent." />
+                        {/* STOCKS */}
+                        {activeTab === "stocks" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Package} title={t("stocks.title")} subtitle={t("stocks.subtitle")} color="text-orange-600 dark:text-orange-400" bg="bg-orange-100 dark:bg-orange-900/30" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={Database} title={t("stocks.productCardTitle")} text={t("stocks.productCardDesc")} iconColor="text-orange-600 dark:text-orange-400" bgAccent="bg-orange-50 dark:bg-orange-900/20" />
+                                    <FeatureCard icon={FileText} title={t("stocks.catalogTitle")} text={t("stocks.catalogDesc")} iconColor="text-red-500 dark:text-red-400" bgAccent="bg-red-50 dark:bg-red-900/20" />
+                                    <FeatureCard icon={Sparkles} title={t("stocks.labelsTitle")} text={t("stocks.labelsDesc")} iconColor="text-amber-500 dark:text-amber-400" bgAccent="bg-amber-50 dark:bg-amber-900/20" />
+                                    <FeatureCard icon={Zap} title={t("stocks.modelsTitle")} text={t("stocks.modelsDesc")} iconColor="text-rose-500 dark:text-rose-400" bgAccent="bg-rose-50 dark:bg-rose-900/20" />
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* ANALYTICS */}
-                    {activeTab === "analytics" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={BarChart3} title="Rapports & Analyses" subtitle="Les mathématiques de votre commerce, en temps réel." color="#334155" />
-                            <PlaceholderImg label="Page Analyses et Rapports" />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <FeatureCard icon={Package} title="Valeur du Stock" iconColor="text-slate-600"
-                                    text="Capitaux immobilisés dans vos rayons (basé sur prix d'achat)." />
-                                <FeatureCard icon={ArrowRight} title="Bénéfice Brut" iconColor="text-emerald-600"
-                                    text="Ventes Totales − Coût des marchandises vendues = Marge commerciale." />
-                                <FeatureCard icon={Zap} title="Bénéfice Net" iconColor="text-amber-500"
-                                    text="Bénéfice Brut − Dépenses (loyer, factures…) = votre vrai gain." />
-                                <FeatureCard icon={BarChart3} title="Top Produits & Clients" iconColor="text-blue-600"
-                                    text="Visualisez les produits et clients qui génèrent le plus de CA." />
+                        {/* SALES */}
+                        {activeTab === "sales" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Receipt} title={t("sales.title")} subtitle={t("sales.subtitle")} color="text-indigo-600 dark:text-indigo-400" bg="bg-indigo-100 dark:bg-indigo-900/30" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={FileText} title={t("sales.blTitle")} text={t("sales.blDesc")} iconColor="text-indigo-600 dark:text-indigo-400" bgAccent="bg-indigo-50 dark:bg-indigo-900/20" />
+                                    <FeatureCard icon={ArrowRight} title={t("sales.proformaTitle")} text={t("sales.proformaDesc")} iconColor="text-blue-500 dark:text-blue-400" bgAccent="bg-blue-50 dark:bg-blue-900/20" />
+                                    <FeatureCard icon={Shield} title={t("sales.taxStampTitle")} text={t("sales.taxStampDesc")} iconColor="text-violet-600 dark:text-violet-400" bgAccent="bg-violet-50 dark:bg-violet-900/20" />
+                                    <FeatureCard icon={Users} title={t("sales.creditTrackingTitle")} text={t("sales.creditTrackingDesc")} iconColor="text-purple-600 dark:text-purple-400" bgAccent="bg-purple-50 dark:bg-purple-900/20" />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* IA */}
-                    {activeTab === "ai" && (
-                        <div className="space-y-8">
-                            <SectionHeader icon={Sparkles} title="Intelligence Artificielle" subtitle="Posez des questions sur vos finances à une IA qui connaît toutes vos données." color="#6d28d9" />
-                            <PlaceholderImg label="Chat IA intégré" />
-                            <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl p-6">
-                                <h3 className="font-bold text-violet-900 text-lg mb-4">Ce que l&apos;IA sait faire pour vous</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {[
-                                        "Lister les produits en rupture de stock",
-                                        "Calculer votre bénéfice net du mois",
-                                        "Identifier les clients qui vous doivent de l'argent",
-                                        "Comparer vos dépenses vs vos revenus",
-                                        "Recommander quels produits commander",
-                                        "Analyser votre top 10 des ventes",
-                                    ].map(item => (
-                                        <div key={item} className="flex items-center gap-2 text-sm text-violet-800">
-                                            <CheckCircle className="w-4 h-4 text-violet-500 shrink-0" /> {item}
+                        {/* PURCHASES */}
+                        {activeTab === "purchases" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Truck} title={t("purchases.title")} subtitle={t("purchases.subtitle")} color="text-rose-600 dark:text-rose-400" bg="bg-rose-100 dark:bg-rose-900/30" />
+
+                                <div className="bg-gradient-to-br from-rose-600 to-pink-600 rounded-3xl p-8 text-white shadow-lg overflow-hidden relative">
+                                    <div className="absolute right-0 top-0 opacity-10 blur-2xl transform translate-x-1/3 -translate-y-1/3">
+                                        <Sparkles className="w-64 h-64" />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                                                <Sparkles className="w-6 h-6 text-pink-100" />
+                                            </div>
+                                            <h3 className="text-2xl font-bold tracking-tight">{t("purchases.ocrTitle")}</h3>
                                         </div>
-                                    ))}
+                                        <p className="text-rose-50 text-lg mb-6 leading-relaxed max-w-2xl">
+                                            {t("purchases.ocrDesc")}
+                                        </p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {t.raw("purchases.ocrTags").map((f: string) => (
+                                                <span key={f} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-medium px-4 py-2 flex items-center gap-2">
+                                                    <CheckCircle className="w-4 h-4 text-pink-200" /> {f}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={Package} title={t("purchases.stockEntryTitle")} text={t("purchases.stockEntryDesc")} iconColor="text-rose-600 dark:text-rose-400" bgAccent="bg-rose-50 dark:bg-rose-900/20" />
+                                    <FeatureCard icon={Wallet} title={t("purchases.expensesTitle")} text={t("purchases.expensesDesc")} iconColor="text-pink-500 dark:text-pink-400" bgAccent="bg-pink-50 dark:bg-pink-900/20" />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FeatureCard icon={Sparkles} title="Modèles au Choix" iconColor="text-violet-600"
-                                    text="Google Gemini, OpenAI GPT, Claude, Kimi. Entrez votre propre clé API, elle reste dans votre navigateur." />
-                                <FeatureCard icon={Shield} title="Données Privées" iconColor="text-violet-400"
-                                    text="Vos clés API ne sont jamais envoyées au serveur. Elles restent sauvegardées localement sur votre appareil." />
-                            </div>
-                        </div>
-                    )}
+                        )}
 
+                        {/* TREASURY */}
+                        {activeTab === "treasury" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Wallet} title={t("treasury.title")} subtitle={t("treasury.subtitle")} color="text-cyan-600 dark:text-cyan-400" bg="bg-cyan-100 dark:bg-cyan-900/30" />
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <FeatureCard icon={Wallet} title={t("treasury.multiAccountTitle")} text={t("treasury.multiAccountDesc")} iconColor="text-cyan-600 dark:text-cyan-400" bgAccent="bg-cyan-50 dark:bg-cyan-900/20" />
+                                    <FeatureCard icon={ArrowRight} title={t("treasury.transferTitle")} text={t("treasury.transferDesc")} iconColor="text-sky-500 dark:text-sky-400" bgAccent="bg-sky-50 dark:bg-sky-900/20" />
+                                    <FeatureCard icon={BarChart3} title={t("treasury.historyTitle")} text={t("treasury.historyDesc")} iconColor="text-teal-600 dark:text-teal-400" bgAccent="bg-teal-50 dark:bg-teal-900/20" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CONTACTS */}
+                        {activeTab === "contacts" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Users} title={t("contacts.title")} subtitle={t("contacts.subtitle")} color="text-purple-600 dark:text-purple-400" bg="bg-purple-100 dark:bg-purple-900/30" />
+
+                                <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 rounded-3xl p-8">
+                                    <h3 className="font-bold text-purple-900 dark:text-purple-400 text-xl mb-6 flex items-center gap-3">
+                                        <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg"><Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" /></div>
+                                        {t("contacts.balanceTitle")}
+                                    </h3>
+                                    <div className="space-y-3">
+                                        <Step n="1" title={t("contacts.step1Title")} text={t("contacts.step1Desc")} bgColor="bg-purple-200 dark:bg-purple-900/50" textColor="text-purple-800 dark:text-purple-300" />
+                                        <Step n="2" title={t("contacts.step2Title")} text={t("contacts.step2Desc")} bgColor="bg-purple-200 dark:bg-purple-900/50" textColor="text-purple-800 dark:text-purple-300" />
+                                        <Step n="3" title={t("contacts.step3Title")} text={t("contacts.step3Desc")} bgColor="bg-purple-200 dark:bg-purple-900/50" textColor="text-purple-800 dark:text-purple-300" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ANALYTICS */}
+                        {activeTab === "analytics" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={BarChart3} title={t("analytics.title")} subtitle={t("analytics.subtitle")} color="text-slate-800 dark:text-slate-200" bg="bg-slate-200 dark:bg-slate-800" />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <FeatureCard icon={Package} title={t("analytics.stockValueTitle")} text={t("analytics.stockValueDesc")} iconColor="text-slate-600 dark:text-slate-400" bgAccent="bg-slate-100 dark:bg-slate-800" />
+                                    <FeatureCard icon={TrendingUp} title={t("analytics.grossProfitTitle")} text={t("analytics.grossProfitDesc")} iconColor="text-emerald-600 dark:text-emerald-400" bgAccent="bg-emerald-50 dark:bg-emerald-900/20" />
+                                    <FeatureCard icon={Zap} title={t("analytics.netProfitTitle")} text={t("analytics.netProfitDesc")} iconColor="text-amber-500 dark:text-amber-400" bgAccent="bg-amber-50 dark:bg-amber-900/20" />
+                                    <FeatureCard icon={Users} title={t("analytics.topTitle")} text={t("analytics.topDesc")} iconColor="text-blue-600 dark:text-blue-400" bgAccent="bg-blue-50 dark:bg-blue-900/20" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* AI */}
+                        {activeTab === "ai" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Sparkles} title={t("ai.title")} subtitle={t("ai.subtitle")} color="text-violet-600 dark:text-violet-400" bg="bg-violet-100 dark:bg-violet-900/30" />
+
+                                <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/10 border border-violet-100 dark:border-violet-800/30 rounded-3xl p-8 shadow-sm">
+                                    <h3 className="font-bold text-violet-900 dark:text-violet-300 text-xl mb-6 flex items-center gap-2">
+                                        <Sparkles className="w-5 h-5" /> {t("ai.capabilitiesTitle")}
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {t.raw("ai.capabilitiesList").map((item: string, i: number) => (
+                                            <div key={i} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-slate-900/40 rounded-xl border border-violet-50 dark:border-violet-800/20 backdrop-blur-sm">
+                                                <div className="bg-violet-100 dark:bg-violet-900/50 p-1.5 rounded-lg text-violet-600 dark:text-violet-400">
+                                                    <CheckCircle className="w-4 h-4" />
+                                                </div>
+                                                <span className="font-medium text-violet-900 dark:text-violet-200 text-sm">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={Monitor} title={t("ai.modelsTitle")} text={t("ai.modelsDesc")} iconColor="text-violet-600 dark:text-violet-400" bgAccent="bg-violet-50 dark:bg-violet-900/20" />
+                                    <FeatureCard icon={Shield} title={t("ai.privacyTitle")} text={t("ai.privacyDesc")} iconColor="text-fuchsia-500 dark:text-fuchsia-400" bgAccent="bg-fuchsia-50 dark:bg-fuchsia-900/20" />
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
                 </div>{/* end content area */}
             </div>{/* end layout */}
         </div>

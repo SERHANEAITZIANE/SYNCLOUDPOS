@@ -634,5 +634,148 @@
     "noCustomer": "No Customer",
     "items": "items",
     "loadOrder": "Load Order"
+  },
+  "Formation": {
+    "hero": {
+      "badge": "Training Guide",
+      "title": "SynCloudPOS ERP",
+      "desc": "Discover all the features of your software. This guide covers each module simply and precisely.",
+      "tags": [
+        "POS Cashier",
+        "Inventory",
+        "Invoices",
+        "Treasury",
+        "AI Chat"
+      ]
+    },
+    "tabs": {
+      "dashboard": "Dashboard",
+      "pos": "POS Cashier",
+      "stocks": "Catalog",
+      "sales": "Sales",
+      "purchases": "Purchases",
+      "treasury": "Treasury",
+      "contacts": "Contacts",
+      "analytics": "Analytics",
+      "ai": "AI"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "The real-time global overview of your business.",
+      "kpiTitle": "Key Figures",
+      "kpiDesc": "Revenue, sales, gross margin — all visible at a glance.",
+      "stockAlertsTitle": "Stock Alerts",
+      "stockAlertsDesc": "Products below threshold to reorder without delay.",
+      "debtorsTitle": "Indebted Customers",
+      "debtorsDesc": "List of customers with negative balance for collection.",
+      "shortcutsTitle": "Quick Shortcuts",
+      "shortcutsDesc": "Direct access to POS, order creation, or expense entry."
+    },
+    "pos": {
+      "title": "Point of Sale (POS)",
+      "subtitle": "Process retail sales quickly. Optimized for touch screens.",
+      "stepsTitle": "3 Steps to Sell",
+      "step1Title": "Add Products",
+      "step1Desc": "Scan or search by name. Negative quantity = return.",
+      "step2Title": "Validate [F9]",
+      "step2Desc": "Choose payment method (Cash, Card). Change is auto-calculated.",
+      "step3Title": "Print Receipt",
+      "step3Desc": "A scannable receipt is printed instantly.",
+      "multiSessionTitle": "Multi-Session",
+      "multiSessionDesc": "Manage multiple carts simultaneously without losing state.",
+      "wholesaleTitle": "Wholesale Mode",
+      "wholesaleDesc": "Adjusted prices based on the customer profile selected.",
+      "scannableTicketTitle": "Scannable Ticket",
+      "scannableTicketDesc": "Scan the receipt barcode to load the order again."
+    },
+    "stocks": {
+      "title": "Catalog & Inventory",
+      "subtitle": "Manage products, pricing, and label printing.",
+      "productCardTitle": "Product Profile",
+      "productCardDesc": "Purchase cost, retail/wholesale price, tax, and barcodes.",
+      "catalogTitle": "PDF Catalog",
+      "catalogDesc": "Export filtered price list for resellers or wholesalers.",
+      "labelsTitle": "Barcode Labels",
+      "labelsDesc": "Select a custom template and print labels in bulk.",
+      "modelsTitle": "Label Models",
+      "modelsDesc": "Configure your favorite layout in print settings."
+    },
+    "sales": {
+      "title": "Sales (Delivery Notes)",
+      "subtitle": "B2B orders requiring official documents and credit tracking.",
+      "blTitle": "Delivery Note (BL)",
+      "blDesc": "Official A4 document. Reduces stock. Unpaid amount builds credit.",
+      "proformaTitle": "Proforma Invoice",
+      "proformaDesc": "Pre-sale quote. No impact on stock. Convertible to BL.",
+      "taxStampTitle": "Tax Stamp",
+      "taxStampDesc": "Calculated automatically on cash-settled invoices.",
+      "creditTrackingTitle": "Customer Credit",
+      "creditTrackingDesc": "Debt grows with each credit sale. Tracked continuously."
+    },
+    "purchases": {
+      "title": "Purchases & Expenses",
+      "subtitle": "Oversee incoming stock and business expenses.",
+      "ocrTitle": "AI Data Entry (OCR)",
+      "ocrDesc": "AI reads the supplier receipt, adding products and prices instantly.",
+      "ocrTags": [
+        "Supplier Detected",
+        "Products Listed",
+        "Prices Filled",
+        "Stock Updated"
+      ],
+      "stockEntryTitle": "Stock Entry",
+      "stockEntryDesc": "Validated purchase orders increment your inventory immediately.",
+      "expensesTitle": "Expenses",
+      "expensesDesc": "Create categories (rent, wages) to analyze monthly costs."
+    },
+    "treasury": {
+      "title": "Treasury & Accounts",
+      "subtitle": "The nerve center of all your liquid assets.",
+      "multiAccountTitle": "Multiple Accounts",
+      "multiAccountDesc": "Till, Bank, Checking. Every transaction is tied to an account.",
+      "transferTitle": "Internal Transfers",
+      "transferDesc": "Move funds between accounts with complete traceability.",
+      "historyTitle": "History",
+      "historyDesc": "View full transaction history and running balances."
+    },
+    "contacts": {
+      "title": "Customers & Suppliers",
+      "subtitle": "Manage your directory, outstanding debts, and settlements.",
+      "balanceTitle": "How Debt Balances Work",
+      "step1Title": "1. Credit Sale",
+      "step1Desc": "Balance goes negative; the customer owes you money.",
+      "step2Title": "2. Recovery",
+      "step2Desc": "Customer pays part/all of debt → balance returns to zero.",
+      "step3Title": "3. Suppliers",
+      "step3Desc": "Negative balance here means you owe the supplier money."
+    },
+    "analytics": {
+      "title": "Reports & Analytics",
+      "subtitle": "Clear, real-time math of your operations.",
+      "stockValueTitle": "Inventory Value",
+      "stockValueDesc": "Tied-up capital measured at the purchase price.",
+      "grossProfitTitle": "Gross Profit",
+      "grossProfitDesc": "Total Sales − Cost of Goods Sold = Trade Margin.",
+      "netProfitTitle": "Net Profit",
+      "netProfitDesc": "Gross Profit − Overhead Expenses = Actual Net Gain.",
+      "topTitle": "Top Performers",
+      "topDesc": "Visualize the products and customers generating the most revenue."
+    },
+    "ai": {
+      "title": "Artificial Intelligence",
+      "subtitle": "Discuss smoothly with your financial data.",
+      "capabilitiesTitle": "AI Strengths:",
+      "capabilitiesList": [
+        "Out of stock alerts",
+        "Monthly net profit",
+        "Indebted customers",
+        "Spendings vs Incomings",
+        "Top sales analysis"
+      ],
+      "modelsTitle": "Choice of Model",
+      "modelsDesc": "Gemini, OpenAI, Claude. Provide your own API keys.",
+      "privacyTitle": "Privacy First",
+      "privacyDesc": "Keys and data queries remain secure in your browser."
+    }
   }
 }
