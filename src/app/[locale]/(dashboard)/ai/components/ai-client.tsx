@@ -88,24 +88,16 @@ const QUICK_PROMPTS = [
     { icon: BarChart3, label: "Rapport complet", prompt: "Génère un rapport de performance complet de mon entreprise avec des recommandations stratégiques pour le mois prochain." },
 ];
 
-// ─── Storage Helpers ────────────────────────────────────────────────────────
-
-const getStoredKey = (provider: Provider): string => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem(`ai_key_${provider}`) ?? "";
-};
-
-const setStoredKey = (provider: Provider, key: string) => {
-    if (typeof window === "undefined") return;
-    if (key) localStorage.setItem(`ai_key_${provider}`, key);
-    else localStorage.removeItem(`ai_key_${provider}`);
-};
-
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export function AiClient() {
-    const [selectedProvider, setSelectedProvider] = useState<Provider>("gemini");
-    const [apiKeys, setApiKeys] = useState<Record<Provider, string>>({ gemini: "", openai: "", claude: "", kimi: "" });
+interface AiClientProps {
+    dbProvider: string;
+    dbKeys: Record<Provider, string>;
+}
+
+export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
+    const initialProvider = (dbProvider?.toLowerCase() as Provider) || "gemini";
+    const [selectedProvider, setSelectedProvider] = useState<Provider>(initialProvider);
     const [showKey, setShowKey] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
@@ -116,27 +108,13 @@ export function AiClient() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const provider = PROVIDERS.find(p => p.id === selectedProvider)!;
-    const currentKey = apiKeys[selectedProvider];
+    const currentKey = dbKeys[selectedProvider] || "";
     const hasKey = currentKey.trim().length > 3;
-
-    // Load keys from localStorage
-    useEffect(() => {
-        const loaded = { gemini: "", openai: "", claude: "", kimi: "" } as Record<Provider, string>;
-        (["gemini", "openai", "claude", "kimi"] as Provider[]).forEach(p => {
-            loaded[p] = getStoredKey(p);
-        });
-        setApiKeys(loaded);
-    }, []);
 
     // Scroll to bottom on new message
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, loading]);
-
-    const handleKeyChange = (val: string) => {
-        setApiKeys(prev => ({ ...prev, [selectedProvider]: val }));
-        setStoredKey(selectedProvider, val);
-    };
 
     const handleCopy = (id: string, text: string) => {
         navigator.clipboard.writeText(text);
@@ -299,51 +277,41 @@ export function AiClient() {
                         ))}
                     </div>
 
-                    {/* API Key Input */}
-                    <div className="flex items-center gap-3">
-                        <div className={`shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br ${provider.gradient} flex items-center justify-center text-white font-bold text-sm`}>
+                    {/* API Key Instructions */}
+                    <div className="flex items-start gap-4 p-4 mt-2 bg-white/5 rounded-lg border border-white/10">
+                        <div className={`shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${provider.gradient} flex items-center justify-center text-white font-bold text-lg shadow-inner`}>
                             {provider.emoji}
                         </div>
-                        <div className="flex-1 relative">
-                            <Input
-                                type={showKey ? "text" : "password"}
-                                value={currentKey}
-                                onChange={e => handleKeyChange(e.target.value)}
-                                placeholder={provider.placeholder}
-                                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 pr-10 text-sm h-9"
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80"
-                                onClick={() => setShowKey(!showKey)}
+                        <div className="flex-1">
+                            <h4 className="text-white font-medium mb-1">Authentification {provider.name}</h4>
+                            <p className="text-sm text-white/70 mb-3">
+                                Pour des raisons de sécurité et pour que l'IA fonctionne avec vos données comme l'OCR de reçus, toutes les clés API sont maintenant gérées <b>centralement</b>.
+                            </p>
+
+                            {hasKey ? (
+                                <div className="flex items-center gap-2 text-sm text-emerald-400">
+                                    <Check className="h-4 w-4" />
+                                    <span>Clé API configurée et détectée.</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 text-sm text-amber-400 mb-2">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <span>Aucune clé API configurée pour ce fournisseur.</span>
+                                </div>
+                            )}
+
+                            <a
+                                href="/settings"
+                                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-indigo-600 text-white shadow hover:bg-indigo-700 h-9 px-4 py-2 mt-2"
                             >
-                                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
+                                <Settings2 className="mr-2 h-4 w-4" />
+                                Aller aux paramètres de la boutique
+                            </a>
                         </div>
-                        <a
-                            href={provider.docsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 text-xs text-white/40 hover:text-white/80 underline whitespace-nowrap"
-                        >
-                            Obtenir clé →
-                        </a>
-                        <button onClick={() => setShowSettings(false)} className="shrink-0 text-white/30 hover:text-white/60">
-                            <X className="h-4 w-4" />
+                        <button onClick={() => setShowSettings(false)} className="shrink-0 text-white/30 hover:text-white/60 p-1">
+                            <X className="h-5 w-5" />
                         </button>
                     </div>
-
-                    {!hasKey && (
-                        <p className="text-xs text-amber-400/80 flex items-center gap-1.5">
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            Entrez votre clé API pour {provider.name} pour commencer. Elle est sauvegardée localement.
-                        </p>
-                    )}
-                    {hasKey && (
-                        <p className="text-xs text-emerald-400/80 flex items-center gap-1.5">
-                            ✓ Clé API configurée pour {provider.name} — {provider.model}
-                        </p>
-                    )}
                 </div>
             )}
 
