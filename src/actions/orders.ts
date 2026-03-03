@@ -57,12 +57,30 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
                     // 1. Revert Old Stock (Parallelized)
                     await Promise.all(
-                        oldSalesOrder.items.map(item =>
-                            tx.product.update({
+                        oldSalesOrder.items.map(async (item) => {
+                            const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
+                            const stockBefore = pBefore?.stock || 0;
+                            const stockAfter = stockBefore + item.quantity;
+
+                            await tx.product.update({
                                 where: { id: item.productId },
-                                data: { stock: { increment: item.quantity } }
-                            })
-                        )
+                                data: { stock: stockAfter }
+                            });
+
+                            await tx.stockMovement.create({
+                                data: {
+                                    productId: item.productId,
+                                    type: "RETURN",
+                                    quantity: item.quantity,
+                                    stockBefore,
+                                    stockAfter,
+                                    referenceId: oldSalesOrder.id,
+                                    reason: `Edition/Annulation Vente N° ${receiptNumber}`,
+                                    userId,
+                                    tenantId
+                                }
+                            });
+                        })
                     );
 
                     // 2. Clear Old SalesOrderItems (we will recreate them)
@@ -182,16 +200,32 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
             // 2. Decrement stock for each item (Parallelized)
             await Promise.all(
-                items.map(item =>
-                    tx.product.update({
+                items.map(async (item) => {
+                    const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
+                    const stockBefore = pBefore?.stock || 0;
+                    const stockAfter = stockBefore - item.quantity;
+
+                    await tx.product.update({
                         where: { id: item.productId },
                         data: {
-                            stock: {
-                                decrement: item.quantity
-                            }
+                            stock: stockAfter
                         }
-                    })
-                )
+                    });
+
+                    await tx.stockMovement.create({
+                        data: {
+                            productId: item.productId,
+                            type: "SALE",
+                            quantity: -item.quantity,
+                            stockBefore,
+                            stockAfter,
+                            referenceId: newOrder.id,
+                            reason: `Vente N° ${receiptNumber}`,
+                            userId,
+                            tenantId
+                        }
+                    });
+                })
             );
 
             // 3. Update Customer Balance (Debt)

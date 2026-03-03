@@ -25,7 +25,7 @@ export default async function SuppliersPage({
         email: item.email || "",
         address: item.address || "",
         taxId: item.taxId || "",
-        balance: item.balance ?? 0,
+        balance: item.balance ? Number(item.balance) : 0,
         createdAt: item.createdAt.toISOString(),
     }))
 

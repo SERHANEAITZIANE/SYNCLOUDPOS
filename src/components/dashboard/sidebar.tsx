@@ -53,235 +53,132 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
         fetchData();
     }, []);
 
-    // Routes visible to all authenticated users (default set)
-    const allRoutes = [
+    const isAdmin = role === "ADMIN" || isSuperadmin;
+    const isVendeur = role === "VENDEUR";
+
+    type Route = { label: string; icon: any; href: string; color: string; visible: boolean };
+    type Group = { label: string; routes: Route[] };
+
+    const groups: Group[] = [
         {
-            label: t("dashboard"),
-            icon: LayoutDashboard,
-            href: "/dashboard",
-            color: "text-sky-500",
+            label: t("overview") || "Vue d'ensemble",
+            routes: [
+                { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isVendeur },
+                { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: true },
+                { label: t("aiIntelligence") || "Intelligence IA", icon: Sparkles, href: "/ai", color: "text-violet-400", visible: !isVendeur },
+            ]
         },
         {
-            label: t("pos"),
-            icon: Store,
-            href: "/pos",
-            color: "text-emerald-500",
+            label: t("transactionsGroup") || "Transactions",
+            routes: [
+                { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: true },
+                { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: !isVendeur },
+                { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: !isVendeur },
+                { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: true },
+            ]
         },
         {
-            label: t("sales"),
-            icon: ShoppingCart,
-            href: "/sales",
-            color: "text-violet-500",
+            label: t("catalogGroup") || "Catalogue",
+            routes: [
+                { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: !isVendeur },
+                { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: !isVendeur },
+                { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: !isVendeur },
+                { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: !isVendeur },
+                { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: !isVendeur },
+            ]
         },
         {
-            label: t("products"),
-            icon: Package,
-            href: "/products",
-            color: "text-pink-700",
+            label: t("partnersGroup") || "Partenaires",
+            routes: [
+                { label: t("customers"), icon: Users, href: "/customers", color: "text-orange-400", visible: true },
+                { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: !isVendeur },
+                { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: true },
+                { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: !isVendeur },
+            ]
         },
         {
-            label: "Avaries",
-            icon: Package,
-            href: "/avaries",
-            color: "text-red-500",
+            label: t("analysisGroup") || "Analyses",
+            routes: [
+                { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: !isVendeur },
+                { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: !isVendeur },
+                { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: !isVendeur },
+            ]
         },
         {
-            label: t("categories"),
-            icon: List,
-            href: "/categories",
-            color: "text-blue-700",
-        },
-        {
-            label: t("brands"),
-            icon: Tag,
-            href: "/brands",
-            color: "text-red-700",
-        },
-        {
-            label: t("customers"),
-            icon: Users,
-            href: "/customers",
-            color: "text-orange-700",
-        },
-        {
-            label: t("suppliers"),
-            icon: Truck,
-            href: "/suppliers",
-            color: "text-amber-600",
-        },
-        {
-            label: t("purchases"),
-            icon: ShoppingBag,
-            href: "/purchases",
-            color: "text-blue-600",
-        },
-        {
-            label: t("reports"),
-            icon: BarChart3,
-            href: "/reports",
-            color: "text-indigo-700",
-        },
-        {
-            label: t("expenses"),
-            icon: FileText,
-            href: "/expenses",
-            color: "text-rose-600",
-        },
-        {
-            label: t("treasury"),
-            icon: BarChart3,
-            href: "/treasury",
-            color: "text-emerald-600",
-        },
-        {
-            label: t("analytics"),
-            icon: LineChart,
-            href: "/analytics",
-            color: "text-blue-600",
-        },
-        {
-            label: "Paiements",
-            icon: CreditCard,
-            href: "/payments",
-            color: "text-green-600",
-        },
-        {
-            label: "Emprunt Client",
-            icon: Landmark,
-            href: "/emprunt",
-            color: "text-red-500",
-        },
-        {
-            label: "Emprunt Fournisseur",
-            icon: Building2,
-            href: "/emprunt-fournisseur",
-            color: "text-orange-500",
-        },
-        {
-            label: "Intelligence IA",
-            icon: Sparkles,
-            href: "/ai",
-            color: "text-violet-400",
-        },
-        {
-            label: "Formation ERP",
-            icon: BookOpen,
-            href: "/formation",
-            color: "text-pink-500",
-        },
-        {
-            label: "Promotions",
-            icon: Gift,
-            href: "/promotions",
-            color: "text-violet-500",
-        },
+            label: t("systemGroup") || "Système",
+            routes: [
+                { label: t("company") || "Mon Entreprise", icon: Store, href: "/company", color: "text-orange-400", visible: isAdmin },
+                { label: t("users") || "Utilisateurs", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
+                { label: t("systemSettings") || t("settings") || "Paramètres", icon: Settings, href: "/settings", color: "text-gray-400", visible: isAdmin },
+                { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isVendeur },
+                { label: t("superAdmin") || "Super Admin", icon: ShieldCheck, href: "/superadmin", color: "text-emerald-400", visible: !!isSuperadmin }
+            ]
+        }
     ];
-
-    // Routes for VENDEUR role: limited access only
-    const vendeurRoutes = [
-        {
-            label: t("pos"),
-            icon: Store,
-            href: "/pos",
-            color: "text-emerald-500",
-        },
-        {
-            label: t("sales"),
-            icon: ShoppingCart,
-            href: "/sales",
-            color: "text-violet-500",
-        },
-        {
-            label: t("customers"),
-            icon: Users,
-            href: "/customers",
-            color: "text-orange-700",
-        },
-        {
-            label: "Paiements",
-            icon: CreditCard,
-            href: "/payments",
-            color: "text-green-600",
-        },
-        {
-            label: "Emprunt Client",
-            icon: Landmark,
-            href: "/emprunt",
-            color: "text-red-500",
-        },
-    ];
-
-    const routes = role === "VENDEUR" ? vendeurRoutes : [...allRoutes];
-
-    if (role === "ADMIN" || isSuperadmin) {
-        routes.push(
-            {
-                label: t("company") || "Mon Entreprise",
-                icon: Store,
-                href: "/company",
-                color: "text-orange-500",
-            },
-            {
-                label: t("users") || "Utilisateurs",
-                icon: Users,
-                href: "/users",
-                color: "text-gray-300"
-            },
-            {
-                label: t("systemSettings") || t("settings") || "Paramètres Système",
-                icon: Settings,
-                href: "/settings",
-                color: "text-gray-400"
-            }
-        );
-    }
-
-    if (isSuperadmin) {
-        routes.push({
-            label: "Super Admin",
-            icon: ShieldCheck,
-            href: "/superadmin",
-            color: "text-emerald-400"
-        })
-    }
 
     return (
-        <div className="flex flex-col h-full bg-[#111827] text-white min-h-0">
-            <div className="px-3 py-2 flex-1 overflow-y-auto">
-                <Link href="/dashboard" className="flex items-center pl-3 mb-6 pt-2">
-                    <div className="relative w-7 h-7 mr-3">
-                        <div className="bg-white rounded-full w-full h-full flex items-center justify-center text-black font-bold text-sm">S</div>
+        <div className="flex flex-col h-full bg-[#0a0a0f] text-white min-h-0 border-r border-white/5 shadow-xl">
+            {/* Header / Logo Area */}
+            <div className="px-5 py-6 shrink-0">
+                <Link href="/dashboard" className="flex items-center group">
+                    <div className="relative w-8 h-8 mr-3 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-all duration-300">
+                        <span className="text-white font-bold text-sm tracking-tighter">S</span>
                     </div>
-                    <h1 className="text-xl font-bold">
-                        SYNCLOUD<span className="text-primary text-blue-400">POS</span>
+                    <h1 className="text-xl font-bold tracking-tight">
+                        SYNCLOUD<span className="text-blue-400 font-extrabold">POS</span>
                     </h1>
                 </Link>
+            </div>
 
-                <div className="mb-4 px-3">
-                    <StoreSwitcher items={tenants} activeTenantId={activeTenantId} />
-                </div>
+            <div className="px-4 pb-4 shrink-0">
+                <StoreSwitcher items={tenants} activeTenantId={activeTenantId} />
+            </div>
 
-                <div className="space-y-0.5">
-                    {routes.map((route) => {
-                        const isActive = pathname.includes(route.href);
+            {/* Navigation Lists */}
+            <div className="px-3 py-2 flex-1 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                {groups.map((group, i) => {
+                    const visibleRoutes = group.routes.filter(r => r.visible);
+                    if (visibleRoutes.length === 0) return null;
 
-                        return (
-                            <Link
-                                key={route.href}
-                                href={route.href}
-                                className={cn(
-                                    "text-sm group flex p-2.5 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                    isActive ? "text-white bg-white/10" : "text-zinc-400"
-                                )}
-                            >
-                                <div className="flex items-center flex-1">
-                                    <route.icon className={cn("h-4 w-4 mr-3 shrink-0", route.color)} />
-                                    {route.label}
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
+                    return (
+                        <div key={i} className="space-y-1">
+                            <h4 className="px-3 text-[10px] font-bold uppercase tracking-wider text-white/40 mb-2">
+                                {group.label}
+                            </h4>
+                            <div className="space-y-0.5">
+                                {visibleRoutes.map((route) => {
+                                    const isActive = pathname.includes(route.href);
+
+                                    return (
+                                        <Link
+                                            key={route.href}
+                                            href={route.href}
+                                            className={cn(
+                                                "group flex items-center p-2.5 w-full justify-start text-sm font-medium rounded-xl transition-all duration-200 ease-in-out relative",
+                                                isActive
+                                                    ? "text-white bg-white/10 shadow-sm"
+                                                    : "text-white/50 hover:text-white hover:bg-white/5"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                                            )}
+
+                                            <div className={cn(
+                                                "shrink-0 w-8 h-8 mr-3 rounded-lg flex items-center justify-center transition-all duration-200",
+                                                isActive ? "bg-white/10" : "bg-transparent group-hover:bg-white/5"
+                                            )}>
+                                                <route.icon className={cn("h-4 w-4", route.color, isActive ? "opacity-100" : "opacity-80 group-hover:opacity-100")} />
+                                            </div>
+
+                                            <span className="truncate">{route.label}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -203,7 +203,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Package className="h-4 w-4 text-muted-foreground" />
-                                        Informations générales
+                                        {t("form.generalInfo")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -214,7 +214,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             <FormItem>
                                                 <FormLabel>{t("fields.name")}</FormLabel>
                                                 <FormControl>
-                                                    <Input disabled={loading} placeholder="Nom du produit" {...field} />
+                                                    <Input disabled={loading} placeholder={t("form.namePlaceholder")} {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -227,7 +227,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             <FormItem>
                                                 <FormLabel>{t("fields.description")}</FormLabel>
                                                 <FormControl>
-                                                    <Textarea disabled={loading} placeholder="Description du produit..." rows={3} {...field} value={field.value ?? ""} />
+                                                    <Textarea disabled={loading} placeholder={t("form.descPlaceholder")} rows={3} {...field} value={field.value ?? ""} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -249,7 +249,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                         onChange={field.onChange}
                                                         disabled={loading}
                                                         placeholder={t("fields.category")}
-                                                        searchPlaceholder="Rechercher une catégorie..."
+                                                        searchPlaceholder={t("form.searchCategory")}
                                                     />
                                                     <FormMessage />
                                                 </FormItem>
@@ -270,7 +270,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                         onChange={field.onChange}
                                                         disabled={loading}
                                                         placeholder={t("fields.brand")}
-                                                        searchPlaceholder="Rechercher une marque..."
+                                                        searchPlaceholder={t("form.searchBrand")}
                                                     />
                                                     <FormMessage />
                                                 </FormItem>
@@ -285,16 +285,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <DollarSign className="h-4 w-4 text-indigo-500" />
-                                        Grille tarifaire
-                                        <Badge variant="outline" className="text-indigo-600 border-indigo-300 text-xs ml-auto">4 tarifs</Badge>
+                                        {t("form.pricing")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {renderPriceInput({ name: "cost", label: "Prix d'achat", description: "Coût fournisseur", icon: ShoppingCart, color: "default" })}
-                                        {renderPriceInput({ name: "price", label: "Prix détaillant", description: "Prix de vente au détail", icon: Store, color: "blue" })}
-                                        {renderPriceInput({ name: "wholesalePrice", label: "Prix en gros", description: "Pour achat de grande quantité", icon: Package, color: "green" })}
-                                        {renderPriceInput({ name: "dealerPrice", label: "Prix revendeur", description: "Pour partenaires et revendeurs", icon: Users, color: "purple" })}
+                                        {renderPriceInput({ name: "cost", label: t("fields.purchasePrice"), description: t("form.purchasePriceDesc"), icon: ShoppingCart, color: "default" })}
+                                        {renderPriceInput({ name: "price", label: t("fields.price"), description: t("form.retailPriceDesc"), icon: Store, color: "blue" })}
+                                        {renderPriceInput({ name: "wholesalePrice", label: t("fields.wholesalePrice"), description: t("form.wholesalePriceDesc"), icon: Package, color: "green" })}
+                                        {renderPriceInput({ name: "dealerPrice", label: t("fields.dealerPrice"), description: t("form.dealerPriceDesc"), icon: Users, color: "purple" })}
                                     </div>
                                     <div className="mt-4">
                                         <FormField
@@ -302,20 +301,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             name="tvaRate"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-sm font-semibold text-indigo-700">Taux de TVA (%)</FormLabel>
+                                                    <FormLabel className="text-sm font-semibold text-indigo-700">{t("form.tvaRate")}</FormLabel>
                                                     <Select disabled={loading} onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
                                                         <FormControl>
                                                             <SelectTrigger>
-                                                                <SelectValue placeholder="Sélectionnez un taux de TVA" />
+                                                                <SelectValue placeholder={t("form.selectTva")} />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            <SelectItem value="19">TVA 19% (Générale)</SelectItem>
-                                                            <SelectItem value="9">TVA 9% (Réduite)</SelectItem>
-                                                            <SelectItem value="0">TVA 0% (Exonéré)</SelectItem>
+                                                            <SelectItem value="19">{t("form.tva19")}</SelectItem>
+                                                            <SelectItem value="9">{t("form.tva9")}</SelectItem>
+                                                            <SelectItem value="0">{t("form.tva0")}</SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormDescription className="text-xs">Taux applicable en Algérie</FormDescription>
+                                                    <FormDescription className="text-xs">{t("form.tvaDesc")}</FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -324,12 +323,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
 
                                     {/* Visual margin helper */}
                                     <div className="mt-4 p-3 rounded-lg bg-muted/50 border">
-                                        <p className="text-xs font-medium text-muted-foreground mb-2">Marges calculées</p>
+                                        <p className="text-xs font-medium text-muted-foreground mb-2">{t("form.calculatedMargins")}</p>
                                         <div className="grid grid-cols-3 gap-3 text-xs">
                                             {[
-                                                { label: "Marge détail", price: form.watch("price"), name: "Détaillant" },
-                                                { label: "Marge gros", price: form.watch("wholesalePrice"), name: "Gros" },
-                                                { label: "Marge revendeur", price: form.watch("dealerPrice"), name: "Revendeur" },
+                                                { label: t("form.marginRetail"), price: form.watch("price"), name: "Détaillant" },
+                                                { label: t("form.marginWholesale"), price: form.watch("wholesalePrice"), name: "Gros" },
+                                                { label: t("form.marginDealer"), price: form.watch("dealerPrice"), name: "Revendeur" },
                                             ].map(({ label, price, name }) => {
                                                 const cost = Number(form.watch("cost") || 0)
                                                 const p = Number(price || 0)
@@ -354,14 +353,14 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Barcode className="h-4 w-4 text-muted-foreground" />
-                                        Codes-barres
+                                        {t("form.barcodes")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
                                     {(form.watch("barcodes") || []).map((_: any, index: number) => (
                                         <div key={index} className="flex items-center gap-2">
-                                            <Input disabled={loading} placeholder="Valeur du code-barres" {...form.register(`barcodes.${index}.value` as const)} />
-                                            <Input disabled={loading} placeholder="Type (ex. EAN-13)" {...form.register(`barcodes.${index}.label` as const)} className="w-36" />
+                                            <Input disabled={loading} placeholder={t("form.barcodeValue")} {...form.register(`barcodes.${index}.value` as const)} />
+                                            <Input disabled={loading} placeholder={t("form.barcodeType")} {...form.register(`barcodes.${index}.label` as const)} className="w-36" />
                                             <Button type="button" variant="destructive" size="icon" onClick={() => {
                                                 const current = form.getValues("barcodes") || []
                                                 form.setValue("barcodes", current.filter((_: any, i: number) => i !== index))
@@ -375,7 +374,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             const current = form.getValues("barcodes") || []
                                             form.setValue("barcodes", [...current, { value: "", label: "" }])
                                         }}>
-                                            <Plus className="h-4 w-4 mr-2" /> Ajouter
+                                            <Plus className="h-4 w-4 mr-2" /> {t("form.addBarcode")}
                                         </Button>
                                         <Button type="button" variant="secondary" size="sm" onClick={async () => {
                                             try {
@@ -383,11 +382,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                 const res = await generateNextBarcode()
                                                 if (res.success && res.barcode) {
                                                     const current = form.getValues("barcodes") || []
-                                                    form.setValue("barcodes", [...current, { value: res.barcode, label: "Auto-Généré" }])
+                                                    form.setValue("barcodes", [...current, { value: res.barcode, label: t("form.autoGenerated") }])
                                                 }
                                             } catch (e) { console.error(e) } finally { setLoading(false) }
                                         }}>
-                                            <Wand2 className="h-4 w-4 mr-2 text-indigo-500" /> Auto-générer
+                                            <Wand2 className="h-4 w-4 mr-2 text-indigo-500" /> {t("form.autoGenerate")}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -400,7 +399,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                             {/* IMAGES */}
                             <Card>
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-base">Images</CardTitle>
+                                    <CardTitle className="text-base">{t("form.images")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <FormField
@@ -428,7 +427,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                 <CardHeader className="pb-3">
                                     <CardTitle className="flex items-center gap-2 text-base">
                                         <Tag className="h-4 w-4 text-muted-foreground" />
-                                        Gestion du stock
+                                        {t("form.stockManagement")}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -454,7 +453,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                                 <FormControl>
                                                     <Input type="number" step="1" disabled={loading} placeholder="0" {...field} />
                                                 </FormControl>
-                                                <FormDescription className="text-xs">Alerte stock faible</FormDescription>
+                                                <FormDescription className="text-xs">{t("form.lowStockAlert")}</FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -463,13 +462,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                     {(() => {
                                         const s = Number(form.watch("stock") || 0)
                                         const m = Number(form.watch("minStock") || 0)
-                                        const status = s === 0 ? { label: "Rupture de stock", color: "text-red-500 bg-red-50 border-red-200" }
-                                            : s <= m ? { label: "Stock faible", color: "text-amber-600 bg-amber-50 border-amber-200" }
-                                                : { label: "En stock", color: "text-emerald-600 bg-emerald-50 border-emerald-200" }
+                                        const status = s === 0 ? { label: t("form.outOfStock"), color: "text-red-500 bg-red-50 border-red-200" }
+                                            : s <= m ? { label: t("form.lowStock"), color: "text-amber-600 bg-amber-50 border-amber-200" }
+                                                : { label: t("form.inStock"), color: "text-emerald-600 bg-emerald-50 border-emerald-200" }
                                         return (
                                             <div className={cn("flex items-center justify-between text-xs font-medium px-3 py-2 rounded-lg border", status.color)}>
                                                 <span>{status.label}</span>
-                                                <span className="font-bold">{s} unités</span>
+                                                <span className="font-bold">{s} {t("form.units")}</span>
                                             </div>
                                         )
                                     })()}
@@ -479,7 +478,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                             {/* STATUS */}
                             <Card>
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-base">Statut du produit</CardTitle>
+                                    <CardTitle className="text-base">{t("form.productStatus")}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <FormField
@@ -521,7 +520,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
 
                             {/* SAVE */}
                             <Button id="global-save-button" disabled={loading} className="w-full" size="lg" type="submit">
-                                {loading ? "Enregistrement..." : action}
+                                {loading ? t("form.saving") : action}
                                 <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>
                             </Button>
                         </div>

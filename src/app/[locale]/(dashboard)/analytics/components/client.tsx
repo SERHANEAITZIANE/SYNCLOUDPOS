@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
 
+import { useTranslations } from "next-intl"
+
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
 
 interface AnalyticsData {
@@ -105,10 +107,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
+    const t = useTranslations("Analytics.kpi")
     const [isMounted, setIsMounted] = React.useState(false)
     React.useEffect(() => { setIsMounted(true) }, [])
     if (!isMounted) return null
-    if (!data) return <div className="p-8 text-center text-rose-500 font-medium bg-rose-50 rounded-xl">Aucune donnée analytique disponible.</div>
+    if (!data) return <div className="p-8 text-center text-rose-500 font-medium bg-rose-50 rounded-xl">{t("noData")}</div>
 
     const profitColor = data.netProfit >= 0 ? "green" : "red"
     const topCategoryTotal = data.categoryPerformance.reduce((a, c) => a + c.value, 0) || 1
@@ -117,8 +120,8 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
         <div className="space-y-8 pb-8">
             <div className="flex flex-col gap-2">
                 <Heading
-                    title="Tableau de Bord Analytique"
-                    description="Vue d'ensemble premium des performances et de la trésorerie de votre commerce."
+                    title={t("dashboardTitle")}
+                    description={t("dashboardDesc")}
                 />
             </div>
 
@@ -127,41 +130,41 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
             {/* ── Section: Performances Générales ────────────────────────────────── */}
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-indigo-500" /> Performances Pures (Théorique)
+                    <TrendingUp className="h-5 w-5 text-indigo-500" /> {t("purePerformance")}
                 </h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <KpiCard
-                        title="Chiffre d'affaires"
+                        title={useTranslations("Dashboard")("totalRevenue")}
                         value={formatter.format(data.totalRevenue)}
                         icon={DollarSign}
                         color="blue"
                         sub={
                             <div className="flex flex-col gap-1">
-                                <span>Total des ventes facturées/POS</span>
-                                <span className="text-blue-600/70 dark:text-blue-400/70">{data.ordersCount + data.salesCount} transactions</span>
+                                <span>{t("revenueTotalSales")}</span>
+                                <span className="text-blue-600/70 dark:text-blue-400/70">{data.ordersCount + data.salesCount} {t("transactions")}</span>
                             </div>
                         }
                     />
                     <KpiCard
-                        title="Coût des Ventes (COGS)"
+                        title={t("cogsDesc").split(" ")[0] + " (COGS)"}
                         value={formatter.format(data.totalCOGS)}
                         icon={Package}
                         color="orange"
-                        sub="Coût d'achat de la marchandise vendue"
+                        sub={t("cogsDesc")}
                     />
                     <KpiCard
-                        title="Charges & Dépenses"
+                        title={useTranslations("Analytics")("expenses")}
                         value={formatter.format(data.totalExpenses)}
                         icon={TrendingDown}
                         color="red"
-                        sub="Frais généraux enregistrés (loyer, salaires...)"
+                        sub={t("expensesDesc")}
                     />
                     <KpiCard
-                        title="Bénéfice Net"
+                        title={useTranslations("Analytics")("profit")}
                         value={formatter.format(data.netProfit)}
                         icon={TrendingUp}
                         color={profitColor}
-                        sub={`Marge nette: ${data.totalRevenue > 0 ? ((data.netProfit / data.totalRevenue) * 100).toFixed(1) : 0}%`}
+                        sub={`${t("netMargin")}: ${data.totalRevenue > 0 ? ((data.netProfit / data.totalRevenue) * 100).toFixed(1) : 0}%`}
                     />
                 </div>
             </div>
@@ -169,38 +172,38 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
             {/* ── Section: Trésorerie & Achats (Cash Flow) ────────────────────────────────── */}
             <div className="space-y-4 pt-4">
                 <h3 className="text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5 text-emerald-500" /> Trésorerie & Opérations (Cash Flow)
+                    <CreditCard className="h-5 w-5 text-emerald-500" /> {t("cashFlowOperations")}
                 </h3>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                     <KpiCard
-                        title="Encaissements Réels"
+                        title={t("actualCash")}
                         value={formatter.format(data.cashCollected)}
                         icon={DollarSign}
                         color="green"
                         sub={
                             <div className="flex flex-col gap-1 mt-1">
-                                <span>Argent physiquement reçu</span>
+                                <span>{t("actualCash")}</span>
                                 {data.totalRevenue > data.cashCollected && (
                                     <span className="text-rose-600 dark:text-rose-400 font-bold tracking-tight">
-                                        Reste à recouvrer: {formatter.format(data.totalRevenue - data.cashCollected)}
+                                        {t("remainingToRecover")}: {formatter.format(data.totalRevenue - data.cashCollected)}
                                     </span>
                                 )}
                             </div>
                         }
                     />
                     <KpiCard
-                        title="Achats Fournisseurs"
+                        title={useTranslations("Navigation")("purchases")}
                         value={formatter.format(data.totalPurchases)}
                         icon={ShoppingCart}
                         color="purple"
-                        sub="Valeur totale du stock acheté (Bons de réception)"
+                        sub={t("totalPurchaseValue")}
                     />
                     <KpiCard
-                        title="Créances Clients"
+                        title={t("unpaidDebts")}
                         value={formatter.format(data.outstandingDebt)}
                         icon={AlertTriangle}
                         color={data.outstandingDebt > 0 ? "red" : "default"}
-                        sub={`${data.debtors.length} client(s) ont des dettes impayées`}
+                        sub={`${data.debtors.length} ${t("clientsWithDebt")}`}
                     />
                 </div>
             </div>
@@ -209,7 +212,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
             <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                 <Card className="shadow-md border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader>
-                        <CardTitle className="text-base text-slate-800 dark:text-slate-200">Revenus vs Charges (30 derniers jours)</CardTitle>
+                        <CardTitle className="text-base text-slate-800 dark:text-slate-200">{t("revenueVsExpenses")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={320}>
@@ -225,8 +228,8 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                                 <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" tickFormatter={v => `${(v / 1000)}k`} dx={-10} />
                                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--muted))', strokeWidth: 2 }} />
                                 <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                                <Line type="monotone" dataKey="revenue" name="Revenus" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
-                                <Line type="monotone" dataKey="expenses" name="Charges" stroke="#ef4444" strokeWidth={3} dot={false} strokeDasharray="5 5" activeDot={{ r: 6, strokeWidth: 0 }} />
+                                <Line type="monotone" dataKey="revenue" name={t("revenues")} stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
+                                <Line type="monotone" dataKey="expenses" name={t("expenses")} stroke="#ef4444" strokeWidth={3} dot={false} strokeDasharray="5 5" activeDot={{ r: 6, strokeWidth: 0 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -235,7 +238,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 {/* Category Bar Chart */}
                 <Card className="shadow-md border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader>
-                        <CardTitle className="text-base text-slate-800 dark:text-slate-200">Chiffre d'affaires par catégorie</CardTitle>
+                        <CardTitle className="text-base text-slate-800 dark:text-slate-200">{t("revenueByCategory")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {data.categoryPerformance.length > 0 ? (
@@ -245,7 +248,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                                     <XAxis type="number" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `${(v / 1000)}k`} />
                                     <YAxis dataKey="name" type="category" fontSize={12} tickLine={false} axisLine={false} width={100} />
                                     <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.4)' }} />
-                                    <Bar dataKey="value" name="Ventes" fill="#3b82f6" radius={[0, 6, 6, 0]}>
+                                    <Bar dataKey="value" name={t("sales")} fill="#3b82f6" radius={[0, 6, 6, 0]}>
                                         {data.categoryPerformance.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
@@ -253,7 +256,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                                 </BarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-[320px] flex items-center justify-center text-muted-foreground text-sm">Aucune donnée de catégorie.</div>
+                            <div className="h-[320px] flex items-center justify-center text-muted-foreground text-sm">{t("noCategoryData")}</div>
                         )}
                     </CardContent>
                 </Card>
@@ -264,12 +267,12 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 {/* Top Products */}
                 <Card className="border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader className="bg-slate-50/50 dark:bg-slate-900/20 border-b">
-                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><Package className="h-4 w-4 text-indigo-500" /> Top 10 Produits (Revenus)</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><Package className="h-4 w-4 text-indigo-500" /> {t("top10Products")}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="divide-y divide-slate-100 dark:divide-slate-800">
                             {data.topProducts.length === 0 && (
-                                <p className="p-6 text-sm text-center text-muted-foreground">Aucune vente enregistrée.</p>
+                                <p className="p-6 text-sm text-center text-muted-foreground">{t("noSales")}</p>
                             )}
                             {data.topProducts.map((product, i) => (
                                 <div key={product.name} className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
@@ -278,7 +281,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{product.name}</p>
-                                        <p className="text-xs font-medium text-slate-500">{product.quantity} unités vendues</p>
+                                        <p className="text-xs font-medium text-slate-500">{product.quantity} {t("unitsSold")}</p>
                                     </div>
                                     <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full">
                                         {formatter.format(product.revenue)}
@@ -292,11 +295,11 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 {/* Top Customers */}
                 <Card className="border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader className="bg-slate-50/50 dark:bg-slate-900/20 border-b">
-                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><Users className="h-4 w-4 text-orange-500" /> Meilleurs Clients</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><Users className="h-4 w-4 text-orange-500" /> {t("topCustomers")}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {data.topCustomers.length === 0 && <p className="p-6 text-sm text-center text-muted-foreground">Aucun client.</p>}
+                            {data.topCustomers.length === 0 && <p className="p-6 text-sm text-center text-muted-foreground">{t("noCustomers")}</p>}
                             {data.topCustomers.map((c, i) => (
                                 <div key={c.name} className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
                                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 text-xs font-bold text-orange-600">
@@ -320,11 +323,11 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                 {/* Recent POS Orders */}
                 <Card className="lg:col-span-2 border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader className="bg-slate-50/50 dark:bg-slate-900/20 border-b">
-                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><ReceiptText className="h-4 w-4 text-blue-500" /> Flux de Ventes Récents</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base text-slate-800 dark:text-slate-200"><ReceiptText className="h-4 w-4 text-blue-500" /> {t("recentSalesFlow")}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {data.recentOrders.length === 0 && <p className="p-6 text-sm text-center text-muted-foreground">Aucune vente récente.</p>}
+                            {data.recentOrders.length === 0 && <p className="p-6 text-sm text-center text-muted-foreground">{t("noRecentSales")}</p>}
                             {data.recentOrders.map(order => {
                                 const isPartial = order.paidAmount < order.total
                                 return (
@@ -337,11 +340,11 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                                             <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{formatter.format(order.total)}</p>
                                             {isPartial ? (
                                                 <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 uppercase tracking-tighter">
-                                                    Partiel: {formatter.format(order.paidAmount)}
+                                                    {t("partial")}: {formatter.format(order.paidAmount)}
                                                 </Badge>
                                             ) : (
                                                 <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800 uppercase tracking-tighter">
-                                                    Payé Complet
+                                                    {t("paidInFull")}
                                                 </Badge>
                                             )}
                                         </div>
@@ -358,15 +361,15 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                     <Card className="border-amber-200/60 dark:border-amber-900/40 shadow-sm bg-amber-50/30 dark:bg-amber-950/10">
                         <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between border-b border-amber-100 dark:border-amber-900/50">
                             <CardTitle className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-500">
-                                <AlertTriangle className="h-4 w-4" /> Stock faible
+                                <AlertTriangle className="h-4 w-4" /> {t("lowStock")}
                             </CardTitle>
                             <Link href="/products/inventory">
-                                <Button variant="ghost" size="sm" className="h-7 text-xs font-semibold text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/50">Gérer</Button>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs font-semibold text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/50">{t("manage")}</Button>
                             </Link>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="divide-y divide-amber-100/50 dark:divide-amber-900/20">
-                                {data.lowStock.length === 0 && <p className="p-4 text-xs font-medium text-amber-600/70 text-center">Aucun alerte stock.</p>}
+                                {data.lowStock.length === 0 && <p className="p-4 text-xs font-medium text-amber-600/70 text-center">{t("noStockAlert")}</p>}
                                 {data.lowStock.map(p => (
                                     <div key={p.id} className="flex items-center justify-between p-3 px-4">
                                         <p className="text-xs font-medium text-amber-900 dark:text-amber-200 truncate pr-2">{p.name}</p>
@@ -383,15 +386,15 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
                     <Card className="border-rose-200/60 dark:border-rose-900/40 shadow-sm bg-rose-50/30 dark:bg-rose-950/10">
                         <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between border-b border-rose-100 dark:border-rose-900/50">
                             <CardTitle className="flex items-center gap-2 text-sm font-semibold text-rose-800 dark:text-rose-500">
-                                <CreditCard className="h-4 w-4" /> Créances Impayées
+                                <CreditCard className="h-4 w-4" /> {t("unpaidDebts")}
                             </CardTitle>
                             <Link href="/customers/unpaid">
-                                <Button variant="ghost" size="sm" className="h-7 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:text-rose-400 dark:hover:bg-rose-900/50">Gérer</Button>
+                                <Button variant="ghost" size="sm" className="h-7 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:text-rose-400 dark:hover:bg-rose-900/50">{t("manage")}</Button>
                             </Link>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="divide-y divide-rose-100/50 dark:divide-rose-900/20">
-                                {data.debtors.length === 0 && <p className="p-4 text-xs font-bold text-emerald-600 text-center flex items-center justify-center gap-1">Aucune créance en cours <TrendingUp className="h-3 w-3" /></p>}
+                                {data.debtors.length === 0 && <p className="p-4 text-xs font-bold text-emerald-600 text-center flex items-center justify-center gap-1">{t("noOngoingDebts")} <TrendingUp className="h-3 w-3" /></p>}
                                 {data.debtors.map(d => (
                                     <div key={d.id} className="flex items-center justify-between p-3 px-4">
                                         <p className="text-xs font-semibold text-rose-900 dark:text-rose-200 truncate pr-2">{d.name}</p>

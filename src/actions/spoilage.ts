@@ -41,8 +41,8 @@ export async function createSpoilage(data: SpoilageData) {
 
         // 1. Create the Spoilage record
         // 2. Decrement the product stock in a transaction to ensure atomicity
-        await db.$transaction([
-            db.spoilage.create({
+        await db.$transaction(async (tx) => {
+            const spoilage = await tx.spoilage.create({
                 data: {
                     date,
                     reason,
@@ -51,8 +51,9 @@ export async function createSpoilage(data: SpoilageData) {
                     tenantId,
                     userId: session.user.id
                 }
-            }),
-            db.product.update({
+            })
+
+            await tx.product.update({
                 where: {
                     id: productId
                 },
@@ -62,7 +63,21 @@ export async function createSpoilage(data: SpoilageData) {
                     }
                 }
             })
-        ])
+
+            await tx.stockMovement.create({
+                data: {
+                    productId,
+                    type: "SPOILAGE",
+                    quantity: -quantity,
+                    stockBefore: Number(product.stock),
+                    stockAfter: Number(product.stock) - quantity,
+                    referenceId: spoilage.id,
+                    reason: reason || "Déclaration avarie",
+                    userId: session.user.id,
+                    tenantId
+                }
+            })
+        })
 
         revalidatePath("/avaries")
         revalidatePath("/products")

@@ -4,13 +4,15 @@ import { PosClient } from "@/components/pos/pos-client"
 import { db } from "@/lib/db"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { auth } from "@/auth"
+import { getTranslations } from "next-intl/server"
 
 const PosPage = async () => {
+    const t = await getTranslations("PosPage")
     const session = await auth()
-    if (!session?.user?.id) return <div>Unauthorized</div>
+    if (!session?.user?.id) return <div>{t("unauthorized")}</div>
 
     const tenantId = await getActiveTenantId()
-    if (!tenantId) return <div>No tenant configured</div>
+    if (!tenantId) return <div>{t("noTenant")}</div>
 
     let storeName = "Premium POS"
     let storeAddress = ""
@@ -73,7 +75,7 @@ const PosPage = async () => {
         cost: Number(item.cost || 0),
         stock: item.stock,
         minStock: Number(item.minStock || 0),
-        category: item.category?.name || "Uncategorized",
+        category: item.category?.name || t("uncategorized"),
         categoryId: item.categoryId || "",
         wholesalePrice: Number(item.wholesalePrice || item.price),
         dealerPrice: Number(item.dealerPrice || item.price),

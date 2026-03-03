@@ -25,6 +25,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [qrOpen, setQrOpen] = useState(false)
+    const t = useTranslations("Customers")
     const tCommon = useTranslations("Common")
     const { data: session } = useSession()
 
@@ -32,10 +33,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         try {
             setLoading(true)
             await deleteCustomer(data.id)
-            toast.success("Client supprimé.")
+            toast.success(t("messages.deleted"))
             router.refresh()
         } catch {
-            toast.error("Erreur lors de la suppression.")
+            toast.error(t("messages.error"))
         } finally {
             setLoading(false)
         }
@@ -58,10 +59,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => setQrOpen(true)}>
-                        <QrCode className="mr-2 h-4 w-4" /> Afficher Code QR
+                        <QrCode className="mr-2 h-4 w-4" /> {t("actions.showQr")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push(`/customers/${data.id}/ledger`)}>
-                        <ScrollText className="mr-2 h-4 w-4" /> Voir Historique (Log)
+                        <ScrollText className="mr-2 h-4 w-4" /> {t("actions.viewLog")}
                     </DropdownMenuItem>
 
                     {session?.user?.canEdit && (

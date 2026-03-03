@@ -25,6 +25,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const t = useTranslations("Expenses")
     const tCommon = useTranslations("Common")
     const { data: session } = useSession()
 
@@ -33,9 +34,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             setLoading(true)
             await deleteExpense(data.id)
             router.refresh()
-            toast.success("Dépense supprimée.")
+            toast.success(t("messages.deleted"))
         } catch {
-            toast.error("Erreur lors de la suppression.")
+            toast.error(t("messages.error"))
         } finally {
             setLoading(false)
             setOpen(false)

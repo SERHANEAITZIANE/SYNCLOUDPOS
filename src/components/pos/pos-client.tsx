@@ -20,6 +20,7 @@ import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { toast } from "react-hot-toast"
 import { getSalesOrderByReceipt } from "@/actions/sales-orders"
+import { useTranslations } from "next-intl"
 
 interface PosClientProps {
     storeName?: string
@@ -58,6 +59,7 @@ export const PosClient: FC<PosClientProps> = ({
     customers = [],
     accounts = []
 }) => {
+    const t = useTranslations("PosClient")
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -177,7 +179,42 @@ export const PosClient: FC<PosClientProps> = ({
             }
         }
 
-        // 2. Check if barcode belongs to a customer
+        // 2. Check if Weight/Price Scale Barcode (EAN-13 starting with 2)
+        if (code.length === 13 && code.startsWith("2")) {
+            for (const p of products) {
+                const prefixMatch = p.barcodes.find(b => code.startsWith(b) && b.length >= 4 && b.length <= 7);
+                if (prefixMatch) {
+                    const safeDataPart = code.substring(7, 12);
+                    const parsedQuantity = parseInt(safeDataPart, 10) / 1000;
+
+                    const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId);
+                    const cType = activeSession?.clientType || 'RETAIL';
+                    let currentPrice = p.price;
+                    if (cType === 'RESELLER' && p.dealerPrice != null) currentPrice = p.dealerPrice;
+                    if (cType === 'WHOLESALE' && p.wholesalePrice != null) currentPrice = p.wholesalePrice;
+
+                    cart.addItem({
+                        id: p.id,
+                        productId: p.id,
+                        name: p.name,
+                        price: currentPrice,
+                        retailPrice: p.price,
+                        wholesalePrice: p.wholesalePrice,
+                        dealerPrice: p.dealerPrice,
+                        cost: p.cost,
+                        tvaRate: p.tvaRate,
+                        priceHt: currentPrice / (1 + (p.tvaRate ?? 19) / 100),
+                        quantity: parsedQuantity,
+                        image: p.imageUrl
+                    });
+                    toast.success(`Ajouté ${p.name} (${parsedQuantity} kg) au panier`);
+                    setSearchQuery("");
+                    return;
+                }
+            }
+        }
+
+        // 3. Check if barcode belongs to a customer
         const customer = customers.find(c => c.barcode === code)
         if (customer) {
             cart.setCustomer(customer.id, customer.name)
@@ -260,7 +297,7 @@ export const PosClient: FC<PosClientProps> = ({
                             <div className="relative group flex-1 w-full">
                                 <Search className="absolute left-3 lg:left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-gray-900 dark:group-focus-within:text-gray-100 transition-colors duration-200" />
                                 <Input
-                                    placeholder="Rechercher ou scanner..."
+                                    placeholder={t("searchPlaceholder")}
                                     className="pl-9 lg:pl-14 h-10 lg:h-14 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl lg:rounded-[20px] text-sm lg:text-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
                                     value={searchQuery}
                                     onChange={(e) => {
@@ -284,7 +321,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     onClick={() => setIsSearchOrderOpen(true)}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></svg>
-                                    <span className="hidden sm:inline">Load Order</span>
+                                    <span className="hidden sm:inline">{t("loadOrder")}</span>
                                 </Button>
 
                                 <div className="hidden lg:flex h-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 rounded-[20px] p-1 shadow-sm gap-1">
@@ -331,7 +368,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         selectedCategory === null ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-sm" : "bg-white text-gray-600 dark:bg-[#1e293b] dark:text-slate-300 dark:border-slate-700"
                                     )}
                                 >
-                                    Tous
+                                    {t("allCategories")}
                                 </Button>
                                 {categories.map((category) => (
                                     <Button
@@ -393,7 +430,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                 {product.imageUrl ? (
                                                     <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center text-[8px] font-medium text-gray-400">NO IMG</div>
+                                                    <div className="flex h-full w-full items-center justify-center text-[8px] text-center font-medium text-gray-400">{t("noImg")}</div>
                                                 )}
                                             </div>
                                         )}
@@ -403,9 +440,9 @@ export const PosClient: FC<PosClientProps> = ({
                                             <div className="flex items-center gap-2 mt-1">
                                                 <p className="text-[10px] lg:text-xs text-gray-500 font-mono">{product.barcodes[0] || 'No Barcode'}</p>
                                                 {product.stock <= 5 ? (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-red-100 text-red-700 font-bold uppercase hidden xs:inline">Low Stock ({product.stock})</span>
+                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-red-100 text-red-700 font-bold uppercase hidden xs:inline">{t("lowStock", { stock: product.stock })}</span>
                                                 ) : (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium uppercase hidden xs:inline">Stock: {product.stock}</span>
+                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium uppercase hidden xs:inline">{t("stock", { stock: product.stock })}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -423,14 +460,14 @@ export const PosClient: FC<PosClientProps> = ({
                         )}
                         {filteredProducts.length > 50 && (
                             <div className="py-8 text-center text-xs lg:text-sm font-medium text-gray-400">
-                                Showing top 50 matches. Use search to find more.
+                                {t("showingTop50")}
                             </div>
                         )}
                         {filteredProducts.length === 0 && (
                             <div className="flex h-64 flex-col items-center justify-center text-muted-foreground animate-in fade-in duration-700">
                                 <Search className="h-10 w-10 lg:h-16 lg:w-16 mb-4 opacity-20" />
-                                <p className="text-lg lg:text-xl font-medium">No products found</p>
-                                <p className="text-xs lg:text-sm opacity-70 mt-1">Try refining your search</p>
+                                <p className="text-lg lg:text-xl font-medium">{t("noProductsFound")}</p>
+                                <p className="text-xs lg:text-sm opacity-70 mt-1">{t("tryRefiningSearch")}</p>
                             </div>
                         )}
                     </ScrollArea>
@@ -450,7 +487,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         </div>
                                     )}
                                 </div>
-                                <span className="font-bold text-sm">Voir Panier</span>
+                                <span className="font-bold text-sm">{t("viewCart")}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="font-black text-base tracking-tight">

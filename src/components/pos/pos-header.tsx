@@ -2,10 +2,12 @@
 
 import { Link } from "@/i18n/routing"
 import { Home } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 
 export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string }) => {
+    const t = useTranslations("PosHeader")
     return (
         <div className="flex items-center justify-between px-6 py-3 bg-[#131418] text-white shadow-sm h-14">
             <div className="flex items-center gap-4">
@@ -21,7 +23,7 @@ export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string })
             <div className="flex items-center gap-4">
                 {/* Clock, Status, User Profile could go here */}
                 <div className="text-[11px] font-bold text-green-400 bg-green-400/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                    Online
+                    {t("online")}
                 </div>
             </div>
         </div>

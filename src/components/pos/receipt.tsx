@@ -70,7 +70,7 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                 <div className="flex justify-between">
                     <span className="text-black">{t("customer")}:</span>
                     <span className="font-bold uppercase max-w-[45mm] truncate text-right">
-                        {customerName || "DIVERS"}
+                        {customerName || t("guest")}
                     </span>
                 </div>
             </div>
@@ -113,7 +113,7 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         if (remise > 0) {
                             return (
                                 <div className="flex justify-between font-bold text-sm text-black">
-                                    <span>Remise</span>
+                                    <span>{t("discount")}</span>
                                     <span>-{formatCurrency(remise)}</span>
                                 </div>
                             )

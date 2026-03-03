@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, Send, Trash2, Settings2, ChevronDown, Sparkles, TrendingUp, Package, Users, DollarSign, AlertTriangle, BarChart3, X, Eye, EyeOff, Loader2, Copy, Check } from "lucide-react";
+import { Bot, Send, Trash2, Settings2, ChevronDown, Sparkles, TrendingUp, Package, Users, DollarSign, AlertTriangle, BarChart3, X, Eye, EyeOff, Loader2, Copy, Check, Volume2, Square } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { DateRange } from "react-day-picker";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -38,7 +40,7 @@ const PROVIDERS: ProviderConfig[] = [
     {
         id: "gemini",
         name: "Google Gemini",
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         color: "text-blue-400",
         gradient: "from-blue-600 to-cyan-500",
         emoji: "✦",
@@ -97,17 +99,24 @@ interface AiClientProps {
 
 export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
     const initialProvider = (dbProvider?.toLowerCase() as Provider) || "gemini";
-    const [selectedProvider, setSelectedProvider] = useState<Provider>(initialProvider);
+    // Check if the provider actually exists in the array
+    const validProvider = PROVIDERS.find(p => p.id === initialProvider) ? initialProvider : "gemini";
+    const [selectedProvider, setSelectedProvider] = useState<Provider>(validProvider);
+
     const [showKey, setShowKey] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [speakingId, setSpeakingId] = useState<string | null>(null);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const synthRef = useRef<SpeechSynthesis | null>(null);
 
-    const provider = PROVIDERS.find(p => p.id === selectedProvider)!;
+    const provider = PROVIDERS.find(p => p.id === selectedProvider) || PROVIDERS[0];
     const currentKey = dbKeys[selectedProvider] || "";
     const hasKey = currentKey.trim().length > 3;
 
@@ -115,6 +124,48 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, loading]);
+
+    // Initialize speech synthesis
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            synthRef.current = window.speechSynthesis;
+        }
+        return () => {
+            if (synthRef.current) synthRef.current.cancel();
+        };
+    }, []);
+
+    const handleSpeak = (id: string, text: string) => {
+        if (!synthRef.current) return;
+
+        // If it's already speaking this exact message, stop it
+        if (speakingId === id) {
+            synthRef.current.cancel();
+            setSpeakingId(null);
+            return;
+        }
+
+        // Stop any currently playing audio
+        synthRef.current.cancel();
+
+        // Remove markdown tokens for cleaner speech
+        const cleanText = text.replace(/[#*`_~\[\]()]/g, ' ').replace(/> /g, '').trim();
+
+        if (!cleanText) return;
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = "fr-FR";
+
+        utterance.onend = () => {
+            setSpeakingId(prev => (prev === id ? null : prev));
+        };
+        utterance.onerror = () => {
+            setSpeakingId(prev => (prev === id ? null : prev));
+        };
+
+        setSpeakingId(id);
+        synthRef.current.speak(utterance);
+    };
 
     const handleCopy = (id: string, text: string) => {
         navigator.clipboard.writeText(text);
@@ -151,23 +202,51 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                     provider: selectedProvider,
                     apiKey: currentKey,
                     history,
+                    dateRange: dateRange ? {
+                        from: dateRange.from?.toISOString(),
+                        to: dateRange.to?.toISOString()
+                    } : undefined
                 }),
             });
-            const data = await res.json();
 
-            const aiMsg: Message = {
-                id: crypto.randomUUID(),
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `Erreur serveur ${res.status}`);
+            }
+
+            const aiMsgId = crypto.randomUUID();
+            setMessages(prev => [...prev, {
+                id: aiMsgId,
                 role: "assistant",
-                content: data.error ? `❌ **Erreur**: ${data.error}` : data.answer,
+                content: "",
                 timestamp: new Date(),
                 provider: selectedProvider,
-            };
-            setMessages(prev => [...prev, aiMsg]);
-        } catch {
+            }]);
+
+            const reader = res.body?.getReader();
+            if (!reader) throw new Error("Flux de réponse indisponible");
+
+            const decoder = new TextDecoder();
+            let accumulatedAnswer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                accumulatedAnswer += decoder.decode(value, { stream: true });
+                setMessages(prev =>
+                    prev.map(msg =>
+                        msg.id === aiMsgId
+                            ? { ...msg, content: accumulatedAnswer }
+                            : msg
+                    )
+                );
+            }
+        } catch (err: any) {
             setMessages(prev => [...prev, {
                 id: crypto.randomUUID(),
                 role: "assistant",
-                content: "❌ **Erreur réseau**: Impossible de contacter l'API.",
+                content: `❌ **Erreur réseau**: ${err.message || "Impossible de contacter l'API."}`,
                 timestamp: new Date(),
             }]);
         } finally {
@@ -202,6 +281,15 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {/* DateRange Picker */}
+                    <div className="hidden lg:flex">
+                        <DatePickerWithRange
+                            date={dateRange}
+                            setDate={setDateRange}
+                            className="w-[260px]"
+                        />
+                    </div>
+
                     {/* Provider Pills */}
                     <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-xl p-1">
                         {PROVIDERS.map(p => (
@@ -258,23 +346,35 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
             {/* ── Settings Panel ── */}
             {showSettings && (
                 <div className="shrink-0 border-b border-white/5 bg-[#0d0d15] px-4 sm:px-6 py-4 space-y-4">
-                    {/* Mobile Provider Selector */}
-                    <div className="md:hidden flex gap-2 flex-wrap">
-                        {PROVIDERS.map(p => (
-                            <button
-                                key={p.id}
-                                onClick={() => setSelectedProvider(p.id)}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
-                                    selectedProvider === p.id
-                                        ? `bg-gradient-to-r ${p.gradient} text-white border-transparent`
-                                        : "text-white/50 border-white/10 hover:border-white/30"
-                                )}
-                            >
-                                <span>{p.emoji}</span>
-                                <span>{p.name}</span>
-                            </button>
-                        ))}
+                    {/* Mobile DateRange Picker & Provider Selector */}
+                    <div className="lg:hidden">
+                        <h4 className="text-white/70 text-xs font-semibold uppercase mb-2">Période d'analyse</h4>
+                        <DatePickerWithRange
+                            date={dateRange}
+                            setDate={setDateRange}
+                            className="w-full mb-4"
+                        />
+                    </div>
+
+                    <div className="md:hidden">
+                        <h4 className="text-white/70 text-xs font-semibold uppercase mb-2">Modèle d'IA</h4>
+                        <div className="flex gap-2 flex-wrap">
+                            {PROVIDERS.map(p => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => setSelectedProvider(p.id)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all",
+                                        selectedProvider === p.id
+                                            ? `bg-gradient-to-r ${p.gradient} text-white border-transparent`
+                                            : "text-white/50 border-white/10 hover:border-white/30"
+                                    )}
+                                >
+                                    <span>{p.emoji}</span>
+                                    <span>{p.name}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* API Key Instructions */}
@@ -391,10 +491,19 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                                             prose-p:leading-relaxed">
                                             <ReactMarkdown>{msg.content}</ReactMarkdown>
                                         </div>
+                                        {/* Speak button */}
+                                        <button
+                                            onClick={() => handleSpeak(msg.id, msg.content)}
+                                            className="absolute top-3 right-10 opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/70 transition-all"
+                                            title="Écouter"
+                                        >
+                                            {speakingId === msg.id ? <Square className="h-3.5 w-3.5 text-blue-400 fill-current" /> : <Volume2 className="h-3.5 w-3.5" />}
+                                        </button>
                                         {/* Copy button */}
                                         <button
                                             onClick={() => handleCopy(msg.id, msg.content)}
                                             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/70 transition-all"
+                                            title="Copier"
                                         >
                                             {copiedId === msg.id ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                                         </button>

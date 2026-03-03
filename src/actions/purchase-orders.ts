@@ -83,12 +83,29 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
             // If BON_LIVRAISON or FACTURE or COMPLETED: add stock
             if (["BON_LIVRAISON", "FACTURE", "COMPLETED"].includes(data.status)) {
                 await Promise.all(
-                    data.items.map(item =>
-                        tx.product.update({
+                    data.items.map(async (item) => {
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
+                        const stockBefore = pBefore?.stock || 0;
+                        const stockAfter = stockBefore + item.quantity;
+
+                        await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: { increment: item.quantity }, cost: item.costPrice }
-                        })
-                    )
+                            data: { stock: stockAfter, cost: item.costPrice }
+                        });
+
+                        await tx.stockMovement.create({
+                            data: {
+                                productId: item.productId,
+                                type: "PURCHASE",
+                                quantity: item.quantity,
+                                stockBefore,
+                                stockAfter,
+                                referenceId: purchaseOrder.id,
+                                reason: `Achat Fournisseur N° ${purchaseOrder.id.slice(-6)}`,
+                                tenantId
+                            }
+                        });
+                    })
                 );
             }
 
@@ -208,24 +225,58 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
             if (!hadStock && getsStock) {
                 await Promise.all(
-                    order.items.map(item =>
-                        tx.product.update({
+                    order.items.map(async (item) => {
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
+                        const stockBefore = pBefore?.stock || 0;
+                        const stockAfter = stockBefore + item.quantity;
+
+                        await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: { increment: item.quantity }, cost: item.costPrice }
-                        })
-                    )
+                            data: { stock: stockAfter, cost: item.costPrice }
+                        });
+
+                        await tx.stockMovement.create({
+                            data: {
+                                productId: item.productId,
+                                type: "PURCHASE",
+                                quantity: item.quantity,
+                                stockBefore,
+                                stockAfter,
+                                referenceId: order.id,
+                                reason: `Modification statut Achat N° ${order.id.slice(-6)}: ${newStatus}`,
+                                tenantId
+                            }
+                        });
+                    })
                 );
             }
 
             // If cancelling after stock was received: reverse stock
             if (hadStock && newStatus === "CANCELLED") {
                 await Promise.all(
-                    order.items.map(item =>
-                        tx.product.update({
+                    order.items.map(async (item) => {
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
+                        const stockBefore = pBefore?.stock || 0;
+                        const stockAfter = stockBefore - item.quantity;
+
+                        await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
-                        })
-                    )
+                            data: { stock: stockAfter }
+                        });
+
+                        await tx.stockMovement.create({
+                            data: {
+                                productId: item.productId,
+                                type: "RETURN",
+                                quantity: -item.quantity,
+                                stockBefore,
+                                stockAfter,
+                                referenceId: order.id,
+                                reason: `Annulation Achat N° ${order.id.slice(-6)}`,
+                                tenantId
+                            }
+                        });
+                    })
                 );
             }
 

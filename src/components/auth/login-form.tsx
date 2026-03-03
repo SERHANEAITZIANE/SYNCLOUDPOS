@@ -18,8 +18,10 @@ import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { useState, useTransition } from "react"
 import { login } from "@/actions/login"
+import { useTranslations } from "next-intl"
 
 export const LoginForm = () => {
+    const t = useTranslations("Auth");
     const [isPending, startTransition] = useTransition();
 
     const form = useForm<z.infer<typeof LoginSchema>>({
@@ -50,7 +52,7 @@ export const LoginForm = () => {
     return (
         <Card className="w-[400px] shadow-lg">
             <CardHeader>
-                <h2 className="text-2xl font-bold text-center">Login</h2>
+                <h2 className="text-2xl font-bold text-center">{t("loginTitle")}</h2>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -60,9 +62,9 @@ export const LoginForm = () => {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>{t("fields.email")}</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} {...field} placeholder="john.doe@example.com" type="email" />
+                                        <Input disabled={isPending} {...field} placeholder={t("fields.emailPlaceholder")} type="email" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -73,25 +75,25 @@ export const LoginForm = () => {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t("fields.password")}</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isPending} {...field} placeholder="******" type="password" />
+                                        <Input disabled={isPending} {...field} placeholder={t("fields.passwordPlaceholder")} type="password" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <Button disabled={isPending} type="submit" className="w-full">
-                            Login
+                            {t("buttons.login")}
                         </Button>
                     </form>
                 </Form>
             </CardContent>
             <CardFooter>
                 <div className="w-full text-center text-sm">
-                    Don&apos;t have an account?{" "}
+                    {t("footer.noAccount")} {" "}
                     <Link href="/register" className="underline hover:text-primary">
-                        Register
+                        {t("footer.registerLink")}
                     </Link>
                 </div>
             </CardFooter>

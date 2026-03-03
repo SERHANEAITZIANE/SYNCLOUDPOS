@@ -20,12 +20,11 @@ type PromotionData = {
 export const getActivePromotions = async () => {
     const session = await auth()
     if (!session?.user?.id) return []
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return []
 
     const now = new Date()
-    return db.promotion.findMany({
+    const promotions = await db.promotion.findMany({
         where: {
             tenantId,
             isActive: true,
@@ -37,25 +36,33 @@ export const getActivePromotions = async () => {
             ]
         }
     })
+
+    return promotions.map(p => ({
+        ...p,
+        discountValue: Number(p.discountValue)
+    }))
 }
 
 export const getAllPromotions = async () => {
     const session = await auth()
     if (!session?.user?.id) return []
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return []
 
-    return db.promotion.findMany({
+    const promotions = await db.promotion.findMany({
         where: { tenantId },
         orderBy: { createdAt: "desc" }
     })
+
+    return promotions.map(p => ({
+        ...p,
+        discountValue: Number(p.discountValue)
+    }))
 }
 
 export const createPromotion = async (data: PromotionData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing" }
 

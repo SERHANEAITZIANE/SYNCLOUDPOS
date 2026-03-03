@@ -5,7 +5,29 @@
   },
   "Auth": {
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "loginTitle": "Login",
+    "registerTitle": "Create an Account",
+    "fields": {
+      "name": "Full Name",
+      "namePlaceholder": "e.g. John Doe",
+      "email": "Email",
+      "emailPlaceholder": "john.doe@example.com",
+      "phone": "Telephone",
+      "phonePlaceholder": "+213 555 55 55 55",
+      "password": "Password",
+      "passwordPlaceholder": "******"
+    },
+    "buttons": {
+      "login": "Login",
+      "register": "Create Account"
+    },
+    "footer": {
+      "noAccount": "Don't have an account?",
+      "hasAccount": "Already have an account?",
+      "registerLink": "Register",
+      "loginLink": "Login"
+    }
   },
   "Navigation": {
     "dashboard": "Dashboard",
@@ -24,7 +46,21 @@
     "treasury": "Treasury",
     "analytics": "Analytics",
     "company": "My Company",
-    "systemSettings": "System Settings"
+    "systemSettings": "System Settings",
+    "overview": "Overview",
+    "aiIntelligence": "AI Intelligence",
+    "transactionsGroup": "Transactions",
+    "payments": "Payments",
+    "catalogGroup": "Catalog",
+    "promotions": "Promotions",
+    "damages": "Damages",
+    "partnersGroup": "Partners",
+    "customerLoan": "Customer Loan",
+    "supplierLoan": "Supplier Loan",
+    "analysisGroup": "Analysis",
+    "systemGroup": "System",
+    "erpTraining": "ERP Training",
+    "superAdmin": "Super Admin"
   },
   "Common": {
     "quantity": "Quantity",
@@ -65,7 +101,12 @@
     "totalOrders": "Orders",
     "totalProducts": "Products",
     "totalCustomers": "Customers",
-    "recentSales": "Recent Sales"
+    "recentSales": "Recent Sales",
+    "messages": {
+      "errorTitle": "Error loading dashboard",
+      "errorMessage": "We couldn't load your dashboard data. Please try refreshing the page or contact support.",
+      "title": "Dashboard"
+    }
   },
   "Sales": {
     "title": "Sales Orders",
@@ -98,6 +139,73 @@
     "title": "Products",
     "subtitle": "Manage products for your store",
     "newProduct": "New Product",
+    "catalogue": "Catalogue",
+    "importExcel": "Import Excel",
+    "outOfStock": "Out of Stock",
+    "stockHistoryLabel": "Stock History",
+    "stockHistory": {
+      "title": "Stock Movement History",
+      "product": "Product:",
+      "loading": "Loading history...",
+      "noMovements": "No movements recorded for this product.",
+      "systemMovement": "System Movement",
+      "by": "By",
+      "types": {
+        "PURCHASE": "Purchase",
+        "RETURN": "Return",
+        "SALE": "Sale",
+        "SPOILAGE": "Spoilage",
+        "ADJUSTMENT": "Adjustment",
+        "INITIAL": "Initial Stock",
+        "default": "Movement"
+      }
+    },
+    "productGrid": {
+      "featured": "★ Featured",
+      "archived": "Archived",
+      "noImage": "No Image",
+      "retailPrice": "Retail Price",
+      "wholesalePrice": "Wholesale Price",
+      "dealerPrice": "Dealer",
+      "stock": "Stock: ",
+      "currency": "DA"
+    },
+    "priceListModal": {
+      "errorLoading": "Error loading data",
+      "copiedSuccess": "Catalogue copied to clipboard",
+      "retailPrice": "Retail Price",
+      "wholesalePrice": "Wholesale Price",
+      "resellerPrice": "Reseller Price",
+      "title": "Generate External Catalogue",
+      "description": "Create a PDF or text catalogue for your customers",
+      "configuration": "Configuration",
+      "categoryLabel": "Category",
+      "allCategories": "All Categories",
+      "pricingLabel": "Pricing",
+      "retailOption": "Retail (Retail Price)",
+      "wholesaleOption": "Wholesale (Wholesale Price)",
+      "resellerOption": "Reseller (Reseller Price)",
+      "filtersLabel": "Filters",
+      "onlyFeatured": "Featured Only (★)",
+      "hideOutOfStock": "Hide Out of Stock",
+      "showPhotos": "Show Photos",
+      "productsDisplayed": "product(s) displayed",
+      "exportPdf": "Export to PDF",
+      "viewCatalogue": "← View Catalogue",
+      "whatsappText": "WhatsApp / SMS Text",
+      "cataloguePreview": "Catalogue Preview",
+      "articles": "item(s)",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "loading": "Loading...",
+      "catalogueTitle": "Price Catalogue",
+      "noProducts": "No products for these criteria",
+      "price": "Price",
+      "product": "Product",
+      "others": "Others"
+    },
+    "importTitle": "Import Products from Excel",
+    "importDesc": "Download the template, fill it out and import.",
     "fields": {
       "name": "Name",
       "category": "Category",
@@ -115,6 +223,43 @@
       "brand": "Brand",
       "featuredDesc": "This product will appear on the home page",
       "archivedDesc": "This product will not appear anywhere in the store"
+    },
+    "form": {
+      "generalInfo": "General Information",
+      "namePlaceholder": "Product Name",
+      "descPlaceholder": "Product Description...",
+      "searchCategory": "Search Category...",
+      "searchBrand": "Search Brand...",
+      "pricing": "Pricing Information",
+      "purchasePriceDesc": "Supplier Cost",
+      "retailPriceDesc": "Retail selling price",
+      "wholesalePriceDesc": "For bulk purchases",
+      "dealerPriceDesc": "For partners and resellers",
+      "tvaRate": "TVA Rate (%)",
+      "selectTva": "Select TVA Rate",
+      "tva19": "TVA 19% (Standard)",
+      "tva9": "TVA 9% (Reduced)",
+      "tva0": "TVA 0% (Exempt)",
+      "tvaDesc": "Applicable rate in Algeria",
+      "calculatedMargins": "Calculated Margins",
+      "marginRetail": "Retail Margin",
+      "marginWholesale": "Wholesale Margin",
+      "marginDealer": "Dealer Margin",
+      "barcodes": "Barcodes",
+      "barcodeValue": "Barcode Value",
+      "barcodeType": "Type (e.g., EAN-13)",
+      "addBarcode": "Add",
+      "autoGenerate": "Auto-generate",
+      "autoGenerated": "Auto-generated",
+      "images": "Images",
+      "stockManagement": "Stock Management",
+      "lowStockAlert": "Low Stock Alert",
+      "outOfStock": "Out of Stock",
+      "lowStock": "Low Stock",
+      "inStock": "In Stock",
+      "units": "units",
+      "productStatus": "Product Status",
+      "saving": "Saving..."
     }
   },
   "Suppliers": {
@@ -128,7 +273,25 @@
       "phone": "Phone",
       "address": "Address",
       "taxId": "Tax ID",
-      "balance": "Outstanding Balance"
+      "balance": "Outstanding Balance",
+      "nifDesc": "Tax Identification Number (NIF)",
+      "nis": "NIS",
+      "nisDesc": "Statistical Identification Number (NIS)",
+      "artImposition": "Article of Imposition",
+      "rc": "NRC",
+      "rcDesc": "Commercial Register Number",
+      "rib": "Bank RIB",
+      "ribDesc": "Bank Identity Statement"
+    },
+    "messages": {
+      "error": "Something went wrong.",
+      "success": "Supplier saved.",
+      "deleted": "Supplier deleted.",
+      "linkedProductError": "Please remove all products linked to this supplier first."
+    },
+    "form": {
+      "generalInfo": "General Information",
+      "fiscalInfo": "Fiscal Information"
     }
   },
   "Customers": {
@@ -145,6 +308,14 @@
       "taxId": "Tax ID",
       "balance": "Outstanding Balance",
       "loyaltyPoints": "Loyalty Points"
+    },
+    "messages": {
+      "deleted": "Customer deleted.",
+      "error": "Error during deletion."
+    },
+    "actions": {
+      "showQr": "Show QR Code",
+      "viewLog": "View History (Log)"
     }
   },
   "Purchases": {
@@ -179,6 +350,10 @@
       "account": "Account",
       "date": "Date",
       "notes": "Notes"
+    },
+    "messages": {
+      "deleted": "Expense deleted.",
+      "error": "Error during deletion."
     }
   },
   "Categories": {
@@ -188,6 +363,13 @@
     "fields": {
       "name": "Name",
       "products": "Products"
+    },
+    "fastCreate": {
+      "title": "Quick Create Category",
+      "description": "Create a new category instantly.",
+      "nameLabel": "Category Name",
+      "namePlaceholder": "e.g. Electronics, Clothing...",
+      "success": "Category created"
     }
   },
   "Brands": {
@@ -197,6 +379,13 @@
     "fields": {
       "name": "Name",
       "products": "Products"
+    },
+    "fastCreate": {
+      "title": "Quick Create Family (Brand)",
+      "description": "Create a new family (brand) instantly.",
+      "nameLabel": "Family / Brand Name",
+      "namePlaceholder": "e.g. Apple, Nike, Dairy...",
+      "success": "Family / Brand created"
     }
   },
   "Treasury": {
@@ -223,7 +412,43 @@
     "expenses": "Expenses",
     "profit": "Net Profit",
     "topProducts": "Top Products",
-    "salesByCategory": "Sales by Category"
+    "salesByCategory": "Sales by Category",
+    "kpi": {
+      "dashboardTitle": "Analytical Dashboard",
+      "dashboardDesc": "Premium overview of your business performance and cash flow.",
+      "purePerformance": "Pure Performance (Theoretical)",
+      "revenueTotalSales": "Total Invoiced/POS Sales",
+      "transactions": "transactions",
+      "cogsDesc": "Purchase cost of goods sold",
+      "expensesDesc": "Recorded general expenses (rent, salaries...)",
+      "netMargin": "Net Margin",
+      "cashFlowOperations": "Treasury & Operations (Cash Flow)",
+      "actualCash": "Money physically received",
+      "remainingToRecover": "Remaining to recover",
+      "totalPurchaseValue": "Total value of stock purchased (Receipt Notes)",
+      "clientsWithDebt": "client(s) have unpaid debts",
+      "revenueVsExpenses": "Revenue vs Expenses (Last 30 days)",
+      "revenues": "Revenues",
+      "expenses": "Expenses",
+      "revenueByCategory": "Revenue by Category",
+      "noCategoryData": "No category data.",
+      "sales": "Sales",
+      "top10Products": "Top 10 Products (Revenue)",
+      "noSales": "No sales recorded.",
+      "unitsSold": "units sold",
+      "topCustomers": "Top Customers",
+      "noCustomers": "No customers.",
+      "recentSalesFlow": "Recent Sales Flow",
+      "noRecentSales": "No recent sales.",
+      "partial": "Partial",
+      "paidInFull": "Paid in Full",
+      "lowStock": "Low Stock",
+      "manage": "Manage",
+      "noStockAlert": "No stock alerts.",
+      "unpaidDebts": "Unpaid Debts",
+      "noOngoingDebts": "No ongoing debts"
+    },
+    "noData": "No analytics data available."
   },
   "Reports": {
     "title": "Reports",
@@ -270,13 +495,144 @@
     "date": "Date",
     "ticketNo": "Receipt No",
     "customer": "Customer",
+    "guest": "GUEST",
     "item": "Item",
     "qty": "Qty",
     "price": "Price",
     "oldBalance": "Old Balance",
+    "discount": "Discount",
     "total": "Total",
     "payment": "Paid Amount",
     "newBalance": "New Balance",
     "thanks": "Thank you for your visit!"
+  },
+  "StoreSwitcher": {
+    "selectStore": "Select Store",
+    "searchStore": "Search store...",
+    "noStoreFound": "No store found.",
+    "storesHeading": "Stores",
+    "createStore": "Create Store",
+    "createStoreTitle": "Create Store",
+    "createStoreDesc": "Add a new store to manage products and sales.",
+    "storeNameLabel": "Store name",
+    "storeNamePlaceholder": "E.g. Oran Branch",
+    "creating": "Creating...",
+    "continue": "Continue",
+    "cancel": "Cancel"
+  },
+  "AlertModal": {
+    "title": "Are you sure?",
+    "description": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
+  "UserNav": {
+    "profile": "Profile",
+    "billing": "Billing",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "ModeToggle": {
+    "toggleTheme": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "DataTable": {
+    "search": "Search...",
+    "allTypes": "All types",
+    "retail": "Retail",
+    "reseller": "Reseller",
+    "wholesale": "Wholesale",
+    "noResults": "No results.",
+    "page": "Page"
+  },
+  "PosPage": {
+    "unauthorized": "Unauthorized",
+    "noTenant": "No tenant configured",
+    "uncategorized": "Uncategorized"
+  },
+  "CartSidebar": {
+    "editItem": "Edit Item",
+    "quantityLabel": "Quantity (Use negative for return)",
+    "priceLabel": "Unit Price (DZD)",
+    "cancel": "Cancel",
+    "save": "Save",
+    "order": "Order",
+    "clearTicket": "Clear Ticket",
+    "walkingCustomer": "Walking Customer",
+    "searchClient": "Search client...",
+    "noClientFound": "No client found.",
+    "usePoints": "Use points",
+    "cancelPoints": "Cancel",
+    "emptyTicket": "Your ticket is empty",
+    "scanToAdd": "Scan or tap products to add",
+    "promoSavings": "Promo savings",
+    "total": "Total",
+    "checkout": "Checkout",
+    "errorValidation": "Validation error.",
+    "orderValidated": "Order validated!"
+  },
+  "PaymentModal": {
+    "transactionComplete": "Transaction Complete",
+    "orderProcessed": "The order has been processed successfully.",
+    "amountPaid": "Amount Paid",
+    "changeToReturn": "Change to return",
+    "printTicket": "Print Ticket",
+    "newOrder": "New Order",
+    "checkoutTitle": "Checkout",
+    "checkoutDesc": "Complete the payment for this order.",
+    "totalDue": "Total Due",
+    "cash": "CASH",
+    "card": "CARD",
+    "transfer": "TRANSFER",
+    "check": "CHECK",
+    "term": "TERM",
+    "depositTo": "Deposit To",
+    "noneDefault": "None / Default",
+    "selectBankAccount": "Select Caisse / Bank",
+    "balanceLabel": "Balance:",
+    "quickCash": "Quick Cash",
+    "tendered": "Tendered",
+    "change": "Change",
+    "balance": "Balance",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "completeOrder": "Complete Order"
+  },
+  "PosHeader": {
+    "online": "Online"
+  },
+  "ProductCard": {
+    "noImg": "No Img",
+    "productDetailsStock": "Product Details & Stock",
+    "viewDetailedInventory": "View detailed inventory info for {name}",
+    "noDescription": "No description available.",
+    "currentStock": "Current Stock",
+    "minStockAlert": "Min. Stock Alert",
+    "sellingPrice": "Selling Price",
+    "unitCost": "Unit Cost",
+    "linkedBarcodes": "Linked Barcodes"
+  },
+  "PosClient": {
+    "searchPlaceholder": "Search or scan...",
+    "loadOrder": "Load Order",
+    "allCategories": "All",
+    "showingTop50": "Showing top 50 matches. Use search to find more.",
+    "noProductsFound": "No products found",
+    "tryRefiningSearch": "Try refining your search",
+    "viewCart": "View Cart",
+    "noImg": "NO IMG",
+    "lowStock": "Low Stock ({stock})",
+    "stock": "Stock: {stock}"
+  },
+  "SalesOrderSearchDialog": {
+    "title": "Load Sales Order",
+    "description": "Search and load a previous Sales Order",
+    "searchPlaceholder": "Search by receipt number (e.g., BL-2026/0001) or customer name...",
+    "noOrdersFound": "No orders found matching '{query}'.",
+    "noCustomer": "No Customer",
+    "items": "items",
+    "loadOrder": "Load Order"
   }
 }

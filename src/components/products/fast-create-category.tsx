@@ -39,7 +39,8 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
-    const t = useTranslations("Common")
+    const tCommon = useTranslations("Common")
+    const tCategory = useTranslations("Categories.fastCreate")
 
     const form = useForm<z.infer<typeof CategorySchema>>({
         resolver: zodResolver(CategorySchema),
@@ -54,7 +55,7 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
             if (result.error) {
                 toast.error(result.error)
             } else {
-                toast.success("Category created")
+                toast.success(tCategory("success"))
                 form.reset()
                 setOpen(false)
                 router.refresh()
@@ -76,9 +77,9 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Quick Create Category</DialogTitle>
+                    <DialogTitle>{tCategory("title")}</DialogTitle>
                     <DialogDescription>
-                        Create a new category instantly without leaving this page.
+                        {tCategory("description")}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -88,9 +89,9 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category Name</FormLabel>
+                                    <FormLabel>{tCategory("nameLabel")}</FormLabel>
                                     <FormControl>
-                                        <Input disabled={loading} placeholder="e.g. Electronics, Clothing..." {...field} />
+                                        <Input disabled={loading} placeholder={tCategory("namePlaceholder")} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -98,7 +99,7 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
                         />
                         <DialogFooter>
                             <Button disabled={loading} type="submit" className="w-full">
-                                {t("save")}
+                                {tCommon("save")}
                             </Button>
                         </DialogFooter>
                     </form>

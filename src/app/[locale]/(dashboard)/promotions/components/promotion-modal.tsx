@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 
 interface PromotionModalProps {
     isOpen: boolean
@@ -47,6 +48,13 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({
         setLoading(false)
         setForm({ name: "", type: "NTH_ITEM_DISCOUNT", targetScope: "ALL", scopeId: "", discountType: "PERCENT", discountValue: "30", triggerQty: "2" })
     }
+
+    const productOptions = useMemo(() => {
+        return products.map(p => ({
+            label: p.name,
+            value: p.id
+        }))
+    }, [products])
 
     return (
         <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
@@ -120,12 +128,13 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({
                     {form.targetScope === "PRODUCT" && (
                         <div className="space-y-2">
                             <Label>Produit cible</Label>
-                            <Select value={form.scopeId} onValueChange={v => handleChange("scopeId", v)}>
-                                <SelectTrigger><SelectValue placeholder="Choisir un produit" /></SelectTrigger>
-                                <SelectContent>
-                                    {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={productOptions}
+                                value={form.scopeId}
+                                onChange={v => handleChange("scopeId", v)}
+                                placeholder="Rechercher un produit..."
+                                searchPlaceholder="Rechercher..."
+                            />
                         </div>
                     )}
                 </div>

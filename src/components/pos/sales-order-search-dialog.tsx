@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState, useEffect } from "react"
 import { Search, Loader2 } from "lucide-react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
     onClose,
     onSelectOrder
 }) => {
+    const t = useTranslations("SalesOrderSearchDialog")
     const [query, setQuery] = useState("")
     const [orders, setOrders] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
@@ -57,8 +59,8 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
 
     return (
         <Modal
-            title="Load Sales Order"
-            description="Search and load a previous Bon de Livraison (Order)"
+            title={t("title")}
+            description={t("description")}
             isOpen={isOpen}
             onClose={onClose}
         >
@@ -67,7 +69,7 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                         <Input
-                            placeholder="Search by receipt number (e.g., BL-2026/0001) or customer name..."
+                            placeholder={t("searchPlaceholder")}
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             className="pl-9 h-12 rounded-xl"
@@ -84,7 +86,7 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                         </div>
                     ) : filteredOrders.length === 0 ? (
                         <div className="text-center py-10 text-gray-500">
-                            No orders found matching "{query}".
+                            {t("noOrdersFound", { query })}
                         </div>
                     ) : (
                         filteredOrders.map((order) => (
@@ -107,12 +109,12 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                                     </div>
                                     <div className="text-sm text-gray-500">
                                         <span className="font-medium text-gray-700 dark:text-gray-300">
-                                            {order.customer?.name || "No Customer"}
+                                            {order.customer?.name || t("noCustomer")}
                                         </span>
                                         {" • "}
                                         {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                                         {" • "}
-                                        {order.items.length} items
+                                        {order.items.length} {t("items")}
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -120,7 +122,7 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                                         {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(order.total)} DA
                                     </div>
                                     <Button size="sm" variant="outline" className="mt-2 h-8 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
-                                        Load Order
+                                        {t("loadOrder")}
                                     </Button>
                                 </div>
                             </div>

@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label"
 import { createStore } from "@/actions/create-store"
 import { switchStore } from "@/actions/switch-store"
 import { useTransition } from "react"
+import { useTranslations } from "next-intl"
 
 type PopoverTriggerProps = React.ComponentPropsWithoutRef<typeof PopoverTrigger>
 
@@ -45,6 +46,7 @@ export default function StoreSwitcher({
     items = [],
     activeTenantId
 }: StoreSwitcherProps) {
+    const t = useTranslations("StoreSwitcher")
     const [open, setOpen] = React.useState(false)
     const [showNewStoreModal, setShowNewStoreModal] = React.useState(false)
     const [isPending, startTransition] = useTransition()
@@ -99,21 +101,21 @@ export default function StoreSwitcher({
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        aria-label="Select a store"
+                        aria-label={t("selectStore")}
                         className={cn("w-[200px] justify-between", className)}
                         disabled={isPending}
                     >
                         <StoreIcon className="mr-2 h-4 w-4" />
-                        {currentStore?.label || "Select Store"}
+                        {currentStore?.label || t("selectStore")}
                         <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[200px] p-0 z-[99999]">
                     <Command>
                         <CommandList>
-                            <CommandInput placeholder="Search store..." />
-                            <CommandEmpty>No store found.</CommandEmpty>
-                            <CommandGroup heading="Stores">
+                            <CommandInput placeholder={t("searchStore")} />
+                            <CommandEmpty>{t("noStoreFound")}</CommandEmpty>
+                            <CommandGroup heading={t("storesHeading")}>
                                 {items.map((store) => (
                                     <CommandItem
                                         key={store.value}
@@ -144,7 +146,7 @@ export default function StoreSwitcher({
                                     }}
                                 >
                                     <PlusCircle className="mr-2 h-5 w-5" />
-                                    Create Store
+                                    {t("createStore")}
                                 </CommandItem>
                             </CommandGroup>
                         </CommandList>
@@ -153,17 +155,17 @@ export default function StoreSwitcher({
             </Popover>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create Store</DialogTitle>
+                    <DialogTitle>{t("createStoreTitle")}</DialogTitle>
                     <DialogDescription>
-                        Add a new store to manage products and sales.
+                        {t("createStoreDesc")}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-2 pb-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Store name</Label>
+                        <Label htmlFor="name">{t("storeNameLabel")}</Label>
                         <Input
                             id="name"
-                            placeholder="E.g. Oran Branch"
+                            placeholder={t("storeNamePlaceholder")}
                             value={newStoreName}
                             onChange={(e) => setNewStoreName(e.target.value)}
                             onKeyDown={(e) => { if (e.key === "Enter") onCreateStore() }}
@@ -172,9 +174,9 @@ export default function StoreSwitcher({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setShowNewStoreModal(false)}>Cancel</Button>
+                    <Button variant="outline" onClick={() => setShowNewStoreModal(false)}>{t("cancel")}</Button>
                     <Button onClick={onCreateStore} disabled={isPending}>
-                        {isPending ? "Creating..." : "Continue"}
+                        {isPending ? t("creating") : t("continue")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

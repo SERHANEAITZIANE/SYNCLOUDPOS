@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 
 interface AlertModalProps {
     isOpen: boolean
@@ -19,6 +20,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     loading
 }) => {
     const [isMounted, setIsMounted] = useState(false)
+    const t = useTranslations("AlertModal")
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -31,17 +33,17 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
     return (
         <Modal
-            title="Are you sure?"
-            description="This action cannot be undone."
+            title={t("title")}
+            description={t("description")}
             isOpen={isOpen}
             onClose={onClose}
         >
             <div className="pt-6 space-x-2 flex items-center justify-end w-full">
                 <Button disabled={loading} variant="outline" onClick={onClose}>
-                    Cancel
+                    {t("cancel")}
                 </Button>
                 <Button disabled={loading} variant="destructive" onClick={onConfirm}>
-                    Continue
+                    {t("continue")}
                 </Button>
             </div>
         </Modal>

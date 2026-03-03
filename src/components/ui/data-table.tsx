@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -37,6 +38,7 @@ export function DataTable<TData, TValue>({
     data,
     searchKey,
 }: DataTableProps<TData, TValue>) {
+    const t = useTranslations("DataTable")
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -60,7 +62,7 @@ export function DataTable<TData, TValue>({
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 py-4">
                 <Input
                     id="global-search-input"
-                    placeholder="Search..."
+                    placeholder={t("search")}
                     value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
                         table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -77,13 +79,13 @@ export function DataTable<TData, TValue>({
                         }
                     >
                         <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Tous les types" />
+                            <SelectValue placeholder={t("allTypes")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="ALL">Tous les types</SelectItem>
-                            <SelectItem value="RETAIL">Détaillant</SelectItem>
-                            <SelectItem value="RESELLER">Revendeur</SelectItem>
-                            <SelectItem value="WHOLESALE">Grossiste</SelectItem>
+                            <SelectItem value="ALL">{t("allTypes")}</SelectItem>
+                            <SelectItem value="RETAIL">{t("retail")}</SelectItem>
+                            <SelectItem value="RESELLER">{t("reseller")}</SelectItem>
+                            <SelectItem value="WHOLESALE">{t("wholesale")}</SelectItem>
                         </SelectContent>
                     </Select>
                 )}
@@ -132,7 +134,7 @@ export function DataTable<TData, TValue>({
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        No results.
+                                        {t("noResults")}
                                     </TableCell>
                                 </TableRow>
                             )}

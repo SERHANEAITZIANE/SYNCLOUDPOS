@@ -5,7 +5,29 @@
     },
     "Auth": {
         "login": "تسجيل الدخول",
-        "register": "إنشاء حساب"
+        "register": "إنشاء حساب",
+        "loginTitle": "تسجيل الدخول",
+        "registerTitle": "إنشاء حساب جديد",
+        "fields": {
+            "name": "الاسم الكامل",
+            "namePlaceholder": "مثال: أحمد محمد",
+            "email": "البريد الإلكتروني",
+            "emailPlaceholder": "ahmad@example.com",
+            "phone": "رقم الهاتف",
+            "phonePlaceholder": "+213 555 55 55 55",
+            "password": "كلمة المرور",
+            "passwordPlaceholder": "******"
+        },
+        "buttons": {
+            "login": "دخول",
+            "register": "إنشاء الحساب"
+        },
+        "footer": {
+            "noAccount": "ليس لديك حساب؟",
+            "hasAccount": "لديك حساب بالفعل؟",
+            "registerLink": "سجل الآن",
+            "loginLink": "تسجيل الدخول"
+        }
     },
     "Navigation": {
         "dashboard": "لوحة القيادة",
@@ -24,7 +46,21 @@
         "treasury": "الخزينة",
         "analytics": "التحليلات",
         "company": "مؤسستي",
-        "systemSettings": "إعدادات النظام"
+        "systemSettings": "إعدادات النظام",
+        "overview": "نظرة عامة",
+        "aiIntelligence": "الذكاء الاصطناعي",
+        "transactionsGroup": "المعاملات",
+        "payments": "المدفوعات",
+        "catalogGroup": "الكتالوج",
+        "promotions": "العروض",
+        "damages": "التوالف",
+        "partnersGroup": "الشركاء",
+        "customerLoan": "سلف العملاء",
+        "supplierLoan": "سلف الموردين",
+        "analysisGroup": "التحليلات",
+        "systemGroup": "النظام",
+        "erpTraining": "تدريب النظام",
+        "superAdmin": "المدير العام"
     },
     "Common": {
         "quantity": "الكمية",
@@ -65,7 +101,12 @@
         "totalOrders": "الطلبات",
         "totalProducts": "المنتجات",
         "totalCustomers": "العملاء",
-        "recentSales": "المبيعات الأخيرة"
+        "recentSales": "المبيعات الأخيرة",
+        "messages": {
+            "errorTitle": "خطأ في تحميل لوحة القيادة",
+            "errorMessage": "تعذر تحميل بيانات لوحة القيادة. يرجى تحديث الصفحة أو الاتصال بالدعم.",
+            "title": "لوحة القيادة"
+        }
     },
     "Sales": {
         "title": "طلبات المبيعات",
@@ -98,6 +139,73 @@
         "title": "المنتجات",
         "subtitle": "إدارة منتجات متجرك",
         "newProduct": "منتج جديد",
+        "catalogue": "الكتالوج",
+        "importExcel": "استيراد من إكسل",
+        "outOfStock": "نفاد الكمية",
+        "stockHistoryLabel": "سجل المخزون",
+        "stockHistory": {
+            "title": "سجل حركات المخزون",
+            "product": "المنتج:",
+            "loading": "جاري تحميل السجل...",
+            "noMovements": "لا توجد حركات مسجلة لهذا المنتج.",
+            "systemMovement": "حركة نظام",
+            "by": "بواسطة",
+            "types": {
+                "PURCHASE": "شراء",
+                "RETURN": "إرجاع",
+                "SALE": "بيع",
+                "SPOILAGE": "تلف",
+                "ADJUSTMENT": "تعديل",
+                "INITIAL": "مخزون أولي",
+                "default": "حركة"
+            }
+        },
+        "productGrid": {
+            "featured": "★ مميز",
+            "archived": "مؤرشف",
+            "noImage": "بدون صورة",
+            "retailPrice": "سعر التجزئة",
+            "wholesalePrice": "سعر الجملة",
+            "dealerPrice": "تاجر",
+            "stock": "المخزون: ",
+            "currency": "د.ج"
+        },
+        "priceListModal": {
+            "errorLoading": "خطأ في تحميل البيانات",
+            "copiedSuccess": "تم نسخ الكتالوج إلى الحافظة",
+            "retailPrice": "سعر البيع",
+            "wholesalePrice": "سعر الجملة",
+            "resellerPrice": "سعر التاجر",
+            "title": "إنشاء كتالوج خارجي",
+            "description": "قم بإنشاء كتالوج بصيغة PDF أو نص لعملائك",
+            "configuration": "تكوين",
+            "categoryLabel": "الفئة",
+            "allCategories": "جميع الفئات",
+            "pricingLabel": "التسعير",
+            "retailOption": "تجزئة (سعر البيع)",
+            "wholesaleOption": "جملة (سعر الجملة)",
+            "resellerOption": "بائع (سعر التاجر)",
+            "filtersLabel": "الفلاتر",
+            "onlyFeatured": "فقط المميز (★)",
+            "hideOutOfStock": "إخفاء المنتجات غير المتوفرة",
+            "showPhotos": "عرض الصور",
+            "productsDisplayed": "منتج (منتجات) معروضة",
+            "exportPdf": "تصدير إلى PDF",
+            "viewCatalogue": "← عرض الكتالوج",
+            "whatsappText": "نص واتساب / SMS",
+            "cataloguePreview": "معاينة الكتالوج",
+            "articles": "مقال (مقالات)",
+            "copied": "تم النسخ!",
+            "copy": "نسخ",
+            "loading": "جاري التحميل...",
+            "catalogueTitle": "كتالوج الأسعار",
+            "noProducts": "لا توجد منتجات لهذه المعايير",
+            "price": "السعر",
+            "product": "المنتج",
+            "others": "أخرى"
+        },
+        "importTitle": "استيراد المنتجات من إكسل",
+        "importDesc": "قم بتنزيل النموذج وتعبئته ثم استيراده.",
         "fields": {
             "name": "الاسم",
             "category": "الفئة",
@@ -115,6 +223,43 @@
             "brand": "العلامة التجارية",
             "featuredDesc": "سيظهر هذا المنتج في الصفحة الرئيسية",
             "archivedDesc": "لن يظهر هذا المنتج في أي مكان في المتجر"
+        },
+        "form": {
+            "generalInfo": "معلومات عامة",
+            "namePlaceholder": "اسم المنتج",
+            "descPlaceholder": "وصف المنتج...",
+            "searchCategory": "البحث عن فئة...",
+            "searchBrand": "البحث عن علامة تجارية...",
+            "pricing": "جدول التسعير",
+            "purchasePriceDesc": "تكلفة المورد",
+            "retailPriceDesc": "سعر البيع بالتجزئة",
+            "wholesalePriceDesc": "للشراء بكميات كبيرة",
+            "dealerPriceDesc": "للشركاء والموزعين",
+            "tvaRate": "نسبة الضريبة (%)",
+            "selectTva": "اختر نسبة الضريبة",
+            "tva19": "ضريبة 19% (عامة)",
+            "tva9": "ضريبة 9% (مخفضة)",
+            "tva0": "ضريبة 0% (معفاة)",
+            "tvaDesc": "النسبة المطبقة في الجزائر",
+            "calculatedMargins": "الهوامش المحسوبة",
+            "marginRetail": "هامش التجزئة",
+            "marginWholesale": "هامش الجملة",
+            "marginDealer": "هامش الموزع",
+            "barcodes": "الرموز الشريطية (الباركود)",
+            "barcodeValue": "قيمة الباركود",
+            "barcodeType": "النوع (مثال EAN-13)",
+            "addBarcode": "إضافة",
+            "autoGenerate": "توليد تلقائي",
+            "autoGenerated": "توليد تلقائي",
+            "images": "الصور",
+            "stockManagement": "إدارة المخزون",
+            "lowStockAlert": "تنبيه انخفاض المخزون",
+            "outOfStock": "نفاد المخزون",
+            "lowStock": "مخزون منخفض",
+            "inStock": "متوفر في المخزون",
+            "units": "وحدات",
+            "productStatus": "حالة المنتج",
+            "saving": "جاري الحفظ..."
         }
     },
     "Suppliers": {
@@ -128,7 +273,25 @@
             "phone": "الهاتف",
             "address": "العنوان",
             "taxId": "الرقم الضريبي",
-            "balance": "الرصيد المستحق"
+            "balance": "الرصيد المستحق",
+            "nifDesc": "رقم التعريف الجبائي (NIF)",
+            "nis": "NIS",
+            "nisDesc": "رقم التعريف الإحصائي (NIS)",
+            "artImposition": "المادة الضريبية",
+            "rc": "NRC",
+            "rcDesc": "رقم السجل التجاري",
+            "rib": "رقم الحساب البنكي (RIB)",
+            "ribDesc": "كشف الهوية البنكية"
+        },
+        "messages": {
+            "error": "حدث خطأ ما.",
+            "success": "تم حفظ المورد.",
+            "deleted": "تم حذف المورد.",
+            "linkedProductError": "يرجى إزالة جميع المنتجات المرتبطة بهذا المورد أولاً."
+        },
+        "form": {
+            "generalInfo": "معلومات عامة",
+            "fiscalInfo": "المعلومات المالية"
         }
     },
     "Customers": {
@@ -145,6 +308,14 @@
             "taxId": "الرقم الضريبي",
             "balance": "الرصيد المستحق",
             "loyaltyPoints": "نقاط الولاء"
+        },
+        "messages": {
+            "deleted": "تم حذف العميل.",
+            "error": "خطأ أثناء الحذف."
+        },
+        "actions": {
+            "showQr": "عرض رمز الاستجابة السريعة",
+            "viewLog": "عرض السجل (التاريخ)"
         }
     },
     "Purchases": {
@@ -179,6 +350,10 @@
             "account": "الحساب",
             "date": "التاريخ",
             "notes": "ملاحظات"
+        },
+        "messages": {
+            "deleted": "تم حذف النفقة.",
+            "error": "خطأ أثناء الحذف."
         }
     },
     "Categories": {
@@ -188,6 +363,13 @@
         "fields": {
             "name": "الاسم",
             "products": "المنتجات"
+        },
+        "fastCreate": {
+            "title": "إنشاء سريع للفئة",
+            "description": "قم بإنشاء فئة جديدة فورًا.",
+            "nameLabel": "اسم الفئة",
+            "namePlaceholder": "مثال: إلكترونيات، ملابس...",
+            "success": "تم إنشاء الفئة"
         }
     },
     "Brands": {
@@ -197,6 +379,13 @@
         "fields": {
             "name": "الاسم",
             "products": "المنتجات"
+        },
+        "fastCreate": {
+            "title": "إنشاء سريع للعلامة التجارية",
+            "description": "قم بإنشاء علامة تجارية جديدة فورًا.",
+            "nameLabel": "اسم العلامة التجارية",
+            "namePlaceholder": "مثال: أبل، نايك، باناسونيك...",
+            "success": "تم إنشاء العلامة التجارية"
         }
     },
     "Treasury": {
@@ -223,7 +412,43 @@
         "expenses": "النفقات",
         "profit": "صافي الأرباح",
         "topProducts": "أفضل المنتجات",
-        "salesByCategory": "المبيعات حسب الفئة"
+        "salesByCategory": "المبيعات حسب الفئة",
+        "kpi": {
+            "dashboardTitle": "لوحة القيادة التحليلية",
+            "dashboardDesc": "نظرة عامة متميزة على أداء عملك وتدفقاتك النقدية.",
+            "purePerformance": "الأداء النقي (نظري)",
+            "revenueTotalSales": "إجمالي المبيعات المفوترة / نقاط البيع",
+            "transactions": "معاملات",
+            "cogsDesc": "تكلفة شراء البضائع المباعة",
+            "expensesDesc": "المصروفات العامة المسجلة (إيجار، رواتب...)",
+            "netMargin": "صافي الهامش",
+            "cashFlowOperations": "الخزينة والعمليات (التدفق النقدي)",
+            "actualCash": "الأموال المستلمة فعلياً",
+            "remainingToRecover": "المتبقي للتحصيل",
+            "totalPurchaseValue": "القيمة الإجمالية للمخزون المشترى (إيصالات الاستلام)",
+            "clientsWithDebt": "عميل (عملاء) لديهم ديون غير مدفوعة",
+            "revenueVsExpenses": "الإيرادات مقابل المصروفات (آخر 30 يومًا)",
+            "revenues": "الإيرادات",
+            "expenses": "المصروفات",
+            "revenueByCategory": "الإيرادات حسب الفئة",
+            "noCategoryData": "لا توجد بيانات فئة.",
+            "sales": "مبيعات",
+            "top10Products": "أفضل 10 منتجات (إيرادات)",
+            "noSales": "لم يتم تسجيل مبيعات.",
+            "unitsSold": "وحدات مباعة",
+            "topCustomers": "أفضل العملاء",
+            "noCustomers": "لا يوجد عملاء.",
+            "recentSalesFlow": "تدفق المبيعات الأخير",
+            "noRecentSales": "لا توجد مبيعات أخيرة.",
+            "partial": "جزئي",
+            "paidInFull": "مدفوع بالكامل",
+            "lowStock": "مخزون منخفض",
+            "manage": "إدارة",
+            "noStockAlert": "لا توجد تنبيهات مخزون.",
+            "unpaidDebts": "ديون غير مدفوعة",
+            "noOngoingDebts": "لا توجد ديون حالية"
+        },
+        "noData": "لا توجد بيانات تحليلية متاحة."
     },
     "Reports": {
         "title": "التقارير",
@@ -270,13 +495,144 @@
         "date": "التاريخ",
         "ticketNo": "رقم الإيصال",
         "customer": "العميل",
+        "guest": "عميل غير مسجل",
         "item": "الصنف",
         "qty": "الكمية",
         "price": "السعر",
         "oldBalance": "الرصيد السابق",
+        "discount": "تخفيض",
         "total": "المجموع",
         "payment": "المدفوع",
         "newBalance": "الرصيد الجديد",
         "thanks": "شكراً لزيارتكم!"
+    },
+    "StoreSwitcher": {
+        "selectStore": "اختر المتجر",
+        "searchStore": "ابحث عن متجر...",
+        "noStoreFound": "لم يتم العثور على متجر.",
+        "storesHeading": "المتاجر",
+        "createStore": "إنشاء متجر",
+        "createStoreTitle": "إنشاء متجر",
+        "createStoreDesc": "إضافة متجر جديد لإدارة المنتجات والمبيعات.",
+        "storeNameLabel": "اسم المتجر",
+        "storeNamePlaceholder": "مثال: فرع وهران",
+        "creating": "جاري الإنشاء...",
+        "continue": "متابعة",
+        "cancel": "إلغاء"
+    },
+    "AlertModal": {
+        "title": "هل أنت متأكد؟",
+        "description": "هذا الإجراء لا يمكن التراجع عنه.",
+        "cancel": "إلغاء",
+        "continue": "متابعة"
+    },
+    "UserNav": {
+        "profile": "الملف الشخصي",
+        "billing": "الفواتير",
+        "settings": "الإعدادات",
+        "logout": "تسجيل الخروج"
+    },
+    "ModeToggle": {
+        "toggleTheme": "تغيير المظهر",
+        "light": "فاتح",
+        "dark": "داكن",
+        "system": "النظام"
+    },
+    "DataTable": {
+        "search": "بحث...",
+        "allTypes": "جميع الأنواع",
+        "retail": "تجزئة",
+        "reseller": "بائع",
+        "wholesale": "جملة",
+        "noResults": "لا توجد نتائج.",
+        "page": "صفحة"
+    },
+    "PosPage": {
+        "unauthorized": "غير مصرح",
+        "noTenant": "لم يتم تكوين مستأجر",
+        "uncategorized": "غير مصنف"
+    },
+    "CartSidebar": {
+        "editItem": "تعديل العنصر",
+        "quantityLabel": "الكمية (استخدم قيمة سالبة للإرجاع)",
+        "priceLabel": "سعر الوحدة (د.ج)",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "order": "طلب",
+        "clearTicket": "مسح التذكرة",
+        "walkingCustomer": "عميل عابر",
+        "searchClient": "البحث عن عميل...",
+        "noClientFound": "لم يتم العثور على عميل.",
+        "usePoints": "استخدام النقاط",
+        "cancelPoints": "إلغاء",
+        "emptyTicket": "تذكرتك فارغة",
+        "scanToAdd": "امسح أو انقر على المنتجات للإضافة",
+        "promoSavings": "توفير العرض",
+        "total": "المجموع",
+        "checkout": "الدفع",
+        "errorValidation": "خطأ في التحقق.",
+        "orderValidated": "تم تأكيد الطلب!"
+    },
+    "PaymentModal": {
+        "transactionComplete": "عملية ناجحة",
+        "orderProcessed": "تمت معالجة الطلب بنجاح.",
+        "amountPaid": "المبلغ المدفوع",
+        "changeToReturn": "الباقي للإرجاع",
+        "printTicket": "طباعة التذكرة",
+        "newOrder": "طلب جديد",
+        "checkoutTitle": "الدفع",
+        "checkoutDesc": "أكمل الدفع لهذا الطلب.",
+        "totalDue": "الإجمالي المستحق",
+        "cash": "نقداً",
+        "card": "بطاقة",
+        "transfer": "تحويل",
+        "check": "شيك",
+        "term": "آجل",
+        "depositTo": "إيداع في",
+        "noneDefault": "لا شيء / افتراضي",
+        "selectBankAccount": "اختر صندوق / بنك",
+        "balanceLabel": "الرصيد:",
+        "quickCash": "نقد سريع",
+        "tendered": "المقدم",
+        "change": "الباقي",
+        "balance": "الرصيد",
+        "cancel": "إلغاء",
+        "processing": "جارٍ المعالجة...",
+        "completeOrder": "إتمام الطلب"
+    },
+    "PosHeader": {
+        "online": "متصل"
+    },
+    "ProductCard": {
+        "noImg": "لا توجد صورة",
+        "productDetailsStock": "تفاصيل المنتج والمخزون",
+        "viewDetailedInventory": "عرض معلومات المخزون التفصيلية لـ {name}",
+        "noDescription": "لا يوجد وصف متاح.",
+        "currentStock": "المخزون الحالي",
+        "minStockAlert": "تنبيه الحد الأدنى للمخزون",
+        "sellingPrice": "سعر البيع",
+        "unitCost": "تكلفة الوحدة",
+        "linkedBarcodes": "الباركود المرتبط"
+    },
+    "PosClient": {
+        "searchPlaceholder": "ابحث أو امسح الباركود...",
+        "loadOrder": "تحميل طلب",
+        "allCategories": "الكل",
+        "showingTop50": "عرض أفضل 50 نتيجة. استخدم البحث للعثور على المزيد.",
+        "noProductsFound": "لم يتم العثور على منتجات",
+        "tryRefiningSearch": "حاول تحسين بحثك",
+        "viewCart": "عرض السلة",
+        "noImg": "لا توجد صورة",
+        "lowStock": "مخزون منخفض ({stock})",
+        "stock": "المخزون: {stock}"
+    },
+    "SalesOrderSearchDialog": {
+        "title": "تحميل طلب مبيعات",
+        "description": "ابحث وقم بتحميل طلب توصيل سابق",
+        "searchPlaceholder": "ابحث برقم الإيصال (مثال: BL-2026/0001) أو اسم العميل...",
+        "noOrdersFound": "لم يتم العثور على طلبات مطابقة لـ '{query}'.",
+        "noCustomer": "بدون عميل",
+        "items": "عناصر",
+        "loadOrder": "تحميل طلب"
     }
 }

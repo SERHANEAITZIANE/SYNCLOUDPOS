@@ -22,6 +22,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useState, useEffect } from "react"
 import { useDebounce } from "use-debounce"
+import { useTranslations } from "next-intl"
 
 interface ServerDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -38,6 +39,7 @@ export function ServerDataTable<TData, TValue>({
     pageCount,
     currentPage,
 }: ServerDataTableProps<TData, TValue>) {
+    const t = useTranslations("DataTable")
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -80,7 +82,7 @@ export function ServerDataTable<TData, TValue>({
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 py-4">
                 <Input
                     id="global-search-input"
-                    placeholder="Search..."
+                    placeholder={t("search")}
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     className="max-w-sm"
@@ -130,7 +132,7 @@ export function ServerDataTable<TData, TValue>({
                                         colSpan={columns.length}
                                         className="h-24 text-center"
                                     >
-                                        No results.
+                                        {t("noResults")}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -150,7 +152,7 @@ export function ServerDataTable<TData, TValue>({
                 >
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <div className="text-sm font-medium">Page {currentPage} / {pageCount}</div>
+                <div className="text-sm font-medium">{t("page")} {currentPage} / {pageCount}</div>
                 <Button
                     variant="outline"
                     size="sm"

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { ShoppingCart, Info } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -31,6 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     data
 }) => {
     const cart = usePosStore()
+    const t = useTranslations("ProductCard")
     const [showInfo, setShowInfo] = useState(false)
 
     const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId);
@@ -84,8 +86,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
 
             <Modal
-                title="Product Details & Stock"
-                description={`View detailed inventory info for ${data.name}`}
+                title={t("productDetailsStock")}
+                description={t("viewDetailedInventory", { name: data.name })}
                 isOpen={showInfo}
                 onClose={() => setShowInfo(false)}
             >
@@ -95,25 +97,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                             {data.imageUrl ? (
                                 <Image src={data.imageUrl} alt={data.name} fill className="object-cover" />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">No Img</div>
+                                <div className="flex h-full w-full items-center justify-center text-xs text-center text-gray-400 leading-tight">{t("noImg")}</div>
                             )}
                         </div>
                         <div className="flex-1">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mt-1">{data.name}</h3>
                             <p className="text-sm font-semibold text-primary/80 uppercase tracking-widest mt-1">{data.category}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">{data.description || "No description available."}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">{data.description || t("noDescription")}</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gray-50 dark:bg-[#111318] rounded-xl p-4 border border-gray-100 dark:border-gray-800">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Current Stock</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("currentStock")}</p>
                             <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">
                                 {data.stock}
                             </p>
                         </div>
                         <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-100 dark:border-orange-800/50">
-                            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest">Min. Stock Alert</p>
+                            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest">{t("minStockAlert")}</p>
                             <p className="text-3xl font-black text-orange-600 dark:text-orange-400 mt-1">
                                 {data.minStock}
                             </p>
@@ -122,13 +124,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gray-50 dark:bg-[#111318] rounded-xl p-4 border border-gray-100 dark:border-gray-800">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Selling Price</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("sellingPrice")}</p>
                             <p className="text-2xl font-black text-primary mt-1">
                                 {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
                             </p>
                         </div>
                         <div className="bg-gray-50 dark:bg-[#111318] rounded-xl p-4 border border-gray-100 dark:border-gray-800">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Unit Cost</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("unitCost")}</p>
                             <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">
                                 {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(data.cost)}
                             </p>
@@ -137,7 +139,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
                     {data.barcodes && data.barcodes.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Linked Barcodes</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("linkedBarcodes")}</p>
                             <div className="flex flex-wrap gap-2">
                                 {data.barcodes.map((code) => (
                                     <span key={code} className="px-3 py-1 bg-gray-100/50 dark:bg-gray-800/50 text-sm font-mono rounded-lg border border-gray-200 dark:border-gray-700">

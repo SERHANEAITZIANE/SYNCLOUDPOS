@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { CellAction } from "./cell-action"
+import { useTranslations } from "next-intl"
 
 interface ProductGridViewProps {
     data: ProductColumn[]
 }
 
 export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
+    const t = useTranslations("Products.productGrid")
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
             {data.map((product) => {
@@ -34,12 +37,12 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1.5 align-start pointer-events-none">
                             {product.isFeatured && (
                                 <Badge className="bg-amber-500 hover:bg-amber-600 border-transparent shadow-sm text-white px-2 py-0.5 rounded-full shadow-amber-500/20">
-                                    ★ En vedette
+                                    {t("featured")}
                                 </Badge>
                             )}
                             {product.isArchived && (
                                 <Badge variant="secondary" className="bg-zinc-500 hover:bg-zinc-600 border-transparent text-white px-2 py-0.5 rounded-full opacity-90 shadow-sm shadow-zinc-500/20">
-                                    Archivé
+                                    {t("archived")}
                                 </Badge>
                             )}
                         </div>
@@ -60,7 +63,7 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center text-zinc-300 dark:text-zinc-700">
                                     <ImageIcon className="h-12 w-12 mb-2 stroke-[1.5]" />
-                                    <span className="text-xs font-semibold uppercase tracking-widest">Sans Image</span>
+                                    <span className="text-xs font-semibold uppercase tracking-widest">{t("noImage")}</span>
                                 </div>
                             )}
 
@@ -89,21 +92,21 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                             {/* Prices Grid */}
                             <div className="grid grid-cols-2 gap-x-3 gap-y-2 mb-5 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-border/50">
                                 <div className="col-span-2">
-                                    <p className="text-xs uppercase font-bold tracking-widest text-zinc-500 mb-0.5">Prix Détail</p>
+                                    <p className="text-xs uppercase font-bold tracking-widest text-zinc-500 mb-0.5">{t("retailPrice")}</p>
                                     <p className="font-black text-2xl text-emerald-600 dark:text-emerald-400 leading-none">
-                                        {product.price} <span className="text-sm font-bold font-sans text-emerald-700/70 dark:text-emerald-500/70">DA</span>
+                                        {product.price} <span className="text-sm font-bold font-sans text-emerald-700/70 dark:text-emerald-500/70">{t("currency")}</span>
                                     </p>
                                 </div>
                                 <div className="pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
-                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Prix Gros</p>
+                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">{t("wholesalePrice")}</p>
                                     <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
-                                        {product.wholesalePrice} <span className="text-[10px] font-medium text-zinc-500">DA</span>
+                                        {product.wholesalePrice} <span className="text-[10px] font-medium text-zinc-500">{t("currency")}</span>
                                     </p>
                                 </div>
                                 <div className="pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
-                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">Revendeur</p>
+                                    <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">{t("dealerPrice")}</p>
                                     <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
-                                        {product.dealerPrice} <span className="text-[10px] font-medium text-zinc-500">DA</span>
+                                        {product.dealerPrice} <span className="text-[10px] font-medium text-zinc-500">{t("currency")}</span>
                                     </p>
                                 </div>
                             </div>
@@ -117,7 +120,7 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                                         : "bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-500/10 dark:bg-emerald-950/30 dark:border-emerald-900/50"
                                 )}>
                                     <PackageIcon className="h-4 w-4" />
-                                    <span>Stock: {product.stock} {isLowStock && "⚠"}</span>
+                                    <span>{t("stock")}{product.stock} {isLowStock && "⚠"}</span>
                                 </div>
 
                                 <span className="text-xs font-medium text-muted-foreground">

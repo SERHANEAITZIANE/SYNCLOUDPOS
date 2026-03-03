@@ -74,13 +74,13 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                     </div>
 
                     <Button variant="outline" className="text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50" onClick={() => setIsPriceListOpen(true)}>
-                        <FileText className="mr-2 h-4 w-4" /> Catalogue
+                        <FileText className="mr-2 h-4 w-4" /> {t("catalogue")}
                     </Button>
                     <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
-                        <FileSpreadsheet className="mr-2 h-4 w-4" /> Import Excel
+                        <FileSpreadsheet className="mr-2 h-4 w-4" /> {t("importExcel")}
                     </Button>
                     <Button variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700 dark:bg-orange-950/30 dark:border-orange-900/50 dark:hover:bg-orange-900/50" onClick={() => router.push(`/products/inventory`)}>
-                        Rupture Stock
+                        {t("outOfStock")}
                     </Button>
                     <Button id="global-add-new" onClick={() => router.push(`/products/new`)}>
                         <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
@@ -102,19 +102,19 @@ export const ProductClient: React.FC<ProductClientProps> = ({
             <ExcelImportModal
                 isOpen={importOpen}
                 onClose={() => setImportOpen(false)}
-                title="Importer des Produits depuis Excel"
-                description="Téléchargez le modèle, remplissez-le et importez."
+                title={t("importTitle")}
+                description={t("importDesc")}
                 columns={[
-                    { key: "Nom", label: "Nom" },
-                    { key: "Prix Vente", label: "Prix Vente" },
-                    { key: "Prix Achat", label: "Prix Achat" },
-                    { key: "Prix Gros", label: "Prix Gros" },
-                    { key: "Stock", label: "Stock" },
-                    { key: "Stock Min", label: "Stock Min" },
-                    { key: "Catégorie", label: "Catégorie" },
-                    { key: "Marque", label: "Marque" },
-                    { key: "Code-barres", label: "Code-barres" },
-                    { key: "Description", label: "Description" },
+                    { key: t("fields.name"), label: t("fields.name") },
+                    { key: t("fields.price"), label: t("fields.price") },
+                    { key: t("fields.purchasePrice"), label: t("fields.purchasePrice") },
+                    { key: t("fields.wholesalePrice"), label: t("fields.wholesalePrice") },
+                    { key: t("fields.stock"), label: t("fields.stock") },
+                    { key: t("fields.minStock"), label: t("fields.minStock") },
+                    { key: t("fields.category"), label: t("fields.category") },
+                    { key: t("fields.brand"), label: t("fields.brand") },
+                    { key: t("fields.barcode"), label: t("fields.barcode") },
+                    { key: t("fields.description"), label: t("fields.description") },
                 ]}
                 onImport={importProducts as any}
                 templateFileName="produits_template"

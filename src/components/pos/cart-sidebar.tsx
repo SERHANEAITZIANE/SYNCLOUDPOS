@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 
 import { usePosStore } from "@/hooks/use-pos-store"
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,7 @@ interface CartSidebarProps {
 }
 
 export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone }: CartSidebarProps) => {
+    const t = useTranslations("CartSidebar")
     const cart = usePosStore()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -88,13 +90,42 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         )
     }, [items, activePromotions])
 
-    // Loyalty points: 100 pts = 10 DA
-    const POINTS_TO_DA_RATIO = 0.10 // 100 pts = 10 DA
-    const maxUsablePoints = Math.min(customerLoyaltyPoints, usePointsMode ? loyaltyPointsToUse : 0)
-    const pointsDiscount = usePointsMode ? Math.round(maxUsablePoints * POINTS_TO_DA_RATIO) : 0
-
     const baseTotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-    const total = Math.max(0, baseTotal - totalDiscount - pointsDiscount)
+    const totalAfterPromo = Math.max(0, baseTotal - totalDiscount)
+
+    // Loyalty points: 100 pts = 10 DA => 1 DA = 10 pts
+    const POINTS_TO_DA_RATIO = 0.10
+
+    // Calculate the maximum amount of points needed to fully cover the cart
+    const pointsNeededToCoverTotal = Math.ceil(totalAfterPromo / POINTS_TO_DA_RATIO)
+
+    // Actual usable points is the minimum between what they have, what they want to use, and what is needed
+    const maxUsablePoints = Math.min(
+        customerLoyaltyPoints,
+        usePointsMode ? pointsNeededToCoverTotal : 0
+    )
+
+    const pointsDiscount = usePointsMode ? (maxUsablePoints * POINTS_TO_DA_RATIO) : 0
+
+    const total = Math.max(0, totalAfterPromo - pointsDiscount)
+
+    useEffect(() => {
+        try {
+            const channel = new BroadcastChannel('pos-customer-display');
+            channel.postMessage({
+                type: 'CART_UPDATE',
+                payload: {
+                    items: promotedItems,
+                    total: total,
+                    totalDiscount: totalDiscount + pointsDiscount,
+                    customerName: activeSession?.customerName || null
+                }
+            });
+            return () => channel.close();
+        } catch (error) {
+            console.error('BroadcastChannel mapping error:', error);
+        }
+    }, [promotedItems, total, totalDiscount, pointsDiscount, activeSession?.customerName]);
 
     const onCheckout = async (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => {
         setLoading(true)
@@ -126,7 +157,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 toast.error(response.error)
                 return { success: false }
             } else {
-                toast.success("Commande validée!")
+                toast.success(t("orderValidated"))
                 cart.resetSession()
                 setUsePointsMode(false)
                 setLoyaltyPointsToUse(0)
@@ -143,7 +174,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
             }
         } catch (error) {
             console.error(error)
-            toast.error("Erreur lors de la validation.")
+            toast.error(t("errorValidation"))
             return { success: false }
         } finally {
             setLoading(false)
@@ -155,12 +186,12 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
             <Dialog open={!!editingItem} onOpenChange={(val) => !val && setEditingItem(null)}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Éditer l'article</DialogTitle>
+                        <DialogTitle>{t("editItem")}</DialogTitle>
                     </DialogHeader>
                     {editingItem && (
                         <div className="grid gap-4 py-4">
                             <div className="space-y-2">
-                                <Label htmlFor="qty">Quantité (Utiliser un négatif pour un retour)</Label>
+                                <Label htmlFor="qty">{t("quantityLabel")}</Label>
                                 <Input
                                     id="qty"
                                     type="number"
@@ -169,7 +200,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="price">Prix Unitaire (DZD)</Label>
+                                <Label htmlFor="price">{t("priceLabel")}</Label>
                                 <Input
                                     id="price"
                                     type="number"
@@ -180,8 +211,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditingItem(null)}>Annuler</Button>
-                        <Button onClick={saveItemEdit}>Enregistrer</Button>
+                        <Button variant="outline" onClick={() => setEditingItem(null)}>{t("cancel")}</Button>
+                        <Button onClick={saveItemEdit}>{t("save")}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -217,7 +248,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                             : "bg-transparent border-transparent hover:bg-white/50 text-gray-500"
                                     )}
                                 >
-                                    <span>Order {index + 1}</span>
+                                    <span>{t("order")} {index + 1}</span>
                                     {cart.sessions.length > 1 && (
                                         <div
                                             role="button"
@@ -247,10 +278,10 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
 
                 <div className="flex shrink-0 items-center justify-between p-6 pb-4">
                     <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
-                        Order {cart.sessions.findIndex(s => s.id === cart.activeSessionId) + 1}
+                        {t("order")} {cart.sessions.findIndex(s => s.id === cart.activeSessionId) + 1}
                     </h2>
                     <Button variant="ghost" size="sm" onClick={cart.resetSession} disabled={items.length === 0} className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full px-4 h-8 text-sm font-black uppercase tracking-wider">
-                        Clear Ticket
+                        {t("clearTicket")}
                     </Button>
                 </div>
 
@@ -268,16 +299,16 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                 <span className="truncate pr-2 border-none">
                                     {activeSession?.customerId
                                         ? customers.find((c) => c.id === activeSession.customerId)?.name
-                                        : "Walking Customer (No Name)"}
+                                        : t("walkingCustomer")}
                                 </span>
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-[340px] md:w-[400px] p-0 rounded-2xl z-[99999]" align="start">
                             <Command>
-                                <CommandInput placeholder="Search client..." className="h-11" />
+                                <CommandInput placeholder={t("searchClient")} className="h-11" />
                                 <CommandList>
-                                    <CommandEmpty>No client found.</CommandEmpty>
+                                    <CommandEmpty>{t("noClientFound")}</CommandEmpty>
                                     <CommandGroup>
                                         <CommandItem
                                             value="Walking Customer No Name"
@@ -291,7 +322,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                             className="font-medium cursor-pointer py-3"
                                         >
                                             <Check className={cn("mr-2 h-4 w-4", !activeSession?.customerId ? "opacity-100" : "opacity-0")} />
-                                            Walking Customer (No Name)
+                                            {t("walkingCustomer")}
                                         </CommandItem>
                                         {customers.map((c) => (
                                             <CommandItem
@@ -350,7 +381,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                     else setLoyaltyPointsToUse(0)
                                 }}
                             >
-                                {usePointsMode ? "Annuler" : "Utiliser les points"}
+                                {usePointsMode ? t("cancelPoints") : t("usePoints")}
                             </Button>
                         </div>
                     )}
@@ -362,8 +393,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                             <div className="p-6 rounded-full bg-gray-50 dark:bg-gray-800/50">
                                 <ShoppingCartIcon className="h-12 w-12 opacity-40" />
                             </div>
-                            <p className="text-lg font-medium">Your ticket is empty</p>
-                            <p className="text-sm opacity-70">Scan or tap products to add</p>
+                            <p className="text-lg font-medium">{t("emptyTicket")}</p>
+                            <p className="text-sm opacity-70">{t("scanToAdd")}</p>
                         </div>
                     )}
                     <div className="flex flex-col gap-1 py-1">
@@ -455,12 +486,12 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                         {/* Discount summary */}
                         {(totalDiscount > 0 || pointsDiscount > 0) && (
                             <div className="flex justify-between items-center text-sm text-violet-600 dark:text-violet-400 font-semibold bg-violet-50 dark:bg-violet-900/20 px-3 py-1.5 rounded-lg">
-                                <span className="flex items-center gap-1.5"><Gift size={14} /> Économie promo</span>
+                                <span className="flex items-center gap-1.5"><Gift size={14} /> {t("promoSavings")}</span>
                                 <span>-{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(totalDiscount + pointsDiscount)} DA</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center text-gray-900 dark:text-slate-100">
-                            <span className="text-3xl font-black">Total</span>
+                            <span className="text-3xl font-black">{t("total")}</span>
                             <div className="text-right flex items-baseline gap-2">
                                 <span className="text-[3rem] leading-none font-black tracking-tighter">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
@@ -476,7 +507,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                         disabled={items.length === 0 || loading}
                         onClick={() => setOpen(true)}
                     >
-                        <span>Checkout</span>
+                        <span>{t("checkout")}</span>
                         <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest leading-none">Space / F9</span>
                     </Button>
                 </div>

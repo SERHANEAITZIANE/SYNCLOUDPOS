@@ -39,7 +39,8 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
-    const t = useTranslations("Common")
+    const tCommon = useTranslations("Common")
+    const tBrand = useTranslations("Brands.fastCreate")
 
     const form = useForm<z.infer<typeof BrandSchema>>({
         resolver: zodResolver(BrandSchema),
@@ -54,7 +55,7 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
             if (result.error) {
                 toast.error(result.error)
             } else {
-                toast.success("Family / Brand created")
+                toast.success(tBrand("success"))
                 form.reset()
                 setOpen(false)
                 router.refresh()
@@ -76,9 +77,9 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Quick Create Family (Brand)</DialogTitle>
+                    <DialogTitle>{tBrand("title")}</DialogTitle>
                     <DialogDescription>
-                        Create a new family (brand) instantly.
+                        {tBrand("description")}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -88,9 +89,9 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Family / Brand Name</FormLabel>
+                                    <FormLabel>{tBrand("nameLabel")}</FormLabel>
                                     <FormControl>
-                                        <Input disabled={loading} placeholder="e.g. Apple, Nike, Dairy..." {...field} />
+                                        <Input disabled={loading} placeholder={tBrand("namePlaceholder")} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -98,7 +99,7 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
                         />
                         <DialogFooter>
                             <Button disabled={loading} type="submit" className="w-full">
-                                {t("save")}
+                                {tCommon("save")}
                             </Button>
                         </DialogFooter>
                     </form>

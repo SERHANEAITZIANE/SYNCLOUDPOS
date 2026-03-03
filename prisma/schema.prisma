@@ -59,6 +59,7 @@ model Tenant {
   treasuryTransactions TreasuryTransaction[]
   spoilages      Spoilage[]
   promotions     Promotion[]
+  stockMovements StockMovement[]
 }
 
 model Promotion {
@@ -97,6 +98,7 @@ model User {
   orders      Order[]
   tenantUsers TenantUser[]
   spoilages   Spoilage[]
+  stockMovements StockMovement[]
 }
 
 model TenantUser {
@@ -139,6 +141,7 @@ model Product {
   spoilages   Spoilage[]
   images      Image[]
   barcodes    Barcode[]
+  stockMovements StockMovement[]
 }
 
 model Image {
@@ -397,3 +400,22 @@ model Spoilage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model StockMovement {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type        String   // "SALE", "PURCHASE", "ADJUSTMENT", "RETURN", "SPOILAGE", "INITIAL"
+  quantity    Int      // positive for incoming, negative for outgoing
+  stockBefore Int      // stock before the movement
+  stockAfter  Int      // stock after the movement
+  referenceId String?  // ID of the related order, purchase, or spilage
+  reason      String?  // Optional explanation
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

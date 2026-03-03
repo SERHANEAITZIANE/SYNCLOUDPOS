@@ -3,12 +3,15 @@
 import { db } from "@/lib/db";
 import { getActiveTenantId } from "@/actions/get-active-tenant";
 
-export async function getBusinessContext(): Promise<string> {
+export async function getBusinessContext(startDate?: Date, endDate?: Date): Promise<string> {
   const tenantId = await getActiveTenantId();
   if (!tenantId) return "Aucune boutique active trouvée.";
 
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Custom range or default to start of month
+  const queryStartDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+  const queryEndDate = endDate || now;
 
   const [
     posOrders,
@@ -23,25 +26,33 @@ export async function getBusinessContext(): Promise<string> {
     purchases,
     categoryCount,
   ] = await Promise.all([
-    // POS Orders this month (model: Order)
+    // POS Orders this period (model: Order)
     db.order.aggregate({
-      where: { tenantId, createdAt: { gte: startOfMonth }, status: "COMPLETED" },
+      where: {
+        tenantId,
+        createdAt: { gte: queryStartDate, lte: queryEndDate },
+        status: "COMPLETED"
+      },
       _sum: { total: true },
       _count: { id: true },
     }),
-    // Sales Orders (BL) this month
+    // Sales Orders (BL) this period
     db.salesOrder.aggregate({
-      where: { tenantId, createdAt: { gte: startOfMonth } },
+      where: {
+        tenantId,
+        createdAt: { gte: queryStartDate, lte: queryEndDate }
+      },
       _sum: { total: true },
       _count: { id: true },
     }),
     // Top products by revenue (via OrderItems) — use raw SQL since total is not a stored field
-    db.$queryRaw<{ productId: string; revenue: number; totalQty: number }[]>`
-            SELECT oi."productId", SUM(oi.quantity * oi.price)::float AS revenue, SUM(oi.quantity)::int AS "totalQty"
+    db.$queryRaw<{ productId: string; revenue: number; totalQty: number, cogs: number }[]>`
+            SELECT oi."productId", SUM(oi.quantity * oi.price)::float AS revenue, SUM(oi.quantity)::int AS "totalQty", SUM(oi.quantity * oi."purchasePrice")::float AS cogs
             FROM "OrderItem" oi
             INNER JOIN "Order" o ON o.id = oi."orderId"
             WHERE o."tenantId" = ${tenantId}
-              AND o."createdAt" >= ${startOfMonth}
+              AND o."createdAt" >= ${queryStartDate}
+              AND o."createdAt" <= ${queryEndDate}
               AND o.status = 'COMPLETED'
             GROUP BY oi."productId"
             ORDER BY revenue DESC
@@ -78,15 +89,21 @@ export async function getBusinessContext(): Promise<string> {
       _count: { id: true },
       _sum: { balance: true },
     }),
-    // Expenses this month
+    // Expenses this period
     db.expense.aggregate({
-      where: { tenantId, date: { gte: startOfMonth } },
+      where: {
+        tenantId,
+        date: { gte: queryStartDate, lte: queryEndDate }
+      },
       _sum: { amount: true },
       _count: { id: true },
     }),
-    // Purchase orders this month
+    // Purchase orders this period
     db.purchaseOrder.aggregate({
-      where: { tenantId, createdAt: { gte: startOfMonth } },
+      where: {
+        tenantId,
+        createdAt: { gte: queryStartDate, lte: queryEndDate }
+      },
       _sum: { total: true },
       _count: { id: true },
     }),
@@ -102,13 +119,24 @@ export async function getBusinessContext(): Promise<string> {
   });
   const productMap = new Map(products.map(p => [p.id, p]));
 
+  let totalRevenue = Number(posOrders._sum.total ?? 0) + Number(salesOrders._sum.total ?? 0);
+  let totalCogsItems = 0;
+
   const topProductLines = topOrderItems.map(p => {
     const prod = productMap.get(p.productId);
-    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p.revenue ?? 0).toFixed(2)} DA (Qté: ${p.totalQty ?? 0}, Stock restant: ${prod?.stock ?? "?"})`;
+    totalCogsItems += p.cogs || 0;
+    const itemProfit = (p.revenue || 0) - (p.cogs || 0);
+    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p.revenue ?? 0).toFixed(2)} DA (Bénéfice Brut: ${itemProfit.toFixed(2)} DA | Qté: ${p.totalQty ?? 0}, Stock restant: ${prod?.stock ?? "?"})`;
   }).join("\n");
 
+  // Rough estimate of gross profit: revenue - cogs
+  // Net profit: gross profit - expenses
+  const totalExpenses = Number(expenses._sum.amount ?? 0);
+  const grossProfitEst = totalRevenue - totalCogsItems;
+  const netProfitEst = grossProfitEst - totalExpenses;
+
   const lowStockLines = lowStockProducts.map(p =>
-    `  - ${p.name}: stock actuel=${p.stock}, seuil min=${p.minStock}`
+    `  - ${p.name}: stock actuel = ${p.stock}, seuil min = ${p.minStock} `
   ).join("\n");
 
   const debtorLines = topDebtors.map(c =>
@@ -116,18 +144,25 @@ export async function getBusinessContext(): Promise<string> {
   ).join("\n");
 
   const context = `
-=== CONTEXTE BUSINESS — ${now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })} ===
+=== CONTEXTE BUSINESS — Période: ${queryStartDate.toLocaleDateString("fr-FR")} au ${queryEndDate.toLocaleDateString("fr-FR")} ===
 
-📊 VENTES POS DU MOIS:
+📈 BÉNÉFICES ET RENTABILITÉ DE LA PÉRIODE:
+  - Chiffre d'affaires total (POS + BL): ${totalRevenue.toFixed(2)} DA
+  - Coût d'achat des marchandises vendues (COGS): ${totalCogsItems.toFixed(2)} DA
+  - Bénéfice Brut estimé (Marge sur ventes): ${grossProfitEst.toFixed(2)} DA
+  - Dépenses totales de la période: ${totalExpenses.toFixed(2)} DA
+  - Bénéfice Net estimé (Brut - Dépenses): ${netProfitEst.toFixed(2)} DA
+
+📊 VENTES POS:
   - Chiffre d'affaires: ${Number(posOrders._sum.total ?? 0).toFixed(2)} DA
   - Nombre de commandes: ${posOrders._count.id}
 
-📋 BONS DE LIVRAISON (BL) DU MOIS:
+📋 BONS DE LIVRAISON (BL):
   - Montant total: ${Number(salesOrders._sum.total ?? 0).toFixed(2)} DA
   - Nombre de BLs: ${salesOrders._count.id}
 
-🏆 TOP 10 PRODUITS PAR CHIFFRE D'AFFAIRES (mois en cours):
-${topProductLines || "  Aucune vente ce mois"}
+🏆 TOP 10 PRODUITS PAR CHIFFRE D'AFFAIRES:
+${topProductLines || "  Aucune vente sur cette période"}
 
 📦 STOCKS:
   - Produits en rupture de stock: ${outOfStockCount}
@@ -144,11 +179,11 @@ ${debtorLines || "  Aucun débiteur"}
   - Nombre total: ${suppliers._count.id}
   - Montant total dû aux fournisseurs: ${Number(suppliers._sum.balance ?? 0).toFixed(2)} DA
 
-💸 DÉPENSES DU MOIS:
+💸 DÉPENSES:
   - Montant total: ${Number(expenses._sum.amount ?? 0).toFixed(2)} DA
   - Nombre de dépenses: ${expenses._count.id}
 
-🛒 ACHATS DU MOIS:
+🛒 ACHATS:
   - Montant total: ${Number(purchases._sum.total ?? 0).toFixed(2)} DA
   - Nombre de bons d'achat: ${purchases._count.id}
 

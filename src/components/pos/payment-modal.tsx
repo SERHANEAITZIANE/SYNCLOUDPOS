@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState, useRef, useEffect } from "react"
 import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileText, Clock } from "lucide-react"
 import { useReactToPrint } from "react-to-print"
+import { useTranslations } from "next-intl"
 
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     storeAddress,
     storePhone
 }) => {
+    const t = useTranslations("PaymentModal")
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
 
@@ -219,8 +221,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     if (success) {
         return (
             <Modal
-                title="Transaction Complete"
-                description="The order has been processed successfully."
+                title={t("transactionComplete")}
+                description={t("orderProcessed")}
                 isOpen={isOpen}
                 onClose={handleClose}
             >
@@ -233,7 +235,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     </div>
 
                     <div className="text-center space-y-2">
-                        <p className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest text-sm">Amount Paid</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest text-sm">{t("amountPaid")}</p>
                         <h3 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
                             <span className="text-xl font-bold text-gray-400 ml-2">DA</span>
@@ -247,7 +249,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                     {method === "CASH" && changeAmount > 0 && (
                         <div className="w-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl p-4 flex justify-between items-center">
-                            <span className="text-green-700 dark:text-green-400 font-bold uppercase tracking-wider text-sm">Change to return</span>
+                            <span className="text-green-700 dark:text-green-400 font-bold uppercase tracking-wider text-sm">{t("changeToReturn")}</span>
                             <span className="text-2xl font-black text-green-700 dark:text-green-400">
                                 {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}
                                 <span className="text-sm font-bold ml-1">DA</span>
@@ -258,10 +260,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div className="flex w-full flex-col gap-3 sm:flex-row mt-4">
                         <Button variant="outline" size="lg" className="flex-1 h-16 rounded-xl text-lg font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => handlePrint && handlePrint()}>
                             <Printer size={22} />
-                            Print Ticket
+                            {t("printTicket")}
                         </Button>
                         <Button size="lg" className="flex-1 h-16 rounded-xl text-lg font-bold gap-3 shadow-xl hover:-translate-y-1 transition-transform" onClick={handleClose}>
-                            New Order
+                            {t("newOrder")}
                             <ArrowRight size={22} />
                         </Button>
                     </div>
@@ -305,8 +307,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     return (
         <Modal
-            title="Checkout"
-            description="Complete the payment for this order."
+            title={t("checkoutTitle")}
+            description={t("checkoutDesc")}
             isOpen={isOpen}
             onClose={handleClose}
             className="sm:max-w-4xl p-4 sm:p-8 rounded-2xl sm:rounded-[32px] bg-slate-100 shadow-2xl dark:bg-zinc-950 max-h-[90vh] overflow-y-auto"
@@ -316,7 +318,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* Left Side: Payment Method & Totals */}
                 <div className="flex-1 space-y-6">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 text-center border-2 border-gray-50 dark:border-gray-800 shadow-sm flex flex-col justify-center h-32">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Due</p>
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{t("totalDue")}</p>
                         <div className="text-[3.5rem] leading-none font-black text-gray-900 dark:text-white tracking-tighter">
                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
                             <span className="text-2xl text-gray-400 font-bold ml-2">DA</span>
@@ -334,7 +336,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             onClick={() => setMethod("CASH")}
                         >
                             <Banknote className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">ESPÈCES</span>
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("cash")}</span>
                         </div>
                         <div
                             className={cn(
@@ -349,7 +351,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             }}
                         >
                             <CreditCard className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">CARTE / TPE</span>
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("card")}</span>
                         </div>
                         <div
                             className={cn(
@@ -364,7 +366,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             }}
                         >
                             <Landmark className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">VIREMENT</span>
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("transfer")}</span>
                         </div>
                         <div
                             className={cn(
@@ -379,7 +381,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             }}
                         >
                             <FileText className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">CHÈQUE</span>
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("check")}</span>
                         </div>
                         <div
                             className={cn(
@@ -394,30 +396,30 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             }}
                         >
                             <Clock className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">À TERME</span>
+                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("term")}</span>
                         </div>
                     </div>
 
                     <div className="space-y-3 pt-2">
-                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Deposit To</Label>
+                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("depositTo")}</Label>
                         <SearchableSelect
                             options={[
-                                { value: "none", label: "None / Default" },
+                                { value: "none", label: t("noneDefault") },
                                 ...accounts.map(acc => ({
                                     value: acc.id,
-                                    label: `${acc.name} (Solde: ${acc.balance})`
+                                    label: `${acc.name} (${t("balanceLabel")} ${acc.balance})`
                                 }))
                             ]}
                             value={accountId}
                             onChange={(val) => setAccountId(val)}
                             disabled={loading}
-                            placeholder="Select Caisse / Bank"
+                            placeholder={t("selectBankAccount")}
                         />
                     </div>
 
                     {method === "CASH" && (
                         <div className="space-y-3 pt-4">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Quick Cash</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("quickCash")}</p>
                             <div className="grid grid-cols-2 gap-3">
                                 {quickCashOptions.map((amount) => (
                                     <Button
@@ -442,7 +444,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         method === "CASH" ? "opacity-100 pointer-events-auto" : "opacity-30 pointer-events-none filter blur-[1px]"
                     )}>
                         <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border-2 border-gray-50 dark:border-gray-800 mb-2 text-right shadow-sm flex flex-col justify-center h-28 relative">
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest absolute top-4 right-6">Tendered</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest absolute top-4 right-6">{t("tendered")}</p>
                             <p className="text-5xl font-black text-gray-900 dark:text-white tracking-tight mt-4">
                                 {tenderedStr ? new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(tenderedAmount) : "0"}
                             </p>
@@ -450,12 +452,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                         {changeAmount > 0 ? (
                             <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30">
-                                <span className="text-gray-500 font-bold text-sm sm:text-lg">Change</span>
+                                <span className="text-gray-500 font-bold text-sm sm:text-lg">{t("change")}</span>
                                 <span className="text-xl sm:text-2xl font-black text-green-500">+{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}</span>
                             </div>
                         ) : (
                             <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                                <span className="text-gray-500 font-bold text-sm sm:text-lg">Balance</span>
+                                <span className="text-gray-500 font-bold text-sm sm:text-lg">{t("balance")}</span>
                                 <span className="text-xl sm:text-2xl font-bold text-gray-400">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, total - tenderedAmount))}
                                 </span>
@@ -489,7 +491,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-6 sm:pt-10 mt-4 sm:mt-6 md:-mr-4">
                 <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl sm:rounded-2xl font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col items-center justify-center" onClick={handleClose}>
-                    <span>Cancel</span>
+                    <span>{t("cancel")}</span>
                     <span className="text-[9px] opacity-50 uppercase tracking-widest mt-0.5 hidden sm:block">Esc</span>
                 </Button>
                 <Button
@@ -497,7 +499,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     className="w-full sm:w-auto h-14 sm:h-16 px-10 rounded-xl sm:rounded-[20px] font-black text-lg sm:text-xl bg-[#0f0f0f] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5"
                     onClick={handleConfirm}
                 >
-                    <span>{loading ? "Processing..." : "Complete Order"}</span>
+                    <span>{loading ? t("processing") : t("completeOrder")}</span>
                     {!loading && <span className="text-[10px] opacity-70 font-bold tracking-widest leading-none mt-1 uppercase hidden sm:block">Enter</span>}
                 </Button>
             </div>

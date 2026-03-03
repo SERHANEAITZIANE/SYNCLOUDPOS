@@ -157,7 +157,7 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
                     {/* General Info */}
                     <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations générales</h3>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t("sections.general")}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {renderField("name", t("fields.name"))}
                             {renderField("contactPerson", t("fields.contact"))}
@@ -171,13 +171,13 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
 
                     {/* Fiscal Info */}
                     <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Informations fiscales</h3>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t("sections.fiscal")}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {renderField("nif", "NIF", "Numéro d'Identification Fiscale")}
-                            {renderField("nis", "NIS", "Numéro d'Identifiant Statistique")}
-                            {renderField("artImposition", "Article d'Imposition", "Article d'Imposition")}
-                            {renderField("rc", "NRC", "Numéro de Registre de Commerce")}
-                            {renderField("rib", "RIB Banque", "Relevé d'Identité Bancaire")}
+                            {renderField("nif", "NIF", t("fields.nif"))}
+                            {renderField("nis", "NIS", t("fields.nis"))}
+                            {renderField("artImposition", t("fields.artImposition"), t("fields.artImposition"))}
+                            {renderField("rc", "NRC", t("fields.rc"))}
+                            {renderField("rib", "RIB Banque", t("fields.rib"))}
                         </div>
                     </div>
 
