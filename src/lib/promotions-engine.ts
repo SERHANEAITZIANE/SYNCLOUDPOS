@@ -64,14 +64,18 @@ export function applyPromotionsToCart(
             if (item.quantity < promo.triggerQty) continue
 
             // How many times does the discount trigger?
-            const triggerCount = Math.floor(item.quantity / promo.triggerQty)
+            let triggerCount = 0
             let discountPerTrigger = 0
 
             if (promo.type === "BUY_X_GET_Y_FREE") {
                 // 1 free item per trigger = full price of 1 unit
+                triggerCount = Math.floor(item.quantity / promo.triggerQty)
                 discountPerTrigger = item.price
             } else if (promo.type === "NTH_ITEM_DISCOUNT") {
-                // Nth item gets a discount
+                // Nth item gets a discount, and ALL items after it too
+                // For example, if triggerQty = 2, first 1 item is full price, remaining (qty - 1) get discounted
+                triggerCount = Math.max(0, item.quantity - (promo.triggerQty - 1))
+
                 if (promo.discountType === "PERCENT") {
                     discountPerTrigger = item.price * (promo.discountValue / 100)
                 } else {
