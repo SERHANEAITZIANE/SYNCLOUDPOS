@@ -36,6 +36,9 @@ model Tenant {
   geminiApiKey String?  // Clé API Gemini
   openaiApiKey String?  // Clé API OpenAI (ChatGPT)
   anthropicApiKey String? // Clé API Anthropic (Claude)
+  whatsappToken   String?  // WhatsApp Cloud API Access Token
+  whatsappPhoneId String?  // WhatsApp Phone Number ID
+  whatsappPhone   String?  // WhatsApp sender phone number (e.g. +213...)
   loyaltyPointsPerDa Int @default(1)   // Points earned per DA spent
   loyaltyDaPerPoint  Int @default(100) // Points required for 1 DA discount
   subscriptionEndsAt DateTime? // End date of current subscription/trial

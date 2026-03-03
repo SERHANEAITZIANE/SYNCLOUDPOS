@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star } from "lucide-react"
+import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star, MessageCircle } from "lucide-react"
 import { GeneralForm } from "./general-form"
 import { PrintingSettingsForm } from "./printing-settings-form"
 import { PosDefaultsForm } from "./pos-defaults-form"
@@ -9,6 +9,7 @@ import { AiSettingsForm } from "./ai-settings-form"
 import { AdvancedSettingsForm } from "./advanced-settings-form"
 import { BackupRestoreForm } from "./backup-restore-form"
 import { LoyaltySettingsForm } from "./loyalty-settings-form"
+import { WhatsAppSettingsForm } from "./whatsapp-settings-form"
 
 interface TenantData {
     name: string
@@ -88,6 +89,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                     <TabsTrigger value="backup" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <HardDrive className="w-4 h-4" />
                         <span>Sauvegarde</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="whatsapp" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                        <MessageCircle className="w-4 h-4" />
+                        <span>WhatsApp</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -210,6 +215,21 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             </p>
                         </div>
                         <BackupRestoreForm />
+                    </div>
+                </TabsContent>
+                {/* Tab 8 — WhatsApp */}
+                <TabsContent value="whatsapp" className="mt-0">
+                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <MessageCircle className="w-5 h-5 text-emerald-500" />
+                                WhatsApp Business
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Envoyez des notifications, rappels de dettes et reçus par WhatsApp.
+                            </p>
+                        </div>
+                        <WhatsAppSettingsForm />
                     </div>
                 </TabsContent>
             </Tabs>
