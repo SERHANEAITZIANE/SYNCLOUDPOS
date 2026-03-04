@@ -34,6 +34,14 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
             }
         })
 
+        // Create default store for the new tenant
+        const defaultStore = await db.store.create({
+            data: {
+                name: "Boutique Principale",
+                tenantId: tenant.id,
+            }
+        })
+
         await db.user.create({
             data: {
                 name,
@@ -41,7 +49,8 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
                 phone,
                 password: hashedPassword,
                 tenantId: tenant.id,
-                role: "ADMIN"
+                role: "ADMIN",
+                defaultStoreId: defaultStore.id,
             },
         })
 
