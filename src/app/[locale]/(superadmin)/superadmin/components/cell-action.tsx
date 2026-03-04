@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Plus, ShieldCheck, Clock } from "lucide-react"
+import { MoreHorizontal, Plus, ShieldCheck, Clock, KeyRound, ShieldOff } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 
@@ -13,16 +13,17 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { updateTenantSubscription, toggleTenantBlock } from "@/actions/superadmin"
-
-interface TenantColumn {
-    id: string;
-    name: string;
-    phone: string | null;
-    subscriptionEndsAt: Date | null;
-    isBlocked: boolean;
-    ownerDetails: { name: string | null, email: string, phone: string | null } | null;
-}
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { updateTenantSubscription, toggleTenantBlock, resetUserPassword } from "@/actions/superadmin"
+import { TenantColumn } from "./columns"
 
 interface CellActionProps {
     data: TenantColumn;
@@ -31,6 +32,9 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [resetOpen, setResetOpen] = useState(false)
+    const [selectedUserId, setSelectedUserId] = useState("")
+    const [newPassword, setNewPassword] = useState("")
 
     const onExtend = async (months: number) => {
         try {
@@ -42,7 +46,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             } else {
                 toast.error(result.error || "Une erreur s'est produite")
             }
-        } catch (error) {
+        } catch {
             toast.error("Erreur système")
         } finally {
             setLoading(false)
@@ -59,7 +63,34 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             } else {
                 toast.error(result.error || "Une erreur s'est produite")
             }
-        } catch (error) {
+        } catch {
+            toast.error("Erreur système")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const onOpenResetPw = (userId: string) => {
+        setSelectedUserId(userId)
+        setNewPassword("")
+        setResetOpen(true)
+    }
+
+    const onResetPassword = async () => {
+        if (!newPassword || newPassword.length < 6) {
+            toast.error("Minimum 6 caractères")
+            return
+        }
+        try {
+            setLoading(true)
+            const result = await resetUserPassword(selectedUserId, newPassword)
+            if (result.success) {
+                toast.success(result.success)
+                setResetOpen(false)
+            } else {
+                toast.error(result.error || "Erreur")
+            }
+        } catch {
             toast.error("Erreur système")
         } finally {
             setLoading(false)
@@ -75,8 +106,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <MoreHorizontal className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuLabel>Abonnement</DropdownMenuLabel>
                     <DropdownMenuItem disabled={loading} onClick={() => onExtend(1)}>
                         <Plus className="mr-2 h-4 w-4 text-emerald-500" />
                         Prolonger 1 Mois
@@ -90,12 +121,44 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         Prolonger 1 An
                     </DropdownMenuItem>
                     <div className="h-px bg-slate-200 my-1" />
+                    <DropdownMenuLabel>Utilisateurs</DropdownMenuLabel>
+                    {data.users && data.users.map(u => (
+                        <DropdownMenuItem key={u.id} onClick={() => onOpenResetPw(u.id)}>
+                            <KeyRound className="mr-2 h-4 w-4 text-blue-500" />
+                            <span className="truncate max-w-[140px]">MdP: {u.name || u.email}</span>
+                        </DropdownMenuItem>
+                    ))}
+                    <div className="h-px bg-slate-200 my-1" />
                     <DropdownMenuItem disabled={loading} onClick={onToggleBlock}>
-                        <ShieldCheck className={`mr-2 h-4 w-4 ${data.isBlocked ? 'text-emerald-500' : 'text-red-500'}`} />
+                        <ShieldOff className={`mr-2 h-4 w-4 ${data.isBlocked ? 'text-emerald-500' : 'text-red-500'}`} />
                         {data.isBlocked ? "Débloquer l'Espace" : "Bloquer l'Espace"}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Reset Password Dialog */}
+            <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3 py-2">
+                        <Label>Nouveau mot de passe</Label>
+                        <Input
+                            type="password"
+                            placeholder="Minimum 6 caractères"
+                            value={newPassword}
+                            onChange={e => setNewPassword(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setResetOpen(false)}>Annuler</Button>
+                        <Button disabled={loading} onClick={onResetPassword}>
+                            Confirmer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

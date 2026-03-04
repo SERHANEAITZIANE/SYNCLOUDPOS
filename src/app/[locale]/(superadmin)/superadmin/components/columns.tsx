@@ -17,6 +17,14 @@ export type TenantColumn = {
         email: string;
         phone: string | null;
     } | null;
+    users: {
+        id: string;
+        name: string | null;
+        email: string;
+        phone: string | null;
+        role: string;
+        isSuperadmin: boolean;
+    }[];
     usageStats?: {
         users: number;
         products: number;

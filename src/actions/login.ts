@@ -12,13 +12,13 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { email, password } = validatedFields.data
+    const { identifier, password } = validatedFields.data
 
     try {
         await signIn("credentials", {
-            email,
+            identifier,
             password,
-            redirectTo: "/dashboard", // Todo: Use DEFAULT_LOGIN_REDIRECT
+            redirectTo: "/dashboard",
         })
     } catch (error) {
         if (error instanceof AuthError) {

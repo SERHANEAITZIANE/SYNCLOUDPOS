@@ -1,19 +1,18 @@
 import { getTenantsForSuperadmin } from "@/actions/superadmin";
 import { SuperAdminClient } from "./components/client";
-import { format } from "date-fns";
 
 export default async function SuperadminPage() {
     const tenants = await getTenantsForSuperadmin();
 
-    // Map to plain objects and enforce types for the client component
     const formattedTenants = tenants.map(t => ({
         id: t.id,
         name: t.name,
         phone: t.phone,
         subscriptionEndsAt: t.subscriptionEndsAt,
-        isBlocked: false,
+        isBlocked: t.isBlocked,
         createdAt: t.createdAt,
         ownerDetails: t.ownerDetails,
+        users: t.users,
         usageStats: t.usageStats
     }));
 

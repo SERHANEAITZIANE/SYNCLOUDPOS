@@ -13,10 +13,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const validatedFields = LoginSchema.safeParse(credentials)
 
                 if (validatedFields.success) {
-                    const { email, password } = validatedFields.data
+                    const { identifier, password } = validatedFields.data
 
-                    const user = await db.user.findUnique({
-                        where: { email }
+                    // Allow login by email OR phone number
+                    const user = await db.user.findFirst({
+                        where: {
+                            OR: [
+                                { email: identifier },
+                                { phone: identifier }
+                            ]
+                        }
                     })
 
                     if (!user || !user.password) return null

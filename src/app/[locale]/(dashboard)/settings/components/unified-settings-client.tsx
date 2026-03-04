@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star, MessageCircle, Flag } from "lucide-react"
+import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star, MessageCircle, Flag, Lock } from "lucide-react"
 import { GeneralForm } from "./general-form"
 import { PrintingSettingsForm } from "./printing-settings-form"
 import { PosDefaultsForm } from "./pos-defaults-form"
@@ -11,6 +11,7 @@ import { BackupsListClient } from "./backups-list-client"
 import { LoyaltySettingsForm } from "./loyalty-settings-form"
 import { WhatsAppSettingsForm } from "./whatsapp-settings-form"
 import { AlgerianSettingsForm } from "./algerian-settings-form"
+import { ChangePasswordForm } from "@/components/auth/change-password-form"
 import { useTranslations } from "next-intl"
 
 interface TenantData {
@@ -101,6 +102,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                     <TabsTrigger value="algeria" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Flag className="w-4 h-4" />
                         <span>🇩🇿 Algérie</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="security" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                        <Lock className="w-4 h-4" />
+                        <span>Sécurité</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -255,6 +260,22 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             </p>
                         </div>
                         <AlgerianSettingsForm />
+                    </div>
+                </TabsContent>
+
+                {/* Tab — Security / Change Password */}
+                <TabsContent value="security" className="mt-0">
+                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <Lock className="w-5 h-5 text-red-500" />
+                                Sécurité du Compte
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Modifiez votre mot de passe de connexion.
+                            </p>
+                        </div>
+                        <ChangePasswordForm />
                     </div>
                 </TabsContent>
             </Tabs>

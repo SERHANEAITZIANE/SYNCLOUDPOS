@@ -1,6 +1,9 @@
 "use server"
 
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
+import { revalidatePath } from "next/cache"
+import bcrypt from "bcryptjs"
 
 export const getTenantsForSuperadmin = async () => {
     try {
@@ -8,11 +11,13 @@ export const getTenantsForSuperadmin = async () => {
             include: {
                 users: {
                     select: {
+                        id: true,
                         name: true,
                         email: true,
                         phone: true,
+                        role: true,
+                        isSuperadmin: true,
                     },
-                    take: 1
                 },
                 _count: {
                     select: {
@@ -22,12 +27,9 @@ export const getTenantsForSuperadmin = async () => {
                     }
                 }
             },
-            orderBy: {
-                createdAt: 'desc'
-            }
+            orderBy: { createdAt: 'desc' }
         });
 
-        // Second step: get total revenue for each tenant from orders
         const revenueAggregates = await Promise.all(tenants.map(async (tenant) => {
             const revenue = await db.order.aggregate({
                 where: { tenantId: tenant.id, status: "COMPLETED" },
@@ -37,14 +39,12 @@ export const getTenantsForSuperadmin = async () => {
                 where: { tenantId: tenant.id, status: "PAID" },
                 _sum: { total: true }
             })
-
             return {
                 id: tenant.id,
                 totalRevenue: Number(revenue._sum.total || 0) + Number(salesInvoiceRevenue._sum.total || 0)
             }
         }))
 
-        // Map the relation array into a flatter structure for the table
         return tenants.map(tenant => ({
             ...tenant,
             ownerDetails: tenant.users[0] || null,
@@ -67,34 +67,50 @@ export const updateTenantSubscription = async (tenantId: string, additionalMonth
         if (!tenant) return { error: "Tenant not found" };
 
         let currentEndDate = tenant.subscriptionEndsAt ? new Date(tenant.subscriptionEndsAt) : new Date();
-
-        // If the subscription is already expired, start strictly from today.
-        if (currentEndDate < new Date()) {
-            currentEndDate = new Date();
-        }
-
+        if (currentEndDate < new Date()) currentEndDate = new Date();
         currentEndDate.setMonth(currentEndDate.getMonth() + additionalMonths);
 
-        await db.tenant.update({
-            where: { id: tenantId },
-            data: { subscriptionEndsAt: currentEndDate }
-        });
-
+        await db.tenant.update({ where: { id: tenantId }, data: { subscriptionEndsAt: currentEndDate } });
+        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
         return { success: "Subscription extended successfully!" };
-    } catch (error) {
+    } catch {
         return { error: "Failed to update subscription" };
     }
 }
 
 export const toggleTenantBlock = async (tenantId: string, isBlocked: boolean) => {
     try {
-        await db.tenant.update({
-            where: { id: tenantId },
-            data: { isBlocked }
-        });
-
+        await db.tenant.update({ where: { id: tenantId }, data: { isBlocked } });
+        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
         return { success: `Tenant ${isBlocked ? 'blocked' : 'unblocked'} successfully.` };
-    } catch (error) {
+    } catch {
         return { error: "Failed to update tenant status" };
     }
+}
+
+// Reset any user's password (superadmin only)
+export const resetUserPassword = async (userId: string, newPassword: string) => {
+    const session = await auth()
+    if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
+    if (newPassword.length < 6) return { error: "Minimum 6 characters" }
+    const hashed = await bcrypt.hash(newPassword, 10)
+    await db.user.update({ where: { id: userId }, data: { password: hashed } })
+    return { success: "Mot de passe réinitialisé" }
+}
+
+// Change own password (any logged-in user)
+export const changeMyPassword = async (currentPassword: string, newPassword: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    if (newPassword.length < 6) return { error: "Minimum 6 caractères requis" }
+
+    const user = await db.user.findUnique({ where: { id: session.user.id } })
+    if (!user) return { error: "Utilisateur introuvable" }
+
+    const match = await bcrypt.compare(currentPassword, user.password)
+    if (!match) return { error: "Mot de passe actuel incorrect" }
+
+    const hashed = await bcrypt.hash(newPassword, 10)
+    await db.user.update({ where: { id: user.id }, data: { password: hashed } })
+    return { success: "Mot de passe modifié avec succès" }
 }
