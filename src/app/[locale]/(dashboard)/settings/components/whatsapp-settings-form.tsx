@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { MessageCircle, ExternalLink, CheckCircle, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useTranslations } from "next-intl"
 
 export const WhatsAppSettingsForm = () => {
+    const t = useTranslations("Settings.WhatsAppSettingsForm")
     const [token, setToken] = useState("")
     const [phoneId, setPhoneId] = useState("")
     const [phone, setPhone] = useState("")
@@ -36,10 +38,10 @@ export const WhatsAppSettingsForm = () => {
         try {
             const result = await saveWhatsAppSettings({ whatsappToken: token, whatsappPhoneId: phoneId, whatsappPhone: phone })
             if (result.error) { toast.error(result.error); return }
-            toast.success("Paramètres WhatsApp sauvegardés!")
+            toast.success(t("success"))
             setIsConfigured(!!(token && phoneId))
         } catch {
-            toast.error("Erreur lors de la sauvegarde.")
+            toast.error(t("error"))
         } finally {
             setLoading(false)
         }
@@ -53,21 +55,21 @@ export const WhatsAppSettingsForm = () => {
                 <div className="flex items-center gap-3">
                     <MessageCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                     <div>
-                        <h3 className="font-semibold text-emerald-900 dark:text-emerald-200">WhatsApp Business API</h3>
+                        <h3 className="font-semibold text-emerald-900 dark:text-emerald-200">{t("title")}</h3>
                         <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                            Envoyez des reçus et rappels de dettes directement sur WhatsApp.
+                            {t("desc")}
                         </p>
                     </div>
                 </div>
                 {isConfigured
-                    ? <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Configuré</Badge>
-                    : <Badge variant="outline" className="text-amber-600 border-amber-400 gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Non configuré</Badge>
+                    ? <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-0 gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> {t("configured")}</Badge>
+                    : <Badge variant="outline" className="text-amber-600 border-amber-400 gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {t("notConfigured")}</Badge>
                 }
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                    <Label>Access Token (Permanent)</Label>
+                    <Label>{t("token.label")}</Label>
                     <Input
                         type="password"
                         placeholder="EAAxxxxxx..."
@@ -77,15 +79,15 @@ export const WhatsAppSettingsForm = () => {
                         disabled={loading}
                     />
                     <p className="text-xs text-muted-foreground">
-                        Générez un token permanent sur{" "}
+                        {t("token.hint")}{" "}
                         <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline inline-flex items-center gap-0.5">
-                            Meta for Developers <ExternalLink className="w-3 h-3" />
+                            {t("token.link")} <ExternalLink className="w-3 h-3" />
                         </a>
                     </p>
                 </div>
 
                 <div className="space-y-1.5">
-                    <Label>Phone Number ID</Label>
+                    <Label>{t("phoneId.label")}</Label>
                     <Input
                         type="text"
                         placeholder="123456789012345"
@@ -94,11 +96,11 @@ export const WhatsAppSettingsForm = () => {
                         onChange={(e) => setPhoneId(e.target.value)}
                         disabled={loading}
                     />
-                    <p className="text-xs text-muted-foreground">Trouvé dans WhatsApp → Numéros de téléphone</p>
+                    <p className="text-xs text-muted-foreground">{t("phoneId.hint")}</p>
                 </div>
 
                 <div className="space-y-1.5 md:col-span-2">
-                    <Label>Numéro WhatsApp Expéditeur</Label>
+                    <Label>{t("phone.label")}</Label>
                     <Input
                         type="text"
                         placeholder="+213554123456"
@@ -107,7 +109,7 @@ export const WhatsAppSettingsForm = () => {
                         onChange={(e) => setPhone(e.target.value)}
                         disabled={loading}
                     />
-                    <p className="text-xs text-muted-foreground">Format international avec indicatif pays (ex: +213 pour Algérie)</p>
+                    <p className="text-xs text-muted-foreground">{t("phone.hint")}</p>
                 </div>
             </div>
 
@@ -118,10 +120,10 @@ export const WhatsAppSettingsForm = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-emerald-700 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
                 >
-                    Guide de configuration <ExternalLink className="w-3 h-3" />
+                    {t("guide")} <ExternalLink className="w-3 h-3" />
                 </a>
                 <Button onClick={handleSave} disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-36">
-                    {loading ? "Sauvegarde..." : "Sauvegarder"}
+                    {loading ? t("saving") : t("submit")}
                 </Button>
             </div>
         </div>

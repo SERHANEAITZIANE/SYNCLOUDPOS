@@ -1,3 +1,5 @@
+"use server"
+
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"

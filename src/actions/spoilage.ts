@@ -23,6 +23,9 @@ export async function createSpoilage(data: SpoilageData) {
 
         const { date, reason, quantity, productId } = data
 
+        const store = await db.store.findFirst({ where: { tenantId } })
+        if (!store) return { error: "Boutique introuvable" }
+
         // Check if product exists and belongs to the current tenant
         const product = await db.product.findFirst({
             where: {
@@ -35,7 +38,16 @@ export async function createSpoilage(data: SpoilageData) {
             return { error: "Produit introuvable" }
         }
 
-        if (Number(product.stock) < quantity) {
+        // Fetch storeProduct to check stock
+        const storeProduct = await db.storeProduct.findUnique({
+            where: { storeId_productId: { storeId: store.id, productId } }
+        })
+
+        if (!storeProduct) {
+            return { error: "Stock non configuré pour ce produit" }
+        }
+
+        if (Number(storeProduct.stock) < quantity) {
             return { error: "Quantité avariée supérieure au stock disponible" }
         }
 
@@ -53,9 +65,9 @@ export async function createSpoilage(data: SpoilageData) {
                 }
             })
 
-            await tx.product.update({
+            await tx.storeProduct.update({
                 where: {
-                    id: productId
+                    storeId_productId: { storeId: store.id, productId }
                 },
                 data: {
                     stock: {
@@ -69,8 +81,8 @@ export async function createSpoilage(data: SpoilageData) {
                     productId,
                     type: "SPOILAGE",
                     quantity: -quantity,
-                    stockBefore: Number(product.stock),
-                    stockAfter: Number(product.stock) - quantity,
+                    stockBefore: Number(storeProduct.stock),
+                    stockAfter: Number(storeProduct.stock) - quantity,
                     referenceId: spoilage.id,
                     reason: reason || "Déclaration avarie",
                     userId: session.user.id,

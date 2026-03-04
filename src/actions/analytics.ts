@@ -10,8 +10,10 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         if (!session?.user?.id) throw new Error("Unauthorized");
 
         const tenantId = session.user.tenantId;
+        const defaultStoreId = session.user.defaultStoreId;
         const toDate = dateRange?.to || new Date();
         const fromDate = dateRange?.from || subDays(toDate, 30);
+        const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         // ─── OPTIMIZED AGGREGATIONS (PARALLELIZED) ───────────────────────
 
@@ -25,13 +27,13 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         ] = await Promise.all([
             // 1. Total Revenue & Cash (Orders)
             db.order.aggregate({
-                where: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 _sum: { total: true, paidAmount: true },
                 _count: { id: true }
             }),
             // 2. Total Revenue & Cash (SalesOrders)
             db.salesOrder.aggregate({
-                where: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 _sum: { total: true },
                 _count: { id: true }
             }),
@@ -42,19 +44,19 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             }),
             // 4. Total Purchases
             db.purchaseOrder.aggregate({
-                where: { tenantId, status: { in: ["COMPLETED", "PAID", "DELIVERED", "PENDING"] }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: { in: ["COMPLETED", "PAID", "DELIVERED", "PENDING"] }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 _sum: { total: true }
             }),
             // 5. COGS: Pos items sum
             db.orderItem.groupBy({
                 by: ['productId'],
-                where: { order: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
+                where: { order: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
                 _sum: { quantity: true }
             }),
             // 6. COGS: Sales items sum
             db.salesOrderItem.groupBy({
                 by: ['productId'],
-                where: { salesOrder: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
+                where: { salesOrder: { tenantId, storeId: storeIdToUse, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
                 _sum: { quantity: true }
             }),
             // 7. Debtors aggregate
@@ -71,25 +73,24 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             }),
             // 9. Low stock products
             db.product.findMany({
-                where: { tenantId, isArchived: false, stock: { lte: 10 } },
-                select: { id: true, name: true, stock: true, minStock: true },
-                orderBy: { stock: 'asc' },
+                where: { tenantId, isArchived: false, storeProducts: { some: { storeId: storeIdToUse, stock: { lte: 10 } } } },
+                include: { storeProducts: { where: { storeId: storeIdToUse } } },
                 take: 50
             }),
             // 10. Recent Orders
             db.order.findMany({
-                where: { tenantId, status: "COMPLETED" },
+                where: { tenantId, storeId: storeIdToUse, status: "COMPLETED" },
                 include: { customer: { select: { name: true } } },
                 orderBy: { createdAt: 'desc' },
                 take: 8
             }),
             // 11-13. Revenue over time charts
             db.order.findMany({
-                where: { tenantId, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 select: { createdAt: true, total: true }
             }),
             db.salesOrder.findMany({
-                where: { tenantId, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 select: { createdAt: true, total: true }
             }),
             db.expense.findMany({
@@ -99,7 +100,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
             // 14. Top customers data
             db.order.groupBy({
                 by: ['customerId'],
-                where: { tenantId, status: "COMPLETED", customerId: { not: null }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
+                where: { tenantId, storeId: storeIdToUse, status: "COMPLETED", customerId: { not: null }, createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
                 _sum: { total: true },
                 orderBy: { _sum: { total: 'desc' } },
                 take: 5
@@ -155,7 +156,13 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         const formattedDebtors = topDebtors.map(c => ({ id: c.id, name: c.name, balance: Math.abs(Number(c.balance)) }));
 
         const lowStock = lowStockProducts
+            .map(p => {
+                const stock = p.storeProducts.reduce((sum, sp) => sum + sp.stock, 0);
+                const minStock = p.storeProducts.reduce((sum, sp) => sum + sp.minStock, 0);
+                return { ...p, stock, minStock };
+            })
             .filter(p => p.stock <= p.minStock)
+            .sort((a, b) => a.stock - b.stock)
             .slice(0, 8);
 
         const recentOrders = recentOrdersRaw.map(o => ({

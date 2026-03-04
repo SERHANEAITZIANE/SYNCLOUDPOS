@@ -19,7 +19,6 @@ export async function getCustomerLedger(customerId: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         // 1. Fetch Sales and payments in parallel, then get order IDs
@@ -183,7 +182,6 @@ export async function getSupplierLedger(supplierId: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         // 1. Fetch Purchases (Credits - money we owe to supplier)

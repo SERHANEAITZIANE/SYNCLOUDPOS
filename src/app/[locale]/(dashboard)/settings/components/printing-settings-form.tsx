@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info } from "lucide-react"
 import Bcode from "react-barcode"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 const STORAGE_KEY = "pos_printing_prefs"
 
@@ -36,9 +37,9 @@ const defaults: PrintingPrefs = {
     showLogoOnBL: true,
 }
 
-// ─── Printer presets (cannot enumerate browser printers — security restriction) ───
-const PRINTERS_A4 = [
-    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+// ─── Printer presets ───
+const getPrintersA4 = (t: any) => [
+    { value: "default", label: t("printersOptions.default") },
     { value: "HP LaserJet Pro", label: "HP LaserJet Pro" },
     { value: "HP DeskJet", label: "HP DeskJet" },
     { value: "Canon LBP", label: "Canon LBP" },
@@ -46,11 +47,11 @@ const PRINTERS_A4 = [
     { value: "Samsung Xpress", label: "Samsung Xpress" },
     { value: "Epson EcoTank", label: "Epson EcoTank" },
     { value: "Gprinter GP-2120TL", label: "Gprinter GP-2120TL" },
-    { value: "custom", label: "✏️ Saisir manuellement..." },
+    { value: "custom", label: t("printersOptions.custom") },
 ]
 
-const PRINTERS_THERMAL = [
-    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+const getPrintersThermal = (t: any) => [
+    { value: "default", label: t("printersOptions.default") },
     { value: "Xprinter XP-58IIH", label: "Xprinter XP-58IIH (58mm)" },
     { value: "Xprinter XP-80C", label: "Xprinter XP-80C (80mm)" },
     { value: "Xprinter XP-480B", label: "Xprinter XP-480B" },
@@ -59,11 +60,11 @@ const PRINTERS_THERMAL = [
     { value: "Epson TM-T20", label: "Epson TM-T20" },
     { value: "Epson TM-T88", label: "Epson TM-T88" },
     { value: "Star TSP100", label: "Star TSP100" },
-    { value: "custom", label: "✏️ Saisir manuellement..." },
+    { value: "custom", label: t("printersOptions.custom") },
 ]
 
-const PRINTERS_BARCODE = [
-    { value: "default", label: "🖨️ Imprimante par défaut du système" },
+const getPrintersBarcode = (t: any) => [
+    { value: "default", label: t("printersOptions.default") },
     { value: "Zebra ZD220", label: "Zebra ZD220" },
     { value: "Zebra ZD421", label: "Zebra ZD421" },
     { value: "Zebra ZP450", label: "Zebra ZP450" },
@@ -72,7 +73,7 @@ const PRINTERS_BARCODE = [
     { value: "Gprinter GP-1324D", label: "Gprinter GP-1324D" },
     { value: "Brother QL-820", label: "Brother QL-820" },
     { value: "DYMO LabelWriter", label: "DYMO LabelWriter" },
-    { value: "custom", label: "✏️ Saisir manuellement..." },
+    { value: "custom", label: t("printersOptions.custom") },
 ]
 
 // ─── Printer select with optional custom input ───────────────────
@@ -84,9 +85,10 @@ const PrinterSelect = ({
     value,
     onChange,
     options,
+    placeholder
 }: {
     label: string; badge: string; badgeColor: string; hint: string;
-    value: string; onChange: (v: string) => void; options: { value: string; label: string }[]
+    value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; placeholder: string
 }) => {
     const isCustom = value !== "default" && !options.find(o => o.value === value && o.value !== "custom")
     const selectedInList = options.find(o => o.value === value)
@@ -119,7 +121,7 @@ const PrinterSelect = ({
             </Select>
             {(selectValue === "custom" || isCustom) && (
                 <Input
-                    placeholder="Entrez le nom exact de l'imprimante..."
+                    placeholder={placeholder}
                     value={value === "" || isCustom ? value : ""}
                     onChange={(e) => onChange(e.target.value)}
                     className="text-sm"
@@ -214,13 +216,13 @@ const BarcodeModelPreview = ({ model, selected, onClick }: { model: string; sele
     )
 }
 
-const BARCODE_MODELS = [
-    { id: "classic", name: "Classique" },
-    { id: "modern", name: "Moderne (Dark)" },
-    { id: "elegant", name: "Élégant" },
-    { id: "retro", name: "Rétro" },
-    { id: "minimal", name: "Minimaliste" },
-    { id: "bold", name: "Bold" },
+const getBarcodeModels = (t: any) => [
+    { id: "classic", name: t("barcodeModels.classic") },
+    { id: "modern", name: t("barcodeModels.modern") },
+    { id: "elegant", name: t("barcodeModels.elegant") },
+    { id: "retro", name: t("barcodeModels.retro") },
+    { id: "minimal", name: t("barcodeModels.minimal") },
+    { id: "bold", name: t("barcodeModels.bold") },
 ]
 
 // ─── Main Form ───────────────────────────────────────────────────
@@ -230,6 +232,7 @@ interface PrintingSettingsFormProps {
 
 export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsFormProps) => {
     const router = useRouter()
+    const t = useTranslations("Settings.PrintingSettingsForm")
     const [loading, setLoading] = useState(false)
     const [blTemplate, setBlTemplate] = useState(initialBlTemplate || "standard")
     const [prefs, setPrefs] = useState<PrintingPrefs>(defaults)
@@ -247,10 +250,10 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
             const result = await updateSystemSettings({ blTemplate, geminiApiKey: undefined })
             if (result.error) { toast.error(result.error); return }
-            toast.success("Paramètres d'impression sauvegardés !")
+            toast.success(t("success"))
             router.refresh()
         } catch {
-            toast.error("Erreur lors de la sauvegarde.")
+            toast.error(t("error"))
         } finally {
             setLoading(false)
         }
@@ -261,41 +264,42 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             {/* Info Banner */}
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800">
                 <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
-                <span>
-                    Les préférences d&apos;imprimantes sont sauvegardées sur <strong>cet appareil uniquement</strong>. Sélectionnez <em>«Défaut»</em> pour utiliser l&apos;imprimante configurée dans Windows. Lors de l&apos;impression, le navigateur ouvrira la boîte de dialogue système si nécessaire.
-                </span>
+                <span dangerouslySetInnerHTML={{ __html: t("infoBanner") }} />
             </div>
 
             {/* ── 1. Printer Assignments ── */}
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <Printer className="w-5 h-5 text-blue-500" />
-                    <h3 className="text-base font-semibold">Imprimantes</h3>
+                    <h3 className="text-base font-semibold">{t("printers")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-muted/40 p-5 rounded-xl border">
                     <PrinterSelect
-                        label="Imprimante A4"
+                        label={t("printerA4.label")}
                         badge="A4" badgeColor="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-                        hint="Utilisée pour les Bons de Livraison et Factures"
+                        hint={t("printerA4.hint")}
                         value={prefs.printerA4}
                         onChange={(v) => setPrefs(p => ({ ...p, printerA4: v }))}
-                        options={PRINTERS_A4}
+                        options={getPrintersA4(t)}
+                        placeholder={t("printersOptions.customPlaceholder")}
                     />
                     <PrinterSelect
-                        label="Imprimante Reçu"
+                        label={t("printerReceipt.label")}
                         badge="REÇU" badgeColor="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300"
-                        hint="Imprimante thermique pour les reçus POS"
+                        hint={t("printerReceipt.hint")}
                         value={prefs.printerReceipt}
                         onChange={(v) => setPrefs(p => ({ ...p, printerReceipt: v }))}
-                        options={PRINTERS_THERMAL}
+                        options={getPrintersThermal(t)}
+                        placeholder={t("printersOptions.customPlaceholder")}
                     />
                     <PrinterSelect
-                        label="Imprimante Code-Barre"
+                        label={t("printerBarcode.label")}
                         badge="CB" badgeColor="bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
-                        hint="Imprimante dédiée aux étiquettes produits"
+                        hint={t("printerBarcode.hint")}
                         value={prefs.printerBarcode}
                         onChange={(v) => setPrefs(p => ({ ...p, printerBarcode: v }))}
-                        options={PRINTERS_BARCODE}
+                        options={getPrintersBarcode(t)}
+                        placeholder={t("printersOptions.customPlaceholder")}
                     />
                 </div>
             </div>
@@ -306,10 +310,10 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <Barcode className="w-5 h-5 text-orange-500" />
-                    <h3 className="text-base font-semibold">Modèle d&apos;étiquette code-barre</h3>
+                    <h3 className="text-base font-semibold">{t("barcodeModel")}</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {BARCODE_MODELS.map((m) => (
+                    {getBarcodeModels(t).map((m) => (
                         <div key={m.id} className="space-y-2">
                             <BarcodeModelPreview
                                 model={m.id}
@@ -330,19 +334,19 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <FileText className="w-5 h-5 text-green-500" />
-                    <h3 className="text-base font-semibold">Modèle de Bon de Livraison</h3>
+                    <h3 className="text-base font-semibold">{t("blTemplate.title")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-xl border">
                     <div className="space-y-2">
-                        <Label>Modèle à utiliser</Label>
+                        <Label>{t("blTemplate.label")}</Label>
                         <Select value={blTemplate} onValueChange={setBlTemplate}>
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="standard">Standard (Classique)</SelectItem>
-                                <SelectItem value="compact">Compact (Thermique)</SelectItem>
-                                <SelectItem value="aitee">AITEE (Facture Structurée)</SelectItem>
+                                <SelectItem value="standard">{t("blTemplate.options.standard", { fallback: "Standard" })}</SelectItem>
+                                <SelectItem value="compact">{t("blTemplate.options.compact", { fallback: "Compact" })}</SelectItem>
+                                <SelectItem value="aitee">{t("blTemplate.options.aitee", { fallback: "AITEE" })}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -355,13 +359,13 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <MonitorDot className="w-5 h-5 text-purple-500" />
-                    <h3 className="text-base font-semibold">Options d&apos;affichage</h3>
+                    <h3 className="text-base font-semibold">{t("displayOptions")}</h3>
                 </div>
                 <div className="space-y-4 bg-muted/40 p-4 rounded-xl border">
                     <div className="flex items-center justify-between">
                         <div>
-                            <Label>Code-barre sur le reçu POS</Label>
-                            <p className="text-xs text-muted-foreground mt-0.5">Imprime un code-barre scannable en bas du reçu</p>
+                            <Label>{t("showBarcodeOnReceipt.label")}</Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t("showBarcodeOnReceipt.hint")}</p>
                         </div>
                         <Switch
                             checked={prefs.showBarcodeOnReceipt}
@@ -373,8 +377,8 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
                         <div className="flex items-center gap-2">
                             <ImageIcon className="w-4 h-4 text-muted-foreground" />
                             <div>
-                                <Label>Logo sur le Bon de Livraison</Label>
-                                <p className="text-xs text-muted-foreground mt-0.5">Imprime le logo en haut du BL</p>
+                                <Label>{t("showLogoOnBL.label")}</Label>
+                                <p className="text-xs text-muted-foreground mt-0.5">{t("showLogoOnBL.hint")}</p>
                             </div>
                         </div>
                         <Switch
@@ -387,7 +391,7 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
 
             <div className="flex justify-end pt-2">
                 <Button onClick={handleSave} disabled={loading} className="min-w-36">
-                    {loading ? "Sauvegarde..." : "Sauvegarder les préférences"}
+                    {loading ? t("saving") : t("submit")}
                 </Button>
             </div>
         </div>

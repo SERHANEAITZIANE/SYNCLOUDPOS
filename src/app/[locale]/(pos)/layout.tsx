@@ -16,11 +16,8 @@ export default async function PosLayout({
     return (
         <NextIntlClientProvider messages={messages}>
             <SubscriptionGuard
-                // @ts-expect-error custom property 
                 isSuperadmin={session?.user?.isSuperadmin}
-                // @ts-expect-error custom property
                 subscriptionEndsAt={session?.user?.subscriptionEndsAt}
-                // @ts-expect-error custom property
                 isBlocked={session?.user?.isBlocked}
             >
                 <div className="h-full w-full bg-slate-100 dark:bg-slate-900">

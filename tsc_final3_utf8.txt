@@ -1,0 +1,2 @@
+﻿src/actions/ai-context.ts(72,43): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductWhereInput'.
+src/actions/purchase-orders.ts(254,131): error TS2339: Property 'minStock' does not exist on type '{ storeProducts: { id: string; stock: number; createdAt: Date; updatedAt: Date; storeId: string; productId: string; minStock: number; }[]; } & { id: string; tenantId: string; name: string; ... 11 more ...; brandId: string; }'.

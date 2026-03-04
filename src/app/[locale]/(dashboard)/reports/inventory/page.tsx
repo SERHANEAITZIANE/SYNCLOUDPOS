@@ -16,18 +16,23 @@ export default async function InventoryReportPage() {
             isArchived: false
         },
         orderBy: {
-            stock: "asc"
-        }
+            name: "asc"
+        },
+        include: { storeProducts: true }
     });
 
-    const formattedData = products.map((product) => ({
-        id: product.id,
-        name: product.name,
-        stock: product.stock,
-        minStock: product.minStock,
-        cost: Number(product.cost || product.price), // Fallback to price if cost is somehow missing
-        price: Number(product.price),
-    }));
+    const formattedData = products.map((product) => {
+        const stock = product.storeProducts.reduce((sum, sp) => sum + sp.stock, 0);
+        const minStock = product.storeProducts.reduce((sum, sp) => sum + sp.minStock, 0);
+        return {
+            id: product.id,
+            name: product.name,
+            stock,
+            minStock,
+            cost: Number(product.cost || product.price), // Fallback to price if cost is somehow missing
+            price: Number(product.price),
+        };
+    }).sort((a, b) => a.stock - b.stock);
 
     return (
         <div className="flex-col">

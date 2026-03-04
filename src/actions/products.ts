@@ -44,8 +44,6 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             data: {
                 name,
                 price,
-                stock,
-                minStock,
                 tvaRate,
                 description,
                 cost: cost ?? undefined,
@@ -143,18 +141,23 @@ export const getLowStockProducts = async () => {
         const products = await db.product.findMany({
             where: {
                 tenantId,
-                stock: {
-                    lte: db.product.fields.minStock
+                storeProducts: {
+                    some: {
+                        stock: {
+                            lte: db.storeProduct.fields.minStock
+                        }
+                    }
                 }
             },
             include: {
                 category: true,
                 brand: true,
                 images: true,
-                barcodes: true
+                barcodes: true,
+                storeProducts: true
             } as any,
             orderBy: {
-                stock: 'asc'
+                createdAt: 'desc'
             }
         })
         return products
@@ -250,8 +253,6 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
                 tvaRate,
                 categoryId,
                 brandId,
-                stock,
-                minStock,
                 description,
                 cost: cost ?? undefined,
                 wholesalePrice: wholesalePrice ?? undefined,
@@ -330,17 +331,44 @@ export const importProducts = async (rows: Record<string, string>[]) => {
         newCats.forEach(c => categoryCache.set(c.name.toLowerCase().trim(), c.id))
         newBrands.forEach(b => brandCache.set(b.name.toLowerCase().trim(), b.id))
 
+        // Helper to parse messy number strings like "17,000.00 DA" or "1 500"
+        const parseNumeric = (val: string | undefined | null) => {
+            if (!val) return 0
+            let clean = String(val).replace(/[^0-9.,-]/g, "")
+            if (clean.includes(",") && clean.includes(".")) {
+                const lastComma = clean.lastIndexOf(",")
+                const lastDot = clean.lastIndexOf(".")
+                if (lastComma > lastDot) {
+                    clean = clean.replace(/\./g, "").replace(",", ".")
+                } else {
+                    clean = clean.replace(/,/g, "")
+                }
+            } else if (clean.includes(",")) {
+                clean = clean.replace(/,/g, ".")
+            }
+            const parsed = parseFloat(clean)
+            return isNaN(parsed) ? 0 : parsed
+        }
+
+        // Helper to parse boolean values like "1", "vrai", "oui", "true", "yes"
+        const parseBoolean = (val: string | undefined | null | boolean | number) => {
+            if (val === true || val === 1) return true
+            if (!val) return false
+            const str = String(val).toLowerCase().trim()
+            return ["1", "true", "yes", "oui", "vrai", "y", "o"].includes(str)
+        }
+
         // Now batch create all products in parallel
         const createPromises = rows.map(async (row) => {
             const name = row["name"] || row["nom"] || row["Nom"] || row["Name"] || ""
             if (!name.trim()) { errors++; return }
 
             try {
-                const price = parseFloat(row["price"] || row["prix"] || row["Prix Vente"] || "0") || 0
-                const cost = parseFloat(row["cost"] || row["cout"] || row["Prix Achat"] || "0") || undefined
-                const wholesalePrice = parseFloat(row["wholesalePrice"] || row["Prix Gros"] || "0") || undefined
-                const stock = parseInt(row["stock"] || row["Stock"] || "0") || 0
-                const minStock = parseInt(row["minStock"] || row["Stock Min"] || "0") || 0
+                const price = parseNumeric(row["price"] || row["prix"] || row["Prix Vente"] || "0")
+                const cost = parseNumeric(row["cost"] || row["cout"] || row["Prix Achat"]) || undefined
+                const wholesalePrice = parseNumeric(row["wholesalePrice"] || row["Prix Gros"]) || undefined
+                const stock = parseNumeric(row["stock"] || row["Stock"])
+                const minStock = parseNumeric(row["minStock"] || row["Stock Min"])
                 const description = row["description"] || row["Description"] || undefined
                 const barcode = row["barcode"] || row["Barcode"] || row["Code-barres"] || undefined
                 const categoryName = (row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || "").trim()
@@ -349,17 +377,20 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                 const categoryId = categoryName ? categoryCache.get(categoryName.toLowerCase()) : undefined
                 const brandId = brandName ? brandCache.get(brandName.toLowerCase()) : undefined
 
+                const isFeatured = parseBoolean(row["isFeatured"] || row["isfeatured"] || row["favoris"] || row["Favoris"])
+                const isArchived = parseBoolean(row["isArchived"] || row["isarchived"] || row["archivé"] || row["Archive"] || row["Archiv\u00e9"])
+
                 await db.product.create({
                     data: {
                         name: name.trim(),
                         price,
                         cost,
                         wholesalePrice,
-                        stock,
-                        minStock,
                         description,
                         categoryId,
                         brandId,
+                        isFeatured,
+                        isArchived,
                         tenantId,
                         ...(barcode ? {
                             barcodes: { create: [{ value: barcode }] }
@@ -397,7 +428,7 @@ export const getAllProductsForCatalogue = async () => {
             where: {
                 tenantId,
                 isArchived: false,
-                stock: { gt: 0 } // Only include available products
+                storeProducts: { some: { stock: { gt: 0 } } } // Only include available products
             },
             include: {
                 category: true,

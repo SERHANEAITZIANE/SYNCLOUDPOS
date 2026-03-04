@@ -1,0 +1,25 @@
+﻿src/actions/purchase-orders.ts(25,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(60,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(88,54): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; dealerPrice: Decimal; tvaRate: Decimal; ... 6 more ...; updatedAt: Date; }'.
+src/actions/purchase-orders.ts(93,37): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/purchase-orders.ts(161,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(205,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(230,54): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; dealerPrice: Decimal; tvaRate: Decimal; ... 6 more ...; updatedAt: Date; }'.
+src/actions/purchase-orders.ts(235,37): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/purchase-orders.ts(259,54): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; dealerPrice: Decimal; tvaRate: Decimal; ... 6 more ...; updatedAt: Date; }'.
+src/actions/purchase-orders.ts(264,37): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/purchase-orders.ts(336,5): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/analytics/page.tsx(9,81): error TS2367: This comparison appears to be unintentional because the types '"CASHIER"' and '"ACCOUNTANT"' have no overlap.
+src/app/[locale]/(dashboard)/inventory-audit/page.tsx(25,81): error TS2367: This comparison appears to be unintentional because the types '"CASHIER"' and '"STOCK_MANAGER"' have no overlap.
+src/app/[locale]/(dashboard)/layout.tsx(40,26): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/reorder/page.tsx(23,81): error TS2367: This comparison appears to be unintentional because the types '"CASHIER"' and '"STOCK_MANAGER"' have no overlap.
+src/app/[locale]/(dashboard)/reports/page.tsx(7,81): error TS2367: This comparison appears to be unintentional because the types '"CASHIER"' and '"ACCOUNTANT"' have no overlap.
+src/app/[locale]/(dashboard)/treasury/page.tsx(17,81): error TS2367: This comparison appears to be unintentional because the types '"CASHIER"' and '"ACCOUNTANT"' have no overlap.
+src/auth.ts(46,17): error TS2322: Type 'unknown' is not assignable to type 'string'.
+src/auth.ts(47,17): error TS2322: Type 'unknown' is not assignable to type 'boolean'.
+src/auth.ts(48,17): error TS2740: Type '{}' is missing the following properties from type 'Date': toDateString, toTimeString, toLocaleDateString, toLocaleTimeString, and 37 more.
+src/auth.ts(49,17): error TS2322: Type 'unknown' is not assignable to type 'boolean'.
+src/auth.ts(50,17): error TS2322: Type 'unknown' is not assignable to type '"ADMIN" | "MANAGER" | "CASHIER"'.
+src/auth.ts(51,17): error TS2322: Type 'unknown' is not assignable to type 'boolean'.
+src/auth.ts(52,17): error TS2322: Type 'unknown' is not assignable to type 'boolean'.
+src/auth.ts(63,21): error TS2322: Type 'string' is not assignable to type '"ADMIN" | "MANAGER" | "CASHIER"'.

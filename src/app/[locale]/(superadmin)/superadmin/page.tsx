@@ -13,7 +13,8 @@ export default async function SuperadminPage() {
         subscriptionEndsAt: t.subscriptionEndsAt,
         isBlocked: false,
         createdAt: t.createdAt,
-        ownerDetails: t.ownerDetails
+        ownerDetails: t.ownerDetails,
+        usageStats: t.usageStats
     }));
 
     return (

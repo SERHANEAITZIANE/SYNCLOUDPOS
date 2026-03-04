@@ -8,7 +8,6 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         // Build where clause

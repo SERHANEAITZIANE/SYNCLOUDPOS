@@ -6,7 +6,6 @@ import { CompanyClient } from "./components/client";
 
 export default async function CompanyPage() {
     const session = await auth();
-    // @ts-expect-error custom property
     if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) {
         redirect("/dashboard");
     }

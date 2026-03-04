@@ -1,813 +1,1082 @@
 {
-    "HomePage": {
-        "title": "Bienvenue sur SYNCLOUDPOS",
-        "subtitle": "Système de Gestion Commerciale & POS Premium"
+  "HomePage": {
+    "title": "Bienvenue sur SYNCLOUDPOS",
+    "subtitle": "Système de Gestion Commerciale & POS Premium"
+  },
+  "Auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "loginTitle": "Se Connecter",
+    "registerTitle": "Créer un Compte",
+    "fields": {
+      "name": "Nom Complet",
+      "namePlaceholder": "ex: Jean Dupont",
+      "email": "Email",
+      "emailPlaceholder": "jean.dupont@exemple.com",
+      "phone": "Téléphone",
+      "phonePlaceholder": "+213 555 55 55 55",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "******"
     },
-    "Auth": {
-        "login": "Connexion",
-        "register": "S'inscrire",
-        "loginTitle": "Se Connecter",
-        "registerTitle": "Créer un Compte",
-        "fields": {
-            "name": "Nom Complet",
-            "namePlaceholder": "ex: Jean Dupont",
-            "email": "Email",
-            "emailPlaceholder": "jean.dupont@exemple.com",
-            "phone": "Téléphone",
-            "phonePlaceholder": "+213 555 55 55 55",
-            "password": "Mot de passe",
-            "passwordPlaceholder": "******"
-        },
-        "buttons": {
-            "login": "Se Connecter",
-            "register": "Créer un Compte"
-        },
-        "footer": {
-            "noAccount": "Pas encore de compte ?",
-            "hasAccount": "Déjà un compte ?",
-            "registerLink": "S'inscrire",
-            "loginLink": "Se Connecter"
-        }
+    "buttons": {
+      "login": "Se Connecter",
+      "register": "Créer un Compte"
     },
-    "Navigation": {
-        "dashboard": "Tableau de bord",
-        "pos": "Caisse (POS)",
-        "users": "Utilisateurs",
-        "products": "Produits",
-        "sales": "Ventes",
-        "settings": "Paramètres",
-        "customers": "Clients",
-        "suppliers": "Fournisseurs",
-        "purchases": "Achats",
-        "expenses": "Dépenses",
-        "categories": "Catégories",
-        "brands": "Marques",
-        "reports": "Rapports",
-        "treasury": "Trésorerie",
-        "analytics": "Analytiques",
-        "company": "Mon Entreprise",
-        "systemSettings": "Paramètres Système",
-        "overview": "Vue d'ensemble",
-        "aiIntelligence": "Intelligence IA",
-        "transactionsGroup": "Transactions",
-        "payments": "Paiements",
-        "catalogGroup": "Catalogue",
-        "promotions": "Promotions",
-        "damages": "Avaries",
-        "partnersGroup": "Partenaires",
-        "customerLoan": "Emprunt Client",
-        "supplierLoan": "Emprunt Fournisseur",
-        "analysisGroup": "Analyses",
-        "systemGroup": "Système",
-        "erpTraining": "Formation ERP",
-        "superAdmin": "Super Admin",
-        "dailyClose": "Clôture de Caisse"
-    },
-    "Common": {
-        "quantity": "Quantité",
-        "addNew": "Ajouter",
-        "edit": "Modifier",
-        "delete": "Supprimer",
-        "view": "Voir",
-        "actions": "Actions",
-        "confirm": "Confirmer",
-        "cancel": "Annuler",
-        "search": "Rechercher",
-        "noResults": "Aucun résultat",
-        "loading": "Chargement...",
-        "save": "Enregistrer",
-        "creating": "Création...",
-        "updating": "Mise à jour...",
-        "success": "Succès",
-        "error": "Erreur",
-        "print": "Imprimer",
-        "close": "Fermer",
-        "back": "Retour",
-        "new": "Nouveau",
-        "total": "Total",
-        "date": "Date",
-        "status": "Statut",
-        "yes": "Oui",
-        "no": "Non",
-        "name": "Nom",
-        "description": "Description",
-        "amount": "Montant",
-        "notes": "Notes",
-        "type": "Type"
-    },
-    "Dashboard": {
-        "title": "Tableau de bord",
-        "subtitle": "Vue d'ensemble de votre activité",
-        "totalRevenue": "Chiffre d'affaires",
-        "totalOrders": "Commandes",
-        "totalProducts": "Produits",
-        "totalCustomers": "Clients",
-        "recentSales": "Ventes récentes",
-        "messages": {
-            "errorTitle": "Erreur de chargement",
-            "errorMessage": "Nous n'avons pas pu charger les données de votre tableau de bord. Veuillez actualiser la page ou contacter le support.",
-            "title": "Tableau de bord"
-        }
-    },
-    "Sales": {
-        "title": "Bons de Commande",
-        "subtitle": "Gérer les commandes, devis et factures",
-        "newSale": "Nouveau bon",
-        "fields": {
-            "type": "Type",
-            "customer": "Client",
-            "date": "Date",
-            "total": "Total",
-            "status": "Statut",
-            "receiptNumber": "N° Référence",
-            "balance": "Solde dû"
-        },
-        "filters": {
-            "filterByType": "Filtrer par Type",
-            "allTypes": "Tous les types",
-            "quote": "Devis",
-            "order": "Bon de Livraison",
-            "invoice": "Facture"
-        },
-        "status": {
-            "draft": "Brouillon",
-            "validated": "Validé",
-            "paid": "Payé",
-            "cancelled": "Annulé"
-        }
-    },
-    "Products": {
-        "title": "Produits",
-        "subtitle": "Gérer les produits de votre magasin",
-        "newProduct": "Nouveau produit",
-        "catalogue": "Catalogue",
-        "importExcel": "Import Excel",
-        "outOfStock": "Rupture Stock",
-        "stockHistoryLabel": "Historique Stock",
-        "stockHistory": {
-            "title": "Historique des mouvements de stock",
-            "product": "Produit:",
-            "loading": "Chargement de l'historique...",
-            "noMovements": "Aucun mouvement enregistré pour ce produit.",
-            "systemMovement": "Mouvement système",
-            "by": "Par",
-            "types": {
-                "PURCHASE": "Achat",
-                "RETURN": "Retour",
-                "SALE": "Vente",
-                "SPOILAGE": "Avarie",
-                "ADJUSTMENT": "Ajustement",
-                "INITIAL": "Stock Initial",
-                "default": "Mouvement"
-            }
-        },
-        "productGrid": {
-            "featured": "★ En vedette",
-            "archived": "Archivé",
-            "noImage": "Sans Image",
-            "retailPrice": "Prix Détail",
-            "wholesalePrice": "Prix Gros",
-            "dealerPrice": "Revendeur",
-            "stock": "Stock: ",
-            "currency": "DA"
-        },
-        "priceListModal": {
-            "errorLoading": "Erreur lors du chargement des données",
-            "copiedSuccess": "Catalogue copié dans le presse-papiers",
-            "retailPrice": "Prix Vente",
-            "wholesalePrice": "Prix Gros",
-            "resellerPrice": "Prix Revendeur",
-            "title": "Générer Catalogue Externe",
-            "description": "Créez un catalogue PDF ou texte pour vos clients",
-            "configuration": "Configuration",
-            "categoryLabel": "Catégorie",
-            "allCategories": "Toutes les catégories",
-            "pricingLabel": "Tarification",
-            "retailOption": "Détaillant (Prix Vente)",
-            "wholesaleOption": "Grossiste (Prix Gros)",
-            "resellerOption": "Revendeur (Prix Revendeur)",
-            "filtersLabel": "Filtres",
-            "onlyFeatured": "Uniquement En Vedette (★)",
-            "hideOutOfStock": "Masquer Rupture de Stock",
-            "showPhotos": "Afficher les photos",
-            "productsDisplayed": "produit(s) affiché(s)",
-            "exportPdf": "Exporter en PDF",
-            "viewCatalogue": "← Voir le Catalogue",
-            "whatsappText": "Texte WhatsApp / SMS",
-            "cataloguePreview": "Aperçu du catalogue",
-            "articles": "article(s)",
-            "copied": "Copié !",
-            "copy": "Copier",
-            "loading": "Chargement...",
-            "catalogueTitle": "Catalogue de Prix",
-            "noProducts": "Aucun produit pour ces critères",
-            "price": "Prix",
-            "product": "Produit",
-            "others": "Autres"
-        },
-        "importTitle": "Importer des Produits depuis Excel",
-        "importDesc": "Téléchargez le modèle, remplissez-le et importez.",
-        "fields": {
-            "name": "Nom",
-            "category": "Catégorie",
-            "price": "Prix détaillant",
-            "purchasePrice": "Prix d'achat",
-            "wholesalePrice": "Prix de gros",
-            "dealerPrice": "Prix revendeur",
-            "stock": "Stock",
-            "minStock": "Stock min",
-            "archived": "Archivé",
-            "featured": "Mis en avant",
-            "barcode": "Code-barres",
-            "description": "Description",
-            "images": "Images",
-            "brand": "Marque",
-            "featuredDesc": "Ce produit apparaîtra sur la page d'accueil",
-            "archivedDesc": "Ce produit n'apparaîtra nulle part dans le magasin"
-        },
-        "form": {
-            "generalInfo": "Informations générales",
-            "namePlaceholder": "Nom du produit",
-            "descPlaceholder": "Description du produit...",
-            "searchCategory": "Rechercher une catégorie...",
-            "searchBrand": "Rechercher une marque...",
-            "pricing": "Grille tarifaire",
-            "purchasePriceDesc": "Coût fournisseur",
-            "retailPriceDesc": "Prix de vente au détail",
-            "wholesalePriceDesc": "Pour achat de grande quantité",
-            "dealerPriceDesc": "Pour partenaires et revendeurs",
-            "tvaRate": "Taux de TVA (%)",
-            "selectTva": "Sélectionnez un taux de TVA",
-            "tva19": "TVA 19% (Générale)",
-            "tva9": "TVA 9% (Réduite)",
-            "tva0": "TVA 0% (Exonérée)",
-            "tvaDesc": "Taux applicable en Algérie",
-            "calculatedMargins": "Marges calculées",
-            "marginRetail": "Marge détail",
-            "marginWholesale": "Marge gros",
-            "marginDealer": "Marge revendeur",
-            "barcodes": "Codes-barres",
-            "barcodeValue": "Valeur du code-barres",
-            "barcodeType": "Type (ex. EAN-13)",
-            "addBarcode": "Ajouter",
-            "autoGenerate": "Auto-générer",
-            "autoGenerated": "Auto-Généré",
-            "images": "Images",
-            "stockManagement": "Gestion du stock",
-            "lowStockAlert": "Alerte stock faible",
-            "outOfStock": "Rupture de stock",
-            "lowStock": "Stock faible",
-            "inStock": "En stock",
-            "units": "unités",
-            "productStatus": "Statut du produit",
-            "saving": "Enregistrement..."
-        }
-    },
-    "Suppliers": {
-        "title": "Fournisseurs",
-        "subtitle": "Gérer les fournisseurs",
-        "newSupplier": "Nouveau fournisseur",
-        "fields": {
-            "name": "Nom / Raison sociale",
-            "contact": "Contact",
-            "email": "Email",
-            "phone": "Téléphone",
-            "address": "Adresse",
-            "taxId": "NIF / Matricule Fiscale",
-            "balance": "Solde dû",
-            "nifDesc": "Numéro d'Identification Fiscale",
-            "nis": "NIS",
-            "nisDesc": "Numéro d'Identifiant Statistique",
-            "artImposition": "Article d'Imposition",
-            "rc": "NRC",
-            "rcDesc": "Numéro de Registre de Commerce",
-            "rib": "RIB Banque",
-            "ribDesc": "Relevé d'Identité Bancaire"
-        },
-        "messages": {
-            "error": "Une erreur s'est produite.",
-            "success": "Fournisseur enregistré.",
-            "deleted": "Fournisseur supprimé.",
-            "linkedProductError": "Veuillez d'abord supprimer tous les produits liés à ce fournisseur."
-        },
-        "form": {
-            "generalInfo": "Informations générales",
-            "fiscalInfo": "Informations fiscales"
-        }
-    },
-    "Customers": {
-        "title": "Clients",
-        "subtitle": "Gérer les clients",
-        "newCustomer": "Nouveau client",
-        "fields": {
-            "name": "Nom",
-            "email": "Email",
-            "phone": "Téléphone",
-            "address": "Adresse",
-            "city": "Ville",
-            "orders": "Commandes",
-            "taxId": "NIF / Matricule Fiscale",
-            "balance": "Solde dû",
-            "loyaltyPoints": "Points fidélité"
-        },
-        "messages": {
-            "deleted": "Client supprimé.",
-            "error": "Erreur lors de la suppression."
-        },
-        "actions": {
-            "showQr": "Afficher Code QR",
-            "viewLog": "Voir Historique (Log)"
-        }
-    },
-    "Purchases": {
-        "title": "Achats",
-        "subtitle": "Gérer les bons d'achat et commandes fournisseurs",
-        "newPurchase": "Nouveau bon d'achat",
-        "fields": {
-            "supplier": "Fournisseur",
-            "status": "Statut",
-            "total": "Total",
-            "date": "Date",
-            "account": "Compte de paiement",
-            "items": "Articles"
-        },
-        "status": {
-            "pending": "Brouillon",
-            "bonCommande": "Bon de Commande",
-            "bonLivraison": "Bon de Livraison",
-            "facture": "Facture",
-            "completed": "Payé",
-            "cancelled": "Annulé"
-        }
-    },
-    "Expenses": {
-        "title": "Dépenses",
-        "subtitle": "Gérer les dépenses de l'entreprise",
-        "newExpense": "Nouvelle dépense",
-        "fields": {
-            "description": "Description",
-            "amount": "Montant",
-            "category": "Catégorie",
-            "account": "Compte imputé",
-            "date": "Date",
-            "notes": "Notes"
-        },
-        "messages": {
-            "deleted": "Dépense supprimée.",
-            "error": "Erreur lors de la suppression."
-        }
-    },
-    "Categories": {
-        "title": "Catégories",
-        "subtitle": "Gérer les catégories de produits",
-        "newCategory": "Nouvelle catégorie",
-        "fields": {
-            "name": "Nom",
-            "products": "Produits"
-        },
-        "fastCreate": {
-            "title": "Création Rapide de Catégorie",
-            "description": "Créez une nouvelle catégorie instantanément.",
-            "nameLabel": "Nom de la Catégorie",
-            "namePlaceholder": "ex. Électronique, Vêtements...",
-            "success": "Catégorie créée"
-        }
-    },
-    "Brands": {
-        "title": "Marques",
-        "subtitle": "Gérer les marques de produits",
-        "newBrand": "Nouvelle marque",
-        "fields": {
-            "name": "Nom",
-            "products": "Produits"
-        },
-        "fastCreate": {
-            "title": "Création Rapide de Famille (Marque)",
-            "description": "Créez une nouvelle famille (marque) instantanément.",
-            "nameLabel": "Nom de la Famille / Marque",
-            "namePlaceholder": "ex. Apple, Nike, Laitier...",
-            "success": "Famille / Marque créée"
-        }
-    },
-    "Treasury": {
-        "title": "Trésorerie",
-        "subtitle": "Gérer les comptes, virements et transactions",
-        "newAccount": "Nouveau compte",
-        "transfer": "Virement",
-        "transaction": "Saisie manuelle",
-        "fields": {
-            "name": "Nom du compte",
-            "type": "Type",
-            "balance": "Solde",
-            "rib": "RIB / Numéro de compte"
-        },
-        "types": {
-            "caisse": "Caisse (Espèces)",
-            "bank": "Compte Bancaire"
-        }
-    },
-    "Analytics": {
-        "title": "Analytiques",
-        "subtitle": "Statistiques et analyses de performance",
-        "revenue": "Chiffre d'affaires",
-        "expenses": "Dépenses",
-        "profit": "Bénéfice net",
-        "topProducts": "Top produits",
-        "salesByCategory": "Ventes par catégorie",
-        "kpi": {
-            "dashboardTitle": "Tableau de Bord Analytique",
-            "dashboardDesc": "Vue d'ensemble premium des performances et de la trésorerie de votre commerce.",
-            "purePerformance": "Performances Pures (Théorique)",
-            "revenueTotalSales": "Total des ventes facturées/POS",
-            "transactions": "transactions",
-            "cogsDesc": "Coût d'achat de la marchandise vendue",
-            "expensesDesc": "Frais généraux enregistrés (loyer, salaires...)",
-            "netMargin": "Marge nette",
-            "cashFlowOperations": "Trésorerie & Opérations (Cash Flow)",
-            "actualCash": "Argent physiquement reçu",
-            "remainingToRecover": "Reste à recouvrer",
-            "totalPurchaseValue": "Valeur totale du stock acheté (Bons de réception)",
-            "clientsWithDebt": "client(s) ont des dettes impayées",
-            "revenueVsExpenses": "Revenus vs Charges (30 derniers jours)",
-            "revenues": "Revenus",
-            "expenses": "Charges",
-            "revenueByCategory": "Chiffre d'affaires par catégorie",
-            "noCategoryData": "Aucune donnée de catégorie.",
-            "sales": "Ventes",
-            "top10Products": "Top 10 Produits (Revenus)",
-            "noSales": "Aucune vente enregistrée.",
-            "unitsSold": "unités vendues",
-            "topCustomers": "Meilleurs Clients",
-            "noCustomers": "Aucun client.",
-            "recentSalesFlow": "Flux de Ventes Récents",
-            "noRecentSales": "Aucune vente récente.",
-            "partial": "Partiel",
-            "paidInFull": "Payé Complet",
-            "lowStock": "Stock faible",
-            "manage": "Gérer",
-            "noStockAlert": "Aucun alerte stock.",
-            "unpaidDebts": "Créances Impayées",
-            "noOngoingDebts": "Aucune créance en cours"
-        },
-        "noData": "Aucune donnée analytique disponible."
-    },
-    "Reports": {
-        "title": "Rapports",
-        "subtitle": "Rapports détaillés de l'activité"
-    },
-    "POS": {
-        "title": "Caisse",
-        "subtitle": "Point de Vente",
-        "search": "Rechercher un produit...",
-        "cart": "Panier",
-        "checkout": "Encaisser",
-        "total": "Total",
-        "discount": "Remise",
-        "tax": "TVA",
-        "payment": "Paiement",
-        "cash": "Espèces",
-        "card": "Carte",
-        "receipt": "Reçu",
-        "newSale": "Nouvelle vente",
-        "customer": "Client"
-    },
-    "Settings": {
-        "title": "Paramètres du Magasin",
-        "subtitle": "Gérez les préférences et détails de votre magasin",
-        "fields": {
-            "storeName": "Nom du magasin",
-            "storeNamePlaceholder": "Ex. Mon Super Magasin",
-            "contactPhone": "Téléphone",
-            "phonePlaceholder": "Numéro de téléphone",
-            "storeAddress": "Adresse du magasin",
-            "addressPlaceholder": "123 Rue de l'Exemple, Ville, Pays",
-            "taxId": "NIF / Numéro Fiscal",
-            "currency": "Devise",
-            "logo": "Logo",
-            "saveChanges": "Enregistrer"
-        },
-        "messages": {
-            "success": "Paramètres mis à jour.",
-            "error": "Une erreur s'est produite."
-        }
-    },
-    "Receipt": {
-        "title": "TICKET DE CAISSE",
-        "date": "Date",
-        "ticketNo": "Ticket N°",
-        "customer": "Client",
-        "guest": "DIVERS",
-        "item": "Désignation",
-        "qty": "Qté",
-        "price": "Prix",
-        "oldBalance": "Ancien Solde",
-        "discount": "Remise",
-        "total": "Total",
-        "payment": "Paiement",
-        "newBalance": "Nouveau Solde",
-        "thanks": "Merci de votre visite !"
-    },
-    "StoreSwitcher": {
-        "selectStore": "Sélectionner la boutique",
-        "searchStore": "Rechercher une boutique...",
-        "noStoreFound": "Aucune boutique trouvée.",
-        "storesHeading": "Boutiques",
-        "createStore": "Créer une boutique",
-        "createStoreTitle": "Créer une boutique",
-        "createStoreDesc": "Ajouter une nouvelle boutique pour gérer les produits et ventes.",
-        "storeNameLabel": "Nom de la boutique",
-        "storeNamePlaceholder": "Ex. Succursale Oran",
-        "creating": "Création en cours...",
-        "continue": "Continuer",
-        "cancel": "Annuler"
-    },
-    "AlertModal": {
-        "title": "Êtes-vous sûr(e) ?",
-        "description": "Cette action est irréversible.",
-        "cancel": "Annuler",
-        "continue": "Continuer"
-    },
-    "UserNav": {
-        "profile": "Profil",
-        "billing": "Facturation",
-        "settings": "Paramètres",
-        "logout": "Déconnexion"
-    },
-    "ModeToggle": {
-        "toggleTheme": "Changer le thème",
-        "light": "Clair",
-        "dark": "Sombre",
-        "system": "Système"
-    },
-    "DataTable": {
-        "search": "Rechercher...",
-        "allTypes": "Tous les types",
-        "retail": "Détaillant",
-        "reseller": "Revendeur",
-        "wholesale": "Grossiste",
-        "noResults": "Aucun résultat.",
-        "page": "Page"
-    },
-    "PosPage": {
-        "unauthorized": "Non autorisé",
-        "noTenant": "Aucun locataire configuré",
-        "uncategorized": "Non Catégorisé"
-    },
-    "CartSidebar": {
-        "editItem": "Éditer l'article",
-        "quantityLabel": "Quantité (Utiliser un négatif pour un retour)",
-        "priceLabel": "Prix Unitaire (DZD)",
-        "cancel": "Annuler",
-        "save": "Enregistrer",
-        "order": "Commande",
-        "clearTicket": "Vider le ticket",
-        "walkingCustomer": "Client de passage",
-        "searchClient": "Rechercher un client...",
-        "noClientFound": "Aucun client trouvé.",
-        "usePoints": "Utiliser les points",
-        "cancelPoints": "Annuler",
-        "emptyTicket": "Votre ticket est vide",
-        "scanToAdd": "Scannez ou touchez des produits pour ajouter",
-        "promoSavings": "Économie promo",
-        "total": "Total",
-        "checkout": "Encaisser",
-        "errorValidation": "Erreur lors de la validation.",
-        "orderValidated": "Commande validée!"
-    },
-    "PaymentModal": {
-        "transactionComplete": "Transaction Terminée",
-        "orderProcessed": "La commande a été traitée avec succès.",
-        "amountPaid": "Montant Payé",
-        "changeToReturn": "Monnaie à rendre",
-        "printTicket": "Imprimer Ticket",
-        "newOrder": "Nouvelle commande",
-        "checkoutTitle": "Paiement",
-        "checkoutDesc": "Complétez le paiement pour cette commande.",
-        "totalDue": "Total Dû",
-        "cash": "ESPÈCES",
-        "card": "CARTE / TPE",
-        "transfer": "VIREMENT",
-        "check": "CHÈQUE",
-        "term": "À TERME",
-        "depositTo": "Déposer sur",
-        "noneDefault": "Aucun / Par défaut",
-        "selectBankAccount": "Sélectionner Caisse / Banque",
-        "balanceLabel": "Solde :",
-        "quickCash": "Espèces Rapide",
-        "tendered": "Reçu",
-        "change": "Monnaie",
-        "balance": "Reste",
-        "cancel": "Annuler",
-        "processing": "Traitement...",
-        "completeOrder": "Valider la Commande"
-    },
-    "PosHeader": {
-        "online": "En ligne"
-    },
-    "ProductCard": {
-        "noImg": "Aucune image",
-        "productDetailsStock": "Détails du produit et stock",
-        "viewDetailedInventory": "Voir les informations d'inventaire détaillées pour {name}",
-        "noDescription": "Aucune description disponible.",
-        "currentStock": "Stock actuel",
-        "minStockAlert": "Alerte de stock min",
-        "sellingPrice": "Prix de vente",
-        "unitCost": "Coût unitaire",
-        "linkedBarcodes": "Codes-barres liés"
-    },
-    "PosClient": {
-        "searchPlaceholder": "Rechercher ou scanner...",
-        "loadOrder": "Charger Commande",
-        "allCategories": "Tous",
-        "showingTop50": "Affichage des 50 meilleurs résultats. Utilisez la recherche pour en trouver plus.",
-        "noProductsFound": "Aucun produit trouvé",
-        "tryRefiningSearch": "Essayez d'affiner votre recherche",
-        "viewCart": "Voir Panier",
-        "noImg": "PAS D'IMAGE",
-        "lowStock": "Stock faible ({stock})",
-        "stock": "Stock: {stock}"
-    },
-    "SalesOrderSearchDialog": {
-        "title": "Charger une commande client",
-        "description": "Rechercher et charger un précédent Bon de Livraison",
-        "searchPlaceholder": "Rechercher par numéro de reçu (ex: BL-2026/0001) ou nom du client...",
-        "noOrdersFound": "Aucune commande trouvée pour '{query}'.",
-        "noCustomer": "Aucun client",
-        "items": "articles",
-        "loadOrder": "Charger Commande"
-    },
-    "Formation": {
-        "hero": {
-            "badge": "Guide de Formation",
-            "title": "SynCloudPOS ERP",
-            "desc": "Découvrez toutes les fonctionnalités de votre logiciel. Ce guide couvre chaque module de manière simple et précise.",
-            "tags": [
-                "Caisse POS",
-                "Stocks",
-                "BL / Factures",
-                "Trésorerie",
-                "IA Chat"
-            ]
-        },
-        "tabs": {
-            "dashboard": "Tableau de Bord",
-            "pos": "Caisse POS",
-            "stocks": "Catalogue",
-            "sales": "Ventes (BL)",
-            "purchases": "Achats",
-            "treasury": "Trésorerie",
-            "contacts": "Contacts",
-            "analytics": "Analyses",
-            "ai": "IA"
-        },
-        "dashboard": {
-            "title": "Tableau de Bord",
-            "subtitle": "L'aperçu global de votre commerce en temps réel.",
-            "kpiTitle": "Chiffres Clés",
-            "kpiDesc": "CA, ventes, marge brute — tout visible d'un coup d'œil.",
-            "stockAlertsTitle": "Alertes Stock",
-            "stockAlertsDesc": "Produits sous le seuil d'alerte pour commander sans délai.",
-            "debtorsTitle": "Clients Endettés",
-            "debtorsDesc": "Liste des clients avec balance négative pour le recouvrement.",
-            "shortcutsTitle": "Raccourcis Rapides",
-            "shortcutsDesc": "Accès direct au POS, création de commande ou dépense."
-        },
-        "pos": {
-            "title": "Caisse (POS)",
-            "subtitle": "Réalisez vos ventes de détail rapidement. Optimisé pour les écrans tactiles.",
-            "stepsTitle": "Les 3 étapes d'une vente",
-            "step1Title": "Ajouter les produits",
-            "step1Desc": "Scannez ou cherchez par nom. Quantité négative = retour.",
-            "step2Title": "Valider le paiement [F9]",
-            "step2Desc": "Choisissez le mode (Espèces, Virement). Monnaie calculée.",
-            "step3Title": "Imprimer le ticket",
-            "step3Desc": "Le reçu thermique scannable est généré automatiquement.",
-            "multiSessionTitle": "Multi-Sessions",
-            "multiSessionDesc": "Gérez plusieurs caisses simultanément sans perdre le panier.",
-            "wholesaleTitle": "Mode Grossiste",
-            "wholesaleDesc": "Prix adapté (détail/gros) selon le profil client sélectionné.",
-            "scannableTicketTitle": "Ticket Scannable",
-            "scannableTicketDesc": "Le code-barre du reçu recharge instantanément la commande."
-        },
-        "stocks": {
-            "title": "Catalogue & Stocks",
-            "subtitle": "Gérez vos produits, tarifs et imprimez vos étiquettes.",
-            "productCardTitle": "Fiche Produit",
-            "productCardDesc": "Prix d'achat, détail, gros, TVA, stock, seuil, code-barres.",
-            "catalogTitle": "Catalogue PDF",
-            "catalogDesc": "Exportez votre liste filtrée pour revendeurs et grossistes.",
-            "labelsTitle": "Étiquettes Code-barre",
-            "labelsDesc": "Sélectionnez un modèle et imprimez en masse.",
-            "modelsTitle": "Modèles d'Étiquettes",
-            "modelsDesc": "Configurez le modèle préféré dans les paramètres d'impression."
-        },
-        "sales": {
-            "title": "Ventes (Bons de Livraison)",
-            "subtitle": "Commandes B2B nécessitant des documents officiels et suivi crédit.",
-            "blTitle": "Bon de Livraison (BL)",
-            "blDesc": "Document A4. Diminue le stock. Montant non payé = crédit.",
-            "proformaTitle": "Facture Proforma",
-            "proformaDesc": "Pré-vente / Devis. N'affecte pas le stock. Convertible en BL.",
-            "taxStampTitle": "Timbre Fiscal",
-            "taxStampDesc": "Calcul automatique sur les factures payées en espèces.",
-            "creditTrackingTitle": "Suivi Crédit Client",
-            "creditTrackingDesc": "La dette augmente à chaque vente à crédit. Consultable sur la fiche."
-        },
-        "purchases": {
-            "title": "Achats & Dépenses",
-            "subtitle": "Gérez vos entrées de stock et vos charges courantes.",
-            "ocrTitle": "Saisie IA (OCR)",
-            "ocrDesc": "L'IA détecte le fournisseur, les produits et les prix depuis une photo du bon.",
-            "ocrTags": [
-                "Fournisseur détecté",
-                "Produits listés",
-                "Prix remplis",
-                "Stock mis à jour"
-            ],
-            "stockEntryTitle": "Entrée de Stock",
-            "stockEntryDesc": "Chaque achat validé incrémente automatiquement le stock.",
-            "expensesTitle": "Dépenses (Charges)",
-            "expensesDesc": "Créez des catégories (loyer, salaires) pour analyser vos charges."
-        },
-        "treasury": {
-            "title": "Trésorerie & Comptes",
-            "subtitle": "Le centre névralgique de tous vos flux de liquidités.",
-            "multiAccountTitle": "Multi-Comptes",
-            "multiAccountDesc": "Caisse, Banque, CCP. Chaque mouvement est lié à un compte.",
-            "transferTitle": "Virements Internes",
-            "transferDesc": "Transférez des fonds entre comptes avec traçabilité parfaite.",
-            "historyTitle": "Historique",
-            "historyDesc": "Consultez l'historique complet des mouvements et les soldes."
-        },
-        "contacts": {
-            "title": "Clients & Fournisseurs",
-            "subtitle": "Gérez votre répertoire, le suivi des dettes et les règlements.",
-            "balanceTitle": "Fonctionnement des balances (Dettes)",
-            "step1Title": "1. Vente à crédit",
-            "step1Desc": "La balance diminue (devient négative), le client vous doit de l'argent.",
-            "step2Title": "2. Recouvrement",
-            "step2Desc": "Le client paie → la balance remonte vers zéro.",
-            "step3Title": "3. Fournisseurs",
-            "step3Desc": "Balance négative = vous lui devez de l'argent."
-        },
-        "analytics": {
-            "title": "Rapports & Analyses",
-            "subtitle": "Les mathématiques de votre commerce, claires et nettes.",
-            "stockValueTitle": "Valeur du Stock",
-            "stockValueDesc": "Vos capitaux immobilisés dans le magasin au prix d'achat.",
-            "grossProfitTitle": "Bénéfice Brut",
-            "grossProfitDesc": "Ventes Totales − Coût des marchandises = Marge.",
-            "netProfitTitle": "Bénéfice Net",
-            "netProfitDesc": "Bénéfice Brut − Dépenses = Gain net réel.",
-            "topTitle": "Top Produits & Clients",
-            "topDesc": "Visualisez les éléments générant le plus grand chiffre d'affaires."
-        },
-        "ai": {
-            "title": "Intelligence Artificielle",
-            "subtitle": "Discutez naturellement avec vos données financières.",
-            "capabilitiesTitle": "Points forts de l'IA :",
-            "capabilitiesList": [
-                "Produits en rupture",
-                "Bénéfice mensuel",
-                "Clients endettés",
-                "Dépenses vs Revenus",
-                "Top Ventes"
-            ],
-            "modelsTitle": "Modèles au Choix",
-            "modelsDesc": "Gemini, OpenAI, Claude. Configuration par clé API personnelle.",
-            "privacyTitle": "Données Privées",
-            "privacyDesc": "Les clés et données restent sécurisées sur votre navigateur."
-        }
-    },
-    "DailyClose": {
-        "title": "Clôture de Caisse",
-        "subtitle": "Rapport de fin de journée - totaux par mode de paiement.",
-        "computeToday": "Calculer la Clôture du Jour",
-        "computing": "Calcul en cours...",
-        "reset": "Réinitialiser",
-        "print": "Imprimer",
-        "save": "Enregistrer la Clôture",
-        "saved": "Clôture enregistrée",
-        "emptyTitle": "Aucune clôture en cours",
-        "emptyDesc": "Cliquez sur le bouton pour calculer les totaux de la journée.",
-        "period": "Période",
-        "revenueBreakdown": "Détail des Recettes",
-        "expensesAndNet": "Dépenses & Solde Net",
-        "cash": "Espèces",
-        "transfer": "Virement",
-        "check": "Chèque",
-        "term": "Terme (Crédit)",
-        "cashIn": "Espèces encaissées",
-        "totalRevenue": "Chiffre d'Affaires Total",
-        "totalExpenses": "Total Dépenses",
-        "expenses": "Dépenses (à déduire)",
-        "netCash": "Caisse Nette",
-        "posOrders": "Ventes POS",
-        "blOrders": "Bons de Livraison",
-        "total": "Total",
-        "transactions": "transactions",
-        "notes": "Notes / Observations",
-        "notesPlaceholder": "Ex: écart de caisse de 200 DA, ticket manquant...",
-        "history": "Historique des Clôtures"
+    "footer": {
+      "noAccount": "Pas encore de compte ?",
+      "hasAccount": "Déjà un compte ?",
+      "registerLink": "S'inscrire",
+      "loginLink": "Se Connecter"
     }
+  },
+  "Navigation": {
+    "dashboard": "Tableau de bord",
+    "pos": "Caisse (POS)",
+    "users": "Utilisateurs",
+    "products": "Produits",
+    "sales": "Ventes",
+    "settings": "Paramètres",
+    "customers": "Clients",
+    "suppliers": "Fournisseurs",
+    "purchases": "Achats",
+    "expenses": "Dépenses",
+    "categories": "Catégories",
+    "brands": "Marques",
+    "reports": "Rapports",
+    "treasury": "Trésorerie",
+    "analytics": "Analytiques",
+    "company": "Mon Entreprise",
+    "systemSettings": "Paramètres Système",
+    "overview": "Vue d'ensemble",
+    "aiIntelligence": "Intelligence IA",
+    "transactionsGroup": "Transactions",
+    "payments": "Paiements",
+    "catalogGroup": "Catalogue",
+    "promotions": "Promotions",
+    "damages": "Avaries",
+    "partnersGroup": "Partenaires",
+    "customerLoan": "Emprunt Client",
+    "supplierLoan": "Emprunt Fournisseur",
+    "analysisGroup": "Analyses",
+    "systemGroup": "Système",
+    "erpTraining": "Formation ERP",
+    "superAdmin": "Super Admin",
+    "dailyClose": "Clôture de Caisse"
+  },
+  "Common": {
+    "quantity": "Quantité",
+    "addNew": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "actions": "Actions",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "creating": "Création...",
+    "updating": "Mise à jour...",
+    "success": "Succès",
+    "error": "Erreur",
+    "print": "Imprimer",
+    "close": "Fermer",
+    "back": "Retour",
+    "new": "Nouveau",
+    "total": "Total",
+    "date": "Date",
+    "status": "Statut",
+    "yes": "Oui",
+    "no": "Non",
+    "name": "Nom",
+    "description": "Description",
+    "amount": "Montant",
+    "notes": "Notes",
+    "type": "Type"
+  },
+  "Dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Vue d'ensemble de votre activité",
+    "totalRevenue": "Chiffre d'affaires",
+    "totalOrders": "Commandes",
+    "totalProducts": "Produits",
+    "totalCustomers": "Clients",
+    "recentSales": "Ventes récentes",
+    "messages": {
+      "errorTitle": "Erreur de chargement",
+      "errorMessage": "Nous n'avons pas pu charger les données de votre tableau de bord. Veuillez actualiser la page ou contacter le support.",
+      "title": "Tableau de bord"
+    }
+  },
+  "Sales": {
+    "title": "Bons de Commande",
+    "subtitle": "Gérer les commandes, devis et factures",
+    "newSale": "Nouveau bon",
+    "fields": {
+      "type": "Type",
+      "customer": "Client",
+      "date": "Date",
+      "total": "Total",
+      "status": "Statut",
+      "receiptNumber": "N° Référence",
+      "balance": "Solde dû"
+    },
+    "filters": {
+      "filterByType": "Filtrer par Type",
+      "allTypes": "Tous les types",
+      "quote": "Devis",
+      "order": "Bon de Livraison",
+      "invoice": "Facture"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "validated": "Validé",
+      "paid": "Payé",
+      "cancelled": "Annulé"
+    }
+  },
+  "Products": {
+    "title": "Produits",
+    "subtitle": "Gérer les produits de votre magasin",
+    "newProduct": "Nouveau produit",
+    "catalogue": "Catalogue",
+    "importExcel": "Import Excel",
+    "outOfStock": "Rupture Stock",
+    "stockHistoryLabel": "Historique Stock",
+    "stockHistory": {
+      "title": "Historique des mouvements de stock",
+      "product": "Produit:",
+      "loading": "Chargement de l'historique...",
+      "noMovements": "Aucun mouvement enregistré pour ce produit.",
+      "systemMovement": "Mouvement système",
+      "by": "Par",
+      "types": {
+        "PURCHASE": "Achat",
+        "RETURN": "Retour",
+        "SALE": "Vente",
+        "SPOILAGE": "Avarie",
+        "ADJUSTMENT": "Ajustement",
+        "INITIAL": "Stock Initial",
+        "default": "Mouvement"
+      }
+    },
+    "productGrid": {
+      "featured": "★ En vedette",
+      "archived": "Archivé",
+      "noImage": "Sans Image",
+      "retailPrice": "Prix Détail",
+      "wholesalePrice": "Prix Gros",
+      "dealerPrice": "Revendeur",
+      "stock": "Stock: ",
+      "currency": "DA"
+    },
+    "priceListModal": {
+      "errorLoading": "Erreur lors du chargement des données",
+      "copiedSuccess": "Catalogue copié dans le presse-papiers",
+      "retailPrice": "Prix Vente",
+      "wholesalePrice": "Prix Gros",
+      "resellerPrice": "Prix Revendeur",
+      "title": "Générer Catalogue Externe",
+      "description": "Créez un catalogue PDF ou texte pour vos clients",
+      "configuration": "Configuration",
+      "categoryLabel": "Catégorie",
+      "allCategories": "Toutes les catégories",
+      "pricingLabel": "Tarification",
+      "retailOption": "Détaillant (Prix Vente)",
+      "wholesaleOption": "Grossiste (Prix Gros)",
+      "resellerOption": "Revendeur (Prix Revendeur)",
+      "filtersLabel": "Filtres",
+      "onlyFeatured": "Uniquement En Vedette (★)",
+      "hideOutOfStock": "Masquer Rupture de Stock",
+      "showPhotos": "Afficher les photos",
+      "productsDisplayed": "produit(s) affiché(s)",
+      "exportPdf": "Exporter en PDF",
+      "viewCatalogue": "← Voir le Catalogue",
+      "whatsappText": "Texte WhatsApp / SMS",
+      "cataloguePreview": "Aperçu du catalogue",
+      "articles": "article(s)",
+      "copied": "Copié !",
+      "copy": "Copier",
+      "loading": "Chargement...",
+      "catalogueTitle": "Catalogue de Prix",
+      "noProducts": "Aucun produit pour ces critères",
+      "price": "Prix",
+      "product": "Produit",
+      "others": "Autres"
+    },
+    "importTitle": "Importer des Produits depuis Excel",
+    "importDesc": "Téléchargez le modèle, remplissez-le et importez.",
+    "fields": {
+      "name": "Nom",
+      "category": "Catégorie",
+      "price": "Prix détaillant",
+      "purchasePrice": "Prix d'achat",
+      "wholesalePrice": "Prix de gros",
+      "dealerPrice": "Prix revendeur",
+      "stock": "Stock",
+      "minStock": "Stock min",
+      "archived": "Archivé",
+      "featured": "Mis en avant",
+      "barcode": "Code-barres",
+      "description": "Description",
+      "images": "Images",
+      "brand": "Marque",
+      "featuredDesc": "Ce produit apparaîtra sur la page d'accueil",
+      "archivedDesc": "Ce produit n'apparaîtra nulle part dans le magasin"
+    },
+    "form": {
+      "generalInfo": "Informations générales",
+      "namePlaceholder": "Nom du produit",
+      "descPlaceholder": "Description du produit...",
+      "searchCategory": "Rechercher une catégorie...",
+      "searchBrand": "Rechercher une marque...",
+      "pricing": "Grille tarifaire",
+      "purchasePriceDesc": "Coût fournisseur",
+      "retailPriceDesc": "Prix de vente au détail",
+      "wholesalePriceDesc": "Pour achat de grande quantité",
+      "dealerPriceDesc": "Pour partenaires et revendeurs",
+      "tvaRate": "Taux de TVA (%)",
+      "selectTva": "Sélectionnez un taux de TVA",
+      "tva19": "TVA 19% (Générale)",
+      "tva9": "TVA 9% (Réduite)",
+      "tva0": "TVA 0% (Exonérée)",
+      "tvaDesc": "Taux applicable en Algérie",
+      "calculatedMargins": "Marges calculées",
+      "marginRetail": "Marge détail",
+      "marginWholesale": "Marge gros",
+      "marginDealer": "Marge revendeur",
+      "barcodes": "Codes-barres",
+      "barcodeValue": "Valeur du code-barres",
+      "barcodeType": "Type (ex. EAN-13)",
+      "addBarcode": "Ajouter",
+      "autoGenerate": "Auto-générer",
+      "autoGenerated": "Auto-Généré",
+      "images": "Images",
+      "stockManagement": "Gestion du stock",
+      "lowStockAlert": "Alerte stock faible",
+      "outOfStock": "Rupture de stock",
+      "lowStock": "Stock faible",
+      "inStock": "En stock",
+      "units": "unités",
+      "productStatus": "Statut du produit",
+      "saving": "Enregistrement..."
+    }
+  },
+  "Suppliers": {
+    "title": "Fournisseurs",
+    "subtitle": "Gérer les fournisseurs",
+    "newSupplier": "Nouveau fournisseur",
+    "fields": {
+      "name": "Nom / Raison sociale",
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "taxId": "NIF / Matricule Fiscale",
+      "balance": "Solde dû",
+      "nifDesc": "Numéro d'Identification Fiscale",
+      "nis": "NIS",
+      "nisDesc": "Numéro d'Identifiant Statistique",
+      "artImposition": "Article d'Imposition",
+      "rc": "NRC",
+      "rcDesc": "Numéro de Registre de Commerce",
+      "rib": "RIB Banque",
+      "ribDesc": "Relevé d'Identité Bancaire"
+    },
+    "messages": {
+      "error": "Une erreur s'est produite.",
+      "success": "Fournisseur enregistré.",
+      "deleted": "Fournisseur supprimé.",
+      "linkedProductError": "Veuillez d'abord supprimer tous les produits liés à ce fournisseur."
+    },
+    "form": {
+      "generalInfo": "Informations générales",
+      "fiscalInfo": "Informations fiscales"
+    }
+  },
+  "Customers": {
+    "title": "Clients",
+    "subtitle": "Gérer les clients",
+    "newCustomer": "Nouveau client",
+    "fields": {
+      "name": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "city": "Ville",
+      "orders": "Commandes",
+      "taxId": "NIF / Matricule Fiscale",
+      "balance": "Solde dû",
+      "loyaltyPoints": "Points fidélité"
+    },
+    "messages": {
+      "deleted": "Client supprimé.",
+      "error": "Erreur lors de la suppression."
+    },
+    "actions": {
+      "showQr": "Afficher Code QR",
+      "viewLog": "Voir Historique (Log)"
+    }
+  },
+  "Purchases": {
+    "title": "Achats",
+    "subtitle": "Gérer les bons d'achat et commandes fournisseurs",
+    "newPurchase": "Nouveau bon d'achat",
+    "fields": {
+      "supplier": "Fournisseur",
+      "status": "Statut",
+      "total": "Total",
+      "date": "Date",
+      "account": "Compte de paiement",
+      "items": "Articles"
+    },
+    "status": {
+      "pending": "Brouillon",
+      "bonCommande": "Bon de Commande",
+      "bonLivraison": "Bon de Livraison",
+      "facture": "Facture",
+      "completed": "Payé",
+      "cancelled": "Annulé"
+    }
+  },
+  "Expenses": {
+    "title": "Dépenses",
+    "subtitle": "Gérer les dépenses de l'entreprise",
+    "newExpense": "Nouvelle dépense",
+    "fields": {
+      "description": "Description",
+      "amount": "Montant",
+      "category": "Catégorie",
+      "account": "Compte imputé",
+      "date": "Date",
+      "notes": "Notes"
+    },
+    "messages": {
+      "deleted": "Dépense supprimée.",
+      "error": "Erreur lors de la suppression."
+    }
+  },
+  "Categories": {
+    "title": "Catégories",
+    "subtitle": "Gérer les catégories de produits",
+    "newCategory": "Nouvelle catégorie",
+    "fields": {
+      "name": "Nom",
+      "products": "Produits"
+    },
+    "fastCreate": {
+      "title": "Création Rapide de Catégorie",
+      "description": "Créez une nouvelle catégorie instantanément.",
+      "nameLabel": "Nom de la Catégorie",
+      "namePlaceholder": "ex. Électronique, Vêtements...",
+      "success": "Catégorie créée"
+    }
+  },
+  "Brands": {
+    "title": "Marques",
+    "subtitle": "Gérer les marques de produits",
+    "newBrand": "Nouvelle marque",
+    "fields": {
+      "name": "Nom",
+      "products": "Produits"
+    },
+    "fastCreate": {
+      "title": "Création Rapide de Famille (Marque)",
+      "description": "Créez une nouvelle famille (marque) instantanément.",
+      "nameLabel": "Nom de la Famille / Marque",
+      "namePlaceholder": "ex. Apple, Nike, Laitier...",
+      "success": "Famille / Marque créée"
+    }
+  },
+  "Treasury": {
+    "title": "Trésorerie",
+    "subtitle": "Gérer les comptes, virements et transactions",
+    "newAccount": "Nouveau compte",
+    "transfer": "Virement",
+    "transaction": "Saisie manuelle",
+    "fields": {
+      "name": "Nom du compte",
+      "type": "Type",
+      "balance": "Solde",
+      "rib": "RIB / Numéro de compte"
+    },
+    "types": {
+      "caisse": "Caisse (Espèces)",
+      "bank": "Compte Bancaire"
+    }
+  },
+  "Analytics": {
+    "title": "Analytiques",
+    "subtitle": "Statistiques et analyses de performance",
+    "revenue": "Chiffre d'affaires",
+    "expenses": "Dépenses",
+    "profit": "Bénéfice net",
+    "topProducts": "Top produits",
+    "salesByCategory": "Ventes par catégorie",
+    "kpi": {
+      "dashboardTitle": "Tableau de Bord Analytique",
+      "dashboardDesc": "Vue d'ensemble premium des performances et de la trésorerie de votre commerce.",
+      "purePerformance": "Performances Pures (Théorique)",
+      "revenueTotalSales": "Total des ventes facturées/POS",
+      "transactions": "transactions",
+      "cogsDesc": "Coût d'achat de la marchandise vendue",
+      "expensesDesc": "Frais généraux enregistrés (loyer, salaires...)",
+      "netMargin": "Marge nette",
+      "cashFlowOperations": "Trésorerie & Opérations (Cash Flow)",
+      "actualCash": "Argent physiquement reçu",
+      "remainingToRecover": "Reste à recouvrer",
+      "totalPurchaseValue": "Valeur totale du stock acheté (Bons de réception)",
+      "clientsWithDebt": "client(s) ont des dettes impayées",
+      "revenueVsExpenses": "Revenus vs Charges (30 derniers jours)",
+      "revenues": "Revenus",
+      "expenses": "Charges",
+      "revenueByCategory": "Chiffre d'affaires par catégorie",
+      "noCategoryData": "Aucune donnée de catégorie.",
+      "sales": "Ventes",
+      "top10Products": "Top 10 Produits (Revenus)",
+      "noSales": "Aucune vente enregistrée.",
+      "unitsSold": "unités vendues",
+      "topCustomers": "Meilleurs Clients",
+      "noCustomers": "Aucun client.",
+      "recentSalesFlow": "Flux de Ventes Récents",
+      "noRecentSales": "Aucune vente récente.",
+      "partial": "Partiel",
+      "paidInFull": "Payé Complet",
+      "lowStock": "Stock faible",
+      "manage": "Gérer",
+      "noStockAlert": "Aucun alerte stock.",
+      "unpaidDebts": "Créances Impayées",
+      "noOngoingDebts": "Aucune créance en cours"
+    },
+    "noData": "Aucune donnée analytique disponible."
+  },
+  "Reports": {
+    "title": "Rapports",
+    "subtitle": "Rapports détaillés de l'activité"
+  },
+  "POS": {
+    "title": "Caisse",
+    "subtitle": "Point de Vente",
+    "search": "Rechercher un produit...",
+    "cart": "Panier",
+    "checkout": "Encaisser",
+    "total": "Total",
+    "discount": "Remise",
+    "tax": "TVA",
+    "payment": "Paiement",
+    "cash": "Espèces",
+    "card": "Carte",
+    "receipt": "Reçu",
+    "newSale": "Nouvelle vente",
+    "customer": "Client"
+  },
+  "Settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez les préférences et détails de votre magasin",
+    "fields": {
+      "storeName": "Nom du magasin",
+      "storeNamePlaceholder": "Ex. Mon Super Magasin",
+      "contactPhone": "Téléphone",
+      "phonePlaceholder": "Numéro de téléphone",
+      "storeAddress": "Adresse du magasin",
+      "addressPlaceholder": "123 Rue de l'Exemple, Ville, Pays",
+      "taxId": "NIF / Numéro Fiscal",
+      "currency": "Devise",
+      "logo": "Logo",
+      "saveChanges": "Enregistrer"
+    },
+    "messages": {
+      "success": "Paramètres mis à jour.",
+      "error": "Une erreur s'est produite."
+    },
+    "Tabs": {
+      "company": "Entreprise",
+      "printing": "Impression",
+      "pos": "POS Par Défaut",
+      "ai": "IA",
+      "advanced": "Avancé",
+      "loyalty": "Fidélité",
+      "backup": "Sauvegarde",
+      "whatsapp": "WhatsApp"
+    },
+    "description": "Configurez votre application, vos préférences d'impression et vos paramètres POS.",
+    "Company": {
+      "title": "Informations de l'Entreprise",
+      "description": "Ces informations apparaissent sur tous vos documents (BL, factures, reçus)."
+    },
+    "Printing": {
+      "title": "Paramètres d'Impression",
+      "description": "Configurez le format papier, le modèle de BL et les options du reçu POS."
+    },
+    "PosDefaults": {
+      "title": "POS — Paramètres par Défaut",
+      "description": "Choisissez la caisse, le mode de paiement et options pré-sélectionnés à chaque vente."
+    },
+    "Ai": {
+      "title": "Intelligence Artificielle",
+      "description": "Configurez vos clés API pour activer la numérisation OCR et les fonctions IA."
+    },
+    "Advanced": {
+      "title": "Paramètres Avancés",
+      "description": "Paramètres techniques réservés aux administrateurs. Prudence requise."
+    },
+    "Loyalty": {
+      "title": "Programme de Fidélité",
+      "description": "Configurez le taux d'accumulation et de remboursement des points de fidélité client."
+    },
+    "Backup": {
+      "title": "Sauvegarde & Restauration",
+      "description": "Exportez toutes vos données ou restaurez depuis une sauvegarde précédente."
+    },
+    "Whatsapp": {
+      "title": "WhatsApp Business",
+      "description": "Envoyez des notifications, rappels de dettes et reçus par WhatsApp."
+    },
+    "GeneralForm": {
+      "success": "Paramètres sauvegardés.",
+      "error": "Une erreur est survenue.",
+      "ownerName": {
+        "label": "Nom",
+        "placeholder": "Nom du propriétaire"
+      },
+      "name": {
+        "label": "Société",
+        "placeholder": "Nom de l'entreprise"
+      },
+      "address": {
+        "label": "Adresse",
+        "placeholder": "Adresse complète"
+      },
+      "activity": {
+        "label": "Activité",
+        "placeholder": "Secteur d'activité"
+      },
+      "wilaya": {
+        "label": "Wilaya",
+        "placeholder": "Ex. ALGER"
+      },
+      "commune": {
+        "label": "Commune",
+        "placeholder": "Ex. DAR EL BEIDA"
+      },
+      "phone": {
+        "label": "Téléphone",
+        "placeholder": "0696 92 82 27"
+      },
+      "fax": {
+        "label": "Fax",
+        "placeholder": "023 83 11 25"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "contact@entreprise.com"
+      },
+      "nif": {
+        "label": "Nif",
+        "placeholder": "191441002919..."
+      },
+      "rc": {
+        "label": "N° Rc",
+        "placeholder": "16/00-3853278 A15"
+      },
+      "artImposition": {
+        "label": "Article d'imposition",
+        "placeholder": "16204594504"
+      },
+      "nis": {
+        "label": "NIS",
+        "placeholder": "199144100291916"
+      },
+      "bankAccount": {
+        "label": "Compte bancaire",
+        "placeholder": "001002680300001520/32"
+      },
+      "logo": {
+        "label": "Photo / Logo"
+      },
+      "headerText": {
+        "label": "Entête",
+        "placeholder": "Texte d'en-tête à imprimer sur les documents..."
+      },
+      "blTemplate": {
+        "label": "Modèle de Bon de Livraison",
+        "placeholder": "Sélectionner le modèle",
+        "options": {
+          "standard": "Standard (Classique)",
+          "compact": "Compact (Sans Entête)",
+          "aitee": "AITEE (Facture Style)"
+        }
+      },
+      "submit": "Valider",
+      "saving": "Sauvegarde..."
+    },
+    "PrintingSettingsForm": {
+      "infoBanner": "Les préférences d'imprimantes sont sauvegardées sur <strong>cet appareil uniquement</strong>. Sélectionnez <em>«Défaut»</em> pour utiliser l'imprimante configurée dans Windows. Lors de l'impression, le navigateur ouvrira la boîte de dialogue système si nécessaire.",
+      "printers": "Imprimantes",
+      "printerA4": {
+        "label": "Imprimante A4",
+        "hint": "Utilisée pour les Bons de Livraison et Factures"
+      },
+      "printerReceipt": {
+        "label": "Imprimante Reçu",
+        "hint": "Imprimante thermique pour les reçus POS"
+      },
+      "printerBarcode": {
+        "label": "Imprimante Code-Barre",
+        "hint": "Imprimante dédiée aux étiquettes produits"
+      },
+      "barcodeModel": "Modèle d'étiquette code-barre",
+      "blTemplate": {
+        "title": "Modèle de Bon de Livraison",
+        "label": "Modèle à utiliser"
+      },
+      "displayOptions": "Options d'affichage",
+      "showBarcodeOnReceipt": {
+        "label": "Code-barre sur le reçu POS",
+        "hint": "Imprime un code-barre scannable en bas du reçu"
+      },
+      "showLogoOnBL": {
+        "label": "Logo sur le Bon de Livraison",
+        "hint": "Imprime le logo en haut du BL"
+      },
+      "success": "Paramètres d'impression sauvegardés !",
+      "error": "Erreur lors de la sauvegarde.",
+      "submit": "Sauvegarder les préférences",
+      "saving": "Sauvegarde...",
+      "printersOptions": {
+        "default": "🖨️ Imprimante par défaut du système",
+        "custom": "✏️ Saisir manuellement...",
+        "customPlaceholder": "Entrez le nom exact de l'imprimante..."
+      },
+      "barcodeModels": {
+        "classic": "Classique",
+        "modern": "Moderne (Dark)",
+        "elegant": "Élégant",
+        "retro": "Rétro",
+        "minimal": "Minimaliste",
+        "bold": "Bold"
+      }
+    },
+    "PosDefaultsForm": {
+      "success": "Paramètres POS sauvegardés sur cet appareil !",
+      "accountSection": {
+        "title": "Caisse / Banque par Défaut",
+        "label": "Compte de dépôt par défaut",
+        "placeholder": "Sélectionner un compte",
+        "none": "— Aucun (saisir à chaque fois) —",
+        "cash": "Caisses",
+        "banks": "Banques",
+        "hint": "Ce compte sera pré-sélectionné automatiquement dans le POS à chaque vente."
+      },
+      "paymentSection": {
+        "title": "Méthode de Paiement par Défaut",
+        "label": "Mode de règlement",
+        "methods": {
+          "cash": "Espèces",
+          "card": "Carte Bancaire",
+          "transfer": "Virement",
+          "check": "Chèque",
+          "term": "À Terme (Crédit)"
+        }
+      },
+      "receiptDisplay": {
+        "title": "Affichage sur le Reçu",
+        "tva": {
+          "label": "Afficher TVA par ligne",
+          "hint": "Affiche le taux et montant TVA pour chaque article"
+        },
+        "ht": {
+          "label": "Afficher les prix HT",
+          "hint": "Affiche le prix hors taxe en plus du prix TTC"
+        }
+      },
+      "warning": "⚠️ Ces réglages sont sauvegardés <strong>sur cet appareil uniquement</strong> (localStorage). Chaque poste peut avoir ses propres paramètres.",
+      "submit": "Sauvegarder"
+    },
+    "AiSettingsForm": {
+      "success": "Paramètres IA sauvegardés !",
+      "error": "Erreur lors de la sauvegarde.",
+      "title": "Modèle d'Intelligence Artificielle",
+      "description": "Choisissez votre fournisseur d'IA pour l'OCR des factures et l'assistant intelligent.",
+      "gemini": {
+        "label": "Clé API Google Gemini",
+        "hint": "Obtenez gratuitement votre clé sur"
+      },
+      "openai": {
+        "label": "Clé API OpenAI",
+        "hint": "Obtenez votre clé sur"
+      },
+      "anthropic": {
+        "label": "Clé API Anthropic (Claude)",
+        "hint": "Obtenez votre clé sur"
+      },
+      "submit": "Sauvegarder",
+      "saving": "Sauvegarde...",
+      "active": "Actif"
+    },
+    "LoyaltySettingsForm": {
+      "success": "Paramètres sauvegardés !",
+      "error": "Une erreur est survenue.",
+      "loyaltyProgram": "Programme de Fidélité",
+      "loyaltyDesc": "Configurez comment les clients gagnent et dépensent leurs points.",
+      "earningPoints": "Gagner des points",
+      "pointsPerDa": "Points par 1 DA dépensé",
+      "exampleEarn": "Ex: Si vous mettez {val}, un achat de 1000 DA = {points} points gagnés.",
+      "spendingPoints": "Dépenser des points",
+      "daPerPoint": "Points requis pour 1 DA de réduction",
+      "exampleSpend": "Ex: Si vous mettez {val}, une réduction de 10 DA nécessitera {points} points.",
+      "summaryTitle": "Résumé du programme",
+      "summaryDesc": "Un client dépensant 10,000 DA obtiendra une réduction future de :",
+      "saveChanges": "Sauvegarder"
+    },
+    "WhatsAppSettingsForm": {
+      "success": "Paramètres WhatsApp sauvegardés!",
+      "error": "Erreur lors de la sauvegarde.",
+      "title": "WhatsApp Business API",
+      "desc": "Envoyez des reçus et rappels de dettes directement sur WhatsApp.",
+      "configured": "Configuré",
+      "notConfigured": "Non configuré",
+      "token": {
+        "label": "Access Token (Permanent)",
+        "hint": "Générez un token permanent sur",
+        "link": "Meta for Developers"
+      },
+      "phoneId": {
+        "label": "Phone Number ID",
+        "hint": "Trouvé dans WhatsApp → Numéros de téléphone"
+      },
+      "phone": {
+        "label": "Numéro WhatsApp Expéditeur",
+        "hint": "Format international avec indicatif pays (ex: +213 pour Algérie)"
+      },
+      "guide": "Guide de configuration",
+      "submit": "Sauvegarder",
+      "saving": "Sauvegarde..."
+    }
+  },
+  "Receipt": {
+    "title": "TICKET DE CAISSE",
+    "date": "Date",
+    "ticketNo": "Ticket N°",
+    "customer": "Client",
+    "guest": "DIVERS",
+    "item": "Désignation",
+    "qty": "Qté",
+    "price": "Prix",
+    "oldBalance": "Ancien Solde",
+    "discount": "Remise",
+    "total": "Total",
+    "payment": "Paiement",
+    "newBalance": "Nouveau Solde",
+    "thanks": "Merci de votre visite !"
+  },
+  "StoreSwitcher": {
+    "selectStore": "Sélectionner la boutique",
+    "searchStore": "Rechercher une boutique...",
+    "noStoreFound": "Aucune boutique trouvée.",
+    "storesHeading": "Boutiques",
+    "createStore": "Créer une boutique",
+    "createStoreTitle": "Créer une boutique",
+    "createStoreDesc": "Ajouter une nouvelle boutique pour gérer les produits et ventes.",
+    "storeNameLabel": "Nom de la boutique",
+    "storeNamePlaceholder": "Ex. Succursale Oran",
+    "creating": "Création en cours...",
+    "continue": "Continuer",
+    "cancel": "Annuler"
+  },
+  "AlertModal": {
+    "title": "Êtes-vous sûr(e) ?",
+    "description": "Cette action est irréversible.",
+    "cancel": "Annuler",
+    "continue": "Continuer"
+  },
+  "UserNav": {
+    "profile": "Profil",
+    "billing": "Facturation",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "ModeToggle": {
+    "toggleTheme": "Changer le thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "DataTable": {
+    "search": "Rechercher...",
+    "allTypes": "Tous les types",
+    "retail": "Détaillant",
+    "reseller": "Revendeur",
+    "wholesale": "Grossiste",
+    "noResults": "Aucun résultat.",
+    "page": "Page"
+  },
+  "PosPage": {
+    "unauthorized": "Non autorisé",
+    "noTenant": "Aucun locataire configuré",
+    "uncategorized": "Non Catégorisé"
+  },
+  "CartSidebar": {
+    "editItem": "Éditer l'article",
+    "quantityLabel": "Quantité (Utiliser un négatif pour un retour)",
+    "priceLabel": "Prix Unitaire (DZD)",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "order": "Commande",
+    "clearTicket": "Vider le ticket",
+    "walkingCustomer": "Client de passage",
+    "searchClient": "Rechercher un client...",
+    "noClientFound": "Aucun client trouvé.",
+    "usePoints": "Utiliser les points",
+    "cancelPoints": "Annuler",
+    "emptyTicket": "Votre ticket est vide",
+    "scanToAdd": "Scannez ou touchez des produits pour ajouter",
+    "promoSavings": "Économie promo",
+    "total": "Total",
+    "checkout": "Encaisser",
+    "errorValidation": "Erreur lors de la validation.",
+    "orderValidated": "Commande validée!"
+  },
+  "PaymentModal": {
+    "transactionComplete": "Transaction Terminée",
+    "orderProcessed": "La commande a été traitée avec succès.",
+    "amountPaid": "Montant Payé",
+    "changeToReturn": "Monnaie à rendre",
+    "printTicket": "Imprimer Ticket",
+    "newOrder": "Nouvelle commande",
+    "checkoutTitle": "Paiement",
+    "checkoutDesc": "Complétez le paiement pour cette commande.",
+    "totalDue": "Total Dû",
+    "cash": "ESPÈCES",
+    "card": "CARTE / TPE",
+    "transfer": "VIREMENT",
+    "check": "CHÈQUE",
+    "term": "À TERME",
+    "depositTo": "Déposer sur",
+    "noneDefault": "Aucun / Par défaut",
+    "selectBankAccount": "Sélectionner Caisse / Banque",
+    "balanceLabel": "Solde :",
+    "quickCash": "Espèces Rapide",
+    "tendered": "Reçu",
+    "change": "Monnaie",
+    "balance": "Reste",
+    "cancel": "Annuler",
+    "processing": "Traitement...",
+    "completeOrder": "Valider la Commande"
+  },
+  "PosHeader": {
+    "online": "En ligne"
+  },
+  "ProductCard": {
+    "noImg": "Aucune image",
+    "productDetailsStock": "Détails du produit et stock",
+    "viewDetailedInventory": "Voir les informations d'inventaire détaillées pour {name}",
+    "noDescription": "Aucune description disponible.",
+    "currentStock": "Stock actuel",
+    "minStockAlert": "Alerte de stock min",
+    "sellingPrice": "Prix de vente",
+    "unitCost": "Coût unitaire",
+    "linkedBarcodes": "Codes-barres liés"
+  },
+  "PosClient": {
+    "searchPlaceholder": "Rechercher ou scanner...",
+    "loadOrder": "Charger Commande",
+    "allCategories": "Tous",
+    "showingTop50": "Affichage des 50 meilleurs résultats. Utilisez la recherche pour en trouver plus.",
+    "noProductsFound": "Aucun produit trouvé",
+    "tryRefiningSearch": "Essayez d'affiner votre recherche",
+    "viewCart": "Voir Panier",
+    "noImg": "PAS D'IMAGE",
+    "lowStock": "Stock faible ({stock})",
+    "stock": "Stock: {stock}"
+  },
+  "SalesOrderSearchDialog": {
+    "title": "Charger une commande client",
+    "description": "Rechercher et charger un précédent Bon de Livraison",
+    "searchPlaceholder": "Rechercher par numéro de reçu (ex: BL-2026/0001) ou nom du client...",
+    "noOrdersFound": "Aucune commande trouvée pour '{query}'.",
+    "noCustomer": "Aucun client",
+    "items": "articles",
+    "loadOrder": "Charger Commande"
+  },
+  "Formation": {
+    "hero": {
+      "badge": "Guide de Formation",
+      "title": "SynCloudPOS ERP",
+      "desc": "Découvrez toutes les fonctionnalités de votre logiciel. Ce guide couvre chaque module de manière simple et précise.",
+      "tags": [
+        "Caisse POS",
+        "Stocks",
+        "BL / Factures",
+        "Trésorerie",
+        "IA Chat"
+      ]
+    },
+    "tabs": {
+      "dashboard": "Tableau de Bord",
+      "pos": "Caisse POS",
+      "stocks": "Catalogue",
+      "sales": "Ventes (BL)",
+      "purchases": "Achats",
+      "treasury": "Trésorerie",
+      "contacts": "Contacts",
+      "analytics": "Analyses",
+      "ai": "IA"
+    },
+    "dashboard": {
+      "title": "Tableau de Bord",
+      "subtitle": "L'aperçu global de votre commerce en temps réel.",
+      "kpiTitle": "Chiffres Clés",
+      "kpiDesc": "CA, ventes, marge brute — tout visible d'un coup d'œil.",
+      "stockAlertsTitle": "Alertes Stock",
+      "stockAlertsDesc": "Produits sous le seuil d'alerte pour commander sans délai.",
+      "debtorsTitle": "Clients Endettés",
+      "debtorsDesc": "Liste des clients avec balance négative pour le recouvrement.",
+      "shortcutsTitle": "Raccourcis Rapides",
+      "shortcutsDesc": "Accès direct au POS, création de commande ou dépense."
+    },
+    "pos": {
+      "title": "Caisse (POS)",
+      "subtitle": "Réalisez vos ventes de détail rapidement. Optimisé pour les écrans tactiles.",
+      "stepsTitle": "Les 3 étapes d'une vente",
+      "step1Title": "Ajouter les produits",
+      "step1Desc": "Scannez ou cherchez par nom. Quantité négative = retour.",
+      "step2Title": "Valider le paiement [F9]",
+      "step2Desc": "Choisissez le mode (Espèces, Virement). Monnaie calculée.",
+      "step3Title": "Imprimer le ticket",
+      "step3Desc": "Le reçu thermique scannable est généré automatiquement.",
+      "multiSessionTitle": "Multi-Sessions",
+      "multiSessionDesc": "Gérez plusieurs caisses simultanément sans perdre le panier.",
+      "wholesaleTitle": "Mode Grossiste",
+      "wholesaleDesc": "Prix adapté (détail/gros) selon le profil client sélectionné.",
+      "scannableTicketTitle": "Ticket Scannable",
+      "scannableTicketDesc": "Le code-barre du reçu recharge instantanément la commande."
+    },
+    "stocks": {
+      "title": "Catalogue & Stocks",
+      "subtitle": "Gérez vos produits, tarifs et imprimez vos étiquettes.",
+      "productCardTitle": "Fiche Produit",
+      "productCardDesc": "Prix d'achat, détail, gros, TVA, stock, seuil, code-barres.",
+      "catalogTitle": "Catalogue PDF",
+      "catalogDesc": "Exportez votre liste filtrée pour revendeurs et grossistes.",
+      "labelsTitle": "Étiquettes Code-barre",
+      "labelsDesc": "Sélectionnez un modèle et imprimez en masse.",
+      "modelsTitle": "Modèles d'Étiquettes",
+      "modelsDesc": "Configurez le modèle préféré dans les paramètres d'impression."
+    },
+    "sales": {
+      "title": "Ventes (Bons de Livraison)",
+      "subtitle": "Commandes B2B nécessitant des documents officiels et suivi crédit.",
+      "blTitle": "Bon de Livraison (BL)",
+      "blDesc": "Document A4. Diminue le stock. Montant non payé = crédit.",
+      "proformaTitle": "Facture Proforma",
+      "proformaDesc": "Pré-vente / Devis. N'affecte pas le stock. Convertible en BL.",
+      "taxStampTitle": "Timbre Fiscal",
+      "taxStampDesc": "Calcul automatique sur les factures payées en espèces.",
+      "creditTrackingTitle": "Suivi Crédit Client",
+      "creditTrackingDesc": "La dette augmente à chaque vente à crédit. Consultable sur la fiche."
+    },
+    "purchases": {
+      "title": "Achats & Dépenses",
+      "subtitle": "Gérez vos entrées de stock et vos charges courantes.",
+      "ocrTitle": "Saisie IA (OCR)",
+      "ocrDesc": "L'IA détecte le fournisseur, les produits et les prix depuis une photo du bon.",
+      "ocrTags": [
+        "Fournisseur détecté",
+        "Produits listés",
+        "Prix remplis",
+        "Stock mis à jour"
+      ],
+      "stockEntryTitle": "Entrée de Stock",
+      "stockEntryDesc": "Chaque achat validé incrémente automatiquement le stock.",
+      "expensesTitle": "Dépenses (Charges)",
+      "expensesDesc": "Créez des catégories (loyer, salaires) pour analyser vos charges."
+    },
+    "treasury": {
+      "title": "Trésorerie & Comptes",
+      "subtitle": "Le centre névralgique de tous vos flux de liquidités.",
+      "multiAccountTitle": "Multi-Comptes",
+      "multiAccountDesc": "Caisse, Banque, CCP. Chaque mouvement est lié à un compte.",
+      "transferTitle": "Virements Internes",
+      "transferDesc": "Transférez des fonds entre comptes avec traçabilité parfaite.",
+      "historyTitle": "Historique",
+      "historyDesc": "Consultez l'historique complet des mouvements et les soldes."
+    },
+    "contacts": {
+      "title": "Clients & Fournisseurs",
+      "subtitle": "Gérez votre répertoire, le suivi des dettes et les règlements.",
+      "balanceTitle": "Fonctionnement des balances (Dettes)",
+      "step1Title": "1. Vente à crédit",
+      "step1Desc": "La balance diminue (devient négative), le client vous doit de l'argent.",
+      "step2Title": "2. Recouvrement",
+      "step2Desc": "Le client paie → la balance remonte vers zéro.",
+      "step3Title": "3. Fournisseurs",
+      "step3Desc": "Balance négative = vous lui devez de l'argent."
+    },
+    "analytics": {
+      "title": "Rapports & Analyses",
+      "subtitle": "Les mathématiques de votre commerce, claires et nettes.",
+      "stockValueTitle": "Valeur du Stock",
+      "stockValueDesc": "Vos capitaux immobilisés dans le magasin au prix d'achat.",
+      "grossProfitTitle": "Bénéfice Brut",
+      "grossProfitDesc": "Ventes Totales − Coût des marchandises = Marge.",
+      "netProfitTitle": "Bénéfice Net",
+      "netProfitDesc": "Bénéfice Brut − Dépenses = Gain net réel.",
+      "topTitle": "Top Produits & Clients",
+      "topDesc": "Visualisez les éléments générant le plus grand chiffre d'affaires."
+    },
+    "ai": {
+      "title": "Intelligence Artificielle",
+      "subtitle": "Discutez naturellement avec vos données financières.",
+      "capabilitiesTitle": "Points forts de l'IA :",
+      "capabilitiesList": [
+        "Produits en rupture",
+        "Bénéfice mensuel",
+        "Clients endettés",
+        "Dépenses vs Revenus",
+        "Top Ventes"
+      ],
+      "modelsTitle": "Modèles au Choix",
+      "modelsDesc": "Gemini, OpenAI, Claude. Configuration par clé API personnelle.",
+      "privacyTitle": "Données Privées",
+      "privacyDesc": "Les clés et données restent sécurisées sur votre navigateur."
+    }
+  },
+  "DailyClose": {
+    "title": "Clôture de Caisse",
+    "subtitle": "Rapport de fin de journée et fermeture de la caisse",
+    "reset": "Réinitialiser",
+    "print": "Imprimer",
+    "save": "Enregistrer la clôture",
+    "computing": "Calcul en cours...",
+    "computeToday": "Calculer la clôture d'aujourd'hui",
+    "emptyTitle": "Aucune clôture n'est en cours",
+    "emptyDesc": "Lancez le calcul pour voir les opérations d'aujourd'hui et enregistrer la clôture.",
+    "period": "Période",
+    "revenueBreakdown": "Répartition des revenus",
+    "cash": "Espèces",
+    "transfer": "Virement",
+    "check": "Chèque",
+    "term": "À Terme / Crédit",
+    "totalRevenue": "Revenu total",
+    "expensesAndNet": "Dépenses & Net",
+    "cashIn": "Entrées d'espèces",
+    "expenses": "Dépenses journalières",
+    "netCash": "Net en caisse",
+    "notes": "Notes du caissier (optionnel)",
+    "notesPlaceholder": "Remarques, écart de caisse, incidents...",
+    "posOrders": "Commandes du point de vente",
+    "blOrders": "Bons de livraison",
+    "totalExpenses": "Total des dépenses",
+    "total": "Total",
+    "transactions": "transactions",
+    "history": "Historique des clôtures",
+    "saved": "Clôture enregistrée avec succès",
+    "noHistory": "Aucun historique disponible",
+    "date": "Date",
+    "amount": "Montant Net",
+    "actions": "Actions",
+    "view": "Voir"
+  }
 }

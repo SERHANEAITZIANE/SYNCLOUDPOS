@@ -6,20 +6,25 @@ import { ProductColumn } from "@/components/products/columns"
 export default async function LowStockPage() {
     const products = await getLowStockProducts()
 
-    const formattedProducts: ProductColumn[] = (products as any[]).map((item) => ({
-        id: item.id,
-        name: item.name,
-        isFeatured: item.isFeatured || false,
-        isArchived: item.isArchived || false,
-        price: Number(item.price || 0).toFixed(2),
-        wholesalePrice: item.wholesalePrice ? Number(item.wholesalePrice).toFixed(2) : "0.00",
-        dealerPrice: item.dealerPrice ? Number(item.dealerPrice).toFixed(2) : "0.00",
-        category: item.category?.name || "N/A",
-        brand: item.brand?.name || "N/A",
-        stock: item.stock || 0,
-        minStock: item.minStock || 0,
-        createdAt: item.createdAt ? format(new Date(item.createdAt), "MMMM do, yyyy") : "",
-    }))
+    const formattedProducts: ProductColumn[] = (products as any[]).map((item) => {
+        const stock = item.storeProducts?.reduce((sum: number, sp: any) => sum + sp.stock, 0) || 0;
+        const minStock = item.storeProducts?.reduce((sum: number, sp: any) => sum + sp.minStock, 0) || 0;
+        return {
+            id: item.id,
+            name: item.name,
+            isFeatured: item.isFeatured || false,
+            isArchived: item.isArchived || false,
+            price: Number(item.price || 0).toFixed(2),
+            wholesalePrice: item.wholesalePrice ? Number(item.wholesalePrice).toFixed(2) : "0.00",
+            dealerPrice: item.dealerPrice ? Number(item.dealerPrice).toFixed(2) : "0.00",
+            category: item.category?.name || "N/A",
+            brand: item.brand?.name || "N/A",
+            stock,
+            minStock,
+            images: item.images || [],
+            createdAt: item.createdAt ? format(new Date(item.createdAt), "MMMM do, yyyy") : "",
+        };
+    })
 
     return (
         <div className="flex-col">

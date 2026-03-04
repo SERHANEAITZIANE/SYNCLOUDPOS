@@ -9,7 +9,6 @@ import { revalidatePath } from "next/cache"
 export const createCategory = async (values: z.infer<typeof CategorySchema>) => {
     const session = await auth()
 
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -42,7 +41,6 @@ export const createCategory = async (values: z.infer<typeof CategorySchema>) => 
 
 export const getCategories = async () => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -66,7 +64,6 @@ export const getCategories = async () => {
 
 export const deleteCategory = async (id: string) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -90,7 +87,6 @@ export const deleteCategory = async (id: string) => {
 
 export const updateCategory = async (id: string, values: z.infer<typeof CategorySchema>) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -125,7 +121,6 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
 
 export const importCategories = async (rows: { name: string }[]) => {
     const session = await auth()
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 

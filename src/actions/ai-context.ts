@@ -69,7 +69,7 @@ export async function getBusinessContext(startDate?: Date, endDate?: Date): Prom
             LIMIT 10
         `,
     // Out of stock count
-    db.product.count({ where: { tenantId, stock: { lte: 0 } } }),
+    db.product.count({ where: { tenantId, isArchived: false, storeProducts: { some: { stock: { lte: 0 } } } } }),
     // Customer summary
     db.customer.aggregate({
       where: { tenantId },
@@ -115,7 +115,7 @@ export async function getBusinessContext(startDate?: Date, endDate?: Date): Prom
   const productIds = topOrderItems.map(p => p.productId).filter(Boolean) as string[];
   const products = await db.product.findMany({
     where: { id: { in: productIds } },
-    select: { id: true, name: true, stock: true },
+    select: { id: true, name: true, storeProducts: true },
   });
   const productMap = new Map(products.map(p => [p.id, p]));
 
@@ -126,7 +126,8 @@ export async function getBusinessContext(startDate?: Date, endDate?: Date): Prom
     const prod = productMap.get(p.productId);
     totalCogsItems += p.cogs || 0;
     const itemProfit = (p.revenue || 0) - (p.cogs || 0);
-    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p.revenue ?? 0).toFixed(2)} DA (Bénéfice Brut: ${itemProfit.toFixed(2)} DA | Qté: ${p.totalQty ?? 0}, Stock restant: ${prod?.stock ?? "?"})`;
+    const stock = prod?.storeProducts.reduce((sum, sp) => sum + sp.stock, 0) ?? "?";
+    return `  - ${prod?.name ?? "Inconnu"}: ${Number(p.revenue ?? 0).toFixed(2)} DA (Bénéfice Brut: ${itemProfit.toFixed(2)} DA | Qté: ${p.totalQty ?? 0}, Stock restant: ${stock})`;
   }).join("\n");
 
   // Rough estimate of gross profit: revenue - cogs

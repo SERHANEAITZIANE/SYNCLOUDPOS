@@ -36,20 +36,21 @@ export async function getAlerts(): Promise<Alert[]> {
         ] = await Promise.all([
             // 1. Products completely out of stock (and not archived)
             db.product.findMany({
-                where: { tenantId, isArchived: false, stock: { lte: 0 } },
-                select: { id: true, name: true, stock: true },
+                where: { tenantId, isArchived: false, storeProducts: { some: { stock: { lte: 0 } } } },
+                include: { storeProducts: true },
                 orderBy: { name: "asc" },
                 take: 20,
             }),
 
             // 2. Products below their minimum stock level (but still > 0)
             db.$queryRaw<{ id: string; name: string; stock: number; minStock: number }[]>`
-                SELECT id, name, stock, "minStock"
-                FROM "Product"
-                WHERE "tenantId" = ${tenantId}
-                  AND "isArchived" = false
-                  AND stock > 0
-                  AND stock < "minStock"
+                SELECT p.id, p.name, SUM(sp.stock) as stock, SUM(sp."minStock") as "minStock"
+                FROM "Product" p
+                JOIN "StoreProduct" sp ON p.id = sp."productId"
+                WHERE p."tenantId" = ${tenantId}
+                  AND p."isArchived" = false
+                GROUP BY p.id, p.name
+                HAVING SUM(sp.stock) > 0 AND SUM(sp.stock) < SUM(sp."minStock")
                 ORDER BY stock ASC
                 LIMIT 20
             `,

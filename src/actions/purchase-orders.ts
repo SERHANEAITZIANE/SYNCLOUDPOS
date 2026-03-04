@@ -16,13 +16,13 @@ interface PurchaseOrderData {
     status: string
     items: PurchaseOrderItemData[]
     accountId?: string
+    storeId?: string
     notes?: string
 }
 
 export const getPurchaseOrders = async () => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {
@@ -57,7 +57,6 @@ export const getPurchaseOrder = async (id: string) => {
 export const createPurchaseOrder = async (data: PurchaseOrderData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {
@@ -66,6 +65,7 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                 data: {
                     tenantId,
                     supplierId: data.supplierId,
+                    storeId: data.storeId || undefined,
                     accountId: (data.accountId && data.accountId !== "none") ? data.accountId : undefined,
                     total: data.total,
                     status: data.status,
@@ -82,16 +82,27 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
             // If BON_LIVRAISON or FACTURE or COMPLETED: add stock
             if (["BON_LIVRAISON", "FACTURE", "COMPLETED"].includes(data.status)) {
+                const stockStoreId = data.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+
                 await Promise.all(
-                    data.items.map(async (item) => {
-                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
-                        const stockBefore = pBefore?.stock || 0;
+                    data.items.map(async (item: any) => {
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                        const spBefore = pBefore?.storeProducts.find(sp => sp.storeId === stockStoreId);
+                        const stockBefore = spBefore?.stock || 0;
                         const stockAfter = stockBefore + item.quantity;
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: stockAfter, cost: item.costPrice }
+                            data: { cost: item.costPrice }
                         });
+
+                        if (stockStoreId) {
+                            await tx.storeProduct.upsert({
+                                where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                                update: { stock: stockAfter },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                            });
+                        }
 
                         await tx.stockMovement.create({
                             data: {
@@ -158,7 +169,6 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {
@@ -202,7 +212,6 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 export const updatePurchaseOrderStatus = async (id: string, newStatus: string, accountId?: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {
@@ -224,16 +233,27 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
             const getsStock = stockStatuses.includes(newStatus)
 
             if (!hadStock && getsStock) {
+                const stockStoreId = order.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+
                 await Promise.all(
                     order.items.map(async (item) => {
-                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
-                        const stockBefore = pBefore?.stock || 0;
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                        const spBefore = pBefore?.storeProducts.find(sp => sp.storeId === stockStoreId);
+                        const stockBefore = spBefore?.stock || 0;
                         const stockAfter = stockBefore + item.quantity;
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: stockAfter, cost: item.costPrice }
+                            data: { cost: item.costPrice }
                         });
+
+                        if (stockStoreId) {
+                            await tx.storeProduct.upsert({
+                                where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                                update: { stock: stockAfter },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                            });
+                        }
 
                         await tx.stockMovement.create({
                             data: {
@@ -253,16 +273,21 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
             // If cancelling after stock was received: reverse stock
             if (hadStock && newStatus === "CANCELLED") {
+                const stockStoreId = order.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+
                 await Promise.all(
-                    order.items.map(async (item) => {
-                        const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
-                        const stockBefore = pBefore?.stock || 0;
+                    order.items.map(async (item: any) => {
+                        const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                        const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
+                        const stockBefore = spBefore?.stock || 0;
                         const stockAfter = stockBefore - item.quantity;
 
-                        await tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: stockAfter }
-                        });
+                        if (stockStoreId) {
+                            await tx.storeProduct.update({
+                                where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                                data: { stock: stockAfter }
+                            });
+                        }
 
                         await tx.stockMovement.create({
                             data: {
@@ -333,7 +358,6 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 export const deletePurchaseOrder = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {

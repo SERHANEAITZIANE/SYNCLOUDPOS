@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star, MessageCircle } from "lucide-react"
+import { Building2, Printer, Store, Sparkles, Settings2, HardDrive, Star, MessageCircle, Flag } from "lucide-react"
 import { GeneralForm } from "./general-form"
 import { PrintingSettingsForm } from "./printing-settings-form"
 import { PosDefaultsForm } from "./pos-defaults-form"
@@ -10,6 +10,8 @@ import { AdvancedSettingsForm } from "./advanced-settings-form"
 import { BackupsListClient } from "./backups-list-client"
 import { LoyaltySettingsForm } from "./loyalty-settings-form"
 import { WhatsAppSettingsForm } from "./whatsapp-settings-form"
+import { AlgerianSettingsForm } from "./algerian-settings-form"
+import { useTranslations } from "next-intl"
 
 interface TenantData {
     name: string
@@ -51,12 +53,14 @@ interface UnifiedSettingsClientProps {
 }
 
 export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: UnifiedSettingsClientProps) => {
+    const t = useTranslations("Settings");
+
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Paramètres</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                    Configurez votre application, vos préférences d&apos;impression et vos paramètres POS.
+                    {t("description")}
                 </p>
             </div>
 
@@ -64,35 +68,39 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                 <TabsList className="w-full h-auto flex-wrap gap-1 bg-muted/60 p-1 rounded-xl mb-6 overflow-x-auto justify-start">
                     <TabsTrigger value="company" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Building2 className="w-4 h-4" />
-                        <span>Entreprise</span>
+                        <span>{t("Tabs.company")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="printing" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Printer className="w-4 h-4" />
-                        <span>Impression</span>
+                        <span>{t("Tabs.printing")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="pos" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Store className="w-4 h-4" />
-                        <span>POS Par Défaut</span>
+                        <span>{t("Tabs.pos")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="ai" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Sparkles className="w-4 h-4" />
-                        <span>IA</span>
+                        <span>{t("Tabs.ai")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="advanced" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Settings2 className="w-4 h-4" />
-                        <span>Avancé</span>
+                        <span>{t("Tabs.advanced")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="loyalty" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Star className="w-4 h-4" />
-                        <span>Fidélité</span>
+                        <span>{t("Tabs.loyalty")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="backup" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <HardDrive className="w-4 h-4" />
-                        <span>Sauvegarde</span>
+                        <span>{t("Tabs.backup")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="whatsapp" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <MessageCircle className="w-4 h-4" />
-                        <span>WhatsApp</span>
+                        <span>{t("Tabs.whatsapp")}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="algeria" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                        <Flag className="w-4 h-4" />
+                        <span>🇩🇿 Algérie</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -102,10 +110,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-blue-500" />
-                                Informations de l&apos;Entreprise
+                                {t("Company.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Ces informations apparaissent sur tous vos documents (BL, factures, reçus).
+                                {t("Company.description")}
                             </p>
                         </div>
                         <GeneralForm initialData={tenant} />
@@ -118,10 +126,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Printer className="w-5 h-5 text-orange-500" />
-                                Paramètres d&apos;Impression
+                                {t("Printing.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Configurez le format papier, le modèle de BL et les options du reçu POS.
+                                {t("Printing.description")}
                             </p>
                         </div>
                         <PrintingSettingsForm initialBlTemplate={tenant.blTemplate} />
@@ -134,10 +142,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Store className="w-5 h-5 text-green-500" />
-                                POS — Paramètres par Défaut
+                                {t("PosDefaults.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Choisissez la caisse, le mode de paiement et options pré-sélectionnés à chaque vente.
+                                {t("PosDefaults.description")}
                             </p>
                         </div>
                         <PosDefaultsForm accounts={accounts} />
@@ -150,10 +158,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-indigo-500" />
-                                Intelligence Artificielle
+                                {t("Ai.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Configurez vos clés API pour activer la numérisation OCR et les fonctions IA.
+                                {t("Ai.description")}
                             </p>
                             <div className="max-w-3xl">
                                 <AiSettingsForm
@@ -173,10 +181,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Settings2 className="w-5 h-5 text-red-500" />
-                                Paramètres Avancés
+                                {t("Advanced.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Paramètres techniques réservés aux administrateurs. Prudence requise.
+                                {t("Advanced.description")}
                             </p>
                         </div>
                         <AdvancedSettingsForm initialDatabaseUrl={databaseUrl} />
@@ -189,10 +197,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                                Programme de Fidélité
+                                {t("Loyalty.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Configurez le taux d&apos;accumulation et de remboursement des points de fidélité client.
+                                {t("Loyalty.description")}
                             </p>
                         </div>
                         <LoyaltySettingsForm
@@ -210,10 +218,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <HardDrive className="w-5 h-5 text-emerald-500" />
-                                Sauvegarde &amp; Restauration
+                                {t("Backup.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Exportez toutes vos données ou restaurez depuis une sauvegarde précédente.
+                                {t("Backup.description")}
                             </p>
                         </div>
                         <BackupsListClient />
@@ -225,13 +233,28 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <MessageCircle className="w-5 h-5 text-emerald-500" />
-                                WhatsApp Business
+                                {t("Whatsapp.title")}
                             </h2>
                             <p className="text-sm text-muted-foreground mt-1">
-                                Envoyez des notifications, rappels de dettes et reçus par WhatsApp.
+                                {t("Whatsapp.description")}
                             </p>
                         </div>
                         <WhatsAppSettingsForm />
+                    </div>
+                </TabsContent>
+                {/* Tab 9 — Algeria */}
+                <TabsContent value="algeria" className="mt-0">
+                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <Flag className="w-5 h-5 text-green-600" />
+                                Paramètres Algériens 🇩🇿
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Mode Ramadan, commissions, régime fiscal, et API livraison
+                            </p>
+                        </div>
+                        <AlgerianSettingsForm />
                     </div>
                 </TabsContent>
             </Tabs>

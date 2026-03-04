@@ -10,7 +10,6 @@ export async function GET(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        // @ts-expect-error custom property
         if (session.user.role !== "ADMIN" && !session.user.isSuperadmin) {
             return new NextResponse("Forbidden", { status: 403 });
         }

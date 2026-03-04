@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Wallet, CreditCard, Receipt } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const STORAGE_KEY = "pos_defaults_prefs"
 
@@ -39,6 +40,7 @@ interface PosDefaultsFormProps {
 }
 
 export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
+    const t = useTranslations("Settings.PosDefaultsForm")
     const [prefs, setPrefs] = useState<PosDefaultPrefs>(defaults)
 
     useEffect(() => {
@@ -50,7 +52,7 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
 
     const handleSave = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
-        toast.success("Paramètres POS sauvegardés sur cet appareil !")
+        toast.success(t("success"))
     }
 
     const cashAccounts = accounts.filter(a => a.type === "CAISSE")
@@ -62,23 +64,23 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <Wallet className="w-5 h-5 text-green-500" />
-                    <h3 className="text-base font-semibold">Caisse / Banque par Défaut</h3>
+                    <h3 className="text-base font-semibold">{t("accountSection.title")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-lg">
                     <div className="space-y-2">
-                        <Label>Compte de dépôt par défaut</Label>
+                        <Label>{t("accountSection.label")}</Label>
                         <Select
                             value={prefs.defaultAccountId}
                             onValueChange={(v) => setPrefs(p => ({ ...p, defaultAccountId: v }))}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Sélectionner un compte" />
+                                <SelectValue placeholder={t("accountSection.placeholder")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="none">— Aucun (saisir à chaque fois) —</SelectItem>
+                                <SelectItem value="none">{t("accountSection.none")}</SelectItem>
                                 {cashAccounts.length > 0 && (
                                     <>
-                                        <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase">Caisses</div>
+                                        <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase">{t("accountSection.cash")}</div>
                                         {cashAccounts.map(a => (
                                             <SelectItem key={a.id} value={a.id}>
                                                 💰 {a.name}
@@ -88,7 +90,7 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                                 )}
                                 {bankAccounts.length > 0 && (
                                     <>
-                                        <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase">Banques</div>
+                                        <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase">{t("accountSection.banks")}</div>
                                         {bankAccounts.map(a => (
                                             <SelectItem key={a.id} value={a.id}>
                                                 🏦 {a.name}
@@ -99,7 +101,7 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                             </SelectContent>
                         </Select>
                         <p className="text-xs text-muted-foreground">
-                            Ce compte sera pré-sélectionné automatiquement dans le POS à chaque vente.
+                            {t("accountSection.hint")}
                         </p>
                     </div>
                 </div>
@@ -111,11 +113,11 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <CreditCard className="w-5 h-5 text-blue-500" />
-                    <h3 className="text-base font-semibold">Méthode de Paiement par Défaut</h3>
+                    <h3 className="text-base font-semibold">{t("paymentSection.title")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-lg">
                     <div className="space-y-2">
-                        <Label>Mode de règlement</Label>
+                        <Label>{t("paymentSection.label")}</Label>
                         <Select
                             value={prefs.defaultPaymentMethod}
                             onValueChange={(v) => setPrefs(p => ({ ...p, defaultPaymentMethod: v as PosDefaultPrefs["defaultPaymentMethod"] }))}
@@ -124,11 +126,11 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="CASH">Espèces</SelectItem>
-                                <SelectItem value="CARD">Carte Bancaire</SelectItem>
-                                <SelectItem value="TRANSFER">Virement</SelectItem>
-                                <SelectItem value="CHECK">Chèque</SelectItem>
-                                <SelectItem value="TERM">À Terme (Crédit)</SelectItem>
+                                <SelectItem value="CASH">{t("paymentSection.methods.cash")}</SelectItem>
+                                <SelectItem value="CARD">{t("paymentSection.methods.card")}</SelectItem>
+                                <SelectItem value="TRANSFER">{t("paymentSection.methods.transfer")}</SelectItem>
+                                <SelectItem value="CHECK">{t("paymentSection.methods.check")}</SelectItem>
+                                <SelectItem value="TERM">{t("paymentSection.methods.term")}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -141,14 +143,14 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
             <div>
                 <div className="flex items-center gap-2 mb-4">
                     <Receipt className="w-5 h-5 text-orange-500" />
-                    <h3 className="text-base font-semibold">Affichage sur le Reçu</h3>
+                    <h3 className="text-base font-semibold">{t("receiptDisplay.title")}</h3>
                 </div>
                 <div className="space-y-4 bg-muted/40 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                         <div>
-                            <Label>Afficher TVA par ligne</Label>
+                            <Label>{t("receiptDisplay.tva.label")}</Label>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                                Affiche le taux et montant TVA pour chaque article
+                                {t("receiptDisplay.tva.hint")}
                             </p>
                         </div>
                         <Switch
@@ -159,9 +161,9 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                     <Separator />
                     <div className="flex items-center justify-between">
                         <div>
-                            <Label>Afficher les prix HT</Label>
+                            <Label>{t("receiptDisplay.ht.label")}</Label>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                                Affiche le prix hors taxe en plus du prix TTC
+                                {t("receiptDisplay.ht.hint")}
                             </p>
                         </div>
                         <Switch
@@ -173,12 +175,12 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
             </div>
 
             <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2">
-                ⚠️ Ces réglages sont sauvegardés <strong>sur cet appareil uniquement</strong> (localStorage). Chaque poste peut avoir ses propres paramètres.
+                {t.rich("warning", { strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
 
             <div className="flex justify-end pt-2">
                 <Button onClick={handleSave} className="min-w-36">
-                    Sauvegarder
+                    {t("submit")}
                 </Button>
             </div>
         </div>

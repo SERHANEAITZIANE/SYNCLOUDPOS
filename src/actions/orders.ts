@@ -11,6 +11,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
+    const defaultStoreId = session?.user?.defaultStoreId
 
     if (!userId || !tenantId) {
         return { error: "Unauthorized" }
@@ -27,6 +28,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
     try {
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
+        const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         // Transaction to ensure order creation and stock update happen together
         const order = await db.$transaction(async (tx) => {
@@ -57,15 +59,20 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
                     // 1. Revert Old Stock (Parallelized)
                     await Promise.all(
-                        oldSalesOrder.items.map(async (item) => {
-                            const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
-                            const stockBefore = pBefore?.stock || 0;
+                        oldSalesOrder.items.map(async (item: any) => {
+                            const stockStoreId = oldSalesOrder.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                            const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                            const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
+                            const stockBefore = spBefore?.stock || 0;
                             const stockAfter = stockBefore + item.quantity;
 
-                            await tx.product.update({
-                                where: { id: item.productId },
-                                data: { stock: stockAfter }
-                            });
+                            if (stockStoreId) {
+                                await tx.storeProduct.upsert({
+                                    where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                                    update: { stock: stockAfter },
+                                    create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                                });
+                            }
 
                             await tx.stockMovement.create({
                                 data: {
@@ -159,6 +166,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             const newOrder = await tx.order.create({
                 data: {
                     tenantId,
+                    storeId: storeIdToUse,
                     userId,
                     customerId: customerId || undefined,
                     accountId: accountId || undefined,
@@ -201,6 +209,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 await tx.salesOrder.create({
                     data: {
                         tenantId,
+                        storeId: storeIdToUse,
                         customerId: finalCustomerId,
                         type: "ORDER", // Bon de Livraison
                         status: "VALIDATED",
@@ -219,17 +228,20 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
             // 2. Decrement stock for each item (Parallelized)
             await Promise.all(
-                items.map(async (item) => {
-                    const pBefore = await tx.product.findUnique({ where: { id: item.productId } });
-                    const stockBefore = pBefore?.stock || 0;
+                items.map(async (item: any) => {
+                    const stockStoreId = storeIdToUse;
+                    const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                    const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
+                    const stockBefore = spBefore?.stock || 0;
                     const stockAfter = stockBefore - item.quantity;
 
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: {
-                            stock: stockAfter
-                        }
-                    });
+                    if (stockStoreId) {
+                        await tx.storeProduct.upsert({
+                            where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                            update: { stock: stockAfter },
+                            create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                        });
+                    }
 
                     await tx.stockMovement.create({
                         data: {

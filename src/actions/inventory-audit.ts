@@ -13,7 +13,7 @@ export async function createStockCountSession(name: string, notes?: string) {
     // Snapshot all active products
     const products = await db.product.findMany({
         where: { tenantId, isArchived: false },
-        select: { id: true, name: true, stock: true }
+        include: { storeProducts: true }
     })
 
     try {
@@ -24,13 +24,16 @@ export async function createStockCountSession(name: string, notes?: string) {
                 notes: notes || null,
                 status: "OPEN",
                 items: {
-                    create: products.map(p => ({
-                        productId: p.id,
-                        productName: p.name,
-                        expectedQty: p.stock,
-                        actualQty: p.stock, // default = no discrepancy
-                        difference: 0
-                    }))
+                    create: products.map(p => {
+                        const stock = p.storeProducts.reduce((sum, sp) => sum + sp.stock, 0);
+                        return {
+                            productId: p.id,
+                            productName: p.name,
+                            expectedQty: stock,
+                            actualQty: stock, // default = no discrepancy
+                            difference: 0
+                        };
+                    })
                 }
             },
             include: { items: true }
@@ -106,13 +109,17 @@ export async function approveStockCountSession(sessionId: string) {
     if (!countSession) return { error: "Session not found or already processed." }
 
     try {
+        // Find a storeId to apply adjustments. Let's use the first store for simplicity.
+        const store = await db.store.findFirst({ where: { tenantId } });
+        if (!store) throw new Error("No store found to apply adjustments");
+
         // Apply each adjustment
         await db.$transaction([
             ...countSession.items
                 .filter(i => i.difference !== 0)
                 .map(i =>
-                    db.product.update({
-                        where: { id: i.productId },
+                    db.storeProduct.updateMany({
+                        where: { productId: i.productId, storeId: store.id },
                         data: { stock: { increment: i.difference } }
                     })
                 ),

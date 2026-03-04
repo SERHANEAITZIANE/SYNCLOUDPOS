@@ -9,7 +9,6 @@ export async function createExpenseCategory(data: { name: string; type: "FIXED" 
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const category = await db.expenseCategory.create({
@@ -33,7 +32,6 @@ export async function getExpenseCategories() {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const categories = await db.expenseCategory.findMany({
@@ -59,7 +57,6 @@ export async function createExpense(data: {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const expense = await db.$transaction(async (tx) => {
@@ -119,7 +116,6 @@ export async function getExpenses() {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const expenses = await db.expense.findMany({
@@ -140,7 +136,6 @@ export async function deleteExpense(id: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         await db.expense.delete({

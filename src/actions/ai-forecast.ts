@@ -45,7 +45,7 @@ export async function getAIDemandForecast() {
                 createdAt: { gte: ninetyDaysAgo }
             }
         },
-        select: { productId: true, quantity: true, product: { select: { name: true, stock: true } } }
+        select: { productId: true, quantity: true, product: { select: { name: true, storeProducts: true } } }
     })
 
     // Sales Orders (BL/Factures)
@@ -57,7 +57,7 @@ export async function getAIDemandForecast() {
                 createdAt: { gte: ninetyDaysAgo }
             }
         },
-        select: { productId: true, quantity: true, product: { select: { name: true, stock: true } } }
+        select: { productId: true, quantity: true, product: { select: { name: true, storeProducts: true } } }
     })
 
     const productSales = new Map<string, { name: string, sold: number, stock: number }>()
@@ -69,8 +69,8 @@ export async function getAIDemandForecast() {
         productSales.get(productId)!.sold += qty
     }
 
-    posItems.forEach(item => addToMap(item.productId, item.product.name, item.quantity, item.product.stock))
-    salesItems.forEach(item => addToMap(item.productId, item.product.name, item.quantity, item.product.stock))
+    posItems.forEach(item => addToMap(item.productId, item.product.name, item.quantity, item.product.storeProducts.reduce((sum, sp) => sum + sp.stock, 0)))
+    salesItems.forEach(item => addToMap(item.productId, item.product.name, item.quantity, item.product.storeProducts.reduce((sum, sp) => sum + sp.stock, 0)))
 
     const dataReportData = Array.from(productSales.values())
         .sort((a, b) => b.sold - a.sold)

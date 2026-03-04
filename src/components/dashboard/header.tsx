@@ -4,7 +4,11 @@ import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
 import { LanguageSwitcher } from "@/components/dashboard/language-switcher";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
-export function DashboardHeader({ user }: { user: any }) {
+import { HeaderStoreSelector } from "./header-store-selector";
+import { getStores } from "@/actions/stores";
+
+export async function DashboardHeader({ user }: { user: any }) {
+    const stores = await getStores();
     return (
         <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
             <MobileSidebar />
@@ -22,6 +26,7 @@ export function DashboardHeader({ user }: { user: any }) {
                 </form>
             </div>
             <div className="flex items-center gap-4">
+                <HeaderStoreSelector stores={stores} currentStoreId={user.defaultStoreId} />
                 <NotificationBell />
                 <LanguageSwitcher />
                 <ModeToggle />

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { createOrder } from "@/actions/orders"
+import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
 import { PaymentModal } from "./payment-modal"
 import { cn } from "@/lib/utils"
 import { getActivePromotions } from "@/actions/promotions"
@@ -161,6 +162,10 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 cart.resetSession()
                 setUsePointsMode(false)
                 setLoyaltyPointsToUse(0)
+                // Fire WhatsApp receipt in background (non-blocking)
+                if (response.orderId) {
+                    sendWhatsAppReceipt(response.orderId).catch(() => null)
+                }
                 router.refresh()
                 return {
                     success: true,

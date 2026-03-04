@@ -13,6 +13,13 @@ export const getTenantsForSuperadmin = async () => {
                         phone: true,
                     },
                     take: 1
+                },
+                _count: {
+                    select: {
+                        users: true,
+                        products: true,
+                        orders: true
+                    }
                 }
             },
             orderBy: {
@@ -20,10 +27,33 @@ export const getTenantsForSuperadmin = async () => {
             }
         });
 
+        // Second step: get total revenue for each tenant from orders
+        const revenueAggregates = await Promise.all(tenants.map(async (tenant) => {
+            const revenue = await db.order.aggregate({
+                where: { tenantId: tenant.id, status: "COMPLETED" },
+                _sum: { total: true }
+            })
+            const salesInvoiceRevenue = await db.salesOrder.aggregate({
+                where: { tenantId: tenant.id, status: "PAID" },
+                _sum: { total: true }
+            })
+
+            return {
+                id: tenant.id,
+                totalRevenue: Number(revenue._sum.total || 0) + Number(salesInvoiceRevenue._sum.total || 0)
+            }
+        }))
+
         // Map the relation array into a flatter structure for the table
         return tenants.map(tenant => ({
             ...tenant,
-            ownerDetails: tenant.users[0] || null
+            ownerDetails: tenant.users[0] || null,
+            usageStats: {
+                users: tenant._count.users,
+                products: tenant._count.products,
+                orders: tenant._count.orders,
+                totalRevenue: revenueAggregates.find(r => r.id === tenant.id)?.totalRevenue || 0
+            }
         }));
     } catch (error) {
         console.error("Failed to fetch tenants:", error)

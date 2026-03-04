@@ -29,6 +29,7 @@ import {
 import { useRouter } from "@/i18n/routing"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Separator } from "@/components/ui/separator"
+import { useTranslations } from "next-intl"
 
 interface GeneralFormProps {
     initialData: {
@@ -55,6 +56,7 @@ interface GeneralFormProps {
 export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const t = useTranslations("Settings.GeneralForm")
 
     const form = useForm<z.infer<typeof SettingsSchema>>({
         resolver: zodResolver(SettingsSchema),
@@ -86,11 +88,11 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
             if (result.error) {
                 toast.error(result.error)
             } else {
-                toast.success(result.success || "Paramètres sauvegardés.")
+                toast.success(result.success || t("success"))
                 router.refresh()
             }
         } catch {
-            toast.error("Une erreur est survenue.")
+            toast.error(t("error"))
         } finally {
             setLoading(false)
         }
@@ -124,8 +126,8 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                     {/* Left Column: Form Fields */}
                     <div className="flex-1 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <Field name="ownerName" label="Nom" placeholder="Nom du propriétaire" />
-                            <Field name="name" label="Société" placeholder="Nom de l'entreprise" />
+                            <Field name="ownerName" label={t("ownerName.label")} placeholder={t("ownerName.placeholder")} />
+                            <Field name="name" label={t("name.label")} placeholder={t("name.placeholder")} />
                         </div>
 
                         <FormField
@@ -133,11 +135,11 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                             name="address"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-sm text-muted-foreground">Adresse</FormLabel>
+                                    <FormLabel className="text-sm text-muted-foreground">{t("address.label")}</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             disabled={loading}
-                                            placeholder="Adresse complète"
+                                            placeholder={t("address.placeholder")}
                                             rows={3}
                                             {...field}
                                             value={field.value ?? ""}
@@ -153,11 +155,11 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                             name="activity"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-sm text-muted-foreground">Activité</FormLabel>
+                                    <FormLabel className="text-sm text-muted-foreground">{t("activity.label")}</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             disabled={loading}
-                                            placeholder="Secteur d'activité"
+                                            placeholder={t("activity.placeholder")}
                                             rows={3}
                                             {...field}
                                             value={field.value ?? ""}
@@ -169,37 +171,37 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                         />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Field name="wilaya" label="Wilaya" placeholder="Ex. ALGER" />
-                            <Field name="commune" label="Commune" placeholder="Ex. DAR EL BEIDA" />
+                            <Field name="wilaya" label={t("wilaya.label")} placeholder={t("wilaya.placeholder")} />
+                            <Field name="commune" label={t("commune.label")} placeholder={t("commune.placeholder")} />
                         </div>
 
                         <Separator />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Field name="phone" label="Téléphone" placeholder="0696 92 82 27" />
-                            <Field name="fax" label="Fax" placeholder="023 83 11 25" />
+                            <Field name="phone" label={t("phone.label")} placeholder={t("phone.placeholder")} />
+                            <Field name="fax" label={t("fax.label")} placeholder={t("fax.placeholder")} />
                         </div>
 
-                        <Field name="email" label="E-Mail" placeholder="contact@entreprise.com" />
+                        <Field name="email" label={t("email.label")} placeholder={t("email.placeholder")} />
 
                         <Separator />
 
                         <div className="grid grid-cols-2 gap-4">
-                            <Field name="nif" label="Nif" placeholder="191441002919..." />
-                            <Field name="rc" label="N° Rc" placeholder="16/00-3853278 A15" />
+                            <Field name="nif" label={t("nif.label")} placeholder={t("nif.placeholder")} />
+                            <Field name="rc" label={t("rc.label")} placeholder={t("rc.placeholder")} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <Field name="artImposition" label="Article d'imposition" placeholder="16204594504" />
-                            <Field name="nis" label="NIS" placeholder="199144100291916" />
+                            <Field name="artImposition" label={t("artImposition.label")} placeholder={t("artImposition.placeholder")} />
+                            <Field name="nis" label={t("nis.label")} placeholder={t("nis.placeholder")} />
                         </div>
 
-                        <Field name="bankAccount" label="Compte bancaire" placeholder="001002680300001520/32" />
+                        <Field name="bankAccount" label={t("bankAccount.label")} placeholder={t("bankAccount.placeholder")} />
                     </div>
 
                     {/* Right Column: Logo + Header */}
                     <div className="w-72 flex-shrink-0 flex flex-col gap-6">
                         <div className="space-y-2">
-                            <FormLabel className="text-sm text-muted-foreground">Photo / Logo</FormLabel>
+                            <FormLabel className="text-sm text-muted-foreground">{t("logo.label")}</FormLabel>
                             <FormField
                                 control={form.control}
                                 name="logo"
@@ -224,11 +226,11 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                             name="headerText"
                             render={({ field }) => (
                                 <FormItem className="flex-1">
-                                    <FormLabel className="text-sm text-muted-foreground">Entête</FormLabel>
+                                    <FormLabel className="text-sm text-muted-foreground">{t("headerText.label")}</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             disabled={loading}
-                                            placeholder="Texte d'en-tête à imprimer sur les documents..."
+                                            placeholder={t("headerText.placeholder")}
                                             className="h-48 resize-none"
                                             {...field}
                                             value={field.value ?? ""}
@@ -244,7 +246,7 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                             name="blTemplate"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-sm text-muted-foreground">Modèle de Bon de Livraison</FormLabel>
+                                    <FormLabel className="text-sm text-muted-foreground">{t("blTemplate.label")}</FormLabel>
                                     <Select
                                         disabled={loading}
                                         onValueChange={field.onChange}
@@ -253,13 +255,13 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionner le modèle" />
+                                                <SelectValue placeholder={t("blTemplate.placeholder")} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="standard">Standard (Classique)</SelectItem>
-                                            <SelectItem value="compact">Compact (Sans Entête)</SelectItem>
-                                            <SelectItem value="aitee">AITEE (Facture Style)</SelectItem>
+                                            <SelectItem value="standard">{t("blTemplate.options.standard")}</SelectItem>
+                                            <SelectItem value="compact">{t("blTemplate.options.compact")}</SelectItem>
+                                            <SelectItem value="aitee">{t("blTemplate.options.aitee")}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -273,7 +275,7 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
 
                 <div className="flex justify-end">
                     <Button disabled={loading} className="min-w-32" type="submit">
-                        {loading ? "Sauvegarde..." : "Valider"}
+                        {loading ? t("saving") : t("submit")}
                     </Button>
                 </div>
             </form>

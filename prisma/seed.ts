@@ -35,10 +35,18 @@ async function main() {
         data: {
             userId: user.id,
             tenantId: tenant.id,
-            role: "ADMIN"
         }
     })
     console.log("Linked User to Tenant via TenantUser")
+
+    // 3b. Create Default Store
+    const store = await db.store.create({
+        data: {
+            name: "Boutique Principale",
+            tenantId: tenant.id
+        }
+    })
+    console.log("Created Default Store")
 
     // 4. Create Categories
     const catElectronics = await db.category.create({
@@ -62,10 +70,15 @@ async function main() {
             name: "Galaxy S24 Ultra",
             description: "Flagship smartphone",
             price: 250000,
-            stock: 10,
             categoryId: catElectronics.id,
             brandId: brandSamsung.id,
-            tenantId: tenant.id
+            tenantId: tenant.id,
+            storeProducts: {
+                create: {
+                    storeId: store.id,
+                    stock: 10,
+                }
+            }
         }
     })
     await (db as any).barcode.create({
@@ -81,10 +94,15 @@ async function main() {
             name: "Coca-Cola 1L",
             description: "Refreshing drink",
             price: 120,
-            stock: 100,
             categoryId: catGroceries.id,
             brandId: brandCocaCola.id,
-            tenantId: tenant.id
+            tenantId: tenant.id,
+            storeProducts: {
+                create: {
+                    storeId: store.id,
+                    stock: 100,
+                }
+            }
         }
     })
     await (db as any).barcode.create({

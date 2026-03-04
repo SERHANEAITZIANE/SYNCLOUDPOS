@@ -22,19 +22,14 @@ export default async function DashboardLayout({
 
     return (
         <SubscriptionGuard
-            // @ts-expect-error custom property 
             isSuperadmin={session.user?.isSuperadmin}
-            // @ts-expect-error custom property
             subscriptionEndsAt={session.user?.subscriptionEndsAt}
-            // @ts-expect-error custom property
             isBlocked={session.user?.isBlocked}
         >
             <div className="flex min-h-screen flex-col md:flex-row">
                 <div className="hidden border-r bg-gray-100/40 md:block md:w-64 lg:w-72 dark:bg-gray-800/40">
                     <DashboardSidebar
-                        // @ts-expect-error custom property 
                         isSuperadmin={session.user?.isSuperadmin}
-                        // @ts-expect-error custom property 
                         role={session.user?.role}
                     />
                 </div>
@@ -42,7 +37,6 @@ export default async function DashboardLayout({
                 <div className="flex-1 flex flex-col">
                     <DashboardHeader user={session!.user} />
                     <main className="flex-1 p-4 md:p-6">
-                        {/* @ts-expect-error custom property */}
                         <ExpirationAlert subscriptionEndsAt={session.user?.subscriptionEndsAt} />
                         {children}
                     </main>

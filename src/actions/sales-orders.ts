@@ -89,14 +89,17 @@ export async function createSalesOrder(data: {
                 STOCK_STATUSES.includes(data.status)
 
             if (shouldDeductStock) {
-                await Promise.all(
-                    data.items.map(item =>
-                        tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
-                        })
-                    )
-                );
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                if (storeId) {
+                    await Promise.all(
+                        data.items.map(item =>
+                            tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        )
+                    );
+                }
             }
 
             // Add to customer balance if validated (not yet paid)
@@ -323,26 +326,32 @@ export async function updateSalesOrderStatus(id: string, newStatus: string) {
             const isStockType = salesOrder.type === "ORDER" || salesOrder.type === "INVOICE"
 
             if (!hadStock && getsStock && isStockType) {
-                await Promise.all(
-                    salesOrder.items.map(item =>
-                        tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
-                        })
-                    )
-                );
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                if (storeId) {
+                    await Promise.all(
+                        salesOrder.items.map(item =>
+                            tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { decrement: item.quantity } }
+                            })
+                        )
+                    );
+                }
             }
 
             // Restore stock if cancelling
             if (hadStock && newStatus === "CANCELLED" && isStockType) {
-                await Promise.all(
-                    salesOrder.items.map(item =>
-                        tx.product.update({
-                            where: { id: item.productId },
-                            data: { stock: { increment: item.quantity } }
-                        })
-                    )
-                );
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                if (storeId) {
+                    await Promise.all(
+                        salesOrder.items.map(item =>
+                            tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { increment: item.quantity } }
+                            })
+                        )
+                    );
+                }
             }
 
             // Customer balance:

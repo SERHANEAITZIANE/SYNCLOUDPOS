@@ -54,6 +54,13 @@ async function fetchProductsFromOFF() {
                 break;
             }
 
+            // Get default store
+            const store = await prisma.store.findFirst({ where: { tenantId } })
+            if (!store) {
+                console.error("No store found for tenant.");
+                return;
+            }
+
             for (const p of data.products) {
                 if (!p.code || !p.product_name) continue;
 
@@ -77,11 +84,16 @@ async function fetchProductsFromOFF() {
                         name: productName,
                         price: price,
                         cost: cost,
-                        stock: stock,
-                        minStock: 10,
                         categoryId: catId,
                         brandId: brandId,
-                        tenantId
+                        tenantId: tenantId,
+                        storeProducts: {
+                            create: {
+                                storeId: store.id,
+                                stock: stock,
+                                minStock: 10
+                            }
+                        }
                     }
                 });
 

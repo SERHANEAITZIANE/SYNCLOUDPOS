@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, FC } from "react"
-import { Search, ShoppingCart, ImageIcon, ChevronUp } from "lucide-react"
+import { useState, useEffect, useRef, FC } from "react"
+import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff } from "lucide-react"
 import Image from "next/image"
 
 import { Input } from "@/components/ui/input"
@@ -65,6 +65,8 @@ export const PosClient: FC<PosClientProps> = ({
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [isSearchOrderOpen, setIsSearchOrderOpen] = useState(false)
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false)
+    const [isListening, setIsListening] = useState(false)
+    const recognitionRef = useRef<any>(null)
     const cart = usePosStore()
 
     // Derived cart values for mobile bottom bar
@@ -83,6 +85,38 @@ export const PosClient: FC<PosClientProps> = ({
             }
         }
     }, [activeSessionId, activeSession?.customerId, customers, cart])
+
+    // Voice search with Web Speech API
+    const startVoiceSearch = () => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        if (!SpeechRecognition) {
+            toast.error("Voice search not supported in this browser")
+            return
+        }
+
+        if (isListening) {
+            recognitionRef.current?.stop()
+            setIsListening(false)
+            return
+        }
+
+        const recognition = new SpeechRecognition()
+        recognitionRef.current = recognition
+        recognition.lang = "ar-DZ" // Algerian Arabic — also picks up French & Darija
+        recognition.interimResults = true
+        recognition.continuous = false
+
+        recognition.onstart = () => setIsListening(true)
+        recognition.onresult = (event: any) => {
+            const transcript = Array.from(event.results)
+                .map((r: any) => r[0].transcript)
+                .join("")
+            setSearchQuery(transcript)
+        }
+        recognition.onend = () => setIsListening(false)
+        recognition.onerror = () => setIsListening(false)
+        recognition.start()
+    }
 
     // Global POS Shortcuts
     useEffect(() => {
@@ -298,7 +332,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 <Search className="absolute left-3 lg:left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-gray-900 dark:group-focus-within:text-gray-100 transition-colors duration-200" />
                                 <Input
                                     placeholder={t("searchPlaceholder")}
-                                    className="pl-9 lg:pl-14 h-10 lg:h-14 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl lg:rounded-[20px] text-sm lg:text-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
+                                    className="pl-9 lg:pl-14 pr-10 h-10 lg:h-14 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all rounded-xl lg:rounded-[20px] text-sm lg:text-lg text-gray-900 dark:text-gray-100 placeholder:text-gray-400"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value)
@@ -312,6 +346,18 @@ export const PosClient: FC<PosClientProps> = ({
                                         }
                                     }}
                                 />
+                                <button
+                                    onClick={startVoiceSearch}
+                                    title={isListening ? "Stop listening" : "Voice search (Arabic/French/Darija)"}
+                                    className={cn(
+                                        "absolute right-3 lg:right-5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center transition-all",
+                                        isListening
+                                            ? "bg-red-500 text-white shadow-lg shadow-red-500/40 animate-pulse"
+                                            : "text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    )}
+                                >
+                                    {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-2 w-full sm:w-auto h-10 lg:h-14">

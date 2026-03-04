@@ -26,7 +26,12 @@ import {
     LockKeyhole,
     RefreshCw,
     ClipboardList,
-    Repeat
+    Repeat,
+    Receipt,
+    Award,
+    Package2,
+    Moon,
+    MapPin
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -101,6 +106,8 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
                 { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
                 { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
                 { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
+                { label: "Réservations", icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER },
+                { label: "Livraison", icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER },
             ]
         },
         {
@@ -113,6 +120,9 @@ export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolea
                 { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
                 { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: "Audit d'Inventaire", icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: "Inventaire Annuel", icon: Package, href: "/inventaire-annuel", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
+                { label: "Commissions Vendeurs", icon: Award, href: "/commissions", color: "text-yellow-400", visible: isAdmin || isACCOUNTANT },
+                { label: "Déclarations Fiscales G50/G12", icon: Receipt, href: "/fiscal", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
             ]
         },
         {

@@ -17,6 +17,12 @@ export type TenantColumn = {
         email: string;
         phone: string | null;
     } | null;
+    usageStats?: {
+        users: number;
+        products: number;
+        orders: number;
+        totalRevenue: number;
+    }
 }
 
 export const columns: ColumnDef<TenantColumn>[] = [
@@ -59,6 +65,29 @@ export const columns: ColumnDef<TenantColumn>[] = [
                     {!orgPhone && !ownerPhone && <span className="text-xs text-muted-foreground">Aucun</span>}
                 </div>
             )
+        }
+    },
+    {
+        id: "usage",
+        header: "Utilisation",
+        cell: ({ row }) => {
+            const stats = row.original.usageStats;
+            if (!stats) return <span className="text-xs text-muted-foreground">N/A</span>;
+            return (
+                <div className="flex flex-col gap-1 text-xs">
+                    <span>U: {stats.users} | P: {stats.products}</span>
+                    <span>Cmd: {stats.orders}</span>
+                </div>
+            )
+        }
+    },
+    {
+        id: "revenue",
+        header: "Revenus",
+        cell: ({ row }) => {
+            const stats = row.original.usageStats;
+            if (!stats) return <span className="text-xs text-muted-foreground">N/A</span>;
+            return <div className="font-medium text-emerald-600">{stats.totalRevenue.toFixed(2)} DA</div>
         }
     },
     {

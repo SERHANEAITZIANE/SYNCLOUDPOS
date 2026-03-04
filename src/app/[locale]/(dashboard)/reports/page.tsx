@@ -4,7 +4,6 @@ import { redirect } from "next/navigation"
 
 const ReportsPage = async () => {
     const session = await auth()
-    // @ts-expect-error custom property
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "ACCOUNTANT" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
     }

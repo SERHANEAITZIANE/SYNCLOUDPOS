@@ -57,6 +57,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.canEdit = token.role === "ADMIN" ? true : token.canEdit
                 // @ts-expect-error custom fields
                 session.user.canDelete = token.role === "ADMIN" ? true : token.canDelete
+                // @ts-expect-error custom fields
+                session.user.defaultStoreId = token.defaultStoreId
             } else if (token.sub && session.user && !token.role) {
                 // Backward compatibility for users with old session cookies
                 // If the token lacks a role, we fetch it dynamically from the DB
@@ -65,20 +67,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     include: { tenant: true }
                 });
                 if (existingUser) {
-                    // @ts-expect-error custom fields
                     session.user.tenantId = existingUser.tenantId;
-                    // @ts-expect-error custom fields
                     session.user.isSuperadmin = existingUser.isSuperadmin;
                     // @ts-expect-error custom fields
                     session.user.role = existingUser.role;
-                    // @ts-expect-error custom fields
                     session.user.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
-                    // @ts-expect-error custom fields
                     session.user.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
-                    // @ts-expect-error custom fields
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
-                    // @ts-expect-error custom fields
                     session.user.isBlocked = existingUser.tenant?.isBlocked;
+                    session.user.defaultStoreId = existingUser.defaultStoreId;
                 }
             }
             return session
@@ -100,6 +97,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
             token.subscriptionEndsAt = existingUser.tenant.subscriptionEndsAt;
             token.isBlocked = existingUser.tenant.isBlocked;
+            token.defaultStoreId = existingUser.defaultStoreId;
             return token
         }
     },

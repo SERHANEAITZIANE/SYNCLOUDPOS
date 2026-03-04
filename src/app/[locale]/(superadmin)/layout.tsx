@@ -15,7 +15,6 @@ export default async function SuperadminLayout({
         redirect({ href: "/login", locale });
     }
 
-    // @ts-expect-error custom property
     if (!session.user?.isSuperadmin) {
         redirect({ href: "/dashboard", locale });
     }

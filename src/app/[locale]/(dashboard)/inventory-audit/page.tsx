@@ -22,7 +22,6 @@ const statusConfig = {
 
 export default async function InventoryAuditPage() {
     const session = await auth()
-    // @ts-expect-error custom property
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "STOCK_MANAGER" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
     }

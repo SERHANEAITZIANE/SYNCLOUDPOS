@@ -149,11 +149,14 @@ export async function processDueRecurringInvoices() {
                 })
 
                 // 2. Decrease stock for the products
-                for (const item of inv.items) {
-                    await tx.product.update({
-                        where: { id: item.productId },
-                        data: { stock: { decrement: item.quantity } }
-                    })
+                const storeId = (await tx.store.findFirst({ where: { tenantId: inv.tenantId } }))?.id;
+                if (storeId) {
+                    for (const item of inv.items) {
+                        await tx.storeProduct.updateMany({
+                            where: { storeId, productId: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    }
                 }
 
                 // 3. Update customer balance (if TERM)

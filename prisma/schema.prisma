@@ -46,6 +46,17 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  // Delivery API Keys
+  yalidineApiId   String?   // Yalidine API ID
+  yalidineApiToken String?  // Yalidine API Token
+  dhdApiToken     String?   // DHD delivery API Token
+  hddApiToken     String?   // HDD delivery API Token
+  // Algerian-specific settings
+  ramadanMode     Boolean   @default(false) // Enable Ramadan mode
+  commissionRate  Float     @default(0)     // Default commission % for salespeople
+  taxRegime       String?   @default("G50") // "G50" (TVA) or "G12" (IFU)
+  ifuRate         Float?    @default(5)     // IFU rate: 0.5, 5, or 12
+  
   users       User[]
   tenantUsers TenantUser[]
   products    Product[]
@@ -66,6 +77,43 @@ model Tenant {
   dailyCloses    DailyClose[]
   stockCountSessions StockCountSession[]
   recurringInvoices  RecurringInvoice[]
+  stores             Store[]
+  reservations       Reservation[]
+  deliveryShipments  DeliveryShipment[]
+}
+
+model Store {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users              User[]              @relation("UserDefaultStore")
+  storeProducts      StoreProduct[]
+  orders             Order[]
+  salesOrders        SalesOrder[]
+  purchaseOrders     PurchaseOrder[]
+  stockMovements     StockMovement[]
+  spoilages          Spoilage[]
+  dailyCloses        DailyClose[]
+}
+
+model StoreProduct {
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stock     Int      @default(0)
+  minStock  Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([storeId, productId])
 }
 
 model RecurringInvoice {
@@ -158,6 +206,8 @@ model User {
   role      String   @default("CASHIER")
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  defaultStoreId String?
+  defaultStore   Store? @relation("UserDefaultStore", fields: [defaultStoreId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
@@ -206,9 +256,11 @@ model Product {
   salesItems    SalesOrderItem[]
   spoilages   Spoilage[]
   images      Image[]
+  storeProducts  StoreProduct[]
   barcodes    Barcode[]
   stockMovements StockMovement[]
   recurringItems RecurringInvoiceItem[]
+  reservations   Reservation[]
 }
 
 model Image {
@@ -272,6 +324,7 @@ model Customer {
   salesOrders SalesOrder[]
   recurringInvoices RecurringInvoice[]
   clientType String @default("RETAIL")
+  reservations Reservation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -313,6 +366,8 @@ model Order {
   customer    Customer?   @relation(fields: [customerId], references: [id])
   tenantId    String
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  storeId     String?
+  store       Store?      @relation(fields: [storeId], references: [id])
   items       OrderItem[]
   accountId   String?
   account     TreasuryAccount? @relation(fields: [accountId], references: [id])
@@ -338,6 +393,8 @@ model PurchaseOrder {
   supplier    Supplier    @relation(fields: [supplierId], references: [id])
   tenantId    String
   tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  storeId     String?
+  store       Store?      @relation(fields: [storeId], references: [id])
   total       Decimal
   status      String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
   items       PurchaseOrderItem[]
@@ -361,6 +418,8 @@ model SalesOrder {
   id              String        @id @default(uuid())
   tenantId        String
   tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  storeId         String?
+  store           Store?        @relation(fields: [storeId], references: [id])
   customerId      String
   customer        Customer      @relation(fields: [customerId], references: [id])
   type            String        @default("ORDER") // QUOTE, ORDER, INVOICE
@@ -467,7 +526,10 @@ model Spoilage {
   
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  
+
+  storeId   String?
+  store     Store?   @relation(fields: [storeId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -476,6 +538,8 @@ model DailyClose {
   id              String   @id @default(uuid())
   tenantId        String
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  storeId         String?
+  store           Store?   @relation(fields: [storeId], references: [id])
   date            DateTime @default(now())    // The date of the close
   periodStart     DateTime                    // Start of the period counted
   periodEnd       DateTime                    // End of the period counted
@@ -507,7 +571,47 @@ model StockMovement {
   user        User?    @relation(fields: [userId], references: [id])
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  storeId     String?
+  store       Store?   @relation(fields: [storeId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
+model Reservation {
+  id            String    @id @default(uuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  quantity      Float     @default(1)
+  depositAmount Float     @default(0)
+  totalAmount   Float     @default(0)
+  status        String    @default("PENDING")
+  dueDate       DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model DeliveryShipment {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salesOrderId    String?
+  provider        String
+  trackingCode    String?
+  providerRef     String?
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  wilaya          String
+  commune         String?
+  weight          Float    @default(0.5)
+  codAmount       Float    @default(0)
+  status          String   @default("PENDING")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

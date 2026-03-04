@@ -36,42 +36,46 @@ export async function getReorderSuggestions(lookbackDays = 30): Promise<ReorderS
             salesItems: {
                 where: { salesOrder: { createdAt: { gte: since }, status: { in: ["VALIDATED", "PAID", "DELIVERED"] } } },
                 select: { quantity: true }
-            }
+            },
+            storeProducts: true
         }
     })
 
     const suggestions: ReorderSuggestion[] = []
 
     for (const p of products) {
+        const stock = p.storeProducts.reduce((sum, sp) => sum + sp.stock, 0)
+        const minStock = p.storeProducts.reduce((sum, sp) => sum + sp.minStock, 0)
+
         const totalPos = p.orderItems.reduce((s, i) => s + i.quantity, 0)
         const totalBl = p.salesItems.reduce((s, i) => s + i.quantity, 0)
         const totalSold = totalPos + totalBl
         const avgDailySales = totalSold / lookbackDays
 
         // Only suggest products that actually sell or are dangerously low
-        if (avgDailySales < 0.01 && p.stock > p.minStock) continue
+        if (avgDailySales < 0.01 && stock > minStock) continue
 
         const daysUntilStockout = avgDailySales > 0
-            ? p.stock / avgDailySales
+            ? stock / avgDailySales
             : null
 
         // Determine urgency
         let urgency: ReorderSuggestion["urgency"] = "low"
-        if (p.stock <= p.minStock) urgency = "critical"
+        if (stock <= minStock) urgency = "critical"
         else if (daysUntilStockout !== null && daysUntilStockout <= 7) urgency = "warning"
         else if (daysUntilStockout !== null && daysUntilStockout <= 14) urgency = "low"
         else continue // more than 14 days runway — skip
 
         // Suggested reorder: 2 weeks of stock + safety buffer
-        const targetStock = Math.max(avgDailySales * 30, p.minStock)
-        const suggestedQty = Math.ceil(Math.max(targetStock - p.stock, p.minStock))
+        const targetStock = Math.max(avgDailySales * 30, minStock)
+        const suggestedQty = Math.ceil(Math.max(targetStock - stock, minStock))
 
         suggestions.push({
             productId: p.id,
             productName: p.name,
             sku: null,
-            currentStock: p.stock,
-            minStock: p.minStock,
+            currentStock: stock,
+            minStock: minStock,
             avgDailySales: Math.round(avgDailySales * 100) / 100,
             daysUntilStockout: daysUntilStockout !== null ? Math.floor(daysUntilStockout) : null,
             totalSoldLast30Days: totalSold,

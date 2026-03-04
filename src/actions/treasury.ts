@@ -9,7 +9,6 @@ export async function getFinancialSummary() {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         // 1. Total Sales (Paid)
@@ -67,7 +66,6 @@ export async function createTreasuryAccount(values: z.infer<typeof TreasuryAccou
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const validatedFields = TreasuryAccountSchema.safeParse(values)
@@ -119,7 +117,6 @@ export async function getTreasuryAccounts() {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const accounts = await db.treasuryAccount.findMany({
@@ -142,7 +139,6 @@ export async function getTreasuryAccount(id: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const account = await db.treasuryAccount.findUnique({
@@ -165,7 +161,6 @@ export async function getTreasuryTransactions(accountId: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const transactions = await db.treasuryTransaction.findMany({
@@ -190,7 +185,6 @@ export async function getAllTreasuryTransactions() {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         const transactions = await db.treasuryTransaction.findMany({
@@ -223,7 +217,6 @@ export async function deleteTreasuryAccount(id: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         await db.treasuryAccount.delete({
@@ -243,7 +236,6 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         if (amount <= 0) return { error: "Amount must be greater than 0" }
@@ -313,7 +305,6 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
-        // @ts-expect-error tenantId
         const tenantId = session.user.tenantId
 
         if (amount <= 0) return { error: "Amount must be greater than 0" }

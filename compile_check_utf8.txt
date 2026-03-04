@@ -1,0 +1,134 @@
+﻿src/actions/ai-context.ts(72,43): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductWhereInput'.
+src/actions/ai-context.ts(118,37): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/ai-context.ts(129,179): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/ai-forecast.ts(48,85): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/ai-forecast.ts(60,85): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/ai-forecast.ts(72,60): error TS2551: Property 'product' does not exist on type '{ id: string; price: Decimal; tvaRate: Decimal; orderId: string; productId: string; quantity: number; priceHt: Decimal; }'. Did you mean 'productId'?
+src/actions/ai-forecast.ts(72,94): error TS2551: Property 'product' does not exist on type '{ id: string; price: Decimal; tvaRate: Decimal; orderId: string; productId: string; quantity: number; priceHt: Decimal; }'. Did you mean 'productId'?
+src/actions/ai-forecast.ts(73,62): error TS2551: Property 'product' does not exist on type '{ id: string; tvaRate: Decimal; productId: string; quantity: number; priceHt: Decimal; salesOrderId: string; unitPrice: Decimal; }'. Did you mean 'productId'?
+src/actions/ai-forecast.ts(73,96): error TS2551: Property 'product' does not exist on type '{ id: string; tvaRate: Decimal; productId: string; quantity: number; priceHt: Decimal; salesOrderId: string; unitPrice: Decimal; }'. Did you mean 'productId'?
+src/actions/alerts.ts(39,55): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductWhereInput'.
+src/actions/alerts.ts(40,49): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/analytics.ts(74,55): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductWhereInput'.
+src/actions/analytics.ts(75,49): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/analytics.ts(76,28): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]'.
+src/actions/analytics.ts(158,28): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/analytics.ts(158,39): error TS2339: Property 'minStock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/barcode.ts(21,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/brands.ts(12,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/brands.ts(45,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/brands.ts(69,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/brands.ts(93,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/brands.ts(128,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/categories.ts(12,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/categories.ts(45,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/categories.ts(69,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/categories.ts(93,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/categories.ts(128,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(28,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(65,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(117,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(161,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(179,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(226,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/customers.ts(294,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/expenses.ts(12,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/expenses.ts(36,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/expenses.ts(62,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/expenses.ts(122,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/expenses.ts(143,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/inventory-audit.ts(16,41): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/actions/inventory-audit.ts(30,40): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/inventory-audit.ts(31,38): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/inventory-audit.ts(116,33): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/ledger.ts(22,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/ledger.ts(186,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/orders.ts(62,58): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/orders.ts(67,41): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/orders.ts(224,50): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/actions/orders.ts(230,29): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type '(Without<ProductUpdateInput, ProductUncheckedUpdateInput> & ProductUncheckedUpdateInput) | (Without<...> & ProductUpdateInput)'.
+src/actions/payments.ts(11,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(26,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(61,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(105,131): error TS2339: Property 'minStock' does not exist on type '{ storeProducts: { id: string; createdAt: Date; updatedAt: Date; stock: number; storeId: string; productId: string; minStock: number; }[]; } & { id: string; name: string; tenantId: string; ... 11 more ...; brandId: string; }'.
+src/actions/purchase-orders.ts(174,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(218,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/purchase-orders.ts(258,131): error TS2339: Property 'minStock' does not exist on type '{ storeProducts: { id: string; createdAt: Date; updatedAt: Date; stock: number; storeId: string; productId: string; minStock: number; }[]; } & { id: string; name: string; tenantId: string; ... 11 more ...; brandId: string; }'.
+src/actions/purchase-orders.ts(365,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/reorder.ts(52,39): error TS2339: Property 'stock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(52,49): error TS2339: Property 'minStock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(55,17): error TS2339: Property 'stock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(60,15): error TS2339: Property 'stock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(60,26): error TS2339: Property 'minStock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(66,60): error TS2339: Property 'minStock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(67,65): error TS2339: Property 'stock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(67,74): error TS2339: Property 'minStock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(73,29): error TS2339: Property 'stock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/reorder.ts(74,25): error TS2339: Property 'minStock' does not exist on type '{ category: { name: string; }; orderItems: { quantity: number; }[]; salesItems: { quantity: number; }[]; } & { id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; ... 8 more ...; brandId: string; }'.
+src/actions/suppliers.ts(25,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/suppliers.ts(62,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/suppliers.ts(116,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/suppliers.ts(164,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/suppliers.ts(225,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/suppliers.ts(288,5): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(12,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(70,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(122,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(145,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(168,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(193,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(226,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(246,9): error TS2578: Unused '@ts-expect-error' directive.
+src/actions/treasury.ts(316,9): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/company/page.tsx(9,5): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(25,13): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(27,13): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(29,13): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(35,25): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(37,25): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/layout.tsx(45,26): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(dashboard)/products/inventory/page.tsx(9,11): error TS2322: Type '{ id: any; name: any; isFeatured: any; isArchived: any; price: string; wholesalePrice: string; dealerPrice: string; category: any; brand: any; stock: any; minStock: any; createdAt: string; }[]' is not assignable to type 'ProductColumn[]'.
+  Property 'images' is missing in type '{ id: any; name: any; isFeatured: any; isArchived: any; price: string; wholesalePrice: string; dealerPrice: string; category: any; brand: any; stock: any; minStock: any; createdAt: string; }' but required in type 'ProductColumn'.
+src/app/[locale]/(dashboard)/reports/inventory/page.tsx(19,13): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductOrderByWithRelationInput | ProductOrderByWithRelationInput[]'.
+src/app/[locale]/(dashboard)/reports/inventory/page.tsx(26,24): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(dashboard)/reports/inventory/page.tsx(27,27): error TS2339: Property 'minStock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(dashboard)/settings/components/loyalty-settings-form.tsx(44,9): error TS2322: Type 'Resolver<{ loyaltyPointsPerDa: unknown; loyaltyDaPerPoint: unknown; }, any, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>' is not assignable to type 'Resolver<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, any, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>'.
+  Types of parameters 'options' and 'options' are incompatible.
+    Type 'ResolverOptions<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>' is not assignable to type 'ResolverOptions<{ loyaltyPointsPerDa: unknown; loyaltyDaPerPoint: unknown; }>'.
+      Type 'unknown' is not assignable to type 'number'.
+src/app/[locale]/(dashboard)/settings/components/loyalty-settings-form.tsx(91,55): error TS2345: Argument of type '(data: LoyaltyFormValues) => Promise<void>' is not assignable to parameter of type 'SubmitHandler<TFieldValues>'.
+  Types of parameters 'data' and 'data' are incompatible.
+    Type 'TFieldValues' is not assignable to type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }'.
+      Type 'FieldValues' is missing the following properties from type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }': loyaltyPointsPerDa, loyaltyDaPerPoint
+src/app/[locale]/(dashboard)/settings/components/loyalty-settings-form.tsx(102,37): error TS2322: Type 'Control<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, any, TFieldValues>' is not assignable to type 'Control<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, any, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>'.
+  The types returned by '_options.resolver(...)' are incompatible between these types.
+    Type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, TFieldValues> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, TFieldValues>>' is not assignable to type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { ...; }>>'.
+      Type 'ResolverSuccess<TFieldValues>' is not assignable to type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { ...; }>>'.
+        Type 'ResolverSuccess<TFieldValues>' is not assignable to type 'ResolverSuccess<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>'.
+          Type 'TFieldValues' is not assignable to type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }'.
+            Type 'FieldValues' is missing the following properties from type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }': loyaltyPointsPerDa, loyaltyDaPerPoint
+src/app/[locale]/(dashboard)/settings/components/loyalty-settings-form.tsx(137,37): error TS2322: Type 'Control<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, any, TFieldValues>' is not assignable to type 'Control<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, any, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>'.
+  The types returned by '_options.resolver(...)' are incompatible between these types.
+    Type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, TFieldValues> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, TFieldValues>>' is not assignable to type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { ...; }>>'.
+      Type 'ResolverSuccess<TFieldValues>' is not assignable to type 'ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }> | Promise<ResolverResult<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }, { ...; }>>'.
+        Type 'ResolverSuccess<TFieldValues>' is not assignable to type 'ResolverSuccess<{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }>'.
+          Type 'TFieldValues' is not assignable to type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }'.
+            Type 'FieldValues' is missing the following properties from type '{ loyaltyPointsPerDa: number; loyaltyDaPerPoint: number; }': loyaltyPointsPerDa, loyaltyDaPerPoint
+src/app/[locale]/(pos)/layout.tsx(19,17): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(pos)/layout.tsx(21,17): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(pos)/layout.tsx(23,17): error TS2578: Unused '@ts-expect-error' directive.
+src/app/[locale]/(pos)/pos/page.tsx(63,13): error TS2353: Object literal may only specify known properties, and 'stock' does not exist in type 'ProductSelect<DefaultArgs>'.
+src/app/[locale]/(pos)/pos/page.tsx(81,21): error TS2339: Property 'stock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(pos)/pos/page.tsx(82,31): error TS2339: Property 'minStock' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(pos)/pos/page.tsx(83,24): error TS2551: Property 'category' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'. Did you mean 'categoryId'?
+src/app/[locale]/(pos)/pos/page.tsx(88,24): error TS2339: Property 'images' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(pos)/pos/page.tsx(89,24): error TS2339: Property 'barcodes' does not exist on type '{ id: string; name: string; tenantId: string; createdAt: Date; updatedAt: Date; description: string; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 5 more ...; brandId: string; }'.
+src/app/[locale]/(superadmin)/layout.tsx(18,5): error TS2578: Unused '@ts-expect-error' directive.
+src/app/api/backup/export/route.ts(13,9): error TS2578: Unused '@ts-expect-error' directive.
+src/app/api/backup/import/route.ts(13,9): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(68,21): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(70,21): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(74,21): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(76,21): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(78,21): error TS2578: Unused '@ts-expect-error' directive.
+src/auth.ts(80,21): error TS2578: Unused '@ts-expect-error' directive.

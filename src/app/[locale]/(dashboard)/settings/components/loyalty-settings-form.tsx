@@ -37,11 +37,11 @@ interface LoyaltySettingsFormProps {
 }
 
 export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) => {
-    const t = useTranslations("Settings")
+    const t = useTranslations("Settings.LoyaltySettingsForm")
     const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<z.infer<typeof loyaltySchema>>({
-        resolver: zodResolver(loyaltySchema),
+        resolver: zodResolver(loyaltySchema) as any,
         defaultValues: {
             loyaltyPointsPerDa: initialData?.loyaltyPointsPerDa ?? 1,
             loyaltyDaPerPoint: initialData?.loyaltyDaPerPoint ?? 100,
@@ -59,10 +59,10 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
             if (res.error) {
                 toast.error(res.error)
             } else {
-                toast.success(res.success || t("settingsUpdated"))
+                toast.success(res.success || t("success"))
             }
         } catch (error) {
-            toast.error(t("errorDefault"))
+            toast.error(t("error"))
         } finally {
             setIsLoading(false)
         }
@@ -79,9 +79,9 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                         <Star className="h-6 w-6 fill-amber-500" />
                     </div>
                     <div>
-                        <CardTitle className="text-xl font-bold">{t("loyaltyProgram") || "Programme de Fidélité"}</CardTitle>
+                        <CardTitle className="text-xl font-bold">{t("loyaltyProgram")}</CardTitle>
                         <CardDescription className="text-gray-500 mt-1">
-                            {t("loyaltyDesc") || "Configurez comment les clients gagnent et dépensent leurs points."}
+                            {t("loyaltyDesc")}
                         </CardDescription>
                     </div>
                 </div>
@@ -96,14 +96,14 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                                     <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg">
                                         <Zap className="h-4 w-4" />
                                     </div>
-                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("earningPoints") || "Gagner des points"}</h3>
+                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("earningPoints")}</h3>
                                 </div>
                                 <FormField
                                     control={form.control}
                                     name="loyaltyPointsPerDa"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Points par 1 DA dépensé</FormLabel>
+                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">{t("pointsPerDa")}</FormLabel>
                                             <FormControl>
                                                 <div className="relative">
                                                     <Input
@@ -118,7 +118,7 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                                                 </div>
                                             </FormControl>
                                             <FormDescription className="text-xs">
-                                                Ex: Si vous mettez 1, un achat de 1000 DA = {1000 * (currentPointsPerDa || 1)} points gagnés.
+                                                {t("exampleEarn", { val: 1, points: 1000 * (currentPointsPerDa || 1) })}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -131,14 +131,14 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                                     <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg">
                                         <Star className="h-4 w-4" />
                                     </div>
-                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("spendingPoints") || "Dépenser des points"}</h3>
+                                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("spendingPoints")}</h3>
                                 </div>
                                 <FormField
                                     control={form.control}
                                     name="loyaltyDaPerPoint"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">Points requis pour 1 DA de réduction</FormLabel>
+                                            <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">{t("daPerPoint")}</FormLabel>
                                             <FormControl>
                                                 <div className="relative">
                                                     <Input
@@ -153,7 +153,7 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                                                 </div>
                                             </FormControl>
                                             <FormDescription className="text-xs">
-                                                Ex: Si vous mettez 100, une réduction de 10 DA nécessitera {10 * (currentDaPerPoint || 100)} points.
+                                                {t("exampleSpend", { val: 100, points: 10 * (currentDaPerPoint || 100) })}
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
@@ -165,8 +165,8 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                         {/* Summary Widget */}
                         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 p-4 rounded-xl border border-indigo-100/50 dark:border-indigo-900/50 flex items-center justify-between">
                             <div className="space-y-1">
-                                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Résumé du programme</p>
-                                <p className="text-xs text-indigo-700/80 dark:text-indigo-300/80">Un client dépensant 10,000 DA obtiendra une réduction future de :</p>
+                                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">{t("summaryTitle")}</p>
+                                <p className="text-xs text-indigo-700/80 dark:text-indigo-300/80">{t("summaryDesc")}</p>
                             </div>
                             <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 bg-white/50 dark:bg-slate-900/50 px-3 py-1.5 rounded-lg">
                                 {Number(((10000 * (currentPointsPerDa || 1)) / (currentDaPerPoint || 100)).toFixed(2))} DA
@@ -180,7 +180,7 @@ export const LoyaltySettingsForm = ({ initialData }: LoyaltySettingsFormProps) =
                                 className="h-11 px-8 rounded-xl font-bold shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
                             >
                                 <Save className="mr-2 h-4 w-4" />
-                                {t("saveChanges") || "Sauvegarder"}
+                                {t("saveChanges")}
                             </Button>
                         </div>
                     </form>

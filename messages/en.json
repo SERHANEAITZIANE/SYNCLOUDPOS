@@ -472,7 +472,7 @@
     "customer": "Customer"
   },
   "Settings": {
-    "title": "Store Settings",
+    "title": "Settings",
     "subtitle": "Manage your store preferences and details",
     "fields": {
       "storeName": "Store Name",
@@ -489,6 +489,270 @@
     "messages": {
       "success": "Store settings updated.",
       "error": "Something went wrong."
+    },
+    "Tabs": {
+      "company": "Company",
+      "printing": "Printing",
+      "pos": "POS Defaults",
+      "ai": "AI",
+      "advanced": "Advanced",
+      "loyalty": "Loyalty",
+      "backup": "Backup",
+      "whatsapp": "WhatsApp"
+    },
+    "description": "Configure your application, printing preferences, and POS settings.",
+    "Company": {
+      "title": "Company Information",
+      "description": "This information appears on all your documents (Delivery Notes, Invoices, Receipts)."
+    },
+    "Printing": {
+      "title": "Printing Settings",
+      "description": "Configure paper size, Delivery Note template, and POS receipt options."
+    },
+    "PosDefaults": {
+      "title": "POS — Default Settings",
+      "description": "Choose the default register, payment method, and options for each sale."
+    },
+    "Ai": {
+      "title": "Artificial Intelligence",
+      "description": "Configure your API keys to enable OCR scanning and AI features."
+    },
+    "Advanced": {
+      "title": "Advanced Settings",
+      "description": "Technical parameters reserved for administrators. Use with caution."
+    },
+    "Loyalty": {
+      "title": "Loyalty Program",
+      "description": "Configure the earning and redemption rates for customer loyalty points."
+    },
+    "Backup": {
+      "title": "Backup & Restore",
+      "description": "Export all your data or restore from a previous backup."
+    },
+    "Whatsapp": {
+      "title": "WhatsApp Business",
+      "description": "Send notifications, debt reminders, and receipts via WhatsApp."
+    },
+    "GeneralForm": {
+      "success": "Settings saved.",
+      "error": "An error occurred.",
+      "ownerName": {
+        "label": "Owner Name",
+        "placeholder": "Name of the owner"
+      },
+      "name": {
+        "label": "Company",
+        "placeholder": "Company name"
+      },
+      "address": {
+        "label": "Address",
+        "placeholder": "Full address"
+      },
+      "activity": {
+        "label": "Activity",
+        "placeholder": "Business sector"
+      },
+      "wilaya": {
+        "label": "State/Province",
+        "placeholder": "e.g. ALGIERS"
+      },
+      "commune": {
+        "label": "City",
+        "placeholder": "e.g. DAR EL BEIDA"
+      },
+      "phone": {
+        "label": "Phone",
+        "placeholder": "0696 92 82 27"
+      },
+      "fax": {
+        "label": "Fax",
+        "placeholder": "023 83 11 25"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "contact@company.com"
+      },
+      "nif": {
+        "label": "Tax ID (NIF)",
+        "placeholder": "191441002919..."
+      },
+      "rc": {
+        "label": "Commercial Register (RC)",
+        "placeholder": "16/00-3853278 A15"
+      },
+      "artImposition": {
+        "label": "Tax Article",
+        "placeholder": "16204594504"
+      },
+      "nis": {
+        "label": "Statistical ID (NIS)",
+        "placeholder": "199144100291916"
+      },
+      "bankAccount": {
+        "label": "Bank Account",
+        "placeholder": "001002680300001520/32"
+      },
+      "logo": {
+        "label": "Photo / Logo"
+      },
+      "headerText": {
+        "label": "Header",
+        "placeholder": "Header text to print on documents..."
+      },
+      "blTemplate": {
+        "label": "Delivery Note Template",
+        "placeholder": "Select template",
+        "options": {
+          "standard": "Standard (Classic)",
+          "compact": "Compact (No Header)",
+          "aitee": "AITEE (Invoice Style)"
+        }
+      },
+      "submit": "Save",
+      "saving": "Saving..."
+    },
+    "PrintingSettingsForm": {
+      "infoBanner": "Printer preferences are saved on <strong>this device only</strong>. Select <em>«Default»</em> to use the printer configured in Windows. When printing, the browser will open the system dialog if necessary.",
+      "printers": "Printers",
+      "printerA4": {
+        "label": "A4 Printer",
+        "hint": "Used for Delivery Notes and Invoices"
+      },
+      "printerReceipt": {
+        "label": "Receipt Printer",
+        "hint": "Thermal printer for POS receipts"
+      },
+      "printerBarcode": {
+        "label": "Barcode Printer",
+        "hint": "Dedicated printer for product labels"
+      },
+      "barcodeModel": "Barcode Label Model",
+      "blTemplate": {
+        "title": "Delivery Note Template",
+        "label": "Template to use"
+      },
+      "displayOptions": "Display Options",
+      "showBarcodeOnReceipt": {
+        "label": "Barcode on POS Receipt",
+        "hint": "Prints a scannable barcode at the bottom of the receipt"
+      },
+      "showLogoOnBL": {
+        "label": "Logo on Delivery Note",
+        "hint": "Prints the logo at the top of the Delivery Note"
+      },
+      "success": "Printing settings saved!",
+      "error": "Error saving settings.",
+      "submit": "Save Preferences",
+      "saving": "Saving...",
+      "printersOptions": {
+        "default": "🖨️ System Default Printer",
+        "custom": "✏️ Enter Manually...",
+        "customPlaceholder": "Enter exact printer name..."
+      },
+      "barcodeModels": {
+        "classic": "Classic",
+        "modern": "Modern (Dark)",
+        "elegant": "Elegant",
+        "retro": "Retro",
+        "minimal": "Minimalist",
+        "bold": "Bold"
+      }
+    },
+    "PosDefaultsForm": {
+      "success": "POS settings saved on this device!",
+      "accountSection": {
+        "title": "Default Register / Bank",
+        "label": "Default deposit account",
+        "placeholder": "Select an account",
+        "none": "— None (enter each time) —",
+        "cash": "Cash Registers",
+        "banks": "Banks",
+        "hint": "This account will be automatically pre-selected in the POS for each sale."
+      },
+      "paymentSection": {
+        "title": "Default Payment Method",
+        "label": "Payment mode",
+        "methods": {
+          "cash": "Cash",
+          "card": "Credit Card",
+          "transfer": "Transfer",
+          "check": "Check",
+          "term": "On Credit"
+        }
+      },
+      "receiptDisplay": {
+        "title": "Receipt Display",
+        "tva": {
+          "label": "Show VAT per line",
+          "hint": "Displays the VAT rate and amount for each item"
+        },
+        "ht": {
+          "label": "Show Excl. Tax prices",
+          "hint": "Displays the price excluding tax in addition to the inclusive price"
+        }
+      },
+      "warning": "⚠️ These settings are saved <strong>on this device only</strong> (localStorage). Each terminal can have its own settings.",
+      "submit": "Save"
+    },
+    "AiSettingsForm": {
+      "success": "AI settings saved!",
+      "error": "Error saving settings.",
+      "title": "Artificial Intelligence Model",
+      "description": "Choose your AI provider for invoice OCR and the smart assistant.",
+      "gemini": {
+        "label": "Google Gemini API Key",
+        "hint": "Get your free key at"
+      },
+      "openai": {
+        "label": "OpenAI API Key",
+        "hint": "Get your key at"
+      },
+      "anthropic": {
+        "label": "Anthropic API Key (Claude)",
+        "hint": "Get your key at"
+      },
+      "submit": "Save",
+      "saving": "Saving...",
+      "active": "Active"
+    },
+    "LoyaltySettingsForm": {
+      "success": "Settings saved!",
+      "error": "An error occurred.",
+      "loyaltyProgram": "Loyalty Program",
+      "loyaltyDesc": "Configure how customers earn and spend their points.",
+      "earningPoints": "Earning points",
+      "pointsPerDa": "Points per 1 DA spent",
+      "exampleEarn": "Ex: If you enter {val}, a 1000 DA purchase = {points} points earned.",
+      "spendingPoints": "Spending points",
+      "daPerPoint": "Points required for 1 DA discount",
+      "exampleSpend": "Ex: If you enter {val}, a 10 DA discount will require {points} points.",
+      "summaryTitle": "Program Summary",
+      "summaryDesc": "A customer spending 10,000 DA will get a future discount of:",
+      "saveChanges": "Save"
+    },
+    "WhatsAppSettingsForm": {
+      "success": "WhatsApp settings saved!",
+      "error": "Error saving settings.",
+      "title": "WhatsApp Business API",
+      "desc": "Send receipts and debt reminders directly on WhatsApp.",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "token": {
+        "label": "Access Token (Permanent)",
+        "hint": "Generate a permanent token on",
+        "link": "Meta for Developers"
+      },
+      "phoneId": {
+        "label": "Phone Number ID",
+        "hint": "Found in WhatsApp → Phone numbers"
+      },
+      "phone": {
+        "label": "Sender WhatsApp Number",
+        "hint": "International format with country code (e.g., +213 for Algeria)"
+      },
+      "guide": "Configuration Guide",
+      "submit": "Save",
+      "saving": "Saving..."
     }
   },
   "Receipt": {
@@ -780,34 +1044,39 @@
     }
   },
   "DailyClose": {
-    "title": "Daily Close",
-    "subtitle": "End-of-day report — revenue breakdown by payment method.",
-    "computeToday": "Compute Today's Close",
-    "computing": "Computing...",
+    "title": "Cash Register Closure",
+    "subtitle": "End of day report and register closure",
     "reset": "Reset",
     "print": "Print",
-    "save": "Save Close Report",
-    "saved": "Report saved",
-    "emptyTitle": "No report yet",
-    "emptyDesc": "Click to compute today's revenue and expense totals.",
+    "save": "Save Closure",
+    "computing": "Computing...",
+    "computeToday": "Compute Today's Closure",
+    "emptyTitle": "No closure in progress",
+    "emptyDesc": "Start the computation to see today's operations and save the closure.",
     "period": "Period",
     "revenueBreakdown": "Revenue Breakdown",
-    "expensesAndNet": "Expenses & Net Cash",
     "cash": "Cash",
     "transfer": "Bank Transfer",
     "check": "Check",
-    "term": "On Account (Credit)",
-    "cashIn": "Cash collected",
+    "term": "On Credit",
     "totalRevenue": "Total Revenue",
-    "totalExpenses": "Total Expenses",
-    "expenses": "Expenses (deducted)",
+    "expensesAndNet": "Expenses & Net Cash",
+    "cashIn": "Cash In",
+    "expenses": "Daily Expenses",
     "netCash": "Net Cash",
-    "posOrders": "POS Sales",
+    "notes": "Cashier Notes (optional)",
+    "notesPlaceholder": "Discrepancies, notes, incidents...",
+    "posOrders": "Point of Sale Orders",
     "blOrders": "Delivery Notes",
+    "totalExpenses": "Total Expenses",
     "total": "Total",
     "transactions": "transactions",
-    "notes": "Notes / Observations",
-    "notesPlaceholder": "e.g. cash drawer shortage of 200, missing receipt...",
-    "history": "Closing Report History"
+    "history": "Closure History",
+    "saved": "Closure saved successfully",
+    "noHistory": "No history available",
+    "date": "Date",
+    "amount": "Net Amount",
+    "actions": "Actions",
+    "view": "View"
   }
 }

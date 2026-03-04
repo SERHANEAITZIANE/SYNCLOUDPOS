@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Sparkles, ExternalLink } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface AiSettingsFormProps {
     initialProvider: string
@@ -23,6 +24,7 @@ export const AiSettingsForm = ({
     initialAnthropicApiKey
 }: AiSettingsFormProps) => {
     const router = useRouter()
+    const t = useTranslations("Settings.AiSettingsForm")
     const [loading, setLoading] = useState(false)
     const [provider, setProvider] = useState(initialProvider || "GEMINI")
     const [geminiApiKey, setGeminiApiKey] = useState(initialGeminiApiKey || "")
@@ -39,10 +41,10 @@ export const AiSettingsForm = ({
                 anthropicApiKey
             })
             if (result.error) { toast.error(result.error); return }
-            toast.success("Paramètres IA sauvegardés !")
+            toast.success(t("success"))
             router.refresh()
         } catch {
-            toast.error("Erreur lors de la sauvegarde.")
+            toast.error(t("error"))
         } finally {
             setLoading(false)
         }
@@ -59,10 +61,10 @@ export const AiSettingsForm = ({
                         <div>
                             <h3 className="font-semibold text-indigo-900 dark:text-indigo-200 flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-indigo-500 md:hidden" />
-                                Modèle d&apos;Intelligence Artificielle
+                                {t("title")}
                             </h3>
                             <p className="text-sm text-indigo-700 dark:text-indigo-400 mt-1">
-                                Choisissez votre fournisseur d&apos;IA pour l&apos;OCR des factures et l&apos;assistant intelligent.
+                                {t("description")}
                             </p>
                         </div>
 
@@ -73,6 +75,7 @@ export const AiSettingsForm = ({
                                 icon="✨"
                                 selected={provider === "GEMINI"}
                                 onSelect={() => setProvider("GEMINI")}
+                                activeText={t("active")}
                             />
                             <ProviderCard
                                 id="OPENAI"
@@ -80,6 +83,7 @@ export const AiSettingsForm = ({
                                 icon="🧠"
                                 selected={provider === "OPENAI"}
                                 onSelect={() => setProvider("OPENAI")}
+                                activeText={t("active")}
                             />
                             <ProviderCard
                                 id="ANTHROPIC"
@@ -87,6 +91,7 @@ export const AiSettingsForm = ({
                                 icon="👁️"
                                 selected={provider === "ANTHROPIC"}
                                 onSelect={() => setProvider("ANTHROPIC")}
+                                activeText={t("active")}
                             />
                         </div>
                     </div>
@@ -96,7 +101,7 @@ export const AiSettingsForm = ({
                 <div className="space-y-5">
                     {provider === "GEMINI" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Label>Clé API Google Gemini</Label>
+                            <Label>{t("gemini.label")}</Label>
                             <Input
                                 type="password"
                                 placeholder="AIzaSy..."
@@ -106,7 +111,7 @@ export const AiSettingsForm = ({
                                 disabled={loading}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Obtenez gratuitement votre clé sur{" "}
+                                {t("gemini.hint")}{" "}
                                 <a
                                     href="https://aistudio.google.com/app/apikey"
                                     target="_blank"
@@ -121,7 +126,7 @@ export const AiSettingsForm = ({
 
                     {provider === "OPENAI" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Label>Clé API OpenAI</Label>
+                            <Label>{t("openai.label")}</Label>
                             <Input
                                 type="password"
                                 placeholder="sk-proj-..."
@@ -131,7 +136,7 @@ export const AiSettingsForm = ({
                                 disabled={loading}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Obtenez votre clé sur{" "}
+                                {t("openai.hint")}{" "}
                                 <a
                                     href="https://platform.openai.com/api-keys"
                                     target="_blank"
@@ -146,7 +151,7 @@ export const AiSettingsForm = ({
 
                     {provider === "ANTHROPIC" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Label>Clé API Anthropic (Claude)</Label>
+                            <Label>{t("anthropic.label")}</Label>
                             <Input
                                 type="password"
                                 placeholder="sk-ant-..."
@@ -156,7 +161,7 @@ export const AiSettingsForm = ({
                                 disabled={loading}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Obtenez votre clé sur{" "}
+                                {t("anthropic.hint")}{" "}
                                 <a
                                     href="https://console.anthropic.com/settings/keys"
                                     target="_blank"
@@ -172,7 +177,7 @@ export const AiSettingsForm = ({
 
                 <div className="flex justify-end pt-2">
                     <Button onClick={handleSave} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-36">
-                        {loading ? "Sauvegarde..." : "Sauvegarder"}
+                        {loading ? t("saving") : t("submit")}
                     </Button>
                 </div>
             </div>
@@ -180,7 +185,7 @@ export const AiSettingsForm = ({
     )
 }
 
-function ProviderCard({ id, label, icon, selected, onSelect }: { id: string, label: string, icon: string, selected: boolean, onSelect: () => void }) {
+function ProviderCard({ id, label, icon, selected, onSelect, activeText }: { id: string, label: string, icon: string, selected: boolean, onSelect: () => void, activeText: string }) {
     return (
         <button
             onClick={(e) => { e.preventDefault(); onSelect(); }}
@@ -198,7 +203,7 @@ function ProviderCard({ id, label, icon, selected, onSelect }: { id: string, lab
                 <span className={`font-semibold text-sm ${selected ? "text-indigo-900 dark:text-indigo-100" : "text-gray-700 dark:text-gray-300"}`}>
                     {label}
                 </span>
-                {selected && <span className="block text-[10px] text-indigo-500 font-bold uppercase tracking-wider mt-0.5">Actif</span>}
+                {selected && <span className="block text-[10px] text-indigo-500 font-bold uppercase tracking-wider mt-0.5">{activeText}</span>}
             </div>
         </button>
     )

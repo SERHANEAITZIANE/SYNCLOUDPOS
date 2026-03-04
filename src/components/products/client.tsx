@@ -115,6 +115,8 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                     { key: t("fields.brand"), label: t("fields.brand") },
                     { key: t("fields.barcode"), label: t("fields.barcode") },
                     { key: t("fields.description"), label: t("fields.description") },
+                    { key: "favoris", label: "Favoris (1 / 0)" },
+                    { key: "archive", label: "Archivé (1 / 0)" },
                 ]}
                 onImport={importProducts as any}
                 templateFileName="produits_template"

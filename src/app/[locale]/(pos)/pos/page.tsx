@@ -19,12 +19,25 @@ const PosPage = async () => {
     const tenantId = await getActiveTenantId()
     if (!tenantId) return <div>{t("noTenant")}</div>
 
+    const defaultStoreId = session?.user?.defaultStoreId;
+    const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
+
+    if (!storeIdToUse) {
+        return <div>No Store Available</div> // Consider adding to translation if needed
+    }
+
     let storeName = "Premium POS"
     let storeAddress = ""
     let storePhone = ""
     const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
-    if (tenant?.name) storeName = tenant.name
-    if (tenant?.address) storeAddress = tenant.address
+    const store = await db.store.findUnique({ where: { id: storeIdToUse } })
+
+    if (store?.name) storeName = store.name
+    else if (tenant?.name) storeName = tenant.name
+
+    if (store?.address) storeAddress = store.address
+    else if (tenant?.address) storeAddress = tenant.address
+
     if (tenant?.phone) storePhone = tenant.phone
 
     const categories = await getCategories()
@@ -60,34 +73,39 @@ const PosPage = async () => {
             description: true,
             price: true,
             cost: true,
-            stock: true,
-            minStock: true,
             categoryId: true,
             category: { select: { name: true } },
             wholesalePrice: true,
             dealerPrice: true,
             tvaRate: true,
+            storeProducts: {
+                where: { storeId: storeIdToUse }
+            },
             barcodes: { select: { value: true } },
             images: { select: { url: true }, take: 1 }
         }
     })
 
-    const formattedProducts = rawProducts.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description || "",
-        price: Number(item.price),
-        cost: Number(item.cost || 0),
-        stock: item.stock,
-        minStock: Number(item.minStock || 0),
-        category: item.category?.name || t("uncategorized"),
-        categoryId: item.categoryId || "",
-        wholesalePrice: Number(item.wholesalePrice || item.price),
-        dealerPrice: Number(item.dealerPrice || item.price),
-        tvaRate: Number(item.tvaRate ?? 19),
-        imageUrl: item.images?.[0]?.url || "",
-        barcodes: item.barcodes?.map(b => b.value) || []
-    }))
+    const formattedProducts = rawProducts.map((item: any) => {
+        const stock = item.storeProducts?.[0]?.stock || 0;
+        const minStock = item.storeProducts?.[0]?.minStock || 0;
+        return {
+            id: item.id,
+            name: item.name,
+            description: item.description || "",
+            price: Number(item.price),
+            cost: Number(item.cost || 0),
+            stock,
+            minStock,
+            category: item.category?.name || t("uncategorized"),
+            categoryId: item.categoryId || "",
+            wholesalePrice: Number(item.wholesalePrice || item.price),
+            dealerPrice: Number(item.dealerPrice || item.price),
+            tvaRate: Number(item.tvaRate ?? 19),
+            imageUrl: item.images?.[0]?.url || "",
+            barcodes: item.barcodes?.map((b: any) => b.value) || []
+        }
+    })
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">

@@ -25,7 +25,6 @@ export const getCustomers = async (page: number = 1, pageSize: number = 20, sear
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized", customers: [], totalCount: 0 }
 
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     if (!tenantId) return { error: "Tenant ID missing from session", customers: [], totalCount: 0 }
@@ -62,7 +61,6 @@ export const createCustomer = async (data: CustomerData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
 
     try {
@@ -114,29 +112,58 @@ export const deleteCustomer = async (id: string) => {
 export const importCustomers = async (rows: CustomerData[]) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId not typed in session yet
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     const validRows = rows.filter(r => r.name?.trim())
     const errors = rows.length - validRows.length
 
+    // Helper to parse messy number strings like "17,000.00 DA" or "1 500"
+    const parseNumeric = (val: string | undefined | null | number) => {
+        if (val === undefined || val === null || val === "") return 0
+        if (typeof val === "number") return val
+
+        // Remove currency symbols, spaces, etc
+        let clean = String(val).replace(/[^0-9.,-]/g, "")
+
+        if (clean.includes(",") && clean.includes(".")) {
+            const lastComma = clean.lastIndexOf(",")
+            const lastDot = clean.lastIndexOf(".")
+            if (lastComma > lastDot) {
+                clean = clean.replace(/\./g, "").replace(",", ".")
+            } else {
+                clean = clean.replace(/,/g, "")
+            }
+        } else if (clean.includes(",")) {
+            clean = clean.replace(/,/g, ".")
+        }
+
+        const parsed = parseFloat(clean)
+        return isNaN(parsed) ? 0 : parsed
+    }
+
     // Build all create data objects in memory (no DB calls needed)
-    const createData = validRows.map(row => ({
-        name: row.name.trim(),
-        phone: row.phone || undefined,
-        email: row.email || undefined,
-        address: row.address || undefined,
-        city: row.city || undefined,
-        nif: row.nif || undefined,
-        nis: row.nis || undefined,
-        artImposition: row.artImposition || undefined,
-        rc: row.rc || undefined,
-        rib: row.rib || undefined,
-        clientType: row.clientType || "RETAIL",
-        barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
-        tenantId
-    }))
+    const createData = validRows.map(row => {
+        // Support 'balance', 'solde', 'Solde', 'solde initial' 
+        const balanceInput = (row as any)["balance"] || (row as any)["solde"] || (row as any)["Solde"] || (row as any)["solde initial"] || (row as any)["Solde Initial"] || 0;
+
+        return {
+            name: row.name.trim(),
+            phone: row.phone || undefined,
+            email: row.email || undefined,
+            address: row.address || undefined,
+            city: row.city || undefined,
+            nif: row.nif || undefined,
+            nis: row.nis || undefined,
+            artImposition: row.artImposition || undefined,
+            rc: row.rc || undefined,
+            rib: row.rib || undefined,
+            clientType: row.clientType || "RETAIL",
+            balance: parseNumeric(balanceInput),
+            barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
+            tenantId
+        }
+    })
 
     let created = 0
     try {
@@ -158,7 +185,6 @@ export const importCustomers = async (rows: CustomerData[]) => {
 export const getUnpaidCustomers = async () => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing" }
 
@@ -176,7 +202,6 @@ export const getUnpaidCustomers = async () => {
 export const registerCustomerPayment = async (data: { customerId: string; amount: number; accountId: string; notes?: string; date?: Date | string }) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing" }
 
@@ -223,7 +248,6 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
 export const registerCustomerLoan = async (data: { customerId: string; amount: number; accountId: string; notes?: string; date?: Date | string }) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing" }
 
@@ -291,7 +315,6 @@ export const registerCustomerLoan = async (data: { customerId: string; amount: n
 export const getCustomerLoans = async (customerId?: string) => {
     const session = await auth()
     if (!session?.user?.id) return []
-    // @ts-expect-error tenantId
     const tenantId = session.user.tenantId
     if (!tenantId) return []
 

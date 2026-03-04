@@ -29,6 +29,11 @@ export function useProductColumns(): ColumnDef<ProductColumn>[] {
         {
             accessorKey: "name",
             header: t("fields.name"),
+            cell: ({ row }) => (
+                <div className="whitespace-normal break-words min-w-[200px] max-w-[250px] md:max-w-[350px] lg:max-w-[500px]">
+                    {row.original.name}
+                </div>
+            )
         },
         {
             accessorKey: "isArchived",

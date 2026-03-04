@@ -18,7 +18,6 @@ function calculateEAN13Checksum(barcode12: string): number {
 
 export const generateNextBarcode = async () => {
     const session = await auth();
-    // @ts-expect-error tenantId is not in session type yet
     const tenantId = session?.user?.tenantId;
 
     if (!tenantId) {
