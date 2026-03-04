@@ -8,7 +8,13 @@ const nextConfig: import('next').NextConfig = {
         ignoreBuildErrors: true,
     },
 
+    // Performance optimizations
+    compress: true,
+    poweredByHeader: false,
+
     images: {
+        formats: ['image/avif', 'image/webp'],
+        minimumCacheTTL: 86400, // 24h cache for images
         localPatterns: [
             {
                 pathname: '/uploads/**',
@@ -26,6 +32,28 @@ const nextConfig: import('next').NextConfig = {
             }
         ],
     },
+
+    // Bundle optimization: skip unused heavy packages from client
+    serverExternalPackages: ['@prisma/client', 'bcryptjs'],
+
+    async headers() {
+        return [
+            {
+                source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)',
+                locale: false,
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
+                ],
+            },
+            {
+                source: '/_next/static/:path*',
+                headers: [
+                    { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }
+                ],
+            },
+        ]
+    },
+
     async rewrites() {
         return [
             {
@@ -37,3 +65,4 @@ const nextConfig: import('next').NextConfig = {
 };
 
 export default withNextIntl(nextConfig);
+

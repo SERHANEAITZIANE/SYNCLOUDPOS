@@ -215,6 +215,9 @@ model User {
   tenantUsers TenantUser[]
   spoilages   Spoilage[]
   stockMovements StockMovement[]
+
+  @@index([tenantId])
+  @@index([email])
 }
 
 model TenantUser {
@@ -237,7 +240,7 @@ model Product {
   cost        Decimal?
   wholesalePrice Decimal?
   dealerPrice    Decimal?
-  tvaRate     Decimal   @default(19) // 0, 9, or 19%
+  tvaRate     Decimal   @default(19)
   isFeatured  Boolean   @default(false)
   isArchived  Boolean   @default(false)
   stock       Int      @default(0)
@@ -261,6 +264,12 @@ model Product {
   stockMovements StockMovement[]
   recurringItems RecurringInvoiceItem[]
   reservations   Reservation[]
+
+  @@index([tenantId])
+  @@index([tenantId, isArchived])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, createdAt])
+  @@index([name])
 }
 
 model Image {
@@ -309,11 +318,11 @@ model Customer {
   address   String?
   city      String?
   taxId     String?  // legacy field
-  nif       String?  // Numéro d'Identification Fiscale
-  nis       String?  // Numéro d'Identifiant Statistique
-  artImposition String?  // Article d'Imposition
-  rc        String?  // Registre de Commerce (NRC)
-  rib       String?  // Relevé d'Identité Bancaire
+  nif       String?
+  nis       String?
+  artImposition String?
+  rc        String?
+  rib       String?
   notes     String?
   barcode   String?  @unique
   loyaltyPoints Int @default(0)
@@ -327,6 +336,10 @@ model Customer {
   reservations Reservation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, balance])
+  @@index([name])
 }
 
 model Supplier {
@@ -353,13 +366,13 @@ model Supplier {
 
 model Order {
   id          String      @id @default(uuid())
-  subtotal    Decimal     @default(0)  // Total HT
-  tvaAmount   Decimal     @default(0)  // Total TVA
-  stampTax    Decimal     @default(0)  // Droit de Timbre (Cash only)
-  total       Decimal                  // Total TTC = subtotal + tvaAmount + stampTax
+  subtotal    Decimal     @default(0)
+  tvaAmount   Decimal     @default(0)
+  stampTax    Decimal     @default(0)
+  total       Decimal
   paidAmount  Decimal     @default(0)
-  status      String      @default("COMPLETED") // COMPLETED, PROFORMA, CANCELLED
-  paymentMethod String    @default("CASH") // CASH, TRANSFER, CHECK, TERM
+  status      String      @default("COMPLETED")
+  paymentMethod String    @default("CASH")
   userId      String
   user        User        @relation(fields: [userId], references: [id])
   customerId  String?
@@ -373,6 +386,12 @@ model Order {
   account     TreasuryAccount? @relation(fields: [accountId], references: [id])
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, storeId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, storeId, status, createdAt])
 }
 
 model OrderItem {
@@ -396,12 +415,17 @@ model PurchaseOrder {
   storeId     String?
   store       Store?      @relation(fields: [storeId], references: [id])
   total       Decimal
-  status      String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  status      String      @default("PENDING")
   items       PurchaseOrderItem[]
   accountId   String?
   account     TreasuryAccount? @relation(fields: [accountId], references: [id])
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, storeId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
 }
 
 model PurchaseOrderItem {
@@ -422,14 +446,14 @@ model SalesOrder {
   store           Store?        @relation(fields: [storeId], references: [id])
   customerId      String
   customer        Customer      @relation(fields: [customerId], references: [id])
-  type            String        @default("ORDER") // QUOTE, ORDER, INVOICE
-  status          String        @default("DRAFT") // DRAFT, VALIDATED, PAID, CANCELLED
-  receiptNumber   String?       // Custom receipt number (e.g. BL0023/02/2026)
-  paymentMethod   String        @default("CASH") // CASH, TRANSFER, CHECK, TERM
-  subtotal        Decimal       @default(0) // Total HT
-  tvaAmount       Decimal       @default(0) // Total TVA
-  stampTax        Decimal       @default(0) // Droit de Timbre
-  total           Decimal       // Devient Subtotal + TVA + Timbre
+  type            String        @default("ORDER")
+  status          String        @default("DRAFT")
+  receiptNumber   String?
+  paymentMethod   String        @default("CASH")
+  subtotal        Decimal       @default(0)
+  tvaAmount       Decimal       @default(0)
+  stampTax        Decimal       @default(0)
+  total           Decimal
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -437,6 +461,12 @@ model SalesOrder {
   recurringInvoice   RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
 
   items           SalesOrderItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, storeId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, storeId, status, createdAt])
 }
 
 model SalesOrderItem {
@@ -475,6 +505,9 @@ model Expense {
   updatedAt   DateTime        @updatedAt
   accountId   String?
   account     TreasuryAccount? @relation(fields: [accountId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, date])
 }
 
 model TreasuryAccount {
@@ -561,12 +594,12 @@ model StockMovement {
   id          String   @id @default(uuid())
   productId   String
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  type        String   // "SALE", "PURCHASE", "ADJUSTMENT", "RETURN", "SPOILAGE", "INITIAL"
-  quantity    Int      // positive for incoming, negative for outgoing
-  stockBefore Int      // stock before the movement
-  stockAfter  Int      // stock after the movement
-  referenceId String?  // ID of the related order, purchase, or spilage
-  reason      String?  // Optional explanation
+  type        String
+  quantity    Int
+  stockBefore Int
+  stockAfter  Int
+  referenceId String?
+  reason      String?
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])
   tenantId    String
@@ -575,6 +608,10 @@ model StockMovement {
   store       Store?   @relation(fields: [storeId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, productId])
+  @@index([tenantId, createdAt])
 }
 
 model Reservation {
