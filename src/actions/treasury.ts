@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { checkSubscription } from "@/lib/subscription"
 
 export async function getFinancialSummary() {
     try {
@@ -62,6 +63,7 @@ import { TreasuryAccountSchema } from "@/schemas"
 import * as z from "zod"
 
 export async function createTreasuryAccount(values: z.infer<typeof TreasuryAccountSchema>) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -213,6 +215,7 @@ export async function getAllTreasuryTransactions() {
 }
 
 export async function deleteTreasuryAccount(id: string) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -232,6 +235,7 @@ export async function deleteTreasuryAccount(id: string) {
 }
 
 export async function transferFunds(fromAccountId: string, toAccountId: string, amount: number, description?: string) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -301,6 +305,7 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
 }
 
 export async function createManualTransaction(accountId: string, type: "CREDIT" | "DEBIT", amount: number, description: string) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")

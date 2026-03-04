@@ -1,4 +1,12 @@
 {
+  "Subscription": {
+    "expiredTitle": "Abonnement Expiré",
+    "expiredDescription": "Votre abonnement a expiré ou votre entreprise est bloquée. Le système est en mode lecture seule.",
+    "daysLeftLabel": "Il vous reste {days} jours d'abonnement.",
+    "renew": "Renouveler l'abonnement",
+    "contactSupport": "Contacter le support",
+    "readOnlyBanner": "Mode Lecture Seule - Actions de modification désactivées"
+  },
   "HomePage": {
     "title": "Bienvenue sur SYNCLOUDPOS",
     "subtitle": "Système de Gestion Commerciale & POS Premium"
@@ -689,6 +697,10 @@
         "ht": {
           "label": "Afficher les prix HT",
           "hint": "Affiche le prix hors taxe en plus du prix TTC"
+        },
+        "featuredOnly": {
+          "label": "Favoris par défaut",
+          "hint": "Afficher uniquement les produits favoris à l'ouverture du POS"
         }
       },
       "warning": "⚠️ Ces réglages sont sauvegardés <strong>sur cet appareil uniquement</strong> (localStorage). Chaque poste peut avoir ses propres paramètres.",

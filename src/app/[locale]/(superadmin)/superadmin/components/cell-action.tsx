@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Plus, ShieldCheck, Clock, KeyRound, ShieldOff } from "lucide-react"
+import { MoreHorizontal, Plus, ShieldCheck, Clock, KeyRound, ShieldOff, Download } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 
@@ -70,6 +70,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         }
     }
 
+    const onDownloadDB = () => {
+        const url = `/api/superadmin/export-tenant?tenantId=${data.id}`
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `backup-${data.name}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        toast.success("Export en cours...")
+    }
+
     const onOpenResetPw = (userId: string) => {
         setSelectedUserId(userId)
         setNewPassword("")
@@ -128,6 +139,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                             <span className="truncate max-w-[140px]">MdP: {u.name || u.email}</span>
                         </DropdownMenuItem>
                     ))}
+                    <div className="h-px bg-slate-200 my-1" />
+                    <DropdownMenuItem onClick={onDownloadDB}>
+                        <Download className="mr-2 h-4 w-4 text-blue-500" />
+                        Télécharger la DB
+                    </DropdownMenuItem>
                     <div className="h-px bg-slate-200 my-1" />
                     <DropdownMenuItem disabled={loading} onClick={onToggleBlock}>
                         <ShieldOff className={`mr-2 h-4 w-4 ${data.isBlocked ? 'text-emerald-500' : 'text-red-500'}`} />

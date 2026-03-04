@@ -6,12 +6,15 @@ import { OrderSchema } from "@/schemas"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { generateReceiptNumber } from "./sales-orders"
+import { checkSubscription } from "@/lib/subscription"
 
 export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
     const defaultStoreId = session?.user?.defaultStoreId
+
+    await checkSubscription();
 
     if (!userId || !tenantId) {
         return { error: "Unauthorized" }

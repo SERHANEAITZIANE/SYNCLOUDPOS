@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
@@ -311,196 +311,149 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             description={t("checkoutDesc")}
             isOpen={isOpen}
             onClose={handleClose}
-            className="sm:max-w-4xl p-4 sm:p-8 rounded-2xl sm:rounded-[32px] bg-slate-100 shadow-2xl dark:bg-zinc-950 max-h-[90vh] overflow-y-auto"
+            className="sm:max-w-4xl p-0 rounded-2xl bg-slate-100 dark:bg-zinc-950 shadow-2xl max-h-[95dvh] overflow-hidden flex flex-col"
         >
-            <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <div className="flex flex-col lg:flex-row gap-5">
 
-                {/* Left Side: Payment Method & Totals */}
-                <div className="flex-1 space-y-6">
-                    <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 text-center border-2 border-gray-50 dark:border-gray-800 shadow-sm flex flex-col justify-center h-32">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{t("totalDue")}</p>
-                        <div className="text-[3.5rem] leading-none font-black text-gray-900 dark:text-white tracking-tighter">
-                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
-                            <span className="text-2xl text-gray-400 font-bold ml-2">DA</span>
-                        </div>
-                    </div>
+                    {/* Left Side: Totals + Payment Method + Account + Quick Cash */}
+                    <div className="flex-1 flex flex-col gap-4">
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                        <div
-                            className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
-                                method === "CASH"
-                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
-                            )}
-                            onClick={() => setMethod("CASH")}
-                        >
-                            <Banknote className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("cash")}</span>
-                        </div>
-                        <div
-                            className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
-                                method === "CARD"
-                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
-                            )}
-                            onClick={() => {
-                                setMethod("CARD")
-                                setTenderedStr(finalTotalTTC.toString())
-                            }}
-                        >
-                            <CreditCard className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("card")}</span>
-                        </div>
-                        <div
-                            className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
-                                method === "TRANSFER"
-                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
-                            )}
-                            onClick={() => {
-                                setMethod("TRANSFER")
-                                setTenderedStr(finalTotalTTC.toString())
-                            }}
-                        >
-                            <Landmark className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("transfer")}</span>
-                        </div>
-                        <div
-                            className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
-                                method === "CHECK"
-                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
-                            )}
-                            onClick={() => {
-                                setMethod("CHECK")
-                                setTenderedStr(finalTotalTTC.toString())
-                            }}
-                        >
-                            <FileText className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("check")}</span>
-                        </div>
-                        <div
-                            className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200",
-                                method === "TERM"
-                                    ? "bg-gray-100/50 dark:bg-gray-800 border-gray-900 dark:border-white text-gray-900 dark:text-white"
-                                    : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-200 text-gray-500 shadow-sm"
-                            )}
-                            onClick={() => {
-                                setMethod("TERM")
-                                setTenderedStr(finalTotalTTC.toString())
-                            }}
-                        >
-                            <Clock className="h-6 w-6 mb-2" strokeWidth={1.5} />
-                            <span className="font-bold text-[10px] sm:text-xs text-center leading-tight">{t("term")}</span>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 pt-2">
-                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("depositTo")}</Label>
-                        <SearchableSelect
-                            options={[
-                                { value: "none", label: t("noneDefault") },
-                                ...accounts.map(acc => ({
-                                    value: acc.id,
-                                    label: `${acc.name} (${t("balanceLabel")} ${acc.balance})`
-                                }))
-                            ]}
-                            value={accountId}
-                            onChange={(val) => setAccountId(val)}
-                            disabled={loading}
-                            placeholder={t("selectBankAccount")}
-                        />
-                    </div>
-
-                    {method === "CASH" && (
-                        <div className="space-y-3 pt-4">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{t("quickCash")}</p>
-                            <div className="grid grid-cols-2 gap-3">
-                                {quickCashOptions.map((amount) => (
-                                    <Button
-                                        key={amount}
-                                        variant="outline"
-                                        className="h-14 rounded-2xl font-bold text-lg hover:border-gray-400 hover:text-gray-900 transition-colors border-gray-100 bg-white shadow-sm"
-                                        onClick={() => setQuickCash(amount)}
-                                    >
-                                        {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)}
-                                    </Button>
-                                ))}
+                        {/* Total Due */}
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 text-center border border-gray-100 dark:border-gray-800 shadow-sm">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t("totalDue")}</p>
+                            <div className="text-4xl sm:text-5xl leading-none font-black text-gray-900 dark:text-white tracking-tighter">
+                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
+                                <span className="text-xl text-gray-400 font-bold ml-2">DA</span>
                             </div>
                         </div>
-                    )}
-                </div>
 
-                {/* Right Side: Numpad (Only for Cash) */}
-                <div className="w-full lg:w-[340px] flex flex-col mt-2 lg:mt-0 relative">
+                        {/* Payment Method â€” 2 rows on mobile, 1 row on bigger */}
+                        <div className="grid grid-cols-5 gap-2">
+                            {([
+                                { key: "CASH", label: t("cash"), Icon: Banknote },
+                                { key: "CARD", label: t("card"), Icon: CreditCard },
+                                { key: "TRANSFER", label: t("transfer"), Icon: Landmark },
+                                { key: "CHECK", label: t("check"), Icon: FileText },
+                                { key: "TERM", label: t("term"), Icon: Clock },
+                            ] as const).map(({ key, label, Icon }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => { setMethod(key); if (key !== "CASH") setTenderedStr(finalTotalTTC.toString()) }}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center py-3 sm:py-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer gap-1.5",
+                                        method === key
+                                            ? "bg-gray-900 dark:bg-white border-gray-900 dark:border-white text-white dark:text-black"
+                                            : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-300 text-gray-500"
+                                    )}
+                                >
+                                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.5} />
+                                    <span className="font-bold text-[9px] sm:text-[10px] text-center leading-tight">{label}</span>
+                                </button>
+                            ))}
+                        </div>
 
+                        {/* Deposit Account */}
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t("depositTo")}</Label>
+                            <SearchableSelect
+                                options={[
+                                    { value: "none", label: t("noneDefault") },
+                                    ...accounts.map(acc => ({
+                                        value: acc.id,
+                                        label: `${acc.name} (${t("balanceLabel")} ${acc.balance})`
+                                    }))
+                                ]}
+                                value={accountId}
+                                onChange={(val) => setAccountId(val)}
+                                disabled={loading}
+                                placeholder={t("selectBankAccount")}
+                            />
+                        </div>
+
+                        {/* Quick Cash â€” only for CASH */}
+                        {method === "CASH" && (
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t("quickCash")}</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2">
+                                    {quickCashOptions.map((amount) => (
+                                        <Button
+                                            key={amount}
+                                            variant="outline"
+                                            className="h-12 sm:h-14 rounded-xl font-bold text-base sm:text-lg hover:border-gray-400 hover:text-gray-900 transition-colors border-gray-100 bg-white shadow-sm"
+                                            onClick={() => setQuickCash(amount)}
+                                        >
+                                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Right Side: Numpad (dimmed when not CASH) */}
                     <div className={cn(
-                        "transition-all duration-500 flex flex-col h-full",
-                        method === "CASH" ? "opacity-100 pointer-events-auto" : "opacity-30 pointer-events-none filter blur-[1px]"
+                        "w-full lg:w-[310px] flex flex-col gap-3 transition-all duration-300",
+                        method !== "CASH" ? "opacity-30 pointer-events-none blur-[1px]" : "opacity-100"
                     )}>
-                        <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 border-2 border-gray-50 dark:border-gray-800 mb-2 text-right shadow-sm flex flex-col justify-center h-28 relative">
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest absolute top-4 right-6">{t("tendered")}</p>
-                            <p className="text-5xl font-black text-gray-900 dark:text-white tracking-tight mt-4">
+                        {/* Tendered Amount */}
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl px-5 py-4 border border-gray-100 dark:border-gray-800 text-right shadow-sm relative">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t("tendered")}</p>
+                            <p className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
                                 {tenderedStr ? new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(tenderedAmount) : "0"}
                             </p>
                         </div>
 
-                        {changeAmount > 0 ? (
-                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30">
-                                <span className="text-gray-500 font-bold text-sm sm:text-lg">{t("change")}</span>
-                                <span className="text-xl sm:text-2xl font-black text-green-500">+{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}</span>
-                            </div>
-                        ) : (
-                            <div className="mb-4 flex flex-row justify-between items-center px-4 py-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                                <span className="text-gray-500 font-bold text-sm sm:text-lg">{t("balance")}</span>
-                                <span className="text-xl sm:text-2xl font-bold text-gray-400">
-                                    {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, total - tenderedAmount))}
-                                </span>
-                            </div>
-                        )}
+                        {/* Change / Remaining */}
+                        <div className={cn(
+                            "flex flex-row justify-between items-center px-4 py-3 rounded-xl border",
+                            changeAmount > 0
+                                ? "bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30"
+                                : "bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800"
+                        )}>
+                            <span className={cn("font-bold text-base", changeAmount > 0 ? "text-green-700 dark:text-green-400" : "text-gray-500")}>
+                                {changeAmount > 0 ? t("change") : t("balance")}
+                            </span>
+                            <span className={cn("text-xl font-black", changeAmount > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400")}>
+                                {changeAmount > 0
+                                    ? `+${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}`
+                                    : new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, total - tenderedAmount))
+                                }
+                            </span>
+                        </div>
 
-                        <div className="grid grid-cols-3 gap-2 sm:gap-3 flex-1">
+                        {/* Numpad */}
+                        <div className="grid grid-cols-3 gap-2">
                             {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
                                 <Button
                                     key={num}
                                     variant="outline"
-                                    className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-900 dark:text-white"
+                                    className="h-14 sm:h-16 rounded-xl text-xl sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all text-gray-900 dark:text-white"
                                     onClick={() => handleNumpad(num)}
                                 >
                                     {num}
                                 </Button>
                             ))}
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black text-red-500 hover:bg-red-50 hover:text-red-600 border-gray-100 shadow-sm bg-white transition-all uppercase" onClick={() => handleNumpad("C")}>
-                                C
-                            </Button>
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-xl sm:text-2xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>
-                                0
-                            </Button>
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl sm:rounded-2xl text-lg sm:text-xl font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>
-                                00
-                            </Button>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-xl font-black text-red-500 hover:bg-red-50 border-gray-100 shadow-sm bg-white transition-all" onClick={() => handleNumpad("C")}>C</Button>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>0</Button>
+                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-lg font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>00</Button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-6 sm:pt-10 mt-4 sm:mt-6 md:-mr-4">
-                <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl sm:rounded-2xl font-bold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col items-center justify-center" onClick={handleClose}>
-                    <span>{t("cancel")}</span>
-                    <span className="text-[9px] opacity-50 uppercase tracking-widest mt-0.5 hidden sm:block">Esc</span>
+            {/* Sticky Footer Actions */}
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 rounded-b-2xl shrink-0">
+                <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl font-bold" onClick={handleClose}>
+                    {t("cancel")} <span className="text-[9px] opacity-40 ml-1 hidden sm:inline">Esc</span>
                 </Button>
                 <Button
                     disabled={loading || (method === "CASH" && tenderedAmount < total && !hasCustomer)}
-                    className="w-full sm:w-auto h-14 sm:h-16 px-10 rounded-xl sm:rounded-[20px] font-black text-lg sm:text-xl bg-[#0f0f0f] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl shadow-gray-200/50 dark:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-0.5"
+                    className="w-full sm:w-auto h-12 sm:h-14 px-8 rounded-xl font-black text-base sm:text-lg bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-black shadow-xl transition-all disabled:opacity-50"
                     onClick={handleConfirm}
                 >
-                    <span>{loading ? t("processing") : t("completeOrder")}</span>
-                    {!loading && <span className="text-[10px] opacity-70 font-bold tracking-widest leading-none mt-1 uppercase hidden sm:block">Enter</span>}
+                    {loading ? t("processing") : t("completeOrder")}
+                    {!loading && <span className="text-[10px] opacity-60 font-bold tracking-widest ml-2 hidden sm:inline">Enter</span>}
                 </Button>
             </div>
         </Modal>

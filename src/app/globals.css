@@ -144,6 +144,16 @@
   }
 }
 
+/* Auth page blob animation */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -20px) scale(1.05); }
+  66% { transform: translate(-10px, 15px) scale(0.97); }
+}
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
 @media print {
   .no-print {
     display: none !important;

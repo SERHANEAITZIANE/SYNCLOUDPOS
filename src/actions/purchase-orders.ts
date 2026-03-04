@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { checkSubscription } from "@/lib/subscription"
 
 interface PurchaseOrderItemData {
     productId: string
@@ -55,6 +56,7 @@ export const getPurchaseOrder = async (id: string) => {
 }
 
 export const createPurchaseOrder = async (data: PurchaseOrderData) => {
+    await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -167,6 +169,7 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
 // Update items of a PENDING purchase order
 export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) => {
+    await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -210,6 +213,7 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 
 // Transition a purchase order status with side effects
 export const updatePurchaseOrderStatus = async (id: string, newStatus: string, accountId?: string) => {
+    await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -356,6 +360,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 }
 
 export const deletePurchaseOrder = async (id: string) => {
+    await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

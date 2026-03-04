@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, FC } from "react"
-import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff } from "lucide-react"
+import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star } from "lucide-react"
 import Image from "next/image"
 
 import { Input } from "@/components/ui/input"
@@ -41,6 +41,7 @@ interface PosClientProps {
         stock: number
         tvaRate: number
         barcodes: string[]
+        isFeatured: boolean
     }[]
     categories: {
         id: string
@@ -66,8 +67,20 @@ export const PosClient: FC<PosClientProps> = ({
     const [isSearchOrderOpen, setIsSearchOrderOpen] = useState(false)
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false)
     const [isListening, setIsListening] = useState(false)
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
     const recognitionRef = useRef<any>(null)
     const cart = usePosStore()
+
+    // Load favorites-only preference from localStorage
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_defaults_prefs")
+            if (stored) {
+                const prefs = JSON.parse(stored)
+                if (prefs.showFavoritesOnly) setShowFavoritesOnly(true)
+            }
+        } catch { }
+    }, [])
 
     // Derived cart values for mobile bottom bar
     const activeSessionId = cart.activeSessionId
@@ -297,10 +310,12 @@ export const PosClient: FC<PosClientProps> = ({
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.barcodes.some(b => b.includes(searchQuery))
         const matchesCategory = selectedCategory ? item.categoryId === selectedCategory : true
-        return matchesSearch && matchesCategory
+        const matchesFavorites = showFavoritesOnly ? item.isFeatured : true
+        return matchesSearch && matchesCategory && matchesFavorites
     })
 
-    const renderedProducts = filteredProducts.slice(0, 50)
+    // Show all matching products (no cap) when searching, otherwise cap at 60 for performance
+    const renderedProducts = searchQuery ? filteredProducts : filteredProducts.slice(0, 60)
 
     return (
         <div className="flex h-[100dvh] flex-col bg-[#f8f9fa] dark:bg-[#0f1115] overflow-hidden">
@@ -389,6 +404,16 @@ export const PosClient: FC<PosClientProps> = ({
                                         className={cn("w-12 h-full rounded-2xl transition-all", viewMode === "list" ? "bg-gray-100 text-gray-900 dark:bg-slate-800 dark:text-white" : "text-gray-500")}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" x2="21" y1="6" y2="6" /><line x1="8" x2="21" y1="12" y2="12" /><line x1="8" x2="21" y1="18" y2="18" /><line x1="3" x2="3.01" y1="6" y2="6" /><line x1="3" x2="3.01" y1="12" y2="12" /><line x1="3" x2="3.01" y1="18" y2="18" /></svg>
+                                    </Button>
+                                    <div className="w-px bg-gray-200 dark:bg-slate-700 my-2 mx-1 rounded-full"></div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Favoris seulement"
+                                        onClick={() => setShowFavoritesOnly(p => !p)}
+                                        className={cn("w-12 h-full rounded-2xl transition-all", showFavoritesOnly ? "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400" : "text-gray-500")}
+                                    >
+                                        <Star strokeWidth={showFavoritesOnly ? 0 : 2} fill={showFavoritesOnly ? "currentColor" : "none"} size={20} />
                                     </Button>
                                     <div className="w-px bg-gray-200 dark:bg-slate-700 my-2 mx-1 rounded-full"></div>
                                     <Button
@@ -504,9 +529,9 @@ export const PosClient: FC<PosClientProps> = ({
                                 ))}
                             </div>
                         )}
-                        {filteredProducts.length > 50 && (
+                        {filteredProducts.length > 60 && !searchQuery && (
                             <div className="py-8 text-center text-xs lg:text-sm font-medium text-gray-400">
-                                {t("showingTop50")}
+                                {t("showingTop50")} — utilisez la recherche ou filtrez par catégorie pour voir plus
                             </div>
                         )}
                         {filteredProducts.length === 0 && (

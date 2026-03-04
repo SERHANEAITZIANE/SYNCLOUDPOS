@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
 import { LoginSchema } from "./schemas"
 import { getUserById } from "@/data/user"
 import { db } from "@/lib/db"
@@ -8,6 +9,10 @@ import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
         Credentials({
             async authorize(credentials) {
                 const validatedFields = LoginSchema.safeParse(credentials)
@@ -44,6 +49,72 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         error: "/auth/error",
     },
     callbacks: {
+        async signIn({ user, account }) {
+            // Handle Google OAuth sign-in
+            if (account?.provider === "google" && user.email) {
+                try {
+                    // Check if user already exists
+                    const existingUser = await db.user.findUnique({
+                        where: { email: user.email }
+                    })
+
+                    if (!existingUser) {
+                        // Auto-register: create tenant + user
+                        const trialEndDate = new Date()
+                        trialEndDate.setDate(trialEndDate.getDate() + 7)
+
+                        const name = user.name || user.email.split("@")[0]
+
+                        const tenant = await db.tenant.create({
+                            data: {
+                                name: `${name}'s Shop`,
+                                subscriptionEndsAt: trialEndDate,
+                            }
+                        })
+
+                        const defaultStore = await db.store.create({
+                            data: {
+                                name: "Boutique Principale",
+                                tenantId: tenant.id,
+                            }
+                        })
+
+                        const newUser = await db.user.create({
+                            data: {
+                                name,
+                                email: user.email,
+                                password: "", // No password for OAuth users
+                                tenantId: tenant.id,
+                                role: "ADMIN",
+                                defaultStoreId: defaultStore.id,
+                            }
+                        })
+
+                        // Seed defaults
+                        await Promise.all([
+                            db.treasuryAccount.createMany({
+                                data: [
+                                    { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
+                                    { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
+                                    { name: "TPE", type: "BANK", tenantId: tenant.id }
+                                ]
+                            }),
+                            db.customer.create({
+                                data: { name: "DIVERS", clientType: "RETAIL", tenantId: tenant.id }
+                            })
+                        ])
+
+                        user.id = newUser.id
+                    } else {
+                        user.id = existingUser.id
+                    }
+                } catch (error) {
+                    console.error("[GOOGLE_SIGNIN_ERROR]", error)
+                    return false
+                }
+            }
+            return true
+        },
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub

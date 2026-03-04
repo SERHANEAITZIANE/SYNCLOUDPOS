@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { checkSubscription } from "@/lib/subscription"
 
 // Helper: generate receipt number
 export async function generateReceiptNumber(type: string, tenantId: string) {
@@ -38,7 +39,7 @@ const STOCK_STATUSES = ["VALIDATED", "PAID"]
 const DEBT_STATUSES = ["VALIDATED"]
 const PAID_STATUSES = ["PAID"]
 
-export async function createSalesOrder(data: {
+export const createSalesOrder = async (data: {
     customerId: string
     type: string
     status: string
@@ -49,7 +50,8 @@ export async function createSalesOrder(data: {
     items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
     total: number
     receiptNumber?: string
-}) {
+}) => {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -249,7 +251,7 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
     }
 }
 
-export async function updateSalesOrder(id: string, data: {
+export const updateSalesOrder = async (id: string, data: {
     customerId: string
     type: string
     status: string
@@ -259,7 +261,8 @@ export async function updateSalesOrder(id: string, data: {
     stampTax: number
     items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
     total: number
-}) {
+}) => {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -302,7 +305,8 @@ export async function updateSalesOrder(id: string, data: {
     }
 }
 
-export async function updateSalesOrderStatus(id: string, newStatus: string) {
+export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -392,7 +396,8 @@ export async function updateSalesOrderStatus(id: string, newStatus: string) {
     }
 }
 
-export async function deleteSalesOrder(id: string) {
+export const deleteSalesOrder = async (id: string) => {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")

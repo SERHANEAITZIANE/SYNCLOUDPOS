@@ -3,8 +3,10 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { checkSubscription } from "@/lib/subscription"
 
 export async function createExpenseCategory(data: { name: string; type: "FIXED" | "VARIABLE" }) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -53,6 +55,7 @@ export async function createExpense(data: {
     accountId?: string
     date?: Date
 }) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -132,6 +135,7 @@ export async function getExpenses() {
 }
 
 export async function deleteExpense(id: string) {
+    await checkSubscription();
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")

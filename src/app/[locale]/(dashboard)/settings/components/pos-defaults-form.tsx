@@ -19,6 +19,7 @@ export interface PosDefaultPrefs {
     defaultPaymentMethod: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM"
     showTvaOnReceipt: boolean
     showHtPricesOnReceipt: boolean
+    showFavoritesOnly: boolean
 }
 
 const defaults: PosDefaultPrefs = {
@@ -26,6 +27,7 @@ const defaults: PosDefaultPrefs = {
     defaultPaymentMethod: "CASH",
     showTvaOnReceipt: false,
     showHtPricesOnReceipt: false,
+    showFavoritesOnly: false,
 }
 
 interface Account {
@@ -169,6 +171,19 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                         <Switch
                             checked={prefs.showHtPricesOnReceipt}
                             onCheckedChange={(v) => setPrefs(p => ({ ...p, showHtPricesOnReceipt: v }))}
+                        />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label>{t("receiptDisplay.featuredOnly.label")}</Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                {t("receiptDisplay.featuredOnly.hint")}
+                            </p>
+                        </div>
+                        <Switch
+                            checked={prefs.showFavoritesOnly}
+                            onCheckedChange={(v) => setPrefs(p => ({ ...p, showFavoritesOnly: v }))}
                         />
                     </div>
                 </div>

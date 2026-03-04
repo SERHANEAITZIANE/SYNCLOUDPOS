@@ -81,6 +81,7 @@ const PosPage = async () => {
             storeProducts: {
                 where: { storeId: storeIdToUse }
             },
+            isFeatured: true,
             barcodes: { select: { value: true } },
             images: { select: { url: true }, take: 1 }
         }
@@ -103,6 +104,7 @@ const PosPage = async () => {
             dealerPrice: Number(item.dealerPrice || item.price),
             tvaRate: Number(item.tvaRate ?? 19),
             imageUrl: item.images?.[0]?.url || "",
+            isFeatured: item.isFeatured || false,
             barcodes: item.barcodes?.map((b: any) => b.value) || []
         }
     })

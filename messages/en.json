@@ -1,4 +1,12 @@
 {
+  "Subscription": {
+    "expiredTitle": "Subscription Expired",
+    "expiredDescription": "Your subscription has expired or your company is blocked. The system is in read-only mode.",
+    "daysLeftLabel": "You have {days} days of subscription left.",
+    "renew": "Renew Subscription",
+    "contactSupport": "Contact Support",
+    "readOnlyBanner": "Read-Only Mode - Modification actions disabled"
+  },
   "HomePage": {
     "title": "Welcome to SYNCLOUDPOS",
     "subtitle": "Premium POS & Commercial Management"
@@ -689,6 +697,10 @@
         "ht": {
           "label": "Show Excl. Tax prices",
           "hint": "Displays the price excluding tax in addition to the inclusive price"
+        },
+        "featuredOnly": {
+          "label": "Featured by default",
+          "hint": "Show only featured products when opening the POS"
         }
       },
       "warning": "⚠️ These settings are saved <strong>on this device only</strong> (localStorage). Each terminal can have its own settings.",

@@ -5,9 +5,11 @@ import { db } from "@/lib/db"
 import { ProductSchema } from "@/schemas"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { checkSubscription } from "@/lib/subscription"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
+    await checkSubscription();
 
     const tenantId = session?.user?.tenantId
 
@@ -187,6 +189,7 @@ export const getProduct = async (productId: string) => {
 
 export const deleteProduct = async (id: string) => {
     const session = await auth()
+    await checkSubscription();
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -210,6 +213,7 @@ export const deleteProduct = async (id: string) => {
 
 export const updateProduct = async (id: string, values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
+    await checkSubscription();
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -291,6 +295,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
 
 export const importProducts = async (rows: Record<string, string>[]) => {
     const session = await auth()
+    await checkSubscription();
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 

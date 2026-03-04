@@ -5,6 +5,8 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { GlobalShortcuts } from "@/components/dashboard/global-shortcuts";
 import { SubscriptionGuard } from "@/components/auth/subscription-guard";
 import { ExpirationAlert } from "@/components/dashboard/expiration-alert";
+import { getSubscriptionStatus } from "@/lib/subscription";
+import { SubscriptionBanner } from "@/components/dashboard/subscription-banner";
 
 export default async function DashboardLayout({
     children,
@@ -19,6 +21,8 @@ export default async function DashboardLayout({
     if (!session) {
         redirect({ href: "/login", locale });
     }
+
+    const subStatus = await getSubscriptionStatus();
 
     return (
         <SubscriptionGuard
@@ -36,6 +40,13 @@ export default async function DashboardLayout({
                 <GlobalShortcuts />
                 <div className="flex-1 flex flex-col">
                     <DashboardHeader user={session!.user} />
+                    {subStatus && (
+                        <SubscriptionBanner
+                            daysLeft={subStatus.daysLeft}
+                            isExpired={subStatus.isExpired}
+                            isBlocked={subStatus.isBlocked}
+                        />
+                    )}
                     <main className="flex-1 p-4 md:p-6">
                         <ExpirationAlert subscriptionEndsAt={session.user?.subscriptionEndsAt} />
                         {children}

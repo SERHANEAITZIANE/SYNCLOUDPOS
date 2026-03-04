@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
+import { checkSubscription } from "@/lib/subscription"
 
 interface SpoilageData {
     date: Date
@@ -13,6 +14,7 @@ interface SpoilageData {
 }
 
 export async function createSpoilage(data: SpoilageData) {
+    await checkSubscription();
     try {
         const tenantId = await getActiveTenantId()
         const session = await auth()
