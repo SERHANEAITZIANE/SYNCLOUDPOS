@@ -95,7 +95,12 @@ export function verifyLicense(): LicenseInfo {
             return { valid: false, error: "Invalid license key. Wrong machine or tampered key." }
         }
 
-        // Check expiry
+        // Lifetime plan — never expires
+        if (plan === "lifetime") {
+            return { valid: true, machineId, expiry: "lifetime", plan, daysLeft: 999999 }
+        }
+
+        // Check expiry for time-limited plans
         const expiry = new Date(expiryDate)
         const now = new Date()
         const daysLeft = Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))

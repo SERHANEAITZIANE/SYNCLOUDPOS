@@ -57,6 +57,40 @@ set MACHINE_ID=%MACHINE_ID%
 :: Create empty license file if not exists
 if not exist "license.key" echo.>license.key
 
+:: ── LAN Mode Setup ────────────────────────────────────────
+echo.
+echo [LAN] Do you want other devices on the network to access this app?
+echo   (Y) YES - Access from phones, tablets, other PCs on the same WiFi/LAN
+echo   (N) NO  - This PC only (localhost)
+echo.
+set /p LAN_CHOICE="   Your choice [Y/N]: "
+
+if /i "%LAN_CHOICE%"=="Y" (
+    for /f "tokens=2 delims=:" %%i in ('ipconfig ^| findstr /R "IPv4.*192\." 2^>nul') do (
+        set LAN_IP=%%i
+        goto :GOT_IP
+    )
+    for /f "tokens=2 delims=:" %%i in ('ipconfig ^| findstr /R "IPv4.*10\." 2^>nul') do (
+        set LAN_IP=%%i
+        goto :GOT_IP
+    )
+    for /f "tokens=2 delims=:" %%i in ('ipconfig ^| findstr /R "IPv4.*172\." 2^>nul') do (
+        set LAN_IP=%%i
+        goto :GOT_IP
+    )
+    :GOT_IP
+    set LAN_IP=%LAN_IP: =%
+    set APP_URL=http://%LAN_IP%:3000
+    echo.
+    echo  [LAN] App will be accessible at: %APP_URL%
+    echo  [LAN] Share this URL with other devices on the same network!
+) else (
+    set APP_URL=http://localhost:3000
+    echo.
+    echo  [LOCAL] App will only be accessible on this PC.
+)
+
+
 if not exist ".env.local" (
     copy ".env.example" ".env.local" >nul
 

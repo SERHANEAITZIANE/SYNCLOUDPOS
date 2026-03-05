@@ -48,6 +48,32 @@ export MACHINE_ID=$(cat .machine-id)
 
 # Create empty license file if it doesn't exist
 [ ! -f "license.key" ] && touch license.key
+
+# ── LAN Mode Setup ───────────────────────────────────────────
+echo ""
+echo -e "[LAN] ${YELLOW}Do you want other devices on the network to access this app?${NC}"
+echo "  (Y) YES - Access from phones, tablets, other PCs on the same WiFi/LAN"
+echo "  (N) NO  - This PC only (localhost)"
+echo ""
+read -rp "   Your choice [Y/N]: " LAN_CHOICE
+
+if [[ "$LAN_CHOICE" =~ ^[Yy]$ ]]; then
+    LAN_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}' || \
+             ipconfig getifaddr en0 2>/dev/null || \
+             hostname -I 2>/dev/null | awk '{print $1}')
+    if [ -n "$LAN_IP" ]; then
+        export APP_URL="http://${LAN_IP}:3000"
+        echo -e "  ${GREEN}[LAN]${NC} App will be accessible at: ${GREEN}${APP_URL}${NC}"
+        echo "  Share this URL with other devices on the same network!"
+    else
+        export APP_URL="http://localhost:3000"
+        echo -e "  ${YELLOW}[WARN]${NC} Could not detect LAN IP, using localhost."
+    fi
+else
+    export APP_URL="http://localhost:3000"
+    echo -e "  [LOCAL] App will only be accessible on this PC."
+fi
+
 if [ ! -f ".env.local" ]; then
     cp ".env.example" ".env.local"
     # Generate random secret

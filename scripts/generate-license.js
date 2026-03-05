@@ -31,41 +31,48 @@ if (!machineId || !expiryDate) {
 Usage: node scripts/generate-license.js <machineId> <expiryDate> [plan]
 
   machineId   - The machine ID shown on the customer's activation screen
-  expiryDate  - License expiry as YYYY-MM-DD (e.g. 2027-03-05)
-  plan        - License plan: "starter" | "pro" | "enterprise" (default: pro)
+  expiryDate  - "lifetime" for no expiry, or a date like 2027-03-05
+  plan        - "starter" | "pro" | "enterprise" | "lifetime" (default: pro)
 
-Example:
-  node scripts/generate-license.js a1b2c3d4e5f6abcdef 2027-03-05 pro
+Examples:
+  node scripts/generate-license.js a1b2c3d4 lifetime lifetime
+  node scripts/generate-license.js a1b2c3d4 2027-03-05 pro
 `)
     process.exit(1)
 }
 
-// Validate date
-const expiry = new Date(expiryDate)
-if (isNaN(expiry.getTime())) {
-    console.error("ERROR: Invalid date format. Use YYYY-MM-DD")
-    process.exit(1)
-}
+// Handle lifetime plan
+const isLifetime = expiryDate === 'lifetime' || plan === 'lifetime'
+const finalPlan = isLifetime ? 'lifetime' : plan
+const finalExpiry = isLifetime ? 'lifetime' : expiryDate
 
-if (expiry < new Date()) {
-    console.error("ERROR: Expiry date is in the past!")
-    process.exit(1)
+if (!isLifetime) {
+    // Validate date only for time-limited plans
+    const expiry = new Date(expiryDate)
+    if (isNaN(expiry.getTime())) {
+        console.error("ERROR: Invalid date. Use YYYY-MM-DD or 'lifetime'")
+        process.exit(1)
+    }
+    if (expiry < new Date()) {
+        console.error("ERROR: Expiry date is in the past!")
+        process.exit(1)
+    }
 }
 
 // Sign the license
-const privateKey = fs.readFileSync(PRIVATE_KEY_PATH, "utf-8")
-const licenseData = `${machineId}|${expiryDate}|${plan}`
+const privateKey = fs.readFileSync(PRIVATE_KEY_PATH, 'utf-8')
+const licenseData = `${machineId}|${finalExpiry}|${finalPlan}`
 const signature = crypto.sign(null, Buffer.from(licenseData), privateKey)
-const licenseKey = `${signature.toString("base64")}|${expiryDate}|${plan}`
+const licenseKey = `${signature.toString('base64')}|${finalExpiry}|${finalPlan}`
 
-const daysValid = Math.floor((expiry - new Date()) / (1000 * 60 * 60 * 24))
+const daysInfo = isLifetime ? 'LIFETIME (never expires)' : `${Math.floor((new Date(expiryDate) - new Date()) / (1000 * 60 * 60 * 24))} days`
 
 console.log("\n" + "=".repeat(70))
 console.log("  SYNCLOUDPOS LICENSE KEY")
 console.log("=".repeat(70))
 console.log(`  Machine ID : ${machineId}`)
-console.log(`  Plan       : ${plan}`)
-console.log(`  Expires    : ${expiryDate} (${daysValid} days)`)
+console.log(`  Plan       : ${finalPlan}`)
+console.log(`  Expires    : ${isLifetime ? 'NEVER (Lifetime)' : finalExpiry + ' (' + daysInfo + ')'}`)
 console.log("=".repeat(70))
 console.log("\n  LICENSE KEY (send this to the customer):\n")
 console.log("  " + licenseKey)
