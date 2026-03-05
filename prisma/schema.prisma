@@ -664,3 +664,33 @@ model OtpCode {
   @@index([phone])
 }
 
+// ── License Requests (from local installations) ───────────────────────────────
+model LicenseRequest {
+  id            String   @id @default(uuid())
+
+  // Client information
+  companyName   String
+  ownerName     String
+  phone         String
+  email         String
+  address       String?
+  wilaya        String?
+
+  // Machine info
+  machineId     String
+  ipAddress     String?
+
+  // License info
+  plan          String   @default("lifetime")  // starter | pro | enterprise | lifetime
+  status        String   @default("PENDING")   // PENDING | APPROVED | REJECTED
+  licenseKey    String?
+  notes         String?
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  approvedAt    DateTime?
+
+  @@index([status])
+  @@index([machineId])
+  @@index([createdAt])
+}
