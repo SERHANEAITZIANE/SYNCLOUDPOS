@@ -11,6 +11,47 @@
     "title": "Welcome to SYNCLOUDPOS",
     "subtitle": "Premium POS & Commercial Management"
   },
+  "LandingPage": {
+    "hero": {
+      "title": "The All-in-One Cloud POS & ERP",
+      "subtitle": "Streamline your retail, wholesale, and services with our powerful, modern point-of-sale system. Designed for businesses that demand excellence.",
+      "cta": "Start Your Trial",
+      "login": "Access Dashboard"
+    },
+    "features": {
+      "title": "Everything You Need to Succeed",
+      "subtitle": "From basic sales to advanced AI insights and automated Algerian taxation, SYNCLOUDPOS provides a complete suite of professional tools.",
+      "pos": {
+        "title": "🚀 Complete Point of Sale",
+        "description": "Fast, intuitive register with offline support, barcode scanning, partial payments, multiple stores, and seamless credit tracking."
+      },
+      "inventory": {
+        "title": "📦 Advanced Inventory",
+        "description": "Real-time stock tracking across branches. Manage barcodes, low-stock alerts, cyclical audits, returns, and damages automatically."
+      },
+      "finance": {
+        "title": "💰 Finance & Algerian Tax",
+        "description": "Track bank and cash treasury, log expenses, and auto-generate complex G50 & G12 algorithmic tax declarations effortlessly."
+      },
+      "ai": {
+        "title": "📊 AI Intelligence & Analytics",
+        "description": "Forecast trends, monitor live KPIs, and employ intelligent assistants (Gemini, Claude, GPT) to analyze your business data."
+      },
+      "delivery": {
+        "title": "🚚 Partnerships & Delivery",
+        "description": "Native integration with Yalidine, DHD, HDD. Manage customer/supplier loans, partial payments, and reservations with deposits."
+      },
+      "hr": {
+        "title": "👥 HR & Commissions",
+        "description": "Assign sophisticated salesperson roles, automatically calculate scalable commissions, and secure operations with strict permissions."
+      }
+    },
+    "footer": {
+      "ready": "Ready to scale your business?",
+      "cta": "Get Started Today",
+      "copyright": "© {year} SYNCLOUDPOS. All rights reserved."
+    }
+  },
   "Auth": {
     "login": "Login",
     "register": "Register",

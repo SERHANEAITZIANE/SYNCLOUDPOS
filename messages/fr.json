@@ -11,6 +11,47 @@
     "title": "Bienvenue sur SYNCLOUDPOS",
     "subtitle": "Système de Gestion Commerciale & POS Premium"
   },
+  "LandingPage": {
+    "hero": {
+      "title": "Le système POS & ERP Cloud Tout-en-Un",
+      "subtitle": "Améliorez votre commerce de détail, de gros et vos services avec notre point de vente moderne et puissant. Conçu pour les entreprises exigeant l'excellence.",
+      "cta": "Commencer l'essai",
+      "login": "Accéder au Tableau de bord"
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin pour réussir",
+      "subtitle": "Des ventes simples aux analyses IA avancées et à la fiscalité algérienne automatisée (G50/G12), SYNCLOUDPOS offre une suite complète d'outils professionnels.",
+      "pos": {
+        "title": "🚀 Point de Vente Complet",
+        "description": "Caisse rapide et intuitive, scan de codes-barres, paiements partiels, multi-boutiques et suivi facile des crédits/dettes clients."
+      },
+      "inventory": {
+        "title": "📦 Inventaire Avancé",
+        "description": "Suivi des stocks en temps réel. Gérez les codes-barres, les alertes de rupture, les inventaires annuels, les retours et les avaries automatiquement."
+      },
+      "finance": {
+        "title": "💰 Finance & Fiscalité Algérienne",
+        "description": "Suivez la trésorerie (Caisse et Banque), vos dépenses, et générez automatiquement vos déclarations fiscales complexes algorithmiques (G50 & G12)."
+      },
+      "ai": {
+        "title": "📊 Intelligence IA & Analytiques",
+        "description": "Prévoyez les tendances, suivez les KPI en direct et utilisez nos assistants intelligents (Gemini, Claude, GPT) pour analyser vos données."
+      },
+      "delivery": {
+        "title": "🚚 Partenariats & Livraison",
+        "description": "Intégration native avec Yalidine, DHD, HDD. Gérez les emprunts clients/fournisseurs et les réservations avec acomptes."
+      },
+      "hr": {
+        "title": "👥 RH & Commissions",
+        "description": "Attribuez des rôles sophistiqués aux vendeurs, calculez automatiquement les commissions et sécurisez vos opérations avec des permissions strictes."
+      }
+    },
+    "footer": {
+      "ready": "Prêt à faire évoluer votre entreprise ?",
+      "cta": "Démarrez aujourd'hui",
+      "copyright": "© {year} SYNCLOUDPOS. Tous droits réservés."
+    }
+  },
   "Auth": {
     "login": "Connexion",
     "register": "S'inscrire",
