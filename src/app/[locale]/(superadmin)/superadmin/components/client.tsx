@@ -7,6 +7,7 @@ import { Users, Package, CheckCircle2, XCircle, ShieldOff, TrendingUp, Search, F
 import { UsageCharts } from "./usage-charts"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface SuperAdminClientProps {
     data: TenantColumn[]
@@ -53,113 +54,99 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
             label: "Espaces Totaux",
             value: data.length,
             icon: Users,
-            color: "#60a5fa", // blue
-            gradient: "from-blue-500/10 to-blue-500/20",
-            border: "border-blue-500/20",
-            shadow: "shadow-blue-500/10"
+            color: "text-blue-500",
+            bgColor: "bg-blue-500/10"
         },
         {
             label: "Actifs",
             value: active,
             icon: CheckCircle2,
-            color: "#34d399", // emerald
-            gradient: "from-emerald-500/10 to-emerald-500/20",
-            border: "border-emerald-500/20",
-            shadow: "shadow-emerald-500/10"
+            color: "text-emerald-500",
+            bgColor: "bg-emerald-500/10"
         },
         {
             label: "Expirés",
             value: expired,
             icon: XCircle,
-            color: "#fb923c", // orange
-            gradient: "from-orange-500/10 to-orange-500/20",
-            border: "border-orange-500/20",
-            shadow: "shadow-orange-500/10"
+            color: "text-orange-500",
+            bgColor: "bg-orange-500/10"
         },
         {
             label: "Bloqués",
             value: blocked,
             icon: ShieldOff,
-            color: "#f87171", // red
-            gradient: "from-red-500/10 to-red-500/20",
-            border: "border-red-500/20",
-            shadow: "shadow-red-500/10"
+            color: "text-red-500",
+            bgColor: "bg-red-500/10"
         },
         {
             label: "CA Global (DA)",
             value: totalRevenue.toLocaleString("fr-DZ", { maximumFractionDigits: 0 }),
             icon: TrendingUp,
-            color: "#a78bfa", // violet
-            gradient: "from-violet-500/10 to-violet-500/20",
-            border: "border-violet-500/20",
-            shadow: "shadow-violet-500/10"
+            color: "text-violet-500",
+            bgColor: "bg-violet-500/10"
         },
     ]
 
     return (
-        <div className="space-y-8 pb-10">
-            {/* Premium Header */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-900/40 backdrop-blur-xl border border-slate-800/60 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-                        Superadmin Dashboard
-                    </h1>
-                    <p className="text-sm text-slate-400 mt-1">
-                        Surveillance en temps réel, gestion des licences et utilisation des ressources.
+        <div className="flex flex-col gap-6 w-full pb-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Espace Superadmin</h1>
+                    <p className="text-muted-foreground mt-1">
+                        Surveillance en temps réel, gestion des abonnements et analytique.
                     </p>
                 </div>
-                <div className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-medium whitespace-nowrap">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm">
                     <Package className="w-4 h-4" />
-                    {data.length} Espaces Cloud
+                    {data.length} Espaces
                 </div>
             </div>
 
-            {/* Glowing Stats Cards */}
+            {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                {stats.map(({ label, value, icon: Icon, color, gradient, border, shadow }) => (
-                    <div
-                        key={label}
-                        className={`relative overflow-hidden rounded-2xl p-5 border bg-gradient-to-br ${gradient} ${border} shadow-lg ${shadow} backdrop-blur-xl transition-all duration-300 hover:scale-[1.02]`}
-                    >
-                        <div className="flex items-center justify-between relative z-10">
-                            <span className="text-sm font-medium text-slate-300">{label}</span>
-                            <div className="p-2 rounded-lg" style={{ backgroundColor: `${color}20` }}>
-                                <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} />
+                {stats.map(({ label, value, icon: Icon, color, bgColor }) => (
+                    <Card key={label}>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
+                            <div className={`p-2 rounded-md ${bgColor}`}>
+                                <Icon className={`w-4 h-4 ${color}`} />
                             </div>
-                        </div>
-                        <p className="text-3xl font-bold mt-4 relative z-10" style={{ color }}>{value}</p>
-                    </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{value}</div>
+                        </CardContent>
+                    </Card>
                 ))}
-            </div >
+            </div>
 
             {/* Interactive Charts */}
             < UsageCharts data={filteredData} />
 
             {/* Advanced Filtering & Data Table */}
-            < div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/60 rounded-2xl p-6 shadow-2xl" >
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                    <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-indigo-400" />
-                        Annuaire des Espaces
-                    </h2>
+            <Card>
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6">
+                    <div className="flex items-center gap-2">
+                        <Filter className="w-5 h-5 text-muted-foreground" />
+                        <CardTitle className="text-xl">Annuaire des Espaces</CardTitle>
+                    </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <div className="relative w-full sm:w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Recherche nom, email, tél..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9 bg-slate-900/50 border-slate-700/50 focus:border-indigo-500/50 text-slate-200"
+                                className="pl-9"
                             />
                         </div>
 
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[180px] bg-slate-900/50 border-slate-700/50 text-slate-200">
+                            <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Tous les statuts" />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-900 border-slate-800">
+                            <SelectContent>
                                 <SelectItem value="all">Tous les statuts</SelectItem>
                                 <SelectItem value="active">Actifs</SelectItem>
                                 <SelectItem value="expired">Expirés</SelectItem>
@@ -167,15 +154,15 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
                             </SelectContent>
                         </Select>
                     </div>
-                </div>
-
-                <DataTable
-                    searchKey="name"
-                    columns={columns}
-                    data={filteredData}
-                />
-            </div >
-        </div >
+                </CardHeader>
+                <CardContent>
+                    <DataTable
+                        searchKey="name"
+                        columns={columns}
+                        data={filteredData}
+                    />
+                </CardContent>
+            </Card>
+        </div>
     )
 }
-
