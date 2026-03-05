@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { RegisterSchema } from "@/schemas"
 import { Link } from "@/i18n/routing"
-import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
@@ -15,14 +14,11 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useState, useTransition, useRef, useEffect } from "react"
+import { useState, useTransition } from "react"
 import { register } from "@/actions/register"
-import { sendWhatsAppOTP, verifyWhatsAppOTP } from "@/actions/verify-otp"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Loader2, AlertCircle, Eye, EyeOff, CheckCircle2, MessageSquare } from "lucide-react"
-
-type Step = "form" | "otp"
+import { Loader2, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react"
 
 export const RegisterForm = () => {
     const t = useTranslations("Auth");
@@ -31,91 +27,13 @@ export const RegisterForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isGooglePending, setIsGooglePending] = useState(false);
-    const [step, setStep] = useState<Step>("form");
-    const [otpValues, setOtpValues] = useState<string[]>(["", "", "", "", "", ""]);
-    const [otpVerified, setOtpVerified] = useState(false);
-    const [otpLoading, setOtpLoading] = useState(false);
-    const [otpError, setOtpError] = useState("");
-    const [countdown, setCountdown] = useState(0);
-    const [normalizedPhone, setNormalizedPhone] = useState("");
-    const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const form = useForm<z.infer<typeof RegisterSchema>>({
         resolver: zodResolver(RegisterSchema),
         defaultValues: { email: "", password: "", name: "", phone: "" },
     })
 
-    // Countdown timer for OTP resend
-    useEffect(() => {
-        if (countdown > 0) {
-            const timer = setTimeout(() => setCountdown(c => c - 1), 1000)
-            return () => clearTimeout(timer)
-        }
-    }, [countdown])
-
-    const onSendOTP = async () => {
-        const phone = form.getValues("phone");
-        if (!phone) {
-            form.setError("phone", { message: "Requis pour vérifier" });
-            return;
-        }
-        setOtpLoading(true);
-        setOtpError("");
-        try {
-            const result = await sendWhatsAppOTP(phone);
-            if (result.error) {
-                setOtpError(result.error);
-            } else {
-                setNormalizedPhone(result.phone || phone);
-                setStep("otp");
-                setCountdown(60);
-                setOtpValues(["", "", "", "", "", ""]);
-                setTimeout(() => otpRefs.current[0]?.focus(), 100);
-            }
-        } finally {
-            setOtpLoading(false);
-        }
-    }
-
-    const onOtpChange = (index: number, value: string) => {
-        if (!/^\d?$/.test(value)) return;
-        const next = [...otpValues];
-        next[index] = value;
-        setOtpValues(next);
-        if (value && index < 5) {
-            otpRefs.current[index + 1]?.focus();
-        }
-    }
-
-    const onOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-            otpRefs.current[index - 1]?.focus();
-        }
-    }
-
-    const onVerifyOTP = async () => {
-        const code = otpValues.join("");
-        if (code.length !== 6) { setOtpError("Entrez les 6 chiffres"); return; }
-        setOtpLoading(true);
-        setOtpError("");
-        try {
-            const result = await verifyWhatsAppOTP(normalizedPhone, code);
-            if (result.error) {
-                setOtpError(result.error);
-            } else {
-                setOtpVerified(true);
-                setStep("form");
-            }
-        } finally {
-            setOtpLoading(false);
-        }
-    }
-
     const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
-        if (!otpVerified) {
-            setError("Veuillez d'abord vérifier votre numéro WhatsApp");
-            return;
-        }
         setError("");
         setSuccess("");
         startTransition(() => {
@@ -129,83 +47,6 @@ export const RegisterForm = () => {
     const onGoogleSignIn = async () => {
         setIsGooglePending(true);
         await signIn("google", { callbackUrl: "/fr/dashboard" });
-    }
-
-    // OTP Step UI
-    if (step === "otp") {
-        return (
-            <div className="w-full">
-                <div className="mb-8">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-                        style={{ background: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.2)" }}>
-                        <MessageSquare className="w-7 h-7" style={{ color: "#25d366" }} />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Vérification WhatsApp</h2>
-                    <p className="text-sm" style={{ color: "#6b7280" }}>
-                        Un code à 6 chiffres a été envoyé sur{" "}
-                        <span className="text-white font-medium">{normalizedPhone}</span>
-                    </p>
-                </div>
-
-                {/* 6-digit OTP input */}
-                <div className="flex gap-2 justify-center mb-6">
-                    {otpValues.map((v, i) => (
-                        <input
-                            key={i}
-                            ref={el => { otpRefs.current[i] = el }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={v}
-                            onChange={e => onOtpChange(i, e.target.value)}
-                            onKeyDown={e => onOtpKeyDown(i, e)}
-                            className="w-12 h-14 text-center text-xl font-bold rounded-xl outline-none transition-all"
-                            style={{
-                                background: v ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.04)",
-                                border: v ? "2px solid rgba(124,58,237,0.6)" : "1px solid rgba(255,255,255,0.1)",
-                                color: "white",
-                            }}
-                        />
-                    ))}
-                </div>
-
-                {otpError && (
-                    <div className="flex items-center gap-2 p-3 rounded-xl mb-4" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                        <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                        <p className="text-sm text-red-400">{otpError}</p>
-                    </div>
-                )}
-
-                <button
-                    onClick={onVerifyOTP}
-                    disabled={otpLoading || otpValues.join("").length !== 6}
-                    className="w-full h-12 rounded-xl font-semibold text-sm text-white mb-4 flex items-center justify-center gap-2 cursor-pointer transition-all"
-                    style={{
-                        background: otpLoading || otpValues.join("").length !== 6
-                            ? "rgba(124,58,237,0.3)"
-                            : "linear-gradient(135deg, #7c3aed, #2563eb)"
-                    }}
-                >
-                    {otpLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                    Vérifier le code
-                </button>
-
-                <div className="flex items-center justify-between">
-                    <button onClick={() => setStep("form")} className="text-sm cursor-pointer hover:text-white transition-colors" style={{ color: "#6b7280" }}>
-                        ← Retour
-                    </button>
-                    {countdown > 0 ? (
-                        <span className="text-sm" style={{ color: "#6b7280" }}>
-                            Renvoyer dans {countdown}s
-                        </span>
-                    ) : (
-                        <button onClick={onSendOTP} disabled={otpLoading} className="text-sm cursor-pointer hover:text-purple-300 transition-colors" style={{ color: "#a78bfa" }}>
-                            Renvoyer le code
-                        </button>
-                    )}
-                </div>
-            </div>
-        )
     }
 
     return (
@@ -267,27 +108,18 @@ export const RegisterForm = () => {
                         </FormItem>
                     )} />
 
-                    {/* Phone with OTP verify button */}
+                    {/* Phone - Verified logic removed */}
                     <FormField control={form.control} name="phone" render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-sm font-medium" style={{ color: "#9ca3af" }}>
                                 {t("fields.phone")}
-                                {otpVerified && <span className="ml-2 text-emerald-400 text-xs inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Vérifié</span>}
                             </FormLabel>
                             <FormControl>
                                 <div className="flex gap-2">
-                                    <Input disabled={isPending || otpVerified} {...field} placeholder={t("fields.phonePlaceholder")} type="tel"
+                                    <Input disabled={isPending} {...field} placeholder={t("fields.phonePlaceholder")} type="tel"
                                         className="h-12 rounded-xl border text-white placeholder:text-gray-600 bg-transparent focus-visible:ring-1 focus-visible:ring-purple-500"
-                                        style={{ background: "rgba(255,255,255,0.04)", borderColor: otpVerified ? "rgba(52,211,153,0.4)" : "rgba(255,255,255,0.1)" }}
+                                        style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)" }}
                                     />
-                                    {!otpVerified && (
-                                        <button type="button" onClick={onSendOTP} disabled={otpLoading || isPending}
-                                            className="h-12 px-3 rounded-xl text-xs font-semibold shrink-0 flex items-center gap-1 cursor-pointer transition-all whitespace-nowrap"
-                                            style={{ background: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.2)", color: "#25d366" }}>
-                                            {otpLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageSquare className="w-3 h-3" />}
-                                            Vérifier
-                                        </button>
-                                    )}
                                 </div>
                             </FormControl>
                             <FormMessage className="text-red-400 text-xs" />

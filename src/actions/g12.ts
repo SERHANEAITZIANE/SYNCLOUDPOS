@@ -24,6 +24,20 @@ export interface G12Result {
     projectedIFU?: number
     /** Months elapsed in current year */
     monthsElapsed?: number
+    tenant: {
+        name: string
+        ownerName: string | null
+        activity: string | null
+        address: string | null
+        wilaya: string | null
+        commune: string | null
+        phone: string | null
+        email: string | null
+        nif: string | null
+        rc: string | null
+        artImposition: string | null
+        nis: string | null
+    } | null
 }
 
 const QUARTER_LABELS: Record<number, string> = {
@@ -90,13 +104,32 @@ export async function getG12Data(
     const totalCA = quarters.reduce((s, q) => s + q.caHT, 0)
     const totalIFU = totalCA * (ifuRate / 100)
 
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+            name: true,
+            ownerName: true,
+            activity: true,
+            address: true,
+            wilaya: true,
+            commune: true,
+            phone: true,
+            email: true,
+            nif: true,
+            rc: true,
+            artImposition: true,
+            nis: true,
+        }
+    })
+
     const result: G12Result = {
         year,
         mode,
         ifuRate,
         quarters,
         totalCA,
-        totalIFU
+        totalIFU,
+        tenant
     }
 
     // For previsionnel mode: project the full-year CA

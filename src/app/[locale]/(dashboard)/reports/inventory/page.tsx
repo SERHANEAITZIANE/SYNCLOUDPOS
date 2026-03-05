@@ -18,7 +18,11 @@ export default async function InventoryReportPage() {
         orderBy: {
             name: "asc"
         },
-        include: { storeProducts: true }
+        include: {
+            storeProducts: true,
+            category: true,
+            brand: true
+        }
     });
 
     const formattedData = products.map((product) => {
@@ -31,8 +35,10 @@ export default async function InventoryReportPage() {
             minStock,
             cost: Number(product.cost || product.price), // Fallback to price if cost is somehow missing
             price: Number(product.price),
+            category: product.category?.name || "Sans Catégorie",
+            brand: product.brand?.name || "Sans Marque",
         };
-    }).sort((a, b) => a.stock - b.stock);
+    }).sort((a, b) => b.stock - a.stock);
 
     return (
         <div className="flex-col">

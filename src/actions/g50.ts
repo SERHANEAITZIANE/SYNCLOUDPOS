@@ -18,6 +18,20 @@ export interface G50Result {
     grandTVA: number
     grandTTC: number
     totalInvoices: number
+    tenant: {
+        name: string
+        ownerName: string | null
+        activity: string | null
+        address: string | null
+        wilaya: string | null
+        commune: string | null
+        phone: string | null
+        email: string | null
+        nif: string | null
+        rc: string | null
+        artImposition: string | null
+        nis: string | null
+    } | null
 }
 
 /**
@@ -92,12 +106,31 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
 
     const periodLabel = new Date(year, month - 1).toLocaleDateString("fr-DZ", { month: "long", year: "numeric" })
 
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+            name: true,
+            ownerName: true,
+            activity: true,
+            address: true,
+            wilaya: true,
+            commune: true,
+            phone: true,
+            email: true,
+            nif: true,
+            rc: true,
+            artImposition: true,
+            nis: true,
+        }
+    })
+
     return {
         period: periodLabel,
         rows,
         grandHT,
         grandTVA,
         grandTTC,
-        totalInvoices: invoices.length
+        totalInvoices: invoices.length,
+        tenant
     }
 }
