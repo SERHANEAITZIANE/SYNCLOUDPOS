@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SYNCLOUDPOS — Point of Sale System
 
-## Getting Started
+A modern, full-featured Point of Sale system for Algerian businesses.
+Multi-store, multi-user, with invoicing, analytics, and subscriptions.
 
-First, run the development server:
+---
 
+## 🚀 Quick Install (Local)
+
+### Requirements
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows / Mac / Linux)
+- That's it — no Node.js, no PostgreSQL needed separately
+
+### Windows
+1. Download or clone this repository
+2. Double-click **`install.bat`**
+3. Open **http://localhost:3000** in your browser
+
+### Mac / Linux
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+chmod +x install.sh
+./install.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### First Time Setup
+- Click **Register** to create your store and admin account
+- Login with your credentials
+- You're ready to use SYNCLOUDPOS!
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Daily Usage
 
-## Learn More
+| Action | Command |
+|--------|---------|
+| Start the app | `docker compose up -d` |
+| Stop the app | `docker compose down` |
+| View logs | `docker compose logs -f app` |
+| Update to new version | `git pull && docker compose up -d --build` |
+| Backup database | `docker compose exec db pg_dump -U syncloud syncloudpos > backup.sql` |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Optional Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Edit `.env.local` to enable extra features:
 
-## Deploy on Vercel
+| Feature | What to add |
+|---------|------------|
+| Google Login | `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` |
+| WhatsApp OTP | `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_ID` |
+| AI Assistant | `GEMINI_API_KEY` |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+After editing `.env.local`, restart with:
+```bash
+docker compose down && docker compose up -d
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🌐 Cloud Version
+
+Your SaaS version is live at: **https://chirpedbeo.online**
+
+---
+
+## 📦 Tech Stack
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Backend**: Next.js Server Actions, Prisma ORM
+- **Database**: PostgreSQL 15
+- **Cache**: Redis 7
+- **Auth**: NextAuth v5 (Credentials + Google OAuth)

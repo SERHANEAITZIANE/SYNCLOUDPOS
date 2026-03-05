@@ -8,6 +8,9 @@ const nextConfig: import('next').NextConfig = {
         ignoreBuildErrors: true,
     },
 
+    // Required for Docker standalone build
+    output: "standalone",
+
     // Performance optimizations
     compress: true,
     poweredByHeader: false,

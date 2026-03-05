@@ -1,7 +1,47 @@
-version: '3.8'
-
 services:
-  syncloudpos:
+  # ──────────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: syncloudpos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: syncloud
+      POSTGRES_PASSWORD: syncloud123
+      POSTGRES_DB: syncloudpos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U syncloud -d syncloudpos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - syncloud_net
+
+  # ──────────────────────────────────
+  # Redis Cache
+  # ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: syncloudpos_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - syncloud_net
+
+  # ──────────────────────────────────
+  # App (migrates DB on first start)
+  # ──────────────────────────────────
+  app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,25 +49,36 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    volumes:
-      - ./prisma:/app/prisma
-    env_file:
-      - .env
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15-alpine
-    container_name: syncloudpos_postgres
-    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: syncloudpos_db
-    ports:
-      - "5432:5432"
+      DATABASE_URL: postgresql://syncloud:syncloud123@db:5432/syncloudpos
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_URL: http://localhost:3000
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    env_file:
+      - .env.local
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - uploads_data:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - syncloud_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
 volumes:
   postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  syncloud_net:
+    driver: bridge
