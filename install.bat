@@ -42,6 +42,21 @@ echo  [OK] Docker is ready
 echo.
 echo [2/5] Setting up configuration...
 
+:: Detect Machine ID from Windows hardware
+if not exist ".machine-id" (
+    for /f "skip=2 tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography" /v MachineGuid 2^>nul') do set RAW_ID=%%b
+    if not defined RAW_ID (
+        for /f %%i in ('powershell -Command "[System.Environment]::MachineName + '-' + (Get-WmiObject Win32_BaseBoard).SerialNumber"') do set RAW_ID=%%i
+    )
+    powershell -Command "$id = '$RAW_ID'; $bytes = [System.Text.Encoding]::UTF8.GetBytes($id); $hash = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes); [System.BitConverter]::ToString($hash).Replace('-','').ToLower() | Out-File -FilePath '.machine-id' -Encoding ascii -NoNewline"
+    echo  [OK] Machine ID generated
+)
+set /p MACHINE_ID=<.machine-id
+set MACHINE_ID=%MACHINE_ID%
+
+:: Create empty license file if not exists
+if not exist "license.key" echo.>license.key
+
 if not exist ".env.local" (
     copy ".env.example" ".env.local" >nul
 

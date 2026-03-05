@@ -30,6 +30,24 @@ echo -e "  ${GREEN}[OK]${NC} Docker is ready"
 # ── Setup .env.local ─────────────────────────────────────────
 echo ""
 echo "[2/5] Setting up configuration..."
+
+# Detect Machine ID from host hardware
+if [ ! -f ".machine-id" ]; then
+    if [ -f "/etc/machine-id" ]; then
+        RAW_ID=$(cat /etc/machine-id)
+    elif command -v ioreg &>/dev/null; then
+        RAW_ID=$(ioreg -rd1 -c IOPlatformExpertDevice 2>/dev/null | awk -F'"' '/IOPlatformSerialNumber/{print $4}')
+    else
+        RAW_ID=$(hostname)-$(whoami)
+    fi
+    echo -n "$RAW_ID" | sha256sum | awk '{print $1}' > .machine-id 2>/dev/null || \
+    echo -n "$RAW_ID" | shasum -a 256 | awk '{print $1}' > .machine-id
+    echo -e "  ${GREEN}[OK]${NC} Machine ID generated"
+fi
+export MACHINE_ID=$(cat .machine-id)
+
+# Create empty license file if it doesn't exist
+[ ! -f "license.key" ] && touch license.key
 if [ ! -f ".env.local" ]; then
     cp ".env.example" ".env.local"
     # Generate random secret

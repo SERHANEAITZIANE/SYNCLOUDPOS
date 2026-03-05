@@ -46,3 +46,10 @@ next-env.d.ts
 *.db
 *.sqlite
 *.sqlite3
+
+# License private key - NEVER COMMIT
+scripts/license.private.pem
+
+# Local machine files
+.machine-id
+license.key
