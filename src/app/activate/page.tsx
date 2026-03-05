@@ -159,7 +159,7 @@ export default function ActivatePage() {
                                 <div className="bg-zinc-900/60 border border-white/10 rounded-xl p-4 space-y-3">
                                     <p className="text-xs text-zinc-400 text-center">Contact us to get your activation key:</p>
                                     <a
-                                        href="https://wa.me/33696928227"
+                                        href="https://wa.me/213696928227"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center justify-center gap-3 py-3 bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 rounded-xl transition"
@@ -170,7 +170,7 @@ export default function ActivatePage() {
                                         <span className="text-[#25D366] font-semibold">WhatsApp: 0696 92 82 27</span>
                                     </a>
                                     <a
-                                        href="tel:+33696928227"
+                                        href="tel:+213696928227"
                                         className="flex items-center justify-center gap-2 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl transition text-sm text-zinc-300"
                                     >
                                         <Phone className="w-4 h-4 text-zinc-400" />
@@ -264,7 +264,7 @@ export default function ActivatePage() {
                 )}
 
                 <p className="text-center text-xs text-zinc-600 mt-5">
-                    Support: <a href="https://wa.me/33696928227" className="text-[#25D366] hover:text-white">WhatsApp 0696 92 82 27</a>
+                    Support: <a href="https://wa.me/213696928227" className="text-[#25D366] hover:text-white">WhatsApp 0696 92 82 27</a>
                 </p>
             </div>
         </div>
