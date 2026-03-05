@@ -6,6 +6,7 @@ import { ProductSchema } from "@/schemas"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
+import { withCache, invalidateCache } from "@/lib/redis"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
@@ -75,6 +76,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         })
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
+        await invalidateCache(`products:${tenantId}`)
         return { success: "Product created!" }
     } catch (error) {
         console.error("Error creating product:", error)
@@ -106,25 +108,23 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         const safePage = isNaN(page) ? 1 : page;
         const safePageSize = isNaN(pageSize) ? 20 : pageSize;
 
-        const [products, totalCount] = await Promise.all([
-            db.product.findMany({
-                where: whereClause,
-                include: {
-                    category: true,
-                    brand: true,
-                    images: true,
-                    barcodes: true,
-                },
-                orderBy: {
-                    createdAt: 'desc'
-                },
-                skip: (safePage - 1) * safePageSize,
-                take: safePageSize,
-            }),
-            db.product.count({ where: whereClause })
-        ]);
-
-        return { items: products, totalCount }
+        return withCache(
+            `products:${tenantId}:p${safePage}:s${safePageSize}:q${safeSearch || ""}`,
+            async () => {
+                const [products, totalCount] = await Promise.all([
+                    db.product.findMany({
+                        where: whereClause,
+                        include: { category: true, brand: true, images: true, barcodes: true },
+                        orderBy: { createdAt: 'desc' },
+                        skip: (safePage - 1) * safePageSize,
+                        take: safePageSize,
+                    }),
+                    db.product.count({ where: whereClause })
+                ])
+                return { items: products, totalCount }
+            },
+            60 // 60 second cache
+        )
     } catch (error) {
         console.error("getProducts error:", error)
         return { items: [], totalCount: 0 }
@@ -205,6 +205,7 @@ export const deleteProduct = async (id: string) => {
         })
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
+        await invalidateCache(`products:${tenantId}`)
         return { success: "Product deleted!" }
     } catch {
         return { error: "Failed to delete product!" }
@@ -286,6 +287,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
         })
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
+        await invalidateCache(`products:${tenantId}`)
         return { success: "Product updated!" }
     } catch (error) {
         console.error("PRISMA ERROR in updateProduct:", error)
