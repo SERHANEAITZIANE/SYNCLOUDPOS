@@ -8,15 +8,29 @@ let client: ReturnType<typeof createClient> | null = null
 async function getClient() {
     if (globalForRedis._redis?.isReady) return globalForRedis._redis
 
+    // Skip Redis initialization if no URL is provided and not in production
+    // or fail fast if Redis is not running locally.
     const c = createClient({
         url: process.env.REDIS_URL || "redis://127.0.0.1:6379",
         socket: {
-            reconnectStrategy: (retries) => Math.min(retries * 100, 3000),
+            // Fail after 3 attempts instead of blocking the app forever
+            reconnectStrategy: (retries) => {
+                if (retries > 3) return new Error("Redis connection limits reached");
+                return Math.min(retries * 100, 3000);
+            },
+            connectTimeout: 5000 // 5 second timeout
         },
     })
-    c.on("error", () => { }) // Silence — Redis is optional, app works without it
-    await c.connect().catch(() => { })
-    globalForRedis._redis = c
+
+    c.on("error", () => { }) // Silence
+
+    try {
+        await c.connect();
+        globalForRedis._redis = c;
+    } catch {
+        // Silently fail if Redis is down, we use DB fallback
+    }
+
     return c
 }
 

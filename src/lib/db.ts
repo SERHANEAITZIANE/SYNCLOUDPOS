@@ -7,7 +7,14 @@ const createPrismaClient = () => {
         log: process.env.NODE_ENV === "development"
             ? ["error", "warn"]
             : ["error"],
+        datasourceUrl: process.env.DATABASE_URL,
     })
+
+    // Auto-reconnect on connection drops (common with remote PostgreSQL on VPS)
+    client.$connect().catch(() => {
+        // Swallow initial connect error - Prisma will retry on next query
+    })
+
     return client
 }
 
