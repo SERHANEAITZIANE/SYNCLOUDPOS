@@ -12,7 +12,8 @@ import {
     Activity,
     Tags,
     Truck,
-    Wallet
+    Wallet,
+    Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -114,6 +115,18 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                 { label: "Paramètres", href: "/settings" },
                 { label: "Mon Entreprise", href: "/company" },
                 { label: "Utilisateurs", href: "/users" }
+            ]
+        },
+        {
+            title: "Intelligence IA",
+            description: "Assistant virtuel, analyse prédictive et outils intelligents.",
+            icon: Sparkles,
+            color: "text-teal-500",
+            bgColor: "bg-teal-500/10",
+            borderColor: "border-teal-500/20",
+            stats: "Assistant",
+            links: [
+                { label: "Assistant IA", href: "/ai" },
             ]
         }
     ];
