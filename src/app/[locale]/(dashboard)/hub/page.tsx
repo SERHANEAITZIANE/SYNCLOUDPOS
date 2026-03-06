@@ -14,7 +14,7 @@ export default async function HubPage() {
     // e.g. recent sales, low stock count, etc.
     const [productsCount, salesCount] = await Promise.all([
         db.product.count({ where: { tenantId, isArchived: false } }),
-        db.order.count({ where: { tenantId, type: "RETAIL" } })
+        db.order.count({ where: { tenantId } })
     ]);
 
     return (
