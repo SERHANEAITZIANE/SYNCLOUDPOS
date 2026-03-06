@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 interface InventoryReportProps {
     data: {
@@ -59,6 +60,10 @@ export const InventoryReportClient: React.FC<InventoryReportProps> = ({ data }) 
         style: "currency",
         currency: "DZD"
     });
+
+    // Calculate totals for the filtered data specifically to show in the footer
+    const currentTableCost = filteredData.reduce((acc, curr) => acc + (Math.max(0, curr.stock) * curr.cost), 0);
+    const currentTableRetail = filteredData.reduce((acc, curr) => acc + (Math.max(0, curr.stock) * curr.price), 0);
 
     const columns: ColumnDef<any>[] = [
         {
@@ -117,6 +122,15 @@ export const InventoryReportClient: React.FC<InventoryReportProps> = ({ data }) 
             }
         }
     ];
+
+    const totalsFooter = (
+        <TableRow>
+            <TableCell colSpan={5} className="text-right text-lg font-bold">Totaux des produits affichés</TableCell>
+            <TableCell className="text-lg font-bold text-muted-foreground">{formatter.format(currentTableCost)}</TableCell>
+            <TableCell></TableCell>
+            <TableCell className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatter.format(currentTableRetail)}</TableCell>
+        </TableRow>
+    );
 
     return (
         <div className="space-y-6">
@@ -216,7 +230,13 @@ export const InventoryReportClient: React.FC<InventoryReportProps> = ({ data }) 
                     <CardTitle className="text-lg">Détails de l'Inventaire ({filteredData.length} produits affichés)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <DataTable searchKey="name" columns={columns} data={filteredData} />
+                    <DataTable
+                        searchKey="name"
+                        columns={columns}
+                        data={filteredData}
+                        showPagination={false}
+                        footerRow={totalsFooter}
+                    />
                 </CardContent>
             </Card>
         </div>
