@@ -1131,5 +1131,88 @@
     "amount": "Montant Net",
     "actions": "Actions",
     "view": "Voir"
+  },
+  "Hub": {
+    "commandCenter": "Centre de Commande",
+    "subtitle": "Sélectionnez un module pour commencer",
+    "searchPlaceholder": "Rechercher un module...",
+    "quickAccess": "Accès Rapide",
+    "noResults": "Aucun résultat",
+    "noResultsDesc": "Aucun module ne correspond à \"{query}\"",
+    "footer": "SYNCLOUDPOS — ERP & POS Cloud",
+    "stats": {
+      "products": "Produits",
+      "sales": "Ventes",
+      "clients": "Clients",
+      "suppliers": "Fournisseurs"
+    },
+    "sections": {
+      "posSales": {
+        "title": "Point de Vente & Ventes",
+        "description": "Caisse, commandes, factures et gestion des ventes"
+      },
+      "catalog": {
+        "title": "Catalogue & Stock",
+        "description": "Produits, catégories, marques et gestion d'inventaire"
+      },
+      "purchases": {
+        "title": "Achats & Fournisseurs",
+        "description": "Commandes fournisseurs, réceptions et dépenses"
+      },
+      "customers": {
+        "title": "Clients & Relations",
+        "description": "Base clients, emprunts et fidélisation"
+      },
+      "treasury": {
+        "title": "Trésorerie & Finances",
+        "description": "Caisses, banques, transferts et clôtures"
+      },
+      "reports": {
+        "title": "Rapports & Analyses",
+        "description": "Statistiques, fiscalité G50/G12 et performance"
+      },
+      "ai": {
+        "title": "Intelligence Artificielle",
+        "description": "Assistant IA, analyse prédictive et outils intelligents"
+      },
+      "system": {
+        "title": "Paramètres & Administration",
+        "description": "Configuration, utilisateurs, formation et système"
+      }
+    },
+    "links": {
+      "pos": "Caisse (POS)",
+      "allSales": "Toutes les Ventes",
+      "recurringInvoices": "Factures Récurrentes",
+      "reservations": "Réservations",
+      "delivery": "Livraison",
+      "payments": "Paiements",
+      "products": "Produits",
+      "categories": "Catégories",
+      "brands": "Marques",
+      "promotions": "Promotions",
+      "damages": "Avaries",
+      "reorder": "Réapprovisionnement",
+      "inventoryAudit": "Audit d'Inventaire",
+      "purchases": "Achats",
+      "suppliers": "Fournisseurs",
+      "expenses": "Dépenses",
+      "supplierLoan": "Emprunt Fournisseur",
+      "customers": "Clients",
+      "customerLoan": "Emprunt Client",
+      "treasuryOverview": "Vue d'ensemble",
+      "dailyClose": "Clôture de Caisse",
+      "reports": "Rapports",
+      "analytics": "Analytiques",
+      "fiscal": "Impôts G50/G12",
+      "annualInventory": "Inventaire Annuel",
+      "commissions": "Commissions",
+      "aiChat": "Assistant IA",
+      "settings": "Paramètres",
+      "company": "Mon Entreprise",
+      "users": "Utilisateurs",
+      "training": "Formation ERP",
+      "dashboard": "Tableau de bord"
+    }
   }
 }

@@ -10,16 +10,40 @@ export default async function HubPage() {
         redirect("/login");
     }
 
-    // You could fetch top-level counts here if needed for the cards
-    // e.g. recent sales, low stock count, etc.
-    const [productsCount, salesCount] = await Promise.all([
+    const [
+        productsCount,
+        salesCount,
+        customersCount,
+        suppliersCount,
+        purchasesCount,
+        expensesCount,
+        categoriesCount,
+        brandsCount,
+    ] = await Promise.all([
         db.product.count({ where: { tenantId, isArchived: false } }),
-        db.order.count({ where: { tenantId } })
+        db.order.count({ where: { tenantId } }),
+        db.customer.count({ where: { tenantId } }),
+        db.supplier.count({ where: { tenantId } }),
+        db.purchaseOrder.count({ where: { tenantId } }),
+        db.expense.count({ where: { tenantId } }),
+        db.category.count({ where: { tenantId } }),
+        db.brand.count({ where: { tenantId } }),
     ]);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto dark:bg-[#0A0A0A] min-h-screen">
-            <HubClient metrics={{ productsCount, salesCount }} />
+        <div className="min-h-screen">
+            <HubClient
+                metrics={{
+                    productsCount,
+                    salesCount,
+                    customersCount,
+                    suppliersCount,
+                    purchasesCount,
+                    expensesCount,
+                    categoriesCount,
+                    brandsCount,
+                }}
+            />
         </div>
     );
 }

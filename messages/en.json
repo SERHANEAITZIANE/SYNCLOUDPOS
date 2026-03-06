@@ -1131,5 +1131,88 @@
     "amount": "Net Amount",
     "actions": "Actions",
     "view": "View"
+  },
+  "Hub": {
+    "commandCenter": "Command Center",
+    "subtitle": "Select a module to get started",
+    "searchPlaceholder": "Search a module...",
+    "quickAccess": "Quick Access",
+    "noResults": "No results",
+    "noResultsDesc": "No module matches \"{query}\"",
+    "footer": "SYNCLOUDPOS — ERP & POS Cloud",
+    "stats": {
+      "products": "Products",
+      "sales": "Sales",
+      "clients": "Clients",
+      "suppliers": "Suppliers"
+    },
+    "sections": {
+      "posSales": {
+        "title": "POS & Sales",
+        "description": "Register, orders, invoices and sales management"
+      },
+      "catalog": {
+        "title": "Catalog & Stock",
+        "description": "Products, categories, brands and inventory"
+      },
+      "purchases": {
+        "title": "Purchases & Suppliers",
+        "description": "Supplier orders, receipts and expenses"
+      },
+      "customers": {
+        "title": "Clients & Relations",
+        "description": "Customer base, loans and loyalty"
+      },
+      "treasury": {
+        "title": "Treasury & Finance",
+        "description": "Accounts, banks, transfers and closures"
+      },
+      "reports": {
+        "title": "Reports & Analysis",
+        "description": "Statistics, G50/G12 tax and performance"
+      },
+      "ai": {
+        "title": "Artificial Intelligence",
+        "description": "AI assistant, predictive analysis and smart tools"
+      },
+      "system": {
+        "title": "Settings & Admin",
+        "description": "Configuration, users, training and system"
+      }
+    },
+    "links": {
+      "pos": "POS (Register)",
+      "allSales": "All Sales",
+      "recurringInvoices": "Recurring Invoices",
+      "reservations": "Reservations",
+      "delivery": "Delivery",
+      "payments": "Payments",
+      "products": "Products",
+      "categories": "Categories",
+      "brands": "Brands",
+      "promotions": "Promotions",
+      "damages": "Damages",
+      "reorder": "Reorder",
+      "inventoryAudit": "Inventory Audit",
+      "purchases": "Purchases",
+      "suppliers": "Suppliers",
+      "expenses": "Expenses",
+      "supplierLoan": "Supplier Loan",
+      "customers": "Customers",
+      "customerLoan": "Customer Loan",
+      "treasuryOverview": "Overview",
+      "dailyClose": "Daily Close",
+      "reports": "Reports",
+      "analytics": "Analytics",
+      "fiscal": "Tax G50/G12",
+      "annualInventory": "Annual Inventory",
+      "commissions": "Commissions",
+      "aiChat": "AI Assistant",
+      "settings": "Settings",
+      "company": "My Company",
+      "users": "Users",
+      "training": "ERP Training",
+      "dashboard": "Dashboard"
+    }
   }
 }

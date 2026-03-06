@@ -1131,5 +1131,88 @@
     "amount": "المبلغ الصافي",
     "actions": "إجراءات",
     "view": "عرض"
+  },
+  "Hub": {
+    "commandCenter": "مركز القيادة",
+    "subtitle": "اختر وحدة للبدء",
+    "searchPlaceholder": "ابحث عن وحدة...",
+    "quickAccess": "وصول سريع",
+    "noResults": "لا توجد نتائج",
+    "noResultsDesc": "لا يوجد وحدة تطابق \"{query}\"",
+    "footer": "SYNCLOUDPOS — ERP & POS Cloud",
+    "stats": {
+      "products": "المنتجات",
+      "sales": "المبيعات",
+      "clients": "العملاء",
+      "suppliers": "الموردون"
+    },
+    "sections": {
+      "posSales": {
+        "title": "نقطة البيع والمبيعات",
+        "description": "الصندوق، الطلبات، الفواتير وإدارة المبيعات"
+      },
+      "catalog": {
+        "title": "الكتالوج والمخزون",
+        "description": "المنتجات، الفئات، العلامات التجارية والمخزون"
+      },
+      "purchases": {
+        "title": "المشتريات والموردون",
+        "description": "طلبات الموردين، الاستلام والنفقات"
+      },
+      "customers": {
+        "title": "العملاء والعلاقات",
+        "description": "قاعدة العملاء، السلف والولاء"
+      },
+      "treasury": {
+        "title": "الخزينة والمالية",
+        "description": "الحسابات، البنوك، التحويلات والإقفال"
+      },
+      "reports": {
+        "title": "التقارير والتحليلات",
+        "description": "الإحصائيات، الضرائب G50/G12 والأداء"
+      },
+      "ai": {
+        "title": "الذكاء الاصطناعي",
+        "description": "مساعد ذكي، تحليل تنبؤي وأدوات ذكية"
+      },
+      "system": {
+        "title": "الإعدادات والإدارة",
+        "description": "التكوين، المستخدمين، التدريب والنظام"
+      }
+    },
+    "links": {
+      "pos": "نقطة البيع",
+      "allSales": "جميع المبيعات",
+      "recurringInvoices": "فواتير متكررة",
+      "reservations": "الحجوزات",
+      "delivery": "التوصيل",
+      "payments": "المدفوعات",
+      "products": "المنتجات",
+      "categories": "الفئات",
+      "brands": "العلامات التجارية",
+      "promotions": "العروض",
+      "damages": "التوالف",
+      "reorder": "إعادة الطلب",
+      "inventoryAudit": "تدقيق المخزون",
+      "purchases": "المشتريات",
+      "suppliers": "الموردون",
+      "expenses": "النفقات",
+      "supplierLoan": "سلف الموردين",
+      "customers": "العملاء",
+      "customerLoan": "سلف العملاء",
+      "treasuryOverview": "نظرة عامة",
+      "dailyClose": "إقفال الصندوق",
+      "reports": "التقارير",
+      "analytics": "التحليلات",
+      "fiscal": "الضرائب G50/G12",
+      "annualInventory": "الجرد السنوي",
+      "commissions": "العمولات",
+      "aiChat": "مساعد ذكي",
+      "settings": "الإعدادات",
+      "company": "مؤسستي",
+      "users": "المستخدمين",
+      "training": "تدريب النظام",
+      "dashboard": "لوحة القيادة"
+    }
   }
 }
