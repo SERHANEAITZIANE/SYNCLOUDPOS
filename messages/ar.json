@@ -520,7 +520,9 @@
     "card": "بطاقة",
     "receipt": "إيصال",
     "newSale": "بيع جديد",
-    "customer": "العميل"
+    "customer": "العميل",
+    "cartTitle": "عربة التسوق",
+    "cartDescription": "قائمة المنتجات المراد دفعها"
   },
   "Settings": {
     "title": "الإعدادات",

@@ -311,10 +311,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             description={t("checkoutDesc")}
             isOpen={isOpen}
             onClose={handleClose}
-            className="sm:max-w-4xl p-0 rounded-2xl bg-slate-100 dark:bg-zinc-950 shadow-2xl max-h-[95dvh] overflow-hidden flex flex-col"
+            className="sm:max-w-4xl w-[95vw] sm:w-[90vw] p-0 rounded-2xl bg-slate-100 dark:bg-zinc-950 shadow-2xl overflow-hidden h-auto max-h-[90dvh] flex flex-col"
         >
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <div className="flex flex-col lg:flex-row gap-5">
+            <div className="flex-1 overflow-y-auto px-4 py-4 sm:p-6" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+                <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
 
                     {/* Left Side: Totals + Payment Method + Account + Quick Cash */}
                     <div className="flex-1 flex flex-col gap-4">
@@ -423,27 +423,27 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
 
                         {/* Numpad */}
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                             {["7", "8", "9", "4", "5", "6", "1", "2", "3"].map((num) => (
                                 <Button
                                     key={num}
                                     variant="outline"
-                                    className="h-14 sm:h-16 rounded-xl text-xl sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all text-gray-900 dark:text-white"
+                                    className="h-12 sm:h-16 rounded-xl text-lg sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all text-gray-900 dark:text-white"
                                     onClick={() => handleNumpad(num)}
                                 >
                                     {num}
                                 </Button>
                             ))}
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-xl font-black text-red-500 hover:bg-red-50 border-gray-100 shadow-sm bg-white transition-all" onClick={() => handleNumpad("C")}>C</Button>
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>0</Button>
-                            <Button variant="outline" className="h-14 sm:h-16 rounded-xl text-lg font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>00</Button>
+                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-xl font-black text-red-500 hover:bg-red-50 border-gray-100 shadow-sm bg-white transition-all" onClick={() => handleNumpad("C")}>C</Button>
+                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>0</Button>
+                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-lg font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>00</Button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Sticky Footer Actions */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 rounded-b-2xl shrink-0">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 rounded-b-2xl shrink-0 mt-auto">
                 <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl font-bold" onClick={handleClose}>
                     {t("cancel")} <span className="text-[9px] opacity-40 ml-1 hidden sm:inline">Esc</span>
                 </Button>

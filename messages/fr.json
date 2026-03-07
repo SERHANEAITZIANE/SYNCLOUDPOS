@@ -520,7 +520,9 @@
     "card": "Carte",
     "receipt": "Reçu",
     "newSale": "Nouvelle vente",
-    "customer": "Client"
+    "customer": "Client",
+    "cartTitle": "Votre Panier",
+    "cartDescription": "Liste des produits à encaisser"
   },
   "Settings": {
     "title": "Paramètres",

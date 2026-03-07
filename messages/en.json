@@ -520,7 +520,9 @@
     "card": "Card",
     "receipt": "Receipt",
     "newSale": "New Sale",
-    "customer": "Customer"
+    "customer": "Customer",
+    "cartTitle": "Your Cart",
+    "cartDescription": "List of products to checkout"
   },
   "Settings": {
     "title": "Settings",

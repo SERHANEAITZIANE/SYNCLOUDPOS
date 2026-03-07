@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { cn, formatter } from "@/lib/utils"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 import { PosHeader } from "./pos-header"
 import { CartSidebar } from "./cart-sidebar"
@@ -329,6 +329,10 @@ export const PosClient: FC<PosClientProps> = ({
                 {/* Mobile Cart Drawer */}
                 <Sheet open={isMobileCartOpen} onOpenChange={setIsMobileCartOpen}>
                     <SheetContent side="bottom" className="h-[90vh] p-0 w-full sm:max-w-md mx-auto rounded-t-3xl overflow-hidden flex flex-col border-none bg-white dark:bg-[#18181b] z-[100]">
+                        <div className="sr-only">
+                            <SheetTitle>{t("cartTitle")}</SheetTitle>
+                            <SheetDescription>{t("cartDescription")}</SheetDescription>
+                        </div>
                         <div className="flex-1 w-full h-[calc(100%-2rem)] flex flex-col pt-2">
                             {/* Draggable indicator line */}
                             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto my-2 flex-shrink-0" />
