@@ -57,6 +57,16 @@ const nextConfig: import('next').NextConfig = {
         ]
     },
 
+    async redirects() {
+        return [
+            {
+                source: '/landing.html',
+                destination: '/',
+                permanent: true,
+            },
+        ]
+    },
+
     async rewrites() {
         return [
             {
