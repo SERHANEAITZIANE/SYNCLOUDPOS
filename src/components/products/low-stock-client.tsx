@@ -39,7 +39,7 @@ export const LowStockClient: React.FC<LowStockClientProps> = ({ data }) => {
                 </div>
             )}
 
-            <DataTable searchKey="name" columns={columns} data={data} />
+            <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="name" columns={columns} data={data} />
         </>
     )
 }

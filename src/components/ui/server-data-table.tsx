@@ -41,6 +41,8 @@ interface ServerDataTableProps<TData, TValue> {
     searchKey: string
     pageCount: number
     currentPage: number
+    exportTitle?: string
+    exportDescription?: string
 }
 
 export function ServerDataTable<TData, TValue>({
@@ -49,6 +51,8 @@ export function ServerDataTable<TData, TValue>({
     searchKey,
     pageCount,
     currentPage,
+    exportTitle = "Export Data",
+    exportDescription = "",
 }: ServerDataTableProps<TData, TValue>) {
     const t = useTranslations("Common")
     const tDataTable = useTranslations("DataTable")
@@ -93,7 +97,7 @@ export function ServerDataTable<TData, TValue>({
 
     const handlePrint = useReactToPrint({
         contentRef: printRef,
-        documentTitle: `Export_Page${currentPage}_${new Date().toLocaleDateString()}`
+        documentTitle: `${exportTitle.replace(/[^a-z0-9]/gi, '_')}_Page${currentPage}_${new Date().toLocaleDateString()}`
     })
 
     const extractTableData = () => {
@@ -122,7 +126,7 @@ export function ServerDataTable<TData, TValue>({
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows])
         const workbook = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(workbook, worksheet, `Page ${currentPage}`)
-        XLSX.writeFile(workbook, `Export_Page${currentPage}_${new Date().toLocaleDateString()}.xlsx`)
+        XLSX.writeFile(workbook, `${exportTitle.replace(/[^a-z0-9]/gi, '_')}_Page${currentPage}_${new Date().toLocaleDateString()}.xlsx`)
     }
 
     const handleExportPDF = () => {
@@ -130,20 +134,29 @@ export function ServerDataTable<TData, TValue>({
         const doc = new jsPDF()
 
         doc.setFontSize(16)
-        doc.text(`Export Data (Page ${currentPage})`, 14, 15)
+        doc.text(`${exportTitle} (Page ${currentPage})`, 14, 15)
         doc.setFontSize(10)
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22)
+
+        let startY = 25;
+        if (exportDescription) {
+            doc.text(exportDescription, 14, 22)
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28)
+            startY = 32;
+        } else {
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22)
+            startY = 25;
+        }
 
         autoTable(doc, {
             head: [headers],
             body: rows,
-            startY: 25,
+            startY: startY,
             theme: 'grid',
             styles: { fontSize: 8, font: "helvetica" },
             headStyles: { fillColor: [41, 128, 185] },
         })
 
-        doc.save(`Export_Page${currentPage}_${new Date().toLocaleDateString()}.pdf`)
+        doc.save(`${exportTitle.replace(/[^a-z0-9]/gi, '_')}_Page${currentPage}_${new Date().toLocaleDateString()}.pdf`)
     }
 
     return (
@@ -194,8 +207,9 @@ export function ServerDataTable<TData, TValue>({
                 <div className="hidden print:block mb-8 mt-4">
                     <div className="flex justify-between items-end border-b-2 border-gray-800 pb-4 mb-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-black font-serif">SYNCLOUDPOS</h1>
-                            <p className="text-sm text-gray-600 mt-1 uppercase tracking-wider">{t("print")} - Page {currentPage}</p>
+                            <h1 className="text-3xl font-bold text-black font-serif">{exportTitle}</h1>
+                            {exportDescription && <p className="text-base text-gray-700 mt-2 font-medium">{exportDescription}</p>}
+                            <p className="text-sm text-gray-600 mt-1 uppercase tracking-wider">SYNCLOUDPOS - {t("print")} (Page {currentPage})</p>
                         </div>
                         <div className="text-right">
                             <p className="text-sm font-semibold text-black">{t("date")}: {new Date().toLocaleDateString()}</p>

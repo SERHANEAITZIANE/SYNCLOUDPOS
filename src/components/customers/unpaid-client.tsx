@@ -127,7 +127,7 @@ export const UnpaidClient: React.FC<UnpaidClientProps> = ({ data, accounts }) =>
                 />
             </div>
             <Separator />
-            <DataTable searchKey="name" columns={columns} data={data} />
+            <DataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="name" columns={columns} data={data} />
 
             <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">

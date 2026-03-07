@@ -45,7 +45,7 @@ export const BrandClient: React.FC<BrandClientProps> = ({ data }) => {
                 </div>
             </div>
             <Separator />
-            <DataTable searchKey="name" columns={columns} data={data} />
+            <DataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="name" columns={columns} data={data} />
 
             <ExcelImportModal
                 isOpen={importOpen}

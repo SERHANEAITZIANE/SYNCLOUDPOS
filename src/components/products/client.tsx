@@ -96,7 +96,7 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                     {/* Pagination will eventually need to be wired up for grid but relying on server-data-table pagination logic right now is tricky. We'll show the grid for the current page. */}
                 </div>
             ) : (
-                <ServerDataTable searchKey="name" columns={columns} data={data} pageCount={pageCount} currentPage={currentPage} />
+                <ServerDataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="name" columns={columns} data={data} pageCount={pageCount} currentPage={currentPage} />
             )}
 
             <ExcelImportModal

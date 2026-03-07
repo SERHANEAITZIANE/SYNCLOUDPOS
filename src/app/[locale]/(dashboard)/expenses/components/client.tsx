@@ -33,7 +33,7 @@ export const ExpensesClient: React.FC<ExpensesClientProps> = ({ data }) => {
                 </Button>
             </div>
             <Separator />
-            <DataTable searchKey="description" columns={columns} data={data} />
+            <DataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="description" columns={columns} data={data} />
         </>
     )
 }

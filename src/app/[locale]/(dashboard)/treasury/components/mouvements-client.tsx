@@ -75,7 +75,7 @@ export const MouvementsClient: React.FC<MouvementsClientProps> = ({
                 </div>
             </div>
             <Separator />
-            <DataTable searchKey="description" columns={columns} data={filteredData} />
+            <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="description" columns={columns} data={filteredData} />
         </div>
     )
 }

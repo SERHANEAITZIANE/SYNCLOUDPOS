@@ -117,7 +117,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
                 <DatePickerWithRange date={dateRange} setDate={setDateRange} />
             </div>
 
-            <ServerDataTable searchKey="search" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
+            <ServerDataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="search" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
         </>
     )
 }

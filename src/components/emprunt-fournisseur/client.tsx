@@ -96,7 +96,7 @@ export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> =
                 </div>
             </div>
 
-            <DataTable searchKey="supplierName" columns={columns} data={filteredData} />
+            <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="supplierName" columns={columns} data={filteredData} />
 
             <SupplierLoanModal
                 open={open}

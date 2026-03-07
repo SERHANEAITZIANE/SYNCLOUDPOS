@@ -156,8 +156,7 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <DataTable
-                        searchKey="name"
+                    <DataTable  exportTitle={"Export"} exportDescription={""}                         searchKey="name"
                         columns={columns}
                         data={filteredData}
                     />

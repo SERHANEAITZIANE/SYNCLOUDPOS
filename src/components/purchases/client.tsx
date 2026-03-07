@@ -36,7 +36,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data }) => {
                 </Link>
             </div>
             <Separator />
-            <DataTable searchKey="supplier" columns={columns} data={data} />
+            <DataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="supplier" columns={columns} data={data} />
         </>
     )
 }

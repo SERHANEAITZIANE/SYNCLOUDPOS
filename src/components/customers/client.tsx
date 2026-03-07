@@ -187,7 +187,7 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
                 </div>
             </div>
             <Separator />
-            <ServerDataTable searchKey="name" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
+            <ServerDataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="name" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />
 
             {/* Advance Payment Modal Overlay */}
             <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>

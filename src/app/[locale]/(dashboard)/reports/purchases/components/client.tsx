@@ -95,7 +95,7 @@ export const PurchasesReportClient: React.FC<PurchasesReportProps> = ({
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable searchKey="supplier" columns={columns} data={purchaseOrders} />
+                    <DataTable  exportTitle={"Rapport des Achats"} exportDescription={"Suivi de vos dépenses fournisseurs et de l'historique d'approvisionnement."} searchKey="supplier" columns={columns} data={purchaseOrders} />
                 </CardContent>
             </Card>
         </div>

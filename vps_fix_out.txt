@@ -1,0 +1,148 @@
+
+--- Executing: cd /var/www/syncloudpos && npm install ---
+
+added 23 packages, and audited 935 packages in 7s
+
+322 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (1 moderate, 5 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+Exit status: 0
+
+--- Executing: cd /var/www/syncloudpos && npm run build ---
+
+> syncloudpos@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 65s
+  Skipping validation of types
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/17) ...
+  Generating static pages using 5 workers (4/17) 
+  Generating static pages using 5 workers (8/17) 
+  Generating static pages using 5 workers (12/17) 
+✓ Generating static pages using 5 workers (17/17) in 353.1ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/ai
+├ ƒ /[locale]/analytics
+├ ƒ /[locale]/analytics/forecast
+├ ƒ /[locale]/avaries
+├ ƒ /[locale]/brands
+├ ƒ /[locale]/categories
+├ ƒ /[locale]/cloture
+├ ƒ /[locale]/commissions
+├ ƒ /[locale]/company
+├ ƒ /[locale]/customers
+├ ƒ /[locale]/customers/[customerId]
+├ ƒ /[locale]/customers/[customerId]/ledger
+├ ƒ /[locale]/customers/new
+├ ƒ /[locale]/customers/unpaid
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/delivery
+├ ƒ /[locale]/display
+├ ƒ /[locale]/emprunt
+├ ƒ /[locale]/emprunt-fournisseur
+├ ƒ /[locale]/error
+├ ƒ /[locale]/expenses
+├ ƒ /[locale]/expenses/new
+├ ƒ /[locale]/fiscal
+├ ƒ /[locale]/formation
+├ ƒ /[locale]/hub
+├ ƒ /[locale]/inventaire-annuel
+├ ƒ /[locale]/inventory-audit
+├ ƒ /[locale]/inventory-audit/[id]
+├ ƒ /[locale]/login
+├ ƒ /[locale]/payments
+├ ƒ /[locale]/pos
+├ ƒ /[locale]/products
+├ ƒ /[locale]/products/[productId]
+├ ƒ /[locale]/products/inventory
+├ ƒ /[locale]/products/new
+├ ƒ /[locale]/promotions
+├ ƒ /[locale]/purchases
+├ ƒ /[locale]/purchases/[purchaseId]
+├ ƒ /[locale]/recurring-invoices
+├ ƒ /[locale]/register
+├ ƒ /[locale]/reorder
+├ ƒ /[locale]/reports
+├ ƒ /[locale]/reports/[reportType]
+├ ƒ /[locale]/reports/customers
+├ ƒ /[locale]/reports/inventory
+├ ƒ /[locale]/reports/purchases
+├ ƒ /[locale]/reports/sales
+├ ƒ /[locale]/reports/treasury
+├ ƒ /[locale]/reservations
+├ ƒ /[locale]/sales
+├ ƒ /[locale]/sales/[salesId]
+├ ƒ /[locale]/settings
+├ ƒ /[locale]/superadmin
+├ ƒ /[locale]/superadmin/licenses
+├ ƒ /[locale]/suppliers
+├ ƒ /[locale]/suppliers/[supplierId]
+├ ƒ /[locale]/suppliers/[supplierId]/ledger
+├ ƒ /[locale]/suppliers/new
+├ ƒ /[locale]/treasury
+├ ƒ /[locale]/treasury/[accountId]
+├ ƒ /[locale]/users
+├ ○ /activate
+├ ƒ /api/ai-analysis
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/backup/export
+├ ƒ /api/backup/import
+├ ƒ /api/cron/process-recurring
+├ ƒ /api/download-backup
+├ ƒ /api/health
+├ ƒ /api/license/activate
+├ ƒ /api/license/request
+├ ƒ /api/license/status
+├ ƒ /api/ping
+├ ƒ /api/superadmin/export-tenant
+├ ƒ /api/upload
+└ ƒ /receipt/[id]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Exit status: 0
+
+--- Executing: pm2 restart syncloudpos ---
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
+[PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](3) ✓
+[PM2] [syncloudpos](5) ✓
+[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](6) ✓
+[PM2] [syncloudpos](7) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501397   │ 0s     │ 118  │ online    │ 0%       │ 55.7mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501398   │ 0s     │ 118  │ online    │ 0%       │ 53.1mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501411   │ 0s     │ 118  │ online    │ 0%       │ 46.5mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501412   │ 0s     │ 118  │ online    │ 0%       │ 46.2mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501425   │ 0s     │ 118  │ online    │ 0%       │ 39.9mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 501426   │ 0s     │ 118  │ online    │ 0%       │ 38.6mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Exit status: 0

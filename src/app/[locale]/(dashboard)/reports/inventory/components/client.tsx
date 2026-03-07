@@ -230,8 +230,7 @@ export const InventoryReportClient: React.FC<InventoryReportProps> = ({ data }) 
                     <CardTitle className="text-lg">Détails de l'Inventaire ({filteredData.length} produits affichés)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <DataTable
-                        searchKey="name"
+                    <DataTable  exportTitle={"État du Stock & Inventaire"} exportDescription={"Visualisation complète de votre inventaire avec filtres, valorisation et contrôle des ruptures."}                         searchKey="name"
                         columns={columns}
                         data={filteredData}
                         showPagination={false}

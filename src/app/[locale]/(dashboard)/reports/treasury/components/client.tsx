@@ -126,7 +126,7 @@ export const TreasuryReportClient: React.FC<TreasuryReportProps> = ({
                     <CardTitle>Journal des Transactions (Entrées / Sorties)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable searchKey="description" columns={columns} data={transactions} />
+                    <DataTable  exportTitle={"Rapport de Trésorerie"} exportDescription={"Vue d'ensemble de vos liquidités, comptes bancaires et flux financiers."} searchKey="description" columns={columns} data={transactions} />
                 </CardContent>
             </Card>
         </div>

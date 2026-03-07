@@ -1,85 +1,255 @@
 
 --- Executing: unzip -o /root/update_v3.zip -d /var/www/syncloudpos ---
 Archive:  /root/update_v3.zip
-  inflating: /var/www/syncloudpos/src/auth.ts  
-  inflating: /var/www/syncloudpos/src/proxy.ts  
+9762e49d705bbacf17c2929bddb7f26a1c1c5973
+  inflating: /var/www/syncloudpos/.dockerignore  
+  inflating: /var/www/syncloudpos/.gitignore  
+ extracting: /var/www/syncloudpos/.vscode/settings.json  
+  inflating: /var/www/syncloudpos/DOM.html  
+  inflating: /var/www/syncloudpos/Dockerfile  
+  inflating: /var/www/syncloudpos/README.md  
+  inflating: /var/www/syncloudpos/algerian_products_export.csv  
+  inflating: /var/www/syncloudpos/build-output.txt  
+  inflating: /var/www/syncloudpos/build-output2.txt  
+  inflating: /var/www/syncloudpos/build-output3.txt  
+  inflating: /var/www/syncloudpos/build.log  
+  inflating: /var/www/syncloudpos/build2.log  
+  inflating: /var/www/syncloudpos/build3.log  
+  inflating: /var/www/syncloudpos/build_log.txt  
+  inflating: /var/www/syncloudpos/build_output.log  
+  inflating: /var/www/syncloudpos/compile_check.txt  
+  inflating: /var/www/syncloudpos/compile_check_utf8.txt  
+  inflating: /var/www/syncloudpos/components.json  
+  inflating: /var/www/syncloudpos/db_snapshot.json  
+  inflating: /var/www/syncloudpos/deploy.bat  
+  inflating: /var/www/syncloudpos/docker-compose.yml  
+  inflating: /var/www/syncloudpos/docker-entrypoint.sh  
+  inflating: /var/www/syncloudpos/documentation/01-introduction-connexion.md  
+  inflating: /var/www/syncloudpos/documentation/02-dashboard-rapports.md  
+  inflating: /var/www/syncloudpos/documentation/03-caisse-ventes.md  
+  inflating: /var/www/syncloudpos/documentation/04-produits-stock.md  
+  inflating: /var/www/syncloudpos/documentation/05-clients-fournisseurs.md  
+  inflating: /var/www/syncloudpos/documentation/06-achats-depenses.md  
+  inflating: /var/www/syncloudpos/documentation/07-finance-tresorerie.md  
+  inflating: /var/www/syncloudpos/documentation/08-parametres-admin.md  
+  inflating: /var/www/syncloudpos/documentation/09-fonctionnalites-ia.md  
+  inflating: /var/www/syncloudpos/ecosystem.config.js  
+  inflating: /var/www/syncloudpos/eslint.config.mjs  
+  inflating: /var/www/syncloudpos/fail2ban-syncloudpos.conf  
+  inflating: /var/www/syncloudpos/fetched_landing.html  
+  inflating: /var/www/syncloudpos/fix-admin.js  
+  inflating: /var/www/syncloudpos/fix-old-loans.ts  
+  inflating: /var/www/syncloudpos/fix_stores.js  
+  inflating: /var/www/syncloudpos/fra.traineddata  
+  inflating: /var/www/syncloudpos/install.bat  
+  inflating: /var/www/syncloudpos/install.sh  
+ extracting: /var/www/syncloudpos/license.key.example  
+  inflating: /var/www/syncloudpos/lint-output.txt  
+  inflating: /var/www/syncloudpos/lint.log  
+  inflating: /var/www/syncloudpos/lint_full_report.txt  
+  inflating: /var/www/syncloudpos/lint_report.txt  
+  inflating: /var/www/syncloudpos/lint_results.txt  
+  inflating: /var/www/syncloudpos/logrotate-syncloudpos.conf  
+  inflating: /var/www/syncloudpos/messages/ar.json  
+  inflating: /var/www/syncloudpos/messages/en.json  
+  inflating: /var/www/syncloudpos/messages/fr.json  
+  inflating: /var/www/syncloudpos/next.config.ts  
+  inflating: /var/www/syncloudpos/nginx-syncloudpos.conf  
+  inflating: /var/www/syncloudpos/ocr-out.txt  
+  inflating: /var/www/syncloudpos/out.json  
+  inflating: /var/www/syncloudpos/package-lock.json  
+  inflating: /var/www/syncloudpos/package.json  
+  inflating: /var/www/syncloudpos/pgbouncer.ini  
+  inflating: /var/www/syncloudpos/post-receive  
+  inflating: /var/www/syncloudpos/postcss.config.mjs  
+  inflating: /var/www/syncloudpos/prisma/dist/import-off-dz.js  
+  inflating: /var/www/syncloudpos/prisma/import-off-dz.ts  
+  inflating: /var/www/syncloudpos/prisma/migrations/20260221200350_add_supplier_balance/migration.sql  
+  inflating: /var/www/syncloudpos/prisma/migrations/20260227165400_add_supplier_notes/migration.sql  
+  inflating: /var/www/syncloudpos/prisma/migrations/migration_lock.toml  
+  inflating: /var/www/syncloudpos/prisma/schema.prisma  
+  inflating: /var/www/syncloudpos/prisma/schema.prisma.backup  
+  inflating: /var/www/syncloudpos/prisma/seed.ts  
+  inflating: /var/www/syncloudpos/public/file.svg  
+  inflating: /var/www/syncloudpos/public/globe.svg  
+  inflating: /var/www/syncloudpos/public/landing-lang-ar.js  
+  inflating: /var/www/syncloudpos/public/landing-lang-en.js  
+  inflating: /var/www/syncloudpos/public/landing-lang.js  
+  inflating: /var/www/syncloudpos/public/landing-style.css  
+  inflating: /var/www/syncloudpos/public/landing.html  
+  inflating: /var/www/syncloudpos/public/next.svg  
+  inflating: /var/www/syncloudpos/public/training.html  
+  inflating: /var/www/syncloudpos/public/uploads/1cf11818-8861-4974-bfc3-f4cf998ae188.jpg  
+  inflating: /var/www/syncloudpos/public/uploads/2a4a097a-451d-465f-a51a-1f3d498d5b6c.jpg  
+  inflating: /var/www/syncloudpos/public/uploads/bf148184-a766-4771-92c1-f0b1d74f66b3.webp  
+  inflating: /var/www/syncloudpos/public/vercel.svg  
+  inflating: /var/www/syncloudpos/public/window.svg  
+  inflating: /var/www/syncloudpos/query.js  
+  inflating: /var/www/syncloudpos/remote_exec.py  
+  inflating: /var/www/syncloudpos/remote_out.txt  
+  inflating: /var/www/syncloudpos/remote_seed_out.txt  
+  inflating: /var/www/syncloudpos/run_seed_vps.py  
+  inflating: /var/www/syncloudpos/scripts/backup.js  
+  inflating: /var/www/syncloudpos/scripts/check-db.ts  
+  inflating: /var/www/syncloudpos/scripts/check-superadmin.js  
+  inflating: /var/www/syncloudpos/scripts/generate-license.js  
+  inflating: /var/www/syncloudpos/scripts/promote-superadmin.ts  
+  inflating: /var/www/syncloudpos/scripts/seed-admin.ts  
+  inflating: /var/www/syncloudpos/scripts/seed-eissam.ts  
+  inflating: /var/www/syncloudpos/scripts/seed-volume.ts  
+  inflating: /var/www/syncloudpos/scripts/seed-xm.ts  
+  inflating: /var/www/syncloudpos/sftp_upload.py  
+  inflating: /var/www/syncloudpos/src/actions/ai-context.ts  
+  inflating: /var/www/syncloudpos/src/actions/ai-forecast.ts  
+  inflating: /var/www/syncloudpos/src/actions/alerts.ts  
+  inflating: /var/www/syncloudpos/src/actions/algerian-settings.ts  
   inflating: /var/www/syncloudpos/src/actions/analytics.ts  
+  inflating: /var/www/syncloudpos/src/actions/backup.ts  
+  inflating: /var/www/syncloudpos/src/actions/backups.ts  
   inflating: /var/www/syncloudpos/src/actions/barcode.ts  
   inflating: /var/www/syncloudpos/src/actions/brands.ts  
   inflating: /var/www/syncloudpos/src/actions/categories.ts  
+  inflating: /var/www/syncloudpos/src/actions/commissions.ts  
   inflating: /var/www/syncloudpos/src/actions/create-store.ts  
   inflating: /var/www/syncloudpos/src/actions/create-user.ts  
   inflating: /var/www/syncloudpos/src/actions/customers.ts  
+  inflating: /var/www/syncloudpos/src/actions/daily-close.ts  
+  inflating: /var/www/syncloudpos/src/actions/delivery.ts  
   inflating: /var/www/syncloudpos/src/actions/expenses.ts  
+  inflating: /var/www/syncloudpos/src/actions/g12.ts  
+  inflating: /var/www/syncloudpos/src/actions/g50.ts  
   inflating: /var/www/syncloudpos/src/actions/get-active-tenant.ts  
   inflating: /var/www/syncloudpos/src/actions/get-tenant-users.ts  
   inflating: /var/www/syncloudpos/src/actions/get-tenants.ts  
+  inflating: /var/www/syncloudpos/src/actions/inventory-annual.ts  
+  inflating: /var/www/syncloudpos/src/actions/inventory-audit.ts  
   inflating: /var/www/syncloudpos/src/actions/ledger.ts  
+  inflating: /var/www/syncloudpos/src/actions/license-requests.ts  
   inflating: /var/www/syncloudpos/src/actions/login.ts  
+  inflating: /var/www/syncloudpos/src/actions/ocr-invoice.ts  
   inflating: /var/www/syncloudpos/src/actions/orders.ts  
   inflating: /var/www/syncloudpos/src/actions/payments.ts  
   inflating: /var/www/syncloudpos/src/actions/products.ts  
+  inflating: /var/www/syncloudpos/src/actions/promotions.ts  
   inflating: /var/www/syncloudpos/src/actions/purchase-orders.ts  
+  inflating: /var/www/syncloudpos/src/actions/recurring-invoices.ts  
   inflating: /var/www/syncloudpos/src/actions/register.ts  
+  inflating: /var/www/syncloudpos/src/actions/reorder.ts  
+  inflating: /var/www/syncloudpos/src/actions/reservations.ts  
   inflating: /var/www/syncloudpos/src/actions/sales-orders.ts  
   inflating: /var/www/syncloudpos/src/actions/settings.ts  
+  inflating: /var/www/syncloudpos/src/actions/spoilage.ts  
+  inflating: /var/www/syncloudpos/src/actions/stock-movements.ts  
+  inflating: /var/www/syncloudpos/src/actions/stores.ts  
   inflating: /var/www/syncloudpos/src/actions/superadmin.ts  
   inflating: /var/www/syncloudpos/src/actions/suppliers.ts  
   inflating: /var/www/syncloudpos/src/actions/switch-store.ts  
   inflating: /var/www/syncloudpos/src/actions/system-settings.ts  
   inflating: /var/www/syncloudpos/src/actions/treasury.ts  
-  inflating: /var/www/syncloudpos/src/app/favicon.ico  
-  inflating: /var/www/syncloudpos/src/app/global-error.tsx  
-  inflating: /var/www/syncloudpos/src/app/globals.css  
-  inflating: /var/www/syncloudpos/src/app/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/api/auth/[...nextauth]/route.ts  
-  inflating: /var/www/syncloudpos/src/app/api/upload/route.ts  
-  inflating: /var/www/syncloudpos/src/app/[locale]/error.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/layout.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/not-found.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/page.tsx  
+  inflating: /var/www/syncloudpos/src/actions/update-user.ts  
+  inflating: /var/www/syncloudpos/src/actions/verify-otp.ts  
+  inflating: /var/www/syncloudpos/src/actions/whatsapp-receipt.ts  
+  inflating: /var/www/syncloudpos/src/actions/whatsapp.ts  
   inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/error/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/login/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(auth)/register/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/error.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/layout.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/ai/components/ai-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/ai/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/forecast/components/forecast-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/forecast/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/analytics/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/avaries/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/brands/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/categories/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/cloture/components/cloture-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/cloture/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/commissions/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/components/client.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/components/company-form.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/new/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/unpaid/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/[customerId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/components/database-backup.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/company/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/[customerId]/ledger/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/[customerId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/customers/unpaid/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/dashboard/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/delivery/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/emprunt/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/error.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/components/client.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/expenses/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/fiscal/components/g12-print-template.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/fiscal/components/g50-print-template.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/fiscal/g12-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/fiscal/g50-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/fiscal/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/formation/components/formation-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/formation/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/hub/components/hub-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/hub/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/inventaire-annuel/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/inventory-audit/[id]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/inventory-audit/components/new-session-button.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/inventory-audit/components/session-detail-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/inventory-audit/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/layout.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/payments/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/[productId]/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/inventory/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/new/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/[productId]/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/purchases/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/products/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/promotions/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/promotions/components/promotion-modal.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/promotions/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/purchases/[purchaseId]/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/purchases/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/recurring-invoices/components/new-recurring-dialog.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/recurring-invoices/components/recurring-list-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/recurring-invoices/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reorder/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/[reportType]/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/components/client.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/customers/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/customers/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/inventory/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/inventory/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/purchases/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/purchases/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/sales/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/sales/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/treasury/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reports/treasury/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/reservations/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/[salesId]/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/sales/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/advanced-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/ai-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/algerian-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/backup-restore-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/backups-list-client.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/client.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/general-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/loyalty-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/pos-defaults-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/printing-settings-form.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/system-settings-form.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/new/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/[supplierId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/unified-settings-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/components/whatsapp-settings-form.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/[supplierId]/ledger/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/[supplierId]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/new/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/suppliers/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/columns.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/types.ts  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/account-modal.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/client.tsx  
@@ -89,22 +259,51 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/transaction-modal.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/transfer-modal.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/components/types.ts  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/page.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/client.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/columns.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/[accountId]/components/types.ts  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/treasury/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(dashboard)/users/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/display/components/client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/display/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/layout.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(pos)/pos/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/layout.tsx  
-  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/page.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/client.tsx  
   inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/columns.tsx  
-  inflating: /var/www/syncloudpos/src/components/theme-provider.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/components/usage-charts.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/licenses/licenses-client.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/licenses/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/(superadmin)/superadmin/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/error.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/layout.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/not-found.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/[locale]/page.tsx.bak  
+  inflating: /var/www/syncloudpos/src/app/activate/page.tsx  
+  inflating: /var/www/syncloudpos/src/app/api/ai-analysis/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/auth/[...nextauth]/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/backup/export/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/backup/import/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/cron/process-recurring/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/download-backup/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/health/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/license/activate/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/license/request/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/license/status/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/ping/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/superadmin/export-tenant/route.ts  
+  inflating: /var/www/syncloudpos/src/app/api/upload/route.ts  
+  inflating: /var/www/syncloudpos/src/app/favicon.ico  
+  inflating: /var/www/syncloudpos/src/app/global-error.tsx  
+  inflating: /var/www/syncloudpos/src/app/globals.css  
+  inflating: /var/www/syncloudpos/src/app/receipt/[id]/page.tsx  
+  inflating: /var/www/syncloudpos/src/auth.ts  
+  inflating: /var/www/syncloudpos/src/components/auth/change-password-form.tsx  
   inflating: /var/www/syncloudpos/src/components/auth/login-form.tsx  
   inflating: /var/www/syncloudpos/src/components/auth/register-form.tsx  
   inflating: /var/www/syncloudpos/src/components/auth/subscription-guard.tsx  
+  inflating: /var/www/syncloudpos/src/components/avaries/add-spoilage-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/avaries/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/avaries/data-table.tsx  
   inflating: /var/www/syncloudpos/src/components/brands/brand-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/brands/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/components/brands/client.tsx  
@@ -120,17 +319,27 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/customers/customer-qr-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/customers/ledger-client.tsx  
   inflating: /var/www/syncloudpos/src/components/customers/ledger-columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/customers/loyalty-badge-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/customers/types.ts  
   inflating: /var/www/syncloudpos/src/components/customers/unpaid-client.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/expiration-alert.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/global-shortcuts.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/header-store-selector.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/header.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/language-switcher.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/mobile-sidebar.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/mode-toggle.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/notification-bell.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/sidebar.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/store-switcher.tsx  
+  inflating: /var/www/syncloudpos/src/components/dashboard/subscription-banner.tsx  
   inflating: /var/www/syncloudpos/src/components/dashboard/user-nav.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt-fournisseur/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt-fournisseur/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt-fournisseur/loan-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt/client.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt/columns.tsx  
+  inflating: /var/www/syncloudpos/src/components/emprunt/loan-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/expenses/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/components/expenses/columns.tsx  
   inflating: /var/www/syncloudpos/src/components/expenses/expense-form.tsx  
@@ -152,8 +361,11 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/products/fast-create-brand.tsx  
   inflating: /var/www/syncloudpos/src/components/products/fast-create-category.tsx  
   inflating: /var/www/syncloudpos/src/components/products/low-stock-client.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/price-list-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/products/print-barcode-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/products/product-form.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/product-grid-view.tsx  
+  inflating: /var/www/syncloudpos/src/components/products/stock-history-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/purchases/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/components/purchases/client.tsx  
   inflating: /var/www/syncloudpos/src/components/purchases/columns.tsx  
@@ -165,6 +377,7 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/sales/columns.tsx  
   inflating: /var/www/syncloudpos/src/components/sales/sales-form.tsx  
   inflating: /var/www/syncloudpos/src/components/sales/types.ts  
+  inflating: /var/www/syncloudpos/src/components/session-provider.tsx  
   inflating: /var/www/syncloudpos/src/components/suppliers/cell-action.tsx  
   inflating: /var/www/syncloudpos/src/components/suppliers/client.tsx  
   inflating: /var/www/syncloudpos/src/components/suppliers/columns.tsx  
@@ -172,6 +385,7 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/suppliers/ledger-columns.tsx  
   inflating: /var/www/syncloudpos/src/components/suppliers/supplier-form.tsx  
   inflating: /var/www/syncloudpos/src/components/suppliers/types.ts  
+  inflating: /var/www/syncloudpos/src/components/theme-provider.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/avatar.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/badge.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/button.tsx  
@@ -183,6 +397,7 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/ui/date-range-picker.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/dialog.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/dropdown-menu.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/excel-import-modal.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/form.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/heading.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/image-upload.tsx  
@@ -195,58 +410,145 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/src/components/ui/radio-group.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/resizable.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/scroll-area.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/searchable-select.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/select.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/separator.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/server-data-table.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/sheet.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/switch.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/table.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/tabs.tsx  
   inflating: /var/www/syncloudpos/src/components/ui/textarea.tsx  
+  inflating: /var/www/syncloudpos/src/components/ui/tooltip.tsx  
   inflating: /var/www/syncloudpos/src/components/users/add-user-modal.tsx  
+  inflating: /var/www/syncloudpos/src/components/users/edit-user-modal.tsx  
   inflating: /var/www/syncloudpos/src/data/user.ts  
   inflating: /var/www/syncloudpos/src/hooks/use-barcode-scanner.ts  
   inflating: /var/www/syncloudpos/src/hooks/use-pos-store.ts  
   inflating: /var/www/syncloudpos/src/i18n/request.ts  
   inflating: /var/www/syncloudpos/src/i18n/routing.ts  
   inflating: /var/www/syncloudpos/src/lib/db.ts  
+  inflating: /var/www/syncloudpos/src/lib/license.ts  
+  inflating: /var/www/syncloudpos/src/lib/promotions-engine.ts  
+  inflating: /var/www/syncloudpos/src/lib/redis.ts  
+  inflating: /var/www/syncloudpos/src/lib/subscription.ts  
   inflating: /var/www/syncloudpos/src/lib/utils.ts  
+  inflating: /var/www/syncloudpos/src/lib/wilayas.ts  
+  inflating: /var/www/syncloudpos/src/proxy.ts  
   inflating: /var/www/syncloudpos/src/schemas/index.ts  
   inflating: /var/www/syncloudpos/src/schemas/settings.ts  
-  inflating: /var/www/syncloudpos/prisma/dev.db  
-  inflating: /var/www/syncloudpos/prisma/import-off-dz.ts  
-  inflating: /var/www/syncloudpos/prisma/schema.prisma  
-  inflating: /var/www/syncloudpos/prisma/schema.prisma.backup  
-  inflating: /var/www/syncloudpos/prisma/seed.ts  
-  inflating: /var/www/syncloudpos/prisma/dist/import-off-dz.js  
-  inflating: /var/www/syncloudpos/prisma/migrations/migration_lock.toml  
-  inflating: /var/www/syncloudpos/prisma/migrations/20260221200350_add_supplier_balance/migration.sql  
-  inflating: /var/www/syncloudpos/components.json  
-STDERR:
-warning:  /root/update_v3.zip appears to use backslashes as path separators
-
-Exit status: 1
+  inflating: /var/www/syncloudpos/src/types/daily-close.ts  
+ extracting: /var/www/syncloudpos/src_update.tar.gz  
+  inflating: /var/www/syncloudpos/store_error.txt  
+  inflating: /var/www/syncloudpos/superadmin_update.tar.gz  
+  inflating: /var/www/syncloudpos/sysctl-syncloudpos.conf  
+  inflating: /var/www/syncloudpos/test-ai-context.ts  
+  inflating: /var/www/syncloudpos/test-import.js  
+  inflating: /var/www/syncloudpos/test-prisma.ts  
+  inflating: /var/www/syncloudpos/test-update.js  
+  inflating: /var/www/syncloudpos/test-zod.js  
+  inflating: /var/www/syncloudpos/test-zod2.js  
+  inflating: /var/www/syncloudpos/test_register.ts  
+  inflating: /var/www/syncloudpos/tmp-models.json  
+  inflating: /var/www/syncloudpos/ts_errors.txt  
+  inflating: /var/www/syncloudpos/tsc_final.txt  
+  inflating: /var/www/syncloudpos/tsc_final2.txt  
+  inflating: /var/www/syncloudpos/tsc_final2_utf8.txt  
+  inflating: /var/www/syncloudpos/tsc_final3.txt  
+  inflating: /var/www/syncloudpos/tsc_final3_utf8.txt  
+  inflating: /var/www/syncloudpos/tsc_final_utf8.txt  
+  inflating: /var/www/syncloudpos/tsc_latest.txt  
+  inflating: /var/www/syncloudpos/tsc_latest_utf8.txt  
+ extracting: /var/www/syncloudpos/tsc_output.txt  
+  inflating: /var/www/syncloudpos/tsc_output_2.txt  
+  inflating: /var/www/syncloudpos/tsc_output_3.txt  
+  inflating: /var/www/syncloudpos/tsc_output_4.txt  
+  inflating: /var/www/syncloudpos/tsc_output_fixed.txt  
+  inflating: /var/www/syncloudpos/tsc_output_latest.txt  
+  inflating: /var/www/syncloudpos/tsc_output_multi.txt  
+  inflating: /var/www/syncloudpos/tsc_output_multi2.txt  
+  inflating: /var/www/syncloudpos/tsc_output_pos.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf8.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf82.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf83.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf84.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf85.txt  
+  inflating: /var/www/syncloudpos/tsc_output_utf86.txt  
+  inflating: /var/www/syncloudpos/tsconfig.json  
+  inflating: /var/www/syncloudpos/types/next-auth.d.ts  
+  inflating: /var/www/syncloudpos/typescript-errors.txt  
+ extracting: /var/www/syncloudpos/update.tar.gz  
+  inflating: /var/www/syncloudpos/update_v3.zip  
+  inflating: /var/www/syncloudpos/upload.mjs  
+  inflating: /var/www/syncloudpos/upload.zip  
+ extracting: /var/www/syncloudpos/upload_res.json  
+  inflating: /var/www/syncloudpos/vps_action_test.txt  
+  inflating: /var/www/syncloudpos/vps_build.txt  
+  inflating: /var/www/syncloudpos/vps_build10.txt  
+  inflating: /var/www/syncloudpos/vps_build2.txt  
+  inflating: /var/www/syncloudpos/vps_build3.txt  
+  inflating: /var/www/syncloudpos/vps_build4.txt  
+  inflating: /var/www/syncloudpos/vps_build5.txt  
+  inflating: /var/www/syncloudpos/vps_build6.txt  
+  inflating: /var/www/syncloudpos/vps_build7.txt  
+  inflating: /var/www/syncloudpos/vps_build8.txt  
+  inflating: /var/www/syncloudpos/vps_build9.txt  
+  inflating: /var/www/syncloudpos/vps_certbot.txt  
+  inflating: /var/www/syncloudpos/vps_certbot_true.txt  
+  inflating: /var/www/syncloudpos/vps_check_db.js  
+  inflating: /var/www/syncloudpos/vps_config_pg.sh  
+  inflating: /var/www/syncloudpos/vps_create_user.txt  
+  inflating: /var/www/syncloudpos/vps_create_user_fixed.sh  
+  inflating: /var/www/syncloudpos/vps_db_master_setup.sh  
+  inflating: /var/www/syncloudpos/vps_debug.txt  
+  inflating: /var/www/syncloudpos/vps_debug2.txt  
+  inflating: /var/www/syncloudpos/vps_env.txt  
+  inflating: /var/www/syncloudpos/vps_error.log  
+ extracting: /var/www/syncloudpos/vps_find_db.txt  
+  inflating: /var/www/syncloudpos/vps_fix_auth.sh  
+  inflating: /var/www/syncloudpos/vps_fix_ipv6.sh  
+  inflating: /var/www/syncloudpos/vps_install.txt  
+  inflating: /var/www/syncloudpos/vps_logs.txt  
+  inflating: /var/www/syncloudpos/vps_ls.txt  
+  inflating: /var/www/syncloudpos/vps_make_admin.js  
+  inflating: /var/www/syncloudpos/vps_nextauth_error.txt  
+  inflating: /var/www/syncloudpos/vps_nginx_access.txt  
+  inflating: /var/www/syncloudpos/vps_nginx_error.txt  
+  inflating: /var/www/syncloudpos/vps_pm2.txt  
+  inflating: /var/www/syncloudpos/vps_pm2_login.txt  
+  inflating: /var/www/syncloudpos/vps_pm2_post.txt  
+  inflating: /var/www/syncloudpos/vps_prisma_push.txt  
+  inflating: /var/www/syncloudpos/vps_register_error.txt  
+  inflating: /var/www/syncloudpos/vps_register_live_error.txt  
+  inflating: /var/www/syncloudpos/vps_register_patched.txt  
+  inflating: /var/www/syncloudpos/vps_reset_pw.sh  
+  inflating: /var/www/syncloudpos/vps_setup_db.sh  
+  inflating: /var/www/syncloudpos/vps_trust_local.sh  
+  inflating: /var/www/syncloudpos/vps_update_env.sh  
+Exit status: 0
 
 --- Executing: cd /var/www/syncloudpos && npx prisma generate ---
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 602ms
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 1.27s
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
 
 Exit status: 0
 
 --- Executing: cd /var/www/syncloudpos && npx prisma db push --accept-data-loss ---
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
-Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+Datasource "db": PostgreSQL database "syncloudpos", schema "public" at "127.0.0.1:5432"
 
 The database is already in sync with the Prisma schema.
 
 Running generate... (Use --skip-generate to skip the generators)
 [2K[1A[2K[GRunning generate... - Prisma Client
-[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 784ms
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 849ms
 
 Exit status: 0
 
@@ -262,226 +564,168 @@ Exit status: 0
 STDERR:
 
 > Build error occurred
-Error: Turbopack build failed with 7 errors:
-./src/app/[locale]/(dashboard)/promotions/page.tsx:3:1
-Export getAllProductsForCatalogue doesn't exist in target module
-[0m [90m 1 |[39m [36mimport[39m { getAllPromotions } [36mfrom[39m [32m"@/actions/promotions"[39m
- [90m 2 |[39m [36mimport[39m { getCategories } [36mfrom[39m [32m"@/actions/categories"[39m
-[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { getAllProductsForCatalogue } [36mfrom[39m [32m"@/actions/products"[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 4 |[39m [36mimport[39m { [33mPromotionsClient[39m } [36mfrom[39m [32m"./components/client"[39m
- [90m 5 |[39m
- [90m 6 |[39m [36mconst[39m [33mPromotionsPage[39m [33m=[39m [36masync[39m () [33m=>[39m {[0m
-
-The export getAllProductsForCatalogue was not found in module [project]/src/actions/products.ts [app-rsc] (ecmascript).
-Did you mean to import getProducts?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
-
-Import trace:
-  App Route:
-    ./src/app/[locale]/(dashboard)/promotions/page.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
+Error: Turbopack build failed with 4 errors:
+./src/components/ui/data-table.tsx:39:1
+Module not found: Can't resolve 'jspdf'
+[0m [90m 37 |[39m [36mimport[39m { useReactToPrint } [36mfrom[39m [32m"react-to-print"[39m
+ [90m 38 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
+[31m[1m>[22m[39m[90m 39 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 40 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
+ [90m 41 |[39m
+ [90m 42 |[39m [36minterface[39m [33mDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {[0m
 
 
-./src/app/[locale]/(dashboard)/emprunt/page.tsx:1:1
-Export getCustomerLoans doesn't exist in target module
-[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { getCustomerLoans[33m,[39m getCustomers } [36mfrom[39m [32m"@/actions/customers"[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 2 |[39m [36mimport[39m { getTreasuryAccounts } [36mfrom[39m [32m"@/actions/treasury"[39m
- [90m 3 |[39m [36mimport[39m { [33mEmpruntClient[39m } [36mfrom[39m [32m"@/components/emprunt/client"[39m
- [90m 4 |[39m[0m
-
-The export getCustomerLoans was not found in module [project]/src/actions/customers.ts [app-rsc] (ecmascript).
-Did you mean to import getCustomers?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
-
-Import trace:
-  App Route:
-    ./src/app/[locale]/(dashboard)/emprunt/page.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-
-./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx:1:1
-Export getSupplierLoans doesn't exist in target module
-[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { getSupplierLoans[33m,[39m getSuppliers } [36mfrom[39m [32m"@/actions/suppliers"[39m
- [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 2 |[39m [36mimport[39m { getTreasuryAccounts } [36mfrom[39m [32m"@/actions/treasury"[39m
- [90m 3 |[39m [36mimport[39m { [33mEmpruntFournisseurClient[39m } [36mfrom[39m [32m"@/components/emprunt-fournisseur/client"[39m
- [90m 4 |[39m[0m
-
-The export getSupplierLoans was not found in module [project]/src/actions/suppliers.ts [app-rsc] (ecmascript).
-Did you mean to import getSuppliers?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
-
-Import trace:
-  App Route:
-    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-
-./src/components/emprunt/loan-modal.tsx:7:1
-Export registerCustomerLoan doesn't exist in target module
-[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
- [90m  6 |[39m [36mimport[39m { [33mLandmark[39m } [36mfrom[39m [32m"lucide-react"[39m
-[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerCustomerLoan } [36mfrom[39m [32m"@/actions/customers"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
- [90m  9 |[39m [36mimport[39m {
- [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
-
-The export registerCustomerLoan was not found in module [project]/src/actions/customers.ts [app-client] (ecmascript).
-Did you mean to import registerCustomerPayment?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
 
 Import traces:
   App Route:
-    ./src/components/emprunt/loan-modal.tsx
+    ./src/components/ui/data-table.tsx
     ./src/lib/license.ts
     ./src/app/api/health/route.ts
 
   Client Component Browser:
-    ./src/components/emprunt/loan-modal.tsx [Client Component Browser]
-    ./src/components/emprunt/client.tsx [Client Component Browser]
-    ./src/components/emprunt/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+    ./src/components/ui/data-table.tsx [Client Component Browser]
+    ./src/components/categories/client.tsx [Client Component Browser]
+    ./src/components/categories/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
 
   Client Component SSR:
-    ./src/components/emprunt/loan-modal.tsx [Client Component SSR]
-    ./src/components/emprunt/client.tsx [Client Component SSR]
-    ./src/components/emprunt/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+    ./src/components/ui/data-table.tsx [Client Component SSR]
+    ./src/components/categories/client.tsx [Client Component SSR]
+    ./src/components/categories/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
 
 
-./src/components/emprunt/loan-modal.tsx:7:1
-Export registerCustomerLoan doesn't exist in target module
-[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
- [90m  6 |[39m [36mimport[39m { [33mLandmark[39m } [36mfrom[39m [32m"lucide-react"[39m
-[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerCustomerLoan } [36mfrom[39m [32m"@/actions/customers"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
- [90m  9 |[39m [36mimport[39m {
- [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+./src/components/ui/server-data-table.tsx:35:1
+Module not found: Can't resolve 'jspdf'
+[0m [90m 33 |[39m [36mimport[39m { useReactToPrint } [36mfrom[39m [32m"react-to-print"[39m
+ [90m 34 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
+[31m[1m>[22m[39m[90m 35 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 36 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
+ [90m 37 |[39m
+ [90m 38 |[39m [36minterface[39m [33mServerDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {[0m
 
-The export registerCustomerLoan was not found in module [project]/src/actions/customers.ts [app-ssr] (ecmascript).
-Did you mean to import registerCustomerPayment?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
 
 Import traces:
   App Route:
-    ./src/components/emprunt/loan-modal.tsx
+    ./src/components/ui/server-data-table.tsx
     ./src/lib/license.ts
     ./src/app/api/health/route.ts
 
   Client Component Browser:
-    ./src/components/emprunt/loan-modal.tsx [Client Component Browser]
-    ./src/components/emprunt/client.tsx [Client Component Browser]
-    ./src/components/emprunt/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+    ./src/components/ui/server-data-table.tsx [Client Component Browser]
+    ./src/components/customers/client.tsx [Client Component Browser]
+    ./src/components/customers/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
 
   Client Component SSR:
-    ./src/components/emprunt/loan-modal.tsx [Client Component SSR]
-    ./src/components/emprunt/client.tsx [Client Component SSR]
-    ./src/components/emprunt/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+    ./src/components/ui/server-data-table.tsx [Client Component SSR]
+    ./src/components/customers/client.tsx [Client Component SSR]
+    ./src/components/customers/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
 
 
-./src/components/emprunt-fournisseur/loan-modal.tsx:7:1
-Export registerSupplierLoan doesn't exist in target module
-[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
- [90m  6 |[39m [36mimport[39m { [33mBuilding2[39m } [36mfrom[39m [32m"lucide-react"[39m
-[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerSupplierLoan } [36mfrom[39m [32m"@/actions/suppliers"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
- [90m  9 |[39m [36mimport[39m {
- [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+./src/components/ui/data-table.tsx:40:1
+Module not found: Can't resolve 'jspdf-autotable'
+[0m [90m 38 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
+ [90m 39 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
+[31m[1m>[22m[39m[90m 40 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 41 |[39m
+ [90m 42 |[39m [36minterface[39m [33mDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {
+ [90m 43 |[39m     columns[33m:[39m [33mColumnDef[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m[][0m
 
-The export registerSupplierLoan was not found in module [project]/src/actions/suppliers.ts [app-client] (ecmascript).
-Did you mean to import registerSupplierPayment?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
 
 Import traces:
   App Route:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx
+    ./src/components/ui/data-table.tsx
     ./src/lib/license.ts
     ./src/app/api/health/route.ts
 
   Client Component Browser:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component Browser]
-    ./src/components/emprunt-fournisseur/client.tsx [Client Component Browser]
-    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+    ./src/components/ui/data-table.tsx [Client Component Browser]
+    ./src/components/categories/client.tsx [Client Component Browser]
+    ./src/components/categories/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
 
   Client Component SSR:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component SSR]
-    ./src/components/emprunt-fournisseur/client.tsx [Client Component SSR]
-    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+    ./src/components/ui/data-table.tsx [Client Component SSR]
+    ./src/components/categories/client.tsx [Client Component SSR]
+    ./src/components/categories/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
 
 
-./src/components/emprunt-fournisseur/loan-modal.tsx:7:1
-Export registerSupplierLoan doesn't exist in target module
-[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
- [90m  6 |[39m [36mimport[39m { [33mBuilding2[39m } [36mfrom[39m [32m"lucide-react"[39m
-[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerSupplierLoan } [36mfrom[39m [32m"@/actions/suppliers"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
- [90m  9 |[39m [36mimport[39m {
- [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+./src/components/ui/server-data-table.tsx:36:1
+Module not found: Can't resolve 'jspdf-autotable'
+[0m [90m 34 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
+ [90m 35 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
+[31m[1m>[22m[39m[90m 36 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 37 |[39m
+ [90m 38 |[39m [36minterface[39m [33mServerDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {
+ [90m 39 |[39m     columns[33m:[39m [33mColumnDef[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m[][0m
 
-The export registerSupplierLoan was not found in module [project]/src/actions/suppliers.ts [app-ssr] (ecmascript).
-Did you mean to import registerSupplierPayment?
-All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
 
 Import traces:
   App Route:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx
+    ./src/components/ui/server-data-table.tsx
     ./src/lib/license.ts
     ./src/app/api/health/route.ts
 
   Client Component Browser:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component Browser]
-    ./src/components/emprunt-fournisseur/client.tsx [Client Component Browser]
-    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+    ./src/components/ui/server-data-table.tsx [Client Component Browser]
+    ./src/components/customers/client.tsx [Client Component Browser]
+    ./src/components/customers/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
 
   Client Component SSR:
-    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component SSR]
-    ./src/components/emprunt-fournisseur/client.tsx [Client Component SSR]
-    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+    ./src/components/ui/server-data-table.tsx [Client Component SSR]
+    ./src/components/customers/client.tsx [Client Component SSR]
+    ./src/components/customers/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
 
 
-    at <unknown> (./src/app/[locale]/(dashboard)/promotions/page.tsx:3:1)
-    at <unknown> (./src/app/[locale]/(dashboard)/emprunt/page.tsx:1:1)
-    at <unknown> (./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx:1:1)
-    at <unknown> (./src/components/emprunt/loan-modal.tsx:7:1)
-    at <unknown> (./src/components/emprunt/loan-modal.tsx:7:1)
-    at <unknown> (./src/components/emprunt-fournisseur/loan-modal.tsx:7:1)
-    at <unknown> (./src/components/emprunt-fournisseur/loan-modal.tsx:7:1)
+    at <unknown> (./src/components/ui/data-table.tsx:39:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/components/ui/server-data-table.tsx:35:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/components/ui/data-table.tsx:40:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/components/ui/server-data-table.tsx:36:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
 
 Exit status: 1
 
 --- Executing: pm2 restart syncloudpos ---
 Use --update-env to update environment variables
 [PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
-[PM2] [syncloudpos](2) ✓
 [PM2] [syncloudpos](3) ✓
-[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](2) ✓
 [PM2] [syncloudpos](5) ✓
-[PM2] [syncloudpos](7) ✓
+[PM2] [syncloudpos](4) ✓
 [PM2] [syncloudpos](6) ✓
+[PM2] [syncloudpos](7) ✓
 ┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495294   │ 0s     │ 99   │ online    │ 0%       │ 61.9mb   │ root     │ disabled │
-│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495295   │ 0s     │ 99   │ online    │ 0%       │ 61.6mb   │ root     │ disabled │
-│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495311   │ 0s     │ 99   │ online    │ 0%       │ 53.5mb   │ root     │ disabled │
-│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495310   │ 0s     │ 99   │ online    │ 0%       │ 50.2mb   │ root     │ disabled │
-│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495340   │ 0s     │ 99   │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
-│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495334   │ 0s     │ 99   │ online    │ 0%       │ 46.1mb   │ root     │ disabled │
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498788   │ 0s     │ 109  │ online    │ 0%       │ 57.9mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498790   │ 0s     │ 109  │ online    │ 0%       │ 57.4mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498804   │ 0s     │ 109  │ online    │ 0%       │ 52.1mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498805   │ 0s     │ 109  │ online    │ 0%       │ 55.6mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498820   │ 0s     │ 109  │ online    │ 0%       │ 47.4mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498839   │ 0s     │ 109  │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
 │ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
 └────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 Exit status: 0

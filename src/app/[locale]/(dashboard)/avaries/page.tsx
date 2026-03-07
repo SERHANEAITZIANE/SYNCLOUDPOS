@@ -30,8 +30,7 @@ export default async function AvariesPage() {
                 <div className="flex items-center justify-between">
                     <h2 className="text-3xl font-bold tracking-tight">Gestion des Avaries</h2>
                 </div>
-                <DataTable
-                    columns={columns}
+                <DataTable  exportTitle={"Export"} exportDescription={""}                     columns={columns}
                     data={formattedSpoilages}
                     products={formattedProducts}
                 />

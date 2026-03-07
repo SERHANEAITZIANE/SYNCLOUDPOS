@@ -7,10 +7,7 @@ username = 'root'
 password = 'pkn567ftXW3L'
 
 commands = [
-    "unzip -o /root/update_v3.zip -d /var/www/syncloudpos",
     "cd /var/www/syncloudpos && npm install",
-    "cd /var/www/syncloudpos && npx prisma generate",
-    "cd /var/www/syncloudpos && npx prisma db push --accept-data-loss",
     "cd /var/www/syncloudpos && npm run build",
     "pm2 restart syncloudpos"
 ]
@@ -20,7 +17,7 @@ try:
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(host, port, username, password)
 
-    with open('remote_out.txt', 'w', encoding='utf-8') as f:
+    with open('vps_fix_out.txt', 'w', encoding='utf-8') as f:
         for cmd in commands:
             f.write(f"\n--- Executing: {cmd} ---\n")
             print(f"Executing: {cmd}")

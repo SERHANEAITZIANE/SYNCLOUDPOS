@@ -104,7 +104,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers 
                 </div>
             </div>
 
-            <DataTable searchKey="customerName" columns={columns} data={filteredData} />
+            <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="customerName" columns={columns} data={filteredData} />
         </>
     )
 }

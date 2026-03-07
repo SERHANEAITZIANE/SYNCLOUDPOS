@@ -36,7 +36,7 @@ export const TransactionsClient: React.FC<TransactionsClientProps> = ({
                 </div>
             </div>
             <Separator />
-            <DataTable searchKey="description" columns={columns} data={data} />
+            <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="description" columns={columns} data={data} />
         </>
     )
 }

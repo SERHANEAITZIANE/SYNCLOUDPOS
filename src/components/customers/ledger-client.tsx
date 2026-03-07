@@ -64,7 +64,7 @@ export const LedgerClient: React.FC<LedgerClientProps> = ({
             </div>
 
             <div className="border rounded-md">
-                <DataTable searchKey="observation" columns={columns} data={data} />
+                <DataTable  exportTitle={"Export"} exportDescription={""} searchKey="observation" columns={columns} data={data} />
             </div>
         </>
     )
