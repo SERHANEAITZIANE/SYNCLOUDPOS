@@ -142,7 +142,9 @@
     "description": "الوصف",
     "amount": "المبلغ",
     "notes": "ملاحظات",
-    "type": "النوع"
+    "type": "النوع",
+    "exportExcel": "تصدير إلى إكسل",
+    "exportPdf": "تصدير إلى PDF"
   },
   "Dashboard": {
     "title": "لوحة القيادة",

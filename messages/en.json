@@ -142,7 +142,9 @@
     "description": "Description",
     "amount": "Amount",
     "notes": "Notes",
-    "type": "Type"
+    "type": "Type",
+    "exportExcel": "To Excel",
+    "exportPdf": "To PDF"
   },
   "Dashboard": {
     "title": "Dashboard",

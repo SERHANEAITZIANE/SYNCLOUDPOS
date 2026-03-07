@@ -229,11 +229,11 @@ Exit status: 1
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 625ms
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 602ms
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
 
 Exit status: 0
 
@@ -246,7 +246,7 @@ The database is already in sync with the Prisma schema.
 
 Running generate... (Use --skip-generate to skip the generators)
 [2K[1A[2K[GRunning generate... - Prisma Client
-[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 437ms
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 784ms
 
 Exit status: 0
 
@@ -259,79 +259,229 @@ Exit status: 0
 - Environments: .env
 
   Creating an optimized production build ...
-✓ Compiled successfully in 25.2s
-  Skipping validation of types
-  Collecting page data using 5 workers ...
-  Generating static pages using 5 workers (0/5) ...
-  Generating static pages using 5 workers (1/5) 
-  Generating static pages using 5 workers (2/5) 
-  Generating static pages using 5 workers (3/5) 
-✓ Generating static pages using 5 workers (5/5) in 241.8ms
-  Finalizing page optimization ...
-
-Route (app)
-┌ ○ /
-├ ○ /_not-found
-├ ƒ /[locale]
-├ ƒ /[locale]/analytics
-├ ƒ /[locale]/brands
-├ ƒ /[locale]/categories
-├ ƒ /[locale]/company
-├ ƒ /[locale]/customers
-├ ƒ /[locale]/customers/[customerId]
-├ ƒ /[locale]/customers/[customerId]/ledger
-├ ƒ /[locale]/customers/new
-├ ƒ /[locale]/customers/unpaid
-├ ƒ /[locale]/dashboard
-├ ƒ /[locale]/error
-├ ƒ /[locale]/expenses
-├ ƒ /[locale]/expenses/new
-├ ƒ /[locale]/login
-├ ƒ /[locale]/payments
-├ ƒ /[locale]/pos
-├ ƒ /[locale]/products
-├ ƒ /[locale]/products/[productId]
-├ ƒ /[locale]/products/inventory
-├ ƒ /[locale]/products/new
-├ ƒ /[locale]/purchases
-├ ƒ /[locale]/purchases/[purchaseId]
-├ ƒ /[locale]/register
-├ ƒ /[locale]/reports
-├ ƒ /[locale]/sales
-├ ƒ /[locale]/sales/[salesId]
-├ ƒ /[locale]/settings
-├ ƒ /[locale]/superadmin
-├ ƒ /[locale]/suppliers
-├ ƒ /[locale]/suppliers/[supplierId]
-├ ƒ /[locale]/suppliers/[supplierId]/ledger
-├ ƒ /[locale]/suppliers/new
-├ ƒ /[locale]/treasury
-├ ƒ /[locale]/treasury/[accountId]
-├ ƒ /[locale]/users
-├ ƒ /api/auth/[...nextauth]
-└ ƒ /api/upload
-
-
-ƒ Proxy (Middleware)
-
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
-
 STDERR:
-⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
-⚠ Invalid next.config.ts options detected: 
-⚠     Unrecognized key(s) in object: 'eslint'
-⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
 
-Exit status: 0
+> Build error occurred
+Error: Turbopack build failed with 7 errors:
+./src/app/[locale]/(dashboard)/promotions/page.tsx:3:1
+Export getAllProductsForCatalogue doesn't exist in target module
+[0m [90m 1 |[39m [36mimport[39m { getAllPromotions } [36mfrom[39m [32m"@/actions/promotions"[39m
+ [90m 2 |[39m [36mimport[39m { getCategories } [36mfrom[39m [32m"@/actions/categories"[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { getAllProductsForCatalogue } [36mfrom[39m [32m"@/actions/products"[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 4 |[39m [36mimport[39m { [33mPromotionsClient[39m } [36mfrom[39m [32m"./components/client"[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mconst[39m [33mPromotionsPage[39m [33m=[39m [36masync[39m () [33m=>[39m {[0m
+
+The export getAllProductsForCatalogue was not found in module [project]/src/actions/products.ts [app-rsc] (ecmascript).
+Did you mean to import getProducts?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./src/app/[locale]/(dashboard)/promotions/page.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+
+./src/app/[locale]/(dashboard)/emprunt/page.tsx:1:1
+Export getCustomerLoans doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { getCustomerLoans[33m,[39m getCustomers } [36mfrom[39m [32m"@/actions/customers"[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { getTreasuryAccounts } [36mfrom[39m [32m"@/actions/treasury"[39m
+ [90m 3 |[39m [36mimport[39m { [33mEmpruntClient[39m } [36mfrom[39m [32m"@/components/emprunt/client"[39m
+ [90m 4 |[39m[0m
+
+The export getCustomerLoans was not found in module [project]/src/actions/customers.ts [app-rsc] (ecmascript).
+Did you mean to import getCustomers?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./src/app/[locale]/(dashboard)/emprunt/page.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+
+./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx:1:1
+Export getSupplierLoans doesn't exist in target module
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { getSupplierLoans[33m,[39m getSuppliers } [36mfrom[39m [32m"@/actions/suppliers"[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { getTreasuryAccounts } [36mfrom[39m [32m"@/actions/treasury"[39m
+ [90m 3 |[39m [36mimport[39m { [33mEmpruntFournisseurClient[39m } [36mfrom[39m [32m"@/components/emprunt-fournisseur/client"[39m
+ [90m 4 |[39m[0m
+
+The export getSupplierLoans was not found in module [project]/src/actions/suppliers.ts [app-rsc] (ecmascript).
+Did you mean to import getSuppliers?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+
+./src/components/emprunt/loan-modal.tsx:7:1
+Export registerCustomerLoan doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
+ [90m  6 |[39m [36mimport[39m { [33mLandmark[39m } [36mfrom[39m [32m"lucide-react"[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerCustomerLoan } [36mfrom[39m [32m"@/actions/customers"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
+ [90m  9 |[39m [36mimport[39m {
+ [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+
+The export registerCustomerLoan was not found in module [project]/src/actions/customers.ts [app-client] (ecmascript).
+Did you mean to import registerCustomerPayment?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./src/components/emprunt/loan-modal.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+  Client Component Browser:
+    ./src/components/emprunt/loan-modal.tsx [Client Component Browser]
+    ./src/components/emprunt/client.tsx [Client Component Browser]
+    ./src/components/emprunt/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/emprunt/loan-modal.tsx [Client Component SSR]
+    ./src/components/emprunt/client.tsx [Client Component SSR]
+    ./src/components/emprunt/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+
+
+./src/components/emprunt/loan-modal.tsx:7:1
+Export registerCustomerLoan doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
+ [90m  6 |[39m [36mimport[39m { [33mLandmark[39m } [36mfrom[39m [32m"lucide-react"[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerCustomerLoan } [36mfrom[39m [32m"@/actions/customers"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
+ [90m  9 |[39m [36mimport[39m {
+ [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+
+The export registerCustomerLoan was not found in module [project]/src/actions/customers.ts [app-ssr] (ecmascript).
+Did you mean to import registerCustomerPayment?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./src/components/emprunt/loan-modal.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+  Client Component Browser:
+    ./src/components/emprunt/loan-modal.tsx [Client Component Browser]
+    ./src/components/emprunt/client.tsx [Client Component Browser]
+    ./src/components/emprunt/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/emprunt/loan-modal.tsx [Client Component SSR]
+    ./src/components/emprunt/client.tsx [Client Component SSR]
+    ./src/components/emprunt/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt/page.tsx [Server Component]
+
+
+./src/components/emprunt-fournisseur/loan-modal.tsx:7:1
+Export registerSupplierLoan doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
+ [90m  6 |[39m [36mimport[39m { [33mBuilding2[39m } [36mfrom[39m [32m"lucide-react"[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerSupplierLoan } [36mfrom[39m [32m"@/actions/suppliers"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
+ [90m  9 |[39m [36mimport[39m {
+ [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+
+The export registerSupplierLoan was not found in module [project]/src/actions/suppliers.ts [app-client] (ecmascript).
+Did you mean to import registerSupplierPayment?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+  Client Component Browser:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component Browser]
+    ./src/components/emprunt-fournisseur/client.tsx [Client Component Browser]
+    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component SSR]
+    ./src/components/emprunt-fournisseur/client.tsx [Client Component SSR]
+    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+
+
+./src/components/emprunt-fournisseur/loan-modal.tsx:7:1
+Export registerSupplierLoan doesn't exist in target module
+[0m [90m  5 |[39m [36mimport[39m { toast } [36mfrom[39m [32m"react-hot-toast"[39m
+ [90m  6 |[39m [36mimport[39m { [33mBuilding2[39m } [36mfrom[39m [32m"lucide-react"[39m
+[31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { registerSupplierLoan } [36mfrom[39m [32m"@/actions/suppliers"[39m
+ [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  8 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m"@/components/ui/button"[39m
+ [90m  9 |[39m [36mimport[39m {
+ [90m 10 |[39m     [33mDialog[39m[33m,[39m[0m
+
+The export registerSupplierLoan was not found in module [project]/src/actions/suppliers.ts [app-ssr] (ecmascript).
+Did you mean to import registerSupplierPayment?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  App Route:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx
+    ./src/lib/license.ts
+    ./src/app/api/health/route.ts
+
+  Client Component Browser:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component Browser]
+    ./src/components/emprunt-fournisseur/client.tsx [Client Component Browser]
+    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/emprunt-fournisseur/loan-modal.tsx [Client Component SSR]
+    ./src/components/emprunt-fournisseur/client.tsx [Client Component SSR]
+    ./src/components/emprunt-fournisseur/client.tsx [Server Component]
+    ./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx [Server Component]
+
+
+    at <unknown> (./src/app/[locale]/(dashboard)/promotions/page.tsx:3:1)
+    at <unknown> (./src/app/[locale]/(dashboard)/emprunt/page.tsx:1:1)
+    at <unknown> (./src/app/[locale]/(dashboard)/emprunt-fournisseur/page.tsx:1:1)
+    at <unknown> (./src/components/emprunt/loan-modal.tsx:7:1)
+    at <unknown> (./src/components/emprunt/loan-modal.tsx:7:1)
+    at <unknown> (./src/components/emprunt-fournisseur/loan-modal.tsx:7:1)
+    at <unknown> (./src/components/emprunt-fournisseur/loan-modal.tsx:7:1)
+
+Exit status: 1
 
 --- Executing: pm2 restart syncloudpos ---
 Use --update-env to update environment variables
-[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 0 ])
-[PM2] [syncloudpos](0) ✓
-┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
-│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
-├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 0  │ syncloudpos    │ default     │ N/A     │ fork    │ 30950    │ 0s     │ 9    │ online    │ 0%       │ 22.7mb   │ root     │ disabled │
-└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
+[PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](3) ✓
+[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](5) ✓
+[PM2] [syncloudpos](7) ✓
+[PM2] [syncloudpos](6) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495294   │ 0s     │ 99   │ online    │ 0%       │ 61.9mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495295   │ 0s     │ 99   │ online    │ 0%       │ 61.6mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495311   │ 0s     │ 99   │ online    │ 0%       │ 53.5mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495310   │ 0s     │ 99   │ online    │ 0%       │ 50.2mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495340   │ 0s     │ 99   │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 495334   │ 0s     │ 99   │ online    │ 0%       │ 46.1mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 Exit status: 0

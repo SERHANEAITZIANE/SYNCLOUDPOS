@@ -142,7 +142,9 @@
     "description": "Description",
     "amount": "Montant",
     "notes": "Notes",
-    "type": "Type"
+    "type": "Type",
+    "exportExcel": "En Excel",
+    "exportPdf": "En PDF"
   },
   "Dashboard": {
     "title": "Tableau de bord",

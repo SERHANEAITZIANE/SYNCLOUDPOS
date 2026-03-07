@@ -59,21 +59,18 @@ const nextConfig: import('next').NextConfig = {
 
     async redirects() {
         return [
-            {
-                source: '/landing.html',
-                destination: '/',
-                permanent: true,
-            },
         ]
     },
 
     async rewrites() {
-        return [
-            {
-                source: '/',
-                destination: '/landing.html',
-            },
-        ]
+        return {
+            beforeFiles: [
+                {
+                    source: '/',
+                    destination: '/landing.html',
+                },
+            ],
+        };
     },
 };
 

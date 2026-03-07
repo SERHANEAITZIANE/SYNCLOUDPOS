@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SyncloudPOS – Logiciel de Caisse & Gestion Commerciale pour l'Algérie</title>
+  <meta name="description"
+    content="SyncloudPOS, le logiciel de caisse tout-en-un pour les commerces algériens. POS, stock, clients, fournisseurs, finances, IA. Essai gratuit 7 jours.">
+  <meta name="keywords"
+    content="logiciel de caisse Algérie, POS Algérie, gestion de stock, SyncloudPOS, gestion commerciale Algérie">
+  <meta name="author" content="SyncloudPOS">
+  <meta property="og:title" content="SyncloudPOS – Logiciel de Caisse Intelligent pour l'Algérie">
+  <meta property="og:description"
+    content="Gérez votre commerce algérien avec SyncloudPOS. POS, stock, clients, finances, IA.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="landing-style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SyncloudPOS",
+    "operatingSystem": "Web, Windows, Android, iOS",
+    "applicationCategory": "BusinessApplication",
+    "description": "Logiciel de caisse POS et gestion commerciale pour l'Algérie",
+    "url": "https://chirpedbeo.online/",
+    "offers": {"@type": "Offer","price": "0","priceCurrency": "DZD","description": "Essai gratuit 7 jours"}
+  }
+  </script>
+</head>
+
+<body>
+
+  <!-- ═══════════════ NAVBAR ═══════════════ -->
+  <nav id="nav">
+    <a href="#" class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M3 3h18v18H3z" stroke="currentColor" stroke-width="2" rx="2" />
+          <path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </div>
+      <span class="logo-text">Syncl<span>oud</span>POS</span>
+    </a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#features" data-t="nav_features" class="nav-link">Fonctionnalités</a></li>
+      <li><a href="#usecases" data-t="nav_usecases" class="nav-link">Cas d'usage</a></li>
+      <li><a href="#pricing" data-t="nav_pricing" class="nav-link">Tarifs</a></li>
+      <li><a href="#contact" data-t="nav_contact" class="nav-link">Contact</a></li>
+      <li>
+        <div class="lang-switch">
+          <button class="lb active" data-l="fr" onclick="setLang('fr')">FR</button>
+          <button class="lb" data-l="en" onclick="setLang('en')">EN</button>
+          <button class="lb" data-l="ar" onclick="setLang('ar')">عر</button>
+        </div>
+      </li>
+      <li><a href="#" onclick="goTrial();return false;" class="btn-nav-cta" data-t="nav_cta">Essai Gratuit</a></li>
+    </ul>
+    <button class="hamburger" id="ham-btn" aria-label="Menu" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mob-menu" id="mob">
+    <a href="#features" data-t="nav_features" onclick="closeMenu()">Fonctionnalités</a>
+    <a href="#usecases" data-t="nav_usecases" onclick="closeMenu()">Cas d'usage</a>
+    <a href="#pricing" data-t="nav_pricing" onclick="closeMenu()">Tarifs</a>
+    <a href="#contact" data-t="nav_contact" onclick="closeMenu()">Contact</a>
+    <div class="lang-switch" style="margin:8px 0">
+      <button class="lb active" data-l="fr" onclick="setLang('fr');closeMenu()">FR</button>
+      <button class="lb" data-l="en" onclick="setLang('en');closeMenu()">EN</button>
+      <button class="lb" data-l="ar" onclick="setLang('ar');closeMenu()">عر</button>
+    </div>
+    <a href="#" onclick="goTrial();closeMenu();return false;" class="btn-mob-cta" data-t="nav_cta">Essai Gratuit</a>
+  </div>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-orb orb1"></div>
+      <div class="hero-orb orb2"></div>
+      <div class="hero-orb orb3"></div>
+      <div class="hero-grid-lines"></div>
+    </div>
+    <div class="hero-inner container">
+      <div class="hero-content">
+        <div class="hero-badge slide-up">
+          <span class="badge-dot"></span>
+          <span data-t="hero_badge">🇩🇿 Logiciel de Caisse Algérien N°1</span>
+        </div>
+        <h1 class="hero-title slide-up">
+          <span data-t="hero_h1a">Gérez votre commerce avec</span><br>
+          <span class="gradient-text" data-t="hero_h1b">intelligence</span>
+        </h1>
+        <p class="hero-desc slide-up" data-t="hero_desc">SyncloudPOS est le logiciel tout-en-un conçu pour les commerces
+          algériens.</p>
+        <div class="hero-actions slide-up">
+          <a href="#" onclick="goTrial();return false;" class="btn-primary" data-t="hero_cta1">🚀 Essai Gratuit 7
+            Jours</a>
+          <a href="#features" class="btn-ghost" data-t="hero_cta2">Voir les fonctionnalités ↓</a>
+        </div>
+        <div class="hero-stats slide-up">
+          <div class="hstat">
+            <div class="hstat-num">30+</div>
+            <div class="hstat-lbl" data-t="stat1">Fonctionnalités</div>
+          </div>
+          <div class="hstat-sep"></div>
+          <div class="hstat">
+            <div class="hstat-num">100%</div>
+            <div class="hstat-lbl" data-t="stat2">Cloud & Local</div>
+          </div>
+          <div class="hstat-sep"></div>
+          <div class="hstat">
+            <div class="hstat-num">3</div>
+            <div class="hstat-lbl" data-t="stat3">Langues FR/AR/EN</div>
+          </div>
+          <div class="hstat-sep"></div>
+          <div class="hstat">
+            <div class="hstat-num">7j</div>
+            <div class="hstat-lbl" data-t="stat4">Support 7j/7</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="dashboard-mock">
+          <div class="mock-topbar">
+            <div class="mock-dots">
+              <span style="background:#FF6B6B"></span>
+              <span style="background:#FFD93D"></span>
+              <span style="background:#6BCB77"></span>
+            </div>
+            <span class="mock-url">SyncloudPOS – Dashboard</span>
+          </div>
+          <div class="mock-body">
+            <div class="mock-sidebar">
+              <div class="ms-item active">🛒 <span>POS</span></div>
+              <div class="ms-item">📦 <span>Stock</span></div>
+              <div class="ms-item">👥 <span>Clients</span></div>
+              <div class="ms-item">📊 <span>Stats</span></div>
+              <div class="ms-item">💰 <span>Trésor</span></div>
+            </div>
+            <div class="mock-main">
+              <div class="mk-cards">
+                <div class="mk-card mk-green">
+                  <div class="mk-clbl">Chiffre d'affaires</div>
+                  <div class="mk-cval">850 200 DA</div>
+                  <div class="mk-ctag">↑ +12%</div>
+                </div>
+                <div class="mk-card mk-purple">
+                  <div class="mk-clbl">Bénéfice Net</div>
+                  <div class="mk-cval">312 500 DA</div>
+                  <div class="mk-ctag">↑ +8%</div>
+                </div>
+                <div class="mk-card mk-blue">
+                  <div class="mk-clbl">Ventes/Jour</div>
+                  <div class="mk-cval">43</div>
+                  <div class="mk-ctag">↑ +5</div>
+                </div>
+                <div class="mk-card mk-orange">
+                  <div class="mk-clbl">Stock Faible</div>
+                  <div class="mk-cval">7 articles</div>
+                  <div class="mk-ctag">⚠️ Alerte</div>
+                </div>
+              </div>
+              <div class="mk-chart">
+                <div class="mk-chart-title">Ventes — 7 derniers jours</div>
+                <div class="mk-bars">
+                  <div class="mk-bar" style="--h:42%"><span>L</span></div>
+                  <div class="mk-bar" style="--h:61%"><span>M</span></div>
+                  <div class="mk-bar" style="--h:48%"><span>M</span></div>
+                  <div class="mk-bar mk-bar-hi" style="--h:82%"><span>J</span></div>
+                  <div class="mk-bar" style="--h:56%"><span>V</span></div>
+                  <div class="mk-bar" style="--h:73%"><span>S</span></div>
+                  <div class="mk-bar mk-bar-hi" style="--h:95%"><span>D</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="float-badge fb1">✅ <span data-t="fb1">Vente enregistrée</span></div>
+        <div class="float-badge fb2">📦 <span data-t="fb2">Stock mis à jour</span></div>
+        <div class="float-badge fb3">🤖 <span data-t="fb3">IA active</span></div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TRUSTED BY ═══════════════ -->
+  <div class="trust-bar">
+    <div class="container">
+      <p class="trust-label" data-t="trust_label">Conçu pour les commerces algériens :</p>
+      <div class="trust-items">
+        <div class="trust-item">🛒 <span data-t="t1">Superettes</span></div>
+        <div class="trust-sep">·</div>
+        <div class="trust-item">🏭 <span data-t="t2">Grossistes</span></div>
+        <div class="trust-sep">·</div>
+        <div class="trust-item">👕 <span data-t="t3">Boutiques</span></div>
+        <div class="trust-sep">·</div>
+        <div class="trust-item">💊 <span data-t="t4">Pharmacies</span></div>
+        <div class="trust-sep">·</div>
+        <div class="trust-item">🔧 <span data-t="t5">Quincailleries</span></div>
+        <div class="trust-sep">·</div>
+        <div class="trust-item">🍕 <span data-t="t6">Restaurants</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FEATURES ═══════════════ -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-purple" data-t="sec_feat_tag">Fonctionnalités</div>
+        <h2 class="s-title" data-t="sec_feat_title">Toutes les fonctionnalités, une par une</h2>
+        <p class="s-desc" data-t="sec_feat_desc">Une solution complète conçue pour chaque besoin de votre commerce.</p>
+      </div>
+
+      <!-- Category: POS & Sales -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#6C63FF,#9b35e9)">🛒</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat1_title">Caisse & Ventes (POS)</h3>
+            <p class="feat-cat-desc" data-t="cat1_desc">Tout ce dont vous avez besoin pour encaisser rapidement et gérer
+              vos ventes.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat1"></div>
+      </div>
+
+      <!-- Category: Products & Inventory -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#00D4AA,#0094c8)">📦</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat2_title">Produits & Stock</h3>
+            <p class="feat-cat-desc" data-t="cat2_desc">Gérez votre catalogue produit et votre inventaire avec
+              précision.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat2"></div>
+      </div>
+
+      <!-- Category: Clients & Suppliers -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#FFD93D,#ff8c00)">👥</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat3_title">Clients & Fournisseurs</h3>
+            <p class="feat-cat-desc" data-t="cat3_desc">Gérez vos relations commerciales et suivez les dettes avec
+              précision.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat3"></div>
+      </div>
+
+      <!-- Category: Finance & Treasury -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#FF6B6B,#c71562)">💰</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat4_title">Finance & Trésorerie</h3>
+            <p class="feat-cat-desc" data-t="cat4_desc">Contrôlez vos flux financiers, dépenses et caisses en temps
+              réel.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat4"></div>
+      </div>
+
+      <!-- Category: Reports & Analytics -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#4FC3F7,#006699)">📊</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat5_title">Rapports & Analytiques</h3>
+            <p class="feat-cat-desc" data-t="cat5_desc">Prenez de meilleures décisions grâce à des données claires et
+              visuelles.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat5"></div>
+      </div>
+
+      <!-- Category: AI & Automation -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#A855F7,#6366F1)">🤖</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat6_title">Intelligence Artificielle</h3>
+            <p class="feat-cat-desc" data-t="cat6_desc">Des outils IA pour automatiser et booster votre commerce.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat6"></div>
+      </div>
+
+      <!-- Category: System & Admin -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#78909C,#37474F)">⚙️</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat7_title">Système & Administration</h3>
+            <p class="feat-cat-desc" data-t="cat7_desc">Configuration avancée, sécurité et gestion multi-utilisateurs.
+            </p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat7"></div>
+      </div>
+
+      <!-- Category: Algerian Compliance -->
+      <div class="feat-category reveal">
+        <div class="feat-cat-header">
+          <div class="feat-cat-icon" style="background:linear-gradient(135deg,#00897B,#006064)">🇩🇿</div>
+          <div>
+            <h3 class="feat-cat-title" data-t="cat8_title">Conformité Algérienne</h3>
+            <p class="feat-cat-desc" data-t="cat8_desc">Adapté aux exigences fiscales et commerciales algériennes.</p>
+          </div>
+        </div>
+        <div class="feat-items-grid" id="feat-cat8"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ USE CASES ═══════════════ -->
+  <section id="usecases" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-teal" data-t="sec_uc_tag">Cas d'utilisation</div>
+        <h2 class="s-title" data-t="sec_uc_title">À qui s'adresse SyncloudPOS ?</h2>
+        <p class="s-desc" data-t="sec_uc_desc">Une solution flexible pour tous les secteurs du commerce en Algérie.</p>
+      </div>
+      <div class="uc-grid" id="uc-grid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-yellow" data-t="sec_how_tag">Comment ça marche</div>
+        <h2 class="s-title" data-t="sec_how_title">Opérationnel en 4 étapes</h2>
+        <p class="s-desc" data-t="sec_how_desc">Pas besoin de technicien. Configuration rapide, support inclus.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card reveal">
+          <div class="step-num">01</div>
+          <div class="step-icon">📝</div>
+          <h3 data-t="st1"></h3>
+          <p data-t="st1d"></p>
+        </div>
+        <div class="step-connector reveal"></div>
+        <div class="step-card reveal">
+          <div class="step-num">02</div>
+          <div class="step-icon">📥</div>
+          <h3 data-t="st2"></h3>
+          <p data-t="st2d"></p>
+        </div>
+        <div class="step-connector reveal"></div>
+        <div class="step-card reveal">
+          <div class="step-num">03</div>
+          <div class="step-icon">🛒</div>
+          <h3 data-t="st3"></h3>
+          <p data-t="st3d"></p>
+        </div>
+        <div class="step-connector reveal"></div>
+        <div class="step-card reveal">
+          <div class="step-num">04</div>
+          <div class="step-icon">📈</div>
+          <h3 data-t="st4"></h3>
+          <p data-t="st4d"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TESTIMONIAL ═══════════════ -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-purple" data-t="sec_testi_tag">Success Story</div>
+        <h2 class="s-title" data-t="sec_testi_title">Ils font confiance à SyncloudPOS</h2>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <blockquote class="testi-quote" data-t="testi_quote"></blockquote>
+        <div class="testi-author">
+          <div class="testi-avatar">A</div>
+          <div>
+            <div class="testi-name" data-t="testi_name">Ahmed B.</div>
+            <div class="testi-role" data-t="testi_role">Propriétaire – 2 Superettes + 1 Dépôt, Alger</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ PRICING ═══════════════ -->
+  <section id="pricing" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-teal" data-t="sec_price_tag">Tarifs</div>
+        <h2 class="s-title" data-t="sec_price_title">Des plans adaptés à votre commerce</h2>
+        <p class="s-desc" data-t="sec_price_desc">Toutes les fonctionnalités incluses. Tarification transparente.</p>
+      </div>
+      <div class="price-grid">
+        <div class="price-card reveal">
+          <div class="price-plan-icon">🚀</div>
+          <div class="price-plan-name" data-t="p1_name">Starter</div>
+          <div class="price-plan-amount" data-t="p1_price">Sur mesure</div>
+          <div class="price-plan-sub" data-t="p1_sub">Devis via WhatsApp</div>
+          <ul class="price-list" id="pf1"></ul>
+          <a href="https://wa.me/213696928227?text=Bonjour%2C%20je%20cherche%20un%20devis%20pour%20SyncloudPOS%20Starter"
+            class="btn-price-outline" data-t="p1_btn">Demander un devis</a>
+        </div>
+        <div class="price-card price-featured reveal">
+          <div class="price-badge-top" data-t="recommended">⭐ Recommandé</div>
+          <div class="price-plan-icon">💎</div>
+          <div class="price-plan-name" data-t="p2_name">Pro</div>
+          <div class="price-plan-amount" data-t="p2_price">Sur mesure</div>
+          <div class="price-plan-sub" data-t="p2_sub">Devis via WhatsApp</div>
+          <ul class="price-list" id="pf2"></ul>
+          <a href="#" onclick="goTrial();return false;" class="btn-price-primary" data-t="p2_btn">Démarrer l'essai
+            gratuit</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TRIAL CTA ═══════════════ -->
+  <section class="trial-section">
+    <div class="trial-inner container reveal">
+      <div class="trial-orbs">
+        <div class="t-orb t-orb1"></div>
+        <div class="t-orb t-orb2"></div>
+      </div>
+      <div class="trial-content">
+        <div class="s-pill s-pill-purple" data-t="trial_pill">Offre Spéciale</div>
+        <h2 class="trial-title">
+          <span data-t="trial_h2a">7 jours d'essai</span> <span class="gradient-text" data-t="trial_h2b">100%
+            gratuits</span>
+        </h2>
+        <p class="trial-desc" data-t="trial_desc">Testez toutes les fonctionnalités sans engagement. Aucune carte
+          bancaire requise.</p>
+        <div class="trial-checks">
+          <span>✓ <span data-t="trial_c1">Sans engagement</span></span>
+          <span>✓ <span data-t="trial_c2">Accès complet</span></span>
+          <span>✓ <span data-t="trial_c3">Support inclus</span></span>
+        </div>
+        <div class="trial-actions">
+          <a href="#" onclick="goTrial();return false;" class="btn-primary" data-t="trial_btn1">🚀 Démarrer
+            maintenant</a>
+          <a href="https://wa.me/213696928227?text=Bonjour%2C%20je%20veux%20plus%20d%27informations%20sur%20SyncloudPOS"
+            class="btn-wa" data-t="trial_btn2">📲 WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CONTACT ═══════════════ -->
+  <section id="contact" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="s-pill s-pill-purple" data-t="sec_cont_tag">Contact</div>
+        <h2 class="s-title" data-t="sec_cont_title">Parlons de votre commerce</h2>
+        <p class="s-desc" data-t="sec_cont_desc">Disponible 7j/7 sur WhatsApp. De l'installation à la formation, on
+          s'occupe de tout.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info reveal">
+          <div class="ci-card">
+            <div class="ci-item">
+              <div class="ci-icon" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.3)">📲</div>
+              <div>
+                <div class="ci-lbl">WhatsApp</div>
+                <div class="ci-val">+213 696 92 82 27</div>
+              </div>
+            </div>
+            <div class="ci-item">
+              <div class="ci-icon" style="background:rgba(108,99,255,.12);border-color:rgba(108,99,255,.3)">⏰</div>
+              <div>
+                <div class="ci-lbl" data-t="ci_avail">Disponibilité</div>
+                <div class="ci-val">7j/7 · 8h – 22h</div>
+              </div>
+            </div>
+            <div class="ci-item">
+              <div class="ci-icon" style="background:rgba(0,212,170,.12);border-color:rgba(0,212,170,.3)">🇩🇿</div>
+              <div>
+                <div class="ci-lbl" data-t="ci_location">Localisation</div>
+                <div class="ci-val" data-t="ci_location_val">Algérie – Service national</div>
+              </div>
+            </div>
+          </div>
+          <div class="ci-actions">
+            <a href="#" onclick="goTrial();return false;" class="btn-primary" data-t="ci_btn1">🚀 Démarrer l'essai
+              gratuit</a>
+            <a href="https://wa.me/213696928227?text=Bonjour%2C%20je%20veux%20acheter%20SyncloudPOS" class="btn-wa"
+              data-t="ci_btn2">📲 Commander sur WhatsApp</a>
+          </div>
+        </div>
+        <div class="contact-form reveal">
+          <h3 data-t="form_title">Message rapide</h3>
+          <div class="fg"><label data-t="f_name">Votre nom</label><input id="fn" type="text" data-tp="f_ph_name"></div>
+          <div class="fg"><label data-t="f_phone">Numéro WhatsApp</label><input id="fp" type="tel" data-tp="f_ph_phone">
+          </div>
+          <div class="fg"><label data-t="f_type">Type de commerce</label><select id="ft"></select></div>
+          <div class="fg"><label data-t="f_msg">Votre message</label><textarea id="fm" rows="4"
+              data-tp="f_ph_msg"></textarea></div>
+          <button onclick="sendWA()" class="btn-wa full-width" data-t="f_send">📲 Envoyer via WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer>
+    <div class="footer-inner container">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M3 3h18v18H3z" stroke="currentColor" stroke-width="2" rx="2" />
+              <path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </div>
+          <span class="logo-text">Syncl<span>oud</span>POS</span>
+        </a>
+        <p class="footer-tagline" data-t="footer_desc">Le logiciel de caisse intelligent pour les commerces algériens.
+        </p>
+        <a href="https://wa.me/213696928227" class="btn-wa-sm">📲 +213 696 92 82 27</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="fl1">Fonctionnalités</h4>
+        <div id="fl-f"></div>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="fl2">Support</h4>
+        <div id="fl-s"></div>
+      </div>
+      <div class="footer-col">
+        <h4 data-t="fl3">Langues</h4>
+        <div class="footer-langs">
+          <button class="lb" data-l="fr" onclick="setLang('fr')">🇫🇷 Français</button>
+          <button class="lb" data-l="en" onclick="setLang('en')">🇬🇧 English</button>
+          <button class="lb" data-l="ar" onclick="setLang('ar')">🇩🇿 العربية</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <span data-t="copyright">© 2026 SyncloudPOS. Fait avec ❤️ en 🇩🇿 Algérie</span>
+      <span class="footer-seo">Logiciel de caisse · POS Algérie · Gestion commerciale</span>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float -->
+  <a href="https://wa.me/213696928227?text=Bonjour%2C%20je%20veux%20plus%20d%27infos%20sur%20SyncloudPOS"
+    class="wa-float" title="WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path
+        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+      <path
+        d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.845L.057 23.996l6.304-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.012-1.374l-.36-.213-3.735.98.997-3.648-.234-.374A9.817 9.817 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z" />
+    </svg>
+  </a>
+
+  <script src="landing-lang.js"></script>
+  <script src="landing-lang-en.js"></script>
+  <script src="landing-lang-ar.js"></script>
+  <script>
+    // ─── Intersection Observer for reveal animations ───
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    function initReveal() {
+      document.querySelectorAll('.reveal, .slide-up').forEach(el => revealObserver.observe(el));
+    }
+
+    // ─── Navbar scroll ───
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('nav');
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ─── Mobile menu ───
+    function toggleMenu() {
+      document.getElementById('mob').classList.toggle('open');
+      document.getElementById('ham-btn').classList.toggle('active');
+    }
+    function closeMenu() {
+      document.getElementById('mob').classList.remove('open');
+      document.getElementById('ham-btn').classList.remove('active');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('nav') && !e.target.closest('#mob')) closeMenu();
+    });
+
+    // ─── Override render to handle dynamic lists ───
+    const _origRender = render;
+    render = function () {
+      _origRender();
+      const tr = T[currentLang];
+
+      // Feature categories
+      const cats = ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat7', 'cat8'];
+      cats.forEach(cat => {
+        const el = document.getElementById('feat-' + cat);
+        if (el && tr[cat + '_items']) {
+          el.innerHTML = tr[cat + '_items'].map(item => `
+            <div class="feat-item">
+              <div class="fi-icon">${item.icon}</div>
+              <div class="fi-body">
+                <div class="fi-title">${item.title}</div>
+                <div class="fi-desc">${item.desc}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+      });
+
+      // Use Cases
+      const ucGrid = document.getElementById('uc-grid');
+      if (ucGrid && tr.uc_items) {
+        ucGrid.innerHTML = tr.uc_items.map(uc => `
+          <div class="uc-card reveal">
+            <div class="uc-icon">${uc.icon}</div>
+            <h3 class="uc-title">${uc.title}</h3>
+            <p class="uc-desc">${uc.desc}</p>
+            <ul class="uc-list">
+              ${uc.list.map(l => `<li>${l}</li>`).join('')}
+            </ul>
+          </div>
+        `).join('');
+      }
+
+      // Pricing
+      const pf1 = document.getElementById('pf1');
+      const pf2 = document.getElementById('pf2');
+      if (pf1 && tr.p1_feats) pf1.innerHTML = tr.p1_feats.map(f => `<li><span class="check">✓</span>${f}</li>`).join('');
+      if (pf2 && tr.p2_feats) pf2.innerHTML = tr.p2_feats.map(f => `<li><span class="check">✓</span>${f}</li>`).join('');
+
+      // Contact form select
+      const ft = document.getElementById('ft');
+      if (ft && tr.f_opts) ft.innerHTML = tr.f_opts.map(o => `<option>${o}</option>`).join('');
+
+      // Footer links
+      const flf = document.getElementById('fl-f');
+      const fls = document.getElementById('fl-s');
+      const ffLinks = ['#features', '#features', '#features', '#features', '#features', '#features'];
+      const fsLinks = [`https://wa.me/213696928227?text=${encodeURIComponent('Bonjour, support SyncloudPOS')}`, '#contact', APP_URL, '#features'];
+      if (flf && tr.fl_f) flf.innerHTML = tr.fl_f.map((f, i) => `<a href="${ffLinks[i] || '#'}">${f}</a>`).join('');
+      if (fls && tr.fl_s) fls.innerHTML = tr.fl_s.map((f, i) => `<a href="${fsLinks[i] || '#'}">${f}</a>`).join('');
+
+      // Re-observe newly rendered elements
+      setTimeout(() => {
+        document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+      }, 50);
+    };
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      setLang(currentLang);
+      initReveal();
+    });
+  </script>
+</body>
+
+</html>
