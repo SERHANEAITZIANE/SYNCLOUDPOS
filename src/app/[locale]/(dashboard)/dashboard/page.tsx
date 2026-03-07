@@ -3,7 +3,11 @@ import { getTranslations } from "next-intl/server";
 import { getAnalyticsData } from "@/actions/analytics";
 import { AnalyticsClient } from "../analytics/components/client";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+    searchParams
+}: {
+    searchParams: { from?: string; to?: string }
+}) {
     const t = await getTranslations("Dashboard");
     const session = await auth();
     if (!session || !session.user) {
@@ -14,7 +18,12 @@ export default async function DashboardPage() {
     let hasError = false;
 
     try {
-        analyticsData = await getAnalyticsData();
+        const fromDate = searchParams.from ? new Date(searchParams.from) : undefined;
+        const toDate = searchParams.to ? new Date(searchParams.to) : undefined;
+
+        analyticsData = await getAnalyticsData(
+            fromDate && toDate ? { from: fromDate, to: toDate } : undefined
+        );
     } catch (error) {
         console.error("Dashboard error:", error);
         hasError = true;
@@ -32,7 +41,13 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 ) : analyticsData ? (
-                    <AnalyticsClient data={analyticsData} />
+                    <AnalyticsClient
+                        data={analyticsData}
+                        initialDateRange={searchParams.from && searchParams.to ? {
+                            from: new Date(searchParams.from),
+                            to: new Date(searchParams.to)
+                        } : undefined}
+                    />
                 ) : null}
             </div>
         </div>

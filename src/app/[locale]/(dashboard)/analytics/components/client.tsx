@@ -15,7 +15,9 @@ import {
 import React from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Link } from "@/i18n/routing"
+import { Link, useRouter, usePathname } from "@/i18n/routing"
+import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { DateRange } from "react-day-picker"
 
 import { useTranslations } from "next-intl"
 
@@ -44,6 +46,10 @@ interface AnalyticsData {
 
 interface AnalyticsClientProps {
     data: AnalyticsData
+    initialDateRange?: {
+        from: Date
+        to: Date
+    }
 }
 
 function KpiCard({
@@ -106,11 +112,31 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     )
 }
 
-export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
+export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialDateRange }) => {
     const t = useTranslations("Analytics.kpi")
     const tDashboard = useTranslations("Dashboard")
     const tAnalytics = useTranslations("Analytics")
     const tNav = useTranslations("Navigation")
+
+    const router = useRouter()
+    const pathname = usePathname()
+
+    const [dateRange, setDateRange] = React.useState<DateRange | undefined>(initialDateRange)
+
+    const handleDateChange = (newDateRange: DateRange | undefined) => {
+        setDateRange(newDateRange)
+
+        // Re-route with search params if both from and to are selected
+        if (newDateRange?.from && newDateRange?.to) {
+            const params = new URLSearchParams()
+            params.set('from', newDateRange.from.toISOString())
+            params.set('to', newDateRange.to.toISOString())
+            router.push(`${pathname}?${params.toString()}`)
+        } else if (!newDateRange) {
+            router.push(pathname)
+        }
+    }
+
     const [isMounted, setIsMounted] = React.useState(false)
     React.useEffect(() => { setIsMounted(true) }, [])
     if (!isMounted) return null
@@ -121,10 +147,14 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data }) => {
 
     return (
         <div className="space-y-8 pb-8">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <Heading
                     title={t("dashboardTitle")}
                     description={t("dashboardDesc")}
+                />
+                <DatePickerWithRange
+                    date={dateRange}
+                    setDate={handleDateChange}
                 />
             </div>
 

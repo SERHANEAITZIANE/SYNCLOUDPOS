@@ -4,7 +4,11 @@ import { AnalyticsClient } from "./components/client"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 
-const AnalyticsPage = async () => {
+const AnalyticsPage = async ({
+    searchParams
+}: {
+    searchParams: { from?: string; to?: string }
+}) => {
     const session = await auth()
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "ACCOUNTANT" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
@@ -14,7 +18,12 @@ const AnalyticsPage = async () => {
     let errorMessage: string | null = null
 
     try {
-        analyticsData = await getAnalyticsData()
+        const fromDate = searchParams.from ? new Date(searchParams.from) : undefined;
+        const toDate = searchParams.to ? new Date(searchParams.to) : undefined;
+
+        analyticsData = await getAnalyticsData(
+            fromDate && toDate ? { from: fromDate, to: toDate } : undefined
+        )
     } catch (error) {
         console.error("Failed to load analytics data:", error)
         errorMessage = error instanceof Error ? error.message : "Unknown error"
@@ -32,7 +41,13 @@ const AnalyticsPage = async () => {
                         </pre>
                     </div>
                 ) : analyticsData ? (
-                    <AnalyticsClient data={analyticsData} />
+                    <AnalyticsClient
+                        data={analyticsData}
+                        initialDateRange={searchParams.from && searchParams.to ? {
+                            from: new Date(searchParams.from),
+                            to: new Date(searchParams.to)
+                        } : undefined}
+                    />
                 ) : null}
             </div>
         </div>

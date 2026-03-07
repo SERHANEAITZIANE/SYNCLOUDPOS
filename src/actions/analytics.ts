@@ -12,8 +12,8 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
 
         const tenantId = session.user.tenantId;
         const defaultStoreId = session.user.defaultStoreId;
-        const toDate = dateRange?.to || new Date();
-        const fromDate = dateRange?.from || subDays(toDate, 30);
+        const toDate = dateRange?.to || endOfDay(new Date());
+        const fromDate = dateRange?.from || startOfDay(new Date());
         const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         const dateKey = `${format(fromDate, 'yyyyMMdd')}-${format(toDate, 'yyyyMMdd')}`
