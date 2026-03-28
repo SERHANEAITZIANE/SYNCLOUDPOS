@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "react-hot-toast"
-import { Moon, Truck, Calculator, Save, AlertTriangle, Key } from "lucide-react"
+import { Moon, Truck, Calculator, Save, AlertTriangle, Key, Stamp, Receipt } from "lucide-react"
 
 export function AlgerianSettingsForm() {
     const [loading, setLoading] = useState(true)
@@ -18,6 +18,9 @@ export function AlgerianSettingsForm() {
         commissionRate: 0,
         taxRegime: "G50",
         ifuRate: 5,
+        tapRate: 2,
+        stampTaxEnabled: true,
+        posTimbreEnabled: false,
         yalidineApiId: "",
         yalidineApiToken: "",
         dhdApiToken: "",
@@ -31,6 +34,9 @@ export function AlgerianSettingsForm() {
                 commissionRate: data.commissionRate ?? 0,
                 taxRegime: data.taxRegime ?? "G50",
                 ifuRate: data.ifuRate ?? 5,
+                tapRate: data.tapRate ?? 2,
+                stampTaxEnabled: data.stampTaxEnabled ?? true,
+                posTimbreEnabled: data.posTimbreEnabled ?? false,
                 yalidineApiId: data.yalidineApiId ?? "",
                 yalidineApiToken: data.yalidineApiToken ?? "",
                 dhdApiToken: data.dhdApiToken ?? "",
@@ -45,7 +51,8 @@ export function AlgerianSettingsForm() {
         const result = await updateAlgerianSettings({
             ...settings,
             commissionRate: Number(settings.commissionRate),
-            ifuRate: Number(settings.ifuRate)
+            ifuRate: Number(settings.ifuRate),
+            tapRate: Number(settings.tapRate),
         })
         if ("error" in result) toast.error(result.error)
         else toast.success("Paramètres algériens enregistrés ✓")
@@ -125,6 +132,108 @@ export function AlgerianSettingsForm() {
                             </Select>
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* TAP Rate */}
+            {settings.taxRegime === "G50" && (
+                <div className="p-5 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Receipt className="h-5 w-5 text-purple-600" />
+                        <h3 className="font-bold">TAP — Taxe sur l'Activité Professionnelle</h3>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Taux TAP</Label>
+                        <Select value={String(settings.tapRate)} onValueChange={v => setSettings(s => ({ ...s, tapRate: Number(v) }))}>
+                            <SelectTrigger className="rounded-xl max-w-xs">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="1">1% — Production de biens</SelectItem>
+                                <SelectItem value="2">2% — Commerce & Services (défaut)</SelectItem>
+                                <SelectItem value="3">3% — Professions libérales</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">Calculée sur le CA HT et déclarée mensuellement sur le G50</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Stamp Tax / Timbre Settings */}
+            <div className="p-5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <Stamp className="h-5 w-5 text-amber-600" />
+                    <h3 className="font-bold">Droit de Timbre (حقوق الطابع)</h3>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-medium text-sm">Timbre sur Factures & BL</p>
+                        <p className="text-xs text-muted-foreground">Applique le timbre fiscal sur les factures et bons de livraison (paiements espèce)</p>
+                    </div>
+                    <Switch
+                        checked={settings.stampTaxEnabled}
+                        onCheckedChange={v => setSettings(s => ({ ...s, stampTaxEnabled: v }))}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
+                    <div>
+                        <p className="font-medium text-sm">Timbre sur Ventes POS (Caisse)</p>
+                        <p className="text-xs text-muted-foreground">Applique le droit de timbre automatiquement sur les ventes POS en espèce</p>
+                    </div>
+                    <Switch
+                        checked={settings.posTimbreEnabled}
+                        onCheckedChange={v => setSettings(s => ({ ...s, posTimbreEnabled: v }))}
+                    />
+                </div>
+
+                <div className="text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg">
+                    <strong>Barème 2025 :</strong> 1 DA/100 DA (≤30k DA), 1,50 DA/100 DA (30k-100k DA), 2 DA/100 DA (&gt;100k DA). Min 5 DA, Max 10.000 DA. Exonéré pour paiements électroniques.
+                </div>
+            </div>
+
+            {/* Retenue à la Source */}
+            {settings.taxRegime === "G50" && (
+                <div className="p-5 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Calculator className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-bold">Retenue à la Source (حجز من المنبع)</h3>
+                    </div>
+                    
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                        La retenue à la source est calculée automatiquement sur les bons d'achat selon le taux configuré par fournisseur. 
+                        Le montant retenu est déclaré sur le G50 et versé à la DGI.
+                    </p>
+
+                    <div className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg space-y-1">
+                        <strong>Barème Retenue à la Source :</strong>
+                        <ul className="list-disc list-inside mt-1 space-y-0.5">
+                            <li><strong>10%</strong> — Achats de marchandises</li>
+                            <li><strong>15%</strong> — Prestations de services (avec RC)</li>
+                            <li><strong>24%</strong> — Prestations de services (sans RC)</li>
+                            <li><strong>0%</strong> — Fournisseurs exonérés</li>
+                        </ul>
+                        <p className="mt-1.5 italic">Le taux est configuré par fournisseur dans la fiche fournisseur.</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Credit Note Settings */}
+            <div className="p-5 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                    <Receipt className="h-5 w-5 text-red-600" />
+                    <h3 className="font-bold">Avoirs (فاتورة الإلغاء)</h3>
+                </div>
+                
+                <p className="text-xs text-red-700 dark:text-red-300">
+                    Les avoirs (factures d'annulation) permettent d'annuler partiellement ou totalement une facture. 
+                    Le stock est automatiquement remis et le solde client ajusté. Numérotation séquentielle : AV-{new Date().getFullYear()}/0001
+                </p>
+
+                <div className="text-xs text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 p-3 rounded-lg">
+                    <strong>Conformité :</strong> Les avoirs sont automatiquement pris en compte dans le calcul du G50 (réduction de la TVA collectée). 
+                    Le stock est rétabli et le solde client diminué lors de la validation de l'avoir.
                 </div>
             </div>
 

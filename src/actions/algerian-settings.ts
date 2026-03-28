@@ -17,12 +17,15 @@ export async function getAlgerianSettings() {
             commissionRate: true,
             taxRegime: true,
             ifuRate: true,
+            tapRate: true,
+            stampTaxEnabled: true,
+            posTimbreEnabled: true,
             yalidineApiId: true,
             yalidineApiToken: true,
             dhdApiToken: true,
             hddApiToken: true,
-        } as any
-    }) as any
+        }
+    })
 }
 
 /** Update Algerian business settings */
@@ -31,6 +34,9 @@ export async function updateAlgerianSettings(data: {
     commissionRate?: number
     taxRegime?: string
     ifuRate?: number
+    tapRate?: number
+    stampTaxEnabled?: boolean
+    posTimbreEnabled?: boolean
     yalidineApiId?: string
     yalidineApiToken?: string
     dhdApiToken?: string
@@ -42,7 +48,7 @@ export async function updateAlgerianSettings(data: {
 
     await db.tenant.update({
         where: { id: tenantId },
-        data: data as any
+        data
     })
 
     revalidatePath("/[locale]/(dashboard)/settings", "page")

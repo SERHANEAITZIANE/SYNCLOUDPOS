@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, Suspense } from "react"
 import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
@@ -17,7 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { createOrder } from "@/actions/orders"
 import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
-import { PaymentModal } from "./payment-modal"
+import dynamic from "next/dynamic"
+const PaymentModal = dynamic(() => import("./payment-modal").then(m => m.PaymentModal), { ssr: false })
 import { cn } from "@/lib/utils"
 import { getActivePromotions } from "@/actions/promotions"
 import { applyPromotionsToCart, ActivePromotion } from "@/lib/promotions-engine"
@@ -28,9 +29,10 @@ interface CartSidebarProps {
     storeName?: string
     storeAddress?: string
     storePhone?: string
+    posTimbreEnabled?: boolean
 }
 
-export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone }: CartSidebarProps) => {
+export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone, posTimbreEnabled = false }: CartSidebarProps) => {
     const t = useTranslations("CartSidebar")
     const cart = usePosStore()
     const router = useRouter()
@@ -222,20 +224,23 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 </DialogContent>
             </Dialog>
 
-            <PaymentModal
-                isOpen={open}
-                onClose={() => setOpen(false)}
-                onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC) => onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC)}
-                loading={loading}
-                total={total}
-                items={items}
-                customerName={activeSession?.customerName || undefined}
-                hasCustomer={!!activeSession?.customerId}
-                accounts={accounts}
-                storeName={storeName}
-                storeAddress={storeAddress}
-                storePhone={storePhone}
-            />
+            <Suspense fallback={null}>
+                <PaymentModal
+                    isOpen={open}
+                    onClose={() => setOpen(false)}
+                    onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC) => onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC)}
+                    loading={loading}
+                    total={total}
+                    items={items}
+                    customerName={activeSession?.customerName || undefined}
+                    hasCustomer={!!activeSession?.customerId}
+                    accounts={accounts}
+                    storeName={storeName}
+                    storeAddress={storeAddress}
+                    storePhone={storePhone}
+                    posTimbreEnabled={posTimbreEnabled}
+                />
+            </Suspense>
             <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-l border-gray-200 dark:border-slate-800 overflow-hidden">
 
                 {/* Session Tabs */}

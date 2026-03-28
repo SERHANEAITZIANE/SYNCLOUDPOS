@@ -371,11 +371,13 @@ export const importProducts = async (rows: Record<string, string>[]) => {
             if (!name.trim()) { errors++; return }
 
             try {
-                const price = parseNumeric(row["price"] || row["prix"] || row["Prix Vente"] || "0")
-                const cost = parseNumeric(row["cost"] || row["cout"] || row["Prix Achat"]) || undefined
-                const wholesalePrice = parseNumeric(row["wholesalePrice"] || row["Prix Gros"]) || undefined
+                const price = parseNumeric(row["price"] || row["prix"] || row["Prix Vente"] || row["Prix détaillant"] || "0")
+                const cost = parseNumeric(row["cost"] || row["cout"] || row["Prix Achat"] || row["Prix d'achat"]) || undefined
+                const wholesalePrice = parseNumeric(row["wholesalePrice"] || row["Prix Gros"] || row["Prix de gros"]) || undefined
+                const dealerPrice = parseNumeric(row["dealerPrice"] || row["Prix revendeur"]) || undefined
+                const tvaRate = parseNumeric(row["tvaRate"] || row["TVA %"] || row["TVA"]) || undefined
                 const stock = parseNumeric(row["stock"] || row["Stock"])
-                const minStock = parseNumeric(row["minStock"] || row["Stock Min"])
+                const minStock = parseNumeric(row["minStock"] || row["Stock Min"] || row["Stock min"])
                 const description = row["description"] || row["Description"] || undefined
                 const barcode = row["barcode"] || row["Barcode"] || row["Code-barres"] || undefined
                 const categoryName = (row["category"] || row["categorie"] || row["Catégorie"] || row["Categorie"] || "").trim()
@@ -385,7 +387,7 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                 const brandId = brandName ? brandCache.get(brandName.toLowerCase()) : undefined
 
                 const isFeatured = parseBoolean(row["isFeatured"] || row["isfeatured"] || row["favoris"] || row["Favoris"])
-                const isArchived = parseBoolean(row["isArchived"] || row["isarchived"] || row["archivé"] || row["Archive"] || row["Archiv\u00e9"])
+                const isArchived = parseBoolean(row["isArchived"] || row["isarchived"] || row["archivé"] || row["archive"] || row["Archive"] || row["Archiv\u00e9"])
 
                 await db.product.create({
                     data: {
@@ -393,6 +395,8 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                         price,
                         cost,
                         wholesalePrice,
+                        dealerPrice,
+                        tvaRate,
                         description,
                         categoryId,
                         brandId,

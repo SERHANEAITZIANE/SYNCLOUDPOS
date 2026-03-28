@@ -1,7 +1,7 @@
 
 --- Executing: unzip -o /root/update_v3.zip -d /var/www/syncloudpos ---
 Archive:  /root/update_v3.zip
-9762e49d705bbacf17c2929bddb7f26a1c1c5973
+e11acc08cd3aedb523a6a778bb3b566d4962aa80
   inflating: /var/www/syncloudpos/.dockerignore  
   inflating: /var/www/syncloudpos/.gitignore  
  extracting: /var/www/syncloudpos/.vscode/settings.json  
@@ -41,6 +41,7 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/fix-old-loans.ts  
   inflating: /var/www/syncloudpos/fix_stores.js  
   inflating: /var/www/syncloudpos/fra.traineddata  
+  inflating: /var/www/syncloudpos/get_logs.py  
   inflating: /var/www/syncloudpos/install.bat  
   inflating: /var/www/syncloudpos/install.sh  
  extracting: /var/www/syncloudpos/license.key.example  
@@ -59,7 +60,9 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/out.json  
   inflating: /var/www/syncloudpos/package-lock.json  
   inflating: /var/www/syncloudpos/package.json  
+  inflating: /var/www/syncloudpos/patch_tables.py  
   inflating: /var/www/syncloudpos/pgbouncer.ini  
+  inflating: /var/www/syncloudpos/pm2_logs.txt  
   inflating: /var/www/syncloudpos/post-receive  
   inflating: /var/www/syncloudpos/postcss.config.mjs  
   inflating: /var/www/syncloudpos/prisma/dist/import-off-dz.js  
@@ -505,8 +508,10 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/vps_env.txt  
   inflating: /var/www/syncloudpos/vps_error.log  
  extracting: /var/www/syncloudpos/vps_find_db.txt  
+  inflating: /var/www/syncloudpos/vps_fix.py  
   inflating: /var/www/syncloudpos/vps_fix_auth.sh  
   inflating: /var/www/syncloudpos/vps_fix_ipv6.sh  
+  inflating: /var/www/syncloudpos/vps_fix_out.txt  
   inflating: /var/www/syncloudpos/vps_install.txt  
   inflating: /var/www/syncloudpos/vps_logs.txt  
   inflating: /var/www/syncloudpos/vps_ls.txt  
@@ -527,15 +532,33 @@ Archive:  /root/update_v3.zip
   inflating: /var/www/syncloudpos/vps_update_env.sh  
 Exit status: 0
 
+--- Executing: cd /var/www/syncloudpos && npm install ---
+
+up to date, audited 935 packages in 5s
+
+322 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (1 moderate, 5 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+Exit status: 0
+
 --- Executing: cd /var/www/syncloudpos && npx prisma generate ---
 Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 1.27s
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 1.32s
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
 
 Exit status: 0
 
@@ -548,7 +571,7 @@ The database is already in sync with the Prisma schema.
 
 Running generate... (Use --skip-generate to skip the generators)
 [2K[1A[2K[GRunning generate... - Prisma Client
-[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 849ms
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 987ms
 
 Exit status: 0
 
@@ -561,158 +584,110 @@ Exit status: 0
 - Environments: .env
 
   Creating an optimized production build ...
-STDERR:
+✓ Compiled successfully in 67s
+  Skipping validation of types
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/17) ...
+  Generating static pages using 5 workers (4/17) 
+  Generating static pages using 5 workers (8/17) 
+  Generating static pages using 5 workers (12/17) 
+✓ Generating static pages using 5 workers (17/17) in 428.8ms
+  Finalizing page optimization ...
 
-> Build error occurred
-Error: Turbopack build failed with 4 errors:
-./src/components/ui/data-table.tsx:39:1
-Module not found: Can't resolve 'jspdf'
-[0m [90m 37 |[39m [36mimport[39m { useReactToPrint } [36mfrom[39m [32m"react-to-print"[39m
- [90m 38 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
-[31m[1m>[22m[39m[90m 39 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 40 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
- [90m 41 |[39m
- [90m 42 |[39m [36minterface[39m [33mDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {[0m
-
-
-
-Import traces:
-  App Route:
-    ./src/components/ui/data-table.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-  Client Component Browser:
-    ./src/components/ui/data-table.tsx [Client Component Browser]
-    ./src/components/categories/client.tsx [Client Component Browser]
-    ./src/components/categories/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/components/ui/data-table.tsx [Client Component SSR]
-    ./src/components/categories/client.tsx [Client Component SSR]
-    ./src/components/categories/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
-./src/components/ui/server-data-table.tsx:35:1
-Module not found: Can't resolve 'jspdf'
-[0m [90m 33 |[39m [36mimport[39m { useReactToPrint } [36mfrom[39m [32m"react-to-print"[39m
- [90m 34 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
-[31m[1m>[22m[39m[90m 35 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 36 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
- [90m 37 |[39m
- [90m 38 |[39m [36minterface[39m [33mServerDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {[0m
-
-
-
-Import traces:
-  App Route:
-    ./src/components/ui/server-data-table.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-  Client Component Browser:
-    ./src/components/ui/server-data-table.tsx [Client Component Browser]
-    ./src/components/customers/client.tsx [Client Component Browser]
-    ./src/components/customers/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/components/ui/server-data-table.tsx [Client Component SSR]
-    ./src/components/customers/client.tsx [Client Component SSR]
-    ./src/components/customers/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
-./src/components/ui/data-table.tsx:40:1
-Module not found: Can't resolve 'jspdf-autotable'
-[0m [90m 38 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
- [90m 39 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
-[31m[1m>[22m[39m[90m 40 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 41 |[39m
- [90m 42 |[39m [36minterface[39m [33mDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {
- [90m 43 |[39m     columns[33m:[39m [33mColumnDef[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m[][0m
-
-
-
-Import traces:
-  App Route:
-    ./src/components/ui/data-table.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-  Client Component Browser:
-    ./src/components/ui/data-table.tsx [Client Component Browser]
-    ./src/components/categories/client.tsx [Client Component Browser]
-    ./src/components/categories/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/components/ui/data-table.tsx [Client Component SSR]
-    ./src/components/categories/client.tsx [Client Component SSR]
-    ./src/components/categories/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/categories/page.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/ai
+├ ƒ /[locale]/analytics
+├ ƒ /[locale]/analytics/forecast
+├ ƒ /[locale]/avaries
+├ ƒ /[locale]/brands
+├ ƒ /[locale]/categories
+├ ƒ /[locale]/cloture
+├ ƒ /[locale]/commissions
+├ ƒ /[locale]/company
+├ ƒ /[locale]/customers
+├ ƒ /[locale]/customers/[customerId]
+├ ƒ /[locale]/customers/[customerId]/ledger
+├ ƒ /[locale]/customers/new
+├ ƒ /[locale]/customers/unpaid
+├ ƒ /[locale]/dashboard
+├ ƒ /[locale]/delivery
+├ ƒ /[locale]/display
+├ ƒ /[locale]/emprunt
+├ ƒ /[locale]/emprunt-fournisseur
+├ ƒ /[locale]/error
+├ ƒ /[locale]/expenses
+├ ƒ /[locale]/expenses/new
+├ ƒ /[locale]/fiscal
+├ ƒ /[locale]/formation
+├ ƒ /[locale]/hub
+├ ƒ /[locale]/inventaire-annuel
+├ ƒ /[locale]/inventory-audit
+├ ƒ /[locale]/inventory-audit/[id]
+├ ƒ /[locale]/login
+├ ƒ /[locale]/payments
+├ ƒ /[locale]/pos
+├ ƒ /[locale]/products
+├ ƒ /[locale]/products/[productId]
+├ ƒ /[locale]/products/inventory
+├ ƒ /[locale]/products/new
+├ ƒ /[locale]/promotions
+├ ƒ /[locale]/purchases
+├ ƒ /[locale]/purchases/[purchaseId]
+├ ƒ /[locale]/recurring-invoices
+├ ƒ /[locale]/register
+├ ƒ /[locale]/reorder
+├ ƒ /[locale]/reports
+├ ƒ /[locale]/reports/[reportType]
+├ ƒ /[locale]/reports/customers
+├ ƒ /[locale]/reports/inventory
+├ ƒ /[locale]/reports/purchases
+├ ƒ /[locale]/reports/sales
+├ ƒ /[locale]/reports/treasury
+├ ƒ /[locale]/reservations
+├ ƒ /[locale]/sales
+├ ƒ /[locale]/sales/[salesId]
+├ ƒ /[locale]/settings
+├ ƒ /[locale]/superadmin
+├ ƒ /[locale]/superadmin/licenses
+├ ƒ /[locale]/suppliers
+├ ƒ /[locale]/suppliers/[supplierId]
+├ ƒ /[locale]/suppliers/[supplierId]/ledger
+├ ƒ /[locale]/suppliers/new
+├ ƒ /[locale]/treasury
+├ ƒ /[locale]/treasury/[accountId]
+├ ƒ /[locale]/users
+├ ○ /activate
+├ ƒ /api/ai-analysis
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/backup/export
+├ ƒ /api/backup/import
+├ ƒ /api/cron/process-recurring
+├ ƒ /api/download-backup
+├ ƒ /api/health
+├ ƒ /api/license/activate
+├ ƒ /api/license/request
+├ ƒ /api/license/status
+├ ƒ /api/ping
+├ ƒ /api/superadmin/export-tenant
+├ ƒ /api/upload
+└ ƒ /receipt/[id]
 
 
-./src/components/ui/server-data-table.tsx:36:1
-Module not found: Can't resolve 'jspdf-autotable'
-[0m [90m 34 |[39m [36mimport[39m [33m*[39m [36mas[39m [33mXLSX[39m [36mfrom[39m [32m"xlsx"[39m
- [90m 35 |[39m [36mimport[39m jsPDF [36mfrom[39m [32m"jspdf"[39m
-[31m[1m>[22m[39m[90m 36 |[39m [36mimport[39m autoTable [36mfrom[39m [32m"jspdf-autotable"[39m
- [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
- [90m 37 |[39m
- [90m 38 |[39m [36minterface[39m [33mServerDataTableProps[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m {
- [90m 39 |[39m     columns[33m:[39m [33mColumnDef[39m[33m<[39m[33mTData[39m[33m,[39m [33mTValue[39m[33m>[39m[][0m
+ƒ Proxy (Middleware)
 
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 
-
-Import traces:
-  App Route:
-    ./src/components/ui/server-data-table.tsx
-    ./src/lib/license.ts
-    ./src/app/api/health/route.ts
-
-  Client Component Browser:
-    ./src/components/ui/server-data-table.tsx [Client Component Browser]
-    ./src/components/customers/client.tsx [Client Component Browser]
-    ./src/components/customers/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
-
-  Client Component SSR:
-    ./src/components/ui/server-data-table.tsx [Client Component SSR]
-    ./src/components/customers/client.tsx [Client Component SSR]
-    ./src/components/customers/client.tsx [Server Component]
-    ./src/app/[locale]/(dashboard)/customers/page.tsx [Server Component]
-
-https://nextjs.org/docs/messages/module-not-found
-
-
-    at <unknown> (./src/components/ui/data-table.tsx:39:1)
-    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
-    at <unknown> (./src/components/ui/server-data-table.tsx:35:1)
-    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
-    at <unknown> (./src/components/ui/data-table.tsx:40:1)
-    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
-    at <unknown> (./src/components/ui/server-data-table.tsx:36:1)
-    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
-
-Exit status: 1
+Exit status: 0
 
 --- Executing: pm2 restart syncloudpos ---
 Use --update-env to update environment variables
 [PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
-[PM2] [syncloudpos](3) ✓
 [PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](3) ✓
 [PM2] [syncloudpos](5) ✓
 [PM2] [syncloudpos](4) ✓
 [PM2] [syncloudpos](6) ✓
@@ -720,12 +695,12 @@ Use --update-env to update environment variables
 ┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498788   │ 0s     │ 109  │ online    │ 0%       │ 57.9mb   │ root     │ disabled │
-│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498790   │ 0s     │ 109  │ online    │ 0%       │ 57.4mb   │ root     │ disabled │
-│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498804   │ 0s     │ 109  │ online    │ 0%       │ 52.1mb   │ root     │ disabled │
-│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498805   │ 0s     │ 109  │ online    │ 0%       │ 55.6mb   │ root     │ disabled │
-│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498820   │ 0s     │ 109  │ online    │ 0%       │ 47.4mb   │ root     │ disabled │
-│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 498839   │ 0s     │ 109  │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510799   │ 0s     │ 121  │ online    │ 0%       │ 57.5mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510800   │ 0s     │ 121  │ online    │ 0%       │ 55.3mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510822   │ 0s     │ 121  │ online    │ 0%       │ 53.0mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510815   │ 0s     │ 121  │ online    │ 0%       │ 55.4mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510839   │ 0s     │ 121  │ online    │ 0%       │ 41.2mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 510850   │ 0s     │ 121  │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
 │ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
 └────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 Exit status: 0

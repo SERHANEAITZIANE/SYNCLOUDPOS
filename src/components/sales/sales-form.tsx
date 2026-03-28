@@ -19,12 +19,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ProductSearchCombobox } from "@/components/ui/product-search-combobox"
 import { SearchableSelect } from "@/components/ui/searchable-select"
-import { createSalesOrder, updateSalesOrder, updateSalesOrderStatus } from "@/actions/sales-orders"
+import { createSalesOrder, updateSalesOrder, updateSalesOrderStatus, searchRecentSalesOrders } from "@/actions/sales-orders"
 import { cn } from "@/lib/utils"
 
 const formSchema = z.object({
     customerId: z.string().min(1, "Client requis"),
-    type: z.enum(["QUOTE", "ORDER", "INVOICE"]),
+    type: z.enum(["QUOTE", "ORDER", "INVOICE", "CREDIT_NOTE"]),
     status: z.enum(["DRAFT", "VALIDATED", "PAID", "CANCELLED"]),
     paymentMethod: z.enum(["CASH", "CARD", "TRANSFER", "CHECK", "TERM"]),
     receiptNumber: z.string().optional(),
@@ -48,6 +48,7 @@ const TYPE_CONFIG = {
     QUOTE: { label: "Devis", color: "bg-gray-100 text-gray-700" },
     ORDER: { label: "Bon de Livraison", color: "bg-amber-100 text-amber-700" },
     INVOICE: { label: "Facture", color: "bg-purple-100 text-purple-700" },
+    CREDIT_NOTE: { label: "Avoir", color: "bg-red-100 text-red-700" },
 }
 const STATUS_CONFIG = {
     DRAFT: { label: "Brouillon", color: "bg-gray-100 text-gray-700" },
@@ -104,6 +105,10 @@ const numberToFrenchWords = (num: number): string => {
 export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, customers, products, storeData }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [relatedSalesOrderId, setRelatedSalesOrderId] = useState<string | null>(initialData?.relatedSalesOrderId || null)
+    const [invoiceSearch, setInvoiceSearch] = useState("")
+    const [invoiceResults, setInvoiceResults] = useState<any[]>([])
+    const [searchingInvoices, setSearchingInvoices] = useState(false)
 
     const isEditMode = !!initialData
     const canEdit = !isEditMode || initialData?.status === "DRAFT"
@@ -169,7 +174,8 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         return Math.min(10000, Math.ceil(amount / 100) * 2);
     }
 
-    const stampTax = (watchPaymentMethod === "CASH" && (watchType === "INVOICE" || watchType === "QUOTE"))
+    const stampTaxEnabled = storeData?.stampTaxEnabled ?? true;
+    const stampTax = (stampTaxEnabled && watchPaymentMethod === "CASH" && (watchType === "INVOICE" || watchType === "QUOTE"))
         ? getStampTaxAmount(totalItemsTTC)
         : 0;
 
@@ -221,7 +227,10 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             }
 
             if (!isEditMode) {
-                await createSalesOrder(submissionData)
+                await createSalesOrder({
+                    ...submissionData,
+                    relatedSalesOrderId: relatedSalesOrderId || undefined,
+                })
                 toast.success("Bon créé avec succès.")
                 router.push("/sales")
                 router.refresh()
@@ -707,6 +716,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                             <SelectItem value="QUOTE">Devis</SelectItem>
                                             <SelectItem value="ORDER">Bon de Livraison (-Stock)</SelectItem>
                                             <SelectItem value="INVOICE">Facture</SelectItem>
+                                            <SelectItem value="CREDIT_NOTE">Avoir (Annulation partielle)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -749,6 +759,94 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         </div>
 
                         <Separator />
+
+                        {/* Credit Note — Invoice Lookup */}
+                        {watchType === "CREDIT_NOTE" && !isEditMode && (
+                            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-red-600" />
+                                    <h3 className="font-bold text-sm text-red-900 dark:text-red-100">Avoir — Référence Facture Originale</h3>
+                                </div>
+                                <p className="text-xs text-red-700 dark:text-red-300">
+                                    Recherchez la facture originale pour créer un avoir. Les articles seront pré-remplis automatiquement.
+                                </p>
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="Rechercher par N° facture ou nom client..."
+                                        value={invoiceSearch}
+                                        onChange={e => setInvoiceSearch(e.target.value)}
+                                        className="flex-1"
+                                        onKeyDown={async (e) => {
+                                            if (e.key === "Enter") {
+                                                e.preventDefault()
+                                                if (!invoiceSearch.trim()) return
+                                                setSearchingInvoices(true)
+                                                const results = await searchRecentSalesOrders(invoiceSearch, "INVOICE")
+                                                setInvoiceResults(results || [])
+                                                setSearchingInvoices(false)
+                                            }
+                                        }}
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={searchingInvoices || !invoiceSearch.trim()}
+                                        onClick={async () => {
+                                            setSearchingInvoices(true)
+                                            const results = await searchRecentSalesOrders(invoiceSearch, "INVOICE")
+                                            setInvoiceResults(results || [])
+                                            setSearchingInvoices(false)
+                                        }}
+                                    >
+                                        {searchingInvoices ? "Recherche..." : "Chercher"}
+                                    </Button>
+                                </div>
+                                {relatedSalesOrderId && (
+                                    <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-300 rounded-lg">
+                                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                                        <span className="text-sm text-emerald-800 dark:text-emerald-200 font-medium">
+                                            Facture liée : {invoiceResults.find(r => r.id === relatedSalesOrderId)?.receiptNumber || relatedSalesOrderId.slice(-8)}
+                                        </span>
+                                    </div>
+                                )}
+                                {invoiceResults.length > 0 && (
+                                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                                        {invoiceResults.map((inv: any) => (
+                                            <button
+                                                key={inv.id}
+                                                type="button"
+                                                className={cn(
+                                                    "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex justify-between items-center",
+                                                    relatedSalesOrderId === inv.id
+                                                        ? "bg-red-200 dark:bg-red-800 font-bold"
+                                                        : "bg-white dark:bg-gray-900 hover:bg-red-100 dark:hover:bg-red-900/40 border"
+                                                )}
+                                                onClick={() => {
+                                                    setRelatedSalesOrderId(inv.id)
+                                                    // Auto-fill customer
+                                                    if (inv.customerId) form.setValue("customerId", inv.customerId)
+                                                    // Auto-fill items from original invoice
+                                                    const items = inv.items?.map((item: any) => ({
+                                                        productId: item.productId,
+                                                        quantity: Number(item.quantity),
+                                                        unitPrice: Number(item.unitPrice),
+                                                    })) || []
+                                                    if (items.length > 0) form.setValue("items", items)
+                                                    toast.success(`Facture ${inv.receiptNumber} sélectionnée — ajustez les quantités si nécessaire`)
+                                                }}
+                                            >
+                                                <div>
+                                                    <span className="font-semibold">{inv.receiptNumber}</span>
+                                                    <span className="text-muted-foreground ml-2">— {inv.customer?.name}</span>
+                                                </div>
+                                                <span className="font-bold">{Number(inv.total).toLocaleString()} DA</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Items */}
                         <div className="space-y-3">

@@ -63,6 +63,11 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
     try {
         const result = await db.$transaction(async (tx) => {
+            // Look up supplier withholding rate for auto-calculation
+            const supplier = await tx.supplier.findUnique({ where: { id: data.supplierId }, select: { withholdingRate: true } })
+            const withholdingRate = supplier?.withholdingRate ?? 0
+            const withholdingAmount = withholdingRate > 0 ? data.total * (withholdingRate / 100) : 0
+
             const purchaseOrder = await tx.purchaseOrder.create({
                 data: {
                     tenantId,
@@ -70,6 +75,7 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     storeId: data.storeId || undefined,
                     accountId: (data.accountId && data.accountId !== "none") ? data.accountId : undefined,
                     total: data.total,
+                    withholdingAmount,
                     status: data.status,
                     items: {
                         create: data.items.map(item => ({
@@ -130,25 +136,29 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                 })
             }
 
-            // If COMPLETED: deduct from treasury if account provided
+            // If COMPLETED: deduct NET amount (total - withholding) from treasury
+            // Per Algerian law: withholding is remitted to DGI, not paid to supplier
             if (data.status === "COMPLETED" && data.accountId && data.accountId !== "none" && data.total > 0) {
+                const netPayment = data.total - Number(withholdingAmount)
                 const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
                 if (account) {
-                    if (Number(account.balance) < data.total) throw new Error("Solde insuffisant dans le compte sélectionné")
+                    if (Number(account.balance) < netPayment) throw new Error("Solde insuffisant dans le compte sélectionné")
                     const updated = await tx.treasuryAccount.update({
                         where: { id: data.accountId },
-                        data: { balance: { decrement: data.total } }
+                        data: { balance: { decrement: netPayment } }
                     })
                     await tx.treasuryTransaction.create({
                         data: {
                             accountId: data.accountId,
                             type: "DEBIT",
-                            amount: data.total,
+                            amount: netPayment,
                             balanceBefore: account.balance,
                             balanceAfter: updated.balance,
                             source: "PURCHASE",
                             referenceId: purchaseOrder.id,
-                            description: `Bon de commande - Paiement`,
+                            description: withholdingAmount > 0 
+                                ? `Paiement fournisseur (net: ${netPayment.toLocaleString()} DA, retenue: ${Number(withholdingAmount).toLocaleString()} DA)`
+                                : `Bon de commande - Paiement`,
                             tenantId
                         }
                     })
@@ -317,25 +327,30 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                 })
             }
 
-            // Pay supplier: if setting COMPLETED with accountId, deduct treasury and reset supplier balance
+            // Pay supplier: deduct NET amount (total - withholding) from treasury
+            // Per Algerian law: retenue à la source is kept and remitted to DGI
             if (newStatus === "COMPLETED" && accountId && accountId !== "none" && total > 0) {
+                const withholdingAmt = Number(order.withholdingAmount ?? 0)
+                const netPayment = total - withholdingAmt
                 const account = await tx.treasuryAccount.findUnique({ where: { id: accountId, tenantId } })
                 if (account) {
-                    if (Number(account.balance) < total) throw new Error("Solde insuffisant")
+                    if (Number(account.balance) < netPayment) throw new Error("Solde insuffisant")
                     const updated = await tx.treasuryAccount.update({
                         where: { id: accountId },
-                        data: { balance: { decrement: total } }
+                        data: { balance: { decrement: netPayment } }
                     })
                     await tx.treasuryTransaction.create({
                         data: {
                             accountId,
                             type: "DEBIT",
-                            amount: total,
+                            amount: netPayment,
                             balanceBefore: account.balance,
                             balanceAfter: updated.balance,
                             source: "PURCHASE",
                             referenceId: id,
-                            description: `Paiement fournisseur - Bon #${id.slice(-6)}`,
+                            description: withholdingAmt > 0
+                                ? `Paiement fournisseur #${id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${withholdingAmt.toLocaleString()} DA)`
+                                : `Paiement fournisseur - Bon #${id.slice(-6)}`,
                             tenantId
                         }
                     })

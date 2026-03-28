@@ -6,10 +6,13 @@ import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { auth } from "@/auth"
 import { getTranslations } from "next-intl/server"
 import { redirect } from "next/navigation"
+import { withCache } from "@/lib/redis"
 
 const PosPage = async () => {
-    const t = await getTranslations("PosPage")
-    const session = await auth()
+    const [t, session] = await Promise.all([
+        getTranslations("PosPage"),
+        auth()
+    ])
     if (!session?.user?.id) return <div>{t("unauthorized")}</div>
 
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "CASHIER" && !session?.user?.isSuperadmin) {
@@ -23,69 +26,66 @@ const PosPage = async () => {
     const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
     if (!storeIdToUse) {
-        return <div>No Store Available</div> // Consider adding to translation if needed
+        return <div>No Store Available</div>
     }
 
-    let storeName = "Premium POS"
-    let storeAddress = ""
-    let storePhone = ""
-    const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
-    const store = await db.store.findUnique({ where: { id: storeIdToUse } })
+    // ── Run ALL independent queries in parallel ──────────────────────
+    const [tenant, store, categories, accounts, rawCustomers, rawProducts] = await Promise.all([
+        db.tenant.findUnique({ where: { id: tenantId } }),
+        db.store.findUnique({ where: { id: storeIdToUse } }),
+        getCategories(),
+        getTreasuryAccounts(),
+        // Lightweight Customers
+        db.customer.findMany({
+            where: { tenantId },
+            select: {
+                id: true,
+                name: true,
+                phone: true,
+                email: true,
+                address: true,
+                balance: true,
+                clientType: true,
+                createdAt: true
+            }
+        }),
+        // Lightweight Products (cached in Redis for 60s)
+        withCache(`pos-products:${tenantId}:${storeIdToUse}`, () =>
+            db.product.findMany({
+                where: { tenantId },
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    price: true,
+                    cost: true,
+                    categoryId: true,
+                    category: { select: { name: true } },
+                    wholesalePrice: true,
+                    dealerPrice: true,
+                    tvaRate: true,
+                    storeProducts: {
+                        where: { storeId: storeIdToUse }
+                    },
+                    isFeatured: true,
+                    barcodes: { select: { value: true } },
+                    images: { select: { url: true }, take: 1 }
+                }
+            }),
+            60
+        )
+    ])
 
-    if (store?.name) storeName = store.name
-    else if (tenant?.name) storeName = tenant.name
-
-    if (store?.address) storeAddress = store.address
-    else if (tenant?.address) storeAddress = tenant.address
-
-    if (tenant?.phone) storePhone = tenant.phone
-
-    const categories = await getCategories()
-    const accounts = await getTreasuryAccounts()
-
-    // 1. Fetch Lightweight Customers Array
-    const rawCustomers = await db.customer.findMany({
-        where: { tenantId },
-        select: {
-            id: true,
-            name: true,
-            phone: true,
-            email: true,
-            address: true,
-            balance: true,
-            clientType: true,
-            createdAt: true
-        }
-    })
+    // Derive store info
+    const storeName = store?.name || tenant?.name || "Premium POS"
+    const storeAddress = store?.address || tenant?.address || ""
+    const storePhone = tenant?.phone || ""
 
     const formattedCustomers = rawCustomers.map(c => ({
         ...c,
         balance: c.balance ? Number(c.balance) : 0,
         createdAt: c.createdAt.toISOString()
     }))
-
-    // 2. Fetch Lightweight Products Array
-    const rawProducts = await db.product.findMany({
-        where: { tenantId },
-        select: {
-            id: true,
-            name: true,
-            description: true,
-            price: true,
-            cost: true,
-            categoryId: true,
-            category: { select: { name: true } },
-            wholesalePrice: true,
-            dealerPrice: true,
-            tvaRate: true,
-            storeProducts: {
-                where: { storeId: storeIdToUse }
-            },
-            isFeatured: true,
-            barcodes: { select: { value: true } },
-            images: { select: { url: true }, take: 1 }
-        }
-    })
 
     const formattedProducts = rawProducts.map((item: any) => {
         const stock = item.storeProducts?.[0]?.stock || 0;
@@ -111,7 +111,7 @@ const PosPage = async () => {
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} />
+            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} />
         </div>
     )
 }

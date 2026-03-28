@@ -1,0 +1,35 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "syncloudpos_db", schema "public" at "127.0.0.1:5432"
+
+Error: Schema engine error:
+FATAL: the database system is in recovery mode
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 4.89s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+PrismaClientInitializationError: 
+Invalid `prisma.tenant.create()` invocation in
+/var/www/syncloudpos/seed_chirpedbeo.js:6:108
+
+  3 const prisma = new PrismaClient();
+  4 async function main() {
+  5   const hashedPassword = await bcrypt.hash('C4r3vL[N7~_ulO%^', 10);
+→ 6   const tenant = await prisma.tenant.create(
+Authentication failed against database server at `127.0.0.1`, the provided database credentials for `syncloudpos` are not valid.
+
+Please make sure to provide valid database credentials for the database server at `127.0.0.1`.
+    at $n.handleRequestError (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async main (/var/www/syncloudpos/seed_chirpedbeo.js:6:18) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}

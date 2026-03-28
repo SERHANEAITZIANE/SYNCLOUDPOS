@@ -1,0 +1,17 @@
+{
+  "name": "SYNCLOUDPOS",
+  "short_name": "SyncPOS",
+  "description": "Premium POS & Commercial Management",
+  "start_url": "/pos",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#10b981",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

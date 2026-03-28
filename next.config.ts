@@ -15,6 +15,16 @@ const nextConfig: import('next').NextConfig = {
     compress: true,
     poweredByHeader: false,
 
+    // Tree-shake heavy barrel-export packages
+    experimental: {
+        optimizePackageImports: ['lucide-react', 'date-fns', 'recharts', 'react-hot-toast'],
+        // Client router cache: avoid redundant server fetches on back/forward
+        staleTimes: {
+            dynamic: 30,  // 30s cache for dynamic pages
+            static: 300,  // 5min cache for static pages
+        },
+    },
+
     images: {
         formats: ['image/avif', 'image/webp'],
         minimumCacheTTL: 86400, // 24h cache for images

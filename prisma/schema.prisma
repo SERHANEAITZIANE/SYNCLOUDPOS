@@ -56,6 +56,9 @@ model Tenant {
   commissionRate  Float     @default(0)     // Default commission % for salespeople
   taxRegime       String?   @default("G50") // "G50" (TVA) or "G12" (IFU)
   ifuRate         Float?    @default(5)     // IFU rate: 0.5, 5, or 12
+  tapRate         Float     @default(2)     // TAP rate: 1% (production), 2% (services/trade), 3% (liberal)
+  stampTaxEnabled Boolean   @default(true)  // Enable Droit de Timbre on invoices/BL
+  posTimbreEnabled Boolean  @default(false) // Enable Droit de Timbre on POS sales (cash only)
   
   users       User[]
   tenantUsers TenantUser[]
@@ -357,6 +360,7 @@ model Supplier {
   rib           String?  // Relevé d'Identité Bancaire
   notes         String?  // Used for tracking loan history entries
   balance       Decimal  @default(0)  // Outstanding amount owed to supplier
+  withholdingRate Float  @default(0)  // Retenue à la source: 0%, 10%, 15%, 24%
   tenantId      String
   tenant        Tenant   @relation(fields: [tenantId], references: [id])
   createdAt     DateTime @default(now())
@@ -415,6 +419,7 @@ model PurchaseOrder {
   storeId     String?
   store       Store?      @relation(fields: [storeId], references: [id])
   total       Decimal
+  withholdingAmount Decimal @default(0) // Retenue à la source amount
   status      String      @default("PENDING")
   items       PurchaseOrderItem[]
   accountId   String?
@@ -436,6 +441,7 @@ model PurchaseOrderItem {
   product         Product       @relation(fields: [productId], references: [id])
   quantity        Int
   costPrice       Decimal
+  tvaRate         Decimal  @default(19) // TVA rate on purchase for TVA déductible
 }
 
 model SalesOrder {
@@ -459,6 +465,8 @@ model SalesOrder {
 
   recurringInvoiceId String?
   recurringInvoice   RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
+
+  relatedSalesOrderId String? // For credit notes: references the original invoice
 
   items           SalesOrderItem[]
 

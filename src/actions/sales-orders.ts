@@ -10,7 +10,8 @@ export async function generateReceiptNumber(type: string, tenantId: string) {
     const prefixMap: Record<string, string> = {
         "QUOTE": "DE",
         "ORDER": "BL",
-        "INVOICE": "FA"
+        "INVOICE": "FA",
+        "CREDIT_NOTE": "AV"
     }
     const prefix = prefixMap[type] || "XX"
     const year = new Date().getFullYear()
@@ -50,6 +51,7 @@ export const createSalesOrder = async (data: {
     items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
     total: number
     receiptNumber?: string
+    relatedSalesOrderId?: string
 }) => {
     await checkSubscription();
     try {
@@ -73,6 +75,7 @@ export const createSalesOrder = async (data: {
                     stampTax: data.stampTax,
                     total: data.total,
                     receiptNumber,
+                    relatedSalesOrderId: data.relatedSalesOrderId || undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
@@ -85,8 +88,26 @@ export const createSalesOrder = async (data: {
                 }
             })
 
+            const isCreditNote = data.type === "CREDIT_NOTE"
+
+            // Credit Note: RETURN stock (add back)
+            if (isCreditNote && STOCK_STATUSES.includes(data.status)) {
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                if (storeId) {
+                    await Promise.all(
+                        data.items.map(item =>
+                            tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { increment: item.quantity } }
+                            })
+                        )
+                    );
+                }
+            }
+
             // Deduct stock for BON DE LIVRAISON (ORDER) or INVOICE validated/paid
             const shouldDeductStock =
+                !isCreditNote &&
                 (data.type === "ORDER" || data.type === "INVOICE") &&
                 STOCK_STATUSES.includes(data.status)
 
@@ -104,8 +125,16 @@ export const createSalesOrder = async (data: {
                 }
             }
 
-            // Add to customer balance if validated (not yet paid)
-            if (DEBT_STATUSES.includes(data.status)) {
+            // Credit Note: DECREMENT customer balance (we owe them)
+            if (isCreditNote && DEBT_STATUSES.includes(data.status)) {
+                await tx.customer.update({
+                    where: { id: data.customerId },
+                    data: { balance: { decrement: data.total } }
+                })
+            }
+
+            // Normal order: Add to customer balance if validated (not yet paid)
+            if (!isCreditNote && DEBT_STATUSES.includes(data.status)) {
                 await tx.customer.update({
                     where: { id: data.customerId },
                     data: { balance: { increment: data.total } }

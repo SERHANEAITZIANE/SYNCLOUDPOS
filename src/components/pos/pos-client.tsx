@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, FC } from "react"
+import { useState, useEffect, useRef, useMemo, FC, Suspense } from "react"
 import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star } from "lucide-react"
 import Image from "next/image"
 
@@ -13,7 +13,8 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import { PosHeader } from "./pos-header"
 import { CartSidebar } from "./cart-sidebar"
 import { ProductCard } from "./product-card"
-import { SalesOrderSearchDialog } from "./sales-order-search-dialog"
+import dynamic from "next/dynamic"
+const SalesOrderSearchDialog = dynamic(() => import("./sales-order-search-dialog").then(m => m.SalesOrderSearchDialog), { ssr: false })
 import { useBarcodeScanner } from "@/hooks/use-barcode-scanner"
 import { ModeToggle } from "@/components/dashboard/mode-toggle"
 import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
@@ -49,6 +50,7 @@ interface PosClientProps {
     }[]
     customers?: any[]
     accounts?: any[]
+    posTimbreEnabled?: boolean
 }
 
 export const PosClient: FC<PosClientProps> = ({
@@ -58,7 +60,8 @@ export const PosClient: FC<PosClientProps> = ({
     products,
     categories,
     customers = [],
-    accounts = []
+    accounts = [],
+    posTimbreEnabled = false
 }) => {
     const t = useTranslations("PosClient")
     const [searchQuery, setSearchQuery] = useState("")
@@ -306,13 +309,13 @@ export const PosClient: FC<PosClientProps> = ({
 
     useBarcodeScanner(onScan)
 
-    const filteredProducts = products.filter((item) => {
+    const filteredProducts = useMemo(() => products.filter((item) => {
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.barcodes.some(b => b.includes(searchQuery))
         const matchesCategory = selectedCategory ? item.categoryId === selectedCategory : true
         const matchesFavorites = showFavoritesOnly ? item.isFeatured : true
         return matchesSearch && matchesCategory && matchesFavorites
-    })
+    }), [products, searchQuery, selectedCategory, showFavoritesOnly])
 
     // Show all matching products (no cap) when searching, otherwise cap at 60 for performance
     const renderedProducts = searchQuery ? filteredProducts : filteredProducts.slice(0, 60)
@@ -323,7 +326,7 @@ export const PosClient: FC<PosClientProps> = ({
             <div className="flex flex-1 overflow-hidden relative">
                 {/* Cart Sidebar - Hidden on mobile, Left on Desktop */}
                 <div className="hidden lg:flex w-[440px] h-full shrink-0 z-20 transition-all bg-white dark:bg-[#18181b] shadow-[4px_0_24px_rgba(0,0,0,0.2)] border-r border-gray-200 dark:border-gray-800 flex-col">
-                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} />
+                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} />
                 </div>
 
                 {/* Mobile Cart Drawer */}
@@ -336,7 +339,7 @@ export const PosClient: FC<PosClientProps> = ({
                         <div className="flex-1 w-full h-[calc(100%-2rem)] flex flex-col pt-2">
                             {/* Draggable indicator line */}
                             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto my-2 flex-shrink-0" />
-                            <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} />
+                            <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} />
                         </div>
                     </SheetContent>
                 </Sheet>
@@ -576,11 +579,13 @@ export const PosClient: FC<PosClientProps> = ({
 
             </div>
 
-            <SalesOrderSearchDialog
-                isOpen={isSearchOrderOpen}
-                onClose={() => setIsSearchOrderOpen(false)}
-                onSelectOrder={handleLoadOrder}
-            />
+            <Suspense fallback={null}>
+                <SalesOrderSearchDialog
+                    isOpen={isSearchOrderOpen}
+                    onClose={() => setIsSearchOrderOpen(false)}
+                    onSelectOrder={handleLoadOrder}
+                />
+            </Suspense>
         </div>
     )
 }

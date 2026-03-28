@@ -5,23 +5,23 @@ export const getSubscriptionStatus = async () => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
+    // Single query instead of two sequential lookups
     const user = await db.user.findUnique({
         where: { id: session.user.id },
-        select: { tenantId: true }
-    });
-
-    if (!user?.tenantId) return null;
-
-    const tenant = await db.tenant.findUnique({
-        where: { id: user.tenantId },
         select: {
-            subscriptionEndsAt: true,
-            isBlocked: true,
+            tenantId: true,
+            tenant: {
+                select: {
+                    subscriptionEndsAt: true,
+                    isBlocked: true,
+                }
+            }
         }
     });
 
-    if (!tenant) return null;
+    if (!user?.tenantId || !user.tenant) return null;
 
+    const tenant = user.tenant;
     const now = new Date();
     const isExpired = tenant.subscriptionEndsAt ? tenant.subscriptionEndsAt < now : true;
 

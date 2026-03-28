@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
@@ -27,6 +27,7 @@ interface PaymentModalProps {
     storeName?: string
     storeAddress?: string
     storePhone?: string
+    posTimbreEnabled?: boolean
 }
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -41,7 +42,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     accounts = [],
     storeName,
     storeAddress,
-    storePhone
+    storePhone,
+    posTimbreEnabled = false
 }) => {
     const t = useTranslations("PaymentModal")
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
@@ -91,7 +93,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         return Math.min(10000, Math.ceil(amount / 100) * 2);
     }
 
-    const stampTax = 0 // Timbre is not calculated in POS
+    const stampTax = (posTimbreEnabled && method === "CASH") ? getStampTaxAmount(total) : 0
     const finalTotalTTC = total + stampTax
 
     const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
@@ -273,7 +275,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         <Receipt
                             ref={componentRef}
                             items={finalItems.length > 0 ? finalItems : items}
-                            total={success ? finalTotal : total}
+                            total={success ? finalTotal : finalTotalTTC}
+                            stampTax={stampTax}
                             date={new Date()}
                             orderId={orderData?.receiptNumber}
                             storeName={storeName}
@@ -323,9 +326,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 text-center border border-gray-100 dark:border-gray-800 shadow-sm">
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t("totalDue")}</p>
                             <div className="text-4xl sm:text-5xl leading-none font-black text-gray-900 dark:text-white tracking-tighter">
-                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
+                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
                                 <span className="text-xl text-gray-400 font-bold ml-2">DA</span>
                             </div>
+                            {stampTax > 0 && (
+                                <div className="mt-2 flex items-center justify-center gap-3 text-xs text-gray-500">
+                                    <span>Sous-total: {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(total)} DA</span>
+                                    <span className="text-amber-600 font-bold">Timbre: +{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(stampTax)} DA</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Payment Method â€” 2 rows on mobile, 1 row on bigger */}

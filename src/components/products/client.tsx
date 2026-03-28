@@ -105,16 +105,18 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                 title={t("importTitle")}
                 description={t("importDesc")}
                 columns={[
-                    { key: t("fields.name"), label: t("fields.name") },
-                    { key: t("fields.price"), label: t("fields.price") },
-                    { key: t("fields.purchasePrice"), label: t("fields.purchasePrice") },
-                    { key: t("fields.wholesalePrice"), label: t("fields.wholesalePrice") },
-                    { key: t("fields.stock"), label: t("fields.stock") },
-                    { key: t("fields.minStock"), label: t("fields.minStock") },
-                    { key: t("fields.category"), label: t("fields.category") },
-                    { key: t("fields.brand"), label: t("fields.brand") },
-                    { key: t("fields.barcode"), label: t("fields.barcode") },
-                    { key: t("fields.description"), label: t("fields.description") },
+                    { key: "name", label: t("fields.name") },
+                    { key: "price", label: t("fields.price") },
+                    { key: "cost", label: t("fields.purchasePrice") },
+                    { key: "wholesalePrice", label: t("fields.wholesalePrice") },
+                    { key: "dealerPrice", label: t("fields.dealerPrice") },
+                    { key: "stock", label: t("fields.stock") },
+                    { key: "minStock", label: t("fields.minStock") },
+                    { key: "category", label: t("fields.category") },
+                    { key: "brand", label: t("fields.brand") },
+                    { key: "barcode", label: t("fields.barcode") },
+                    { key: "description", label: t("fields.description") },
+                    { key: "tvaRate", label: "TVA %" },
                     { key: "favoris", label: "Favoris (1 / 0)" },
                     { key: "archive", label: "Archivé (1 / 0)" },
                 ]}

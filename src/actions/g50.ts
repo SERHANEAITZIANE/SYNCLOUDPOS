@@ -11,13 +11,35 @@ export interface G50Row {
     invoiceCount: number
 }
 
+export interface G50DeductibleRow {
+    rate: number
+    baseHT: number
+    tvaAmount: number
+    purchaseCount: number
+}
+
 export interface G50Result {
     period: string
+    // Section I: TVA Collectée (output VAT from sales)
     rows: G50Row[]
     grandHT: number
     grandTVA: number
     grandTTC: number
     totalInvoices: number
+    // Section II: TAP
+    tapRate: number
+    tapAmount: number
+    // Section III: TVA Déductible (input VAT from purchases)
+    deductibleRows: G50DeductibleRow[]
+    totalDeductibleTVA: number
+    // Section IV: TVA Nette
+    netTVA: number
+    // Section V: Retenue à la source
+    totalWithholding: number
+    // Section VI: Droit de timbre collecté
+    totalTimbre: number
+    // Section VII: Total à verser
+    totalTaxDue: number
     tenant: {
         name: string
         ownerName: string | null
@@ -36,7 +58,8 @@ export interface G50Result {
 
 /**
  * Computes the G50 TVA declaration for a given month/year.
- * Only processes SalesOrders of type "INVOICE".
+ * Only processes SalesOrders of type "INVOICE" for TVA collectée.
+ * Also includes TAP, TVA déductible from purchases, withholding tax, and stamp tax.
  */
 export async function getG50Data(year: number, month: number): Promise<G50Result | { error: string }> {
     const session = await auth()
@@ -46,11 +69,33 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
     const startDate = new Date(year, month - 1, 1)
     const endDate = new Date(year, month, 1)
 
-    // Fetch all INVOICE-type SalesOrders for the period with their line items
+    // ── Fetch tenant settings ──────────────────────────────────────
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+            name: true,
+            ownerName: true,
+            activity: true,
+            address: true,
+            wilaya: true,
+            commune: true,
+            phone: true,
+            email: true,
+            nif: true,
+            rc: true,
+            artImposition: true,
+            nis: true,
+            tapRate: true,
+        }
+    })
+
+    const tapRate = tenant?.tapRate ?? 2
+
+    // ── Section I: TVA Collectée (from INVOICE sales) ──────────────
     const invoices = await db.salesOrder.findMany({
         where: {
             tenantId,
-            type: "INVOICE",
+            type: { in: ["INVOICE", "CREDIT_NOTE"] },
             status: { not: "CANCELLED" },
             createdAt: { gte: startDate, lt: endDate }
         },
@@ -61,15 +106,15 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
         }
     })
 
-    // Group by TVA rate
     const rateMap = new Map<number, { baseHT: number; tvaAmount: number; totalTTC: number; count: number }>()
 
     for (const invoice of invoices) {
+        const multiplier = invoice.type === "CREDIT_NOTE" ? -1 : 1
         for (const item of invoice.items) {
             const rate = Number(item.tvaRate ?? item.product?.tvaRate ?? 19)
             const qty = Number(item.quantity)
             const unitPriceHT = Number(item.priceHt ?? item.unitPrice)
-            const lineHT = unitPriceHT * qty
+            const lineHT = unitPriceHT * qty * multiplier
             const lineTVA = lineHT * (rate / 100)
             const lineTTC = lineHT + lineTVA
 
@@ -83,7 +128,7 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
         }
     }
 
-    // Ensure standard Algerian TVA rates always appear (even if 0)
+    // Ensure standard Algerian TVA rates always appear
     for (const rate of [0, 9, 19]) {
         if (!rateMap.has(rate)) {
             rateMap.set(rate, { baseHT: 0, tvaAmount: 0, totalTTC: 0, count: 0 })
@@ -104,25 +149,74 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
     const grandTVA = rows.reduce((s, r) => s + r.tvaAmount, 0)
     const grandTTC = rows.reduce((s, r) => s + r.totalTTC, 0)
 
-    const periodLabel = new Date(year, month - 1).toLocaleDateString("fr-DZ", { month: "long", year: "numeric" })
+    // ── Section II: TAP ────────────────────────────────────────────
+    const tapAmount = grandHT * (tapRate / 100)
 
-    const tenant = await db.tenant.findUnique({
-        where: { id: tenantId },
-        select: {
-            name: true,
-            ownerName: true,
-            activity: true,
-            address: true,
-            wilaya: true,
-            commune: true,
-            phone: true,
-            email: true,
-            nif: true,
-            rc: true,
-            artImposition: true,
-            nis: true,
+    // ── Section III: TVA Déductible (from purchases) ───────────────
+    const purchases = await db.purchaseOrder.findMany({
+        where: {
+            tenantId,
+            status: { in: ["FACTURE", "COMPLETED"] },
+            createdAt: { gte: startDate, lt: endDate }
+        },
+        include: {
+            items: true
         }
     })
+
+    const deductibleMap = new Map<number, { baseHT: number; tvaAmount: number; count: number }>()
+
+    for (const po of purchases) {
+        for (const item of po.items) {
+            const rate = Number(item.tvaRate ?? 19)
+            const qty = Number(item.quantity)
+            const costHT = Number(item.costPrice)
+            const lineHT = costHT * qty
+            const lineTVA = lineHT * (rate / 100)
+
+            const existing = deductibleMap.get(rate) ?? { baseHT: 0, tvaAmount: 0, count: 0 }
+            deductibleMap.set(rate, {
+                baseHT: existing.baseHT + lineHT,
+                tvaAmount: existing.tvaAmount + lineTVA,
+                count: existing.count + 1
+            })
+        }
+    }
+
+    // Ensure standard rates
+    for (const rate of [0, 9, 19]) {
+        if (!deductibleMap.has(rate)) {
+            deductibleMap.set(rate, { baseHT: 0, tvaAmount: 0, count: 0 })
+        }
+    }
+
+    const deductibleRows: G50DeductibleRow[] = Array.from(deductibleMap.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([rate, data]) => ({
+            rate,
+            baseHT: data.baseHT,
+            tvaAmount: data.tvaAmount,
+            purchaseCount: data.count
+        }))
+
+    const totalDeductibleTVA = deductibleRows.reduce((s, r) => s + r.tvaAmount, 0)
+
+    // ── Section IV: TVA Nette ──────────────────────────────────────
+    const netTVA = Math.max(0, grandTVA - totalDeductibleTVA)
+
+    // ── Section V: Retenue à la source ─────────────────────────────
+    const totalWithholding = purchases.reduce((s, po) => s + Number(po.withholdingAmount ?? 0), 0)
+
+    // ── Section VI: Droit de timbre collecté ───────────────────────
+    const totalTimbre = invoices.reduce((s, inv) => s + Number(inv.stampTax ?? 0), 0)
+
+    // ── Section VII: Total à verser ────────────────────────────────
+    const totalTaxDue = netTVA + tapAmount + totalTimbre
+
+    const periodLabel = new Date(year, month - 1).toLocaleDateString("fr-DZ", { month: "long", year: "numeric" })
+
+    // Remove tapRate from tenant before returning
+    const { tapRate: _, ...tenantData } = tenant || {} as any
 
     return {
         period: periodLabel,
@@ -130,7 +224,15 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
         grandHT,
         grandTVA,
         grandTTC,
-        totalInvoices: invoices.length,
-        tenant
+        totalInvoices: invoices.filter(i => i.type === "INVOICE").length,
+        tapRate,
+        tapAmount,
+        deductibleRows,
+        totalDeductibleTVA,
+        netTVA,
+        totalWithholding,
+        totalTimbre,
+        totalTaxDue,
+        tenant: tenantData?.name ? tenantData : null
     }
 }

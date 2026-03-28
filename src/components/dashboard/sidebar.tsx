@@ -37,35 +37,21 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
-import { getUserTenants } from "@/actions/get-tenants";
-import { getActiveTenantId } from "@/actions/get-active-tenant";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function DashboardSidebar({ isSuperadmin, role }: { isSuperadmin?: boolean, role?: string }) {
+interface DashboardSidebarProps {
+    isSuperadmin?: boolean;
+    role?: string;
+    tenants?: { label: string; value: string }[];
+    activeTenantId?: string;
+}
+
+export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenantId }: DashboardSidebarProps) {
     const pathname = usePathname();
     const t = useTranslations("Navigation");
-    const [tenants, setTenants] = useState<{ label: string; value: string }[]>([]);
-    const [activeTenantId, setActiveTenantId] = useState<string | undefined>(undefined);
     const [isCollapsed, setIsCollapsed] = useState(true);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [tenantsData, activeId] = await Promise.all([
-                    getUserTenants(),
-                    getActiveTenantId()
-                ]);
-                const formatted = tenantsData.map((t: { name: string; id: string }) => ({ label: t.name, value: t.id }));
-                setTenants(formatted);
-                setActiveTenantId(activeId || undefined);
-            } catch (error) {
-                console.error("Failed to fetch tenants", error);
-            }
-        }
-        fetchData();
-    }, []);
 
     const isAdmin = role === "ADMIN" || isSuperadmin;
     const isCASHIER = role === "CASHIER" || role === "VENDEUR";

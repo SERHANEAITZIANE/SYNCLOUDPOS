@@ -1,0 +1,18 @@
+                                     List of databases
+      Name      |    Owner    | Encoding | Collate |  Ctype  |      Access privileges      
+----------------+-------------+----------+---------+---------+-----------------------------
+ postgres       | postgres    | UTF8     | C.UTF-8 | C.UTF-8 | 
+ syncloudpos_db | syncloudpos | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/syncloudpos            +
+                |             |          |         |         | syncloudpos=CTc/syncloudpos
+ template0      | postgres    | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres                +
+                |             |          |         |         | postgres=CTc/postgres
+ template1      | postgres    | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres                +
+                |             |          |         |         | postgres=CTc/postgres
+(4 rows)
+
+                                    List of roles
+  Role name  |                         Attributes                         | Member of 
+-------------+------------------------------------------------------------+-----------
+ postgres    | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ syncloudpos | Create DB                                                  | {}
+

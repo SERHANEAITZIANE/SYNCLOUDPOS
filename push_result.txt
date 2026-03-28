@@ -1,0 +1,65 @@
+Connected!
+Backed up existing schema
+Uploaded new schema!
+Running: prisma db push...
+STDOUT: Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "syncloudpos", schema "public" at "localhost:5433"
+
+🚀  Your database is now in sync with your Prisma schema. Done in 2.78s
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 9.41s
+
+
+
+Running: prisma generate...
+STDOUT: Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 4.79s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 5.22.0 -> 7.6.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+
+Running: pm2 restart all...
+STDOUT: Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [
+  1, 2, 3, 4,
+  5, 6, 7
+])
+[PM2] [syncloudpos-db-backup](1) ✓
+[PM2] [syncloudpos](3) ✓
+[PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](5) ✓
+[PM2] [syncloudpos](6) ✓
+[PM2] [syncloudpos](7) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453585   │ 4s     │ 133  │ online    │ 0%       │ 59.8mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453567   │ 4s     │ 133  │ online    │ 0%       │ 59.5mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453655   │ 3s     │ 133  │ online    │ 0%       │ 59.9mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453683   │ 3s     │ 133  │ online    │ 0%       │ 58.9mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453759   │ 2s     │ 133  │ online    │ 0%       │ 56.1mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453852   │ 0s     │ 133  │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 453475   │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== ALL DONE ===

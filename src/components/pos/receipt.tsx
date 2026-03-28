@@ -13,6 +13,7 @@ interface ReceiptItem {
 interface ReceiptProps {
     items: ReceiptItem[]
     total: number
+    stampTax?: number
     date: Date
     orderId?: string
     storeName?: string
@@ -27,6 +28,7 @@ interface ReceiptProps {
 export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
     items,
     total,
+    stampTax = 0,
     date,
     orderId = "12345",
     storeName = "SYNCLOUDPOS",
@@ -121,6 +123,13 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         }
                         return null
                     })()}
+
+                    {stampTax > 0 && (
+                        <div className="flex justify-between font-bold text-sm text-black">
+                            <span>Droit de Timbre</span>
+                            <span>+{formatCurrency(stampTax)}</span>
+                        </div>
+                    )}
 
                     <div className="flex justify-between items-center font-black text-xl py-2 border-y-2 border-dashed border-black my-1">
                         <span>{t("total")}</span>

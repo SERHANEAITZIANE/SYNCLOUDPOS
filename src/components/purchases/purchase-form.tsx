@@ -472,13 +472,33 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     })}
                                 </div>
 
-                                {/* Total */}
+                                {/* Total + Withholding breakdown */}
                                 <div className="flex justify-end">
-                                    <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right">
-                                        <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Total TTC</p>
-                                        <p className="text-3xl font-bold">
-                                            {total.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
-                                        </p>
+                                    <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right space-y-2">
+                                        <div>
+                                            <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Total TTC</p>
+                                            <p className="text-3xl font-bold">
+                                                {total.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
+                                            </p>
+                                        </div>
+                                        {selectedSupplier && Number(selectedSupplier.withholdingRate ?? 0) > 0 && total > 0 && (() => {
+                                            const whRate = Number(selectedSupplier.withholdingRate)
+                                            const whAmount = total * (whRate / 100)
+                                            const netPayment = total - whAmount
+                                            return (
+                                                <div className="border-t border-primary/20 pt-2 space-y-1">
+                                                    <div className="flex justify-between text-xs">
+                                                        <span className="text-red-600 font-semibold">Retenue à la source ({whRate}%)</span>
+                                                        <span className="text-red-600 font-bold">-{whAmount.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm font-bold">
+                                                        <span className="text-emerald-700">Net à payer au fournisseur</span>
+                                                        <span className="text-emerald-700">{netPayment.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</span>
+                                                    </div>
+                                                    <p className="text-[10px] text-muted-foreground">La retenue est versée à la DGI via le G50</p>
+                                                </div>
+                                            )
+                                        })()}
                                     </div>
                                 </div>
 

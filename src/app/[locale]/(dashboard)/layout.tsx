@@ -7,6 +7,8 @@ import { SubscriptionGuard } from "@/components/auth/subscription-guard";
 import { ExpirationAlert } from "@/components/dashboard/expiration-alert";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import { SubscriptionBanner } from "@/components/dashboard/subscription-banner";
+import { getUserTenants } from "@/actions/get-tenants";
+import { getActiveTenantId } from "@/actions/get-active-tenant";
 
 export default async function DashboardLayout({
     children,
@@ -22,7 +24,17 @@ export default async function DashboardLayout({
         redirect({ href: "/login", locale });
     }
 
-    const subStatus = await getSubscriptionStatus();
+    // Fetch subscription + tenant data in parallel (server-side)
+    const [subStatus, tenantsData, activeTenantId] = await Promise.all([
+        getSubscriptionStatus(),
+        getUserTenants(),
+        getActiveTenantId()
+    ]);
+
+    const formattedTenants = tenantsData.map((t: { name: string; id: string }) => ({
+        label: t.name,
+        value: t.id
+    }));
 
     return (
         <SubscriptionGuard
@@ -35,6 +47,8 @@ export default async function DashboardLayout({
                     <DashboardSidebar
                         isSuperadmin={session.user?.isSuperadmin}
                         role={session.user?.role}
+                        tenants={formattedTenants}
+                        activeTenantId={activeTenantId || undefined}
                     />
                 </div>
                 <GlobalShortcuts />

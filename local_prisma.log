@@ -1,0 +1,26 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "syncloudpos_db", schema "public" at "localhost"
+
+Error: P1001: Can't reach database server at `/run/postgresql:5432`
+
+Please make sure your database server is running at `/run/postgresql:5432`.
+PrismaClientInitializationError: 
+Invalid `prisma.tenant.create()` invocation in
+/var/www/syncloudpos/seed_chirpedbeo.js:6:108
+
+  3 const prisma = new PrismaClient();
+  4 async function main() {
+  5   const hashedPassword = await bcrypt.hash('C4r3vL[N7~_ulO%^', 10);
+→ 6   const tenant = await prisma.tenant.create(
+Can't reach database server at `/run/postgresql:5432`
+
+Please make sure your database server is running at `/run/postgresql:5432`.
+    at $n.handleRequestError (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:7615)
+    at $n.handleAndLogRequestError (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/var/www/syncloudpos/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async main (/var/www/syncloudpos/seed_chirpedbeo.js:6:18) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}

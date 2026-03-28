@@ -1,0 +1,149 @@
+﻿node.exe : ظأب 
+Warning: Next.js 
+inferred your 
+workspace root, but it 
+may not be correct.
+At C:\Program Files\nod
+ejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (ظأب Warning:    
+ Ne...not be correc    
+t.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+ We detected multiple 
+lockfiles and selected 
+the directory of C:\Use
+rs\tre\package-lock.jso
+n as the root 
+directory.
+ To silence this 
+warning, set 
+`turbopack.root` in 
+your Next.js config, 
+or consider removing 
+one of the lockfiles 
+if it's not needed.
+   See https://nextjs.o
+rg/docs/app/api-referen
+ce/config/next-config-j
+s/turbopack#root-direct
+ory for more 
+information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\tre\Docum
+ents\SYNCLOUDPOS\packag
+e-lock.json
+
+ظû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  ┬╖ optimizePackageImports
+  ┬╖ staleTimes
+
+  Creating an optimized production build ...
+ظ£ô Compiled successfully in 116s
+  Skipping validation of types
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/16) ...
+  Generating static pages using 11 workers (4/16) 
+  Generating static pages using 11 workers (8/16) 
+  Generating static pages using 11 workers (12/16) 
+ظ£ô Generating static pages using 11 workers (16/16) in 2.5s
+  Finalizing page optimization ...
+
+Route (app)
+ظ¤î ظùï /_not-found
+ظ¤£ ╞ْ /[locale]
+ظ¤£ ╞ْ /[locale]/ai
+ظ¤£ ╞ْ /[locale]/analytics
+ظ¤£ ╞ْ /[locale]/analytics/forecast
+ظ¤£ ╞ْ /[locale]/avaries
+ظ¤£ ╞ْ /[locale]/brands
+ظ¤£ ╞ْ /[locale]/categories
+ظ¤£ ╞ْ /[locale]/cloture
+ظ¤£ ╞ْ /[locale]/commissions
+ظ¤£ ╞ْ /[locale]/company
+ظ¤£ ╞ْ /[locale]/customers
+ظ¤£ ╞ْ /[locale]/customers/[customerId]
+ظ¤£ ╞ْ /[locale]/customers/[customerId]/ledger
+ظ¤£ ╞ْ /[locale]/customers/new
+ظ¤£ ╞ْ /[locale]/customers/unpaid
+ظ¤£ ╞ْ /[locale]/dashboard
+ظ¤£ ╞ْ /[locale]/delivery
+ظ¤£ ╞ْ /[locale]/display
+ظ¤£ ╞ْ /[locale]/emprunt
+ظ¤£ ╞ْ /[locale]/emprunt-fournisseur
+ظ¤£ ╞ْ /[locale]/error
+ظ¤£ ╞ْ /[locale]/expenses
+ظ¤£ ╞ْ /[locale]/expenses/new
+ظ¤£ ╞ْ /[locale]/fiscal
+ظ¤£ ╞ْ /[locale]/formation
+ظ¤£ ╞ْ /[locale]/hub
+ظ¤£ ╞ْ /[locale]/inventaire-annuel
+ظ¤£ ╞ْ /[locale]/inventory-audit
+ظ¤£ ╞ْ /[locale]/inventory-audit/[id]
+ظ¤£ ╞ْ /[locale]/login
+ظ¤£ ╞ْ /[locale]/payments
+ظ¤£ ╞ْ /[locale]/pos
+ظ¤£ ╞ْ /[locale]/products
+ظ¤£ ╞ْ /[locale]/products/[productId]
+ظ¤£ ╞ْ /[locale]/products/inventory
+ظ¤£ ╞ْ /[locale]/products/new
+ظ¤£ ╞ْ /[locale]/promotions
+ظ¤£ ╞ْ /[locale]/purchases
+ظ¤£ ╞ْ /[locale]/purchases/[purchaseId]
+ظ¤£ ╞ْ /[locale]/recurring-invoices
+ظ¤£ ╞ْ /[locale]/register
+ظ¤£ ╞ْ /[locale]/reorder
+ظ¤£ ╞ْ /[locale]/reports
+ظ¤£ ╞ْ /[locale]/reports/[reportType]
+ظ¤£ ╞ْ /[locale]/reports/customers
+ظ¤£ ╞ْ /[locale]/reports/inventory
+ظ¤£ ╞ْ /[locale]/reports/purchases
+ظ¤£ ╞ْ /[locale]/reports/sales
+ظ¤£ ╞ْ /[locale]/reports/treasury
+ظ¤£ ╞ْ /[locale]/reservations
+ظ¤£ ╞ْ /[locale]/sales
+ظ¤£ ╞ْ /[locale]/sales/[salesId]
+ظ¤£ ╞ْ /[locale]/settings
+ظ¤£ ╞ْ /[locale]/superadmin
+ظ¤£ ╞ْ /[locale]/superadmin/licenses
+ظ¤£ ╞ْ /[locale]/suppliers
+ظ¤£ ╞ْ /[locale]/suppliers/[supplierId]
+ظ¤£ ╞ْ /[locale]/suppliers/[supplierId]/ledger
+ظ¤£ ╞ْ /[locale]/suppliers/new
+ظ¤£ ╞ْ /[locale]/treasury
+ظ¤£ ╞ْ /[locale]/treasury/[accountId]
+ظ¤£ ╞ْ /[locale]/users
+ظ¤£ ظùï /activate
+ظ¤£ ╞ْ /api/ai-analysis
+ظ¤£ ╞ْ /api/auth/[...nextauth]
+ظ¤£ ╞ْ /api/backup/export
+ظ¤£ ╞ْ /api/backup/import
+ظ¤£ ╞ْ /api/cron/process-recurring
+ظ¤£ ╞ْ /api/download-backup
+ظ¤£ ╞ْ /api/health
+ظ¤£ ╞ْ /api/license/activate
+ظ¤£ ╞ْ /api/license/request
+ظ¤£ ╞ْ /api/license/status
+ظ¤£ ╞ْ /api/ping
+ظ¤£ ╞ْ /api/superadmin/export-tenant
+ظ¤£ ╞ْ /api/upload
+ظ¤¤ ╞ْ /receipt/[id]
+
+
+╞ْ Proxy (Middleware)
+
+ظùï  (Static)   prerendered as static content
+╞ْ  (Dynamic)  server-rendered on demand
+
