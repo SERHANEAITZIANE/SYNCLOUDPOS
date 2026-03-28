@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs"
 
 export const getTenantsForSuperadmin = async () => {
     try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return []
         const tenants = await db.tenant.findMany({
             include: {
                 users: {
@@ -63,6 +65,8 @@ export const getTenantsForSuperadmin = async () => {
 
 export const updateTenantSubscription = async (tenantId: string, additionalMonths: number) => {
     try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
         const tenant = await db.tenant.findUnique({ where: { id: tenantId } });
         if (!tenant) return { error: "Tenant not found" };
 
@@ -80,6 +84,8 @@ export const updateTenantSubscription = async (tenantId: string, additionalMonth
 
 export const toggleTenantBlock = async (tenantId: string, isBlocked: boolean) => {
     try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
         await db.tenant.update({ where: { id: tenantId }, data: { isBlocked } });
         revalidatePath("/[locale]/(dashboard)/superadmin", "page")
         return { success: `Tenant ${isBlocked ? 'blocked' : 'unblocked'} successfully.` };

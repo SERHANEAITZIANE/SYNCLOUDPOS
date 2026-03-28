@@ -45,6 +45,7 @@ export async function updateAlgerianSettings(data: {
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
+    if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) return { error: "Accès réservé aux administrateurs" }
 
     await db.tenant.update({
         where: { id: tenantId },
