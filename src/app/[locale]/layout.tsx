@@ -10,7 +10,19 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SYNCLOUDPOS",
-  description: "Premium POS & Commercial Management",
+  description: "Système ERP complet — Point de Vente, Facturation, Gestion Commerciale et Conformité Fiscale Algérienne",
+  applicationName: "SYNCLOUDPOS",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "SYNCLOUDPOS",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default async function RootLayout({
@@ -25,6 +37,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#3b82f6" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+      </head>
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>

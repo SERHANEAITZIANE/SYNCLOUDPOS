@@ -83,6 +83,7 @@ model Tenant {
   stores             Store[]
   reservations       Reservation[]
   deliveryShipments  DeliveryShipment[]
+  sequenceCounters   SequenceCounter[]
 }
 
 model Store {
@@ -701,4 +702,18 @@ model LicenseRequest {
   @@index([status])
   @@index([machineId])
   @@index([createdAt])
+}
+
+// Atomic invoice/receipt number counter per tenant
+model SequenceCounter {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  prefix    String   // FA, BL, DE, AV, BC, etc.
+  year      Int      // 2026
+  lastValue Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, prefix, year])
+  @@index([tenantId])
 }

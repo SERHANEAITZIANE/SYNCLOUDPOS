@@ -15,23 +15,24 @@ export async function generateReceiptNumber(type: string, tenantId: string) {
     }
     const prefix = prefixMap[type] || "XX"
     const year = new Date().getFullYear()
-    const pattern = `${prefix}-${year}/`
 
-    const lastOrder = await db.salesOrder.findFirst({
-        where: { tenantId, type, receiptNumber: { startsWith: pattern } },
-        orderBy: { createdAt: "desc" }
+    // Atomic increment — no race condition possible
+    const counter = await db.sequenceCounter.upsert({
+        where: {
+            tenantId_prefix_year: { tenantId, prefix, year }
+        },
+        update: {
+            lastValue: { increment: 1 }
+        },
+        create: {
+            tenantId,
+            prefix,
+            year,
+            lastValue: 1
+        }
     })
 
-    let sequence = 1
-    if (lastOrder?.receiptNumber) {
-        const parts = lastOrder.receiptNumber.split("/")
-        if (parts.length === 2) {
-            const lastSeq = parseInt(parts[1])
-            if (!isNaN(lastSeq)) sequence = lastSeq + 1
-        }
-    }
-
-    return `${pattern}${sequence.toString().padStart(4, "0")}`
+    return `${prefix}-${year}/${counter.lastValue.toString().padStart(4, "0")}`
 }
 
 // Status transitions that affect stock
