@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
+import { logAudit } from "./audit-log"
 
 // Helper: generate receipt number
 export async function generateReceiptNumber(type: string, tenantId: string) {
@@ -146,6 +147,7 @@ export const createSalesOrder = async (data: {
         })
 
         revalidatePath("/(dashboard)/sales")
+        logAudit({ action: "CREATE", entity: "SALES_ORDER", entityId: salesOrder.id, description: `${data.type} créé: ${receiptNumber} — ${data.total} DA`, after: { receiptNumber, type: data.type, total: data.total } }).catch(() => null)
         return { success: true, id: salesOrder.id }
     } catch (error) {
         console.error("[CREATE_SALES_ORDER]", error)
@@ -419,6 +421,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
         })
 
         revalidatePath("/(dashboard)/sales")
+        logAudit({ action: "UPDATE", entity: "SALES_ORDER", entityId: id, description: `Statut ${salesOrder.receiptNumber || id}: ${prevStatus} → ${newStatus}`, before: { status: prevStatus }, after: { status: newStatus } }).catch(() => null)
         return { success: true, id }
     } catch (error) {
         console.error("[UPDATE_SALES_ORDER_STATUS]", error)

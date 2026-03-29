@@ -7,6 +7,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import { withCache, invalidateCache } from "@/lib/redis"
+import { logAudit } from "./audit-log"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
@@ -77,6 +78,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
         await invalidateCache(`products:${tenantId}`)
+        logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
         return { success: "Product created!" }
     } catch (error) {
         console.error("Error creating product:", error)
@@ -206,6 +208,7 @@ export const deleteProduct = async (id: string) => {
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
         await invalidateCache(`products:${tenantId}`)
+        logAudit({ action: "DELETE", entity: "PRODUCT", entityId: id, description: `Produit supprimé (ID: ${id})` }).catch(() => null)
         return { success: "Product deleted!" }
     } catch {
         return { error: "Failed to delete product!" }
@@ -288,6 +291,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
         await invalidateCache(`products:${tenantId}`)
+        logAudit({ action: "UPDATE", entity: "PRODUCT", entityId: id, description: `Produit mis à jour: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
         return { success: "Product updated!" }
     } catch (error) {
         console.error("PRISMA ERROR in updateProduct:", error)

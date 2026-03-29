@@ -84,6 +84,7 @@ model Tenant {
   reservations       Reservation[]
   deliveryShipments  DeliveryShipment[]
   sequenceCounters   SequenceCounter[]
+  auditLogs          AuditLog[]
 }
 
 model Store {
@@ -716,4 +717,26 @@ model SequenceCounter {
 
   @@unique([tenantId, prefix, year])
   @@index([tenantId])
+}
+
+// Audit trail for DGI compliance and security
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId      String?  // Who performed the action
+  userName    String?  // Snapshot of user's name at the time
+  action      String   // CREATE, UPDATE, DELETE, VOID, LOGIN, EXPORT, PRINT
+  entity      String   // ORDER, PRODUCT, CUSTOMER, SETTINGS, USER, SALES_ORDER
+  entityId    String?  // ID of the affected record
+  description String?  // Human-readable description
+  before      String?  // JSON snapshot of before state
+  after       String?  // JSON snapshot of after state
+  ipAddress   String?  // Client IP for security audits
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, entity])
+  @@index([tenantId, createdAt])
+  @@index([userId])
 }

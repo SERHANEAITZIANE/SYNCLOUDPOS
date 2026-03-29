@@ -7,6 +7,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { generateReceiptNumber } from "./sales-orders"
 import { checkSubscription } from "@/lib/subscription"
+import { logAudit } from "./audit-log"
 
 export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const session = await auth()
@@ -336,9 +337,18 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         })
 
         revalidatePath("/[locale]/(dashboard)/orders", "page")
-        revalidatePath("/[locale]/(dashboard)/products", "page") // Update stock in product list
-        revalidatePath("/[locale]/(dashboard)/treasury", "page") // Update treasury balances
-        revalidatePath("/[locale]/(dashboard)/sales", "page") // Update sales records
+        revalidatePath("/[locale]/(dashboard)/products", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/sales", "page")
+
+        // Fire-and-forget audit log
+        logAudit({
+            action: "CREATE",
+            entity: "ORDER",
+            entityId: order.order.id,
+            description: `Vente ${receiptNumber} — ${total} DA (${items.length} articles, ${paymentMethod})`,
+            after: { receiptNumber, total, paymentMethod, items: items.length }
+        }).catch(() => null)
 
         return {
             success: "Commande créée avec succès!",
@@ -347,8 +357,23 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             previousBalance: order.previousBalance,
             newBalance: order.newBalance
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating order:", error)
-        return { error: "Something went wrong!" }
+
+        // Prisma-specific errors for better diagnostics
+        if (error?.code === "P2002") {
+            return { error: "Conflit: Un numéro de reçu en doublon a été détecté. Veuillez réessayer." }
+        }
+        if (error?.code === "P2025") {
+            return { error: "Produit ou client introuvable. Il a peut-être été supprimé." }
+        }
+        if (error?.message?.includes("Stock insuffisant")) {
+            return { error: error.message }
+        }
+        if (error?.message?.includes("timeout") || error?.message?.includes("connect")) {
+            return { error: "Erreur de connexion à la base de données. Veuillez réessayer." }
+        }
+
+        return { error: "Erreur lors de la création de la commande. Veuillez réessayer." }
     }
 }

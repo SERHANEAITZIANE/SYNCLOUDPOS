@@ -3,225 +3,223 @@
 ┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 118  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 348  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 276  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 278  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 344  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 2160993  │ 0      │ 141… │ launching │ 0%       │ 0b       │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 2160940  │ 0s     │ 141… │ online    │ 100%     │ 41.9mb   │ root     │ disabled │
 │ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
 └────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 
 --- Executing: pm2 logs syncloudpos --lines 100 --nostream ---
 [TAILING] Tailing last 100 lines for [syncloudpos] process (change the value with --lines option)
 /var/log/pm2/syncloudpos-out.log last 100 lines:
-2|syncloud | 2026-03-07 05:36:55: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:55: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:55: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:55: 
-2|syncloud | 2026-03-07 05:36:55: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:55: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:55: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:55: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:55: 
-2|syncloud | 2026-03-07 05:36:55: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:56: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:56: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:56: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:56: 
-2|syncloud | 2026-03-07 05:36:56: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:56: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:56: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:56: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:56: 
-2|syncloud | 2026-03-07 05:36:56: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:57: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:57: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:57: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:57: 
-2|syncloud | 2026-03-07 05:36:57: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:58: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:58: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:58: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:58: 
-2|syncloud | 2026-03-07 05:36:58: ✓ Starting...
-2|syncloud | 2026-03-07 05:36:59: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:36:59: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:36:59: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:36:59: 
-2|syncloud | 2026-03-07 05:36:59: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:00: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:00: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:00: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:00: 
-2|syncloud | 2026-03-07 05:37:00: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:00: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:00: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:00: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:00: 
-2|syncloud | 2026-03-07 05:37:00: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:01: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:01: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:01: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:01: 
-2|syncloud | 2026-03-07 05:37:01: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:02: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:02: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:02: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:02: 
-2|syncloud | 2026-03-07 05:37:02: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:02: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:02: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:02: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:02: 
-2|syncloud | 2026-03-07 05:37:02: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:03: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:03: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:03: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:03: 
-2|syncloud | 2026-03-07 05:37:03: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:04: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:04: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:04: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:04: 
-2|syncloud | 2026-03-07 05:37:04: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:05: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:05: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:05: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:05: 
-2|syncloud | 2026-03-07 05:37:05: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:05: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:05: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:05: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:05: 
-2|syncloud | 2026-03-07 05:37:05: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:06: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:06: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:06: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:06: 
-2|syncloud | 2026-03-07 05:37:06: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:07: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:07: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:07: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:07: 
-2|syncloud | 2026-03-07 05:37:07: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:08: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:08: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:08: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:08: 
-2|syncloud | 2026-03-07 05:37:08: ✓ Starting...
-2|syncloud | 2026-03-07 05:37:09: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-07 05:37:09: - Local:         http://localhost:3000
-2|syncloud | 2026-03-07 05:37:09: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-07 05:37:09: 
-2|syncloud | 2026-03-07 05:37:09: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:38: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:39: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:39: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:39: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:39: 
+2|syncloud | 2026-03-28 20:50:39: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:39: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:40: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:40: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:40: 
+2|syncloud | 2026-03-28 20:50:40: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:43: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:43: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:43: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:43: 
+2|syncloud | 2026-03-28 20:50:43: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:43: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:43: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:43: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:43: 
+2|syncloud | 2026-03-28 20:50:43: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:44: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:44: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:44: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:44: 
+2|syncloud | 2026-03-28 20:50:44: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:48: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:48: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:48: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:48: 
+2|syncloud | 2026-03-28 20:50:48: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:49: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:49: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:49: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:49: 
+2|syncloud | 2026-03-28 20:50:49: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:50: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:50: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:50: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:50: 
+2|syncloud | 2026-03-28 20:50:50: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:53: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:53: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:53: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:53: 
+2|syncloud | 2026-03-28 20:50:53: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:56: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:56: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:56: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:56: 
+2|syncloud | 2026-03-28 20:50:56: ✓ Starting...
+2|syncloud | 2026-03-28 20:50:56: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:50:56: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:50:56: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:50:56: 
+2|syncloud | 2026-03-28 20:50:56: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:01: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:01: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:01: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:01: 
+2|syncloud | 2026-03-28 20:51:01: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:02: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:02: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:02: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:02: 
+2|syncloud | 2026-03-28 20:51:02: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:03: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:03: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:03: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:03: 
+2|syncloud | 2026-03-28 20:51:03: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:04: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:04: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:04: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:04: 
+2|syncloud | 2026-03-28 20:51:04: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:06: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:06: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:06: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:06: 
+2|syncloud | 2026-03-28 20:51:06: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:08: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:08: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:08: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:08: 
+2|syncloud | 2026-03-28 20:51:08: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:13: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:13: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:13: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:13: 
+2|syncloud | 2026-03-28 20:51:13: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:15: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-28 20:51:15: - Local:         http://localhost:3000
+2|syncloud | 2026-03-28 20:51:15: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-28 20:51:15: 
+2|syncloud | 2026-03-28 20:51:15: ✓ Starting...
+2|syncloud | 2026-03-28 20:51:15: 
+2|syncloud | 2026-03-28 20:51:15: Installing devDependencies (npm):
+2|syncloud | 2026-03-28 20:51:15: - typescript
+2|syncloud | 2026-03-28 20:51:15: 
 
 /var/log/pm2/syncloudpos-error.log last 100 lines:
-2|syncloud | 2026-03-07 05:36:31: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:31: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:34: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:35: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:49:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:36: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:49:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:36: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:36: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:01: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:37: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:05: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:38: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:40: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:41: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:08: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:42: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:11: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:42: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:13: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:42: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:15: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:43: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:16: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:44: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:19: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:45: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:20: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:46: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:23: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:47: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:24: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:47: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:25: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:48: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:29: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:48: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:32: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:49: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:32: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:50: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:37: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:51: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:39: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:52: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:39: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:52: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:40: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:41: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:53: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:41: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:45: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:56: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:49: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:56: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:49: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:58: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:36:58: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:50:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:01: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:51:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:02: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:51:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:02: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:51:07: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:03: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:51:09: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:04: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-28 20:51:11: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:05: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:05: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:07: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:07: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:09: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-07 05:37:09: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
+2|syncloud | 2026-03-28 20:51:14: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
+2|syncloud | You have triggered an unhandledRejection, you may have forgotten to catch a Promise rejection:
+2|syncloud | Error: Cannot find module '/var/www/syncloudpos/node_modules/react/index.js'
+2|syncloud |     at createEsmNotFoundErr (node:internal/modules/cjs/loader:1244:15)
+2|syncloud |     at finalizeEsmResolution (node:internal/modules/cjs/loader:1232:15)
+2|syncloud |     at resolveExports (node:internal/modules/cjs/loader:638:14)
+2|syncloud |     at Module._findPath (node:internal/modules/cjs/loader:711:31)
+2|syncloud |     at Module._resolveFilename (node:internal/modules/cjs/loader:1193:27)
+2|syncloud |     at /var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:57:36
+2|syncloud |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
+2|syncloud |     at mod.require (/var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:68:28)
+2|syncloud |     at require (node:internal/modules/helpers:182:18)
+2|syncloud |     at Object.<anonymous> (/var/www/syncloudpos/node_modules/next/dist/server/app-render/dynamic-rendering.js:147:55)
+2|syncloud | 2026-03-28 20:51:15: ⚠ Installing TypeScript as it was not found while loading "next.config.ts".
+2|syncloud | 2026-03-28 20:51:15: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
 
 
 --- Executing: journalctl -u nginx --no-pager -n 50 ---
-Feb 26 01:30:34 vmi3085016 systemd[1]: nginx.service: Failed with result 'exit-code'.
-Feb 26 01:30:34 vmi3085016 systemd[1]: Failed to start A high performance web server and a reverse proxy server.
 Feb 26 01:32:18 vmi3085016 systemd[1]: Starting A high performance web server and a reverse proxy server...
 Feb 26 01:32:18 vmi3085016 nginx[4919]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Unknown error)
 Feb 26 01:32:18 vmi3085016 nginx[4919]: nginx: [emerg] bind() to [::]:80 failed (98: Unknown error)
@@ -274,3 +272,5 @@ Mar 05 03:25:19 vmi3085016 systemd[1]: Reloading A high performance web server a
 Mar 05 03:25:19 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.
 Mar 07 03:34:13 vmi3085016 systemd[1]: Reloading A high performance web server and a reverse proxy server...
 Mar 07 03:34:13 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.
+Mar 28 20:31:51 vmi3085016 systemd[1]: Reloading A high performance web server and a reverse proxy server...
+Mar 28 20:31:51 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.

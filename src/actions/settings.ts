@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { getActiveTenantId } from "./get-active-tenant"
 import { revalidatePath } from "next/cache"
+import { logAudit } from "./audit-log"
 
 export async function updateTenantSettings(data: {
     name: string; ownerName?: string; activity?: string; address?: string;
@@ -50,6 +51,8 @@ export async function updateTenantSettings(data: {
         revalidatePath("/dashboard")
         revalidatePath("/settings")
 
+        logAudit({ action: "SETTINGS_CHANGE", entity: "SETTINGS", description: `Entreprise mise à jour: ${data.name}`, after: { name: data.name, nif: data.nif, rc: data.rc } }).catch(() => null)
+
         return { success: "Settings updated successfully!", tenant }
     } catch (error) {
         console.error("[SETTINGS_UPDATE_ERROR]", error);
@@ -87,6 +90,8 @@ export async function updateSystemSettings(data: {
 
         revalidatePath("/dashboard")
         revalidatePath("/settings")
+
+        logAudit({ action: "SETTINGS_CHANGE", entity: "SETTINGS", description: `Paramètres système modifiés`, after: { ...updateData } }).catch(() => null)
 
         return { success: "Paramètres système mis à jour!", tenant }
     } catch (error) {

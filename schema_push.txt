@@ -1,0 +1,7 @@
+Connected!
+Schema uploaded!
+prisma db push: generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 5.23s
+prisma generate: done
+Schema pushed! SequenceCounter table now exists.

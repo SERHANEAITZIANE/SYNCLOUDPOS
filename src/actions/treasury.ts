@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
+import { requirePermission } from "@/lib/rbac"
 
 export async function getFinancialSummary() {
     try {

@@ -24,6 +24,7 @@ import {
     BookOpen,
     Gift,
     LockKeyhole,
+    History,
     RefreshCw,
     ClipboardList,
     Repeat,
@@ -89,6 +90,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: "Étiquettes", icon: Tag, href: "/barcode-labels", color: "text-rose-400", visible: isAdmin || isSTOCK_MANAGER },
             ]
         },
         {
@@ -122,6 +124,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("company") || "Mon Entreprise", icon: Store, href: "/company", color: "text-orange-400", visible: isAdmin },
                 { label: t("users") || "Utilisateurs", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
                 { label: t("systemSettings") || t("settings") || "Paramètres", icon: Settings, href: "/settings", color: "text-gray-400", visible: isAdmin },
+                { label: "Journal d'Audit", icon: History, href: "/audit-log", color: "text-violet-400", visible: isAdmin },
                 { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isCASHIER },
                 { label: t("superAdmin") || "Super Admin", icon: ShieldCheck, href: "/superadmin", color: "text-emerald-400", visible: !!isSuperadmin }
             ]

@@ -7,13 +7,13 @@ import { getTreasuryAccounts } from "@/actions/treasury"
 export default async function PurchaseOrderPage({
     params
 }: {
-    params: Promise<{ purchaseId: string }>
+    params: Promise<{ id: string }>
 }) {
-    const { purchaseId } = await params;
+    const { id } = await params;
     let purchaseOrder = null
 
-    if (purchaseId !== "new") {
-        const result = await getPurchaseOrder(purchaseId)
+    if (id !== "new") {
+        const result = await getPurchaseOrder(id)
         if (result.purchaseOrder) {
             purchaseOrder = result.purchaseOrder
         }

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { logAudit } from "./audit-log"
 
 /** Get Algerian business settings for the current tenant */
 export async function getAlgerianSettings() {
@@ -47,10 +48,28 @@ export async function updateAlgerianSettings(data: {
     if (!tenantId) return { error: "Unauthorized" }
     if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) return { error: "Accès réservé aux administrateurs" }
 
+    // Get current values for audit trail
+    const before = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: {
+            ramadanMode: true, commissionRate: true, taxRegime: true,
+            ifuRate: true, tapRate: true, stampTaxEnabled: true, posTimbreEnabled: true,
+        }
+    })
+
     await db.tenant.update({
         where: { id: tenantId },
         data
     })
+
+    // Audit log (fire-and-forget)
+    logAudit({
+        action: "SETTINGS_CHANGE",
+        entity: "SETTINGS",
+        description: `Paramètres fiscaux modifiés par ${session.user?.name || "Admin"}`,
+        before,
+        after: data,
+    }).catch(() => null)
 
     revalidatePath("/[locale]/(dashboard)/settings", "page")
     return { success: true }

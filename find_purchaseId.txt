@@ -1,0 +1,1 @@
+﻿c:\Users\tre\Documents\SYNCLOUDPOS\src\app\[locale]\(dashboard)\purchases\[purchaseId]

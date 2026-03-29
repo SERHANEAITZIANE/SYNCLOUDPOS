@@ -1,0 +1,3 @@
+﻿c:\Users\tre\Documents\SYNCLOUDPOS\src\auth.ts
+c:\Users\tre\Documents\SYNCLOUDPOS\src\app\api\auth
+c:\Users\tre\Documents\SYNCLOUDPOS\src\components\auth
