@@ -102,6 +102,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
                 { label: "Réservations", icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER },
                 { label: "Livraison", icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER },
+                { label: "Suivi Livreurs", icon: Truck, href: "/driver-tracking", color: "text-green-400", visible: isAdmin },
             ]
         },
         {

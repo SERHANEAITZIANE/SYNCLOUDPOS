@@ -85,6 +85,12 @@ model Tenant {
   deliveryShipments  DeliveryShipment[]
   sequenceCounters   SequenceCounter[]
   auditLogs          AuditLog[]
+  // Tournée mobile
+  deliveryTours      DeliveryTour[]
+  truckLoads         TruckLoad[]
+  productReturns     ProductReturn[]
+  driverLocations    DriverLocation[]
+  mobileTokens       MobileRefreshToken[]
 }
 
 model Store {
@@ -220,6 +226,12 @@ model User {
   tenantUsers TenantUser[]
   spoilages   Spoilage[]
   stockMovements StockMovement[]
+  // Tournée mobile
+  deliveryTours    DeliveryTour[]
+  truckLoads       TruckLoad[]
+  productReturns   ProductReturn[]
+  driverLocations  DriverLocation[]
+  mobileTokens     MobileRefreshToken[]
 
   @@index([tenantId])
   @@index([email])
@@ -269,6 +281,9 @@ model Product {
   stockMovements StockMovement[]
   recurringItems RecurringInvoiceItem[]
   reservations   Reservation[]
+  // Tournée mobile
+  truckLoadItems TruckLoadItem[]
+  productReturns ProductReturn[]
 
   @@index([tenantId])
   @@index([tenantId, isArchived])
@@ -339,6 +354,9 @@ model Customer {
   recurringInvoices RecurringInvoice[]
   clientType String @default("RETAIL")
   reservations Reservation[]
+  // Tournée mobile
+  tourStops      TourStop[]
+  productReturns ProductReturn[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -739,4 +757,167 @@ model AuditLog {
   @@index([tenantId, entity])
   @@index([tenantId, createdAt])
   @@index([userId])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SYNCLOUD TOURNÉE — Mobile Delivery Tour System
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// JWT refresh tokens for mobile app authentication
+model MobileRefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deviceName  String?  // "Samsung Galaxy A54", "Pixel 7"
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+// A daily delivery tour assigned to a driver
+model DeliveryTour {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  driverId    String
+  driver      User     @relation(fields: [driverId], references: [id])
+  name        String?  // "Tournée Alger Centre", "Route Sud"
+  date        DateTime @default(now()) // Tour date
+  status      String   @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
+  startedAt   DateTime?
+  completedAt DateTime?
+  totalKm     Float    @default(0)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stops       TourStop[]
+  truckLoad   TruckLoad?
+
+  @@index([tenantId])
+  @@index([tenantId, driverId])
+  @@index([tenantId, date])
+  @@index([tenantId, status])
+}
+
+// A stop on a delivery tour (one per client)
+model TourStop {
+  id              String   @id @default(uuid())
+  tourId          String
+  tour            DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  sortOrder       Int      @default(0)  // Order in the optimized route
+  status          String   @default("PENDING") // PENDING, EN_ROUTE, DELIVERED, ABSENT, SKIPPED, PARTIAL
+  latitude        Float?   // Client GPS coordinates
+  longitude       Float?
+  arrivedAt       DateTime?
+  completedAt     DateTime?
+  signatureUrl    String?  // URL to signature image
+  photoUrl        String?  // Proof of delivery photo
+  notes           String?
+  // Linked documents created at this stop
+  salesOrderId    String?  // BL created
+  paymentAmount   Float    @default(0)  // Payment collected
+  paymentMethod   String?  // CASH, CHECK, TRANSFER
+  returnAmount    Float    @default(0)  // Value of returns
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tourId])
+  @@index([customerId])
+  @@index([tourId, sortOrder])
+}
+
+// Truck load for a delivery tour (what's in the truck)
+model TruckLoad {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tourId      String   @unique
+  tour        DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  driverId    String
+  driver      User     @relation(fields: [driverId], references: [id])
+  status      String   @default("LOADING") // LOADING, LOADED, IN_TRANSIT, RETURNED
+  loadedAt    DateTime?
+  returnedAt  DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       TruckLoadItem[]
+
+  @@index([tenantId])
+  @@index([tourId])
+}
+
+// Individual product in the truck
+model TruckLoadItem {
+  id            String    @id @default(uuid())
+  truckLoadId   String
+  truckLoad     TruckLoad @relation(fields: [truckLoadId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product   @relation(fields: [productId], references: [id])
+  qtyLoaded     Int       // Quantity loaded at departure
+  qtySold       Int       @default(0) // Quantity sold during tour
+  qtyReturned   Int       @default(0) // Quantity returned by clients
+  qtyRemaining  Int       @default(0) // Quantity remaining at end of tour
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([truckLoadId])
+  @@index([productId])
+}
+
+// Product returns from clients during delivery
+model ProductReturn {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tourStopId  String?  // Link to the stop where return happened
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  driverId    String
+  driver      User     @relation(fields: [driverId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  unitPrice   Float    @default(0)
+  totalAmount Float    @default(0)
+  reason      String   // EXPIRED, DAMAGED, REFUSED, ERROR, OTHER
+  photoUrl    String?  // Photo of damaged/returned goods
+  notes       String?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, RESTOCKED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([tenantId, createdAt])
+}
+
+// Real-time GPS location of delivery drivers
+model DriverLocation {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  driverId    String
+  driver      User     @relation(fields: [driverId], references: [id])
+  latitude    Float
+  longitude   Float
+  speed       Float?   // km/h
+  heading     Float?   // Compass direction 0-360
+  accuracy    Float?   // GPS accuracy in meters
+  source      String   @default("PHONE") // PHONE, TRACKER (GPS tracker in truck)
+  tourId      String?  // Active tour if any
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, driverId])
+  @@index([tenantId, createdAt])
+  @@index([driverId, createdAt])
 }
