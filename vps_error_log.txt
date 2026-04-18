@@ -1,0 +1,100 @@
+  - /var/www/syncloudpos/node_modules/next/dist/bin/next
+      at Context.loadChunkAsync [as l] (.next/server/chunks/ssr/[turbopack]_runtime.js:678:34) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      '/var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js',
+      '/var/www/syncloudpos/.next/server/app/[locale]/(auth)/error/page.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/require.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/load-components.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/utils.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/options.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/index.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/next-config-ts/transpile-config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/cli/next-test.js',
+      '/var/www/syncloudpos/node_modules/next/dist/bin/next'
+    ]
+  }
+}
+You have triggered an unhandledRejection, you may have forgotten to catch a Promise rejection:
+ChunkLoadError: Failed to load chunk server/chunks/ssr/node_modules_next_dist_esm_eedfc1fd._.js from module 720741
+    at Context.loadChunkAsync [as l] (/var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js:683:27)
+    at Object.loadChunk (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:17666)
+    at globalThis.__next_chunk_load__ (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:18204)
+    at d (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:150326)
+    at em (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:171956)
+    at /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:174721
+    at eg (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:174748)
+    at t (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:2:175602)
+2026-03-30 03:33:42: Error [ChunkLoadError]: Failed to load chunk server/chunks/ssr/node_modules_next_dist_esm_eedfc1fd._.js from module 720741
+    at Context.loadChunkAsync [as l] (.next/server/chunks/ssr/[turbopack]_runtime.js:683:27) {
+  [cause]: Error: Cannot find module '/var/www/syncloudpos/.next/server/chunks/ssr/node_modules_next_dist_esm_eedfc1fd._.js'
+  Require stack:
+  - /var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js
+  - /var/www/syncloudpos/.next/server/app/[locale]/(auth)/error/page.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/require.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/load-components.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/utils.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/swc/options.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/swc/index.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/next-config-ts/transpile-config.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/config.js
+  - /var/www/syncloudpos/node_modules/next/dist/cli/next-test.js
+  - /var/www/syncloudpos/node_modules/next/dist/bin/next
+      at Context.loadChunkAsync [as l] (.next/server/chunks/ssr/[turbopack]_runtime.js:678:34) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      '/var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js',
+      '/var/www/syncloudpos/.next/server/app/[locale]/(auth)/error/page.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/require.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/load-components.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/utils.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/options.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/index.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/next-config-ts/transpile-config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/cli/next-test.js',
+      '/var/www/syncloudpos/node_modules/next/dist/bin/next'
+    ]
+  }
+}
+2026-03-30 03:33:42: ⨯ unhandledRejection:  Error [ChunkLoadError]: Failed to load chunk server/chunks/ssr/node_modules_next_dist_esm_eedfc1fd._.js from module 720741
+    at Context.loadChunkAsync [as l] (.next/server/chunks/ssr/[turbopack]_runtime.js:683:27) {
+  [cause]: Error: Cannot find module '/var/www/syncloudpos/.next/server/chunks/ssr/node_modules_next_dist_esm_eedfc1fd._.js'
+  Require stack:
+  - /var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js
+  - /var/www/syncloudpos/.next/server/app/[locale]/(auth)/error/page.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/require.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/load-components.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/utils.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/swc/options.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/swc/index.js
+  - /var/www/syncloudpos/node_modules/next/dist/build/next-config-ts/transpile-config.js
+  - /var/www/syncloudpos/node_modules/next/dist/server/config.js
+  - /var/www/syncloudpos/node_modules/next/dist/cli/next-test.js
+  - /var/www/syncloudpos/node_modules/next/dist/bin/next
+      at Context.loadChunkAsync [as l] (.next/server/chunks/ssr/[turbopack]_runtime.js:678:34) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      '/var/www/syncloudpos/.next/server/chunks/ssr/[turbopack]_runtime.js',
+      '/var/www/syncloudpos/.next/server/app/[locale]/(auth)/error/page.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/require.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/load-components.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/utils.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/options.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/swc/index.js',
+      '/var/www/syncloudpos/node_modules/next/dist/build/next-config-ts/transpile-config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/server/config.js',
+      '/var/www/syncloudpos/node_modules/next/dist/cli/next-test.js',
+      '/var/www/syncloudpos/node_modules/next/dist/bin/next'
+    ]
+  }
+}
+2026-03-30 03:33:42: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-30 03:36:30: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-30 03:36:31: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-30 03:36:31: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-30 03:36:32: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-30 03:36:33: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-30 03:36:33: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.

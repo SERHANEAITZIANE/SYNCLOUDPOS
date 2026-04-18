@@ -1,0 +1,651 @@
+"use client"
+
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+
+// ─── Shared Types ───────────────────────────────────────────────────────────────
+export interface PrintableItem {
+    product?: { name: string }
+    quantity: number
+    unitPrice: number
+    tvaRate?: number
+    priceHt?: number
+}
+
+export interface PrintableCustomer {
+    name: string
+    address?: string
+    phone?: string
+    email?: string
+    taxId?: string
+    nif?: string
+    nis?: string
+    artImposition?: string
+    rc?: string
+    rib?: string
+    balance?: number
+}
+
+export interface PrintableStore {
+    name?: string
+    activity?: string
+    address?: string
+    phone?: string
+    fax?: string
+    email?: string
+    nif?: string
+    rc?: string
+    nis?: string
+    artImposition?: string
+    bankAccount?: string
+    logo?: string
+    headerText?: string
+}
+
+export interface PrintTemplateProps {
+    items: PrintableItem[]
+    customer?: PrintableCustomer | null
+    store?: PrintableStore | null
+    receiptNumber?: string
+    date?: Date
+    subtotalHT: number
+    totalTVA: number
+    stampTax: number
+    totalTTC: number
+    paymentMethod?: string
+    previousBalance?: number
+    paymentAmount?: number
+    newBalance?: number
+    documentId?: string
+}
+
+// ─── Utility: Number to French Words ─────────────────────────────────────────
+const numberToFrenchWords = (num: number): string => {
+    if (num === 0) return "zéro"
+    const ones = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"]
+    const tens = ["", "dix", "vingt", "trente", "quarante", "cinquante", "soixante", "soixante-dix", "quatre-vingt", "quatre-vingt-dix"]
+    function convertGroup(n: number): string {
+        let str = ""
+        const c = Math.floor(n / 100)
+        const r = n % 100
+        if (c > 0) {
+            if (c === 1) str += "cent "
+            else str += ones[c] + " cent" + (r === 0 ? "s " : " ")
+        }
+        if (r > 0) {
+            if (r < 20) str += ones[r] + " "
+            else {
+                const d = Math.floor(r / 10)
+                const u = r % 10
+                if (d === 7 || d === 9) {
+                    str += tens[d - 1] + (u === 1 && d === 7 ? " et " : "-") + ones[10 + u] + " "
+                } else {
+                    str += tens[d] + (u === 1 ? " et un" : (u > 0 ? "-" + ones[u] : (d === 8 ? "s" : ""))) + " "
+                }
+            }
+        }
+        return str.trim()
+    }
+    let result = ""
+    let n = Math.floor(num)
+    if (n >= 1000000000) {
+        const b = Math.floor(n / 1000000000)
+        result += (b === 1 ? "un milliard " : convertGroup(b) + " milliards ")
+        n %= 1000000000
+    }
+    if (n >= 1000000) {
+        const m = Math.floor(n / 1000000)
+        result += (m === 1 ? "un million " : convertGroup(m) + " millions ")
+        n %= 1000000
+    }
+    if (n >= 1000) {
+        const k = Math.floor(n / 1000)
+        result += (k === 1 ? "mille " : convertGroup(k) + " mille ")
+        n %= 1000
+    }
+    if (n > 0 || result === "") {
+        result += convertGroup(n)
+    }
+    // Handle centimes
+    const centimes = Math.round((num - Math.floor(num)) * 100)
+    if (centimes > 0) {
+        result = result.trim() + " dinars et " + convertGroup(centimes) + " centimes"
+    } else {
+        result = result.trim() + " dinars"
+    }
+    return result.charAt(0).toUpperCase() + result.slice(1)
+}
+
+const formatNumber = (n: number) =>
+    new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+
+// ─── Company Header Block (shared between templates) ────────────────────────
+const CompanyHeaderBlock = ({ store }: { store?: PrintableStore | null }) => (
+    <div className="print-company-info">
+        {store?.logo ? (
+            <img src={store.logo} alt="Logo" className="print-logo" />
+        ) : (
+            <div className="print-logo-placeholder">
+                {store?.name?.substring(0, 2).toUpperCase() || "SC"}
+            </div>
+        )}
+        <div>
+            <div className="print-company-name">{store?.name || "VOTRE SOCIÉTÉ"}</div>
+            {store?.activity && <div className="print-company-activity">{store.activity}</div>}
+        </div>
+    </div>
+)
+
+// ─── Company Fiscal Details (right side) ─────────────────────────────────────
+const CompanyFiscalBlock = ({ store }: { store?: PrintableStore | null }) => (
+    <div className="print-fiscal-grid">
+        {store?.address && <div className="print-fiscal-row"><span className="print-fiscal-label">Adresse</span><span className="print-fiscal-value">{store.address}</span></div>}
+        {store?.phone && <div className="print-fiscal-row"><span className="print-fiscal-label">Tél</span><span className="print-fiscal-value">{store.phone}</span></div>}
+        {store?.fax && <div className="print-fiscal-row"><span className="print-fiscal-label">Fax</span><span className="print-fiscal-value">{store.fax}</span></div>}
+        {store?.email && <div className="print-fiscal-row"><span className="print-fiscal-label">Email</span><span className="print-fiscal-value">{store.email}</span></div>}
+        {store?.nif && <div className="print-fiscal-row"><span className="print-fiscal-label">NIF</span><span className="print-fiscal-value">{store.nif}</span></div>}
+        {store?.rc && <div className="print-fiscal-row"><span className="print-fiscal-label">RC</span><span className="print-fiscal-value">{store.rc}</span></div>}
+        {store?.nis && <div className="print-fiscal-row"><span className="print-fiscal-label">NIS</span><span className="print-fiscal-value">{store.nis}</span></div>}
+        {store?.artImposition && <div className="print-fiscal-row"><span className="print-fiscal-label">Art. Imp</span><span className="print-fiscal-value">{store.artImposition}</span></div>}
+        {store?.bankAccount && <div className="print-fiscal-row"><span className="print-fiscal-label">RIB</span><span className="print-fiscal-value">{store.bankAccount}</span></div>}
+    </div>
+)
+
+// ─── Customer Block ──────────────────────────────────────────────────────────
+const CustomerBlock = ({ customer, label = "Client" }: { customer?: PrintableCustomer | null, label?: string }) => (
+    <div className="print-customer-box">
+        <div className="print-customer-label">{label}</div>
+        <div className="print-customer-name">{customer?.name || "Client Standard"}</div>
+        {customer?.address && <div className="print-customer-detail">{customer.address}</div>}
+        {customer?.phone && <div className="print-customer-detail">Tél: {customer.phone}</div>}
+        <div className="print-customer-fiscal">
+            {(customer?.nif || customer?.taxId) && <span>NIF: {customer.nif || customer.taxId}</span>}
+            {customer?.rc && <span>RC: {customer.rc}</span>}
+            {customer?.nis && <span>NIS: {customer.nis}</span>}
+            {customer?.artImposition && <span>Art: {customer.artImposition}</span>}
+            {customer?.rib && <span>RIB: {customer.rib}</span>}
+        </div>
+    </div>
+)
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  1. FACTURE (Invoice) — Premium Modern Design
+// ═════════════════════════════════════════════════════════════════════════════
+export function InvoicePrintTemplate(props: PrintTemplateProps) {
+    const {
+        items, customer, store, receiptNumber, date = new Date(),
+        subtotalHT, totalTVA, stampTax, totalTTC, paymentMethod, documentId
+    } = props
+
+    // Group TVA by rate
+    const tvaBreakdown: Record<number, { base: number, amount: number }> = {}
+    items.forEach(item => {
+        const rate = Number(item.tvaRate || 19)
+        const ht = item.quantity * (item.priceHt || item.unitPrice / (1 + rate / 100))
+        const tva = ht * (rate / 100)
+        if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 }
+        tvaBreakdown[rate].base += ht
+        tvaBreakdown[rate].amount += tva
+    })
+
+    return (
+        <div className="print-template print-facture">
+            {/* ── Decorative Top Strip ── */}
+            <div className="print-accent-strip" />
+
+            {/* ── Header ── */}
+            <div className="print-header">
+                <CompanyHeaderBlock store={store} />
+                <div className="print-header-right">
+                    <div className="print-doc-type">FACTURE</div>
+                    <div className="print-doc-badge">
+                        N° {receiptNumber || `FA-${documentId?.slice(-6) || "000000"}`}
+                    </div>
+                    <div className="print-doc-date">
+                        {format(date, "dd MMMM yyyy", { locale: fr })}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Parties ── */}
+            <div className="print-parties">
+                <CustomerBlock customer={customer} label="Facturé à" />
+                <div className="print-store-details">
+                    <div className="print-customer-label">Nos coordonnées</div>
+                    <CompanyFiscalBlock store={store} />
+                </div>
+            </div>
+
+            {/* ── Items Table ── */}
+            <div className="print-table-wrapper">
+                <table className="print-table">
+                    <thead>
+                        <tr>
+                            <th className="print-th-num">N°</th>
+                            <th className="print-th-designation">Désignation</th>
+                            <th className="print-th-center">Qté</th>
+                            <th className="print-th-right">P.U HT (DA)</th>
+                            <th className="print-th-center">TVA %</th>
+                            <th className="print-th-right">Montant HT (DA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, i) => {
+                            const rate = Number(item.tvaRate || 19)
+                            const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const lineHT = item.quantity * ht
+                            return (
+                                <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
+                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-center">{item.quantity}</td>
+                                    <td className="print-td-right">{formatNumber(ht)}</td>
+                                    <td className="print-td-center">{rate}%</td>
+                                    <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
+                                </tr>
+                            )
+                        })}
+                        {/* Empty rows pad to fill space */}
+                        {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="print-row-empty">
+                                <td className="print-td-num">&nbsp;</td>
+                                <td className="print-td-designation">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ── TVA Breakdown + Totals ── */}
+            <div className="print-footer-section">
+                {/* TVA Breakdown */}
+                <div className="print-tva-breakdown">
+                    <div className="print-tva-title">Récapitulatif TVA</div>
+                    <table className="print-tva-table">
+                        <thead>
+                            <tr>
+                                <th>Taux</th>
+                                <th>Base HT</th>
+                                <th>Montant TVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Object.entries(tvaBreakdown).map(([rate, data]) => (
+                                <tr key={rate}>
+                                    <td>{rate}%</td>
+                                    <td>{formatNumber(data.base)}</td>
+                                    <td>{formatNumber(data.amount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {/* Amount in words */}
+                    <div className="print-amount-words">
+                        <div className="print-amount-words-label">Arrêtée la présente facture à la somme de :</div>
+                        <div className="print-amount-words-text">{numberToFrenchWords(totalTTC)}</div>
+                    </div>
+                    {paymentMethod && (
+                        <div className="print-payment-mode">
+                            Mode de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
+                        </div>
+                    )}
+                </div>
+
+                {/* Totals column */}
+                <div className="print-totals-box">
+                    <div className="print-total-row">
+                        <span>Total HT</span>
+                        <span>{formatNumber(subtotalHT)}</span>
+                    </div>
+                    <div className="print-total-row">
+                        <span>TVA</span>
+                        <span>{formatNumber(totalTVA)}</span>
+                    </div>
+                    {stampTax > 0 && (
+                        <div className="print-total-row">
+                            <span>Droit de Timbre</span>
+                            <span>{formatNumber(stampTax)}</span>
+                        </div>
+                    )}
+                    <div className="print-total-row print-total-final">
+                        <span>NET À PAYER</span>
+                        <span>{formatNumber(totalTTC)} DA</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Signatures ── */}
+            <div className="print-signatures">
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Signature du Client</div>
+                    <div className="print-signature-space" />
+                    <div className="print-signature-note">Précédé de la mention &quot;Lu et approuvé&quot;</div>
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Cachet &amp; Signature</div>
+                    <div className="print-signature-space">
+                        <div className="print-stamp-ghost">
+                            {store?.name?.substring(0, 10) || "SOCIÉTÉ"}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="print-footer-bar">
+                {store?.headerText || `${store?.name || "SYNCLOUDPOS"} — ${store?.address || ""}`}
+                {store?.phone && ` | Tél: ${store.phone}`}
+                {store?.nif && ` | NIF: ${store.nif}`}
+            </div>
+        </div>
+    )
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  2. BON DE LIVRAISON (Delivery Note) — Clean & Professional
+// ═════════════════════════════════════════════════════════════════════════════
+export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
+    const {
+        items, customer, store, receiptNumber, date = new Date(),
+        subtotalHT, totalTVA, stampTax, totalTTC,
+        previousBalance = 0, paymentAmount = 0, newBalance = 0, documentId
+    } = props
+
+    return (
+        <div className="print-template print-bl">
+            {/* ── Decorative Top Strip ── */}
+            <div className="print-accent-strip print-accent-strip-emerald" />
+
+            {/* ── Header ── */}
+            <div className="print-header">
+                <CompanyHeaderBlock store={store} />
+                <div className="print-header-right">
+                    <div className="print-doc-type print-doc-type-emerald">BON DE LIVRAISON</div>
+                    <div className="print-doc-badge print-doc-badge-emerald">
+                        N° {receiptNumber || `BL-${documentId?.slice(-6) || "000000"}`}
+                    </div>
+                    <div className="print-doc-date">
+                        {format(date, "dd MMMM yyyy", { locale: fr })}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Client Info Row ── */}
+            <div className="print-parties">
+                <CustomerBlock customer={customer} label="Livré à" />
+                <div className="print-store-details">
+                    <div className="print-customer-label">Nos coordonnées</div>
+                    <CompanyFiscalBlock store={store} />
+                </div>
+            </div>
+
+            {/* ── Items Table ── */}
+            <div className="print-table-wrapper">
+                <table className="print-table print-table-bl">
+                    <thead>
+                        <tr>
+                            <th className="print-th-num">N°</th>
+                            <th className="print-th-designation">Désignation</th>
+                            <th className="print-th-center">Qté</th>
+                            <th className="print-th-right">P.U (DA)</th>
+                            <th className="print-th-right">Montant (DA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, i) => {
+                            const lineTotal = item.quantity * Number(item.unitPrice)
+                            return (
+                                <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
+                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-center">{item.quantity}</td>
+                                    <td className="print-td-right">{formatNumber(Number(item.unitPrice))}</td>
+                                    <td className="print-td-right print-td-bold">{formatNumber(lineTotal)}</td>
+                                </tr>
+                            )
+                        })}
+                        {items.length < 10 && Array.from({ length: 10 - items.length }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="print-row-empty">
+                                <td className="print-td-num">&nbsp;</td>
+                                <td className="print-td-designation">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ── Balance + Totals ── */}
+            <div className="print-footer-section">
+                <div className="print-bl-notes">
+                    <div className="print-tva-title">Observations</div>
+                    <div className="print-bl-notes-area" />
+                </div>
+
+                <div className="print-totals-box print-totals-box-bl">
+                    <div className="print-total-row print-total-row-muted">
+                        <span>Ancien Solde</span>
+                        <span>{formatNumber(previousBalance)}</span>
+                    </div>
+                    <div className="print-total-row">
+                        <span>Total TTC</span>
+                        <span>{formatNumber(totalTTC)}</span>
+                    </div>
+                    {totalTVA > 0 && (
+                        <div className="print-total-row print-total-row-muted">
+                            <span>dont TVA</span>
+                            <span>{formatNumber(totalTVA)}</span>
+                        </div>
+                    )}
+                    {stampTax > 0 && (
+                        <div className="print-total-row print-total-row-muted">
+                            <span>dont Timbre</span>
+                            <span>{formatNumber(stampTax)}</span>
+                        </div>
+                    )}
+                    <div className="print-total-row print-total-row-muted">
+                        <span>Paiement</span>
+                        <span>{formatNumber(paymentAmount)}</span>
+                    </div>
+                    <div className="print-total-row print-total-final print-total-final-emerald">
+                        <span>NOUVEAU SOLDE</span>
+                        <span>{formatNumber(newBalance)} DA</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Signatures ── */}
+            <div className="print-signatures">
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Reçu par (Client)</div>
+                    <div className="print-signature-space" />
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Livré par</div>
+                    <div className="print-signature-space" />
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Cachet &amp; Signature</div>
+                    <div className="print-signature-space">
+                        <div className="print-stamp-ghost print-stamp-ghost-emerald">
+                            {store?.name?.substring(0, 10) || "SOCIÉTÉ"}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="print-footer-bar print-footer-bar-emerald">
+                {store?.headerText || `${store?.name || "SYNCLOUDPOS"} — ${store?.address || ""}`}
+                {store?.phone && ` | Tél: ${store.phone}`}
+            </div>
+        </div>
+    )
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  3. PROFORMA / DEVIS (Quotation) — Elegant Professional Design
+// ═════════════════════════════════════════════════════════════════════════════
+export function ProformaPrintTemplate(props: PrintTemplateProps) {
+    const {
+        items, customer, store, receiptNumber, date = new Date(),
+        subtotalHT, totalTVA, stampTax, totalTTC, paymentMethod, documentId
+    } = props
+
+    // Calculate validity (30 days from date)
+    const validityDate = new Date(date)
+    validityDate.setDate(validityDate.getDate() + 30)
+
+    return (
+        <div className="print-template print-proforma">
+            {/* ── Decorative Top Strip ── */}
+            <div className="print-accent-strip print-accent-strip-amber" />
+
+            {/* ── Watermark ── */}
+            <div className="print-watermark">PROFORMA</div>
+
+            {/* ── Header ── */}
+            <div className="print-header">
+                <CompanyHeaderBlock store={store} />
+                <div className="print-header-right">
+                    <div className="print-doc-type print-doc-type-amber">DEVIS / PROFORMA</div>
+                    <div className="print-doc-badge print-doc-badge-amber">
+                        N° {receiptNumber || `DE-${documentId?.slice(-6) || "000000"}`}
+                    </div>
+                    <div className="print-doc-date">
+                        {format(date, "dd MMMM yyyy", { locale: fr })}
+                    </div>
+                    <div className="print-doc-validity">
+                        Validité : {format(validityDate, "dd/MM/yyyy")}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Parties ── */}
+            <div className="print-parties">
+                <CustomerBlock customer={customer} label="Destinataire" />
+                <div className="print-store-details">
+                    <div className="print-customer-label">Émetteur</div>
+                    <CompanyFiscalBlock store={store} />
+                </div>
+            </div>
+
+            {/* ── Items Table ── */}
+            <div className="print-table-wrapper">
+                <table className="print-table print-table-proforma">
+                    <thead>
+                        <tr>
+                            <th className="print-th-num">N°</th>
+                            <th className="print-th-designation">Désignation</th>
+                            <th className="print-th-center">Qté</th>
+                            <th className="print-th-right">P.U HT (DA)</th>
+                            <th className="print-th-center">TVA %</th>
+                            <th className="print-th-right">Montant HT (DA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, i) => {
+                            const rate = Number(item.tvaRate || 19)
+                            const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const lineHT = item.quantity * ht
+                            return (
+                                <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
+                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-center">{item.quantity}</td>
+                                    <td className="print-td-right">{formatNumber(ht)}</td>
+                                    <td className="print-td-center">{rate}%</td>
+                                    <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
+                                </tr>
+                            )
+                        })}
+                        {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="print-row-empty">
+                                <td className="print-td-num">&nbsp;</td>
+                                <td className="print-td-designation">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-right">&nbsp;</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ── Totals + Amount in words ── */}
+            <div className="print-footer-section">
+                <div className="print-tva-breakdown">
+                    <div className="print-amount-words">
+                        <div className="print-amount-words-label">Arrêté le présent devis à la somme de :</div>
+                        <div className="print-amount-words-text">{numberToFrenchWords(totalTTC)}</div>
+                    </div>
+                    {paymentMethod && (
+                        <div className="print-payment-mode">
+                            Conditions de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
+                        </div>
+                    )}
+                    <div className="print-proforma-notice">
+                        <strong>Note :</strong> Ce document est un devis estimatif et ne constitue pas une facture.
+                        Il est valable 30 jours à compter de sa date d&apos;émission.
+                    </div>
+                </div>
+
+                <div className="print-totals-box print-totals-box-proforma">
+                    <div className="print-total-row">
+                        <span>Total HT</span>
+                        <span>{formatNumber(subtotalHT)}</span>
+                    </div>
+                    <div className="print-total-row">
+                        <span>TVA</span>
+                        <span>{formatNumber(totalTVA)}</span>
+                    </div>
+                    {stampTax > 0 && (
+                        <div className="print-total-row">
+                            <span>Droit de Timbre</span>
+                            <span>{formatNumber(stampTax)}</span>
+                        </div>
+                    )}
+                    <div className="print-total-row print-total-final print-total-final-amber">
+                        <span>TOTAL TTC</span>
+                        <span>{formatNumber(totalTTC)} DA</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Signatures ── */}
+            <div className="print-signatures">
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Bon pour accord (Client)</div>
+                    <div className="print-signature-space" />
+                    <div className="print-signature-note">Précédé de la mention &quot;Bon pour accord&quot;</div>
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Cachet &amp; Signature</div>
+                    <div className="print-signature-space">
+                        <div className="print-stamp-ghost print-stamp-ghost-amber">
+                            {store?.name?.substring(0, 10) || "SOCIÉTÉ"}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="print-footer-bar print-footer-bar-amber">
+                {store?.headerText || `${store?.name || "SYNCLOUDPOS"} — ${store?.address || ""}`}
+                {store?.phone && ` | Tél: ${store.phone}`}
+                {store?.nif && ` | NIF: ${store.nif}`}
+            </div>
+        </div>
+    )
+}

@@ -51,7 +51,7 @@ export async function withCache<T>(
         if (!redis?.isReady) return fn()
 
         const cached = await redis.get(key)
-        if (cached) return JSON.parse(cached) as T
+        if (cached) return JSON.parse(cached.toString()) as T
 
         const result = await fn()
         await redis.setEx(key, ttl, JSON.stringify(result))

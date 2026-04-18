@@ -1,0 +1,100 @@
+﻿2026-03-04 16:25:04:     at ignore-listed frames {
+2026-03-04 16:25:04:   code: 'ERR_INVALID_STATE'
+2026-03-04 16:25:04: }
+2026-03-04 16:59:26: Error: Failed to find Server Action "1". This request might be from an older or newer deployment.
+2026-03-04 16:59:26: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+2026-03-04 16:59:26:     at ignore-listed frames
+2026-03-04 19:34:55: [31m[auth][error][0m InvalidCheck: pkceCodeVerifier value could not be parsed. Read more at https://errors.authjs.dev#invalidcheck
+2026-03-04 19:34:55:     at i1 (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:24542)
+2026-03-04 19:34:55:     at Object.use (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:24950)
+2026-03-04 19:34:55:     at at (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:30950)
+2026-03-04 19:34:55:     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-03-04 19:34:55:     at async ap (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:38134)
+2026-03-04 19:34:55:     at async a$ (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:49965)
+2026-03-04 19:34:55:     at async ak (/var/www/syncloudpos/.next/server/chunks/_e87708e8._.js:404:54646)
+2026-03-04 19:34:55:     at async rW.do (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:20169)
+2026-03-04 19:34:55:     at async rW.handle (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:24949)
+2026-03-04 19:34:55:     at async d (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__3a03b152._.js:1:4783)
+2026-03-04 21:10:47: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:10:47:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:10:47:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:10:47:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:10:47:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:10:47:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:10:47:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:10:47:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:10:47:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:10:47:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:10:47:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:11:00: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:11:00:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:11:00:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:11:00:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:11:00:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:11:00:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:11:00:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:11:00:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:11:00:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:11:00:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:11:00:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:11:37: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:11:37:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:11:37:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:11:37:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:11:37:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:11:37:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:11:37:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:11:37:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:11:37:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:11:37:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:11:37:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:11:50: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:11:50:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:11:50:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:11:50:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:11:50:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:11:50:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:11:50:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:11:50:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:11:50:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:11:50:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:11:50:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:12:06: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:12:06:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:12:06:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:12:06:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:12:06:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:12:06:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:12:06:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:12:06:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:12:06:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:12:06:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:12:06:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:13:19: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:13:19:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:13:19:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:13:19:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:13:19:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:13:19:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:13:19:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:13:19:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:13:19:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:13:19:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:13:19:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 21:13:23: [31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+2026-03-04 21:13:23:     at fl (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:40971)
+2026-03-04 21:13:23:     at async fu (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:50396)
+2026-03-04 21:13:23:     at async fw (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:54646)
+2026-03-04 21:13:23:     at async fH (/var/www/syncloudpos/.next/server/chunks/ssr/_e5869d89._.js:415:59936)
+2026-03-04 21:13:23:     at async g (/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__727672b8._.js:2:531)
+2026-03-04 21:13:23:     at async rH (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:1960)
+2026-03-04 21:13:23:     at async /var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:16:642
+2026-03-04 21:13:23:     at async rU (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:14:14060)
+2026-03-04 21:13:23:     at async sT (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-page-turbo.runtime.prod.js:21:21178)
+2026-03-04 21:13:23:     at async m (/var/www/syncloudpos/.next/server/chunks/ssr/_91620fc3._.js:1:7408)
+2026-03-04 22:50:14: Error: Failed to find Server Action "1". This request might be from an older or newer deployment.
+2026-03-04 22:50:14: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+2026-03-04 22:50:14:     at ignore-listed frames
+2026-03-04 22:51:48: Error: Failed to find Server Action "1". This request might be from an older or newer deployment.
+2026-03-04 22:51:48: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action
+2026-03-04 22:51:48:     at ignore-listed frames

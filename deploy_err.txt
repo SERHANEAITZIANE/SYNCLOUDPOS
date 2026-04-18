@@ -1,0 +1,205 @@
+🚀 Connecting to VPS...
+
+📂 Creating directories...
+
+--- Running: mkdir -p '/var/www/syncloudpos/prisma' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/[locale]/(dashboard)/avaries' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/[locale]/(dashboard)/driver-tracking' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/admin/drivers' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/admin/drivers/[driverId]' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/auth' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/auth/refresh' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/clients' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/clients/[id]' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/dashboard' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/location' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/payments' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/products' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/returns' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/sales' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/tours' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/tours/[id]' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/tours/[id]/stops/[stopId]' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/app/api/mobile/truck-load' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/components/dashboard' ---
+
+Exit code: 0
+
+
+--- Running: mkdir -p '/var/www/syncloudpos/src/lib' ---
+
+Exit code: 0
+
+
+📤 Uploading files...
+  ✅ prisma/schema.prisma
+  ✅ src/lib/mobile-auth.ts
+  ✅ src/components/dashboard/sidebar.tsx
+  ✅ src/app/[locale]/(dashboard)/driver-tracking/page.tsx
+  ✅ src/lib/redis.ts
+  ✅ src/app/[locale]/(dashboard)/avaries/page.tsx
+  ✅ src/app/api/mobile/auth/route.ts
+  ✅ src/app/api/mobile/auth/refresh/route.ts
+  ✅ src/app/api/mobile/tours/route.ts
+  ✅ src/app/api/mobile/tours/[id]/route.ts
+  ✅ src/app/api/mobile/tours/[id]/stops/[stopId]/route.ts
+  ✅ src/app/api/mobile/clients/route.ts
+  ✅ src/app/api/mobile/clients/[id]/route.ts
+  ✅ src/app/api/mobile/products/route.ts
+  ✅ src/app/api/mobile/sales/route.ts
+  ✅ src/app/api/mobile/payments/route.ts
+  ✅ src/app/api/mobile/returns/route.ts
+  ✅ src/app/api/mobile/location/route.ts
+  ✅ src/app/api/mobile/truck-load/route.ts
+  ✅ src/app/api/mobile/dashboard/route.ts
+  ✅ src/app/api/mobile/admin/drivers/route.ts
+  ✅ src/app/api/mobile/admin/drivers/[driverId]/route.ts
+
+📤 Uploaded 22/22 files
+
+📦 Installing jsonwebtoken...
+
+--- Running: cd /var/www/syncloudpos && npm install jsonwebtoken uuid 2>&1 | tail -5 ---
+
+STDOUT:
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.12.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+npm notice To update run: npm install -g npm@11.12.1
+npm notice
+
+Exit code: 0
+
+
+🗄️ Pushing Prisma schema to database...
+
+--- Running: cd /var/www/syncloudpos && npx prisma@5.22.0 db push --accept-data-loss 2>&1 | tail -10 ---
+
+STDOUT:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "syncloudpos", schema "public" at "localhost:5433"
+
+🚀  Your database is now in sync with your Prisma schema. Done in 1.40s
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 5.69s
+
+
+Exit code: 0
+
+
+🔧 Generating Prisma Client...
+
+--- Running: cd /var/www/syncloudpos && npx prisma@5.22.0 generate ---
+
+STDOUT:
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 4.11s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
+
+
+Exit code: 0
+
+
+🏗️ Building Next.js App...
+
+--- Running: cd /var/www/syncloudpos && npm run build 2>&1 | tail -30 ---
+
+Traceback (most recent call last):
+  File "C:\Users\tre\Documents\SYNCLOUDPOS\deploy_mobile_api.py", line 104, in <module>
+    status = run_cmd("cd /var/www/syncloudpos && npm run build 2>&1 | tail -30")
+  File "C:\Users\tre\Documents\SYNCLOUDPOS\deploy_mobile_api.py", line 56, in run_cmd
+    exit_status = stdout.channel.recv_exit_status()
+  File "C:\Users\tre\AppData\Roaming\Python\Python313\site-packages\paramiko\channel.py", line 400, in recv_exit_status
+    self.status_event.wait()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 659, in wait
+    signaled = self._cond.wait(timeout)
+  File "C:\Python313\Lib\threading.py", line 359, in wait
+    waiter.acquire()
+    ~~~~~~~~~~~~~~^^
+KeyboardInterrupt
+^C

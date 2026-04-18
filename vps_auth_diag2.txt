@@ -1,0 +1,78 @@
+=== LOGIN PAGE HTML (first 1000 chars) ===
+
+
+=== SERVER ACTION TEST (register) ===
+https://chirpedbeo.online/register
+HTTP: 307
+
+
+=== SERVER ACTION TEST (login) ===
+https://chirpedbeo.online/login
+HTTP: 307
+
+
+=== MIDDLEWARE INTERCEPTION TEST ===
+https://chirpedbeo.online/login
+HTTP: 307
+
+https://chirpedbeo.online/register
+HTTP: 307
+
+
+=== PM2 ERRORS (after test) ===
+2026-03-31 02:41:13: [31m[auth][error][0m MissingCSRF: CSRF token was missing during an action callback. Read more at https://errors.authjs.dev#missingcsrf
+2026-03-31 02:41:13:     at t3 (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:1:80593)
+    at a_ (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:404:50388)
+    at async aw (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:404:54646)
+    at async rW.do (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:20169)
+    at async rW.handle (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:24949)
+    at async u (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:5122)
+    at async rW.handleResponse (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:1:104149)
+    at async d (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:6163)
+    at async Module.C (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:7241)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/var/www/syncloudpos/node_modules/next/dist/server/base-server.js:1442:9)
+
+
+=== PM2 OUT (after test) ===
+2026-03-31 02:39:34: - Local:         http://localhost:3000
+2026-03-31 02:39:34: - Network:       http://155.133.26.217:3000
+2026-03-31 02:39:34: 
+2026-03-31 02:39:34: ✓ Starting...
+2026-03-31 02:39:38: ✓ Ready in 7.8s
+2026-03-31 02:39:38: ✓ Ready in 7.7s
+2026-03-31 02:39:38: ✓ Ready in 6.5s
+2026-03-31 02:39:39: ✓ Ready in 9.2s
+2026-03-31 02:39:40: ✓ Ready in 8.4s
+2026-03-31 02:39:40: ✓ Ready in 9.1s
+
+
+=== MIDDLEWARE.JS CONTENT ===
+var R=require("./chunks/[turbopack]_runtime.js")("server/middleware.js")
+R.c("server/chunks/[root-of-the-server]__f06562e6._.js")
+R.c("server/chunks/[root-of-the-server]__13a35509._.js")
+R.m(489997)
+module.exports=R.m(489997).exports
+
+
+=== FULL .env (redacted passwords) ===
+# Database
+DATABASE_URL=<REDACTED>
+
+# Auth
+NEXTAUTH_URL=<REDACTED>
+NEXTAUTH_SECRET=<REDACTED>
+
+# App
+NEXT_PUBLIC_APP_URL=<REDACTED>
+AUTH_TRUST_HOST=<REDACTED>
+
+# Google OAuth (fill in your real credentials)
+GOOGLE_CLIENT_ID=<REDACTED>
+GOOGLE_CLIENT_SECRET=<REDACTED>
+
+# WhatsApp OTP - Platform credentials for sending verification codes
+WHATSAPP_TOKEN=<REDACTED>
+WHATSAPP_PHONE_ID=<REDACTED>
+REDIS_URL=<REDACTED>
+SYNCLOUDPOS_MODE=<REDACTED>
+SUPERADMIN_WHATSAPP=<REDACTED>

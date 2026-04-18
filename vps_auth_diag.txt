@@ -1,0 +1,90 @@
+=== PM2 ERROR LOG (last 50 lines) ===
+
+
+=== TEST LOGIN ENDPOINT ===
+
+HTTP_CODE: 302
+
+
+=== TEST REGISTER ENDPOINT ===
+{"error":"Unauthorized"}
+HTTP_CODE: 401
+
+
+=== LOGIN PAGE RENDER ===
+https://chirpedbeo.online/login
+HTTP_CODE: 307
+
+
+=== NEXTAUTH ENV ===
+NEXTAUTH_URL="https://chirpedbeo.online"
+NEXTAUTH_SECRET="6ac8ee01d3c6c9a9bdf0f12c5558b33d627a60361e2b9b2cb40681f38798db4a"
+AUTH_TRUST_HOST=true
+
+
+=== AUTH PROVIDERS ===
+{"google":{"id":"google","name":"Google","type":"oidc","signinUrl":"https://chirpedbeo.online/api/auth/signin/google","callbackUrl":"https://chirpedbeo.online/api/auth/callback/google"},"credentials":{"id":"credentials","name":"Credentials","type":"credentials","signinUrl":"https://chirpedbeo.online/api/auth/signin/credentials","callbackUrl":"https://chirpedbeo.online/api/auth/callback/credentials"}}
+
+=== CSRF TOKEN ===
+{"csrfToken":"26faa5a08839ac2e6a7c8674042e55ae8e9c9ae9862f11e85107e1d17fe17b0c"}
+
+=== DATABASE TEST ===
+[eval]:1
+const {PrismaClient}=require('@prisma/client');const p=new PrismaClient();p.user.count().then(c=>console.log('Users:',c)).catch(e=>console.error('DB Error:',e.message)).finally(()=>p.\())
+                                                                                                                                                                                       ^
+
+SyntaxError: Invalid or unexpected token
+    at makeContextifyScript (node:internal/vm:185:14)
+    at node:internal/process/execution:107:22
+    at [eval]-wrapper:6:24
+    at runScript (node:internal/process/execution:101:62)
+    at evalScript (node:internal/process/execution:133:3)
+    at node:internal/main/eval_string:51:3
+
+Node.js v20.20.0
+
+
+=== NEXT.JS BUILD MANIFEST CHECK ===
+total 640
+drwxr-xr-x  6 root root   4096 Mar 31 01:03 .
+drwxr-xr-x 10 root root   4096 Mar 31 01:04 ..
+drwxr-xr-x 15 root root   4096 Mar 31 01:03 app
+-rw-r--r--  1 root root   8488 Mar 31 01:03 app-paths-manifest.json
+drwxr-xr-x  3 root root  16384 Mar 31 01:03 chunks
+-rw-r--r--  1 root root    545 Mar 31 01:03 functions-config-manifest.json
+-rw-r--r--  1 root root     48 Mar 31 01:03 interception-route-rewrite-manifest.js
+drwxr-xr-x  2 root root   4096 Mar 31 01:03 middleware
+-rw-r--r--  1 root root    637 Mar 31 01:03 middleware-build-manifest.js
+-rw-r--r--  1 root root     83 Mar 31 01:03 middleware-manifest.json
+-rw-rw-r--  1 root root    234 Mar 31 01:03 middleware.js
+-rw-rw-r--  1 root root     53 Mar 31 01:03 middleware.js.map
+-rw-rw-r--  1 root root   3378 Mar 31 01:03 middleware.js.nft.json
+-rw-r--r--  1 root root   9140 Mar 31 01:03 next-font-manifest.js
+-rw-r--r--  1 root root   8636 Mar 31 01:03 next-font-manifest.json
+drwxr-xr-x  2 root root   4096 Mar 31 01:03 pages
+-rw-r--r--  1 root root     58 Mar 31 01:03 pages-manifest.json
+-rw-r--r--  1 root root 284744 Mar 31 01:03 server-reference-manifest.js
+-rw-r--r--  1 root root 260969 Mar 31 01:03 server-reference-manifest.json
+
+
+=== PM2 OUT LOG (last 20) ===
+2026-03-31 02:39:34: ▲ Next.js 16.1.6
+2026-03-31 02:39:34: - Local:         http://localhost:3000
+2026-03-31 02:39:34: - Network:       http://155.133.26.217:3000
+2026-03-31 02:39:34: 
+2026-03-31 02:39:34: ✓ Starting...
+2026-03-31 02:39:34: - Local:         http://localhost:3000
+2026-03-31 02:39:34: - Network:       http://155.133.26.217:3000
+2026-03-31 02:39:34: 
+2026-03-31 02:39:34: ✓ Starting...
+2026-03-31 02:39:34: ▲ Next.js 16.1.6
+2026-03-31 02:39:34: - Local:         http://localhost:3000
+2026-03-31 02:39:34: - Network:       http://155.133.26.217:3000
+2026-03-31 02:39:34: 
+2026-03-31 02:39:34: ✓ Starting...
+2026-03-31 02:39:38: ✓ Ready in 7.8s
+2026-03-31 02:39:38: ✓ Ready in 7.7s
+2026-03-31 02:39:38: ✓ Ready in 6.5s
+2026-03-31 02:39:39: ✓ Ready in 9.2s
+2026-03-31 02:39:40: ✓ Ready in 8.4s
+2026-03-31 02:39:40: ✓ Ready in 9.1s

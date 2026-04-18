@@ -1,0 +1,170 @@
+=== DNS RESOLUTION TEST ===
+;; communications error to 127.0.0.53#53: timed out
+;; communications error to 127.0.0.53#53: timed out
+172.67.129.222
+104.21.1.194
+
+# This is /run/systemd/resolve/stub-resolv.conf managed by man:systemd-resolved(8).
+# Do not edit.
+#
+# This file might be symlinked as /etc/resolv.conf. If you're looking at
+# /etc/resolv.conf and seeing this text, you have followed the symlink.
+#
+# This is a dynamic resolv.conf file for connecting local clients to the
+# internal DNS stub resolver of systemd-resolved. This file lists all
+# configured search domains.
+#
+# Run "resolvectl status" to see details about the uplink DNS servers
+# currently in use.
+#
+# Third party programs should typically not access this file directly, but only
+# through the symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a
+# different way, replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver 127.0.0.53
+options edns0 trust-ad
+search .
+
+
+=== GREP 'Failed to proxy' in deployed code ===
+/var/www/syncloudpos/node_modules/next/dist/server/lib/router-utils/proxy-request.js
+/var/www/syncloudpos/node_modules/next/dist/esm/server/lib/router-utils/proxy-request.js
+
+/var/www/syncloudpos/.next/server/chunks/ssr/[root-of-the-server]__1bff0c22._.js
+/var/www/syncloudpos/.next/standalone/.next/server/chunks/ssr/[root-of-the-server]__1bff0c22._.js
+/var/www/syncloudpos/.next/standalone/node_modules/next/dist/server/lib/router-utils/proxy-request.js
+/var/www/syncloudpos/.next/static/chunks/034945ea23f7a8ce.js
+
+
+
+=== PM2 ERROR LOGS (lines 200-280 from end) ===
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:46:04: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:48:10: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:48:10: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:48:10: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:52:15: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:52:15: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:52:15: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:52:27: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:52:27: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:52:27: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:53:22: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:53:22: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:53:22: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:54:10: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:54:10: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:54:10: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+2026-03-31 00:54:14: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:54:14: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 00:54:14: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
+    at ignore-listed frames
+
+
+=== TEST LOCALHOST HEALTH ===
+307
+200
+
+=== NEXTAUTH_URL / APP_URL ===
+NEXTAUTH_URL="https://chirpedbeo.online"
+NEXT_PUBLIC_APP_URL="https://chirpedbeo.online"
+
+
+=== /etc/hosts ===
+# Your system has configured 'manage_etc_hosts' as True.
+# As a result, if you wish for changes to this file to persist
+# then you will need to either
+# a.) make changes to the master file in /etc/cloud/templates/hosts.debian.tmpl
+# b.) change or remove the value of 'manage_etc_hosts' in
+#     /etc/cloud/cloud.cfg or cloud-config from user-data
+#
+127.0.1.1 vmi3085016.contaboserver.net vmi3085016
+127.0.0.1 localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1 localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+

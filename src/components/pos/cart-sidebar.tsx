@@ -189,8 +189,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         } catch (error) {
             console.error("POS Checkout Error:", error)
             // Distinguish network errors from other failures
-            if (error instanceof TypeError && error.message.includes("fetch")) {
-                toast.error("🌐 Connexion perdue. La vente sera réessayée automatiquement.", { duration: 5000 })
+            if (error instanceof TypeError && (error.message.includes("fetch") || error.message.includes("network"))) {
+                toast.error("🌐 Connexion perdue. Veuillez vérifier votre réseau et réessayer.", { duration: 5000 })
             } else {
                 toast.error(`❌ ${t("errorValidation")} — Veuillez réessayer.`, { duration: 4000 })
             }

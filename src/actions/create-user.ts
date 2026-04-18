@@ -22,6 +22,10 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Unauthorized" }
     }
 
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("users"))) return { error: "Accès refusé" }
+
     const validatedFields = CreateUserSchema.safeParse(values)
 
     if (!validatedFields.success) {

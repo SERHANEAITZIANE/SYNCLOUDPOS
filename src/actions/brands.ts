@@ -8,6 +8,10 @@ import { revalidatePath } from "next/cache"
 
 export const createBrand = async (values: z.infer<typeof BrandSchema>) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
 
     const tenantId = session?.user?.tenantId
 
@@ -64,6 +68,10 @@ export const getBrands = async () => {
 
 export const deleteBrand = async (id: string) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -87,6 +95,10 @@ export const deleteBrand = async (id: string) => {
 
 export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema>) => {
     const session = await auth()
+
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -121,6 +133,10 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
 
 export const importBrands = async (rows: { name: string }[]) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 

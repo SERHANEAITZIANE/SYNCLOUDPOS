@@ -1,0 +1,193 @@
+=== EXTERNAL LOGIN PAGE TEST ===
+Final URL: https://chirpedbeo.online/login
+HTTP: 307
+Size: 31
+
+
+=== REDIRECT CHAIN ===
+> GET /fr/login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+> GET /login HTTP/2
+< HTTP/2 307 
+< location: https://chirpedbeo.online/login
+
+
+=== LOGIN PAGE HTML SIZE ===
+0
+
+
+
+=== LOCALHOST WITH HOST HEADER ===
+HTTP: 307
+Size: 31
+
+https://chirpedbeo.online/login
+
+=== TRUNCATE ERROR LOG ===
+
+=== SIMULATED LOGIN TEST ===
+{"csrfToken":"b50d87f3d50af2b78995abfbee9c2f36c7d14207a7d4262e350669f36c2cd635"}
+
+HTTP: 302
+
+
+=== PM2 ERRORS AFTER TESTS ===
+2026-03-31 02:44:49: [31m[auth][error][0m MissingCSRF: CSRF token was missing during an action callback. Read more at https://errors.authjs.dev#missingcsrf
+2026-03-31 02:44:49:     at t3 (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:1:80593)
+    at a_ (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:404:50388)
+    at async aw (/var/www/syncloudpos/.next/server/chunks/_626b2d63._.js:404:54646)
+    at async rW.do (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:20169)
+    at async rW.handle (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:5:24949)
+    at async u (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:5122)
+    at async rW.handleResponse (/var/www/syncloudpos/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.prod.js:1:104149)
+    at async d (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:6163)
+    at async Module.C (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__8a6f9588._.js:1:7241)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/var/www/syncloudpos/node_modules/next/dist/server/base-server.js:1442:9)

@@ -1,0 +1,100 @@
+=== FIX: Update localePrefix to 'always' ===
+
+import { defineRouting } from 'next-intl/routing';
+import { createNavigation } from 'next-intl/navigation';
+
+export const routing = defineRouting({
+    // A list of all locales that are supported
+    locales: ['en', 'fr', 'ar'],
+
+    // Used when no locale matches
+    defaultLocale: 'fr',
+    localePrefix: 'always'
+});
+
+// Lightweight wrappers around Next.js' navigation APIs
+// that will consider the routing configuration
+export const { Link, redirect, usePathname, useRouter, getPathname } =
+    createNavigation(routing);
+
+
+=== Rebuilding Next.js on VPS ===
+Starting build (this may take a few minutes)...
+├ ƒ /api/license/request
+├ ƒ /api/license/status
+├ ƒ /api/mobile/admin/drivers
+├ ƒ /api/mobile/admin/drivers/[driverId]
+├ ƒ /api/mobile/auth
+├ ƒ /api/mobile/auth/refresh
+├ ƒ /api/mobile/clients
+├ ƒ /api/mobile/clients/[id]
+├ ƒ /api/mobile/dashboard
+├ ƒ /api/mobile/location
+├ ƒ /api/mobile/payments
+├ ƒ /api/mobile/products
+├ ƒ /api/mobile/returns
+├ ƒ /api/mobile/sales
+├ ƒ /api/mobile/tours
+├ ƒ /api/mobile/tours/[id]
+├ ƒ /api/mobile/tours/[id]/stops/[stopId]
+├ ƒ /api/mobile/truck-load
+├ ƒ /api/ping
+├ ƒ /api/superadmin/export-tenant
+├ ƒ /api/upload
+├ ○ /manifest.webmanifest
+└ ƒ /receipt/[id]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+
+=== Restarting PM2 ===
+[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
+[PM2] [syncloudpos](3) ✓
+[PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](5) ✓
+[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](6) ✓
+[PM2] [syncloudpos](7) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558493  │ 2s     │ 708  │ online    │ 0%       │ 55.9mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558498  │ 2s     │ 1558 │ online    │ 0%       │ 60.1mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558556  │ 1s     │ 1555 │ online    │ 0%       │ 53.4mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558571  │ 1s     │ 1625 │ online    │ 0%       │ 50.8mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558658  │ 0s     │ 224… │ online    │ 0%       │ 47.5mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558669  │ 0s     │ 225… │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== VERIFICATION ===
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558493  │ 19s    │ 708  │ online    │ 0%       │ 204.7mb  │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558498  │ 19s    │ 1558 │ online    │ 0%       │ 207.1mb  │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558556  │ 18s    │ 1555 │ online    │ 20%      │ 191.1mb  │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558571  │ 18s    │ 1625 │ online    │ 0%       │ 205.7mb  │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558658  │ 17s    │ 224… │ online    │ 120%     │ 194.1mb  │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3558669  │ 17s    │ 225… │ online    │ 0%       │ 204.0mb  │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== Login page test ===
+HTTP: 200
+Size: 72172
+
+
+=== Redirect test ===
+HTTP: 307
+Redirect: https://chirpedbeo.online/fr/login
+
+
+=== PM2 errors ===

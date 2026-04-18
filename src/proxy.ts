@@ -95,32 +95,37 @@ export default auth(async function middleware(request) {
         return intlMiddleware(request)
     }
 
-    // Static assets, _next, etc. — skip
-    if (pathname.startsWith("/_next") || pathname.startsWith("/uploads") || pathname.includes(".")) {
-        return NextResponse.next()
-    }
-
     // Protect all dashboard routes - session is injected by NextAuth wrapper
-    if (!request.auth?.user) {
-        const loginUrl = new URL("/login", request.url)
+    if (!request.auth?.user && !isPublicPath(pathname)) {
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = "/login"
         loginUrl.searchParams.set("callbackUrl", pathname)
         return NextResponse.redirect(loginUrl)
     }
 
     // Blocked tenants: only allow settings page
-    if (request.auth.user.isBlocked) {
-        if (!clean.startsWith("/settings") && !clean.startsWith("/api")) {
-            return NextResponse.redirect(new URL("/settings", request.url))
-        }
+    if (request.auth?.user?.isBlocked && !clean.startsWith("/settings")) {
+        const settingsUrl = request.nextUrl.clone()
+        settingsUrl.pathname = "/settings"
+        return NextResponse.redirect(settingsUrl)
     }
 
     // Superadmin routes: restrict to superadmins
-    if (clean.startsWith("/superadmin") && !request.auth.user.isSuperadmin) {
-        return NextResponse.redirect(new URL("/dashboard", request.url))
+    if (clean.startsWith("/superadmin") && !request.auth?.user?.isSuperadmin) {
+        const dashUrl = request.nextUrl.clone()
+        dashUrl.pathname = "/dashboard"
+        return NextResponse.redirect(dashUrl)
     }
 
-    // Add security headers to response
+    // Static assets, public uploads, _next files
+    if (pathname.startsWith("/_next") || pathname.startsWith("/uploads") || pathname.includes(".")) {
+        return NextResponse.next()
+    }
+
+    // For everything else, rely on next-intl middleware
     const response = intlMiddleware(request)
+    
+    // Add security headers
     response.headers.set("X-Content-Type-Options", "nosniff")
     response.headers.set("X-Frame-Options", "SAMEORIGIN")
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")

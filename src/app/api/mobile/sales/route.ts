@@ -86,10 +86,9 @@ export async function POST(req: NextRequest) {
             })
         );
 
-        // Calculate stamp tax
         let stampTax = 0;
         if (tenant.stampTaxEnabled && paymentMethod === "CASH") {
-            const stampRate = Number(tenant.stampTaxRate);
+            const stampRate = 1; // Assuming 1%
             stampTax = Math.ceil(subtotalTTC * stampRate / 100);
         }
 
@@ -103,7 +102,7 @@ export async function POST(req: NextRequest) {
                 type: type as any,
                 receiptNumber,
                 subtotal: totalHT,
-                taxAmount: totalTVA,
+                tvaAmount: totalTVA,
                 stampTax,
                 total: totalWithStamp,
                 paymentMethod,
@@ -166,7 +165,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             ...salesOrder,
             subtotal: Number(salesOrder.subtotal),
-            taxAmount: Number(salesOrder.taxAmount),
+            tvaAmount: Number(salesOrder.tvaAmount),
             total: Number(salesOrder.total),
             stampTax: Number(salesOrder.stampTax),
             amountPaid: Number(salesOrder.amountPaid),
@@ -214,7 +213,7 @@ export async function GET(req: NextRequest) {
             sales.map(s => ({
                 ...s,
                 subtotal: Number(s.subtotal),
-                taxAmount: Number(s.taxAmount),
+                tvaAmount: Number(s.tvaAmount),
                 total: Number(s.total),
                 stampTax: Number(s.stampTax),
                 amountPaid: Number(s.amountPaid),

@@ -41,11 +41,21 @@ export async function GET(req: NextRequest) {
                 notes: { contains: "[Mobile]" },
                 createdAt: { gte: today, lt: tomorrow },
             },
-            select: { total: true, amountPaid: true },
+            select: { total: true, amountPaid: true, paymentMethod: true },
         });
 
         const totalSales = todaySales.reduce((sum, s) => sum + Number(s.total), 0);
         const totalCollected = todaySales.reduce((sum, s) => sum + Number(s.amountPaid), 0);
+
+        let cash = 0, check = 0, transfer = 0;
+        
+        todaySales.forEach(s => {
+            const amt = Number(s.amountPaid) || 0;
+            if (s.paymentMethod === "CASH") cash += amt;
+            else if (s.paymentMethod === "CHECK") check += amt;
+            else if (s.paymentMethod === "TRANSFER") transfer += amt;
+            else cash += amt; // Default to cash
+        });
 
         // Today's returns
         const todayReturns = await db.productReturn.findMany({
@@ -73,7 +83,15 @@ export async function GET(req: NextRequest) {
         const standalonePayments = paymentLogs.reduce((sum, log) => {
             try {
                 const after = JSON.parse(log.after || "{}");
-                return sum + (after.paymentAmount || 0);
+                const pAm = Number(after.paymentAmount) || 0;
+                const pMethod = after.paymentMethod || "CASH";
+                
+                if (pMethod === "CASH") cash += pAm;
+                else if (pMethod === "CHECK") check += pAm;
+                else if (pMethod === "TRANSFER") transfer += pAm;
+                else cash += pAm;
+                
+                return sum + pAm;
             } catch { return sum; }
         }, 0);
 
@@ -100,6 +118,7 @@ export async function GET(req: NextRequest) {
                 totalCollected: totalCollected + standalonePayments,
                 totalReturns,
                 netAmount: totalSales - totalReturns,
+                byMethod: { cash, check, transfer }
             },
             distance: {
                 totalKm: Math.round(totalKm * 10) / 10,

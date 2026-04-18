@@ -1,0 +1,170 @@
+=== PM2 STATUS ===
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 706  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546519  │ 2h     │ 1555 │ online    │ 0%       │ 203.6mb  │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546617  │ 2h     │ 1552 │ online    │ 0%       │ 205.5mb  │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546501  │ 2h     │ 1622 │ online    │ 0%       │ 205.3mb  │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546535  │ 2h     │ 224… │ online    │ 0%       │ 205.5mb  │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546301  │ 2h     │ 225… │ online    │ 0%       │ 207.0mb  │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== PM2 ERROR LOGS (last 80 lines) ===
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 01:50:11: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 01:54:08: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 01:54:08: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:00:15: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:00:15: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:04:11: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:04:11: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:10:10: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:10:11: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:12:05: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:12:05: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+    at ignore-listed frames {
+  errno: -3001,
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+
+
+=== PM2 OUT LOGS (last 40 lines) ===
+2026-03-31 00:05:53: ▲ Next.js 16.1.6
+2026-03-31 00:05:53: - Local:         http://localhost:3000
+2026-03-31 00:05:53: - Network:       http://155.133.26.217:3000
+2026-03-31 00:05:53: 
+2026-03-31 00:05:54: ✓ Starting...
+2026-03-31 00:05:57: ▲ Next.js 16.1.6
+2026-03-31 00:05:57: - Local:         http://localhost:3000
+2026-03-31 00:05:57: - Network:       http://155.133.26.217:3000
+2026-03-31 00:05:57: 
+2026-03-31 00:05:57: ✓ Starting...
+2026-03-31 00:06:06: ▲ Next.js 16.1.6
+2026-03-31 00:06:06: - Local:         http://localhost:3000
+2026-03-31 00:06:06: - Network:       http://155.133.26.217:3000
+2026-03-31 00:06:06: 
+2026-03-31 00:06:06: ✓ Starting...
+2026-03-31 00:06:10: ▲ Next.js 16.1.6
+2026-03-31 00:06:10: - Local:         http://localhost:3000
+2026-03-31 00:06:10: - Network:       http://155.133.26.217:3000
+2026-03-31 00:06:10: 
+2026-03-31 00:06:10: ✓ Starting...
+2026-03-31 00:06:12: ▲ Next.js 16.1.6
+2026-03-31 00:06:12: - Local:         http://localhost:3000
+2026-03-31 00:06:12: - Network:       http://155.133.26.217:3000
+2026-03-31 00:06:12: 
+2026-03-31 00:06:12: ✓ Starting...
+2026-03-31 00:06:12: ▲ Next.js 16.1.6
+2026-03-31 00:06:12: - Local:         http://localhost:3000
+2026-03-31 00:06:12: - Network:       http://155.133.26.217:3000
+2026-03-31 00:06:12: 
+2026-03-31 00:06:12: ✓ Starting...
+2026-03-31 00:06:16: ▲ Next.js 16.1.6
+2026-03-31 00:06:16: - Local:         http://localhost:3000
+2026-03-31 00:06:16: - Network:       http://155.133.26.217:3000
+2026-03-31 00:06:16: 
+2026-03-31 00:06:16: ✓ Starting...
+2026-03-31 00:06:17: ✓ Ready in 13.9s
+2026-03-31 00:06:17: ✓ Ready in 9.7s
+2026-03-31 00:06:19: ✓ Ready in 10.8s
+2026-03-31 00:06:22: ✓ Ready in 12.2s
+2026-03-31 00:06:22: ✓ Ready in 11.5s
+
+
+=== NGINX ERROR LOG (last 20 lines) ===
+2026/03/31 00:01:15 [error] 2042848#2042848: *105848 upstream prematurely closed connection while reading response header from upstream, client: 172.69.50.149, server: chirpedbeo.online, request: "GET /wp-admin/setup-config.php HTTP/2.0", upstream: "http://127.0.0.1:3000/wp-admin/setup-config.php", host: "chirpedbeo.online"
+2026/03/31 00:02:44 [error] 2042848#2042848: *105843 upstream timed out (110: Unknown error) while reading response header from upstream, client: 172.68.42.8, server: chirpedbeo.online, request: "POST /fr/sales/b775b68f-376e-4389-8b79-6759160ea93b HTTP/2.0", upstream: "http://127.0.0.1:3000/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b", host: "chirpedbeo.online", referrer: "https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b"
+2026/03/31 00:02:47 [error] 2042848#2042848: *105857 recv() failed (104: Unknown error) while reading response header from upstream, client: 80.82.77.202, server: chirpedbeo.online, request: "GET /aaa9 HTTP/1.1", upstream: "http://127.0.0.1:3000/aaa9", host: "155.133.26.217:443"
+2026/03/31 00:02:47 [error] 2042848#2042848: *105860 connect() failed (111: Unknown error) while connecting to upstream, client: 80.82.77.202, server: chirpedbeo.online, request: "GET /aab9 HTTP/1.1", upstream: "http://127.0.0.1:3000/aab9", host: "155.133.26.217:443"
+2026/03/31 00:03:45 [error] 2042848#2042848: *105843 upstream prematurely closed connection while reading response header from upstream, client: 172.68.42.8, server: chirpedbeo.online, request: "POST /fr/sales/b775b68f-376e-4389-8b79-6759160ea93b HTTP/2.0", upstream: "http://127.0.0.1:3000/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b", host: "chirpedbeo.online", referrer: "https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b"
+2026/03/31 00:05:46 [error] 2042848#2042848: *105864 upstream prematurely closed connection while reading response header from upstream, client: 104.22.45.40, server: chirpedbeo.online, request: "POST /fr/sales/b775b68f-376e-4389-8b79-6759160ea93b HTTP/2.0", upstream: "http://127.0.0.1:3000/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b", host: "chirpedbeo.online", referrer: "https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b"
+2026/03/31 01:39:44 [crit] 2042848#2042848: *107488 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 212.102.40.218, server: 0.0.0.0:443
+
+
+=== DISK SPACE ===
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        97G   14G   84G  14% /
+
+
+=== MEMORY ===
+               total        used        free      shared  buff/cache   available
+Mem:           11956        3375        7806          88         775        8171
+Swap:           4095           0        4095
+
+
+=== BUILD_ID ===
+sVB3wbphDJ1oMa7JttW13
+
+=== Node version ===
+v20.20.0
+
+
+=== .env present ===
+1

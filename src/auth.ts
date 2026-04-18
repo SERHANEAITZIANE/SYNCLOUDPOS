@@ -169,8 +169,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.role = existingUser.role;
             token.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
             token.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
-            token.subscriptionEndsAt = existingUser.tenant.subscriptionEndsAt;
-            token.isBlocked = existingUser.tenant.isBlocked;
+            token.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
+            token.isBlocked = existingUser.tenant?.isBlocked;
             token.defaultStoreId = existingUser.defaultStoreId;
             return token
         }

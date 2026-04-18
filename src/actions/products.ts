@@ -11,6 +11,11 @@ import { logAudit } from "./audit-log"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+
     await checkSubscription();
 
     const tenantId = session?.user?.tenantId
@@ -191,6 +196,11 @@ export const getProduct = async (productId: string) => {
 
 export const deleteProduct = async (id: string) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const tenantId = session?.user?.tenantId
 
@@ -217,6 +227,11 @@ export const deleteProduct = async (id: string) => {
 
 export const updateProduct = async (id: string, values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
+
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const tenantId = session?.user?.tenantId
 
@@ -301,6 +316,11 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
 
 export const importProducts = async (rows: Record<string, string>[]) => {
     const session = await auth()
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

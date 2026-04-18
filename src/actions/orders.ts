@@ -238,6 +238,10 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
                     const stockBefore = spBefore?.stock || 0;
                     const stockAfter = stockBefore - item.quantity;
+                    
+                    if (stockAfter < 0) {
+                        throw new Error(`Stock insuffisant pour: ${pBefore?.name || "Produit inconnu"}. Disponible: ${stockBefore}, Requis: ${item.quantity}`);
+                    }
 
                     if (stockStoreId) {
                         await tx.storeProduct.upsert({

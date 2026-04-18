@@ -3,227 +3,223 @@
 ┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 348  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 276  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 278  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 344  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
-│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 2160993  │ 0      │ 141… │ launching │ 0%       │ 0b       │ root     │ disabled │
-│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 2160940  │ 0s     │ 141… │ online    │ 100%     │ 41.9mb   │ root     │ disabled │
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 0        │ 0      │ 706  │ waiting … │ 0%       │ 0b       │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546519  │ 50m    │ 1555 │ online    │ 0%       │ 199.9mb  │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546617  │ 50m    │ 1552 │ online    │ 0%       │ 198.6mb  │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546501  │ 50m    │ 1622 │ online    │ 100%     │ 201.3mb  │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546535  │ 50m    │ 224… │ online    │ 0%       │ 199.4mb  │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 1546301  │ 50m    │ 225… │ online    │ 0%       │ 198.0mb  │ root     │ disabled │
 │ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
 └────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 
 --- Executing: pm2 logs syncloudpos --lines 100 --nostream ---
 [TAILING] Tailing last 100 lines for [syncloudpos] process (change the value with --lines option)
 /var/log/pm2/syncloudpos-out.log last 100 lines:
-2|syncloud | 2026-03-28 20:50:38: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:39: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:39: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:39: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:39: 
-2|syncloud | 2026-03-28 20:50:39: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:39: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:40: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:40: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:40: 
-2|syncloud | 2026-03-28 20:50:40: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:43: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:43: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:43: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:43: 
-2|syncloud | 2026-03-28 20:50:43: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:43: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:43: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:43: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:43: 
-2|syncloud | 2026-03-28 20:50:43: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:44: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:44: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:44: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:44: 
-2|syncloud | 2026-03-28 20:50:44: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:48: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:48: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:48: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:48: 
-2|syncloud | 2026-03-28 20:50:48: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:49: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:49: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:49: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:49: 
-2|syncloud | 2026-03-28 20:50:49: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:50: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:50: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:50: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:50: 
-2|syncloud | 2026-03-28 20:50:50: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:53: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:53: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:53: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:53: 
-2|syncloud | 2026-03-28 20:50:53: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:56: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:56: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:56: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:56: 
-2|syncloud | 2026-03-28 20:50:56: ✓ Starting...
-2|syncloud | 2026-03-28 20:50:56: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:50:56: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:50:56: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:50:56: 
-2|syncloud | 2026-03-28 20:50:56: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:01: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:01: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:01: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:01: 
-2|syncloud | 2026-03-28 20:51:01: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:02: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:02: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:02: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:02: 
-2|syncloud | 2026-03-28 20:51:02: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:03: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:03: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:03: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:03: 
-2|syncloud | 2026-03-28 20:51:03: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:04: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:04: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:04: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:04: 
-2|syncloud | 2026-03-28 20:51:04: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:06: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:06: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:06: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:06: 
-2|syncloud | 2026-03-28 20:51:06: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:08: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:08: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:08: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:08: 
-2|syncloud | 2026-03-28 20:51:08: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:13: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:13: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:13: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:13: 
-2|syncloud | 2026-03-28 20:51:13: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:15: ▲ Next.js 16.1.6
-2|syncloud | 2026-03-28 20:51:15: - Local:         http://localhost:3000
-2|syncloud | 2026-03-28 20:51:15: - Network:       http://155.133.26.217:3000
-2|syncloud | 2026-03-28 20:51:15: 
-2|syncloud | 2026-03-28 20:51:15: ✓ Starting...
-2|syncloud | 2026-03-28 20:51:15: 
-2|syncloud | 2026-03-28 20:51:15: Installing devDependencies (npm):
-2|syncloud | 2026-03-28 20:51:15: - typescript
-2|syncloud | 2026-03-28 20:51:15: 
+2|syncloud | 2026-03-31 00:05:26: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:26: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:26: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:26: 
+2|syncloud | 2026-03-31 00:05:26: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:27: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:27: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:27: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:27: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:27: 
+2|syncloud | 2026-03-31 00:05:27: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:27: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:27: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:27: 
+2|syncloud | 2026-03-31 00:05:27: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:32: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:32: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:32: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:32: 
+2|syncloud | 2026-03-31 00:05:32: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:37: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:37: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:37: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:37: 
+2|syncloud | 2026-03-31 00:05:37: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:38: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:38: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:38: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:38: 
+2|syncloud | 2026-03-31 00:05:38: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:39: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:39: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:39: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:39: 
+2|syncloud | 2026-03-31 00:05:39: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:39: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:39: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:39: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:39: 
+2|syncloud | 2026-03-31 00:05:39: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:43: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:43: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:43: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:43: 
+2|syncloud | 2026-03-31 00:05:43: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:49: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:49: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:49: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:49: 
+2|syncloud | 2026-03-31 00:05:49: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:53: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:53: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:53: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:53: 
+2|syncloud | 2026-03-31 00:05:53: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:53: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:53: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:53: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:53: 
+2|syncloud | 2026-03-31 00:05:53: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:53: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:53: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:53: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:53: 
+2|syncloud | 2026-03-31 00:05:54: ✓ Starting...
+2|syncloud | 2026-03-31 00:05:57: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:05:57: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:05:57: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:05:57: 
+2|syncloud | 2026-03-31 00:05:57: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:06: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:06:06: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:06:06: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:06:06: 
+2|syncloud | 2026-03-31 00:06:06: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:10: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:06:10: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:06:10: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:06:10: 
+2|syncloud | 2026-03-31 00:06:10: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:12: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:06:12: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:06:12: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:06:12: 
+2|syncloud | 2026-03-31 00:06:12: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:12: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:06:12: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:06:12: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:06:12: 
+2|syncloud | 2026-03-31 00:06:12: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:16: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-31 00:06:16: - Local:         http://localhost:3000
+2|syncloud | 2026-03-31 00:06:16: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-31 00:06:16: 
+2|syncloud | 2026-03-31 00:06:16: ✓ Starting...
+2|syncloud | 2026-03-31 00:06:17: ✓ Ready in 13.9s
+2|syncloud | 2026-03-31 00:06:17: ✓ Ready in 9.7s
+2|syncloud | 2026-03-31 00:06:19: ✓ Ready in 10.8s
+2|syncloud | 2026-03-31 00:06:22: ✓ Ready in 12.2s
+2|syncloud | 2026-03-31 00:06:22: ✓ Ready in 11.5s
 
 /var/log/pm2/syncloudpos-error.log last 100 lines:
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:48:10: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:52:15: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:52:15: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:52:15: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:49:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:52:27: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:52:27: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:52:27: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:49:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:53:22: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:53:22: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:53:22: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:49:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:54:10: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:54:10: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:54:10: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:00: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:54:14: Failed to proxy https://chirpedbeo.online/fr/register Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:54:14: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:54:14: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:01: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud | 2026-03-31 00:56:10: Failed to proxy https://chirpedbeo.online/fr/sales/b775b68f-376e-4389-8b79-6759160ea93b Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:56:10: Error: getaddrinfo EAI_AGAIN chirpedbeo.online
+2|syncloud |     at ignore-listed frames {
+2|syncloud |   errno: -3001,
+2|syncloud |   code: 'EAI_AGAIN',
+2|syncloud |   syscall: 'getaddrinfo',
+2|syncloud |   hostname: 'chirpedbeo.online'
+2|syncloud | }
+2|syncloud | 2026-03-31 00:56:10: ⨯ Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/var/www/syncloudpos/.next/server/pages/500.html'
 2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:05: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:08: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:11: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:13: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:15: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:16: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:19: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:20: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:23: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:24: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:25: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:29: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:32: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:32: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:37: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:39: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:39: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:40: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:41: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:41: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:45: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:49: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:49: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:54: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:55: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:57: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:50:59: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:06: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:07: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:09: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:11: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
-2|syncloud |     at ignore-listed frames
-2|syncloud | 2026-03-28 20:51:14: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
-2|syncloud | You have triggered an unhandledRejection, you may have forgotten to catch a Promise rejection:
-2|syncloud | Error: Cannot find module '/var/www/syncloudpos/node_modules/react/index.js'
-2|syncloud |     at createEsmNotFoundErr (node:internal/modules/cjs/loader:1244:15)
-2|syncloud |     at finalizeEsmResolution (node:internal/modules/cjs/loader:1232:15)
-2|syncloud |     at resolveExports (node:internal/modules/cjs/loader:638:14)
-2|syncloud |     at Module._findPath (node:internal/modules/cjs/loader:711:31)
-2|syncloud |     at Module._resolveFilename (node:internal/modules/cjs/loader:1193:27)
-2|syncloud |     at /var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:57:36
-2|syncloud |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
-2|syncloud |     at mod.require (/var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:68:28)
-2|syncloud |     at require (node:internal/modules/helpers:182:18)
-2|syncloud |     at Object.<anonymous> (/var/www/syncloudpos/node_modules/next/dist/server/app-render/dynamic-rendering.js:147:55)
-2|syncloud | 2026-03-28 20:51:15: ⚠ Installing TypeScript as it was not found while loading "next.config.ts".
-2|syncloud | 2026-03-28 20:51:15: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
 
 
 --- Executing: journalctl -u nginx --no-pager -n 50 ---
-Feb 26 01:32:18 vmi3085016 systemd[1]: Starting A high performance web server and a reverse proxy server...
-Feb 26 01:32:18 vmi3085016 nginx[4919]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Unknown error)
-Feb 26 01:32:18 vmi3085016 nginx[4919]: nginx: [emerg] bind() to [::]:80 failed (98: Unknown error)
-Feb 26 01:32:19 vmi3085016 nginx[4919]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Unknown error)
 Feb 26 01:32:19 vmi3085016 nginx[4919]: nginx: [emerg] bind() to [::]:80 failed (98: Unknown error)
 Feb 26 01:32:19 vmi3085016 nginx[4919]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Unknown error)
 Feb 26 01:32:19 vmi3085016 nginx[4919]: nginx: [emerg] bind() to [::]:80 failed (98: Unknown error)
@@ -274,3 +270,7 @@ Mar 07 03:34:13 vmi3085016 systemd[1]: Reloading A high performance web server a
 Mar 07 03:34:13 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.
 Mar 28 20:31:51 vmi3085016 systemd[1]: Reloading A high performance web server and a reverse proxy server...
 Mar 28 20:31:51 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.
+Mar 29 13:23:39 vmi3085016 systemd[1]: Reloading A high performance web server and a reverse proxy server...
+Mar 29 13:23:39 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.
+Mar 30 02:32:56 vmi3085016 systemd[1]: Reloading A high performance web server and a reverse proxy server...
+Mar 30 02:32:56 vmi3085016 systemd[1]: Reloaded A high performance web server and a reverse proxy server.

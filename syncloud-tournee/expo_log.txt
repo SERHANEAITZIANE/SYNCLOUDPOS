@@ -1,0 +1,73 @@
+﻿Starting project at C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee
+node.exe : Error: The 
+required package 
+`expo-asset` cannot be 
+found
+At C:\Program 
+Files\nodejs\npx.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Err  
+  or: The requ...cannot    
+ be found:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Error: The required 
+package `expo-asset` 
+cannot be found
+    at getAssetPlugins (C:\
+Users\tre\Documents\SYNCLOU
+DPOS\syncloud-tournee\node_
+modules\@expo\metro-config\
+src\ExpoMetroConfig.ts:65:1
+1)
+    at getDefaultConfig (C:
+\Users\tre\Documents\SYNCLO
+UDPOS\syncloud-tournee\node
+_modules\@expo\metro-config
+\src\ExpoMetroConfig.ts:373
+:21)
+    at 
+loadMetroConfigAsync (C:\Us
+ers\tre\Documents\SYNCLOUDP
+OS\syncloud-tournee\node_mo
+dules\@expo\cli\src\start\s
+erver\metro\instantiateMetr
+o.ts:96:43)
+    at 
+instantiateMetroAsync (C:\U
+sers\tre\Documents\SYNCLOUD
+POS\syncloud-tournee\node_m
+odules\@expo\cli\src\start\
+server\metro\instantiateMet
+ro.ts:195:53)
+    at MetroBundlerDevServe
+r.startImplementationAsync 
+(C:\Users\tre\Documents\SYN
+CLOUDPOS\syncloud-tournee\n
+ode_modules\@expo\cli\src\s
+tart\server\metro\MetroBund
+lerDevServer.ts:940:69)
+    at MetroBundlerDevServe
+r.startAsync (C:\Users\tre\
+Documents\SYNCLOUDPOS\syncl
+oud-tournee\node_modules\@e
+xpo\cli\src\start\server\Bu
+ndlerDevServer.ts:160:18)
+    at DevServerManager.sta
+rtAsync (C:\Users\tre\Docum
+ents\SYNCLOUDPOS\syncloud-t
+ournee\node_modules\@expo\c
+li\src\start\server\DevServ
+erManager.ts:184:7)
+    at startAsync (C:\Users
+\tre\Documents\SYNCLOUDPOS\
+syncloud-tournee\node_modul
+es\@expo\cli\src\start\star
+tAsync.ts:99:3)

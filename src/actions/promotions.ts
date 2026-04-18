@@ -63,6 +63,11 @@ export const getAllPromotions = async () => {
 export const createPromotion = async (data: PromotionData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
+    
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("promotions"))) return { error: "Accès refusé" }
+    
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing" }
 
@@ -94,6 +99,10 @@ export const togglePromotion = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("promotions"))) return { error: "Accès refusé" }
+
     try {
         const promo = await db.promotion.findUnique({ where: { id } })
         if (!promo) return { error: "Promotion introuvable" }
@@ -113,6 +122,10 @@ export const togglePromotion = async (id: string) => {
 export const deletePromotion = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
+
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("promotions"))) return { error: "Accès refusé" }
 
     try {
         await db.promotion.delete({ where: { id } })

@@ -1,0 +1,111 @@
+=== NGINX ERRORS ===
+2026/03/30 00:39:03 [crit] 2253428#2253428: *101402 SSL_do_handshake() failed (SSL: error:0A00006C:SSL routines::bad key share) while SSL handshaking, client: 212.102.40.218, server: 0.0.0.0:443
+
+=== PM2 ERRORS ===
+[TAILING] Tailing last 50 lines for [syncloudpos] process (change the value with --lines option)
+/var/log/pm2/syncloudpos-error.log last 50 lines:
+2|syncloud | 2026-03-28 20:51:09: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud |     at ignore-listed frames
+2|syncloud | 2026-03-28 20:51:11: Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id
+2|syncloud |     at ignore-listed frames
+2|syncloud | 2026-03-28 20:51:14: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
+2|syncloud | You have triggered an unhandledRejection, you may have forgotten to catch a Promise rejection:
+2|syncloud | Error: Cannot find module '/var/www/syncloudpos/node_modules/react/index.js'
+2|syncloud |     at createEsmNotFoundErr (node:internal/modules/cjs/loader:1244:15)
+2|syncloud |     at finalizeEsmResolution (node:internal/modules/cjs/loader:1232:15)
+2|syncloud |     at resolveExports (node:internal/modules/cjs/loader:638:14)
+2|syncloud |     at Module._findPath (node:internal/modules/cjs/loader:711:31)
+2|syncloud |     at Module._resolveFilename (node:internal/modules/cjs/loader:1193:27)
+2|syncloud |     at /var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:57:36
+2|syncloud |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
+2|syncloud |     at mod.require (/var/www/syncloudpos/node_modules/next/dist/server/require-hook.js:68:28)
+2|syncloud |     at require (node:internal/modules/helpers:182:18)
+2|syncloud |     at Object.<anonymous> (/var/www/syncloudpos/node_modules/next/dist/server/app-render/dynamic-rendering.js:147:55)
+2|syncloud | 2026-03-28 20:51:15: ⚠ Installing TypeScript as it was not found while loading "next.config.ts".
+2|syncloud | 2026-03-28 20:51:15: ⨯ Failed to load next.config.ts, see more info here https://nextjs.org/docs/messages/next-config-error
+2|syncloud | 2026-03-29 23:09:02: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-29 23:09:02: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-29 23:09:02: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-29 23:09:03: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-29 23:09:03: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-29 23:09:04: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:31: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:33: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:34: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:35: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:35: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 00:04:37: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 01:28:40: [31m[auth][error][0m JWTSessionError: Read more at https://errors.authjs.dev#jwtsessionerror
+2|syncloud | 2026-03-30 01:28:40: [31m[auth][cause][0m: Error: no matching decryption secret
+2|syncloud |     at ny.clockTolerance (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:26:86852)
+2|syncloud |     at async nm (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:26:79855)
+2|syncloud |     at async ng (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:26:80992)
+2|syncloud |     at async ny (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:26:81221)
+2|syncloud |     at async Object.nN [as decode] (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:26:86685)
+2|syncloud |     at async sm (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:429:43585)
+2|syncloud |     at async sE (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:429:50156)
+2|syncloud |     at async sR (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:429:54721)
+2|syncloud |     at async sI (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:429:58311)
+2|syncloud |     at async handler (/var/www/syncloudpos/.next/server/chunks/[root-of-the-server]__13a35509._.js:431:13697)
+2|syncloud | 2026-03-30 01:28:40: [31m[auth][details][0m: {}
+2|syncloud | 2026-03-30 02:19:06: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 02:19:07: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 02:19:07: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 02:19:07: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 02:19:07: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2|syncloud | 2026-03-30 02:19:08: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+
+/var/log/pm2/syncloudpos-out.log last 50 lines:
+2|syncloud | 2026-03-30 00:04:29: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 00:04:29: 
+2|syncloud | 2026-03-30 00:04:29: ✓ Starting...
+2|syncloud | 2026-03-30 00:04:30: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 00:04:30: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 00:04:30: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 00:04:30: 
+2|syncloud | 2026-03-30 00:04:30: ✓ Starting...
+2|syncloud | 2026-03-30 00:04:32: ✓ Ready in 6.1s
+2|syncloud | 2026-03-30 00:04:34: ✓ Ready in 8.2s
+2|syncloud | 2026-03-30 00:04:35: ✓ Ready in 9.2s
+2|syncloud | 2026-03-30 00:04:35: ✓ Ready in 8.4s
+2|syncloud | 2026-03-30 00:04:36: ✓ Ready in 10s
+2|syncloud | 2026-03-30 00:04:37: ✓ Ready in 10.4s
+2|syncloud | 2026-03-30 02:18:59: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:18:59: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:18:59: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:18:59: 
+2|syncloud | 2026-03-30 02:18:59: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:00: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:19:00: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:19:00: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:19:00: 
+2|syncloud | 2026-03-30 02:19:00: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:01: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:19:01: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:19:01: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:19:01: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:19:01: 
+2|syncloud | 2026-03-30 02:19:01: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:01: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:19:01: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:19:01: 
+2|syncloud | 2026-03-30 02:19:01: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:01: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:19:01: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:19:01: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:19:01: 
+2|syncloud | 2026-03-30 02:19:01: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:02: ▲ Next.js 16.1.6
+2|syncloud | 2026-03-30 02:19:02: - Local:         http://localhost:3000
+2|syncloud | 2026-03-30 02:19:02: - Network:       http://155.133.26.217:3000
+2|syncloud | 2026-03-30 02:19:02: 
+2|syncloud | 2026-03-30 02:19:02: ✓ Starting...
+2|syncloud | 2026-03-30 02:19:07: ✓ Ready in 8.6s
+2|syncloud | 2026-03-30 02:19:08: ✓ Ready in 10.5s
+2|syncloud | 2026-03-30 02:19:08: ✓ Ready in 10s
+2|syncloud | 2026-03-30 02:19:08: ✓ Ready in 10.2s
+2|syncloud | 2026-03-30 02:19:08: ✓ Ready in 9.7s
+2|syncloud | 2026-03-30 02:19:09: ✓ Ready in 9.9s
+
+
+

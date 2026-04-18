@@ -1,0 +1,76 @@
+=== FIX 1: /etc/hosts ===
+Added chirpedbeo.online to /etc/hosts
+127.0.1.1 vmi3085016.contaboserver.net vmi3085016
+127.0.0.1 localhost
+::1 localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+155.133.26.217 chirpedbeo.online
+
+
+=== FIX 2: DNS upstream ===
+[Resolve]\nDNS=8.8.8.8 1.1.1.1\nFallbackDNS=8.8.4.4 1.0.0.1\n
+
+DNS configured
+
+=== FIX 3: 500.html ===
+
+-rw-r--r-- 1 root root 683 Mar 31 02:37 /var/www/syncloudpos/.next/server/pages/500.html
+
+
+=== FIX 4: PM2 restart ===
+[PM2] Applying action restartProcessId on app [syncloudpos](ids: [ 2, 3, 4, 5, 6, 7 ])
+[PM2] [syncloudpos](2) ✓
+[PM2] [syncloudpos](3) ✓
+[PM2] [syncloudpos](4) ✓
+[PM2] [syncloudpos](5) ✓
+[PM2] [syncloudpos](6) ✓
+[PM2] [syncloudpos](7) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285552  │ 3s     │ 706  │ online    │ 0%       │ 57.5mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285603  │ 2s     │ 1556 │ online    │ 0%       │ 54.4mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285647  │ 2s     │ 1553 │ online    │ 0%       │ 59.5mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285657  │ 2s     │ 1623 │ online    │ 0%       │ 54.9mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285760  │ 0s     │ 224… │ online    │ 0%       │ 47.7mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285781  │ 0s     │ 225… │ online    │ 0%       │ 41.2mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== VERIFICATION ===
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285552  │ 16s    │ 706  │ online    │ 0%       │ 190.1mb  │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285603  │ 16s    │ 1556 │ online    │ 100%     │ 187.9mb  │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285647  │ 15s    │ 1553 │ online    │ 100%     │ 190.1mb  │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285657  │ 15s    │ 1623 │ online    │ 0%       │ 180.4mb  │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285760  │ 14s    │ 224… │ online    │ 0%       │ 182.8mb  │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 3285781  │ 14s    │ 225… │ online    │ 16.7%    │ 175.1mb  │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 0        │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+└────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+=== Endpoint tests ===
+Homepage: 307
+
+Session: 200
+
+
+=== DNS verify ===
+155.133.26.217  chirpedbeo.online
+
+
+=== Recent PM2 errors (last 10) ===
+  code: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'chirpedbeo.online'
+}
+2026-03-31 02:37:28: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-31 02:37:28: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-31 02:37:28: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-31 02:37:28: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-31 02:37:29: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.
+2026-03-31 02:37:30: ⚠ "next start" does not work with "output: standalone" configuration. Use "node .next/standalone/server.js" instead.

@@ -1,0 +1,22 @@
+Error: The required package `expo-asset` cannot be found
+Error: The required package `expo-asset` cannot be found
+    at getAssetPlugins (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\metro-config\src\ExpoMetroConfig.ts:65:11)
+    at getDefaultConfig (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\metro-config\src\ExpoMetroConfig.ts:373:21)
+    at loadMetroConfigAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\instantiateMetro.ts:96:43)
+    at instantiateMetroAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\instantiateMetro.ts:195:53)
+    at MetroBundlerDevServer.startImplementationAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\MetroBundlerDevServer.ts:940:69)
+    at MetroBundlerDevServer.startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\BundlerDevServer.ts:160:18)
+    at DevServerManager.startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\DevServerManager.ts:184:7)
+    at startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\startAsync.ts:99:3)
+---Starting project at C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee
+---Command failed: npx expo start
+Error: The required package `expo-asset` cannot be found
+Error: The required package `expo-asset` cannot be found
+    at getAssetPlugins (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\metro-config\src\ExpoMetroConfig.ts:65:11)
+    at getDefaultConfig (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\metro-config\src\ExpoMetroConfig.ts:373:21)
+    at loadMetroConfigAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\instantiateMetro.ts:96:43)
+    at instantiateMetroAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\instantiateMetro.ts:195:53)
+    at MetroBundlerDevServer.startImplementationAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\metro\MetroBundlerDevServer.ts:940:69)
+    at MetroBundlerDevServer.startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\BundlerDevServer.ts:160:18)
+    at DevServerManager.startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\server\DevServerManager.ts:184:7)
+    at startAsync (C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee\node_modules\@expo\cli\src\start\startAsync.ts:99:3)

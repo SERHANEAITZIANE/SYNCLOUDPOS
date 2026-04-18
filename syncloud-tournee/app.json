@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "SynCloud Tournée",
+    "slug": "syncloud-tournee",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.syncloud.tournee",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Pour suivre votre position pendant les livraisons",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Pour le tracking GPS en arrière-plan pendant les tournées",
+        "NSCameraUsageDescription": "Pour scanner les codes-barres et prendre des photos de livraison",
+        "NSPhotoLibraryUsageDescription": "Pour sauvegarder les preuves de livraison"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.syncloud.tournee",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "BLUETOOTH",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Pour le tracking GPS pendant les tournées",
+          "locationWhenInUsePermission": "Pour naviguer vers vos clients",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Pour scanner les codes-barres et prendre des photos"
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ]
+  }
+}

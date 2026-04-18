@@ -1,0 +1,50 @@
+src/actions/audit-log.ts(21,18): error TS2339: Property 'auditLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/actions/audit-log.ts(52,27): error TS2339: Property 'auditLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/[locale]/(dashboard)/avaries/page.tsx(33,29): error TS2322: Type '{ exportTitle: string; exportDescription: string; columns: ColumnDef<SpoilageColumn>[]; data: { id: string; productName: string; quantity: number; reason: string; date: Date; userName: string; }[]; products: { ...; }[]; }' is not assignable to type 'IntrinsicAttributes & DataTableProps<{ id: string; productName: string; quantity: number; reason: string; date: Date; userName: string; }, unknown>'.
+  Property 'exportTitle' does not exist on type 'IntrinsicAttributes & DataTableProps<{ id: string; productName: string; quantity: number; reason: string; date: Date; userName: string; }, unknown>'.
+src/app/api/mobile/admin/drivers/[driverId]/route.ts(26,36): error TS2339: Property 'driverLocation' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/admin/drivers/route.ts(35,49): error TS2339: Property 'driverLocation' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/admin/drivers/route.ts(41,44): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/admin/drivers/route.ts(59,25): error TS2561: Object literal may only specify known properties, but 'notes' does not exist in type 'SalesOrderWhereInput'. Did you mean to write 'NOT'?
+src/app/api/mobile/auth/refresh/route.ts(17,38): error TS2339: Property 'mobileRefreshToken' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/auth/refresh/route.ts(27,22): error TS2339: Property 'mobileRefreshToken' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/auth/refresh/route.ts(51,18): error TS2339: Property 'mobileRefreshToken' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/auth/route.ts(64,18): error TS2339: Property 'mobileRefreshToken' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/auth/route.ts(72,18): error TS2339: Property 'mobileRefreshToken' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/clients/[id]/route.ts(20,46): error TS2353: Object literal may only specify known properties, and 'paymentStatus' does not exist in type 'SalesOrderSelect<DefaultArgs>'.
+src/app/api/mobile/dashboard/route.ts(16,32): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/dashboard/route.ts(41,17): error TS2561: Object literal may only specify known properties, but 'notes' does not exist in type 'SalesOrderWhereInput'. Did you mean to write 'NOT'?
+src/app/api/mobile/dashboard/route.ts(44,36): error TS2353: Object literal may only specify known properties, and 'amountPaid' does not exist in type 'SalesOrderSelect<DefaultArgs>'.
+src/app/api/mobile/dashboard/route.ts(48,77): error TS2339: Property 'amountPaid' does not exist on type '{ id: string; type: string; tenantId: string; createdAt: Date; updatedAt: Date; storeId: string; subtotal: Decimal; tvaAmount: Decimal; stampTax: Decimal; ... 6 more ...; relatedSalesOrderId: string; }'.
+src/app/api/mobile/dashboard/route.ts(51,39): error TS2339: Property 'productReturn' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/dashboard/route.ts(63,38): error TS2339: Property 'auditLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/location/route.ts(17,18): error TS2339: Property 'driverLocation' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/location/route.ts(53,41): error TS2339: Property 'driverLocation' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/payments/route.ts(43,22): error TS2339: Property 'tourStop' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/payments/route.ts(53,18): error TS2339: Property 'auditLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/products/route.ts(43,43): error TS2353: Object literal may only specify known properties, and 'code' does not exist in type 'BarcodeSelect<DefaultArgs>'.
+src/app/api/mobile/products/route.ts(61,29): error TS2339: Property 'images' does not exist on type '{ id: string; description: string; tenantId: string; createdAt: Date; name: string; updatedAt: Date; price: Decimal; cost: Decimal; wholesalePrice: Decimal; ... 7 more ...; brandId: string; }'.
+src/app/api/mobile/returns/route.ts(32,40): error TS2339: Property 'productReturn' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/returns/route.ts(67,22): error TS2339: Property 'tourStop' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/returns/route.ts(74,18): error TS2339: Property 'auditLog' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/sales/route.ts(92,45): error TS2339: Property 'stampTaxRate' does not exist on type '{ id: string; createdAt: Date; name: string; phone: string; email: string; address: string; nif: string; nis: string; artImposition: string; rc: string; updatedAt: Date; ownerName: string; ... 29 more ...; posTimbreEnabled: boolean; }'.
+src/app/api/mobile/sales/route.ts(106,17): error TS2561: Object literal may only specify known properties, but 'taxAmount' does not exist in type '(Without<SalesOrderCreateInput, SalesOrderUncheckedCreateInput> & SalesOrderUncheckedCreateInput) | (Without<...> & SalesOrderCreateInput)'. Did you mean to write 'tvaAmount'?
+src/app/api/mobile/sales/route.ts(156,22): error TS2339: Property 'tourStop' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/sales/route.ts(169,42): error TS2551: Property 'taxAmount' does not exist on type '{ id: string; type: string; tenantId: string; createdAt: Date; updatedAt: Date; storeId: string; subtotal: Decimal; tvaAmount: Decimal; stampTax: Decimal; ... 6 more ...; relatedSalesOrderId: string; }'. Did you mean 'tvaAmount'?
+src/app/api/mobile/sales/route.ts(172,43): error TS2339: Property 'amountPaid' does not exist on type '{ id: string; type: string; tenantId: string; createdAt: Date; updatedAt: Date; storeId: string; subtotal: Decimal; tvaAmount: Decimal; stampTax: Decimal; ... 6 more ...; relatedSalesOrderId: string; }'.
+src/app/api/mobile/sales/route.ts(217,37): error TS2551: Property 'taxAmount' does not exist on type '{ customer: { name: string; balance: Decimal; }; items: ({ product: { name: string; }; } & { id: string; tvaRate: Decimal; productId: string; quantity: number; priceHt: Decimal; salesOrderId: string; unitPrice: Decimal; })[]; } & { ...; }'. Did you mean 'tvaAmount'?
+src/app/api/mobile/sales/route.ts(220,38): error TS2339: Property 'amountPaid' does not exist on type '{ customer: { name: string; balance: Decimal; }; items: ({ product: { name: string; }; } & { id: string; tvaRate: Decimal; productId: string; quantity: number; priceHt: Decimal; salesOrderId: string; unitPrice: Decimal; })[]; } & { ...; }'.
+src/app/api/mobile/tours/[id]/route.ts(14,31): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/tours/[id]/route.ts(77,31): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/tours/[id]/stops/[stopId]/route.ts(16,31): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/tours/[id]/stops/[stopId]/route.ts(47,31): error TS2339: Property 'tourStop' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/tours/route.ts(27,32): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/tours/route.ts(85,31): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/truck-load/route.ts(21,31): error TS2339: Property 'deliveryTour' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/truck-load/route.ts(29,35): error TS2339: Property 'truckLoad' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/truck-load/route.ts(53,36): error TS2339: Property 'truckLoad' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/app/api/mobile/truck-load/route.ts(96,36): error TS2339: Property 'truckLoad' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+src/lib/redis.ts(54,39): error TS2345: Argument of type 'string | Buffer<ArrayBufferLike>' is not assignable to parameter of type 'string'.
+  Type 'Buffer<ArrayBufferLike>' is not assignable to type 'string'.
+syncloud-tournee/App.tsx(137,10): error TS2741: Property 'id' is missing in type '{ children: Element[]; screenOptions: ({ route }: { route: RouteProp<ParamListBase, string>; navigation: BottomTabNavigationProp<ParamListBase, string, string>; theme: Theme; }) => { ...; }; }' but required in type '{ id: string; }'.
+syncloud-tournee/App.tsx(232,14): error TS2741: Property 'id' is missing in type '{ children: Element; screenOptions: { headerShown: false; }; }' but required in type '{ id: string; }'.

@@ -1,0 +1,38 @@
+﻿Starting project at C:\Users\tre\Documents\SYNCLOUDPOS\syncloud-tournee
+Starting Metro Bundler
+node.exe : CommandError: 
+No Android connected 
+device found, and no 
+emulators could be started 
+automatically.
+At C:\Program 
+Files\nodejs\npx.ps1:29 
+char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Com  
+  mandError: N... automa   
+ tically.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+Please connect a device or 
+create an emulator (https:/
+/docs.expo.dev/workflow/and
+roid-studio-emulator).
+Then follow the 
+instructions here to 
+enable USB debugging:
+https://developer.android.c
+om/studio/run/device.html#d
+eveloper-device-options. 
+If you are using 
+Genymotion go to Settings 
+-> ADB, select "Use custom 
+Android SDK tools", and 
+point it at your Android 
+SDK directory.

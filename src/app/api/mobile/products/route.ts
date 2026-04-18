@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         if (barcode) {
             // Barcode scan
             where.OR = [
-                { barcodes: { some: { code: barcode } } },
+                { barcodes: { some: { value: barcode } } },
             ];
         } else if (search) {
             where.OR = [
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
                     tvaRate: true, stock: true, minStock: true,
                     categoryId: true,
                     category: { select: { id: true, name: true } },
-                    barcodes: { select: { code: true, type: true } },
+                    barcodes: { select: { value: true, label: true } },
                     images: { select: { url: true }, take: 1 },
                 },
                 orderBy: { name: "asc" },

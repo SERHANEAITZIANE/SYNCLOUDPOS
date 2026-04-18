@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
 import { Trash, Plus, Printer, CheckCircle, FileText, TruckIcon, Package } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
+import { InvoicePrintTemplate, BonLivraisonPrintTemplate, ProformaPrintTemplate } from "@/components/print/print-templates"
 import { toast } from "react-hot-toast"
 import { format } from "date-fns"
 
@@ -276,346 +277,67 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
 
     return (
         <>
-            {/* Print layout */}
+            {/* Print layout — Premium Templates */}
             <div className="hidden print:block print-page">
                 {currentType === "INVOICE" ? (
-                    <div className="bg-white text-gray-800 font-sans p-10 max-w-4xl mx-auto text-sm leading-relaxed">
-                        {/* Premium Header */}
-                        <div className="flex justify-between items-start mb-12 border-b-2 border-gray-100 pb-8">
-                            <div className="flex gap-6 items-center">
-                                {storeData?.logo ? (
-                                    <img src={storeData.logo} alt="Logo" className="h-20 object-contain" />
-                                ) : (
-                                    <div className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold tracking-widest shadow-sm">
-                                        {storeData?.name?.substring(0, 2).toUpperCase() || "LOGO"}
-                                    </div>
-                                )}
-                                <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{storeData?.name || "VOTRE SOCIÉTÉ"}</h1>
-                                    <p className="text-gray-500 font-medium tracking-wide text-xs mt-1 uppercase">{storeData?.activity || "Activité de l'entreprise"}</p>
-                                </div>
-                            </div>
-                            <div className="text-right flex flex-col items-end">
-                                <div className="text-4xl font-extrabold text-gray-200 tracking-tighter uppercase mb-2">FACTURE</div>
-                                <div className="bg-blue-50 text-blue-800 px-4 py-1.5 rounded-full font-bold text-sm shadow-sm inline-block">
-                                    N° {initialData?.receiptNumber || `FA-${initialData?.id?.slice(-6)}`}
-                                </div>
-                                <div className="mt-4 text-gray-500 font-medium">
-                                    Date: <span className="text-gray-800">{format(new Date(), "dd/MM/yyyy")}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Store & Customer Details */}
-                        <div className="flex justify-between mb-12 gap-8">
-                            {/* Billed To */}
-                            <div className="w-1/2 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Facturé à</h3>
-                                <div className="font-bold text-lg text-gray-900 mb-1">{selectedCustomer?.name || "Client Standard"}</div>
-                                <div className="text-gray-600 mb-4">{selectedCustomer?.address || "Adresse non spécifiée"}</div>
-
-                                <div className="space-y-1.5 text-xs">
-                                    {selectedCustomer?.taxId && (
-                                        <div className="flex"><span className="w-16 text-gray-500 font-medium">NIF:</span> <span className="font-medium">{selectedCustomer.taxId}</span></div>
-                                    )}
-                                    <div className="flex"><span className="w-16 text-gray-500 font-medium">RC:</span> <span className="font-medium">-</span></div>
-                                    <div className="flex"><span className="w-16 text-gray-500 font-medium">NIS:</span> <span className="font-medium">-</span></div>
-                                    <div className="flex"><span className="w-16 text-gray-500 font-medium">ART:</span> <span className="font-medium">-</span></div>
-                                </div>
-                            </div>
-
-                            {/* Store Info */}
-                            <div className="w-1/2 p-6 flex flex-col justify-center">
-                                <div className="space-y-1.5 text-xs text-right overflow-hidden">
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">Adresse:</span> <span className="font-medium text-gray-800">{storeData?.address || "Adresse de l'entreprise"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">Tél:</span> <span className="font-medium text-gray-800">{storeData?.phone || "-"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">Email:</span> <span className="font-medium text-gray-800">{storeData?.email || "-"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">NIF:</span> <span className="font-medium text-gray-800">{storeData?.nif || "-"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">RC:</span> <span className="font-medium text-gray-800">{storeData?.rc || "-"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">NIS:</span> <span className="font-medium text-gray-800">{storeData?.nis || "-"}</span></div>
-                                    <div className="flex justify-end gap-2"><span className="text-gray-500">RIB:</span> <span className="font-medium text-gray-800">{storeData?.bankAccount || "-"}</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modern Table */}
-                        <div className="mb-10 rounded-2xl overflow-hidden border border-gray-200">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
-                                        <th className="py-4 px-6 font-medium">N°</th>
-                                        <th className="py-4 px-6 font-medium">Désignation</th>
-                                        <th className="py-4 px-6 font-medium text-center">Qté</th>
-                                        <th className="py-4 px-6 font-medium text-right">P.U (DA)</th>
-                                        <th className="py-4 px-6 font-medium text-right">Montant (DA)</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 bg-white">
-                                    {(initialData?.items || []).map((item: any, i: number) => {
-                                        const lTotal = Number(item.unitPrice) * item.quantity;
-                                        return (
-                                            <tr key={i} className="hover:bg-gray-50 transition-colors">
-                                                <td className="py-4 px-6 text-gray-400 font-medium">{String(i + 1).padStart(2, '0')}</td>
-                                                <td className="py-4 px-6 font-semibold text-gray-800">{item.product?.name}</td>
-                                                <td className="py-4 px-6 text-center text-gray-600">{item.quantity}</td>
-                                                <td className="py-4 px-6 text-right text-gray-600">{Number(item.unitPrice).toLocaleString("fr-DZ", { minimumFractionDigits: 2 })}</td>
-                                                <td className="py-4 px-6 text-right font-bold text-gray-900">{lTotal.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })}</td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Footer & Totals */}
-                        <div className="flex justify-between items-end mb-16">
-                            <div className="w-1/2 pr-8">
-                                <div className="bg-blue-50 text-blue-900 p-5 rounded-xl border border-blue-100">
-                                    <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-70">Arrêtée à la somme de {finalTotalTTCStr} DA</p>
-                                    <p className="italic font-medium leading-relaxed">{numberToFrenchWords(finalTotalTTC)}</p>
-                                </div>
-                                <div className="mt-4 text-xs text-gray-500">
-                                    Paiement: <span className="font-semibold text-gray-700">{watchPaymentMethod}</span>
-                                </div>
-                            </div>
-
-                            <div className="w-[320px]">
-                                <div className="space-y-3">
-                                    <div className="flex justify-between text-gray-500 px-4">
-                                        <span>Total HT</span>
-                                        <span className="font-medium text-gray-800">{subtotalHTStr}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-500 px-4">
-                                        <span>TVA</span>
-                                        <span className="font-medium text-gray-800">{tvaAmountStr}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-500 px-4">
-                                        <span>Timbre ({watchPaymentMethod})</span>
-                                        <span className="font-medium text-gray-800">{stampTaxStr}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center bg-gray-900 text-white p-4 rounded-xl mt-4 shadow-md">
-                                        <span className="font-bold uppercase tracking-wider text-xs text-gray-300">Net à Payer</span>
-                                        <span className="font-extrabold text-xl">{finalTotalTTCStr} <span className="text-sm font-medium text-gray-400">DA</span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Signatures */}
-                        <div className="flex justify-between pt-8 border-t border-gray-100 text-sm text-gray-500 pb-8 mt-auto">
-                            <div className="text-center w-48">
-                                <p className="font-medium mb-16">Signature Client</p>
-                                <div className="border-b border-gray-300 w-full mb-2"></div>
-                                <p className="text-xs text-gray-400">Précédé de la mention "Lu et approuvé"</p>
-                            </div>
-                            <div className="text-center w-48 relative">
-                                <p className="font-medium mb-16 relative z-10">Cachet & Signature</p>
-                                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-28 border-[1.5px] border-blue-200 rounded-full flex flex-col items-center justify-center text-blue-800/20 pointer-events-none -rotate-12 bg-transparent z-0">
-                                    <span className="text-xs font-bold tracking-widest">{storeData?.name?.substring(0, 8) || "SOCIÉTÉ"}</span>
-                                </div>
-                                <div className="border-b border-gray-300 w-full"></div>
-                            </div>
-                        </div>
-                    </div>
+                    <InvoicePrintTemplate
+                        items={(initialData?.items || []).map((item: any) => ({
+                            product: item.product,
+                            quantity: item.quantity,
+                            unitPrice: Number(item.unitPrice),
+                            tvaRate: Number(item.tvaRate || 19),
+                            priceHt: Number(item.priceHt || 0),
+                        }))}
+                        customer={selectedCustomer}
+                        store={storeData}
+                        receiptNumber={initialData?.receiptNumber}
+                        documentId={initialData?.id}
+                        subtotalHT={subtotalHT}
+                        totalTVA={totalTVA}
+                        stampTax={stampTax}
+                        totalTTC={finalTotalTTC}
+                        paymentMethod={watchPaymentMethod}
+                    />
+                ) : currentType === "QUOTE" ? (
+                    <ProformaPrintTemplate
+                        items={(initialData?.items || []).map((item: any) => ({
+                            product: item.product,
+                            quantity: item.quantity,
+                            unitPrice: Number(item.unitPrice),
+                            tvaRate: Number(item.tvaRate || 19),
+                            priceHt: Number(item.priceHt || 0),
+                        }))}
+                        customer={selectedCustomer}
+                        store={storeData}
+                        receiptNumber={initialData?.receiptNumber}
+                        documentId={initialData?.id}
+                        subtotalHT={subtotalHT}
+                        totalTVA={totalTVA}
+                        stampTax={stampTax}
+                        totalTTC={finalTotalTTC}
+                        paymentMethod={watchPaymentMethod}
+                    />
                 ) : (
-                    /* BL / QUOTE LAYOUTS */
-                    <div className="p-8 text-sm bg-white text-black min-h-[500px]">
-                        {blTemplate === "compact" && (
-                            /* COMPACT BL PATTERN */
-                            <div className="flex flex-col gap-4">
-                                <div className="flex justify-between border-b pb-4">
-                                    <div>
-                                        <h2 className="text-xl font-bold uppercase">{typeConf.label}</h2>
-                                        <p>Réf: {initialData?.receiptNumber}</p>
-                                        <p>Client: {selectedCustomer?.name}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-bold">{storeData?.name || "SYNCLOUD POS"}</p>
-                                        <p>{format(new Date(), "dd/MM/yyyy HH:mm")}</p>
-                                    </div>
-                                </div>
-                                <table className="w-full border-collapse text-sm mt-4">
-                                    <thead>
-                                        <tr className="border-y border-black">
-                                            <th className="py-2 text-left">Désignation</th>
-                                            <th className="py-2 text-center w-16">Qté</th>
-                                            <th className="py-2 text-right">P.U</th>
-                                            <th className="py-2 text-right">Montant</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200">
-                                        {(initialData?.items || []).map((item: any, i: number) => (
-                                            <tr key={i}>
-                                                <td className="py-2">{item.product?.name}</td>
-                                                <td className="py-2 text-center">{item.quantity}</td>
-                                                <td className="py-2 text-right">{Number(item.unitPrice).toLocaleString()}</td>
-                                                <td className="py-2 text-right font-semibold">{(Number(item.unitPrice) * item.quantity).toLocaleString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {currentType === "ORDER" && selectedCustomer && (
-                                    <div className="self-end w-64 mt-4 border border-black p-3 space-y-1 bg-gray-50 text-xs">
-                                        <div className="flex justify-between"><span>Ancien Solde:</span> <span>{previousBalanceStr}</span></div>
-                                        <div className="flex justify-between font-bold"><span>Total TTC:</span> <span>{finalTotalTTCStr}</span></div>
-                                        <div className="flex justify-between text-gray-500"><span>(Timbre:</span> <span>{stampTaxStr})</span></div>
-                                        <div className="flex justify-between text-gray-500"><span>(TVA:</span> <span>{tvaAmountStr})</span></div>
-                                        <div className="flex justify-between"><span>Paiement:</span> <span>{paymentAmountStr}</span></div>
-                                        <div className="flex justify-between border-t border-black pt-1 mt-1 font-bold"><span>Nouveau Solde:</span> <span>{newBalanceStr}</span></div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {blTemplate === "aitee" && (
-                            /* AITEE STYLE BL */
-                            <div className="flex flex-col gap-4 font-sans text-xs">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="w-[45%]">
-                                        <div className="bg-[#222428] text-white p-3 flex flex-col justify-center items-center rounded-sm mb-2">
-                                            <div className="text-3xl tracking-widest text-[#4185D0] font-light mb-1 border-b border-gray-600 pb-1">{storeData?.name || "AITEE"}</div>
-                                            <div className="text-[8px] tracking-[0.2em] text-gray-400 uppercase mt-1">{storeData?.activity || "Premium Solutions"}</div>
-                                        </div>
-                                    </div>
-                                    <div className="text-center w-[40%] pt-2 px-6">
-                                        <h1 className="border border-black rounded-xl px-4 py-2 tracking-wider text-lg font-bold uppercase shadow-sm whitespace-nowrap">
-                                            {typeConf.label}
-                                        </h1>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between mb-8">
-                                    <div className="w-[48%] border border-black p-2 rounded-md">
-                                        <div className="font-bold underline mb-1">Détails Client :</div>
-                                        <div>{selectedCustomer?.name}</div>
-                                        <div>{selectedCustomer?.address}</div>
-                                        <div>Tél: {selectedCustomer?.phone}</div>
-                                    </div>
-                                    <div className="w-[48%] flex flex-col items-end text-sm">
-                                        <span className="font-bold mb-1">Réf: {initialData?.receiptNumber}</span>
-                                        <span>Date: {format(new Date(), "dd/MM/yyyy")}</span>
-                                    </div>
-                                </div>
-                                <table className="w-full border-collapse border border-black text-[12px]">
-                                    <thead>
-                                        <tr className="bg-[#e6f2e1] text-green-900 border-b border-black">
-                                            <th className="border-r border-black p-1.5 text-center">Désignation</th>
-                                            <th className="border-r border-black p-1.5 w-20 text-center">Qté</th>
-                                            <th className="border-r border-black p-1.5 w-28 text-center">P.U</th>
-                                            <th className="p-1.5 w-32 text-center">Montant</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {(initialData?.items || []).map((item: any, i: number) => (
-                                            <tr key={i} className="border-b border-gray-300">
-                                                <td className="border-r border-black p-1.5">{item.product?.name}</td>
-                                                <td className="border-r border-black p-1.5 text-center">{item.quantity}</td>
-                                                <td className="border-r border-black p-1.5 text-right">{Number(item.unitPrice).toLocaleString()}</td>
-                                                <td className="p-1.5 text-right font-semibold">{(Number(item.unitPrice) * item.quantity).toLocaleString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {currentType === "ORDER" && selectedCustomer && (
-                                    <div className="flex justify-end mt-4">
-                                        <div className="w-[300px] border border-black text-[12px]">
-                                            <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Ancien Solde:</span><span className="w-1/2 text-right">{previousBalanceStr}</span></div>
-                                            <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Total TTC:</span><span className="w-1/2 text-right">{finalTotalTTCStr}</span></div>
-                                            <div className="flex p-1.5 border-b border-gray-300 text-gray-500"><span className="w-1/2">Timbre:</span><span className="w-1/2 text-right">{stampTaxStr}</span></div>
-                                            <div className="flex p-1.5 border-b border-gray-300 text-gray-500"><span className="w-1/2">TVA:</span><span className="w-1/2 text-right">{tvaAmountStr}</span></div>
-                                            <div className="flex p-1.5 border-b border-gray-300"><span className="w-1/2 font-bold">Paiement:</span><span className="w-1/2 text-right">{paymentAmountStr}</span></div>
-                                            <div className="flex p-1.5 bg-gray-100 font-bold"><span className="w-1/2">Nouveau Solde:</span><span className="w-1/2 text-right">{newBalanceStr}</span></div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {blTemplate === "standard" && (
-                            /* STANDARD BL PATTERN (ORIGINAL) */
-                            <div>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h1 className="text-2xl font-bold">{typeConf.label}</h1>
-                                        <p className="text-gray-500">Réf: {initialData?.receiptNumber}</p>
-                                        <p className="text-gray-500">Date: {format(new Date(), "dd/MM/yyyy HH:mm")}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="flex items-center justify-end gap-2 mb-2">
-                                            {storeData?.logo && <img src={storeData.logo} alt="Logo" className="h-8 object-contain" />}
-                                            <p className="font-bold text-lg">{storeData?.name || "SYNCLOUD POS"}</p>
-                                        </div>
-                                        <p className="text-sm text-gray-600">Client: {selectedCustomer?.name}</p>
-                                    </div>
-                                </div>
-                                <table className="w-full border-collapse border border-gray-300 mb-6">
-                                    <thead className="bg-gray-100">
-                                        <tr>
-                                            <th className="border border-gray-300 p-2 text-left">Désignation</th>
-                                            <th className="border border-gray-300 p-2 text-right">Qté</th>
-                                            <th className="border border-gray-300 p-2 text-right">P.U (DA)</th>
-                                            <th className="border border-gray-300 p-2 text-right">Total (DA)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {(initialData?.items || []).map((item: any, i: number) => (
-                                            <tr key={i} className={i % 2 === 0 ? "" : "bg-gray-50"}>
-                                                <td className="border border-gray-300 p-2">{item.product?.name}</td>
-                                                <td className="border border-gray-300 p-2 text-right">{item.quantity}</td>
-                                                <td className="border border-gray-300 p-2 text-right">{Number(item.unitPrice).toLocaleString()}</td>
-                                                <td className="border border-gray-300 p-2 text-right font-semibold">{(Number(item.unitPrice) * item.quantity).toLocaleString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                    <tfoot>
-                                        {currentType === "ORDER" && selectedCustomer ? (
-                                            <>
-                                                <tr className="font-semibold bg-white border-t-2 border-gray-400">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">ANCIEN SOLDE</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{previousBalanceStr} DA</td>
-                                                </tr>
-                                                <tr className="font-semibold bg-white">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">MONTANT TOTAL TTC</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{finalTotalTTCStr} DA</td>
-                                                </tr>
-                                                <tr className="text-gray-500 bg-white">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">DONT TIMBRE</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{stampTaxStr} DA</td>
-                                                </tr>
-                                                <tr className="text-gray-500 bg-white">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">DONT TVA</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{tvaAmountStr} DA</td>
-                                                </tr>
-                                                <tr className="font-semibold bg-white">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">PAIEMENT</td>
-                                                    <td className="border border-gray-300 p-2 text-right">{paymentAmountStr} DA</td>
-                                                </tr>
-                                                <tr className="font-bold bg-gray-100">
-                                                    <td colSpan={3} className="border border-gray-300 p-2 text-right">NOUVEAU SOLDE</td>
-                                                    <td className="border border-gray-300 p-2 text-right py-3">{newBalanceStr} DA</td>
-                                                </tr>
-                                            </>
-                                        ) : (
-                                            <tr className="font-bold bg-gray-100">
-                                                <td colSpan={3} className="border border-gray-300 p-2 text-right">TOTAL TTC</td>
-                                                <td className="border border-gray-300 p-2 text-right py-3">{finalTotalTTCStr} DA</td>
-                                            </tr>
-                                        )}
-                                    </tfoot>
-                                </table>
-                            </div>
-                        )}
-
-                        <div className="flex justify-between mt-12 px-8">
-                            <div className="text-center">
-                                <p className="font-semibold mb-12">Signature Client</p>
-                                <div className="border-t border-gray-400 w-40"></div>
-                            </div>
-                            <div className="text-center">
-                                <p className="font-semibold mb-12">Cachet & Signature</p>
-                                <div className="border-t border-gray-400 w-40"></div>
-                            </div>
-                        </div>
-                    </div>
+                    <BonLivraisonPrintTemplate
+                        items={(initialData?.items || []).map((item: any) => ({
+                            product: item.product,
+                            quantity: item.quantity,
+                            unitPrice: Number(item.unitPrice),
+                            tvaRate: Number(item.tvaRate || 19),
+                            priceHt: Number(item.priceHt || 0),
+                        }))}
+                        customer={selectedCustomer}
+                        store={storeData}
+                        receiptNumber={initialData?.receiptNumber}
+                        documentId={initialData?.id}
+                        subtotalHT={subtotalHT}
+                        totalTVA={totalTVA}
+                        stampTax={stampTax}
+                        totalTTC={finalTotalTTC}
+                        previousBalance={previousBalance}
+                        paymentAmount={paymentAmount}
+                        newBalance={newBalance}
+                    />
                 )}
             </div>
 

@@ -1,0 +1,4 @@
+src/lib/redis.ts(54,39): error TS2345: Argument of type 'string | Buffer<ArrayBufferLike>' is not assignable to parameter of type 'string'.
+  Type 'Buffer<ArrayBufferLike>' is not assignable to type 'string'.
+syncloud-tournee/App.tsx(137,10): error TS2741: Property 'id' is missing in type '{ children: Element[]; screenOptions: ({ route }: { route: RouteProp<ParamListBase, string>; navigation: BottomTabNavigationProp<ParamListBase, string, string>; theme: Theme; }) => { ...; }; }' but required in type '{ id: string; }'.
+syncloud-tournee/App.tsx(232,14): error TS2741: Property 'id' is missing in type '{ children: Element; screenOptions: { headerShown: false; }; }' but required in type '{ id: string; }'.
