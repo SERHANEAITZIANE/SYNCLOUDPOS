@@ -186,13 +186,21 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     }
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("POS Checkout Error:", error)
-            // Distinguish network errors from other failures
+            // Extract the most useful error message
+            const errorMsg = error?.message || error?.digest || String(error)
+            
             if (error instanceof TypeError && (error.message.includes("fetch") || error.message.includes("network"))) {
                 toast.error("🌐 Connexion perdue. Veuillez vérifier votre réseau et réessayer.", { duration: 5000 })
+            } else if (errorMsg.includes("abonnement") || errorMsg.includes("bloqué") || errorMsg.includes("expiré")) {
+                toast.error(`🔒 ${errorMsg}`, { duration: 6000 })
+            } else if (errorMsg.includes("Stock insuffisant")) {
+                toast.error(`⚠️ ${errorMsg}`, { duration: 5000 })
+            } else if (errorMsg.includes("magasin") || errorMsg.includes("store")) {
+                toast.error(`🏪 ${errorMsg}`, { duration: 5000 })
             } else {
-                toast.error(`❌ ${t("errorValidation")} — Veuillez réessayer.`, { duration: 4000 })
+                toast.error(`❌ ${t("errorValidation")} — ${errorMsg}`, { duration: 4000 })
             }
             return { success: false }
         } finally {

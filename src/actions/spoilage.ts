@@ -5,6 +5,7 @@ import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
+import cacheMonitor from "@/lib/cache-monitor"
 
 interface SpoilageData {
     date: Date
@@ -78,6 +79,11 @@ export async function createSpoilage(data: SpoilageData) {
                 }
             })
 
+            await tx.product.update({
+                where: { id: productId },
+                data: { stock: { decrement: quantity } }
+            })
+
             await tx.stockMovement.create({
                 data: {
                     productId,
@@ -95,6 +101,8 @@ export async function createSpoilage(data: SpoilageData) {
 
         revalidatePath("/avaries")
         revalidatePath("/products")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
 
         return { success: "Avarie enregistrée avec succès" }
 

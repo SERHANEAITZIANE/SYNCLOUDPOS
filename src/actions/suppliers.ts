@@ -81,9 +81,12 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
     try {
         const supplier = await db.supplier.update({
-            where: { id },
+            where: { id, tenantId },
             data
         })
         revalidatePath("/(dashboard)/suppliers")
@@ -97,9 +100,12 @@ export const deleteSupplier = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
     try {
         await db.supplier.delete({
-            where: { id }
+            where: { id, tenantId }
         })
         revalidatePath("/(dashboard)/suppliers")
         return { success: "Supplier deleted" }
@@ -251,7 +257,7 @@ export const registerSupplierLoan = async (data: { supplierId: string; amount: n
 
     try {
         const result = await db.$transaction(async (tx) => {
-            const supplier = await tx.supplier.findUnique({ where: { id: data.supplierId } })
+            const supplier = await tx.supplier.findUnique({ where: { id: data.supplierId, tenantId } })
 
             // Get the treasury account
             const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
@@ -312,42 +318,45 @@ export const getSupplierLoans = async (supplierId?: string) => {
     if (!tenantId) return []
 
     try {
-        const where: any = { tenantId }
+        // Fetch specific or all suppliers 
+        const supplierWhere: any = { tenantId }
         if (supplierId && supplierId !== "ALL") {
-            where.id = supplierId
+            supplierWhere.id = supplierId
         }
 
         const suppliers = await db.supplier.findMany({
-            where,
-            select: { id: true, name: true, notes: true }
+            where: supplierWhere,
+            select: { id: true, name: true }
         })
 
-        const loans: { id: string; date: string; amount: number; description: string; supplierName: string; supplierId: string }[] = []
+        const supplierIds = suppliers.map(s => s.id)
 
-        suppliers.forEach(s => {
-            if (!s.notes) return
-            const lines = s.notes.split("\n")
-            lines.forEach((line, idx) => {
-                const match = line.match(/\[EMPRUNT (\d{2}\/\d{2}\/\d{4})\]\s+(\d+(?:\.\d+)?)\s+DA\s*-\s*(.*)/)
-                if (match) {
-                    const [, dateStr, amount, desc] = match
-                    const [day, month, year] = dateStr.split("/")
-                    loans.push({
-                        id: `${s.id}-${idx}`,
-                        date: new Date(`${year}-${month}-${day}`).toISOString(),
-                        amount: parseFloat(amount),
-                        description: desc.trim(),
-                        supplierName: s.name,
-                        supplierId: s.id
-                    })
-                }
-            })
+        // Supplier loans are MANUAL_IN transactions linked to a supplier
+        const transactions = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                source: "MANUAL_IN",
+                referenceId: { in: supplierIds }
+            },
+            orderBy: { date: "desc" }
         })
 
-        loans.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        const loans = transactions.map(t => {
+            const supplier = suppliers.find(s => s.id === t.referenceId)
+            return {
+                id: t.id,
+                date: t.date.toISOString(),
+                amount: Number(t.amount),
+                source: t.source,
+                description: t.description || "",
+                supplierName: supplier?.name || "Inconnu",
+                supplierId: t.referenceId as string
+            }
+        })
+
         return loans
     } catch (error) {
-        console.error("getSupplierLoans error:", error)
+        console.error("[GET_SUPPLIER_LOANS] error:", error)
         return []
     }
 }

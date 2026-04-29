@@ -26,14 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { registerSupplierPayment, deleteSupplier, importSuppliers } from "@/actions/suppliers"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
-import { Edit, MoreHorizontal, Trash, HandCoins, ScrollText } from "lucide-react"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Edit, Trash, HandCoins, ScrollText } from "lucide-react"
 
 interface SupplierClientProps {
     data: SupplierColumn[]
@@ -78,40 +71,54 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
             }
 
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">{tCommon("actions")}</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-
-                        <DropdownMenuItem onClick={() => {
+                <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        onClick={() => {
                             setSelectedSupplier(supplier)
                             setPaymentAmount("")
                             setAccountId(accounts.length > 0 ? accounts[0].id : "")
                             setNotes("Paiement / Avance Fournisseur")
                             setDate(new Date().toISOString().split('T')[0])
                             setPaymentModalOpen(true)
-                        }}>
-                            <HandCoins className="mr-2 h-4 w-4 text-emerald-600" /> Ajouter Paiement
-                        </DropdownMenuItem>
+                        }}
+                        title="Ajouter Paiement"
+                    >
+                        <HandCoins className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={() => router.push(`/suppliers/${supplier.id}/ledger`)}>
-                            <ScrollText className="mr-2 h-4 w-4" /> Voir Historique (Log)
-                        </DropdownMenuItem>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        onClick={() => router.push(`/suppliers/${supplier.id}/ledger`)}
+                        title="Historique"
+                    >
+                        <ScrollText className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={() => router.push(`/suppliers/${supplier.id}`)}>
-                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                        </DropdownMenuItem>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        onClick={() => router.push(`/suppliers/${supplier.id}`)}
+                        title={tCommon("edit")}
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={onConfirmDelete} className="text-red-600">
-                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        onClick={onConfirmDelete}
+                        title={tCommon("delete")}
+                    >
+                        <Trash className="h-4 w-4" />
+                    </Button>
+                </div>
             )
         }
     }

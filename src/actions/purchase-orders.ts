@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
+import cacheMonitor from "@/lib/cache-monitor"
 
 interface PurchaseOrderItemData {
     productId: string
@@ -42,10 +43,11 @@ export const getPurchaseOrders = async () => {
 export const getPurchaseOrder = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
+    const tenantId = session.user.tenantId
 
     try {
-        const purchaseOrder = await db.purchaseOrder.findUnique({
-            where: { id },
+        const purchaseOrder = await db.purchaseOrder.findFirst({
+            where: { id, tenantId },
             include: {
                 supplier: true,
                 items: { include: { product: { include: { barcodes: true } } } }
@@ -101,7 +103,10 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { cost: item.costPrice }
+                            data: { 
+                                cost: item.costPrice,
+                                stock: { increment: item.quantity }
+                            }
                         });
 
                         if (stockStoreId) {
@@ -169,6 +174,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
         })
 
         revalidatePath("/(dashboard)/purchases")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         return { success: "Bon de commande créé", id: result.id }
     } catch (error) {
         console.error("Create Purchase Order Error:", error)
@@ -258,7 +265,10 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { cost: item.costPrice }
+                            data: { 
+                                cost: item.costPrice,
+                                stock: { increment: item.quantity }
+                            }
                         });
 
                         if (stockStoreId) {
@@ -302,6 +312,11 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 data: { stock: stockAfter }
                             });
                         }
+
+                        await tx.product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        });
 
                         await tx.stockMovement.create({
                             data: {
@@ -366,6 +381,8 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
         })
 
         revalidatePath("/(dashboard)/purchases")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         return { success: `Statut mis à jour: ${newStatus}` }
     } catch (error) {
         console.error("Update Purchase Order Status Error:", error)
@@ -381,8 +398,53 @@ export const deletePurchaseOrder = async (id: string) => {
     const tenantId = session.user.tenantId
 
     try {
-        await db.purchaseOrder.delete({ where: { id, tenantId } })
+        await db.$transaction(async (tx) => {
+            const order = await tx.purchaseOrder.findUnique({
+                where: { id, tenantId },
+                include: { items: true }
+            });
+
+            if (!order) throw new Error("Not found");
+
+            // If order was COMPLETED, stock was incremented, so we must restore it
+            if (order.status === "COMPLETED") {
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                
+                await Promise.all(
+                    order.items.map(async (item) => {
+                        if (storeId) {
+                            await tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { decrement: item.quantity } }
+                            });
+                        }
+                        await tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        });
+                        
+                        // Delete related stock movements
+                        await tx.stockMovement.deleteMany({
+                            where: { referenceId: id, productId: item.productId }
+                        });
+                    })
+                );
+            }
+
+            // Restore supplier balance if we owed them money
+            if (order.status === "FACTURE") {
+                await tx.supplier.update({
+                    where: { id: order.supplierId },
+                    data: { balance: { decrement: order.total } }
+                });
+            }
+
+            await tx.purchaseOrder.delete({ where: { id, tenantId } });
+        });
+
         revalidatePath("/(dashboard)/purchases")
-        return { success: "Supprimé" }
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        return { success: "Supprimé et stock restauré" }
     } catch { return { error: "Erreur lors de la suppression" } }
 }

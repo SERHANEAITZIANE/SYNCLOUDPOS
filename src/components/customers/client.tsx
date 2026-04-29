@@ -24,17 +24,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { registerCustomerPayment } from "@/actions/customers"
-import { Edit, MoreHorizontal, Trash, ScrollText, HandCoins } from "lucide-react"
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { deleteCustomer } from "@/actions/customers"
+import { registerCustomerPayment, deleteCustomer } from "@/actions/customers"
+import { Edit, Trash, ScrollText, HandCoins } from "lucide-react"
 import { LoyaltyBadgeModal } from "./loyalty-badge-modal"
 
 interface CustomerClientProps {
@@ -81,47 +72,67 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
             }
 
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">{tCommon("actions")}</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-
-                        <DropdownMenuItem onClick={() => {
+                <div className="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        onClick={() => {
                             setSelectedCustomer(customer)
                             setPaymentAmount("")
                             setAccountId(accounts.length > 0 ? accounts[0].id : "")
                             setNotes("Paiement / Avance")
                             setDate(new Date().toISOString().split('T')[0])
                             setPaymentModalOpen(true)
-                        }}>
-                            <HandCoins className="mr-2 h-4 w-4 text-emerald-600" /> Ajouter Paiement
-                        </DropdownMenuItem>
+                        }}
+                        title="Ajouter Paiement"
+                    >
+                        <HandCoins className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={() => router.push(`/customers/${customer.id}/ledger`)}>
-                            <ScrollText className="mr-2 h-4 w-4" /> Voir Historique (Log)
-                        </DropdownMenuItem>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        onClick={() => router.push(`/customers/${customer.id}/ledger`)}
+                        title="Historique"
+                    >
+                        <ScrollText className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={() => router.push(`/customers/${customer.id}`)}>
-                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                        </DropdownMenuItem>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        onClick={() => router.push(`/customers/${customer.id}`)}
+                        title={tCommon("edit")}
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={() => {
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        onClick={() => {
                             setBadgeCustomer(customer)
                             setBadgeModalOpen(true)
-                        }}>
-                            <Star className="mr-2 h-4 w-4 text-amber-500 fill-amber-500" /> Carte Fidélité
-                        </DropdownMenuItem>
+                        }}
+                        title="Carte Fidélité"
+                    >
+                        <Star className="h-4 w-4 fill-current" />
+                    </Button>
 
-                        <DropdownMenuItem onClick={onConfirmDelete} className="text-red-600">
-                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        onClick={onConfirmDelete}
+                        title={tCommon("delete")}
+                    >
+                        <Trash className="h-4 w-4" />
+                    </Button>
+                </div>
             )
         }
     }

@@ -14,83 +14,86 @@ datasource db {
 // Models
 
 model Tenant {
-  id          String   @id @default(uuid())
-  name        String
-  ownerName   String?   // Nom
-  activity    String?   // Activité
-  address     String?   // Adresse
-  wilaya      String?   // Wilaya
-  commune     String?   // Commune
-  phone       String?   // Téléphone
-  fax         String?   // Fax
-  email       String?   // E-Mail
-  nif         String?   // Nif
-  rc          String?   // N° Rc
-  artImposition String? // Article d'imposition
-  nis         String?   // NIS
-  bankAccount String?   // Compte bancaire
-  logo        String?   // Photo
-  headerText  String?   // Entête
-  blTemplate  String?   @default("standard") // Template for Bon de Livraison
-  aiProvider  String?   @default("GEMINI") // GEMINI, OPENAI, ANTHROPIC
-  geminiApiKey String?  // Clé API Gemini
-  openaiApiKey String?  // Clé API OpenAI (ChatGPT)
-  anthropicApiKey String? // Clé API Anthropic (Claude)
-  whatsappToken   String?  // WhatsApp Cloud API Access Token
-  whatsappPhoneId String?  // WhatsApp Phone Number ID
-  whatsappPhone   String?  // WhatsApp sender phone number (e.g. +213...)
-  loyaltyPointsPerDa Int @default(1)   // Points earned per DA spent
-  loyaltyDaPerPoint  Int @default(100) // Points required for 1 DA discount
+  id                 String    @id @default(uuid())
+  name               String
+  ownerName          String? // Nom
+  activity           String? // Activité
+  address            String? // Adresse
+  wilaya             String? // Wilaya
+  commune            String? // Commune
+  phone              String? // Téléphone
+  fax                String? // Fax
+  email              String? // E-Mail
+  nif                String? // Nif
+  rc                 String? // N° Rc
+  artImposition      String? // Article d'imposition
+  nis                String? // NIS
+  bankAccount        String? // Compte bancaire
+  logo               String? // Photo
+  headerText         String? // Entête
+  blTemplate         String?   @default("standard") // Template for Bon de Livraison
+  aiProvider         String?   @default("GEMINI") // GEMINI, OPENAI, ANTHROPIC
+  geminiApiKey       String? // Clé API Gemini
+  openaiApiKey       String? // Clé API OpenAI (ChatGPT)
+  anthropicApiKey    String? // Clé API Anthropic (Claude)
+  whatsappToken      String? // WhatsApp Cloud API Access Token
+  whatsappPhoneId    String? // WhatsApp Phone Number ID
+  whatsappPhone      String? // WhatsApp sender phone number (e.g. +213...)
+  loyaltyPointsPerDa Int       @default(1) // Points earned per DA spent
+  loyaltyDaPerPoint  Int       @default(100) // Points required for 1 DA discount
   subscriptionEndsAt DateTime? // End date of current subscription/trial
-  isBlocked   Boolean   @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  isBlocked          Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
   // Delivery API Keys
-  yalidineApiId   String?   // Yalidine API ID
-  yalidineApiToken String?  // Yalidine API Token
-  dhdApiToken     String?   // DHD delivery API Token
-  hddApiToken     String?   // HDD delivery API Token
+  yalidineApiId    String? // Yalidine API ID
+  yalidineApiToken String? // Yalidine API Token
+  dhdApiToken      String? // DHD delivery API Token
+  hddApiToken      String? // HDD delivery API Token
   // Algerian-specific settings
-  ramadanMode     Boolean   @default(false) // Enable Ramadan mode
-  commissionRate  Float     @default(0)     // Default commission % for salespeople
-  taxRegime       String?   @default("G50") // "G50" (TVA) or "G12" (IFU)
-  ifuRate         Float?    @default(5)     // IFU rate: 0.5, 5, or 12
-  tapRate         Float     @default(2)     // TAP rate: 1% (production), 2% (services/trade), 3% (liberal)
-  stampTaxEnabled Boolean   @default(true)  // Enable Droit de Timbre on invoices/BL
-  posTimbreEnabled Boolean  @default(false) // Enable Droit de Timbre on POS sales (cash only)
-  
-  users       User[]
-  tenantUsers TenantUser[]
-  products    Product[]
-  brands      Brand[]
-  categories  Category[]
-  orders      Order[]
-  customers   Customer[]
-  suppliers   Supplier[]
-  purchaseOrders PurchaseOrder[]
-  salesOrders    SalesOrder[]
-  expenses       Expense[]
-  expenseCategories ExpenseCategory[]
-  treasuryAccounts TreasuryAccount[]
+  ramadanMode      Boolean @default(false) // Enable Ramadan mode
+  commissionRate   Float   @default(0) // Default commission % for salespeople
+  taxRegime        String? @default("G50") // "G50" (TVA) or "G12" (IFU)
+  ifuRate          Float?  @default(5) // IFU rate: 0.5, 5, or 12
+  tapRate          Float   @default(2) // TAP rate: 1% (production), 2% (services/trade), 3% (liberal)
+  stampTaxEnabled  Boolean @default(true) // Enable Droit de Timbre on invoices/BL
+  posTimbreEnabled Boolean @default(false) // Enable Droit de Timbre on POS sales (cash only)
+
+  users                User[]
+  tenantUsers          TenantUser[]
+  products             Product[]
+  brands               Brand[]
+  categories           Category[]
+  orders               Order[]
+  customers            Customer[]
+  suppliers            Supplier[]
+  purchaseOrders       PurchaseOrder[]
+  salesOrders          SalesOrder[]
+  expenses             Expense[]
+  expenseCategories    ExpenseCategory[]
+  treasuryAccounts     TreasuryAccount[]
   treasuryTransactions TreasuryTransaction[]
-  spoilages      Spoilage[]
-  promotions     Promotion[]
-  stockMovements StockMovement[]
-  dailyCloses    DailyClose[]
-  stockCountSessions StockCountSession[]
-  recurringInvoices  RecurringInvoice[]
-  stores             Store[]
-  reservations       Reservation[]
-  deliveryShipments  DeliveryShipment[]
-  sequenceCounters   SequenceCounter[]
-  auditLogs          AuditLog[]
+  spoilages            Spoilage[]
+  promotions           Promotion[]
+  stockMovements       StockMovement[]
+  dailyCloses          DailyClose[]
+  stockCountSessions   StockCountSession[]
+  recurringInvoices    RecurringInvoice[]
+  stores               Store[]
+  reservations         Reservation[]
+  deliveryShipments    DeliveryShipment[]
+  sequenceCounters     SequenceCounter[]
+  auditLogs            AuditLog[]
   // Tournée mobile
-  deliveryTours      DeliveryTour[]
-  truckLoads         TruckLoad[]
-  productReturns     ProductReturn[]
-  driverLocations    DriverLocation[]
-  mobileTokens       MobileRefreshToken[]
+  deliveryTours        DeliveryTour[]
+  truckLoads           TruckLoad[]
+  productReturns       ProductReturn[]
+  driverLocations      DriverLocation[]
+  mobileTokens         MobileRefreshToken[]
+  // Proforma & Invoices
+  proformas            Proforma[]
+  invoices             Invoice[]
 }
 
 model Store {
@@ -102,24 +105,26 @@ model Store {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users              User[]              @relation("UserDefaultStore")
-  storeProducts      StoreProduct[]
-  orders             Order[]
-  salesOrders        SalesOrder[]
-  purchaseOrders     PurchaseOrder[]
-  stockMovements     StockMovement[]
-  spoilages          Spoilage[]
-  dailyCloses        DailyClose[]
+  users          User[]          @relation("UserDefaultStore")
+  storeProducts  StoreProduct[]
+  orders         Order[]
+  salesOrders    SalesOrder[]
+  purchaseOrders PurchaseOrder[]
+  stockMovements StockMovement[]
+  spoilages      Spoilage[]
+  dailyCloses    DailyClose[]
+  proformas      Proforma[]
+  invoices       Invoice[]
 }
 
 model StoreProduct {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   storeId   String
-  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store     Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  stock     Int      @default(0)
-  minStock  Int      @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stock     Int     @default(0)
+  minStock  Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -128,110 +133,110 @@ model StoreProduct {
 }
 
 model RecurringInvoice {
-  id              String   @id @default(uuid())
-  tenantId        String
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id])
-  
-  status          String   @default("ACTIVE") // ACTIVE, PAUSED
-  frequency       String   @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
-  nextRunDate     DateTime
-  lastRunDate     DateTime?
-  
-  subTotal        Decimal  @default(0)
-  tax             Decimal  @default(0)
-  total           Decimal  @default(0)
-  
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  status      String    @default("ACTIVE") // ACTIVE, PAUSED
+  frequency   String    @default("MONTHLY") // WEEKLY, MONTHLY, YEARLY
+  nextRunDate DateTime
+  lastRunDate DateTime?
+
+  subTotal Decimal @default(0)
+  tax      Decimal @default(0)
+  total    Decimal @default(0)
+
   items           RecurringInvoiceItem[]
   generatedOrders SalesOrder[] // Optional history of BLs generated
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RecurringInvoiceItem {
-  id                 String   @id @default(uuid())
+  id                 String           @id @default(uuid())
   recurringInvoiceId String
   recurringInvoice   RecurringInvoice @relation(fields: [recurringInvoiceId], references: [id], onDelete: Cascade)
   productId          String
-  product            Product  @relation(fields: [productId], references: [id])
+  product            Product          @relation(fields: [productId], references: [id])
   quantity           Int
   unitPrice          Decimal
   subTotal           Decimal
 }
 
 model StockCountSession {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  name        String   // e.g. "Inventaire Mars 2026"
-  status      String   @default("OPEN") // OPEN, APPROVED, CANCELLED
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  approvedAt  DateTime?
-  items       StockCountItem[]
+  id         String           @id @default(uuid())
+  tenantId   String
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
+  name       String // e.g. "Inventaire Mars 2026"
+  status     String           @default("OPEN") // OPEN, APPROVED, CANCELLED
+  notes      String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  approvedAt DateTime?
+  items      StockCountItem[]
 }
 
 model StockCountItem {
-  id          String   @id @default(uuid())
+  id          String            @id @default(uuid())
   sessionId   String
   session     StockCountSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   productId   String
-  productName String   // snapshot at time of count
-  expectedQty Int      // stock in DB at time of count
-  actualQty   Int      @default(0)
-  difference  Int      @default(0) // actualQty - expectedQty
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  productName String // snapshot at time of count
+  expectedQty Int // stock in DB at time of count
+  actualQty   Int               @default(0)
+  difference  Int               @default(0) // actualQty - expectedQty
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model Promotion {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
   name          String
-  type          String   @default("NTH_ITEM_DISCOUNT") // NTH_ITEM_DISCOUNT | BUY_X_GET_Y_FREE
-  targetScope   String   @default("ALL")  // ALL | CATEGORY | PRODUCT
-  scopeId       String?  // categoryId or productId if targeted
-  discountType  String   @default("PERCENT") // PERCENT | FIXED
-  discountValue Decimal  @default(30)   // e.g. 30 for 30%
-  triggerQty    Int      @default(2)    // Apply from Nth item
-  isActive      Boolean  @default(true)
+  type          String    @default("NTH_ITEM_DISCOUNT") // NTH_ITEM_DISCOUNT | BUY_X_GET_Y_FREE
+  targetScope   String    @default("ALL") // ALL | CATEGORY | PRODUCT
+  scopeId       String? // categoryId or productId if targeted
+  discountType  String    @default("PERCENT") // PERCENT | FIXED
+  discountValue Decimal   @default(30) // e.g. 30 for 30%
+  triggerQty    Int       @default(2) // Apply from Nth item
+  isActive      Boolean   @default(true)
   startsAt      DateTime?
   endsAt        DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  phone     String?
-  isSuperadmin Boolean @default(false)
-  canEdit   Boolean  @default(false)
-  canDelete Boolean  @default(false)
-  role      String   @default("CASHIER")
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  id             String   @id @default(uuid())
+  email          String   @unique
+  name           String?
+  password       String
+  phone          String?
+  isSuperadmin   Boolean  @default(false)
+  canEdit        Boolean  @default(false)
+  canDelete      Boolean  @default(false)
+  role           String   @default("CASHIER")
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
   defaultStoreId String?
-  defaultStore   Store? @relation("UserDefaultStore", fields: [defaultStoreId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  orders      Order[]
-  tenantUsers TenantUser[]
-  spoilages   Spoilage[]
-  stockMovements StockMovement[]
+  defaultStore   Store?   @relation("UserDefaultStore", fields: [defaultStoreId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders          Order[]
+  tenantUsers     TenantUser[]
+  spoilages       Spoilage[]
+  stockMovements  StockMovement[]
   // Tournée mobile
-  deliveryTours    DeliveryTour[]
-  truckLoads       TruckLoad[]
-  productReturns   ProductReturn[]
-  driverLocations  DriverLocation[]
-  mobileTokens     MobileRefreshToken[]
+  deliveryTours   DeliveryTour[]
+  truckLoads      TruckLoad[]
+  productReturns  ProductReturn[]
+  driverLocations DriverLocation[]
+  mobileTokens    MobileRefreshToken[]
 
   @@index([tenantId])
   @@index([email])
@@ -250,40 +255,43 @@ model TenantUser {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal
-  cost        Decimal?
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  price          Decimal
+  cost           Decimal?
   wholesalePrice Decimal?
   dealerPrice    Decimal?
-  tvaRate     Decimal   @default(19)
-  isFeatured  Boolean   @default(false)
-  isArchived  Boolean   @default(false)
-  stock       Int      @default(0)
-  minStock    Int      @default(0)
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
-  brandId     String?
-  brand       Brand?    @relation(fields: [brandId], references: [id])
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  orderItems  OrderItem[]
-  purchaseItems PurchaseOrderItem[]
-  salesItems    SalesOrderItem[]
-  spoilages   Spoilage[]
-  images      Image[]
+  tvaRate        Decimal   @default(19)
+  isFeatured     Boolean   @default(false)
+  isArchived     Boolean   @default(false)
+  stock          Int       @default(0)
+  minStock       Int       @default(0)
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+  brandId        String?
+  brand          Brand?    @relation(fields: [brandId], references: [id])
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  orderItems     OrderItem[]
+  purchaseItems  PurchaseOrderItem[]
+  salesItems     SalesOrderItem[]
+  spoilages      Spoilage[]
+  images         Image[]
   storeProducts  StoreProduct[]
-  barcodes    Barcode[]
+  barcodes       Barcode[]
   stockMovements StockMovement[]
   recurringItems RecurringInvoiceItem[]
   reservations   Reservation[]
   // Tournée mobile
   truckLoadItems TruckLoadItem[]
   productReturns ProductReturn[]
+  // Proforma & Invoices
+  proformaItems  ProformaItem[]
+  invoiceItems   InvoiceItem[]
 
   @@index([tenantId])
   @@index([tenantId, isArchived])
@@ -304,7 +312,7 @@ model Image {
 model Barcode {
   id        String   @id @default(uuid())
   value     String
-  label     String?  // e.g. "EAN-13", "UPC", "Internal"
+  label     String? // e.g. "EAN-13", "UPC", "Internal"
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -331,34 +339,37 @@ model Brand {
 }
 
 model Customer {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String?
-  email     String?
-  address   String?
-  city      String?
-  taxId     String?  // legacy field
-  nif       String?
-  nis       String?
-  artImposition String?
-  rc        String?
-  rib       String?
-  notes     String?
-  barcode   String?  @unique
-  loyaltyPoints Int @default(0)
-  balance       Decimal @default(0)
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  orders    Order[]
-  salesOrders SalesOrder[]
+  id                String             @id @default(uuid())
+  name              String
+  phone             String?
+  email             String?
+  address           String?
+  city              String?
+  taxId             String? // legacy field
+  nif               String?
+  nis               String?
+  artImposition     String?
+  rc                String?
+  rib               String?
+  notes             String?
+  barcode           String?            @unique
+  loyaltyPoints     Int                @default(0)
+  balance           Decimal            @default(0)
+  tenantId          String
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  orders            Order[]
+  salesOrders       SalesOrder[]
   recurringInvoices RecurringInvoice[]
-  clientType String @default("RETAIL")
-  reservations Reservation[]
+  clientType        String             @default("RETAIL")
+  reservations      Reservation[]
   // Tournée mobile
-  tourStops      TourStop[]
-  productReturns ProductReturn[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  tourStops         TourStop[]
+  productReturns    ProductReturn[]
+  // Proforma & Invoices
+  proformas         Proforma[]
+  invoices          Invoice[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([tenantId])
   @@index([tenantId, balance])
@@ -366,50 +377,50 @@ model Customer {
 }
 
 model Supplier {
-  id            String   @id @default(uuid())
-  name          String
-  contactPerson String?
-  email         String?
-  phone         String?
-  address       String?
-  taxId         String?  // legacy field
-  nif           String?  // Numéro d'Identification Fiscale
-  nis           String?  // Numéro d'Identifiant Statistique
-  artImposition String?  // Article d'Imposition
-  rc            String?  // Registre de Commerce (NRC)
-  rib           String?  // Relevé d'Identité Bancaire
-  notes         String?  // Used for tracking loan history entries
-  balance       Decimal  @default(0)  // Outstanding amount owed to supplier
-  withholdingRate Float  @default(0)  // Retenue à la source: 0%, 10%, 15%, 24%
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  purchaseOrders PurchaseOrder[]
+  id              String          @id @default(uuid())
+  name            String
+  contactPerson   String?
+  email           String?
+  phone           String?
+  address         String?
+  taxId           String? // legacy field
+  nif             String? // Numéro d'Identification Fiscale
+  nis             String? // Numéro d'Identifiant Statistique
+  artImposition   String? // Article d'Imposition
+  rc              String? // Registre de Commerce (NRC)
+  rib             String? // Relevé d'Identité Bancaire
+  notes           String? // Used for tracking loan history entries
+  balance         Decimal         @default(0) // Outstanding amount owed to supplier
+  withholdingRate Float           @default(0) // Retenue à la source: 0%, 10%, 15%, 24%
+  tenantId        String
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  purchaseOrders  PurchaseOrder[]
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  subtotal    Decimal     @default(0)
-  tvaAmount   Decimal     @default(0)
-  stampTax    Decimal     @default(0)
-  total       Decimal
-  paidAmount  Decimal     @default(0)
-  status      String      @default("COMPLETED")
-  paymentMethod String    @default("CASH")
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  customerId  String?
-  customer    Customer?   @relation(fields: [customerId], references: [id])
-  tenantId    String
-  tenant      Tenant      @relation(fields: [tenantId], references: [id])
-  storeId     String?
-  store       Store?      @relation(fields: [storeId], references: [id])
-  items       OrderItem[]
-  accountId   String?
-  account     TreasuryAccount? @relation(fields: [accountId], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            String           @id @default(uuid())
+  subtotal      Decimal          @default(0)
+  tvaAmount     Decimal          @default(0)
+  stampTax      Decimal          @default(0)
+  total         Decimal
+  paidAmount    Decimal          @default(0)
+  status        String           @default("COMPLETED")
+  paymentMethod String           @default("CASH")
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  customerId    String?
+  customer      Customer?        @relation(fields: [customerId], references: [id])
+  tenantId      String
+  tenant        Tenant           @relation(fields: [tenantId], references: [id])
+  storeId       String?
+  store         Store?           @relation(fields: [storeId], references: [id])
+  items         OrderItem[]
+  accountId     String?
+  account       TreasuryAccount? @relation(fields: [accountId], references: [id])
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -425,27 +436,27 @@ model OrderItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Decimal  // Unit Price TTC at the time of sale
-  priceHt   Decimal  @default(0) // Unit Price HT at the time of sale
-  tvaRate   Decimal  @default(0) // TVA Rate at the time of sale
+  price     Decimal // Unit Price TTC at the time of sale
+  priceHt   Decimal @default(0) // Unit Price HT at the time of sale
+  tvaRate   Decimal @default(0) // TVA Rate at the time of sale
 }
 
 model PurchaseOrder {
-  id          String      @id @default(uuid())
-  supplierId  String
-  supplier    Supplier    @relation(fields: [supplierId], references: [id])
-  tenantId    String
-  tenant      Tenant      @relation(fields: [tenantId], references: [id])
-  storeId     String?
-  store       Store?      @relation(fields: [storeId], references: [id])
-  total       Decimal
-  withholdingAmount Decimal @default(0) // Retenue à la source amount
-  status      String      @default("PENDING")
-  items       PurchaseOrderItem[]
-  accountId   String?
-  account     TreasuryAccount? @relation(fields: [accountId], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                String              @id @default(uuid())
+  supplierId        String
+  supplier          Supplier            @relation(fields: [supplierId], references: [id])
+  tenantId          String
+  tenant            Tenant              @relation(fields: [tenantId], references: [id])
+  storeId           String?
+  store             Store?              @relation(fields: [storeId], references: [id])
+  total             Decimal
+  withholdingAmount Decimal             @default(0) // Retenue à la source amount
+  status            String              @default("PENDING")
+  items             PurchaseOrderItem[]
+  accountId         String?
+  account           TreasuryAccount?    @relation(fields: [accountId], references: [id])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -461,55 +472,60 @@ model PurchaseOrderItem {
   product         Product       @relation(fields: [productId], references: [id])
   quantity        Int
   costPrice       Decimal
-  tvaRate         Decimal  @default(19) // TVA rate on purchase for TVA déductible
+  tvaRate         Decimal       @default(19) // TVA rate on purchase for TVA déductible
 }
 
 model SalesOrder {
-  id              String        @id @default(uuid())
-  tenantId        String
-  tenant          Tenant        @relation(fields: [tenantId], references: [id])
-  storeId         String?
-  store           Store?        @relation(fields: [storeId], references: [id])
-  customerId      String
-  customer        Customer      @relation(fields: [customerId], references: [id])
-  type            String        @default("ORDER")
-  status          String        @default("DRAFT")
-  receiptNumber   String?
-  paymentMethod   String        @default("CASH")
-  paymentStatus   String        @default("PENDING")
-  amountPaid      Decimal       @default(0)
-  subtotal        Decimal       @default(0)
-  tvaAmount       Decimal       @default(0)
-  stampTax        Decimal       @default(0)
-  total           Decimal
-  notes           String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  storeId       String?
+  store         Store?   @relation(fields: [storeId], references: [id])
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  type          String   @default("ORDER")
+  status        String   @default("DRAFT")
+  receiptNumber String?
+  paymentMethod String   @default("CASH")
+  paymentStatus String   @default("PENDING")
+  amountPaid    Decimal  @default(0)
+  subtotal      Decimal  @default(0)
+  tvaAmount     Decimal  @default(0)
+  stampTax      Decimal  @default(0)
+  total         Decimal
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   recurringInvoiceId String?
   recurringInvoice   RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
 
   relatedSalesOrderId String? // For credit notes: references the original invoice
 
-  items           SalesOrderItem[]
+  proformaId String? // Link to source proforma
+  proforma   Proforma? @relation(fields: [proformaId], references: [id])
+
+  items        SalesOrderItem[]
+  invoiceItems InvoiceItem[] // BL can be included in invoices
 
   @@index([tenantId])
   @@index([tenantId, storeId])
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
   @@index([tenantId, storeId, status, createdAt])
+  @@index([proformaId])
 }
 
 model SalesOrderItem {
-  id              String        @id @default(uuid())
-  salesOrderId    String
-  salesOrder      SalesOrder    @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
-  productId       String
-  product         Product       @relation(fields: [productId], references: [id])
-  quantity        Int
-  unitPrice       Decimal
-  tvaRate         Decimal       @default(0) // TVA Rate at the time of sale
-  priceHt         Decimal       @default(0) // Unit Price HT at the time of sale
+  id           String     @id @default(uuid())
+  salesOrderId String
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  quantity     Int
+  unitPrice    Decimal
+  tvaRate      Decimal    @default(0) // TVA Rate at the time of sale
+  priceHt      Decimal    @default(0) // Unit Price HT at the time of sale
 }
 
 model ExpenseCategory {
@@ -524,16 +540,16 @@ model ExpenseCategory {
 }
 
 model Expense {
-  id          String          @id @default(uuid())
+  id          String           @id @default(uuid())
   description String
   amount      Decimal
-  date        DateTime        @default(now())
+  date        DateTime         @default(now())
   categoryId  String
-  category    ExpenseCategory @relation(fields: [categoryId], references: [id])
+  category    ExpenseCategory  @relation(fields: [categoryId], references: [id])
   tenantId    String
-  tenant      Tenant          @relation(fields: [tenantId], references: [id])
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   accountId   String?
   account     TreasuryAccount? @relation(fields: [accountId], references: [id])
 
@@ -542,15 +558,15 @@ model Expense {
 }
 
 model TreasuryAccount {
-  id          String   @id @default(uuid())
-  name        String
-  type        String   // CAISSE, BANK
-  balance     Decimal  @default(0)
-  rib         String?
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  type      String // CAISSE, BANK
+  balance   Decimal  @default(0)
+  rib       String?
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   transactions TreasuryTransaction[]
   orders       Order[]
@@ -559,40 +575,39 @@ model TreasuryAccount {
 }
 
 model TreasuryTransaction {
-  id            String   @id @default(uuid())
+  id            String          @id @default(uuid())
   accountId     String
   account       TreasuryAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  type          String   // CREDIT, DEBIT
+  type          String // CREDIT, DEBIT
   amount        Decimal
   balanceBefore Decimal
   balanceAfter  Decimal
-  source        String   // SALE, PURCHASE, EXPENSE, MANUAL_IN, MANUAL_OUT, TRANSFER, INITIAL_BALANCE
-  referenceId   String?  // ID of the related order, purchase, or expense
+  source        String // SALE, PURCHASE, EXPENSE, MANUAL_IN, MANUAL_OUT, TRANSFER, INITIAL_BALANCE
+  referenceId   String? // ID of the related order, purchase, or expense
   description   String?
-  date          DateTime @default(now())
+  date          DateTime        @default(now())
   tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt     DateTime @default(now())
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime        @default(now())
 }
 
-
 model Spoilage {
-  id        String   @id @default(uuid())
-  date      DateTime @default(now())
-  reason    String?
-  quantity  Int
-  
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String   @id @default(uuid())
+  date     DateTime @default(now())
+  reason   String?
+  quantity Int
 
-  storeId   String?
-  store     Store?   @relation(fields: [storeId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -604,20 +619,20 @@ model DailyClose {
   tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   storeId         String?
   store           Store?   @relation(fields: [storeId], references: [id])
-  date            DateTime @default(now())    // The date of the close
-  periodStart     DateTime                    // Start of the period counted
-  periodEnd       DateTime                    // End of the period counted
-  totalRevenue    Decimal  @default(0)        // Sum of all POS + BL sales
-  cashRevenue     Decimal  @default(0)        // Revenue from CASH
-  transferRevenue Decimal  @default(0)        // Revenue from TRANSFER
-  checkRevenue    Decimal  @default(0)        // Revenue from CHECK
-  termRevenue     Decimal  @default(0)        // Revenue from TERM (credit)
-  totalExpenses   Decimal  @default(0)        // Sum of expenses in period
-  netCash         Decimal  @default(0)        // cashRevenue - totalExpenses
-  ordersCount     Int      @default(0)        // Number of POS orders
-  salesCount      Int      @default(0)        // Number of BL orders
-  notes           String?                     // Optional cashier notes
-  closedByUserId  String?                     // Who closed the register
+  date            DateTime @default(now()) // The date of the close
+  periodStart     DateTime // Start of the period counted
+  periodEnd       DateTime // End of the period counted
+  totalRevenue    Decimal  @default(0) // Sum of all POS + BL sales
+  cashRevenue     Decimal  @default(0) // Revenue from CASH
+  transferRevenue Decimal  @default(0) // Revenue from TRANSFER
+  checkRevenue    Decimal  @default(0) // Revenue from CHECK
+  termRevenue     Decimal  @default(0) // Revenue from TERM (credit)
+  totalExpenses   Decimal  @default(0) // Sum of expenses in period
+  netCash         Decimal  @default(0) // cashRevenue - totalExpenses
+  ordersCount     Int      @default(0) // Number of POS orders
+  salesCount      Int      @default(0) // Number of BL orders
+  notes           String? // Optional cashier notes
+  closedByUserId  String? // Who closed the register
   createdAt       DateTime @default(now())
 }
 
@@ -697,29 +712,29 @@ model OtpCode {
 
 // ── License Requests (from local installations) ───────────────────────────────
 model LicenseRequest {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
   // Client information
-  companyName   String
-  ownerName     String
-  phone         String
-  email         String
-  address       String?
-  wilaya        String?
+  companyName String
+  ownerName   String
+  phone       String
+  email       String
+  address     String?
+  wilaya      String?
 
   // Machine info
-  machineId     String
-  ipAddress     String?
+  machineId String
+  ipAddress String?
 
   // License info
-  plan          String   @default("lifetime")  // starter | pro | enterprise | lifetime
-  status        String   @default("PENDING")   // PENDING | APPROVED | REJECTED
-  licenseKey    String?
-  notes         String?
+  plan       String  @default("lifetime") // starter | pro | enterprise | lifetime
+  status     String  @default("PENDING") // PENDING | APPROVED | REJECTED
+  licenseKey String?
+  notes      String?
 
   // Timestamps
-  createdAt     DateTime @default(now())
-  approvedAt    DateTime?
+  createdAt  DateTime  @default(now())
+  approvedAt DateTime?
 
   @@index([status])
   @@index([machineId])
@@ -731,8 +746,8 @@ model SequenceCounter {
   id        String   @id @default(uuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  prefix    String   // FA, BL, DE, AV, BC, etc.
-  year      Int      // 2026
+  prefix    String // FA, BL, DE, AV, BC, etc.
+  year      Int // 2026
   lastValue Int      @default(0)
   updatedAt DateTime @updatedAt
 
@@ -745,15 +760,15 @@ model AuditLog {
   id          String   @id @default(uuid())
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  userId      String?  // Who performed the action
-  userName    String?  // Snapshot of user's name at the time
-  action      String   // CREATE, UPDATE, DELETE, VOID, LOGIN, EXPORT, PRINT
-  entity      String   // ORDER, PRODUCT, CUSTOMER, SETTINGS, USER, SALES_ORDER
-  entityId    String?  // ID of the affected record
-  description String?  // Human-readable description
-  before      String?  // JSON snapshot of before state
-  after       String?  // JSON snapshot of after state
-  ipAddress   String?  // Client IP for security audits
+  userId      String? // Who performed the action
+  userName    String? // Snapshot of user's name at the time
+  action      String // CREATE, UPDATE, DELETE, VOID, LOGIN, EXPORT, PRINT
+  entity      String // ORDER, PRODUCT, CUSTOMER, SETTINGS, USER, SALES_ORDER
+  entityId    String? // ID of the affected record
+  description String? // Human-readable description
+  before      String? // JSON snapshot of before state
+  after       String? // JSON snapshot of after state
+  ipAddress   String? // Client IP for security audits
   createdAt   DateTime @default(now())
 
   @@index([tenantId])
@@ -768,15 +783,15 @@ model AuditLog {
 
 // JWT refresh tokens for mobile app authentication
 model MobileRefreshToken {
-  id          String   @id @default(uuid())
-  token       String   @unique
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  deviceName  String?  // "Samsung Galaxy A54", "Pixel 7"
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  token      String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deviceName String? // "Samsung Galaxy A54", "Pixel 7"
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
 
   @@index([userId])
   @@index([token])
@@ -784,23 +799,23 @@ model MobileRefreshToken {
 
 // A daily delivery tour assigned to a driver
 model DeliveryTour {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   driverId    String
-  driver      User     @relation(fields: [driverId], references: [id])
-  name        String?  // "Tournée Alger Centre", "Route Sud"
-  date        DateTime @default(now()) // Tour date
-  status      String   @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
+  driver      User      @relation(fields: [driverId], references: [id])
+  name        String? // "Tournée Alger Centre", "Route Sud"
+  date        DateTime  @default(now()) // Tour date
+  status      String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, CANCELLED
   startedAt   DateTime?
   completedAt DateTime?
-  totalKm     Float    @default(0)
+  totalKm     Float     @default(0)
   notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  stops       TourStop[]
-  truckLoad   TruckLoad?
+  stops     TourStop[]
+  truckLoad TruckLoad?
 
   @@index([tenantId])
   @@index([tenantId, driverId])
@@ -810,27 +825,27 @@ model DeliveryTour {
 
 // A stop on a delivery tour (one per client)
 model TourStop {
-  id              String   @id @default(uuid())
-  tourId          String
-  tour            DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id])
-  sortOrder       Int      @default(0)  // Order in the optimized route
-  status          String   @default("PENDING") // PENDING, EN_ROUTE, DELIVERED, ABSENT, SKIPPED, PARTIAL
-  latitude        Float?   // Client GPS coordinates
-  longitude       Float?
-  arrivedAt       DateTime?
-  completedAt     DateTime?
-  signatureUrl    String?  // URL to signature image
-  photoUrl        String?  // Proof of delivery photo
-  notes           String?
+  id            String       @id @default(uuid())
+  tourId        String
+  tour          DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  customerId    String
+  customer      Customer     @relation(fields: [customerId], references: [id])
+  sortOrder     Int          @default(0) // Order in the optimized route
+  status        String       @default("PENDING") // PENDING, EN_ROUTE, DELIVERED, ABSENT, SKIPPED, PARTIAL
+  latitude      Float? // Client GPS coordinates
+  longitude     Float?
+  arrivedAt     DateTime?
+  completedAt   DateTime?
+  signatureUrl  String? // URL to signature image
+  photoUrl      String? // Proof of delivery photo
+  notes         String?
   // Linked documents created at this stop
-  salesOrderId    String?  // BL created
-  paymentAmount   Float    @default(0)  // Payment collected
-  paymentMethod   String?  // CASH, CHECK, TRANSFER
-  returnAmount    Float    @default(0)  // Value of returns
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  salesOrderId  String? // BL created
+  paymentAmount Float        @default(0) // Payment collected
+  paymentMethod String? // CASH, CHECK, TRANSFER
+  returnAmount  Float        @default(0) // Value of returns
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([tourId])
   @@index([customerId])
@@ -839,21 +854,21 @@ model TourStop {
 
 // Truck load for a delivery tour (what's in the truck)
 model TruckLoad {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  tourId      String   @unique
-  tour        DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
-  driverId    String
-  driver      User     @relation(fields: [driverId], references: [id])
-  status      String   @default("LOADING") // LOADING, LOADED, IN_TRANSIT, RETURNED
-  loadedAt    DateTime?
-  returnedAt  DateTime?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String       @id @default(uuid())
+  tenantId   String
+  tenant     Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tourId     String       @unique
+  tour       DeliveryTour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  driverId   String
+  driver     User         @relation(fields: [driverId], references: [id])
+  status     String       @default("LOADING") // LOADING, LOADED, IN_TRANSIT, RETURNED
+  loadedAt   DateTime?
+  returnedAt DateTime?
+  notes      String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
-  items       TruckLoadItem[]
+  items TruckLoadItem[]
 
   @@index([tenantId])
   @@index([tourId])
@@ -861,17 +876,17 @@ model TruckLoad {
 
 // Individual product in the truck
 model TruckLoadItem {
-  id            String    @id @default(uuid())
-  truckLoadId   String
-  truckLoad     TruckLoad @relation(fields: [truckLoadId], references: [id], onDelete: Cascade)
-  productId     String
-  product       Product   @relation(fields: [productId], references: [id])
-  qtyLoaded     Int       // Quantity loaded at departure
-  qtySold       Int       @default(0) // Quantity sold during tour
-  qtyReturned   Int       @default(0) // Quantity returned by clients
-  qtyRemaining  Int       @default(0) // Quantity remaining at end of tour
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  truckLoadId  String
+  truckLoad    TruckLoad @relation(fields: [truckLoadId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product   @relation(fields: [productId], references: [id])
+  qtyLoaded    Int // Quantity loaded at departure
+  qtySold      Int       @default(0) // Quantity sold during tour
+  qtyReturned  Int       @default(0) // Quantity returned by clients
+  qtyRemaining Int       @default(0) // Quantity remaining at end of tour
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([truckLoadId])
   @@index([productId])
@@ -882,7 +897,7 @@ model ProductReturn {
   id          String   @id @default(uuid())
   tenantId    String
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  tourStopId  String?  // Link to the stop where return happened
+  tourStopId  String? // Link to the stop where return happened
   customerId  String
   customer    Customer @relation(fields: [customerId], references: [id])
   driverId    String
@@ -892,8 +907,8 @@ model ProductReturn {
   quantity    Int
   unitPrice   Float    @default(0)
   totalAmount Float    @default(0)
-  reason      String   // EXPIRED, DAMAGED, REFUSED, ERROR, OTHER
-  photoUrl    String?  // Photo of damaged/returned goods
+  reason      String // EXPIRED, DAMAGED, REFUSED, ERROR, OTHER
+  photoUrl    String? // Photo of damaged/returned goods
   notes       String?
   status      String   @default("PENDING") // PENDING, APPROVED, REJECTED, RESTOCKED
   createdAt   DateTime @default(now())
@@ -906,21 +921,136 @@ model ProductReturn {
 
 // Real-time GPS location of delivery drivers
 model DriverLocation {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  driverId    String
-  driver      User     @relation(fields: [driverId], references: [id])
-  latitude    Float
-  longitude   Float
-  speed       Float?   // km/h
-  heading     Float?   // Compass direction 0-360
-  accuracy    Float?   // GPS accuracy in meters
-  source      String   @default("PHONE") // PHONE, TRACKER (GPS tracker in truck)
-  tourId      String?  // Active tour if any
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  driverId  String
+  driver    User     @relation(fields: [driverId], references: [id])
+  latitude  Float
+  longitude Float
+  speed     Float? // km/h
+  heading   Float? // Compass direction 0-360
+  accuracy  Float? // GPS accuracy in meters
+  source    String   @default("PHONE") // PHONE, TRACKER (GPS tracker in truck)
+  tourId    String? // Active tour if any
+  createdAt DateTime @default(now())
 
   @@index([tenantId, driverId])
   @@index([tenantId, createdAt])
   @@index([driverId, createdAt])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROFORMA → BL → FACTURE WORKFLOW
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Proforma (devis) - document initial avant livraison
+model Proforma {
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  storeId    String?
+  store      Store?   @relation(fields: [storeId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  proformaNumber String // PF-2026-001
+  status         String @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED, PARTIALLY_DELIVERED, COMPLETED
+
+  subtotal  Decimal @default(0)
+  tvaAmount Decimal @default(0)
+  stampTax  Decimal @default(0)
+  total     Decimal
+
+  validUntil DateTime? // Date d'expiration du proforma
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items       ProformaItem[]
+  salesOrders SalesOrder[] // BLs générés depuis ce proforma
+
+  @@index([tenantId])
+  @@index([tenantId, storeId])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([proformaNumber])
+}
+
+model ProformaItem {
+  id         String   @id @default(uuid())
+  proformaId String
+  proforma   Proforma @relation(fields: [proformaId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+
+  quantity          Int // Quantité totale commandée
+  quantityDelivered Int @default(0) // Quantité déjà livrée via BLs
+
+  unitPrice Decimal
+  tvaRate   Decimal @default(0)
+  priceHt   Decimal @default(0)
+
+  @@index([proformaId])
+  @@index([productId])
+}
+
+// Facture - regroupe plusieurs BLs
+model Invoice {
+  id         String   @id @default(uuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  storeId    String?
+  store      Store?   @relation(fields: [storeId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  invoiceNumber String // FA-2026-001
+  status        String @default("DRAFT") // DRAFT, SENT, PAID, PARTIALLY_PAID, OVERDUE, CANCELLED
+
+  subtotal  Decimal @default(0)
+  tvaAmount Decimal @default(0)
+  stampTax  Decimal @default(0)
+  total     Decimal
+
+  amountPaid    Decimal @default(0)
+  paymentStatus String  @default("PENDING") // PENDING, PARTIAL, PAID
+  paymentMethod String? // CASH, TRANSFER, CHECK, TERM
+
+  dueDate DateTime? // Date d'échéance
+  notes   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items InvoiceItem[] // Lignes de facture (agrégées depuis BLs)
+
+  @@index([tenantId])
+  @@index([tenantId, storeId])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([invoiceNumber])
+  @@index([tenantId, paymentStatus])
+}
+
+model InvoiceItem {
+  id        String  @id @default(uuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  salesOrderId String // BL source
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity  Int // Quantité facturée depuis ce BL
+  unitPrice Decimal
+  tvaRate   Decimal @default(0)
+  priceHt   Decimal @default(0)
+
+  @@index([invoiceId])
+  @@index([salesOrderId])
+  @@index([productId])
 }

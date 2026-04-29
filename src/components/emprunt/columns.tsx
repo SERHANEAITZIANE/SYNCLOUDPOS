@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { CellAction } from "./cell-action"
 
 export type LoanColumn = {
     id: string
@@ -53,6 +54,10 @@ export const useLoanColumns = () => {
                 <span className="text-sm text-muted-foreground">{row.original.description || "-"}</span>
             )
         },
+        {
+            id: "actions",
+            cell: ({ row }) => <CellAction data={row.original} />
+        }
     ]
     return columns
 }

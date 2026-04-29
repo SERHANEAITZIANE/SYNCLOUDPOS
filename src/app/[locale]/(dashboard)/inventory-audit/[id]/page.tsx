@@ -5,14 +5,15 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import type { Metadata } from "next"
 
-interface Props { params: { id: string } }
+interface Props { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: `Session Inventaire | SynCloudPOS` }
 }
 
 export default async function SessionDetailPage({ params }: Props) {
-    const session = await getStockCountSession(params.id)
+    const { id } = await params;
+    const session = await getStockCountSession(id)
     if (!session) notFound()
 
     return (

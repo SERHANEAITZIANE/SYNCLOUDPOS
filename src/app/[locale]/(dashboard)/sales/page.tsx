@@ -23,6 +23,8 @@ const SalesPage = async ({
     const formattedSalesOrders: SalesOrderColumn[] = salesOrders.map((item: any) => ({
         id: item.id,
         customer: item.customer.name,
+        customerPhone: item.customer.phone || null,
+        customerEmail: item.customer.email || null,
         type: item.type,
         status: item.status,
         total: formatter.format(Number(item.total)),

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import cacheMonitor from "@/lib/cache-monitor"
 
 /** Create a new stock count session and snapshot current product stock */
 export async function createStockCountSession(name: string, notes?: string) {
@@ -123,6 +124,14 @@ export async function approveStockCountSession(sessionId: string) {
                         data: { stock: { increment: i.difference } }
                     })
                 ),
+            ...countSession.items
+                .filter(i => i.difference !== 0)
+                .map(i =>
+                    db.product.updateMany({
+                        where: { id: i.productId },
+                        data: { stock: { increment: i.difference } }
+                    })
+                ),
             db.stockCountSession.update({
                 where: { id: sessionId },
                 data: { status: "APPROVED", approvedAt: new Date() }
@@ -130,6 +139,8 @@ export async function approveStockCountSession(sessionId: string) {
         ])
         revalidatePath("/[locale]/(dashboard)/inventory-audit")
         revalidatePath("/[locale]/(dashboard)/products")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         return { success: "Inventaire approuvé. Stock mis à jour." }
     } catch (e) {
         console.error("approveStockCountSession error:", e)

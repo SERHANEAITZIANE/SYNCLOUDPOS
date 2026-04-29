@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import { logAudit } from "./audit-log"
+import cacheMonitor from "@/lib/cache-monitor"
 
 // Helper: generate receipt number
 export async function generateReceiptNumber(type: string, tenantId: string) {
@@ -105,6 +106,15 @@ export const createSalesOrder = async (data: {
                         )
                     );
                 }
+
+                await Promise.all(
+                    data.items.map(item =>
+                        tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Deduct stock for BON DE LIVRAISON (ORDER) or INVOICE validated/paid
@@ -125,6 +135,15 @@ export const createSalesOrder = async (data: {
                         )
                     );
                 }
+
+                await Promise.all(
+                    data.items.map(item =>
+                        tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Credit Note: DECREMENT customer balance (we owe them)
@@ -147,6 +166,8 @@ export const createSalesOrder = async (data: {
         })
 
         revalidatePath("/(dashboard)/sales")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "SALES_ORDER", entityId: salesOrder.id, description: `${data.type} créé: ${receiptNumber} — ${data.total} DA`, after: { receiptNumber, type: data.type, total: data.total } }).catch(() => null)
         return { success: true, id: salesOrder.id }
     } catch (error) {
@@ -216,9 +237,10 @@ export async function getSalesOrder(id: string) {
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
+        const tenantId = session.user.tenantId
 
-        const salesOrder = await db.salesOrder.findUnique({
-            where: { id },
+        const salesOrder = await db.salesOrder.findFirst({
+            where: { id, tenantId },
             include: {
                 customer: true,
                 items: { include: { product: { include: { barcodes: true } } } }
@@ -373,6 +395,15 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                         )
                     );
                 }
+
+                await Promise.all(
+                    salesOrder.items.map(item =>
+                        tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Restore stock if cancelling
@@ -388,6 +419,15 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                         )
                     );
                 }
+
+                await Promise.all(
+                    salesOrder.items.map(item =>
+                        tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity } }
+                        })
+                    )
+                );
             }
 
             // Customer balance:
@@ -421,6 +461,8 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
         })
 
         revalidatePath("/(dashboard)/sales")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "UPDATE", entity: "SALES_ORDER", entityId: id, description: `Statut ${salesOrder.receiptNumber || id}: ${prevStatus} → ${newStatus}`, before: { status: prevStatus }, after: { status: newStatus } }).catch(() => null)
         return { success: true, id }
     } catch (error) {
@@ -436,8 +478,57 @@ export const deleteSalesOrder = async (id: string) => {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
-        await db.salesOrder.delete({ where: { id, tenantId } })
+        await db.$transaction(async (tx) => {
+            const order = await tx.salesOrder.findUnique({
+                where: { id, tenantId },
+                include: { items: true }
+            });
+
+            if (!order) throw new Error("Not found");
+
+            // If order was validated or paid, stock was decremented, so we must restore it
+            const STOCK_STATUSES = ["VALIDATED", "PAID"];
+            const isStockType = order.type === "ORDER" || order.type === "INVOICE";
+            
+            if (STOCK_STATUSES.includes(order.status) && isStockType) {
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                
+                await Promise.all(
+                    order.items.map(async (item) => {
+                        if (storeId) {
+                            await tx.storeProduct.updateMany({
+                                where: { storeId, productId: item.productId },
+                                data: { stock: { increment: item.quantity } }
+                            });
+                        }
+                        await tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { increment: item.quantity } }
+                        });
+                        
+                        // Delete related stock movements
+                        await tx.stockMovement.deleteMany({
+                            where: { referenceId: id, productId: item.productId }
+                        });
+                    })
+                );
+            }
+
+            // Restore customer balance if they owed money
+            const DEBT_STATUSES = ["VALIDATED"];
+            if (DEBT_STATUSES.includes(order.status)) {
+                await tx.customer.update({
+                    where: { id: order.customerId },
+                    data: { balance: { decrement: order.total } }
+                });
+            }
+
+            await tx.salesOrder.delete({ where: { id, tenantId } });
+        });
+
         revalidatePath("/(dashboard)/sales")
-        return { success: "Supprimé" }
-    } catch { return { error: "Erreur" } }
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        return { success: "Supprimé et stock restauré" }
+    } catch { return { error: "Erreur lors de la suppression" } }
 }

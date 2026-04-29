@@ -7,19 +7,21 @@ import { redirect } from "next/navigation"
 const AnalyticsPage = async ({
     searchParams
 }: {
-    searchParams: { from?: string; to?: string }
+    searchParams: Promise<{ from?: string; to?: string }>
 }) => {
     const session = await auth()
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "ACCOUNTANT" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
     }
 
+    const { from, to } = await searchParams;
+
     let analyticsData = null
     let errorMessage: string | null = null
 
     try {
-        const fromDate = searchParams.from ? new Date(searchParams.from) : undefined;
-        const toDate = searchParams.to ? new Date(searchParams.to) : undefined;
+        const fromDate = from ? new Date(from) : undefined;
+        const toDate = to ? new Date(to) : undefined;
 
         analyticsData = await getAnalyticsData(
             fromDate && toDate ? { from: fromDate, to: toDate } : undefined
@@ -43,9 +45,9 @@ const AnalyticsPage = async ({
                 ) : analyticsData ? (
                     <AnalyticsClient
                         data={analyticsData}
-                        initialDateRange={searchParams.from && searchParams.to ? {
-                            from: new Date(searchParams.from),
-                            to: new Date(searchParams.to)
+                        initialDateRange={from && to ? {
+                            from: new Date(from),
+                            to: new Date(to)
                         } : undefined}
                     />
                 ) : null}

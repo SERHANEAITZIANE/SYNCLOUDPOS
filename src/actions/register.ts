@@ -1,19 +1,21 @@
 "use server"
 
-import * as z from "zod"
 import bcrypt from "bcryptjs"
 import { db } from "@/lib/db"
-import { RegisterSchema } from "@/schemas"
 import { getUserByEmail } from "@/data/user"
+import { createValidatedAction } from "@/lib/server-action-validation"
+import { registerValidationSchema } from "@/validation/register"
+import { RegisterInput } from "@/types/register"
+import { sanitizeEmail, sanitizeString, sanitizePhone } from "@/lib/sanitizer"
 
-export const register = async (values: z.infer<typeof RegisterSchema>) => {
-    const validatedFields = RegisterSchema.safeParse(values)
+async function registerCore(values: RegisterInput) {
+    const { email, password, name, phone } = values
 
-    if (!validatedFields.success) {
-        return { error: "Invalid fields!" }
-    }
+    // Sanitize inputs to prevent injection attacks
+    const emailToUse = sanitizeEmail(email)
+    const nameToUse = sanitizeString(name)
+    const phoneToUse = phone ? sanitizePhone(phone) : undefined
 
-    const { email, password, name, phone } = validatedFields.data
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const existingUser = await getUserByEmail(email)
@@ -26,10 +28,15 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
         const trialEndDate = new Date()
         trialEndDate.setDate(trialEndDate.getDate() + 7)
 
+        // Use sanitized inputs in database operations
+        const sanitizedEmail = sanitizeEmail(email)
+        const sanitizedName = sanitizeString(name)
+        const sanitizedPhone = phone ? sanitizePhone(phone) : undefined
+
         const tenant = await db.tenant.create({
             data: {
-                name: `${name}'s Shop`,
-                phone: phone,
+                name: `${sanitizedName}'s Shop`,
+                phone: sanitizedPhone,
                 subscriptionEndsAt: trialEndDate,
             }
         })
@@ -73,8 +80,15 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
         ])
 
         return { success: "User created!" }
-    } catch (error) {
+    } catch (error: any) {
         console.error("[REGISTER_ACTION_ERROR]", error)
-        return { error: "Something went wrong during registration." }
+        return { error: `Erreur: ${error?.message || "Something went wrong"}` }
     }
 }
+
+// Export the validated version of the register action
+export const register = createValidatedAction(
+    registerValidationSchema,
+    registerCore,
+    'register'
+)

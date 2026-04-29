@@ -208,6 +208,7 @@
         "SALE": "Vente",
         "SPOILAGE": "Avarie",
         "ADJUSTMENT": "Ajustement",
+        "MANUAL_ADJUSTMENT": "Ajustement Manuel",
         "INITIAL": "Stock Initial",
         "default": "Mouvement"
       }
@@ -944,6 +945,8 @@
     "noProductsFound": "Aucun produit trouvé",
     "tryRefiningSearch": "Essayez d'affiner votre recherche",
     "viewCart": "Voir Panier",
+    "cartTitle": "Votre Panier",
+    "cartDescription": "Vérifiez les articles et procédez au paiement",
     "noImg": "PAS D'IMAGE",
     "lowStock": "Stock faible ({stock})",
     "stock": "Stock: {stock}"

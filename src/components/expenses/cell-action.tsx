@@ -1,15 +1,11 @@
 "use client"
 
-import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { Trash } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { useTranslations } from "next-intl"
 
-import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuLabel, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { AlertModal } from "@/components/modals/alert-modal"
 import { deleteExpense } from "@/actions/expenses"
@@ -46,23 +42,19 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     return (
         <>
             <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">{tCommon("actions")}</span>
-                        <MoreHorizontal className="h-4 w-4" />
+            <div className="flex items-center gap-1">
+                {session?.user?.canDelete && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        onClick={() => setOpen(true)}
+                        title={tCommon("delete")}
+                    >
+                        <Trash className="h-4 w-4" />
                     </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
-
-                    {session?.user?.canDelete && (
-                        <DropdownMenuItem onClick={() => setOpen(true)} className="text-red-600">
-                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                        </DropdownMenuItem>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                )}
+            </div>
         </>
     )
 }

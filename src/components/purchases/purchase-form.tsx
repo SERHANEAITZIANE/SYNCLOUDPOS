@@ -26,6 +26,8 @@ import {
     updatePurchaseOrder,
     updatePurchaseOrderStatus
 } from "@/actions/purchase-orders"
+import { createSupplier } from "@/actions/suppliers"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { OcrReceiptUploader } from "./ocr-receipt-uploader"
 import { MissingProductsForm } from "./missing-products-form"
 import { cn } from "@/lib/utils"
@@ -74,6 +76,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [ocrItems, setOcrItems] = useState<{ name: string, price: number, quantity: number }[]>([])
+    const [supplierModalOpen, setSupplierModalOpen] = useState(false)
+    const [newSupplierName, setNewSupplierName] = useState("")
+    const [newSupplierPhone, setNewSupplierPhone] = useState("")
     const printRef = useRef<HTMLDivElement>(null)
 
     const isEditMode = !!initialData
@@ -142,6 +147,33 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             window.location.reload()
         } catch { toast.error("Erreur lors de la mise à jour.") }
         finally { setLoading(false) }
+    }
+
+    const handleCreateSupplier = async () => {
+        if (!newSupplierName.trim()) return;
+        try {
+            setLoading(true)
+            const result = await createSupplier({
+                name: newSupplierName,
+                phone: newSupplierPhone
+            })
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Fournisseur créé")
+                setSupplierModalOpen(false)
+                setNewSupplierName("")
+                setNewSupplierPhone("")
+                if (result.id) {
+                    form.setValue("supplierId", result.id)
+                }
+                router.refresh()
+            }
+        } catch (error) {
+            toast.error("Une erreur est survenue.")
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handlePrint = useReactToPrint({
@@ -244,6 +276,29 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
             {/* ── Screen UI ─────────────────────────────────────────────── */}
             <div className="print:hidden">
+                <Dialog open={supplierModalOpen} onOpenChange={setSupplierModalOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Nouveau Fournisseur</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nom *</label>
+                                <Input disabled={loading} placeholder="Nom du fournisseur" value={newSupplierName} onChange={e => setNewSupplierName(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Téléphone</label>
+                                <Input disabled={loading} placeholder="Téléphone" value={newSupplierPhone} onChange={e => setNewSupplierPhone(e.target.value)} />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button disabled={loading || !newSupplierName.trim()} onClick={handleCreateSupplier}>
+                                Créer
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -314,14 +369,23 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             <FormField control={form.control} name="supplierId" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Fournisseur</FormLabel>
-                                    <SearchableSelect
-                                        options={suppliers.map(s => ({ value: s.id, label: s.name }))}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        disabled={loading || !canEdit}
-                                        placeholder="Sélectionner un fournisseur..."
-                                        searchPlaceholder="Rechercher un fournisseur..."
-                                    />
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1">
+                                            <SearchableSelect
+                                                options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                disabled={loading || !canEdit}
+                                                placeholder="Sélectionner un fournisseur..."
+                                                searchPlaceholder="Rechercher un fournisseur..."
+                                            />
+                                        </div>
+                                        {canEdit && (
+                                            <Button type="button" variant="outline" size="icon" onClick={() => setSupplierModalOpen(true)} disabled={loading} className="shrink-0">
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )} />

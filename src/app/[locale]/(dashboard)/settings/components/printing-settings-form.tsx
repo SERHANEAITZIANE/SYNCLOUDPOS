@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
-import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info } from "lucide-react"
+import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info, Star } from "lucide-react"
 import Bcode from "react-barcode"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
@@ -24,6 +24,7 @@ export interface PrintingPrefs {
     printerReceipt: string
     printerBarcode: string
     barcodeModel: string
+    loyaltyCardModel: string
     showBarcodeOnReceipt: boolean
     showLogoOnBL: boolean
 }
@@ -33,6 +34,7 @@ const defaults: PrintingPrefs = {
     printerReceipt: "default",
     printerBarcode: "default",
     barcodeModel: "classic",
+    loyaltyCardModel: "violet",
     showBarcodeOnReceipt: true,
     showLogoOnBL: true,
 }
@@ -350,6 +352,63 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
                             </SelectContent>
                         </Select>
                     </div>
+                </div>
+            </div>
+
+            <Separator />
+
+            {/* ── 3b. Loyalty Card Model ── */}
+            <div>
+                <div className="flex items-center gap-2 mb-4">
+                    <Star className="w-5 h-5 text-amber-500" />
+                    <h3 className="text-base font-semibold">Modèle Carte Fidélité</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                        { id: "violet", name: "Violet", bg: "linear-gradient(135deg,#1e0e3e,#5b21b6)", accent: "#ffd700" },
+                        { id: "dark", name: "Noir Premium", bg: "linear-gradient(135deg,#0f0f0f,#1a1a2e)", accent: "#60a5fa" },
+                        { id: "ocean", name: "Océan", bg: "linear-gradient(135deg,#0c4a6e,#0ea5e9)", accent: "#fbbf24" },
+                    ].map(m => (
+                        <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setPrefs(p => ({ ...p, loyaltyCardModel: m.id }))}
+                            className={cn(
+                                "relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 border-2 p-0",
+                                prefs.loyaltyCardModel === m.id
+                                    ? "border-primary shadow-lg ring-2 ring-primary/30"
+                                    : "border-gray-200 dark:border-gray-700"
+                            )}
+                        >
+                            {prefs.loyaltyCardModel === m.id && (
+                                <div className="absolute top-2 right-2 z-10">
+                                    <CheckCircle2 className="w-4 h-4 text-white drop-shadow" />
+                                </div>
+                            )}
+                            <div
+                                style={{ background: m.bg, height: 100 }}
+                                className="flex flex-col justify-between p-3 text-white text-left"
+                            >
+                                <div>
+                                    <div className="text-[7px] font-bold tracking-widest uppercase opacity-60">BOUTIQUE</div>
+                                    <div className="text-[8px] mt-0.5">⭐⭐⭐</div>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-black">NOM DU CLIENT</div>
+                                    <div className="flex items-center gap-1 mt-1">
+                                        <span style={{ color: m.accent }} className="text-[8px]">★</span>
+                                        <span style={{ color: m.accent }} className="text-[9px] font-black">1 000</span>
+                                        <span style={{ color: m.accent }} className="text-[6px] uppercase opacity-70">pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+                <div className="flex gap-3 mt-2">
+                    {["Violet", "Noir Premium", "Océan"].map((name, i) => (
+                        <p key={i} className={cn("text-xs text-center font-semibold flex-1 transition-colors", prefs.loyaltyCardModel === ["violet","dark","ocean"][i] ? "text-primary" : "text-muted-foreground")}>{name}</p>
+                    ))}
                 </div>
             </div>
 

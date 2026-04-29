@@ -21,6 +21,33 @@ export default {
             }
         })
     ],
+    callbacks: {
+        // Pass JWT custom fields into session so Edge middleware can read them
+        async session({ session, token }) {
+            if (token.sub && session.user) {
+                session.user.id = token.sub
+            }
+            if (session.user) {
+                // @ts-expect-error custom fields from JWT
+                session.user.tenantId = token.tenantId
+                // @ts-expect-error custom fields from JWT
+                session.user.isSuperadmin = token.isSuperadmin
+                // @ts-expect-error custom fields from JWT
+                session.user.role = token.role
+                // @ts-expect-error custom fields from JWT
+                session.user.isBlocked = token.isBlocked
+                // @ts-expect-error custom fields from JWT
+                session.user.canEdit = token.canEdit
+                // @ts-expect-error custom fields from JWT
+                session.user.canDelete = token.canDelete
+                // @ts-expect-error custom fields from JWT
+                session.user.defaultStoreId = token.defaultStoreId
+                // @ts-expect-error custom fields from JWT
+                session.user.subscriptionEndsAt = token.subscriptionEndsAt
+            }
+            return session
+        },
+    },
     pages: {
         signIn: "/login",
         error: "/auth/error",

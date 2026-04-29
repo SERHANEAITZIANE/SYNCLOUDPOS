@@ -4,18 +4,19 @@ import { formatter } from "@/lib/utils"
 import type { Metadata } from "next"
 
 interface Props {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { id } = await params;
     return {
-        title: `Reçu #${params.id.slice(0, 8)} | SynCloudPOS`,
+        title: `Reçu #${id.slice(0, 8)} | SynCloudPOS`,
         description: "Visualisez votre facture et statut de paiement en ligne."
     }
 }
 
 export default async function ReceiptPage({ params }: Props) {
-    const { id } = params
+    const { id } = await params
 
     // Try POS order first, then Sales Order
     const order = await db.order.findUnique({

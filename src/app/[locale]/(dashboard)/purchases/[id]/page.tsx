@@ -1,5 +1,6 @@
 
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
 import { PurchaseOrderForm } from "@/components/purchases/purchase-form"
 import { getPurchaseOrder } from "@/actions/purchase-orders"
 import { getTreasuryAccounts } from "@/actions/treasury"
@@ -19,18 +20,22 @@ export default async function PurchaseOrderPage({
         }
     }
 
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
     const suppliers = await db.supplier.findMany({
+        where: { tenantId },
         orderBy: { createdAt: 'desc' }
     })
 
     const products = await db.product.findMany({
         orderBy: { name: 'asc' },
-        where: { isArchived: false },
+        where: { isArchived: false, tenantId },
         include: { barcodes: true }
     })
 
-    const categories = await db.category.findMany()
-    const brands = await db.brand.findMany()
+    const categories = await db.category.findMany({ where: { tenantId } })
+    const brands = await db.brand.findMany({ where: { tenantId } })
 
     const accounts = await getTreasuryAccounts()
 

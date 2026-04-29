@@ -8,14 +8,13 @@ import { revalidatePath } from "next/cache"
 import { generateReceiptNumber } from "./sales-orders"
 import { checkSubscription } from "@/lib/subscription"
 import { logAudit } from "./audit-log"
+import cacheMonitor from "@/lib/cache-monitor"
 
 export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
     const defaultStoreId = session?.user?.defaultStoreId
-
-    await checkSubscription();
 
     if (!userId || !tenantId) {
         return { error: "Unauthorized" }
@@ -31,8 +30,15 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId, discountAmount, loyaltyPointsUsed } = validatedFields.data
 
     try {
+        // Check subscription INSIDE try/catch so errors are returned properly
+        await checkSubscription();
+
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
         const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
+
+        if (!storeIdToUse) {
+            return { error: "Aucun magasin trouvé. Veuillez configurer un magasin d'abord." }
+        }
 
         // Transaction to ensure order creation and stock update happen together
         const order = await db.$transaction(async (tx) => {
@@ -77,6 +83,11 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                                     create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
                                 });
                             }
+
+                            await tx.product.update({
+                                where: { id: item.productId },
+                                data: { stock: { increment: item.quantity } }
+                            });
 
                             await tx.stockMovement.create({
                                 data: {
@@ -239,9 +250,10 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     const stockBefore = spBefore?.stock || 0;
                     const stockAfter = stockBefore - item.quantity;
                     
-                    if (stockAfter < 0) {
-                        throw new Error(`Stock insuffisant pour: ${pBefore?.name || "Produit inconnu"}. Disponible: ${stockBefore}, Requis: ${item.quantity}`);
-                    }
+                    // if (stockAfter < 0) {
+                    //    throw new Error(`Stock insuffisant pour: ${pBefore?.name || "Produit inconnu"}. Disponible: ${stockBefore}, Requis: ${item.quantity}`);
+                    // }
+                    // ⬆️ We deliberately allow negative stock for POS sales to prevent blocking checkouts when physical inventory differs from system inventory.
 
                     if (stockStoreId) {
                         await tx.storeProduct.upsert({
@@ -250,6 +262,11 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
                         });
                     }
+
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: { stock: { decrement: item.quantity } }
+                    });
 
                     await tx.stockMovement.create({
                         data: {
@@ -345,6 +362,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
         revalidatePath("/[locale]/(dashboard)/sales", "page")
 
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
         // Fire-and-forget audit log
         logAudit({
             action: "CREATE",
@@ -364,6 +384,10 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
     } catch (error: any) {
         console.error("Error creating order:", error)
 
+        // Subscription-specific errors
+        if (error?.message?.includes("abonnement") || error?.message?.includes("bloqué") || error?.message?.includes("expiré")) {
+            return { error: error.message }
+        }
         // Prisma-specific errors for better diagnostics
         if (error?.code === "P2002") {
             return { error: "Conflit: Un numéro de reçu en doublon a été détecté. Veuillez réessayer." }

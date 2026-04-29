@@ -8,14 +8,15 @@ import { redirect } from "@/i18n/routing"
 const TransactionLogPage = async ({
     params
 }: {
-    params: { accountId: string, locale: string }
+    params: Promise<{ accountId: string, locale: string }>
 }) => {
-    const account = await getTreasuryAccount(params.accountId)
+    const { accountId, locale } = await params;
+    const account = await getTreasuryAccount(accountId)
     if (!account) {
-        redirect({ href: "/treasury", locale: params.locale })
+        redirect({ href: "/treasury", locale })
     }
 
-    const transactions = await getTreasuryTransactions(params.accountId)
+    const transactions = await getTreasuryTransactions(accountId)
 
     const formattedTransactions: TreasuryTransactionColumn[] = transactions.map((item: any) => ({
         id: item.id,

@@ -47,6 +47,7 @@ interface DataTableProps<TData, TValue> {
     footerRow?: React.ReactNode
     exportTitle?: string
     exportDescription?: string
+    hidePrintHeader?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -57,6 +58,7 @@ export function DataTable<TData, TValue>({
     footerRow,
     exportTitle = "Export Data",
     exportDescription = "",
+    hidePrintHeader = false,
 }: DataTableProps<TData, TValue>) {
     const t = useTranslations("Common")
     const tDataTable = useTranslations("DataTable")
@@ -156,7 +158,7 @@ export function DataTable<TData, TValue>({
 
     return (
         <div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0 no-print">
                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                     <Input
                         id="global-search-input"
@@ -221,7 +223,7 @@ export function DataTable<TData, TValue>({
 
             <div className="rounded-md border overflow-hidden print:border-none print:shadow-none print:m-0 print:p-0" ref={printRef}>
                 {/* Print Header - Only visible when printing */}
-                <div className="hidden print:block mb-8 mt-4">
+                {!hidePrintHeader && <div className="hidden print:block mb-8 mt-4">
                     <div className="flex justify-between items-end border-b-2 border-gray-800 pb-4 mb-4">
                         <div>
                             <h1 className="text-3xl font-bold text-black font-serif">{exportTitle}</h1>
@@ -233,7 +235,7 @@ export function DataTable<TData, TValue>({
                             <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleTimeString()}</p>
                         </div>
                     </div>
-                </div>
+                </div>}
 
                 <div className="overflow-x-auto max-h-[800px] print:overflow-visible print:max-h-none">
                     <Table className="print:w-full print:border-collapse print:text-black">

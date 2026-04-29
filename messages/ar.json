@@ -208,6 +208,7 @@
         "SALE": "بيع",
         "SPOILAGE": "تلف",
         "ADJUSTMENT": "تعديل",
+        "MANUAL_ADJUSTMENT": "تعديل يدوي",
         "INITIAL": "مخزون أولي",
         "default": "حركة"
       }
@@ -944,6 +945,8 @@
     "noProductsFound": "لم يتم العثور على منتجات",
     "tryRefiningSearch": "حاول تحسين بحثك",
     "viewCart": "عرض السلة",
+    "cartTitle": "عربة التسوق",
+    "cartDescription": "راجع العناصر وتابع إلى الدفع",
     "noImg": "لا توجد صورة",
     "lowStock": "مخزون منخفض ({stock})",
     "stock": "المخزون: {stock}"

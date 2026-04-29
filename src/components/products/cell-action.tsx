@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, MoreHorizontal, Trash, History } from "lucide-react"
+import { Edit, Trash, History } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
@@ -8,17 +8,8 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 
 import { deleteProduct } from "@/actions/products"
-
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ProductColumn } from "./columns"
-
 import { StockHistoryModal } from "./stock-history-modal"
 
 interface CellActionProps {
@@ -54,36 +45,42 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 productId={data.id}
                 productName={data.name}
             />
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                    onClick={() => setOpenHistory(true)}
+                    title={t("stockHistoryLabel")}
+                >
+                    <History className="h-4 w-4" />
+                </Button>
+
+                {session?.user?.canEdit && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        onClick={() => router.push(`/products/${data.id}`)}
+                        title={tCommon("edit")}
+                    >
+                        <Edit className="h-4 w-4" />
                     </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{tCommon("actions")}</DropdownMenuLabel>
+                )}
 
-                    <DropdownMenuItem onClick={() => setOpenHistory(true)}>
-                        <History className="mr-2 h-4 w-4 text-blue-500" /> {t("stockHistoryLabel")}
-                    </DropdownMenuItem>
-
-                    {session?.user?.canEdit && (
-                        <DropdownMenuItem onClick={() => router.push(`/products/${data.id}`)}>
-                            <Edit className="mr-2 h-4 w-4" /> {tCommon("edit")}
-                        </DropdownMenuItem>
-                    )}
-
-                    {session?.user?.canDelete && (
-                        <DropdownMenuItem
-                            onClick={onConfirm}
-                            className="text-red-600 focus:text-red-700 focus:bg-red-50"
-                        >
-                            <Trash className="mr-2 h-4 w-4" /> {tCommon("delete")}
-                        </DropdownMenuItem>
-                    )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                {session?.user?.canDelete && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        onClick={onConfirm}
+                        disabled={loading}
+                        title={tCommon("delete")}
+                    >
+                        <Trash className="h-4 w-4" />
+                    </Button>
+                )}
+            </div>
         </>
     )
 }

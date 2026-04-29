@@ -6,7 +6,7 @@ import { AnalyticsClient } from "../analytics/components/client";
 export default async function DashboardPage({
     searchParams
 }: {
-    searchParams: { from?: string; to?: string }
+    searchParams: Promise<{ from?: string; to?: string }>
 }) {
     const t = await getTranslations("Dashboard");
     const session = await auth();
@@ -14,12 +14,14 @@ export default async function DashboardPage({
         return null;
     }
 
+    const { from, to } = await searchParams;
+
     let analyticsData = null;
     let hasError = false;
 
     try {
-        const fromDate = searchParams.from ? new Date(searchParams.from) : undefined;
-        const toDate = searchParams.to ? new Date(searchParams.to) : undefined;
+        const fromDate = from ? new Date(from) : undefined;
+        const toDate = to ? new Date(to) : undefined;
 
         analyticsData = await getAnalyticsData(
             fromDate && toDate ? { from: fromDate, to: toDate } : undefined
@@ -43,9 +45,9 @@ export default async function DashboardPage({
                 ) : analyticsData ? (
                     <AnalyticsClient
                         data={analyticsData}
-                        initialDateRange={searchParams.from && searchParams.to ? {
-                            from: new Date(searchParams.from),
-                            to: new Date(searchParams.to)
+                        initialDateRange={from && to ? {
+                            from: new Date(from),
+                            to: new Date(to)
                         } : undefined}
                     />
                 ) : null}

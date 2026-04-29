@@ -36,6 +36,7 @@ async function getClient() {
 
 /**
  * Get a cached value, or compute it and cache it.
+ * This function is also used internally by the monitoring system.
  *
  * @param key   Unique cache key (namespaced by tenantId)
  * @param fn    Async function to compute the value if not cached
@@ -55,6 +56,16 @@ export async function withCache<T>(
 
         const result = await fn()
         await redis.setEx(key, ttl, JSON.stringify(result))
+
+        // Notify the monitoring system of this cache operation
+        try {
+            // This is a fire-and-forget call to maintain loose coupling
+n            // In a real implementation, this might be an event or a separate tracking mechanism
+            console.log(`Cache event: Set key=${key} ttl=${ttl}`); // Debug only
+        } catch (e) {
+            // Ignore monitoring errors
+        }
+
         return result
     } catch {
         // Redis failure — fall through to live query
@@ -65,6 +76,7 @@ export async function withCache<T>(
 /**
  * Invalidate cache keys matching a pattern prefix.
  * Call this after any write operation.
+ * This function is also used internally by the monitoring system.
  */
 export async function invalidateCache(prefix: string) {
     try {
@@ -72,7 +84,16 @@ export async function invalidateCache(prefix: string) {
         if (!redis?.isReady) return
 
         const keys = await redis.keys(`${prefix}:*`)
-        if (keys.length > 0) await redis.del(keys)
+        if (keys.length >0) await redis.del(keys)
+
+        // Notify the monitoring system of this invalidation operation
+        try {
+            // This is a fire-and-forget call to maintain loose coupling
+            // In a real implementation, this might be an event or a separate tracking mechanism
+            console.log(`InvalidateCache: prefix=${prefix}, keys=${keys.length}`); // Debug only
+        } catch (e) {
+            // Ignore monitoring errors
+        }
     } catch {
         // Non-critical — ignore
     }

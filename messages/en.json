@@ -208,6 +208,7 @@
         "SALE": "Sale",
         "SPOILAGE": "Spoilage",
         "ADJUSTMENT": "Adjustment",
+        "MANUAL_ADJUSTMENT": "Manual Adjustment",
         "INITIAL": "Initial Stock",
         "default": "Movement"
       }
@@ -944,6 +945,8 @@
     "noProductsFound": "No products found",
     "tryRefiningSearch": "Try refining your search",
     "viewCart": "View Cart",
+    "cartTitle": "Shopping Cart",
+    "cartDescription": "Review items and proceed to checkout",
     "noImg": "NO IMG",
     "lowStock": "Low Stock ({stock})",
     "stock": "Stock: {stock}"

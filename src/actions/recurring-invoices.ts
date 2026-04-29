@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { addMonths, addWeeks, addYears } from "date-fns"
 import { Prisma } from "@prisma/client"
+import cacheMonitor from "@/lib/cache-monitor"
 
 export type RecurringFrequency = "WEEKLY" | "MONTHLY" | "YEARLY"
 
@@ -156,6 +157,10 @@ export async function processDueRecurringInvoices() {
                             where: { storeId, productId: item.productId },
                             data: { stock: { decrement: item.quantity } }
                         })
+                        await tx.product.updateMany({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } }
+                        })
                     }
                 }
 
@@ -173,6 +178,8 @@ export async function processDueRecurringInvoices() {
                     }
                 })
             })
+            await cacheMonitor.invalidateCache(`products:${inv.tenantId}`)
+            await cacheMonitor.invalidateCache(`pos-products:${inv.tenantId}`)
             processedCount++
         } catch (e) {
             console.error(`Failed to process recurring invoice ${inv.id}:`, e)

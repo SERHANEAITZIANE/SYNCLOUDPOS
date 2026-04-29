@@ -1,5 +1,6 @@
 
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
 import { CustomerForm } from "@/components/customers/customer-form"
 
 export default async function CustomerPage({
@@ -12,12 +13,16 @@ export default async function CustomerPage({
     // If it's "new", we pass null. DB search might fail for "new" if uuid validation was strict,
     // but here we just check if it matches a record.
 
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
     let customer = null
 
-    if (customerId !== "new") {
-        customer = await db.customer.findUnique({
+    if (customerId !== "new" && tenantId) {
+        customer = await db.customer.findFirst({
             where: {
-                id: customerId
+                id: customerId,
+                tenantId
             }
         })
     }

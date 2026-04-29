@@ -6,7 +6,7 @@ import { ProductSchema } from "@/schemas"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
-import { withCache, invalidateCache } from "@/lib/redis"
+import cacheMonitor from "@/lib/cache-monitor"
 import { logAudit } from "./audit-log"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
@@ -49,40 +49,75 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     } = validatedFields.data
 
     try {
-        await db.product.create({
-            data: {
-                name,
-                price,
-                tvaRate,
-                description,
-                cost: cost ?? undefined,
-                wholesalePrice: wholesalePrice ?? undefined,
-                dealerPrice: dealerPrice ?? undefined,
-                isFeatured: isFeatured || false,
-                isArchived: isArchived || false,
-                categoryId,
-                brandId,
-                tenantId,
-                images: {
-                    createMany: {
-                        data: [
-                            ...images.map((image: { url: string }) => image)
-                        ]
+        await db.$transaction(async (tx) => {
+            const product = await tx.product.create({
+                data: {
+                    name,
+                    price,
+                    tvaRate,
+                    description,
+                    cost: cost ?? undefined,
+                    wholesalePrice: wholesalePrice ?? undefined,
+                    dealerPrice: dealerPrice ?? undefined,
+                    isFeatured: isFeatured || false,
+                    isArchived: isArchived || false,
+                    stock: stock ?? 0,
+                    minStock: minStock ?? 0,
+                    categoryId,
+                    brandId,
+                    tenantId,
+                    images: {
+                        createMany: {
+                            data: [
+                                ...images.map((image: { url: string }) => image)
+                            ]
+                        }
+                    },
+                    barcodes: barcodes && barcodes.length > 0 ? {
+                        createMany: {
+                            data: barcodes.map((b: { value: string; label?: string }) => ({
+                                value: b.value,
+                                label: b.label || null
+                            }))
+                        }
+                    } : undefined
+                } as any
+            });
+
+            // If initial stock is provided, create StoreProduct and StockMovement
+            const initialStock = stock ?? 0;
+            if (initialStock > 0) {
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                
+                if (storeId) {
+                    await tx.storeProduct.create({
+                        data: {
+                            storeId,
+                            productId: product.id,
+                            stock: initialStock,
+                            minStock: minStock ?? 0
+                        }
+                    });
+                }
+
+                await tx.stockMovement.create({
+                    data: {
+                        productId: product.id,
+                        type: "MANUAL_ADJUSTMENT",
+                        quantity: initialStock,
+                        stockBefore: 0,
+                        stockAfter: initialStock,
+                        reason: "Stock initial à la création",
+                        userId: session.user.id,
+                        tenantId
                     }
-                },
-                barcodes: barcodes && barcodes.length > 0 ? {
-                    createMany: {
-                        data: barcodes.map((b: { value: string; label?: string }) => ({
-                            value: b.value,
-                            label: b.label || null
-                        }))
-                    }
-                } : undefined
-            } as any
-        })
+                });
+            }
+        });
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
-        await invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
         return { success: "Product created!" }
     } catch (error) {
@@ -115,7 +150,7 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         const safePage = isNaN(page) ? 1 : page;
         const safePageSize = isNaN(pageSize) ? 20 : pageSize;
 
-        return withCache(
+        return cacheMonitor.withCache(
             `products:${tenantId}:p${safePage}:s${safePageSize}:q${safeSearch || ""}`,
             async () => {
                 const [products, totalCount] = await Promise.all([
@@ -176,10 +211,18 @@ export const getLowStockProducts = async () => {
 }
 
 export const getProduct = async (productId: string) => {
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
+    if (!tenantId) {
+        return null
+    }
+
     try {
-        const product = await db.product.findUnique({
+        const product = await db.product.findFirst({
             where: {
-                id: productId
+                id: productId,
+                tenantId
             },
             include: {
                 images: true,
@@ -217,7 +260,8 @@ export const deleteProduct = async (id: string) => {
         })
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
-        await invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "DELETE", entity: "PRODUCT", entityId: id, description: `Produit supprimé (ID: ${id})` }).catch(() => null)
         return { success: "Product deleted!" }
     } catch {
@@ -265,47 +309,87 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
     } = validatedFields.data
 
     try {
-        await db.product.update({
-            where: {
-                id,
-                tenantId
-            },
-            data: {
-                name,
-                price,
-                tvaRate,
-                categoryId,
-                brandId,
-                description,
-                cost: cost ?? undefined,
-                wholesalePrice: wholesalePrice ?? undefined,
-                dealerPrice: dealerPrice ?? undefined,
-                isFeatured,
-                isArchived,
-                images: {
-                    deleteMany: {},
-                    createMany: {
-                        data: [
-                            ...images.map((image: { url: string }) => ({ url: image.url }))
-                        ]
-                    }
+        const previousProduct = await db.product.findUnique({
+            where: { id, tenantId },
+            include: { storeProducts: true }
+        });
+
+        await db.$transaction(async (tx) => {
+            await tx.product.update({
+                where: {
+                    id,
+                    tenantId
                 },
-                barcodes: {
-                    deleteMany: {},
-                    ...(barcodes && barcodes.length > 0 ? {
+                data: {
+                    name,
+                    price,
+                    tvaRate,
+                    categoryId,
+                    brandId,
+                    description,
+                    stock: stock ?? 0,
+                    minStock: minStock ?? 0,
+                    cost: cost ?? undefined,
+                    wholesalePrice: wholesalePrice ?? undefined,
+                    dealerPrice: dealerPrice ?? undefined,
+                    isFeatured,
+                    isArchived,
+                    images: {
+                        deleteMany: {},
                         createMany: {
-                            data: barcodes.map((b: { value: string; label?: string }) => ({
-                                value: b.value,
-                                label: b.label || null
-                            }))
+                            data: [
+                                ...images.map((image: { url: string }) => ({ url: image.url }))
+                            ]
                         }
-                    } : {})
+                    },
+                    barcodes: {
+                        deleteMany: {},
+                        ...(barcodes && barcodes.length > 0 ? {
+                            createMany: {
+                                data: barcodes.map((b: { value: string; label?: string }) => ({
+                                    value: b.value,
+                                    label: b.label || null
+                                }))
+                            }
+                        } : {})
+                    }
+                } as any
+            });
+
+            // Adjust StoreProduct and record movement if stock was manually changed
+            const newStock = stock ?? 0;
+            const oldStock = previousProduct?.stock ?? 0;
+            const stockDiff = newStock - oldStock;
+
+            if (stockDiff !== 0) {
+                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                
+                if (storeId) {
+                    await tx.storeProduct.upsert({
+                        where: { storeId_productId: { storeId, productId: id } },
+                        update: { stock: { increment: stockDiff } },
+                        create: { storeId, productId: id, stock: newStock, minStock: minStock ?? 0 }
+                    });
                 }
-            } as any
-        })
+
+                await tx.stockMovement.create({
+                    data: {
+                        productId: id,
+                        type: "MANUAL_ADJUSTMENT",
+                        quantity: stockDiff,
+                        stockBefore: oldStock,
+                        stockAfter: newStock,
+                        reason: "Ajustement manuel depuis la fiche produit",
+                        userId: session.user.id,
+                        tenantId
+                    }
+                });
+            }
+        });
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
-        await invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "UPDATE", entity: "PRODUCT", entityId: id, description: `Produit mis à jour: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
         return { success: "Product updated!" }
     } catch (error) {
@@ -467,6 +551,7 @@ export const getAllProductsForCatalogue = async () => {
             },
             include: {
                 category: true,
+                brand: true,
                 images: true
             },
             orderBy: [
@@ -488,3 +573,16 @@ export const getAllProductsForCatalogue = async () => {
         return []
     }
 }
+
+// Lightweight list for select dropdowns
+export async function getProductsForSelect() {
+    const session = await auth()
+    if (!session?.user?.tenantId) return { error: "Non autorisé" }
+    const products = await db.product.findMany({
+        where: { tenantId: session.user.tenantId, isArchived: false },
+        select: { id: true, name: true, price: true, tvaRate: true, stock: true },
+        orderBy: { name: "asc" },
+    })
+    return { data: products }
+}
+

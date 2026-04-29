@@ -49,7 +49,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
 
-    // Read localStorage POS defaults on first open, fallback to CAISSE PRINCIPALE
+    // Read localStorage POS defaults on first open, fallback to CAISSE SECONDAIRE
     useEffect(() => {
         if (isOpen) {
             try {
@@ -63,8 +63,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     }
                 }
 
-                // Fallback to CAISSE PRINCIPALE if no stored preference found
-                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                // Fallback to CAISSE SECONDAIRE if no stored preference found
+                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE SECONDAIRE")
                 if (defaultAccount) {
                     setAccountId(defaultAccount.id)
                 } else {
@@ -72,7 +72,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 }
             } catch {
                 // Fallback on error
-                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE SECONDAIRE")
                 if (defaultAccount) setAccountId(defaultAccount.id)
             }
         }
@@ -457,7 +457,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     {t("cancel")} <span className="text-[9px] opacity-40 ml-1 hidden sm:inline">Esc</span>
                 </Button>
                 <Button
-                    disabled={loading || (method === "CASH" && tenderedAmount < total && !hasCustomer)}
+                    disabled={loading || (method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer)}
                     className="w-full sm:w-auto h-12 sm:h-14 px-8 rounded-xl font-black text-base sm:text-lg bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-black shadow-xl transition-all disabled:opacity-50"
                     onClick={handleConfirm}
                 >

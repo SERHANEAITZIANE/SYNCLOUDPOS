@@ -1,5 +1,6 @@
 
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
 import { SupplierForm } from "@/components/suppliers/supplier-form"
 
 export default async function SupplierPage({
@@ -9,12 +10,16 @@ export default async function SupplierPage({
 }) {
     const { supplierId } = await params
 
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
     let supplier = null
 
-    if (supplierId !== "new") {
-        supplier = await db.supplier.findUnique({
+    if (supplierId !== "new" && tenantId) {
+        supplier = await db.supplier.findFirst({
             where: {
-                id: supplierId
+                id: supplierId,
+                tenantId
             }
         })
     }

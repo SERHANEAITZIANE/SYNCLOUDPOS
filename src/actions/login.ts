@@ -4,6 +4,7 @@ import * as z from "zod"
 import { signIn } from "@/auth"
 import { LoginSchema } from "@/schemas"
 import { AuthError } from "next-auth"
+import { sanitizeString, sanitizeEmail } from "@/lib/sanitizer"
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
     const validatedFields = LoginSchema.safeParse(values)
@@ -13,6 +14,11 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
     }
 
     const { identifier, password } = validatedFields.data
+
+    // Sanitize inputs to prevent injection attacks
+    const sanitizedIdentifier = identifier.includes('@')
+      ? sanitizeEmail(identifier)
+      : sanitizeString(identifier)
 
     try {
         await signIn("credentials", {

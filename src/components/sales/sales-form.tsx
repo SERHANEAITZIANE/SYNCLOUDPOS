@@ -4,7 +4,7 @@ import * as z from "zod"
 import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
-import { Trash, Plus, Printer, CheckCircle, FileText, TruckIcon, Package } from "lucide-react"
+import { Trash, Plus, Printer, CheckCircle, FileText, TruckIcon, Package, Send } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { InvoicePrintTemplate, BonLivraisonPrintTemplate, ProformaPrintTemplate } from "@/components/print/print-templates"
 import { toast } from "react-hot-toast"
@@ -22,6 +22,7 @@ import { ProductSearchCombobox } from "@/components/ui/product-search-combobox"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { createSalesOrder, updateSalesOrder, updateSalesOrderStatus, searchRecentSalesOrders } from "@/actions/sales-orders"
 import { cn } from "@/lib/utils"
+import { SendDocumentDialog } from "./send-document-dialog"
 
 const formSchema = z.object({
     customerId: z.string().min(1, "Client requis"),
@@ -106,6 +107,7 @@ const numberToFrenchWords = (num: number): string => {
 export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, customers, products, storeData }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [sendDialogOpen, setSendDialogOpen] = useState(false)
     const [relatedSalesOrderId, setRelatedSalesOrderId] = useState<string | null>(initialData?.relatedSalesOrderId || null)
     const [invoiceSearch, setInvoiceSearch] = useState("")
     const [invoiceResults, setInvoiceResults] = useState<any[]>([])
@@ -360,6 +362,10 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         <div className="flex items-center gap-2 flex-wrap">
                             <Button variant="outline" size="sm" onClick={() => window.print()}>
                                 <Printer className="h-4 w-4 mr-1.5" /> Imprimer
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => setSendDialogOpen(true)}
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                                <Send className="h-4 w-4 mr-1.5" /> Envoyer
                             </Button>
                             {currentStatus === "DRAFT" && (
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}
@@ -686,6 +692,21 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     </form>
                 </Form>
             </div>
+
+            {/* Send Document Dialog */}
+            {isEditMode && initialData && (
+                <SendDocumentDialog
+                    open={sendDialogOpen}
+                    onClose={() => setSendDialogOpen(false)}
+                    salesOrderId={initialData.id}
+                    receiptNumber={initialData.receiptNumber}
+                    documentType={currentType}
+                    customerName={selectedCustomer?.name || initialData.customer?.name || "Client"}
+                    customerPhone={selectedCustomer?.phone || initialData.customer?.phone}
+                    customerEmail={selectedCustomer?.email || initialData.customer?.email}
+                    total={finalTotalTTC}
+                />
+            )}
         </>
     )
 }

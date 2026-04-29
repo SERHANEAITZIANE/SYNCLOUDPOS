@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import Image from "next/image"
 import { ShoppingCart, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
 import { usePosStore, CartItem } from "@/hooks/use-pos-store"
+import { useSwipe } from "@/hooks/use-swipe"
 
 interface ProductCardProps {
     data: {
@@ -41,6 +42,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (clientType === 'RESELLER' && data.dealerPrice != null) displayPrice = data.dealerPrice;
     if (clientType === 'WHOLESALE' && data.wholesalePrice != null) displayPrice = data.wholesalePrice;
 
+    // Find if this product is already in cart
+    const cartItem = activeSession?.items.find(item => item.productId === data.id);
+    const quantityInCart = cartItem?.quantity || 0;
+
     const onAddToCart = () => {
         cart.addItem({
             id: data.id,
@@ -56,11 +61,41 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         })
     }
 
+    const onRemoveFromCart = () => {
+        if (quantityInCart > 0) {
+            cart.removeItem(cartItem!.id);
+        }
+    }
+
+    // Swipe handlers for gesture navigation
+    const handleSwipeRight = useCallback(() => {
+        // Swipe right adds another unit of the product
+        onAddToCart();
+    }, [onAddToCart]);
+
+    const handleSwipeLeft = useCallback(() => {
+        // Swipe left removes one unit of the product
+        onRemoveFromCart();
+    }, [onRemoveFromCart]);
+
+    // Setup swipe detection
+    const { ref } = useSwipe({
+        onSwipeRight: handleSwipeRight,
+        onSwipeLeft: handleSwipeLeft,
+        onLongPress: () => setShowInfo(true),
+        threshold: 50,
+        preventDefaultTouchmoveEvent: true
+    });
+
     return (
-        <Card className={cn(
-            "group cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-primary/20 transition-all duration-200 flex flex-col p-2.5 lg:p-4 h-[100px] lg:h-32 justify-between relative",
-            data.stock <= 0 ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10" : ""
-        )} onClick={onAddToCart}>
+        <Card
+            ref={ref}
+            className={cn(
+                "group cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-primary/20 transition-all duration-200 flex flex-col p-2.5 lg:p-4 h-[100px] lg:h-32 justify-between relative",
+                (data.stock - quantityInCart) <= 0 ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10" : ""
+            )}
+            onClick={onAddToCart}
+        >
             {/* Top row: Name and Stock */}
             <div className="relative w-full">
                 <h3 className="font-bold text-gray-800 dark:text-slate-200 text-[11px] lg:text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors duration-200 pr-7" title={data.name}>
@@ -68,11 +103,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </h3>
                 <div className={cn(
                     "absolute -top-0.5 right-0 shrink-0 text-[9px] lg:text-[10px] font-bold px-1.5 py-0.5 rounded-md border",
-                    data.stock > 0
+                    (data.stock - quantityInCart) > 0
                         ? "bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-900/50"
                         : "bg-red-100/80 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-900/50"
                 )}>
-                    {data.stock}
+                    {data.stock - quantityInCart}
                 </div>
             </div>
 

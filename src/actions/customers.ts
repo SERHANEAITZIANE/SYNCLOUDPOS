@@ -82,9 +82,12 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
     try {
         const customer = await db.customer.update({
-            where: { id },
+            where: { id, tenantId },
             data
         })
         revalidatePath("/(dashboard)/customers")
@@ -98,9 +101,12 @@ export const deleteCustomer = async (id: string) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing from session" }
+
     try {
         await db.customer.delete({
-            where: { id }
+            where: { id, tenantId }
         })
         revalidatePath("/(dashboard)/customers")
         return { success: "Customer deleted" }
@@ -318,45 +324,58 @@ export const getCustomerLoans = async (customerId?: string) => {
     const tenantId = session.user.tenantId
     if (!tenantId) return []
 
-    // Loans are tracked via customer notes — parse loan entries from all customers
     try {
-        const where: any = { tenantId }
+        // Fetch all customer IDs to cross-reference (or filter by specific customer)
+        const customerWhere: any = { tenantId }
         if (customerId && customerId !== "ALL") {
-            where.id = customerId
+            customerWhere.id = customerId
         }
-
+        
         const customers = await db.customer.findMany({
-            where,
-            select: { id: true, name: true, notes: true }
+            where: customerWhere,
+            select: { id: true, name: true }
+        })
+        
+        const customerIds = customers.map(c => c.id)
+
+        // Customer loans are MANUAL_OUT transactions linked to a customer
+        const transactions = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                source: "MANUAL_OUT",
+                referenceId: { in: customerIds }
+            },
+            orderBy: { date: "desc" }
         })
 
-        const loans: { id: string; date: string; amount: number; description: string; customerName: string; customerId: string }[] = []
-
-        customers.forEach(c => {
-            if (!c.notes) return
-            const lines = c.notes.split("\n")
-            lines.forEach((line, idx) => {
-                const match = line.match(/\[EMPRUNT (\d{2}\/\d{2}\/\d{4})\]\s+(\d+(?:\.\d+)?)\s+DA\s*-\s*(.*)/)
-                if (match) {
-                    const [, dateStr, amount, desc] = match
-                    const [day, month, year] = dateStr.split("/")
-                    loans.push({
-                        id: `${c.id}-${idx}`,
-                        date: new Date(`${year}-${month}-${day}`).toISOString(),
-                        amount: parseFloat(amount),
-                        description: desc.trim(),
-                        customerName: c.name,
-                        customerId: c.id
-                    })
-                }
-            })
+        const loans = transactions.map(t => {
+            const customer = customers.find(c => c.id === t.referenceId)
+            return {
+                id: t.id,
+                date: t.date.toISOString(),
+                amount: Number(t.amount),
+                source: t.source,
+                description: t.description || "",
+                customerName: customer?.name || "Inconnu",
+                customerId: t.referenceId as string
+            }
         })
 
-        // Sort most recent first
-        loans.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         return loans
     } catch (error) {
-        console.error("getCustomerLoans error:", error)
+        console.error("[GET_CUSTOMER_LOANS] error:", error)
         return []
     }
+}
+
+// Lightweight list for select dropdowns
+export async function getCustomersForSelect() {
+    const session = await auth()
+    if (!session?.user?.tenantId) return { error: "Non autorisé" }
+    const customers = await db.customer.findMany({
+        where: { tenantId: session.user.tenantId },
+        select: { id: true, name: true, phone: true, clientType: true },
+        orderBy: { name: "asc" },
+    })
+    return { data: customers }
 }

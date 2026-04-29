@@ -2,10 +2,11 @@ import { DisplayClient } from "./components/client"
 import { getTranslations } from "next-intl/server"
 
 export async function generateMetadata({
-    params: { locale }
+    params
 }: {
-    params: { locale: string }
+    params: Promise<{ locale: string }>
 }) {
+    const { locale } = await params;
     const t = await getTranslations({ locale, namespace: "Dashboard" })
     return {
         title: `Customer Display | SYNCLOUDPOS`,
@@ -14,9 +15,9 @@ export async function generateMetadata({
 }
 
 export default async function DisplayPage({
-    params: { locale }
+    params
 }: {
-    params: { locale: string }
+    params: Promise<{ locale: string }>
 }) {
     return (
         <div className="flex flex-col h-screen w-full bg-slate-50 dark:bg-slate-900">

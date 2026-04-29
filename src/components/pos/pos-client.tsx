@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { useSwipe } from "@/hooks/use-swipe"
 import { cn, formatter } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
@@ -309,13 +310,54 @@ export const PosClient: FC<PosClientProps> = ({
 
     useBarcodeScanner(onScan)
 
-    const filteredProducts = useMemo(() => products.filter((item) => {
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.barcodes.some(b => b.includes(searchQuery))
-        const matchesCategory = selectedCategory ? item.categoryId === selectedCategory : true
-        const matchesFavorites = showFavoritesOnly ? item.isFeatured : true
-        return matchesSearch && matchesCategory && matchesFavorites
-    }), [products, searchQuery, selectedCategory, showFavoritesOnly])
+    const filteredProducts = useMemo(() => {
+        // Simple fuzzy matching function
+        const fuzzyMatch = (text: string, query: string) => {
+            const pattern = query.toLowerCase().split('').join('.*?');
+            return new RegExp(`^.*?${pattern}.*?$`, 'i').test(text);
+        };
+
+        // Use fuzzier matching when search query is short
+        const matchesSearch = searchQuery ? products.filter(item =>
+            (searchQuery.length <= 2 // For short queries, allow more leniency
+                ? fuzzyMatch(item.name.toLowerCase(), searchQuery) ||
+                  fuzzyMatch(item.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''), searchQuery) ||
+                  item.barcodes.some(b => b.startsWith(searchQuery))
+                : item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  item.barcodes.some(b => b.includes(searchQuery))
+            ) &&
+            (!selectedCategory || item.categoryId === selectedCategory) &&
+            (!showFavoritesOnly || item.isFeatured)
+        ) : products;
+
+        // Prioritize: matches at the beginning, then by category, then favorited
+        return matchesSearch.sort((a, b) => {
+            // 1. Beginning matches first
+            const aMatchStart = a.name.toLowerCase().indexOf(searchQuery.toLowerCase()) === 0;
+            const bMatchStart = b.name.toLowerCase().indexOf(searchQuery.toLowerCase()) === 0;
+            if (aMatchStart && !bMatchStart) return -1;
+            if (bMatchStart && !aMatchStart) return 1;
+
+            // 2. Then by category
+            if (selectedCategory) {
+                const aInCategory = a.categoryId === selectedCategory;
+                const bInCategory = b.categoryId === selectedCategory;
+                if (aInCategory && !bInCategory) return -1;
+                if (bInCategory && !aInCategory) return 1;
+            }
+
+            // 3. Then favorited
+            if (showFavoritesOnly) {
+                const aFavorited = a.isFeatured;
+                const bFavorited = b.isFeatured;
+                if (aFavorited && !bFavorited) return -1;
+                if (bFavorited && !aFavorited) return 1;
+            }
+
+            // 4. Alphabetical
+            return a.name.localeCompare(b.name);
+        });
+    }, [products, searchQuery, selectedCategory, showFavoritesOnly]);
 
     // Show all matching products (no cap) when searching, otherwise cap at 60 for performance
     const renderedProducts = searchQuery ? filteredProducts : filteredProducts.slice(0, 60)

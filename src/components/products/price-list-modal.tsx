@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getAllProductsForCatalogue } from "@/actions/products"
 import { getCategories } from "@/actions/categories"
+import { getBrands } from "@/actions/brands"
 
 interface PriceListModalProps {
     isOpen: boolean
@@ -26,7 +27,9 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
     const [loading, setLoading] = useState(false)
     const [products, setProducts] = useState<any[]>([])
     const [categories, setCategories] = useState<any[]>([])
+    const [brands, setBrands] = useState<any[]>([])
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
+    const [brandFilter, setBrandFilter] = useState<string>("ALL")
     const [priceTier, setPriceTier] = useState<"RETAIL" | "WHOLESALE" | "RESELLER">("RETAIL")
     const [includeImages, setIncludeImages] = useState(true)
     const [onlyFeatured, setOnlyFeatured] = useState(false)
@@ -41,12 +44,14 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
             const fetchData = async () => {
                 setLoading(true)
                 try {
-                    const [prodData, catData] = await Promise.all([
+                    const [prodData, catData, brandData] = await Promise.all([
                         getAllProductsForCatalogue(),
-                        getCategories()
+                        getCategories(),
+                        getBrands()
                     ])
                     setProducts(prodData)
                     setCategories(catData)
+                    setBrands(brandData)
                 } catch {
                     toast.error("Erreur lors du chargement des données")
                 } finally {
@@ -59,6 +64,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
 
     const filteredProducts = products.filter(p => {
         if (categoryFilter !== "ALL" && p.categoryId !== categoryFilter) return false
+        if (brandFilter !== "ALL" && p.brandId !== brandFilter) return false
         if (onlyInStock && (p.stock == null || p.stock <= 0)) return false
         if (onlyFeatured && !p.isFeatured) return false
         return true
@@ -92,7 +98,7 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
 
     useEffect(() => {
         if (textPreview !== null) generateText()
-    }, [priceTier, categoryFilter])
+    }, [priceTier, categoryFilter, brandFilter])
 
     const handleCopyText = () => {
         if (!textPreview) return
@@ -151,6 +157,25 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
                                 </Select>
                             </div>
 
+                            {/* Brand Filter */}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Filter className="h-3.5 w-3.5 text-purple-500" />
+                                    Marque
+                                </Label>
+                                <Select value={brandFilter} onValueChange={setBrandFilter}>
+                                    <SelectTrigger className="h-9 text-sm bg-background">
+                                        <SelectValue placeholder="Toutes les marques" />
+                                    </SelectTrigger>
+                                    <SelectContent position="popper" className="z-[9999]">
+                                        <SelectItem value="ALL">Toutes les marques</SelectItem>
+                                        {brands.map((b) => (
+                                            <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             {/* Price Tier */}
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -204,7 +229,14 @@ export const PriceListModal: React.FC<PriceListModalProps> = ({ isOpen, onClose 
                         <div className="px-5 pb-5 pt-3 border-t border-border space-y-2 shrink-0">
                             <Button
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-10"
-                                onClick={() => { setTextPreview(null); handlePrint(); }}
+                                onClick={() => {
+                                    if (textPreview !== null) {
+                                        setTextPreview(null);
+                                        setTimeout(() => handlePrint(), 100);
+                                    } else {
+                                        handlePrint();
+                                    }
+                                }}
                                 disabled={loading || filteredProducts.length === 0}
                             >
                                 <Download className="h-4 w-4 mr-2" />
