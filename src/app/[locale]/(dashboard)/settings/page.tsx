@@ -52,6 +52,7 @@ export default async function SettingsPage() {
                         headerText: store.headerText,
                         blTemplate: store.blTemplate || "standard",
                         aiProvider: store.aiProvider || "GEMINI",
+                        aiModel: store.aiModel || null,
                         geminiApiKey: store.geminiApiKey,
                         openaiApiKey: store.openaiApiKey,
                         anthropicApiKey: store.anthropicApiKey,

@@ -19,6 +19,7 @@ interface CustomerData {
     barcode?: string
     notes?: string
     clientType?: string
+    balance?: number
 }
 
 export const getCustomers = async (page: number = 1, pageSize: number = 20, search?: string) => {
@@ -115,23 +116,17 @@ export const deleteCustomer = async (id: string) => {
     }
 }
 
-export const importCustomers = async (rows: CustomerData[]) => {
+export const importCustomers = async (rows: Record<string, string>[]) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
-    const validRows = rows.filter(r => r.name?.trim())
-    const errors = rows.length - validRows.length
-
     // Helper to parse messy number strings like "17,000.00 DA" or "1 500"
     const parseNumeric = (val: string | undefined | null | number) => {
         if (val === undefined || val === null || val === "") return 0
         if (typeof val === "number") return val
-
-        // Remove currency symbols, spaces, etc
         let clean = String(val).replace(/[^0-9.,-]/g, "")
-
         if (clean.includes(",") && clean.includes(".")) {
             const lastComma = clean.lastIndexOf(",")
             const lastDot = clean.lastIndexOf(".")
@@ -143,29 +138,65 @@ export const importCustomers = async (rows: CustomerData[]) => {
         } else if (clean.includes(",")) {
             clean = clean.replace(/,/g, ".")
         }
-
         const parsed = parseFloat(clean)
         return isNaN(parsed) ? 0 : parsed
     }
 
-    // Build all create data objects in memory (no DB calls needed)
+    // Helper to resolve a value from multiple possible column names
+    const resolve = (row: Record<string, string>, ...keys: string[]): string => {
+        for (const key of keys) {
+            if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+                return String(row[key]).trim()
+            }
+        }
+        return ""
+    }
+
+    // Helper to determine client type
+    const resolveClientType = (val: string): string => {
+        const v = val.toLowerCase().trim()
+        if (["reseller", "revendeur", "grossiste-revendeur"].includes(v)) return "RESELLER"
+        if (["wholesale", "grossiste", "gros"].includes(v)) return "WHOLESALE"
+        return "RETAIL"
+    }
+
+    const validRows = rows.filter(r => {
+        const name = resolve(r, "name", "nom", "Nom", "Name", "Nom Client", "nom client", "NOM", "client", "Client", "RAISON SOCIALE", "Raison Sociale", "raison sociale")
+        return name.length > 0
+    })
+    const errors = rows.length - validRows.length
+
     const createData = validRows.map(row => {
-        // Support 'balance', 'solde', 'Solde', 'solde initial' 
-        const balanceInput = (row as any)["balance"] || (row as any)["solde"] || (row as any)["Solde"] || (row as any)["solde initial"] || (row as any)["Solde Initial"] || 0;
+        const name = resolve(row, "name", "nom", "Nom", "Name", "Nom Client", "nom client", "NOM", "client", "Client", "RAISON SOCIALE", "Raison Sociale", "raison sociale")
+        const phone = resolve(row, "phone", "téléphone", "telephone", "Téléphone", "Telephone", "tel", "Tel", "TEL", "Mobile", "mobile", "N° Téléphone", "numéro")
+        const email = resolve(row, "email", "Email", "EMAIL", "e-mail", "E-mail", "Mail", "mail")
+        const address = resolve(row, "address", "adresse", "Adresse", "ADRESSE", "Adresse Complète")
+        const city = resolve(row, "city", "ville", "Ville", "VILLE", "Wilaya", "wilaya", "commune", "Commune")
+        const nif = resolve(row, "nif", "NIF", "Nif", "N° Identification Fiscale")
+        const nis = resolve(row, "nis", "NIS", "Nis", "N° Identification Statistique")
+        const artImposition = resolve(row, "artImposition", "Article Imposition", "Art Imposition", "article imposition", "AI", "Art. Imp.")
+        const rc = resolve(row, "rc", "RC", "Rc", "Registre Commerce", "registre commerce", "N° RC")
+        const rib = resolve(row, "rib", "RIB", "Rib", "N° Compte Bancaire", "Compte Bancaire")
+        const taxId = resolve(row, "taxId", "Tax ID", "tax_id", "identifiant fiscal")
+        const notes = resolve(row, "notes", "Notes", "NOTES", "Observation", "observation", "Remarque", "remarque", "note")
+        const clientTypeRaw = resolve(row, "clientType", "Type Client", "type client", "Type", "type", "client_type", "catégorie", "Catégorie")
+        const balanceRaw = resolve(row, "balance", "solde", "Solde", "SOLDE", "solde initial", "Solde Initial", "Solde Client", "solde client", "Dette", "dette", "Crédit", "crédit")
 
         return {
-            name: row.name.trim(),
-            phone: row.phone || undefined,
-            email: row.email || undefined,
-            address: row.address || undefined,
-            city: row.city || undefined,
-            nif: row.nif || undefined,
-            nis: row.nis || undefined,
-            artImposition: row.artImposition || undefined,
-            rc: row.rc || undefined,
-            rib: row.rib || undefined,
-            clientType: row.clientType || "RETAIL",
-            balance: parseNumeric(balanceInput),
+            name,
+            phone: phone || undefined,
+            email: email || undefined,
+            address: address || undefined,
+            city: city || undefined,
+            nif: nif || undefined,
+            nis: nis || undefined,
+            artImposition: artImposition || undefined,
+            rc: rc || undefined,
+            rib: rib || undefined,
+            taxId: taxId || undefined,
+            notes: notes || undefined,
+            clientType: resolveClientType(clientTypeRaw),
+            balance: parseNumeric(balanceRaw),
             barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
             tenantId
         }
@@ -173,7 +204,6 @@ export const importCustomers = async (rows: CustomerData[]) => {
 
     let created = 0
     try {
-        // Batch-insert in chunks of 50 for best performance
         const batchSize = 50
         for (let i = 0; i < createData.length; i += batchSize) {
             const batch = createData.slice(i, i + batchSize)
@@ -182,10 +212,11 @@ export const importCustomers = async (rows: CustomerData[]) => {
         }
     } catch (error) {
         console.error("importCustomers error:", error)
+        return { error: `Erreur: ${error instanceof Error ? error.message : "Erreur inconnue"}` }
     }
 
     revalidatePath("/(dashboard)/customers")
-    return { success: `${created} clients importés`, errors }
+    return { success: `${created} client(s) importé(s)`, errors }
 }
 
 export const getUnpaidCustomers = async () => {

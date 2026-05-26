@@ -60,7 +60,7 @@ export async function withCache<T>(
         // Notify the monitoring system of this cache operation
         try {
             // This is a fire-and-forget call to maintain loose coupling
-n            // In a real implementation, this might be an event or a separate tracking mechanism
+            // In a real implementation, this might be an event or a separate tracking mechanism
             console.log(`Cache event: Set key=${key} ttl=${ttl}`); // Debug only
         } catch (e) {
             // Ignore monitoring errors
@@ -96,5 +96,38 @@ export async function invalidateCache(prefix: string) {
         }
     } catch {
         // Non-critical — ignore
+    }
+}
+
+/**
+ * Basic Token Bucket Rate Limiter using Redis.
+ * Useful for protecting auth endpoints from brute force attacks.
+ */
+export async function rateLimit(identifier: string, limit: number = 5, windowMs: number = 60000): Promise<{ success: boolean; remaining: number }> {
+    try {
+        const redis = await getClient();
+        if (!redis?.isReady) return { success: true, remaining: 1 }; // Fallback pass-through if Redis is down
+
+        const key = `ratelimit:${identifier}`;
+        
+        // Use a transaction/pipeline to increment and set expiry
+        const multi = redis.multi();
+        multi.incr(key);
+        multi.pTtl(key);
+        
+        const [count, ttl] = await multi.exec() as unknown as [number, number];
+
+        if (count === 1 || ttl < 0) {
+            // First time or key expired without TTL
+            await redis.pExpire(key, windowMs);
+        }
+
+        return {
+            success: count <= limit,
+            remaining: Math.max(0, limit - count)
+        };
+    } catch (error) {
+        console.error("Rate limit error:", error);
+        return { success: true, remaining: 1 }; // Fail open
     }
 }

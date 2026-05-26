@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 export async function POST(req: Request) {
     try {
         const formData = await req.formData()
-        const file = formData.get("file") as File
+        const file = (formData as any).get("file") as File
 
         if (!file) {
             return new NextResponse("No file uploaded", { status: 400 })

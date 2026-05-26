@@ -54,6 +54,7 @@ export async function createExpense(data: {
     categoryId: string
     accountId?: string
     date?: Date
+    imageUrl?: string
 }) {
     await checkSubscription();
     try {
@@ -70,6 +71,7 @@ export async function createExpense(data: {
                     categoryId: data.categoryId,
                     accountId: data.accountId || undefined,
                     date: data.date || new Date(),
+                    imageUrl: data.imageUrl || undefined,
                     tenantId
                 }
             })

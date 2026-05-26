@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, FileSpreadsheet, Star } from "lucide-react"
+import { Plus, FileSpreadsheet, Star, Upload } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -24,7 +24,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { registerCustomerPayment, deleteCustomer } from "@/actions/customers"
+import { registerCustomerPayment, deleteCustomer, importCustomers } from "@/actions/customers"
+import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { Edit, Trash, ScrollText, HandCoins } from "lucide-react"
 import { LoyaltyBadgeModal } from "./loyalty-badge-modal"
 
@@ -51,6 +52,7 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [badgeModalOpen, setBadgeModalOpen] = useState(false)
     const [badgeCustomer, setBadgeCustomer] = useState<CustomerColumn | null>(null)
+    const [importModalOpen, setImportModalOpen] = useState(false)
 
     // Base Columns
     const baseColumns = useCustomerColumns()
@@ -189,6 +191,9 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
                             Impayés
                         </Button>
                     </Link>
+                    <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+                        <Upload className="mr-2 h-4 w-4" /> Importer Excel
+                    </Button>
                     <Link href="/customers/new">
                         <Button id="global-add-new">
                             <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
@@ -278,6 +283,35 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
                     }}
                 />
             )}
+
+            {/* Excel Import Modal */}
+            <ExcelImportModal
+                isOpen={importModalOpen}
+                onClose={() => setImportModalOpen(false)}
+                title="Importer des Clients depuis Excel"
+                description="Importez vos clients avec toutes leurs informations : nom, téléphone, adresse, solde, NIF, NIS, RC, etc."
+                templateFileName="modele_clients"
+                columns={[
+                    { label: "Nom", key: "name" },
+                    { label: "Téléphone", key: "phone" },
+                    { label: "Email", key: "email" },
+                    { label: "Adresse", key: "address" },
+                    { label: "Ville", key: "city" },
+                    { label: "NIF", key: "nif" },
+                    { label: "NIS", key: "nis" },
+                    { label: "RC", key: "rc" },
+                    { label: "RIB", key: "rib" },
+                    { label: "Art. Imposition", key: "artImposition" },
+                    { label: "Solde", key: "balance" },
+                    { label: "Type Client", key: "clientType" },
+                    { label: "Notes", key: "notes" },
+                ]}
+                onImport={async (rows) => {
+                    const result = await importCustomers(rows)
+                    if (result.success) router.refresh()
+                    return result
+                }}
+            />
         </>
     )
 }

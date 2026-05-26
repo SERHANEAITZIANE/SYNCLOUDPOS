@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { AlertModal } from "@/components/modals/alert-modal"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CustomerSchema } from "@/schemas"
 import { createCustomer, deleteCustomer, updateCustomer } from "@/actions/customers"
@@ -60,7 +61,8 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             rc: initialData.rc || "",
             rib: initialData.rib || "",
             notes: initialData.notes || "",
-            clientType: initialData.clientType || "RETAIL"
+            clientType: initialData.clientType || "RETAIL",
+            balance: initialData.balance ?? 0,
         } : {
             name: "",
             phone: "",
@@ -75,6 +77,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             rib: "",
             notes: "",
             clientType: "RETAIL",
+            balance: 0,
             barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString()
         }
     })
@@ -214,6 +217,52 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
                                 )}
                             />
                         </div>
+                    </div>
+
+                    {/* Solde Initial */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Solde Initial</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormField
+                                control={form.control}
+                                name="balance"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Solde Initial (DA)</FormLabel>
+                                        <FormControl>
+                                            <Input disabled={loading} type="number" min={0} step={0.01} placeholder="0.00" {...field} value={field.value ?? 0} />
+                                        </FormControl>
+                                        <p className="text-xs text-muted-foreground">Le montant que ce client vous doit initialement</p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Notes</h3>
+                        <FormField
+                            control={form.control}
+                            name="notes"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Notes / Remarques</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            disabled={loading}
+                                            placeholder="Remarques, conditions particulières, historique..."
+                                            rows={4}
+                                            className="resize-y"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
                     <Separator />

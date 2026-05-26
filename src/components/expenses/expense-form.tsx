@@ -15,10 +15,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { createExpense, createExpenseCategory } from "@/actions/expenses"
 import { Modal } from "@/components/ui/modal"
 import { Textarea } from "@/components/ui/textarea"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 const formSchema = z.object({
     description: z.string().min(1, "La description est requise"),
@@ -28,6 +30,7 @@ const formSchema = z.object({
     date: z.string(),
     time: z.string(),
     notes: z.string().optional(),
+    imageUrl: z.string().optional(),
 })
 
 type ExpenseFormValues = z.infer<typeof formSchema>
@@ -53,7 +56,16 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
+        defaultValues: initialData ? {
+            description: initialData.description || "",
+            amount: Number(initialData.amount) || 0,
+            categoryId: initialData.categoryId || "",
+            accountId: initialData.accountId || "",
+            date: initialData.date ? format(new Date(initialData.date), "yyyy-MM-dd") : defaultDate,
+            time: initialData.date ? format(new Date(initialData.date), "HH:mm") : defaultTime,
+            notes: initialData.notes || "",
+            imageUrl: initialData.imageUrl || "",
+        } : {
             description: "",
             amount: 0,
             categoryId: "",
@@ -61,6 +73,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
             date: defaultDate,
             time: defaultTime,
             notes: "",
+            imageUrl: "",
         }
     })
 
@@ -186,18 +199,14 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
                                                     <Plus className="h-3 w-3" /> Nouvelle catégorie
                                                 </Button>
                                             </div>
-                                            <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Sélectionner une catégorie..." />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {categories.map(c => (
-                                                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <SearchableSelect
+                                                options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                disabled={loading}
+                                                placeholder="Sélectionner une catégorie..."
+                                                searchPlaceholder="Rechercher une catégorie..."
+                                            />
                                             <FormMessage />
                                         </FormItem>
                                     )} />
@@ -267,6 +276,31 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
                                             {Number(form.watch("amount") || 0).toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
                                         </p>
                                     </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Receipt Image Card */}
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                                        Justificatif de dépense (Photo)
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col items-center justify-center py-4">
+                                    <FormField control={form.control} name="imageUrl" render={({ field }) => (
+                                        <FormItem className="w-full flex flex-col items-center">
+                                            <FormControl>
+                                                <ImageUpload
+                                                    value={field.value ? [field.value] : []}
+                                                    disabled={loading}
+                                                    onChange={(url) => field.onChange(url)}
+                                                    onRemove={() => field.onChange("")}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
                                 </CardContent>
                             </Card>
 

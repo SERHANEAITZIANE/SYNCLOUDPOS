@@ -183,6 +183,71 @@ export async function getTreasuryTransactions(accountId: string) {
     }
 }
 
+export async function getCashbook(accountId: string, year: number, month: number) {
+    try {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error("Unauthorized")
+
+        const tenantId = session.user.tenantId
+
+        const startDate = new Date(year, month - 1, 1)
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999)
+
+        const account = await db.treasuryAccount.findUnique({
+            where: { id: accountId, tenantId }
+        })
+        if (!account) return { error: "Compte introuvable" }
+
+        // Find opening balance (last transaction before startDate)
+        const lastTxBefore = await db.treasuryTransaction.findFirst({
+            where: { accountId, tenantId, date: { lt: startDate } },
+            orderBy: { date: "desc" }
+        })
+        const openingBalance = lastTxBefore ? Number(lastTxBefore.balanceAfter) : 0
+
+        // Get transactions for the month, ordered ascending
+        const transactions = await db.treasuryTransaction.findMany({
+            where: { 
+                accountId, 
+                tenantId,
+                date: { gte: startDate, lte: endDate }
+            },
+            orderBy: { date: "asc" }
+        })
+
+        const entries = transactions.map(t => ({
+            id: t.id,
+            date: t.date.toISOString(),
+            type: t.type,
+            amount: Number(t.amount),
+            balanceBefore: Number(t.balanceBefore),
+            balanceAfter: Number(t.balanceAfter),
+            source: t.source,
+            description: t.description || "-",
+            referenceId: t.referenceId
+        }))
+
+        const totalIn = entries.filter(e => e.type === "CREDIT").reduce((sum, e) => sum + e.amount, 0)
+        const totalOut = entries.filter(e => e.type === "DEBIT").reduce((sum, e) => sum + e.amount, 0)
+        const closingBalance = entries.length > 0 ? entries[entries.length - 1].balanceAfter : openingBalance
+
+        return {
+            entries,
+            totals: {
+                openingBalance,
+                totalIn,
+                totalOut,
+                closingBalance
+            },
+            accountName: account.name,
+            period: `${String(month).padStart(2, "0")}/${year}`
+        }
+    } catch (error) {
+        console.error("[GET_CASHBOOK]", error)
+        return { error: "Erreur lors du calcul du livre de caisse" }
+    }
+}
+
 export async function getAllTreasuryTransactions() {
     try {
         const session = await auth()

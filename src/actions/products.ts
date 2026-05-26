@@ -49,6 +49,15 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     } = validatedFields.data
 
     try {
+        // Check for duplicate product name
+        const existingProduct = await db.product.findFirst({
+            where: { tenantId, name: { equals: name, mode: 'insensitive' } },
+            select: { id: true, name: true }
+        })
+        if (existingProduct) {
+            return { error: `Un produit avec le nom "${existingProduct.name}" existe déjà.` }
+        }
+
         await db.$transaction(async (tx) => {
             const product = await tx.product.create({
                 data: {
@@ -84,22 +93,22 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
                 } as any
             });
 
-            // If initial stock is provided, create StoreProduct and StockMovement
+            // Always create StoreProduct to ensure POS visibility
             const initialStock = stock ?? 0;
-            if (initialStock > 0) {
-                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
-                
-                if (storeId) {
-                    await tx.storeProduct.create({
-                        data: {
-                            storeId,
-                            productId: product.id,
-                            stock: initialStock,
-                            minStock: minStock ?? 0
-                        }
-                    });
-                }
+            const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            
+            if (storeId) {
+                await tx.storeProduct.create({
+                    data: {
+                        storeId,
+                        productId: product.id,
+                        stock: initialStock,
+                        minStock: minStock ?? 0
+                    }
+                });
+            }
 
+            if (initialStock > 0) {
                 await tx.stockMovement.create({
                     data: {
                         productId: product.id,
@@ -547,12 +556,12 @@ export const getAllProductsForCatalogue = async () => {
             where: {
                 tenantId,
                 isArchived: false,
-                storeProducts: { some: { stock: { gt: 0 } } } // Only include available products
             },
             include: {
                 category: true,
                 brand: true,
-                images: true
+                images: true,
+                storeProducts: true
             },
             orderBy: [
                 { categoryId: 'asc' },

@@ -16,6 +16,7 @@ export async function getAlgerianSettings() {
         select: {
             ramadanMode: true,
             commissionRate: true,
+            commissionMode: true,
             taxRegime: true,
             ifuRate: true,
             tapRate: true,
@@ -33,6 +34,7 @@ export async function getAlgerianSettings() {
 export async function updateAlgerianSettings(data: {
     ramadanMode?: boolean
     commissionRate?: number
+    commissionMode?: string
     taxRegime?: string
     ifuRate?: number
     tapRate?: number
@@ -52,7 +54,7 @@ export async function updateAlgerianSettings(data: {
     const before = await db.tenant.findUnique({
         where: { id: tenantId },
         select: {
-            ramadanMode: true, commissionRate: true, taxRegime: true,
+            ramadanMode: true, commissionRate: true, commissionMode: true, taxRegime: true,
             ifuRate: true, tapRate: true, stampTaxEnabled: true, posTimbreEnabled: true,
         }
     })

@@ -43,7 +43,7 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
     const tCategory = useTranslations("Categories.fastCreate")
 
     const form = useForm<z.infer<typeof CategorySchema>>({
-        resolver: zodResolver(CategorySchema),
+        resolver: zodResolver(CategorySchema) as any,
         defaultValues: { name: "" }
     })
 

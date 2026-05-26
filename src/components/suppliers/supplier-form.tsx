@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { AlertModal } from "@/components/modals/alert-modal"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { SupplierSchema } from "@/schemas"
 import { createSupplier, deleteSupplier, updateSupplier } from "@/actions/suppliers"
 
@@ -44,7 +45,7 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
     const action = initialData ? tCommon("save") : tCommon("save")
 
     const form = useForm<z.infer<typeof SupplierSchema>>({
-        resolver: zodResolver(SupplierSchema),
+        resolver: zodResolver(SupplierSchema) as any,
         defaultValues: initialData ? {
             ...initialData,
             contactPerson: initialData.contactPerson || "",
@@ -57,6 +58,7 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
             artImposition: initialData.artImposition || "",
             rc: initialData.rc || "",
             rib: initialData.rib || "",
+            balance: initialData.balance != null ? Number(initialData.balance) : 0,
         } : {
             name: "",
             contactPerson: "",
@@ -69,6 +71,7 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
             artImposition: "",
             rc: "",
             rib: "",
+            balance: 0,
         }
     })
 
@@ -179,6 +182,56 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
                             {renderField("rc", "NRC", t("fields.rc"))}
                             {renderField("rib", "RIB Banque", t("fields.rib"))}
                         </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Solde Initial */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Solde Initial</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormField
+                                control={form.control}
+                                name="balance"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Solde Initial (DA)</FormLabel>
+                                        <FormControl>
+                                            <Input disabled={loading} type="number" min={0} step={0.01} placeholder="0.00" {...field} value={field.value ?? 0} />
+                                        </FormControl>
+                                        <p className="text-xs text-muted-foreground">Le montant que vous devez initialement à ce fournisseur</p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Notes */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Notes</h3>
+                        <FormField
+                            control={form.control}
+                            name="notes"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Notes / Remarques</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            disabled={loading}
+                                            placeholder="Remarques, conditions de paiement, délais..."
+                                            rows={4}
+                                            className="resize-y"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
                     <Button id="global-save-button" disabled={loading} className="ml-auto" type="submit">

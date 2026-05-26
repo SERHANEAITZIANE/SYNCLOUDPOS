@@ -5,7 +5,7 @@ module.exports = {
             script: "node_modules/.bin/next",
             args: "start",
             cwd: "/var/www/syncloudpos",
-            instances: "max",          // Use all available CPU cores
+            instances: 4,          // Reduced from max to optimize memory
             exec_mode: "cluster",      // Cluster mode for load balancing
             watch: false,
             max_memory_restart: "900M",

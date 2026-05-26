@@ -11,6 +11,7 @@ export default async function AiPage() {
         where: { id: tenantId },
         select: {
             aiProvider: true,
+            aiModel: true,
             geminiApiKey: true,
             openaiApiKey: true,
             anthropicApiKey: true

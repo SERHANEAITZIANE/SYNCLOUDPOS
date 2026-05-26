@@ -156,7 +156,8 @@
 }
 
 @page {
-  margin: 0.5cm 1cm;
+  size: auto;
+  margin: 0;
 }
 
 @media print {

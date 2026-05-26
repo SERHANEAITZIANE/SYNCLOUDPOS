@@ -45,7 +45,10 @@ export async function PATCH(
         if (returnAmount !== undefined) updateData.returnAmount = returnAmount;
 
         const stop = await db.tourStop.update({
-            where: { id: stopId },
+            where: { 
+                id: stopId,
+                tourId: tour.id // Ensures the stop actually belongs to the verified tour
+            },
             data: updateData,
             include: {
                 customer: {

@@ -19,7 +19,6 @@ export const registerValidationSchema: ValidationSchema<RegisterInput> = {
     rules.minLength(1, "Name must be at least 1 character long")
   ],
   phone: [
-    rules.required("Phone number is required"),
     rules.phone("Must be a valid phone number")
   ]
 }

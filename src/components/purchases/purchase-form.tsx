@@ -31,17 +31,24 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { OcrReceiptUploader } from "./ocr-receipt-uploader"
 import { MissingProductsForm } from "./missing-products-form"
 import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 const formSchema = z.object({
     supplierId: z.string().min(1, "Fournisseur requis"),
     accountId: z.string().optional(),
     status: z.enum(["PENDING", "BON_COMMANDE", "BON_LIVRAISON", "FACTURE", "COMPLETED", "CANCELLED"]),
     notes: z.string().optional(),
+    imageUrl1: z.string().optional(),
+    imageUrl2: z.string().optional(),
+    imageUrl3: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
         quantity: z.number().min(1),
-        costPrice: z.number().min(0)
-    })).min(1, "Ajoutez au moins un article")
+        costPrice: z.number().min(0),
+        tvaRate: z.number().optional()
+    })).min(1, "Ajoutez au moins un article"),
+    reference: z.string().optional()
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -58,7 +65,7 @@ interface PurchaseOrderFormProps {
 const STATUS_CONFIG = {
     PENDING: { label: "Brouillon", color: "bg-gray-100 text-gray-700", icon: Package },
     BON_COMMANDE: { label: "Bon de Commande", color: "bg-blue-100 text-blue-700", icon: FileText },
-    BON_LIVRAISON: { label: "Bon de Livraison", color: "bg-amber-100 text-amber-700", icon: TruckIcon },
+    BON_LIVRAISON: { label: "Bon de Réception", color: "bg-amber-100 text-amber-700", icon: TruckIcon },
     FACTURE: { label: "Facture", color: "bg-purple-100 text-purple-700", icon: FileText },
     COMPLETED: { label: "Payé ✓", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle },
     CANCELLED: { label: "Annulé", color: "bg-red-100 text-red-700", icon: Trash },
@@ -95,17 +102,26 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             accountId: initialData.accountId || "none",
             status: initialData.status,
             notes: initialData.notes || "",
+            imageUrl1: initialData.imageUrl1 || "",
+            imageUrl2: initialData.imageUrl2 || "",
+            imageUrl3: initialData.imageUrl3 || "",
             items: initialData.items.map((item: any) => ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
-                costPrice: Number(item.costPrice)
-            }))
+                costPrice: Number(item.costPrice),
+                tvaRate: Number(item.tvaRate ?? 19)
+            })),
+            reference: initialData.reference || ""
         } : {
             supplierId: "",
             accountId: "none",
             status: "BON_COMMANDE",
             notes: "",
-            items: [{ productId: "", quantity: 1, costPrice: 0 }]
+            imageUrl1: "",
+            imageUrl2: "",
+            imageUrl3: "",
+            reference: "",
+            items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 19 }]
         }
     })
 
@@ -185,7 +201,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Insert" && ocrItems.length === 0) {
                 e.preventDefault()
-                append({ productId: "", quantity: 1, costPrice: 0 })
+                append({ productId: "", quantity: 1, costPrice: 0, tvaRate: 19 })
             }
         }
         window.addEventListener("keydown", handler)
@@ -318,7 +334,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             {currentStatus === "PENDING" || currentStatus === "BON_COMMANDE" ? (
                                 <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white" disabled={loading}
                                     onClick={() => handleStatusChange("BON_LIVRAISON")}>
-                                    <TruckIcon className="h-4 w-4 mr-1.5" /> Passer en Bon de Livraison
+                                    <TruckIcon className="h-4 w-4 mr-1.5" /> Valider la Réception (BR)
                                 </Button>
                             ) : null}
                             {currentStatus === "BON_LIVRAISON" && (
@@ -399,7 +415,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                         </FormControl>
                                         <SelectContent>
                                             <SelectItem value="BON_COMMANDE">Bon de Commande</SelectItem>
-                                            <SelectItem value="BON_LIVRAISON">Bon de Livraison (+Stock)</SelectItem>
+                                            <SelectItem value="BON_LIVRAISON">Bon de Réception (BR) (+Stock)</SelectItem>
                                             <SelectItem value="FACTURE">Facture</SelectItem>
                                             <SelectItem value="PENDING">Brouillon</SelectItem>
                                         </SelectContent>
@@ -422,6 +438,16 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                         placeholder="Sélectionner un compte..."
                                         searchPlaceholder="Rechercher un compte..."
                                     />
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <FormField control={form.control} name="reference" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Réf. Fournisseur (Facture/BL)</FormLabel>
+                                    <FormControl>
+                                        <Input disabled={loading || !canEdit} placeholder="Ex: FAC-2024-001" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -464,9 +490,10 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
                                     {/* Column headers */}
                                     <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                        <div className="col-span-5">Produit</div>
+                                        <div className="col-span-4">Produit</div>
                                         <div className="col-span-2 text-center">Qté</div>
-                                        <div className="col-span-3">Prix unitaire (DA)</div>
+                                        <div className="col-span-2">Prix U. HT (DA)</div>
+                                        <div className="col-span-2 text-center">TVA</div>
                                         <div className="col-span-1 text-right">Total</div>
                                         <div className="col-span-1"></div>
                                     </div>
@@ -476,7 +503,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                         return (
                                             <Card key={field.id} className="overflow-hidden">
                                                 <CardContent className="p-3 grid grid-cols-12 gap-3 items-center">
-                                                    <div className="col-span-12 md:col-span-5">
+                                                    <div className="col-span-12 md:col-span-4 min-w-0 overflow-hidden">
                                                         <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
                                                             <FormItem>
                                                                 <FormControl>
@@ -504,16 +531,33 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                             </FormItem>
                                                         )} />
                                                     </div>
-                                                    <div className="col-span-5 md:col-span-3">
+                                                    <div className="col-span-4 md:col-span-2">
                                                         <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
                                                             <FormItem>
                                                                 <FormControl>
                                                                     <div className="relative">
                                                                         <Input type="number" step="0.01" min={0} disabled={loading || !canEdit}
-                                                                            className="pr-10" {...f} onChange={e => f.onChange(e.target.valueAsNumber || 0)} />
-                                                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">DA</span>
+                                                                            className="pr-6" {...f} onChange={e => f.onChange(e.target.valueAsNumber || 0)} />
                                                                     </div>
                                                                 </FormControl>
+                                                            </FormItem>
+                                                        )} />
+                                                    </div>
+                                                    <div className="col-span-2 md:col-span-2">
+                                                        <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => (
+                                                            <FormItem>
+                                                                <Select disabled={loading || !canEdit} onValueChange={(v) => f.onChange(Number(v))} value={f.value?.toString()}>
+                                                                    <FormControl>
+                                                                        <SelectTrigger className="font-bold">
+                                                                            <SelectValue />
+                                                                        </SelectTrigger>
+                                                                    </FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="19">19%</SelectItem>
+                                                                        <SelectItem value="9">9%</SelectItem>
+                                                                        <SelectItem value="0">0%</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </FormItem>
                                                         )} />
                                                     </div>
@@ -564,6 +608,102 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             )
                                         })()}
                                     </div>
+                                </div>
+
+                                {/* Notes & Visual Proof (Photos) */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
+                                    <Card className="md:col-span-1 shadow-sm">
+                                        <CardHeader className="pb-3">
+                                            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                                <FileText className="h-4 w-4 text-muted-foreground" /> Notes & Remarques
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <FormField
+                                                control={form.control}
+                                                name="notes"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Textarea
+                                                                disabled={loading || !canEdit}
+                                                                placeholder="Ajouter des notes ou remarques particulières..."
+                                                                className="min-h-[140px] resize-none text-sm"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </CardContent>
+                                    </Card>
+
+                                    <Card className="md:col-span-2 shadow-sm">
+                                        <CardHeader className="pb-3">
+                                            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                                                <Package className="h-4 w-4 text-muted-foreground" /> Preuves d'achat (Max 3 photos)
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="imageUrl1"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col items-center">
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 1</FormLabel>
+                                                            <FormControl>
+                                                                <ImageUpload
+                                                                    value={field.value ? [field.value] : []}
+                                                                    disabled={loading || !canEdit}
+                                                                    onChange={(url) => field.onChange(url)}
+                                                                    onRemove={() => field.onChange("")}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="imageUrl2"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col items-center">
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 2</FormLabel>
+                                                            <FormControl>
+                                                                <ImageUpload
+                                                                    value={field.value ? [field.value] : []}
+                                                                    disabled={loading || !canEdit}
+                                                                    onChange={(url) => field.onChange(url)}
+                                                                    onRemove={() => field.onChange("")}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="imageUrl3"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-col items-center">
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 3</FormLabel>
+                                                            <FormControl>
+                                                                <ImageUpload
+                                                                    value={field.value ? [field.value] : []}
+                                                                    disabled={loading || !canEdit}
+                                                                    onChange={(url) => field.onChange(url)}
+                                                                    onRemove={() => field.onChange("")}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
 
                                 {/* Submit */}

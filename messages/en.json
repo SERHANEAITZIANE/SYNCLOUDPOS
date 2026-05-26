@@ -101,8 +101,10 @@
     "transactionsGroup": "Transactions",
     "payments": "Payments",
     "catalogGroup": "Catalog",
+    "salesCatalog": "Sales Catalog",
     "promotions": "Promotions",
     "damages": "Damages",
+    "transfers": "Inter-Store Transfers",
     "partnersGroup": "Partners",
     "customerLoan": "Customer Loan",
     "supplierLoan": "Supplier Loan",
@@ -110,7 +112,25 @@
     "systemGroup": "System",
     "erpTraining": "ERP Training",
     "superAdmin": "Super Admin",
-    "dailyClose": "Daily Close"
+    "dailyClose": "Daily Close",
+    "recurringInvoices": "Recurring Invoices",
+    "barcodeLabels": "Labels",
+    "reservations": "Reservations",
+    "delivery": "Delivery",
+    "driverTracking": "Driver Tracking",
+    "reorder": "Reorder",
+    "inventoryAudit": "Inventory Audit",
+    "annualInventory": "Annual Inventory",
+    "commissions": "Commissions",
+    "fiscalG50G12": "Tax G50/G12",
+    "auditLog": "Audit Log",
+    "hub": "Hub",
+    "proformas": "Proformas",
+    "invoices": "Invoices",
+    "salesJournal": "Sales Journal",
+    "purchaseJournal": "Purchase Journal",
+    "cheques": "Checks",
+    "reconciliation": "Reconciliation"
   },
   "Common": {
     "quantity": "Quantity",
@@ -386,7 +406,7 @@
     "status": {
       "pending": "Draft",
       "bonCommande": "Purchase Order",
-      "bonLivraison": "Delivery Note",
+      "bonLivraison": "Goods Receipt",
       "facture": "Invoice",
       "completed": "Paid",
       "cancelled": "Cancelled"
@@ -683,7 +703,12 @@
       "barcodeModel": "Barcode Label Model",
       "blTemplate": {
         "title": "Delivery Note Template",
-        "label": "Template to use"
+        "label": "Template to use",
+        "options": {
+          "standard": "Standard (Classic)",
+          "compact": "Compact (No Header)",
+          "aitee": "AITEE (Invoice Style)"
+        }
       },
       "displayOptions": "Display Options",
       "showBarcodeOnReceipt": {
@@ -1189,6 +1214,7 @@
     },
     "links": {
       "pos": "POS (Register)",
+      "salesCatalog": "Sales Catalog",
       "allSales": "All Sales",
       "recurringInvoices": "Recurring Invoices",
       "reservations": "Reservations",
@@ -1214,13 +1240,31 @@
       "analytics": "Analytics",
       "fiscal": "Tax G50/G12",
       "annualInventory": "Annual Inventory",
-      "commissions": "Commissions",
+      "commissions": "Commissions & Seller Balances",
       "aiChat": "AI Assistant",
       "settings": "Settings",
       "company": "My Company",
       "users": "Users",
       "training": "ERP Training",
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "transfers": "Inter-Depot Transfers",
+      "barcodeLabels": "Barcode Labels",
+      "cheques": "Cheques",
+      "reconciliation": "Bank Reconciliation",
+      "auditLog": "Audit Log",
+      "driverTracking": "Driver Tracking",
+      "driverPortal": "Driver Portal",
+      "journals": "Accounting Journals",
+      "superAdmin": "Super Admin",
+      "mobileConnect": "Mobile App",
+      "mobileConnectDesc": "Scan QR Code to connect your mobile device",
+      "scanQrCode": "Mobile App Connection",
+      "scanQrCodeDesc": "Scan this QR code with the Expo Go app to connect instantly.",
+      "howToConnect": "How to connect:",
+      "installExpoGo": "1. Install the Expo Go app on your smartphone (Android/iOS).",
+      "sameWifi": "2. Make sure you are connected to the same Wi-Fi network.",
+      "scanCamera": "3. Scan the QR code below with your camera or via the Expo Go app.",
+      "manualUrl": "Or enter the following URL address in Expo Go:"
     }
   }
 }

@@ -4,7 +4,7 @@ export const useBarcodeScanner = (onScan: (code: string) => void) => {
     const [buffer, setBuffer] = useState("")
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout
+        let timeout: any
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ignore if focus is on an input field (to allow manual searching/typing)

@@ -15,6 +15,7 @@ export default async function LowStockPage() {
             isFeatured: item.isFeatured || false,
             isArchived: item.isArchived || false,
             price: Number(item.price || 0).toFixed(2),
+            cost: item.cost ? Number(item.cost).toFixed(2) : "0.00",
             wholesalePrice: item.wholesalePrice ? Number(item.wholesalePrice).toFixed(2) : "0.00",
             dealerPrice: item.dealerPrice ? Number(item.dealerPrice).toFixed(2) : "0.00",
             category: item.category?.name || "N/A",

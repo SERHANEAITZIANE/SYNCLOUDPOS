@@ -101,8 +101,10 @@
     "transactionsGroup": "Transactions",
     "payments": "Paiements",
     "catalogGroup": "Catalogue",
+    "salesCatalog": "Catalogue de Vente",
     "promotions": "Promotions",
     "damages": "Avaries",
+    "transfers": "Transferts Inter-Dépôts",
     "partnersGroup": "Partenaires",
     "customerLoan": "Emprunt Client",
     "supplierLoan": "Emprunt Fournisseur",
@@ -110,7 +112,25 @@
     "systemGroup": "Système",
     "erpTraining": "Formation ERP",
     "superAdmin": "Super Admin",
-    "dailyClose": "Clôture de Caisse"
+    "dailyClose": "Clôture de Caisse",
+    "recurringInvoices": "Factures Récurrentes",
+    "barcodeLabels": "Étiquettes",
+    "reservations": "Réservations",
+    "delivery": "Livraison",
+    "driverTracking": "Suivi Livreurs",
+    "reorder": "Réapprovisionnement",
+    "inventoryAudit": "Audit d'Inventaire",
+    "annualInventory": "Inventaire Annuel",
+    "commissions": "Commissions",
+    "fiscalG50G12": "Impôts G50/G12",
+    "auditLog": "Journal d'Audit",
+    "hub": "Hub",
+    "proformas": "Proformas",
+    "invoices": "Factures",
+    "salesJournal": "Journal des Ventes",
+    "purchaseJournal": "Journal des Achats",
+    "cheques": "Chèques",
+    "reconciliation": "Rapprochement"
   },
   "Common": {
     "quantity": "Quantité",
@@ -386,7 +406,7 @@
     "status": {
       "pending": "Brouillon",
       "bonCommande": "Bon de Commande",
-      "bonLivraison": "Bon de Livraison",
+      "bonLivraison": "Bon de Réception",
       "facture": "Facture",
       "completed": "Payé",
       "cancelled": "Annulé"
@@ -683,7 +703,12 @@
       "barcodeModel": "Modèle d'étiquette code-barre",
       "blTemplate": {
         "title": "Modèle de Bon de Livraison",
-        "label": "Modèle à utiliser"
+        "label": "Modèle à utiliser",
+        "options": {
+          "standard": "Standard (Classique)",
+          "compact": "Compact (Sans Entête)",
+          "aitee": "AITEE (Facture Style)"
+        }
       },
       "displayOptions": "Options d'affichage",
       "showBarcodeOnReceipt": {
@@ -1189,6 +1214,7 @@
     },
     "links": {
       "pos": "Caisse (POS)",
+      "salesCatalog": "Catalogue de Vente",
       "allSales": "Toutes les Ventes",
       "recurringInvoices": "Factures Récurrentes",
       "reservations": "Réservations",
@@ -1214,13 +1240,31 @@
       "analytics": "Analytiques",
       "fiscal": "Impôts G50/G12",
       "annualInventory": "Inventaire Annuel",
-      "commissions": "Commissions",
+      "commissions": "Commissions & Soldes Vendeurs",
       "aiChat": "Assistant IA",
       "settings": "Paramètres",
       "company": "Mon Entreprise",
       "users": "Utilisateurs",
       "training": "Formation ERP",
-      "dashboard": "Tableau de bord"
+      "dashboard": "Tableau de bord",
+      "transfers": "Transferts Inter-Dépôts",
+      "barcodeLabels": "Étiquettes Codes-Barres",
+      "cheques": "Chèques",
+      "reconciliation": "Rapprochement Bancaire",
+      "auditLog": "Journal d'Audit",
+      "driverTracking": "Suivi Livreurs",
+      "driverPortal": "Portail Livreur",
+      "journals": "Journaux Comptables",
+      "superAdmin": "Super Admin",
+      "mobileConnect": "App Mobile",
+      "mobileConnectDesc": "Scannez le QR Code pour connecter votre mobile",
+      "scanQrCode": "Connexion Mobile App",
+      "scanQrCodeDesc": "Scannez ce code QR avec l'application Expo Go pour vous connecter instantanément.",
+      "howToConnect": "Comment se connecter :",
+      "installExpoGo": "1. Installez l'application Expo Go sur votre smartphone (Android/iOS).",
+      "sameWifi": "2. Assurez-vous d'être connecté au même réseau Wi-Fi.",
+      "scanCamera": "3. Scannez le code QR ci-dessous avec votre caméra ou via l'application Expo Go.",
+      "manualUrl": "Ou entrez l'adresse URL suivante dans Expo Go :"
     }
   }
 }

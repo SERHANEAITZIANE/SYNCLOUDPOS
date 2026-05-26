@@ -25,12 +25,17 @@ export const createCategory = async (values: z.infer<typeof CategorySchema>) => 
         return { error: "Invalid fields!" }
     }
 
-    const { name } = validatedFields.data
+    const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
         const category = await db.category.create({
             data: {
                 name,
+                imageUrl: imageUrl ?? null,
+                isArchived: isArchived ?? false,
+                commissionWholesale: commissionWholesale ?? 0,
+                commissionReseller: commissionReseller ?? 0,
+                commissionRetail: commissionRetail ?? 0,
                 tenantId,
             }
         })
@@ -43,7 +48,7 @@ export const createCategory = async (values: z.infer<typeof CategorySchema>) => 
     }
 }
 
-export const getCategories = async () => {
+export const getCategories = async (includeArchived: boolean = true) => {
     const session = await auth()
     const tenantId = session?.user?.tenantId
 
@@ -52,10 +57,12 @@ export const getCategories = async () => {
     }
 
     try {
+        const where: any = { tenantId }
+        if (!includeArchived) {
+            where.isArchived = false
+        }
         const categories = await db.category.findMany({
-            where: {
-                tenantId
-            },
+            where,
             orderBy: {
                 createdAt: 'desc'
             }
@@ -111,7 +118,7 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
         return { error: "Invalid fields!" }
     }
 
-    const { name } = validatedFields.data
+    const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
         await db.category.update({
@@ -120,7 +127,12 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
                 tenantId
             },
             data: {
-                name
+                name,
+                imageUrl: imageUrl ?? null,
+                isArchived: isArchived ?? false,
+                commissionWholesale: commissionWholesale ?? 0,
+                commissionReseller: commissionReseller ?? 0,
+                commissionRetail: commissionRetail ?? 0,
             }
         })
 

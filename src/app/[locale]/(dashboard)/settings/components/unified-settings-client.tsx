@@ -34,6 +34,7 @@ interface TenantData {
     headerText: string | null
     blTemplate: string
     aiProvider: string
+    aiModel: string | null
     geminiApiKey: string | null
     openaiApiKey: string | null
     anthropicApiKey: string | null
@@ -176,6 +177,7 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             <div className="max-w-3xl">
                                 <AiSettingsForm
                                     initialProvider={tenant.aiProvider}
+                                    initialModel={tenant.aiModel}
                                     initialGeminiApiKey={tenant.geminiApiKey}
                                     initialOpenaiApiKey={tenant.openaiApiKey}
                                     initialAnthropicApiKey={tenant.anthropicApiKey}

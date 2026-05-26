@@ -15,6 +15,8 @@ const PUBLIC_PATHS = [
     "/register",
     "/auth",
     "/api/auth",
+    "/api/webhooks",
+    "/api/mobile",
     "/landing.html",
 ]
 
@@ -129,15 +131,15 @@ export default auth(async function middleware(request) {
     response.headers.set("X-Content-Type-Options", "nosniff")
     response.headers.set("X-Frame-Options", "SAMEORIGIN")
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-    response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    response.headers.set("Permissions-Policy", "camera=(), microphone=(self), geolocation=(self)")
 
     // Content Security Policy
     response.headers.set("Content-Security-Policy",
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
       "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: https:; " +
-      "connect-src 'self' https://graph.facebook.com https://*.googleapis.com; " +
+      "img-src 'self' data: https: blob:; " +
+      "connect-src 'self' https://graph.facebook.com https://*.googleapis.com https://*.tile.openstreetmap.org; " +
       "frame-src 'self'; " +
       "object-src 'none'; " +
       "base-uri 'self';"

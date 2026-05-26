@@ -6,6 +6,8 @@ import { CellAction } from "./cell-action"
 import { PurchaseOrderColumn } from "./types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 const STATUS_STYLES: Record<string, string> = {
     PENDING: "bg-gray-100 text-gray-700",
@@ -53,6 +55,49 @@ export function usePurchaseColumns(): ColumnDef<PurchaseOrderColumn>[] {
         {
             accessorKey: "createdAt",
             header: tCommon("date"),
+        },
+        {
+            accessorKey: "imageUrl1",
+            header: "Preuves",
+            cell: ({ row }) => {
+                const images = [
+                    row.original.imageUrl1,
+                    row.original.imageUrl2,
+                    row.original.imageUrl3,
+                ].filter(Boolean) as string[]
+
+                if (images.length === 0) return <span className="text-muted-foreground text-xs italic">Aucune</span>
+
+                return (
+                    <div className="flex gap-1 items-center">
+                        {images.map((url, idx) => (
+                            <Dialog key={url}>
+                                <DialogTrigger asChild>
+                                    <div className="relative w-8 h-8 rounded border hover:opacity-80 transition cursor-pointer overflow-hidden flex-shrink-0">
+                                        <Image
+                                            fill
+                                            src={url}
+                                            alt={`Preuve ${idx + 1}`}
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-3xl p-1 bg-black border-none">
+                                    <div className="relative w-full h-[70vh] bg-black">
+                                        <Image
+                                            fill
+                                            src={url}
+                                            alt={`Preuve ${idx + 1}`}
+                                            className="object-contain"
+                                            unoptimized
+                                        />
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        ))}
+                    </div>
+                )
+            }
         },
         {
             id: "actions",

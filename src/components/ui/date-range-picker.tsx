@@ -13,6 +13,8 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { useLocale } from "next-intl"
+import { fr, arDZ, enUS } from "date-fns/locale"
 
 interface DatePickerWithRangeProps {
     className?: string
@@ -25,6 +27,16 @@ export function DatePickerWithRange({
     date,
     setDate,
 }: DatePickerWithRangeProps) {
+    const appLocale = useLocale()
+    
+    const dateFnsLocale = React.useMemo(() => {
+        switch (appLocale) {
+            case 'fr': return fr
+            case 'ar': return arDZ
+            default: return enUS
+        }
+    }, [appLocale])
+
     return (
         <div className={cn("grid gap-2", className)}>
             <Popover>
@@ -41,14 +53,14 @@ export function DatePickerWithRange({
                         {date?.from ? (
                             date.to ? (
                                 <>
-                                    {format(date.from, "LLL dd, y")} -{" "}
-                                    {format(date.to, "LLL dd, y")}
+                                    {format(date.from, "LLL dd, y", { locale: dateFnsLocale })} -{" "}
+                                    {format(date.to, "LLL dd, y", { locale: dateFnsLocale })}
                                 </>
                             ) : (
-                                format(date.from, "LLL dd, y")
+                                format(date.from, "LLL dd, y", { locale: dateFnsLocale })
                             )
                         ) : (
-                            <span>Pick a date</span>
+                            <span>{appLocale === 'fr' ? 'Sélectionner une date' : appLocale === 'ar' ? 'اختر تاريخًا' : 'Pick a date'}</span>
                         )}
                     </Button>
                 </PopoverTrigger>

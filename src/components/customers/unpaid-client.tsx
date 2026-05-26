@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { registerCustomerPayment } from "@/actions/customers"
+import { sendDebtReminder } from "@/actions/whatsapp"
 import { toast } from "react-hot-toast"
 
 interface UnpaidClientProps {
@@ -41,12 +42,14 @@ export const UnpaidClient: React.FC<UnpaidClientProps> = ({ data, accounts }) =>
     const [notes, setNotes] = useState<string>("")
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0])
     const [loading, setLoading] = useState(false)
+    const [remindingIds, setRemindingIds] = useState<Record<string, boolean>>({})
 
     // Add immediate action column to list
     const actionColumn = {
         id: "actions",
         cell: ({ row }: any) => {
             const customer = row.original
+            const isReminding = remindingIds[customer.id] || false
             return (
                 <div className="flex flex-row space-x-2">
                     <Button
@@ -64,6 +67,35 @@ export const UnpaidClient: React.FC<UnpaidClientProps> = ({ data, accounts }) =>
                     >
                         Recevoir Paiement
                     </Button>
+                    {customer.phone ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
+                            disabled={isReminding}
+                            onClick={async () => {
+                                try {
+                                    setRemindingIds(prev => ({ ...prev, [customer.id]: true }))
+                                    const res = await sendDebtReminder({
+                                        customerName: customer.name,
+                                        phone: customer.phone,
+                                        balance: customer.balance
+                                    })
+                                    if (res.error) {
+                                        toast.error(res.error)
+                                    } else {
+                                        toast.success("Rappel de dette envoyé avec succès !")
+                                    }
+                                } catch (err) {
+                                    toast.error("Erreur lors de l'envoi du rappel")
+                                } finally {
+                                    setRemindingIds(prev => ({ ...prev, [customer.id]: false }))
+                                }
+                            }}
+                        >
+                            {isReminding ? "Envoi..." : "Relancer"}
+                        </Button>
+                    ) : null}
                     <Button
                         size="sm"
                         variant="secondary"

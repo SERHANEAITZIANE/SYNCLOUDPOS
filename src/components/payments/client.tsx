@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PaymentColumn, usePaymentColumns } from "./columns"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -159,32 +160,30 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
             <div className="flex flex-col sm:flex-row items-center gap-4 py-4">
                 {/* Filter by Client */}
                 <div className="w-full sm:w-[250px]">
-                    <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Filtrer par Client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Tous les Clients</SelectItem>
-                            {customers.map(c => (
-                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                        options={[
+                            { value: "ALL", label: "Tous les Clients" },
+                            ...customers.map(c => ({ value: c.id, label: c.name }))
+                        ]}
+                        value={selectedCustomer}
+                        onChange={setSelectedCustomer}
+                        placeholder="Filtrer par Client"
+                        searchPlaceholder="Rechercher un client..."
+                    />
                 </div>
 
                 {/* Filter by Modalité (Account) */}
                 <div className="w-full sm:w-[220px]">
-                    <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Modalité de paiement" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Toutes les modalités</SelectItem>
-                            {uniqueAccounts.map(name => (
-                                <SelectItem key={name} value={name}>{name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                        options={[
+                            { value: "ALL", label: "Toutes les modalités" },
+                            ...uniqueAccounts.map(name => ({ value: name, label: name }))
+                        ]}
+                        value={selectedAccount}
+                        onChange={setSelectedAccount}
+                        placeholder="Modalité de paiement"
+                        searchPlaceholder="Rechercher une modalité..."
+                    />
                 </div>
 
                 {/* Filter by Date */}
@@ -207,16 +206,13 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
                             <Label>Client</Label>
-                            <Select value={newPayment.customerId} onValueChange={(v) => setNewPayment(prev => ({ ...prev, customerId: v }))}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un client" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {customers.map(c => (
-                                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={customers.map(c => ({ value: c.id, label: c.name }))}
+                                value={newPayment.customerId}
+                                onChange={(v) => setNewPayment(prev => ({ ...prev, customerId: v }))}
+                                placeholder="Sélectionner un client"
+                                searchPlaceholder="Rechercher un client..."
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label>Montant (DA)</Label>
@@ -230,18 +226,13 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                         </div>
                         <div className="grid gap-2">
                             <Label>Caisse / Banque</Label>
-                            <Select value={newPayment.accountId} onValueChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner une caisse" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {accounts.map(a => (
-                                        <SelectItem key={a.id} value={a.id}>
-                                            {a.name} ({a.type})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
+                                value={newPayment.accountId}
+                                onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
+                                placeholder="Sélectionner une caisse"
+                                searchPlaceholder="Rechercher une caisse..."
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label>Date</Label>

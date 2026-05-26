@@ -10,6 +10,7 @@ interface PurchaseOrderItemData {
     productId: string
     quantity: number
     costPrice: number
+    tvaRate?: number
 }
 
 interface PurchaseOrderData {
@@ -19,7 +20,11 @@ interface PurchaseOrderData {
     items: PurchaseOrderItemData[]
     accountId?: string
     storeId?: string
+    reference?: string
     notes?: string
+    imageUrl1?: string
+    imageUrl2?: string
+    imageUrl3?: string
 }
 
 export const getPurchaseOrders = async () => {
@@ -78,12 +83,17 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     accountId: (data.accountId && data.accountId !== "none") ? data.accountId : undefined,
                     total: data.total,
                     withholdingAmount,
+                    reference: data.reference,
                     status: data.status,
+                    imageUrl1: data.imageUrl1 || undefined,
+                    imageUrl2: data.imageUrl2 || undefined,
+                    imageUrl3: data.imageUrl3 || undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            costPrice: item.costPrice
+                            costPrice: item.costPrice,
+                            tvaRate: item.tvaRate ?? 19
                         }))
                     }
                 },
@@ -207,13 +217,18 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                 data: {
                     supplierId: data.supplierId,
                     total: data.total,
+                    reference: data.reference,
                     status: data.status,
                     accountId: (data.accountId && data.accountId !== "none") ? data.accountId : undefined,
+                    imageUrl1: data.imageUrl1 || undefined,
+                    imageUrl2: data.imageUrl2 || undefined,
+                    imageUrl3: data.imageUrl3 || undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            costPrice: item.costPrice
+                            costPrice: item.costPrice,
+                            tvaRate: item.tvaRate ?? 19
                         }))
                     }
                 }
@@ -259,15 +274,27 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                 await Promise.all(
                     order.items.map(async (item) => {
                         const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
-                        const spBefore = pBefore?.storeProducts.find(sp => sp.storeId === stockStoreId);
+                        if (!pBefore) return;
+
+                        const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId);
                         const stockBefore = spBefore?.stock || 0;
                         const stockAfter = stockBefore + item.quantity;
+
+                        const globalStockBefore = pBefore.stock || 0;
+                        const globalStockAfter = globalStockBefore + item.quantity;
+
+                        // CUMP calculation (Weighted Average Cost)
+                        const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0;
+                        const newPurchaseValue = item.quantity * Number(item.costPrice);
+                        const newCump = globalStockAfter > 0 
+                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
+                            : Number(item.costPrice);
 
                         await tx.product.update({
                             where: { id: item.productId },
                             data: { 
-                                cost: item.costPrice,
-                                stock: { increment: item.quantity }
+                                cost: newCump,
+                                stock: globalStockAfter
                             }
                         });
 
@@ -287,7 +314,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 stockBefore,
                                 stockAfter,
                                 referenceId: order.id,
-                                reason: `Modification statut Achat N° ${order.id.slice(-6)}: ${newStatus}`,
+                                reason: `Modification statut Achat N° ${order.id.slice(-6)}: ${newStatus} (CUMP: ${newCump.toFixed(2)})`,
                                 tenantId
                             }
                         });

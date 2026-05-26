@@ -122,8 +122,8 @@ export function getCacheMetrics(): Readonly<CacheMetrics> {
 }
 
 // Get active cache operations
-export function getActiveCacheOperations(): Readonly<ReturnType<typeof activeOperations.get>>[] {
-  returnArray.from(activeOperations.values())
+export function getActiveCacheOperations() {
+  return Array.from(activeOperations.values())
 }
 
 // Clear completed operations - useful for testing

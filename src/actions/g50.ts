@@ -113,7 +113,7 @@ export async function getG50Data(year: number, month: number): Promise<G50Result
         for (const item of invoice.items) {
             const rate = Number(item.tvaRate ?? item.product?.tvaRate ?? 19)
             const qty = Number(item.quantity)
-            const unitPriceHT = Number(item.priceHt ?? item.unitPrice)
+            const unitPriceHT = Number(item.priceHt) > 0 ? Number(item.priceHt) : Number(item.unitPrice)
             const lineHT = unitPriceHT * qty * multiplier
             const lineTVA = lineHT * (rate / 100)
             const lineTTC = lineHT + lineTVA

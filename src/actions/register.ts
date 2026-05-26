@@ -11,6 +11,14 @@ import { sanitizeEmail, sanitizeString, sanitizePhone } from "@/lib/sanitizer"
 async function registerCore(values: RegisterInput) {
     const { email, password, name, phone } = values
 
+    // Apply Rate Limiting (max 3 registrations per minute per email)
+    const { rateLimit } = await import("@/lib/redis")
+    const { success } = await rateLimit(`register:${email}`, 3, 60 * 1000)
+    
+    if (!success) {
+        return { error: "Trop de tentatives. Veuillez réessayer plus tard." }
+    }
+
     // Sanitize inputs to prevent injection attacks
     const emailToUse = sanitizeEmail(email)
     const nameToUse = sanitizeString(name)

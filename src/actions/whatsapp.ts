@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import logger from "@/lib/logger"
 import { checkRateLimit, RateLimitResult } from "@/lib/rate-limiter"
-import { handleAppError, IntegrationError, ValidationError } from "@/lib/errors"
+import { handleAppError, IntegrationError, ValidationError, AuthenticationError } from "@/lib/errors"
 
 // WhatsApp API rate limit configuration
 // WhatsApp Business API limits: typically 250 messages per second per phone number

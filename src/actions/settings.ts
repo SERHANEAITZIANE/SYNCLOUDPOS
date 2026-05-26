@@ -63,6 +63,7 @@ export async function updateTenantSettings(data: {
 export async function updateSystemSettings(data: {
     blTemplate?: string;
     aiProvider?: string;
+    aiModel?: string;
     geminiApiKey?: string;
     openaiApiKey?: string;
     anthropicApiKey?: string;
@@ -77,6 +78,7 @@ export async function updateSystemSettings(data: {
         const updateData: any = {};
         if (data.blTemplate !== undefined) updateData.blTemplate = data.blTemplate || "standard";
         if (data.aiProvider !== undefined) updateData.aiProvider = data.aiProvider || "GEMINI";
+        if (data.aiModel !== undefined) updateData.aiModel = data.aiModel || null;
         if (data.geminiApiKey !== undefined) updateData.geminiApiKey = data.geminiApiKey || null;
         if (data.openaiApiKey !== undefined) updateData.openaiApiKey = data.openaiApiKey || null;
         if (data.anthropicApiKey !== undefined) updateData.anthropicApiKey = data.anthropicApiKey || null;

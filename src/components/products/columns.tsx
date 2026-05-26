@@ -9,6 +9,7 @@ export type ProductColumn = {
     id: string
     name: string
     price: string
+    cost: string
     wholesalePrice: string
     dealerPrice: string
     category: string
@@ -58,6 +59,10 @@ export function useProductColumns(): ColumnDef<ProductColumn>[] {
         {
             accessorKey: "price",
             header: t("fields.price"),
+        },
+        {
+            accessorKey: "cost",
+            header: "Prix Achat",
         },
         {
             accessorKey: "wholesalePrice",

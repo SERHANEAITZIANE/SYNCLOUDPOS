@@ -248,3 +248,54 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
         };
     }
 }
+
+export async function getSalesData(tenantId: string, days: number = 60): Promise<{ date: string; sales: number }[]> {
+    try {
+        const toDate = new Date();
+        const fromDate = subDays(toDate, days);
+
+        const [posOrders, salesOrders] = await Promise.all([
+            db.order.findMany({
+                where: {
+                    tenantId,
+                    status: "COMPLETED",
+                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+                },
+                select: { createdAt: true, total: true }
+            }),
+            db.salesOrder.findMany({
+                where: {
+                    tenantId,
+                    status: "PAID",
+                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+                },
+                select: { createdAt: true, total: true }
+            })
+        ]);
+
+        const salesMap = new Map<string, number>();
+
+        const intervalDays = eachDayOfInterval({ start: fromDate, end: toDate });
+        intervalDays.forEach(day => {
+            salesMap.set(format(day, "yyyy-MM-dd"), 0);
+        });
+
+        posOrders.forEach(o => {
+            const dateStr = format(o.createdAt, "yyyy-MM-dd");
+            salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(o.total));
+        });
+
+        salesOrders.forEach(so => {
+            const dateStr = format(so.createdAt, "yyyy-MM-dd");
+            salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(so.total));
+        });
+
+        return Array.from(salesMap.entries()).map(([date, sales]) => ({
+            date,
+            sales
+        }));
+    } catch (error) {
+        console.error("[GET_SALES_DATA]", error);
+        return [];
+    }
+}

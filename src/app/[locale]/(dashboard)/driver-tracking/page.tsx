@@ -1,14 +1,18 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, lazy, Suspense } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { toast } from "react-hot-toast"
-import { 
-    MapPin, Navigation, Truck, Clock, Phone, RefreshCw, 
-    TrendingUp, Users, Activity, ChevronRight, Eye
+import {
+    MapPin, Navigation, Truck, Clock, Phone, RefreshCw,
+    TrendingUp, Users, Activity, ChevronRight, Eye, Map
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+// Lazy-load the map to avoid SSR issues
+const LeafletMap = lazy(() =>
+    import("@/components/maps/leaflet-map").then(mod => ({ default: mod.LeafletMap }))
+)
 
 interface DriverData {
     driver: { id: string; name: string; phone: string; role: string }
@@ -31,6 +35,7 @@ export default function DriverTrackingPage() {
     const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
     const [driverRoute, setDriverRoute] = useState<any>(null)
     const [autoRefresh, setAutoRefresh] = useState(true)
+    const [showMap, setShowMap] = useState(true)
 
     const fetchDrivers = useCallback(async () => {
         try {
@@ -80,6 +85,12 @@ export default function DriverTrackingPage() {
         return "bg-gray-500"
     }
 
+    const getMarkerColor = (driver: DriverData): "green" | "yellow" | "gray" => {
+        if (driver.location?.isRecent) return "green"
+        if (driver.location) return "yellow"
+        return "gray"
+    }
+
     const getStatusLabel = (driver: DriverData) => {
         if (driver.location?.isRecent) return "En ligne"
         if (driver.location) return "Dernière position"
@@ -95,6 +106,25 @@ export default function DriverTrackingPage() {
         return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
     }
 
+    // Build map markers from driver data
+    const mapMarkers = drivers
+        .filter(d => d.location)
+        .map(d => ({
+            id: d.driver.id,
+            lat: d.location!.latitude,
+            lng: d.location!.longitude,
+            label: d.driver.name,
+            color: getMarkerColor(d),
+            speed: d.location!.speed,
+            popup: `${getStatusLabel(d)} — ${d.tour ? `${d.tour.visitedStops}/${d.tour.totalStops} clients` : "Pas de tournée"}`
+        }))
+
+    // Build route points if a specific driver is selected
+    const routePoints = driverRoute?.locations?.map((l: any) => ({
+        lat: l.latitude,
+        lng: l.longitude,
+    })) || []
+
     return (
         <div className="p-6 space-y-6">
             {/* Header */}
@@ -109,6 +139,15 @@ export default function DriverTrackingPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowMap(!showMap)}
+                        className={cn(showMap && "border-blue-500 text-blue-600")}
+                    >
+                        <Map className="h-4 w-4 mr-1" />
+                        {showMap ? "Masquer carte" : "Afficher carte"}
+                    </Button>
                     <Button
                         variant="outline"
                         size="sm"
@@ -146,7 +185,7 @@ export default function DriverTrackingPage() {
                         </div>
                         <div>
                             <p className="text-2xl font-bold">{totalSales}</p>
-                            <p className="text-xs text-muted-foreground">BLs créés aujourd'hui</p>
+                            <p className="text-xs text-muted-foreground">BLs créés aujourd&apos;hui</p>
                         </div>
                     </div>
                 </div>
@@ -180,6 +219,37 @@ export default function DriverTrackingPage() {
                     </div>
                 </div>
             </div>
+
+            {/* EMBEDDED MAP */}
+            {showMap && (
+                <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+                    <div className="p-4 border-b flex items-center justify-between">
+                        <h2 className="font-semibold flex items-center gap-2">
+                            <Map className="h-5 w-5 text-blue-500" />
+                            Carte en temps réel
+                            {mapMarkers.length > 0 && (
+                                <span className="text-xs text-muted-foreground font-normal">
+                                    — {mapMarkers.length} livreur(s) localisé(s)
+                                </span>
+                            )}
+                        </h2>
+                    </div>
+                    <Suspense fallback={
+                        <div className="flex items-center justify-center h-[400px] bg-muted/30">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                Chargement de la carte...
+                            </div>
+                        </div>
+                    }>
+                        <LeafletMap
+                            markers={mapMarkers}
+                            routePoints={routePoints.length > 1 ? routePoints : undefined}
+                            height="420px"
+                        />
+                    </Suspense>
+                </div>
+            )}
 
             {/* Drivers List */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -295,7 +365,7 @@ export default function DriverTrackingPage() {
                     <div className="col-span-2 text-center py-16 text-muted-foreground">
                         <Truck className="h-12 w-12 mx-auto mb-3 opacity-40" />
                         <p className="text-lg font-medium">Aucun livreur trouvé</p>
-                        <p className="text-sm">Les livreurs apparaîtront ici dès qu'ils se connectent à l'app mobile</p>
+                        <p className="text-sm">Les livreurs apparaîtront ici dès qu&apos;ils se connectent à l&apos;app mobile</p>
                     </div>
                 )}
             </div>

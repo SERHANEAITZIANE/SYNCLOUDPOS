@@ -162,6 +162,86 @@ export default function DashboardScreen() {
                 </View>
             )}
 
+            {/* Commission & Milestone tracker card */}
+            {(() => {
+                const netSales = data.financials.netAmount;
+                const commissionRate = 0.03; 
+                const earnedCommission = netSales * commissionRate;
+                const dailyTarget = 150000;
+                const progressPercent = Math.min(100, Math.round((netSales / dailyTarget) * 100));
+
+                let encouragementText = "En route vers vos objectifs !";
+                if (progressPercent < 30) {
+                    encouragementText = "Bon début de tournée ! Poussez les ventes pour décrocher les premiers paliers.";
+                } else if (progressPercent < 70) {
+                    encouragementText = "Vous êtes à mi-chemin ! Vos efforts paient, continuez sur cette lancée.";
+                } else if (progressPercent < 100) {
+                    encouragementText = "Objectif quotidien presque atteint ! Plus que quelques ventes pour le bonus.";
+                } else {
+                    encouragementText = "🏆 Félicitations ! Objectif quotidien atteint. Zone super-bonus active !";
+                }
+
+                return (
+                    <View style={styles.commissionCard}>
+                        <View style={styles.commHeader}>
+                            <View style={styles.commTitleWrap}>
+                                <Ionicons name="sparkles" size={18} color="#f59e0b" />
+                                <Text style={styles.commTitle}>Commissions & Objectifs</Text>
+                            </View>
+                            <View style={styles.commBadge}>
+                                <Text style={styles.commBadgeText}>Commission: 3%</Text>
+                            </View>
+                        </View>
+
+                        {/* Primary numbers */}
+                        <View style={styles.commStatsRow}>
+                            <View>
+                                <Text style={styles.commLabel}>COMMISSION DU JOUR (EST.)</Text>
+                                <Text style={styles.commValue}>
+                                    {earnedCommission.toLocaleString("fr-FR")} DA
+                                </Text>
+                            </View>
+                            <View style={{ alignItems: "flex-end" }}>
+                                <Text style={styles.commLabel}>OBJECTIF DE VENTES ({dailyTarget.toLocaleString("fr-FR")} DA)</Text>
+                                <Text style={styles.commTargetValue}>
+                                    {progressPercent}% complété
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Progress bar */}
+                        <View style={styles.progressBarBg}>
+                            <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+                        </View>
+
+                        {/* Milestone nodes */}
+                        <View style={styles.milestonesRow}>
+                            <Text style={[styles.milestoneText, progressPercent >= 33 && styles.milestoneTextActive]}>
+                                🥉 50k
+                            </Text>
+                            <Text style={[styles.milestoneText, progressPercent >= 66 && styles.milestoneTextActive]}>
+                                🥈 100k
+                            </Text>
+                            <Text style={[styles.milestoneText, progressPercent >= 100 && styles.milestoneTextActive]}>
+                                🥇 150k + Bonus
+                            </Text>
+                        </View>
+
+                        {/* Encouragement message */}
+                        <View style={[styles.encouragementBox, progressPercent >= 100 && styles.encouragementBoxGold]}>
+                            <Ionicons 
+                                name={progressPercent >= 100 ? "trophy" : "ribbon-outline"} 
+                                size={15} 
+                                color={progressPercent >= 100 ? "#f59e0b" : "#94a3b8"} 
+                            />
+                            <Text style={[styles.encouragementText, progressPercent >= 100 && styles.encouragementTextGold]}>
+                                {encouragementText}
+                            </Text>
+                        </View>
+                    </View>
+                );
+            })()}
+
             {/* Financial KPIs */}
             <Text style={styles.sectionTitle}>{t("financial")}</Text>
             <View style={styles.kpiGrid}>
@@ -340,4 +420,52 @@ const styles = StyleSheet.create({
         color: "#f8fafc", fontSize: 16, fontWeight: "800",
         borderBottomWidth: 1, borderBottomColor: "#334155", paddingBottom: 12,
     },
+
+    // Commission Tracker Card
+    commissionCard: {
+        backgroundColor: "#1e293b", marginHorizontal: 16, marginBottom: 16,
+        padding: 20, borderRadius: 20, borderWidth: 1, borderColor: "#334155",
+        shadowColor: "#f59e0b", shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05, shadowRadius: 10, elevation: 4,
+    },
+    commHeader: {
+        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+        borderBottomWidth: 1, borderBottomColor: "#334155", paddingBottom: 10,
+        marginBottom: 12,
+    },
+    commTitleWrap: { flexDirection: "row", alignItems: "center", gap: 8 },
+    commTitle: { color: "#f8fafc", fontSize: 15, fontWeight: "800" },
+    commBadge: {
+        backgroundColor: "#f59e0b15", borderWidth: 1, borderColor: "#f59e0b30",
+        paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
+    },
+    commBadgeText: { color: "#f59e0b", fontSize: 10, fontWeight: "700" },
+    commStatsRow: {
+        flexDirection: "row", justifyContent: "space-between", marginBottom: 14,
+    },
+    commLabel: { color: "#64748b", fontSize: 9, fontWeight: "700", letterSpacing: 0.5 },
+    commValue: { color: "#22c55e", fontSize: 20, fontWeight: "900", marginTop: 4 },
+    commTargetValue: { color: "#f8fafc", fontSize: 14, fontWeight: "800", marginTop: 4 },
+    progressBarBg: {
+        height: 8, backgroundColor: "#0f172a", borderRadius: 4, overflow: "hidden",
+        marginBottom: 10,
+    },
+    progressBarFill: {
+        height: "100%", backgroundColor: "#f59e0b", borderRadius: 4,
+    },
+    milestonesRow: {
+        flexDirection: "row", justifyContent: "space-between", marginBottom: 14,
+    },
+    milestoneText: { color: "#64748b", fontSize: 10, fontWeight: "700" },
+    milestoneTextActive: { color: "#f59e0b" },
+    encouragementBox: {
+        flexDirection: "row", alignItems: "center", gap: 8,
+        backgroundColor: "#0f172a", borderRadius: 10, padding: 10,
+        borderWidth: 1, borderColor: "#334155/50",
+    },
+    encouragementBoxGold: {
+        backgroundColor: "#f59e0b08", borderColor: "#f59e0b20",
+    },
+    encouragementText: { color: "#94a3b8", fontSize: 11, fontWeight: "600", flex: 1, lineHeight: 15 },
+    encouragementTextGold: { color: "#f59e0b" },
 });

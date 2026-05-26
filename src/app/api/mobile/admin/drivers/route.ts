@@ -1,12 +1,26 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { requireMobileAuth, mobileErrorResponse, verifyMobileAuth } from "@/lib/mobile-auth";
+import { mobileErrorResponse, verifyMobileAuth } from "@/lib/mobile-auth";
+import { auth } from "@/auth";
 
 // GET /api/mobile/admin/drivers — Get all drivers with their latest status (admin only)
 export async function GET(req: NextRequest) {
     try {
-        // Allow both mobile JWT and check for admin role
-        const user = verifyMobileAuth(req);
+        let user: any = verifyMobileAuth(req);
+        
+        if (!user) {
+            const session = await auth();
+            if (session?.user) {
+                user = {
+                    userId: session.user.id!,
+                    tenantId: (session.user as any).tenantId,
+                    email: session.user.email!,
+                    name: session.user.name!,
+                    role: (session.user as any).role,
+                };
+            }
+        }
+
         if (!user) {
             return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
         }
@@ -29,40 +43,55 @@ export async function GET(req: NextRequest) {
             select: { id: true, name: true, phone: true, email: true, role: true },
         });
 
-        const driverData = await Promise.all(
-            drivers.map(async (driver) => {
-                // Latest GPS position
-                const latestLocation = await db.driverLocation.findFirst({
-                    where: { driverId: driver.id },
-                    orderBy: { createdAt: "desc" },
-                });
+        const driverIds = drivers.map(d => d.id);
 
-                // Today's tour
-                const todayTour = await db.deliveryTour.findFirst({
-                    where: {
-                        driverId: driver.id,
-                        tenantId: user.tenantId,
-                        date: { gte: today, lt: tomorrow },
-                    },
-                    include: {
-                        stops: {
-                            select: { status: true, paymentAmount: true, returnAmount: true },
-                        },
-                        _count: { select: { stops: true } },
-                    },
-                });
+        // Batch 1: Latest locations
+        const latestLocations = await db.driverLocation.findMany({
+            where: { tenantId: user.tenantId, driverId: { in: driverIds } },
+            distinct: ['driverId'],
+            orderBy: { createdAt: "desc" },
+        });
+        const locationsMap = new Map(latestLocations.map(l => [l.driverId, l]));
 
-                // Today's sales count
-                const todaySales = await db.salesOrder.count({
-                    where: {
-                        tenantId: user.tenantId,
-                        notes: { contains: "[Mobile]" },
-                        createdAt: { gte: today, lt: tomorrow },
-                    },
-                });
+        // Batch 2: Today's tours
+        const todayTours = await db.deliveryTour.findMany({
+            where: {
+                tenantId: user.tenantId,
+                driverId: { in: driverIds },
+                date: { gte: today, lt: tomorrow },
+            },
+            include: {
+                stops: {
+                    select: { status: true, paymentAmount: true, returnAmount: true },
+                },
+                _count: { select: { stops: true } },
+            },
+            orderBy: { createdAt: "desc" } // get the latest if multiple
+        });
+        const toursMap = new Map();
+        for (const t of todayTours) {
+            if (!toursMap.has(t.driverId)) toursMap.set(t.driverId, t);
+        }
+
+        // Batch 3: Sales counts per driver
+        const salesCounts = await db.salesOrder.groupBy({
+            by: ['userId'],
+            where: {
+                tenantId: user.tenantId,
+                source: "MOBILE",
+                createdAt: { gte: today, lt: tomorrow },
+            },
+            _count: true,
+        });
+        const salesCountMap = new Map(salesCounts.map(s => [s.userId, s._count]));
+
+        const driverData = drivers.map((driver) => {
+                const latestLocation = locationsMap.get(driver.id);
+                const todayTour = toursMap.get(driver.id);
+                const todaySales = salesCountMap.get(driver.id) || 0;
 
                 const stops = todayTour?.stops || [];
-                const visited = stops.filter(s =>
+                const visited = stops.filter((s: any) =>
                     ["DELIVERED", "ABSENT", "PARTIAL", "SKIPPED"].includes(s.status)
                 ).length;
 
@@ -91,13 +120,12 @@ export async function GET(req: NextRequest) {
                         progress: todayTour._count.stops > 0
                             ? Math.round((visited / todayTour._count.stops) * 100)
                             : 0,
-                        totalCollected: stops.reduce((s, st) => s + (st.paymentAmount || 0), 0),
-                        totalReturns: stops.reduce((s, st) => s + (st.returnAmount || 0), 0),
+                        totalCollected: stops.reduce((s: number, st: any) => s + (st.paymentAmount || 0), 0),
+                        totalReturns: stops.reduce((s: number, st: any) => s + (st.returnAmount || 0), 0),
                     } : null,
                     salesCount: todaySales,
                 };
-            })
-        );
+            });
 
         return NextResponse.json({
             drivers: driverData,

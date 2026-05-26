@@ -25,12 +25,17 @@ export const createBrand = async (values: z.infer<typeof BrandSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { name } = validatedFields.data
+    const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
         const brand = await db.brand.create({
             data: {
                 name,
+                imageUrl: imageUrl ?? null,
+                isArchived: isArchived ?? false,
+                commissionWholesale: commissionWholesale ?? 0,
+                commissionReseller: commissionReseller ?? 0,
+                commissionRetail: commissionRetail ?? 0,
                 tenantId,
             }
         })
@@ -43,7 +48,7 @@ export const createBrand = async (values: z.infer<typeof BrandSchema>) => {
     }
 }
 
-export const getBrands = async () => {
+export const getBrands = async (includeArchived: boolean = true) => {
     const session = await auth()
     const tenantId = session?.user?.tenantId
 
@@ -52,10 +57,12 @@ export const getBrands = async () => {
     }
 
     try {
+        const where: any = { tenantId }
+        if (!includeArchived) {
+            where.isArchived = false
+        }
         const brands = await db.brand.findMany({
-            where: {
-                tenantId
-            },
+            where,
             orderBy: {
                 createdAt: 'desc'
             }
@@ -111,7 +118,7 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
         return { error: "Invalid fields!" }
     }
 
-    const { name } = validatedFields.data
+    const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
         await db.brand.update({
@@ -120,7 +127,12 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
                 tenantId
             },
             data: {
-                name
+                name,
+                imageUrl: imageUrl ?? null,
+                isArchived: isArchived ?? false,
+                commissionWholesale: commissionWholesale ?? 0,
+                commissionReseller: commissionReseller ?? 0,
+                commissionRetail: commissionRetail ?? 0,
             }
         })
 

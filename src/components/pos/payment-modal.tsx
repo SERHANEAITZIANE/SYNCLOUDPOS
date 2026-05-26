@@ -199,7 +199,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     // Auto-print effect
     React.useEffect(() => {
-        let timeoutId: NodeJS.Timeout
+        let timeoutId: any
 
         if (success && !hasAutoPrinted) {
             setHasAutoPrinted(true)

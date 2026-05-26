@@ -49,31 +49,43 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Create truck load
-        const truckLoad = await db.truckLoad.create({
-            data: {
-                tenantId: user.tenantId,
-                tourId,
-                driverId: user.userId,
-                status: "LOADED",
-                loadedAt: new Date(),
-                items: {
-                    create: items.map((item: { productId: string; quantity: number }) => ({
-                        productId: item.productId,
-                        qtyLoaded: item.quantity,
-                        qtyRemaining: item.quantity,
-                    })),
+        // Create truck load and deduct stock in a transaction
+        const truckLoad = await db.$transaction(async (tx) => {
+            const created = await tx.truckLoad.create({
+                data: {
+                    tenantId: user.tenantId,
+                    tourId,
+                    driverId: user.userId,
+                    status: "LOADED",
+                    loadedAt: new Date(),
+                    items: {
+                        create: items.map((item: { productId: string; quantity: number }) => ({
+                            productId: item.productId,
+                            qtyLoaded: item.quantity,
+                            qtyRemaining: item.quantity,
+                        })),
+                    },
                 },
-            },
-            include: {
-                items: {
-                    include: {
-                        product: {
-                            select: { id: true, name: true, price: true, stock: true },
+                include: {
+                    items: {
+                        include: {
+                            product: {
+                                select: { id: true, name: true, price: true, stock: true },
+                            },
                         },
                     },
                 },
-            },
+            });
+
+            // Deduct stock
+            for (const item of items) {
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { decrement: item.quantity } },
+                });
+            }
+
+            return created;
         });
 
         return NextResponse.json(truckLoad, { status: 201 });

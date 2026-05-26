@@ -606,71 +606,94 @@
       if (!e.target.closest('nav') && !e.target.closest('#mob')) closeMenu();
     });
 
-    // ─── Override render to handle dynamic lists ───
-    const _origRender = render;
-    render = function () {
-      _origRender();
-      const tr = T[currentLang];
+    // ─── Override render to handle dynamic lists (Resilient Interceptor) ───
+    (function() {
+      var _origRender = window.render;
+      var _isWrapped = false;
 
-      // Feature categories
-      const cats = ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat7', 'cat8'];
-      cats.forEach(cat => {
-        const el = document.getElementById('feat-' + cat);
-        if (el && tr[cat + '_items']) {
-          el.innerHTML = tr[cat + '_items'].map(item => `
-            <div class="feat-item">
-              <div class="fi-icon">${item.icon}</div>
-              <div class="fi-body">
-                <div class="fi-title">${item.title}</div>
-                <div class="fi-desc">${item.desc}</div>
-              </div>
-            </div>
-          `).join('');
-        }
-      });
+      function wrap(orig) {
+        if (_isWrapped || !orig) return orig;
+        _isWrapped = true;
+        
+        return function() {
+          orig();
+          var tr = window.T ? window.T[window.currentLang] : null;
+          if (!tr) return;
 
-      // Use Cases
-      const ucGrid = document.getElementById('uc-grid');
-      if (ucGrid && tr.uc_items) {
-        ucGrid.innerHTML = tr.uc_items.map(uc => `
-          <div class="uc-card reveal">
-            <div class="uc-icon">${uc.icon}</div>
-            <h3 class="uc-title">${uc.title}</h3>
-            <p class="uc-desc">${uc.desc}</p>
-            <ul class="uc-list">
-              ${uc.list.map(l => `<li>${l}</li>`).join('')}
-            </ul>
-          </div>
-        `).join('');
+          // Feature categories
+          var cats = ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat7', 'cat8'];
+          cats.forEach(function(cat) {
+            var el = document.getElementById('feat-' + cat);
+            if (el && tr[cat + '_items']) {
+              el.innerHTML = tr[cat + '_items'].map(function(item) {
+                return '\n            <div class="feat-item">\n              <div class="fi-icon">' + item.icon + '</div>\n              <div class="fi-body">\n                <div class="fi-title">' + item.title + '</div>\n                <div class="fi-desc">' + item.desc + '</div>\n              </div>\n            </div>\n          ';
+              }).join('');
+            }
+          });
+
+          // Use Cases
+          var ucGrid = document.getElementById('uc-grid');
+          if (ucGrid && tr.uc_items) {
+            ucGrid.innerHTML = tr.uc_items.map(function(uc) {
+              return '\n          <div class="uc-card reveal">\n            <div class="uc-icon">' + uc.icon + '</div>\n            <h3 class="uc-title">' + uc.title + '</h3>\n            <p class="uc-desc">' + uc.desc + '</p>\n            <ul class="uc-list">\n              ' + uc.list.map(function(l) { return '<li>' + l + '</li>'; }).join('') + '\n            </ul>\n          </div>\n        ';
+            }).join('');
+          }
+
+          // Pricing
+          var pf1 = document.getElementById('pf1');
+          var pf2 = document.getElementById('pf2');
+          if (pf1 && tr.p1_feats) pf1.innerHTML = tr.p1_feats.map(function(f) { return '<li><span class="check">✓</span>' + f + '</li>'; }).join('');
+          if (pf2 && tr.p2_feats) pf2.innerHTML = tr.p2_feats.map(function(f) { return '<li><span class="check">✓</span>' + f + '</li>'; }).join('');
+
+          // Contact form select
+          var ft = document.getElementById('ft');
+          if (ft && tr.f_opts) ft.innerHTML = tr.f_opts.map(function(o) { return '<option>' + o + '</option>'; }).join('');
+
+          // Footer links
+          var flf = document.getElementById('fl-f');
+          var fls = document.getElementById('fl-s');
+          var ffLinks = ['#features', '#features', '#features', '#features', '#features', '#features'];
+          var fsLinks = ['https://wa.me/213696928227?text=' + encodeURIComponent('Bonjour, support SyncloudPOS'), '#contact', window.APP_URL || '/fr/register', '#features'];
+          if (flf && tr.fl_f) flf.innerHTML = tr.fl_f.map(function(f, i) { return '<a href="' + (ffLinks[i] || '#') + '">' + f + '</a>'; }).join('');
+          if (fls && tr.fl_s) fls.innerHTML = tr.fl_s.map(function(f, i) { return '<a href="' + (fsLinks[i] || '#') + '">' + f + '</a>'; }).join('');
+
+          // Re-observe newly rendered elements
+          setTimeout(function() {
+            document.querySelectorAll('.reveal:not(.visible)').forEach(function(el) { revealObserver.observe(el); });
+          }, 50);
+        };
       }
 
-      // Pricing
-      const pf1 = document.getElementById('pf1');
-      const pf2 = document.getElementById('pf2');
-      if (pf1 && tr.p1_feats) pf1.innerHTML = tr.p1_feats.map(f => `<li><span class="check">✓</span>${f}</li>`).join('');
-      if (pf2 && tr.p2_feats) pf2.innerHTML = tr.p2_feats.map(f => `<li><span class="check">✓</span>${f}</li>`).join('');
+      var currentVal = _origRender ? wrap(_origRender) : undefined;
 
-      // Contact form select
-      const ft = document.getElementById('ft');
-      if (ft && tr.f_opts) ft.innerHTML = tr.f_opts.map(o => `<option>${o}</option>`).join('');
+      try {
+        Object.defineProperty(window, 'render', {
+          configurable: true,
+          enumerable: true,
+          get: function() {
+            return currentVal;
+          },
+          set: function(val) {
+            currentVal = wrap(val);
+            if (typeof currentVal === 'function') {
+              currentVal();
+            }
+          }
+        });
+      } catch(e) {
+        window.render = wrap(window.render);
+      }
 
-      // Footer links
-      const flf = document.getElementById('fl-f');
-      const fls = document.getElementById('fl-s');
-      const ffLinks = ['#features', '#features', '#features', '#features', '#features', '#features'];
-      const fsLinks = [`https://wa.me/213696928227?text=${encodeURIComponent('Bonjour, support SyncloudPOS')}`, '#contact', APP_URL, '#features'];
-      if (flf && tr.fl_f) flf.innerHTML = tr.fl_f.map((f, i) => `<a href="${ffLinks[i] || '#'}">${f}</a>`).join('');
-      if (fls && tr.fl_s) fls.innerHTML = tr.fl_s.map((f, i) => `<a href="${fsLinks[i] || '#'}">${f}</a>`).join('');
-
-      // Re-observe newly rendered elements
-      setTimeout(() => {
-        document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
-      }, 50);
-    };
+      if (_origRender && typeof currentVal === 'function') {
+        currentVal();
+      }
+    })();
 
     // Init
-    document.addEventListener('DOMContentLoaded', () => {
-      setLang(currentLang);
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof window.setLang === 'function') {
+        window.setLang(window.currentLang || 'fr');
+      }
       initReveal();
     });
   </script>

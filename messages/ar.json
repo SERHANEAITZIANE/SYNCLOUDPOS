@@ -101,8 +101,10 @@
     "transactionsGroup": "المعاملات",
     "payments": "المدفوعات",
     "catalogGroup": "الكتالوج",
+    "salesCatalog": "كتالوج المبيعات",
     "promotions": "العروض",
     "damages": "التوالف",
+    "transfers": "التحويلات بين المستودعات",
     "partnersGroup": "الشركاء",
     "customerLoan": "سلف العملاء",
     "supplierLoan": "سلف الموردين",
@@ -110,7 +112,25 @@
     "systemGroup": "النظام",
     "erpTraining": "تدريب النظام",
     "superAdmin": "المدير العام",
-    "dailyClose": "إقفال الصندوق"
+    "dailyClose": "إقفال الصندوق",
+    "recurringInvoices": "فواتير متكررة",
+    "barcodeLabels": "ملصقات",
+    "reservations": "حجوزات",
+    "delivery": "التوصيل",
+    "driverTracking": "تتبع السائقين",
+    "reorder": "إعادة التموين",
+    "inventoryAudit": "تدقيق المخزون",
+    "annualInventory": "الجرد السنوي",
+    "commissions": "العمولات",
+    "fiscalG50G12": "الضرائب G50/G12",
+    "auditLog": "سجل التدقيق",
+    "hub": "الرئيسية",
+    "proformas": "عروض الأسعار",
+    "invoices": "الفواتير",
+    "salesJournal": "دفتر المبيعات",
+    "purchaseJournal": "دفتر المشتريات",
+    "cheques": "الشيكات",
+    "reconciliation": "المطابقة"
   },
   "Common": {
     "quantity": "الكمية",
@@ -683,7 +703,12 @@
       "barcodeModel": "نموذج ملصق الباركود",
       "blTemplate": {
         "title": "قالب وصل الاستلام",
-        "label": "القالب المراد استخدامه"
+        "label": "القالب المراد استخدامه",
+        "options": {
+          "standard": "قياسي (كلاسيكي)",
+          "compact": "مدمج (بدون ترويسة)",
+          "aitee": "AITEE (نمط الفاتورة)"
+        }
       },
       "displayOptions": "خيارات العرض",
       "showBarcodeOnReceipt": {
@@ -1189,6 +1214,7 @@
     },
     "links": {
       "pos": "نقطة البيع",
+      "salesCatalog": "كتالوج المبيعات",
       "allSales": "جميع المبيعات",
       "recurringInvoices": "فواتير متكررة",
       "reservations": "الحجوزات",
@@ -1214,13 +1240,31 @@
       "analytics": "التحليلات",
       "fiscal": "الضرائب G50/G12",
       "annualInventory": "الجرد السنوي",
-      "commissions": "العمولات",
+      "commissions": "العمولات وأرصدة البائعين",
       "aiChat": "مساعد ذكي",
       "settings": "الإعدادات",
       "company": "مؤسستي",
       "users": "المستخدمين",
       "training": "تدريب النظام",
-      "dashboard": "لوحة القيادة"
+      "dashboard": "لوحة القيادة",
+      "transfers": "تحويلات بين المستودعات",
+      "barcodeLabels": "ملصقات الباركود",
+      "cheques": "الشيكات",
+      "reconciliation": "المطابقة البنكية",
+      "auditLog": "سجل المراجعة",
+      "driverTracking": "تتبع السائقين",
+      "driverPortal": "بوابة السائق",
+      "journals": "الدفاتر المحاسبية",
+      "superAdmin": "مشرف عام",
+      "mobileConnect": "تطبيق الهاتف",
+      "mobileConnectDesc": "امسح رمز الاستجابة السريعة (QR) لتوصيل هاتفك",
+      "scanQrCode": "اتصال تطبيق الهاتف",
+      "scanQrCodeDesc": "امسح رمز الاستجابة السريعة هذا باستخدام تطبيق Expo Go للاتصال فوراً.",
+      "howToConnect": "كيفية الاتصال:",
+      "installExpoGo": "1. قم بتثبيت تطبيق Expo Go على هاتفك الذكي (Android/iOS).",
+      "sameWifi": "2. تأكد من أنك متصل بنفس شبكة الواي فاي (Wi-Fi).",
+      "scanCamera": "3. امسح رمز الاستجابة السريعة أدناه باستخدام الكاميرا أو عبر تطبيق Expo Go.",
+      "manualUrl": "أو أدخل عنوان URL التالي في تطبيق Expo Go:"
     }
   }
 }

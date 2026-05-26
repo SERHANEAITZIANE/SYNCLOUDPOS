@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Trash, History } from "lucide-react"
+import { Edit, Trash, History, ArrowRightLeft } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
@@ -54,6 +54,16 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     title={t("stockHistoryLabel")}
                 >
                     <History className="h-4 w-4" />
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
+                    onClick={() => router.push(`/products/${data.id}/movements`)}
+                    title="Mouvements de Stock"
+                >
+                    <ArrowRightLeft className="h-4 w-4" />
                 </Button>
 
                 {session?.user?.canEdit && (

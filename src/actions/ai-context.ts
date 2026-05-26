@@ -6,7 +6,10 @@ import { getActiveTenantId } from "@/actions/get-active-tenant";
 export async function getBusinessContext(startDate?: Date, endDate?: Date): Promise<string> {
   const tenantId = await getActiveTenantId();
   if (!tenantId) return "Aucune boutique active trouvée.";
+  return getBusinessContextForTenant(tenantId, startDate, endDate);
+}
 
+export async function getBusinessContextForTenant(tenantId: string, startDate?: Date, endDate?: Date): Promise<string> {
   const now = new Date();
 
   // Custom range or default to start of month
@@ -47,9 +50,13 @@ export async function getBusinessContext(startDate?: Date, endDate?: Date): Prom
     }),
     // Top products by revenue (via OrderItems) — use raw SQL since total is not a stored field
     db.$queryRaw<{ productId: string; revenue: number; totalQty: number, cogs: number }[]>`
-            SELECT oi."productId", SUM(oi.quantity * oi.price)::float AS revenue, SUM(oi.quantity)::int AS "totalQty", SUM(oi.quantity * oi."purchasePrice")::float AS cogs
+            SELECT oi."productId", 
+                   SUM(oi.quantity * oi.price)::float AS revenue, 
+                   SUM(oi.quantity)::int AS "totalQty", 
+                   SUM(oi.quantity * COALESCE(p.cost, 0))::float AS cogs
             FROM "OrderItem" oi
             INNER JOIN "Order" o ON o.id = oi."orderId"
+            INNER JOIN "Product" p ON p.id = oi."productId"
             WHERE o."tenantId" = ${tenantId}
               AND o."createdAt" >= ${queryStartDate}
               AND o."createdAt" <= ${queryEndDate}

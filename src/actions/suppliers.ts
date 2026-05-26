@@ -16,6 +16,8 @@ interface SupplierData {
     artImposition?: string
     rc?: string
     rib?: string
+    balance?: number
+    notes?: string
 }
 
 export const getSuppliers = async (page: number = 1, pageSize: number = 20, search?: string) => {
@@ -187,6 +189,7 @@ export const registerSupplierPayment = async (data: {
     accountId: string
     notes?: string
     date?: string
+    imageUrl?: string
 }) => {
     try {
         const session = await auth()
@@ -223,6 +226,7 @@ export const registerSupplierPayment = async (data: {
                     source: "MANUAL_OUT",
                     referenceId: data.supplierId, // Link to supplier for history
                     description: `Paiement Fournisseur: ${data.notes || "Règlement"}`,
+                    imageUrl: data.imageUrl || undefined,
                     date: data.date ? new Date(data.date) : new Date(),
                 }
             })

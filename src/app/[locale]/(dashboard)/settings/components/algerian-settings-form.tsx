@@ -16,6 +16,7 @@ export function AlgerianSettingsForm() {
     const [settings, setSettings] = useState({
         ramadanMode: false,
         commissionRate: 0,
+        commissionMode: "CATEGORY",
         taxRegime: "G50",
         ifuRate: 5,
         tapRate: 2,
@@ -32,6 +33,7 @@ export function AlgerianSettingsForm() {
             if (data) setSettings({
                 ramadanMode: data.ramadanMode ?? false,
                 commissionRate: data.commissionRate ?? 0,
+                commissionMode: data.commissionMode ?? "CATEGORY",
                 taxRegime: data.taxRegime ?? "G50",
                 ifuRate: data.ifuRate ?? 5,
                 tapRate: data.tapRate ?? 2,
@@ -78,27 +80,43 @@ export function AlgerianSettingsForm() {
                 />
             </div>
 
-            {/* Commission Rate */}
+            {/* Commission Rate & Mode */}
             <div className="p-5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
                 <div className="flex items-center gap-2 mb-4">
                     <Calculator className="h-5 w-5 text-yellow-600" />
                     <h3 className="font-bold">Commissions Vendeurs</h3>
                 </div>
-                <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Taux de commission par défaut (%)</Label>
-                    <div className="flex items-center gap-2 max-w-xs">
-                        <Input
-                            type="number"
-                            min={0}
-                            max={100}
-                            step={0.5}
-                            value={settings.commissionRate}
-                            onChange={e => setSettings(s => ({ ...s, commissionRate: Number(e.target.value) }))}
-                            className="rounded-xl"
-                        />
-                        <span className="text-muted-foreground font-bold">%</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Mode de calcul principal</Label>
+                        <Select value={settings.commissionMode} onValueChange={v => setSettings(s => ({ ...s, commissionMode: v }))}>
+                            <SelectTrigger className="rounded-xl">
+                                <SelectValue placeholder="Choisir le mode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="CATEGORY">Par Catégorie de Produit</SelectItem>
+                                <SelectItem value="BRAND">Par Marque (Famille)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">Détermine si les taux spécifiques sont appliqués par catégorie ou par marque</p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Appliqué automatiquement sur la page Commissions Vendeurs</p>
+
+                    <div className="space-y-1.5">
+                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Taux de commission par défaut (%)</Label>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                step={0.5}
+                                value={settings.commissionRate}
+                                onChange={e => setSettings(s => ({ ...s, commissionRate: Number(e.target.value) }))}
+                                className="rounded-xl"
+                            />
+                            <span className="text-muted-foreground font-bold">%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Taux de secours si aucun taux spécifique n'est défini pour le produit/catégorie/marque</p>
+                    </div>
                 </div>
             </div>
 

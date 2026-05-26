@@ -183,7 +183,8 @@ export async function getSupplierPayments() {
                 accountName: paymentMethod,
                 accountId: t.accountId,
                 supplierName,
-                supplierId: foundSupplierId
+                supplierId: foundSupplierId,
+                imageUrl: t.imageUrl,
             }
         })
 

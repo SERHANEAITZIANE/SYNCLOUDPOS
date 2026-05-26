@@ -32,8 +32,6 @@ function calculateChange(current: number, previous: number): number {
   return ((current - previous) / previous) * 100
 }
 
-function calculateChange() should be at the beginning
-
 export const AnalyticsClient = ({ data }: AnalyticsClientProps) => {
   const t = useTranslations("AnalyticsClient")
 

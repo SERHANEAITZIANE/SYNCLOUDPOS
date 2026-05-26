@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "SynCloud Gérant",
+    "slug": "syncloud-gerant",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.syncloud.gerant",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Pour suivre votre position pendant les livraisons",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Pour le tracking GPS en arrière-plan pendant les tournées",
+        "NSCameraUsageDescription": "Pour scanner les codes-barres et prendre des photos de livraison",
+        "NSPhotoLibraryUsageDescription": "Pour sauvegarder les preuves de livraison"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.syncloud.gerant",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "BLUETOOTH",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Pour le tracking GPS pendant les tournées",
+          "locationWhenInUsePermission": "Pour naviguer vers vos clients",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Pour scanner les codes-barres et prendre des photos"
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "86e328d1-c7f8-4add-9288-61b09c86dbc8"
+      }
+    }
+  }
+}

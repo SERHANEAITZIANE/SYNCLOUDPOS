@@ -195,7 +195,7 @@ function MainTabs() {
 
 // ─── Root App ────────────────────────────────────────────────────────────────
 export default function App() {
-    const { isLoading, isAuthenticated, loadSession } = useAuthStore();
+    const { isLoading, isAuthenticated, loadSession, user } = useAuthStore();
     const { loadLang } = useLangStore();
 
     useEffect(() => {
@@ -239,7 +239,10 @@ export default function App() {
                     <Stack.Screen name="Login" component={LoginScreen} />
                 ) : (
                     <>
-                        <Stack.Screen name="Main" component={MainTabs} />
+                        <Stack.Screen
+                            name="Main"
+                            component={MainTabs}
+                        />
                         <Stack.Screen
                             name="ClientDetail"
                             component={ClientDetailScreen}

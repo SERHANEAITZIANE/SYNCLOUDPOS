@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
         const todaySales = await db.salesOrder.findMany({
             where: {
                 tenantId: user.tenantId,
-                notes: { contains: "[Mobile]" },
+                source: "MOBILE",
                 createdAt: { gte: today, lt: tomorrow },
             },
             select: { total: true, amountPaid: true, paymentMethod: true },

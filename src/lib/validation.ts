@@ -100,7 +100,7 @@ export function validate<T>(data: T, schema: ValidationSchema<T>, context?: any)
     const value = (data as any)[field]
 
     if (fieldRules) {
-      for (const rule of fieldRules) {
+      for (const rule of (fieldRules as any[])) {
         if (!rule.validate(value, context)) {
           errors.push({
             field,

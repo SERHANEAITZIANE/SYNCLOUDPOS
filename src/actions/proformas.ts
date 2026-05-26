@@ -258,6 +258,7 @@ export async function createBLFromProforma(data: {
       const bl = await tx.salesOrder.create({
         data: {
           tenantId,
+          userId: session.user.id,
           customerId: proforma.customerId,
           storeId: data.storeId ?? proforma.storeId,
           type: "ORDER",

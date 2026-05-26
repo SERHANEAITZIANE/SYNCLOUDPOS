@@ -34,7 +34,8 @@ import {
     MapPin,
     ChevronLeft,
     ChevronRight,
-    Home
+    Home,
+    ArrowRightLeft
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import StoreSwitcher from "@/components/dashboard/store-switcher";
@@ -66,7 +67,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
         {
             label: "Accueil",
             routes: [
-                { label: "Hub", icon: Home, href: "/hub", color: "text-blue-400", visible: !isCASHIER },
+                { label: t("hub"), icon: Home, href: "/hub", color: "text-blue-400", visible: !isCASHIER },
                 { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isCASHIER },
                 { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: isAdmin || isCASHIER },
                 { label: t("aiIntelligence") || "Intelligence IA", icon: Sparkles, href: "/ai", color: "text-violet-400", visible: isAdmin },
@@ -76,7 +77,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
             label: t("transactionsGroup") || "Transactions",
             routes: [
                 { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
-                { label: "Factures Récurrentes", icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("recurringInvoices"), icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
                 { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
@@ -85,12 +86,14 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
         {
             label: t("catalogGroup") || "Catalogue",
             routes: [
+                { label: t("salesCatalog") || "Catalogue de Vente", icon: BookOpen, href: "/catalog", color: "text-amber-300", visible: true },
                 { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: isAdmin || isSTOCK_MANAGER || isCASHIER },
                 { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER },
-                { label: "Étiquettes", icon: Tag, href: "/barcode-labels", color: "text-rose-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("transfers") || "Transferts Inter-Dépôts", icon: ArrowRightLeft, href: "/transfers", color: "text-teal-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("barcodeLabels"), icon: Tag, href: "/barcode-labels", color: "text-rose-400", visible: isAdmin || isSTOCK_MANAGER },
             ]
         },
         {
@@ -100,9 +103,10 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
                 { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
                 { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
-                { label: "Réservations", icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER },
-                { label: "Livraison", icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER },
-                { label: "Suivi Livreurs", icon: Truck, href: "/driver-tracking", color: "text-green-400", visible: isAdmin },
+                { label: t("reservations"), icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER },
+                { label: t("delivery"), icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER },
+                { label: t("driverTracking"), icon: Truck, href: "/driver-tracking", color: "text-green-400", visible: isAdmin },
+                { label: "Portail Livreur", icon: Truck, href: "/driver", color: "text-cyan-400", visible: isAdmin },
             ]
         },
         {
@@ -111,12 +115,16 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("cheques") || "Chèques", icon: Receipt, href: "/treasury/cheques", color: "text-emerald-300", visible: isAdmin || isACCOUNTANT },
+                { label: t("reconciliation") || "Rapprochement", icon: RefreshCw, href: "/treasury/reconciliation", color: "text-emerald-200", visible: isAdmin || isACCOUNTANT },
                 { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
-                { label: "Réapprovisionnement", icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER },
-                { label: "Audit d'Inventaire", icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER },
-                { label: "Inventaire Annuel", icon: Package, href: "/inventaire-annuel", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
-                { label: "Commissions", icon: Award, href: "/commissions", color: "text-yellow-400", visible: isAdmin || isACCOUNTANT },
-                { label: "Impôts G50/G12", icon: Receipt, href: "/fiscal", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("reorder"), icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("inventoryAudit"), icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER },
+                { label: t("annualInventory"), icon: Package, href: "/inventaire-annuel", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT },
+                { label: t("commissions"), icon: Award, href: "/commissions", color: "text-yellow-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("fiscalG50G12"), icon: Receipt, href: "/fiscal", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
+                { label: t("salesJournal") || "Journaux", icon: BookOpen, href: "/journals", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT },
+                { label: "Rentabilité", icon: LineChart, href: "/reports/profit", color: "text-cyan-400", visible: isAdmin || isACCOUNTANT },
             ]
         },
         {
@@ -125,7 +133,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("company") || "Mon Entreprise", icon: Store, href: "/company", color: "text-orange-400", visible: isAdmin },
                 { label: t("users") || "Utilisateurs", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
                 { label: t("systemSettings") || t("settings") || "Paramètres", icon: Settings, href: "/settings", color: "text-gray-400", visible: isAdmin },
-                { label: "Journal d'Audit", icon: History, href: "/audit-log", color: "text-violet-400", visible: isAdmin },
+                { label: t("auditLog"), icon: History, href: "/audit-log", color: "text-violet-400", visible: isAdmin },
                 { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isCASHIER },
                 { label: t("superAdmin") || "Super Admin", icon: ShieldCheck, href: "/superadmin", color: "text-emerald-400", visible: !!isSuperadmin }
             ]

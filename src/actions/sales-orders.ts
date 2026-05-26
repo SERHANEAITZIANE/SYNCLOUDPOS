@@ -69,6 +69,7 @@ export const createSalesOrder = async (data: {
             const order = await tx.salesOrder.create({
                 data: {
                     tenantId,
+                    userId: session.user.id,
                     customerId: data.customerId,
                     type: data.type,
                     status: data.status,
@@ -383,14 +384,16 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
             const getsStock = STOCK_STATUSES.includes(newStatus)
             const isStockType = salesOrder.type === "ORDER" || salesOrder.type === "INVOICE"
 
-            if (!hadStock && getsStock && isStockType) {
+            const isCreditNote = salesOrder.type === "CREDIT_NOTE"
+
+            if (!hadStock && getsStock && (isStockType || isCreditNote)) {
                 const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 if (storeId) {
                     await Promise.all(
                         salesOrder.items.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
-                                data: { stock: { decrement: item.quantity } }
+                                data: { stock: isCreditNote ? { increment: item.quantity } : { decrement: item.quantity } }
                             })
                         )
                     );
@@ -400,21 +403,21 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                     salesOrder.items.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
+                            data: { stock: isCreditNote ? { increment: item.quantity } : { decrement: item.quantity } }
                         })
                     )
                 );
             }
 
             // Restore stock if cancelling
-            if (hadStock && newStatus === "CANCELLED" && isStockType) {
+            if (hadStock && newStatus === "CANCELLED" && (isStockType || isCreditNote)) {
                 const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 if (storeId) {
                     await Promise.all(
                         salesOrder.items.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
-                                data: { stock: { increment: item.quantity } }
+                                data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
                             })
                         )
                     );
@@ -424,18 +427,18 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                     salesOrder.items.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
-                            data: { stock: { increment: item.quantity } }
+                            data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
                         })
                     )
                 );
             }
 
             // Customer balance:
-            // VALIDATED → add to balance (they owe us)
+            // VALIDATED → add to balance (they owe us) or decrement if CREDIT_NOTE
             if (DEBT_STATUSES.includes(newStatus) && !DEBT_STATUSES.includes(prevStatus)) {
                 await tx.customer.update({
                     where: { id: salesOrder.customerId },
-                    data: { balance: { increment: total } }
+                    data: { balance: isCreditNote ? { decrement: total } : { increment: total } }
                 })
             }
 
@@ -447,7 +450,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
             if (newStatus === "PAID" && DEBT_STATUSES.includes(prevStatus)) {
                 await tx.customer.update({
                     where: { id: salesOrder.customerId },
-                    data: { balance: { decrement: total } }
+                    data: { balance: isCreditNote ? { increment: total } : { decrement: total } }
                 })
             }
 
@@ -455,7 +458,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
             if (newStatus === "CANCELLED" && DEBT_STATUSES.includes(prevStatus)) {
                 await tx.customer.update({
                     where: { id: salesOrder.customerId },
-                    data: { balance: { decrement: total } }
+                    data: { balance: isCreditNote ? { increment: total } : { decrement: total } }
                 })
             }
         })
@@ -485,6 +488,11 @@ export const deleteSalesOrder = async (id: string) => {
             });
 
             if (!order) throw new Error("Not found");
+
+            // DGI Compliance: Invoices/BLs with receipt numbers must be VOIDED, not deleted
+            // This preserves the numbering sequence required by fiscal authorities
+            const hasReceiptNumber = !!order.receiptNumber
+            const isNumberedDocument = (order.type === "INVOICE" || order.type === "ORDER" || order.type === "CREDIT_NOTE") && hasReceiptNumber
 
             // If order was validated or paid, stock was decremented, so we must restore it
             const STOCK_STATUSES = ["VALIDATED", "PAID"];
@@ -523,12 +531,22 @@ export const deleteSalesOrder = async (id: string) => {
                 });
             }
 
-            await tx.salesOrder.delete({ where: { id, tenantId } });
+            if (isNumberedDocument) {
+                // Void the document instead of deleting — keeps receipt number in the chain
+                await tx.salesOrder.update({
+                    where: { id },
+                    data: { status: "CANCELLED" }
+                });
+            } else {
+                // DRAFT or QUOTE without receipt number — safe to delete
+                await tx.salesOrder.delete({ where: { id, tenantId } });
+            }
         });
 
         revalidatePath("/(dashboard)/sales")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        return { success: "Supprimé et stock restauré" }
+        logAudit({ action: "DELETE", entity: "SALES_ORDER", entityId: id, description: `Document annulé/supprimé` }).catch(() => null)
+        return { success: "Document annulé et stock restauré" }
     } catch { return { error: "Erreur lors de la suppression" } }
 }

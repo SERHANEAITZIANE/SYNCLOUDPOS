@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileAuth, mobileErrorResponse } from "@/lib/mobile-auth";
+import { auth } from "@/auth";
 
 // GET /api/mobile/admin/drivers/[driverId]/route — Get GPS trail for a driver
 export async function GET(
@@ -8,7 +9,21 @@ export async function GET(
     { params }: { params: Promise<{ driverId: string }> }
 ) {
     try {
-        const user = verifyMobileAuth(req);
+        let user: any = verifyMobileAuth(req);
+        
+        if (!user) {
+            const session = await auth();
+            if (session?.user) {
+                user = {
+                    userId: session.user.id!,
+                    tenantId: (session.user as any).tenantId,
+                    email: session.user.email!,
+                    name: session.user.name!,
+                    role: (session.user as any).role,
+                };
+            }
+        }
+
         if (!user || !["ADMIN", "MANAGER"].includes(user.role)) {
             return NextResponse.json({ error: "Accès admin requis" }, { status: 403 });
         }

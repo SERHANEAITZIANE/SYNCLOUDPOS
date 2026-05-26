@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { registerSupplierPayment, deleteSupplier, importSuppliers } from "@/actions/suppliers"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
+import { ImageUpload } from "@/components/ui/image-upload"
 import { Edit, Trash, HandCoins, ScrollText } from "lucide-react"
 
 interface SupplierClientProps {
@@ -48,6 +49,7 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
     const [accountId, setAccountId] = useState<string>("")
     const [notes, setNotes] = useState<string>("")
     const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0])
+    const [imageUrl, setImageUrl] = useState<string>("")
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [importOpen, setImportOpen] = useState(false)
 
@@ -145,7 +147,8 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
                 amount,
                 accountId,
                 notes,
-                date: new Date(date).toISOString()
+                date: new Date(date).toISOString(),
+                imageUrl: imageUrl || undefined,
             })
 
             if ("error" in result && result.error) {
@@ -153,6 +156,7 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
             } else if ("success" in result) {
                 toast.success(result.success)
                 setPaymentModalOpen(false)
+                setImageUrl("")
                 router.refresh()
             }
         } catch (error) {
@@ -235,6 +239,17 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
                                 value={notes}
                                 onChange={(e) => setNotes(e.target.value)}
                             />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
+                            <Label className="text-right">Justificatif (Photo)</Label>
+                            <div className="col-span-3 flex justify-center">
+                                <ImageUpload
+                                    value={imageUrl ? [imageUrl] : []}
+                                    disabled={isSubmitting}
+                                    onChange={(url) => setImageUrl(url)}
+                                    onRemove={() => setImageUrl("")}
+                                />
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>

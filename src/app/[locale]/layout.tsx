@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/session-provider";
+import { VoiceAssistantWidget } from "@/components/ui/voice-assistant-widget";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,7 +37,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#3b82f6" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
@@ -51,6 +52,7 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               {children}
+              <VoiceAssistantWidget />
             </ThemeProvider>
           </AuthSessionProvider>
         </NextIntlClientProvider>

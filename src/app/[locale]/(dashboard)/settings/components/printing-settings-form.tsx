@@ -266,7 +266,7 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
             {/* Info Banner */}
             <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800">
                 <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
-                <span dangerouslySetInnerHTML={{ __html: t("infoBanner") }} />
+                <span dangerouslySetInnerHTML={{ __html: t.raw("infoBanner") }} />
             </div>
 
             {/* ── 1. Printer Assignments ── */}

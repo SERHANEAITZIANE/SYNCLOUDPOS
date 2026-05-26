@@ -15,6 +15,7 @@ const ExpensesPage = async () => {
         category: item.category.name,
         date: format(item.date, "MMMM do, yyyy"),
         createdAt: format(item.createdAt, "MMMM do, yyyy"),
+        imageUrl: item.imageUrl,
     }))
 
     return (

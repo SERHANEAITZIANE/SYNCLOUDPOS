@@ -59,6 +59,22 @@ export const ReportsClient = () => {
             color: "text-violet-500",
             bgColor: "bg-violet-500/10",
             href: "/analytics" // Links to the existing analytics page
+        },
+        {
+            title: "Balance Âgée",
+            description: "Rapport de vieillissement des créances clients.",
+            icon: Users,
+            color: "text-red-500",
+            bgColor: "bg-red-500/10",
+            href: "/reports/aging"
+        },
+        {
+            title: "Rapport de Rentabilité",
+            description: "Analyse des marges bénéficiaires par produit, catégorie et marque.",
+            icon: TrendingUp,
+            color: "text-cyan-500",
+            bgColor: "bg-cyan-500/10",
+            href: "/reports/profit"
         }
     ]
 

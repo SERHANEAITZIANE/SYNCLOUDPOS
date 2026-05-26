@@ -12,10 +12,9 @@ const ProductPage = async ({
 
     const isNew = productId === "new"
 
-    // Parallel fetching
-    // If new, we don't fetch product, but we still need categories and brands
-    const categoriesPromise = getCategories()
-    const brandsPromise = getBrands()
+    // Parallel fetching — exclude archived categories/brands from dropdowns
+    const categoriesPromise = getCategories(false)
+    const brandsPromise = getBrands(false)
     const productPromise = isNew ? Promise.resolve(null) : getProduct(productId)
 
     const [categories, brands, product] = await Promise.all([

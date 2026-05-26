@@ -37,7 +37,7 @@ export const RegisterForm = () => {
         setError("");
         setSuccess("");
         startTransition(() => {
-            register(values).then((data) => {
+            register(values).then((data: any) => {
                 if (data.error) setError(data.error);
                 if (data.success) setSuccess(data.success);
             })

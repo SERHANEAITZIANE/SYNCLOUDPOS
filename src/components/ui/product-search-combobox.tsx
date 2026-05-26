@@ -90,7 +90,7 @@ export const ProductSearchCombobox: React.FC<ProductSearchComboboxProps> = ({
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
-                    className="w-full justify-between h-9 text-left font-normal"
+                    className="w-full justify-between h-9 text-left font-normal overflow-hidden"
                 >
                     {selectedProduct ? (
                         <span className="flex items-center gap-2 flex-1 min-w-0">

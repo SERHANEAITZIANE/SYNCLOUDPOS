@@ -5,4 +5,5 @@ export type ExpenseColumn = {
     category: string
     date: string
     createdAt: string
+    imageUrl?: string | null
 }

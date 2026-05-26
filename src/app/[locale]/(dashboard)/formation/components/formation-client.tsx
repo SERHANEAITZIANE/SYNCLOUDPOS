@@ -60,6 +60,7 @@ export const FormationClient = () => {
 
     const tabs = [
         { value: "dashboard", label: t("tabs.dashboard"), icon: Monitor, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10", activeBg: "bg-blue-600 text-white" },
+        { value: "delivery", label: "Livraison & Tournées", icon: Truck, color: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-500/10", activeBg: "bg-sky-600 text-white" },
         { value: "pos", label: t("tabs.pos"), icon: ShoppingCart, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", activeBg: "bg-emerald-600 text-white" },
         { value: "stocks", label: t("tabs.stocks"), icon: Package, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-500/10", activeBg: "bg-orange-600 text-white" },
         { value: "sales", label: t("tabs.sales"), icon: Receipt, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", activeBg: "bg-indigo-600 text-white" },
@@ -295,6 +296,40 @@ export const FormationClient = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <FeatureCard icon={Monitor} title={t("ai.modelsTitle")} text={t("ai.modelsDesc")} iconColor="text-violet-600 dark:text-violet-400" bgAccent="bg-violet-50 dark:bg-violet-900/20" />
                                     <FeatureCard icon={Shield} title={t("ai.privacyTitle")} text={t("ai.privacyDesc")} iconColor="text-fuchsia-500 dark:text-fuchsia-400" bgAccent="bg-fuchsia-50 dark:bg-fuchsia-900/20" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* DELIVERY */}
+                        {activeTab === "delivery" && (
+                            <div className="space-y-8">
+                                <SectionHeader icon={Truck} title="Système de Livraison & Tournées" subtitle="Gestion des colis E-commerce et de l'application mobile Chauffeur" color="text-sky-600 dark:text-sky-400" bg="bg-sky-100 dark:bg-sky-900/30" />
+
+                                <div className="bg-sky-50/50 dark:bg-sky-900/10 border border-sky-100 dark:border-sky-900/30 rounded-2xl p-6 mb-8">
+                                    <h3 className="font-bold text-xl text-sky-900 dark:text-sky-400 mb-6 flex items-center gap-2">
+                                        <Package className="w-6 h-6" /> Expédition Colis (Yalidine, DHD, HDD)
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <Step n="1" title="Configuration API" text="Dans Paramètres > Paramètres Algériens, insérez vos clés API (ex: Yalidine API ID et Token) pour lier votre compte." bgColor="bg-sky-100 dark:bg-sky-900/40" textColor="text-sky-700 dark:text-sky-400" />
+                                        <Step n="2" title="Création de Colis" text="Dans l'onglet Livraison, cliquez sur 'Nouveau Colis'. Le système génère automatiquement l'étiquette et le tracking code via l'API du prestataire." bgColor="bg-sky-100 dark:bg-sky-900/40" textColor="text-sky-700 dark:text-sky-400" />
+                                        <Step n="3" title="Synchronisation" text="Les statuts (Livré, Retourné) se mettent à jour automatiquement via Webhooks. Vous pouvez aussi forcer la mise à jour via le bouton 'Sync API'." bgColor="bg-sky-100 dark:bg-sky-900/40" textColor="text-sky-700 dark:text-sky-400" />
+                                    </div>
+                                </div>
+
+                                <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 mb-8">
+                                    <h3 className="font-bold text-xl text-indigo-900 dark:text-indigo-400 mb-6 flex items-center gap-2">
+                                        <Truck className="w-6 h-6" /> Tournées B2B & App Mobile
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <Step n="1" title="Création de la Tournée" text="Dans l'onglet Tournées, créez une tournée, assignez un chauffeur, et ajoutez les clients à visiter." bgColor="bg-indigo-100 dark:bg-indigo-900/40" textColor="text-indigo-700 dark:text-indigo-400" />
+                                        <Step n="2" title="Chargement du Camion" text="Cliquez sur 'Charger le Camion'. Les quantités sélectionnées seront automatiquement déduites de votre stock principal." bgColor="bg-indigo-100 dark:bg-indigo-900/40" textColor="text-indigo-700 dark:text-indigo-400" />
+                                        <Step n="3" title="Application Chauffeur" text="Le chauffeur utilise l'App Mobile pour valider les arrêts, encaisser les paiements, gérer les retours et effectuer des ventes directes sur le terrain." bgColor="bg-indigo-100 dark:bg-indigo-900/40" textColor="text-indigo-700 dark:text-indigo-400" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FeatureCard icon={Monitor} title="Suivi GPS" text="Suivez la position exacte de vos chauffeurs et leur avancement en temps réel depuis le tableau de bord Admin." iconColor="text-emerald-600 dark:text-emerald-400" bgAccent="bg-emerald-50 dark:bg-emerald-900/20" />
+                                    <FeatureCard icon={Receipt} title="Traçabilité" text="Chaque colis expédié est directement lié à sa commande ou facture d'origine dans le système." iconColor="text-violet-600 dark:text-violet-400" bgAccent="bg-violet-50 dark:bg-violet-900/20" />
                                 </div>
                             </div>
                         )}

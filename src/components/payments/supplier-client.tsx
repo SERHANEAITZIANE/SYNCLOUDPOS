@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SupplierPaymentColumn, useSupplierPaymentColumns } from "./supplier-columns"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -22,6 +23,7 @@ import {
     DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { registerSupplierPayment } from "@/actions/suppliers"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 interface SupplierPaymentsClientProps {
     data: SupplierPaymentColumn[]
@@ -48,6 +50,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
         accountId: "",
         notes: "",
         date: new Date().toISOString().slice(0, 10),
+        imageUrl: "",
     })
 
     // Apply filters
@@ -113,6 +116,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                 accountId: newPayment.accountId,
                 notes: newPayment.notes,
                 date: newPayment.date,
+                imageUrl: newPayment.imageUrl || undefined,
             })
 
             if ('error' in result) {
@@ -120,7 +124,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             } else {
                 toast.success("Paiement fournisseur enregistré")
                 setCreateOpen(false)
-                setNewPayment({ supplierId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10) })
+                setNewPayment({ supplierId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10), imageUrl: "" })
                 router.refresh()
             }
         } catch {
@@ -152,31 +156,29 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row items-center gap-4 py-4">
                 <div className="w-full sm:w-[250px]">
-                    <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Filtrer par Fournisseur" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Tous les Fournisseurs</SelectItem>
-                            {suppliers.map(s => (
-                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                        options={[
+                            { value: "ALL", label: "Tous les Fournisseurs" },
+                            ...suppliers.map(s => ({ value: s.id, label: s.name }))
+                        ]}
+                        value={selectedSupplier}
+                        onChange={setSelectedSupplier}
+                        placeholder="Filtrer par Fournisseur"
+                        searchPlaceholder="Rechercher un fournisseur..."
+                    />
                 </div>
 
                 <div className="w-full sm:w-[220px]">
-                    <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Modalité de paiement" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="ALL">Toutes les modalités</SelectItem>
-                            {uniqueAccounts.map(name => (
-                                <SelectItem key={name} value={name}>{name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                        options={[
+                            { value: "ALL", label: "Toutes les modalités" },
+                            ...uniqueAccounts.map(name => ({ value: name, label: name }))
+                        ]}
+                        value={selectedAccount}
+                        onChange={setSelectedAccount}
+                        placeholder="Modalité de paiement"
+                        searchPlaceholder="Rechercher une modalité..."
+                    />
                 </div>
 
                 <div className="w-full sm:w-auto">
@@ -198,16 +200,13 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
                             <Label>Fournisseur</Label>
-                            <Select value={newPayment.supplierId} onValueChange={(v) => setNewPayment(prev => ({ ...prev, supplierId: v }))}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner un fournisseur" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {suppliers.map(s => (
-                                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                                value={newPayment.supplierId}
+                                onChange={(v) => setNewPayment(prev => ({ ...prev, supplierId: v }))}
+                                placeholder="Sélectionner un fournisseur"
+                                searchPlaceholder="Rechercher un fournisseur..."
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label>Montant (DA)</Label>
@@ -221,18 +220,13 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                         </div>
                         <div className="grid gap-2">
                             <Label>Caisse / Banque</Label>
-                            <Select value={newPayment.accountId} onValueChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner une caisse" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {accounts.map(a => (
-                                        <SelectItem key={a.id} value={a.id}>
-                                            {a.name} ({a.type})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
+                                value={newPayment.accountId}
+                                onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
+                                placeholder="Sélectionner une caisse"
+                                searchPlaceholder="Rechercher une caisse..."
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label>Date</Label>
@@ -248,6 +242,15 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                                 value={newPayment.notes}
                                 onChange={(e) => setNewPayment(prev => ({ ...prev, notes: e.target.value }))}
                                 placeholder="Note optionnelle"
+                            />
+                        </div>
+                        <div className="grid gap-2 items-center justify-center border-t pt-4">
+                            <Label className="w-full text-center">Justificatif de Paiement (Photo)</Label>
+                            <ImageUpload
+                                value={newPayment.imageUrl ? [newPayment.imageUrl] : []}
+                                disabled={createLoading}
+                                onChange={(url) => setNewPayment(prev => ({ ...prev, imageUrl: url }))}
+                                onRemove={() => setNewPayment(prev => ({ ...prev, imageUrl: "" }))}
                             />
                         </div>
                     </div>

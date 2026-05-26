@@ -7,11 +7,13 @@ import { useRouter } from "@/i18n/routing"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Sparkles, ExternalLink } from "lucide-react"
+import { Sparkles, ExternalLink, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { testAiApiKey } from "@/actions/test-ai-key"
 
 interface AiSettingsFormProps {
     initialProvider: string
+    initialModel: string | null
     initialGeminiApiKey: string | null
     initialOpenaiApiKey: string | null
     initialAnthropicApiKey: string | null
@@ -19,6 +21,7 @@ interface AiSettingsFormProps {
 
 export const AiSettingsForm = ({
     initialProvider,
+    initialModel,
     initialGeminiApiKey,
     initialOpenaiApiKey,
     initialAnthropicApiKey
@@ -27,15 +30,29 @@ export const AiSettingsForm = ({
     const t = useTranslations("Settings.AiSettingsForm")
     const [loading, setLoading] = useState(false)
     const [provider, setProvider] = useState(initialProvider || "GEMINI")
+    const [aiModel, setAiModel] = useState(initialModel || "")
     const [geminiApiKey, setGeminiApiKey] = useState(initialGeminiApiKey || "")
     const [openaiApiKey, setOpenaiApiKey] = useState(initialOpenaiApiKey || "")
     const [anthropicApiKey, setAnthropicApiKey] = useState(initialAnthropicApiKey || "")
 
+    const [testingKey, setTestingKey] = useState(false)
+    const [testResult, setTestResult] = useState<{ provider: string, status: "success" | "error", message: string } | null>(null)
+
     const handleSave = async () => {
         try {
             setLoading(true)
+            
+            // Set default model if empty
+            let modelToSave = aiModel;
+            if (!modelToSave) {
+                if (provider === "GEMINI") modelToSave = "gemini-1.5-flash";
+                if (provider === "OPENAI") modelToSave = "gpt-4o-mini";
+                if (provider === "ANTHROPIC") modelToSave = "claude-3-haiku-20240307";
+            }
+
             const result = await updateSystemSettings({
                 aiProvider: provider,
+                aiModel: modelToSave,
                 geminiApiKey,
                 openaiApiKey,
                 anthropicApiKey
@@ -47,6 +64,30 @@ export const AiSettingsForm = ({
             toast.error(t("error"))
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleTestKey = async (providerToTest: string, key: string) => {
+        if (!key) {
+            toast.error("Veuillez entrer une clé API d'abord.")
+            return
+        }
+        setTestingKey(true)
+        setTestResult(null)
+        try {
+            const res = await testAiApiKey(providerToTest, key)
+            if (res.error) {
+                setTestResult({ provider: providerToTest, status: "error", message: res.error })
+                toast.error(res.error)
+            } else if (res.success) {
+                setTestResult({ provider: providerToTest, status: "success", message: res.success })
+                toast.success(res.success)
+            }
+        } catch {
+            toast.error("Erreur de connexion.")
+            setTestResult({ provider: providerToTest, status: "error", message: "Erreur de connexion." })
+        } finally {
+            setTestingKey(false)
         }
     }
 
@@ -71,26 +112,26 @@ export const AiSettingsForm = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <ProviderCard
                                 id="GEMINI"
-                                label="Google Gemini"
+                                label="Gemini"
                                 icon="✨"
                                 selected={provider === "GEMINI"}
-                                onSelect={() => setProvider("GEMINI")}
+                                onSelect={() => { setProvider("GEMINI"); setTestResult(null); }}
                                 activeText={t("active")}
                             />
                             <ProviderCard
                                 id="OPENAI"
-                                label="OpenAI ChatGPT"
+                                label="ChatGPT"
                                 icon="🧠"
                                 selected={provider === "OPENAI"}
-                                onSelect={() => setProvider("OPENAI")}
+                                onSelect={() => { setProvider("OPENAI"); setTestResult(null); }}
                                 activeText={t("active")}
                             />
                             <ProviderCard
                                 id="ANTHROPIC"
-                                label="Anthropic Claude"
+                                label="Claude"
                                 icon="👁️"
                                 selected={provider === "ANTHROPIC"}
-                                onSelect={() => setProvider("ANTHROPIC")}
+                                onSelect={() => { setProvider("ANTHROPIC"); setTestResult(null); }}
                                 activeText={t("active")}
                             />
                         </div>
@@ -102,14 +143,45 @@ export const AiSettingsForm = ({
                     {provider === "GEMINI" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <Label>{t("gemini.label")}</Label>
-                            <Input
-                                type="password"
-                                placeholder="AIzaSy..."
-                                className="font-mono text-sm max-w-xl"
-                                value={geminiApiKey}
-                                onChange={(e) => setGeminiApiKey(e.target.value)}
-                                disabled={loading}
-                            />
+                            <div className="flex gap-2 max-w-xl">
+                                <Input
+                                    type="password"
+                                    placeholder="AIzaSy..."
+                                    className="font-mono text-sm"
+                                    value={geminiApiKey}
+                                    onChange={(e) => { setGeminiApiKey(e.target.value); setTestResult(null); }}
+                                    disabled={loading || testingKey}
+                                />
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => handleTestKey("GEMINI", geminiApiKey)}
+                                    disabled={testingKey || loading || !geminiApiKey}
+                                >
+                                    {testingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : "Test"}
+                                </Button>
+                            </div>
+                            <div className="max-w-xl mt-3 space-y-2">
+                                <Label>Modèle Gemini</Label>
+                                <select 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={aiModel} 
+                                    onChange={(e) => setAiModel(e.target.value)}
+                                    disabled={loading}
+                                >
+                                    <option value="">Sélectionnez un modèle</option>
+                                    <option value="gemini-3.1-pro">Gemini 3.1 Pro (Le plus avancé)</option>
+                                    <option value="gemini-3.1-flash">Gemini 3.1 Flash (Ultra Rapide)</option>
+                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Performant)</option>
+                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rapide)</option>
+                                </select>
+                            </div>
+                            {testResult?.provider === "GEMINI" && (
+                                <p className={`text-xs flex items-center gap-1 mt-1 ${testResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`}>
+                                    {testResult.status === "success" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                    {testResult.message}
+                                </p>
+                            )}
                             <p className="text-xs text-muted-foreground">
                                 {t("gemini.hint")}{" "}
                                 <a
@@ -127,14 +199,46 @@ export const AiSettingsForm = ({
                     {provider === "OPENAI" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <Label>{t("openai.label")}</Label>
-                            <Input
-                                type="password"
-                                placeholder="sk-proj-..."
-                                className="font-mono text-sm max-w-xl"
-                                value={openaiApiKey}
-                                onChange={(e) => setOpenaiApiKey(e.target.value)}
-                                disabled={loading}
-                            />
+                            <div className="flex gap-2 max-w-xl">
+                                <Input
+                                    type="password"
+                                    placeholder="sk-proj-..."
+                                    className="font-mono text-sm"
+                                    value={openaiApiKey}
+                                    onChange={(e) => { setOpenaiApiKey(e.target.value); setTestResult(null); }}
+                                    disabled={loading || testingKey}
+                                />
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => handleTestKey("OPENAI", openaiApiKey)}
+                                    disabled={testingKey || loading || !openaiApiKey}
+                                >
+                                    {testingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : "Test"}
+                                </Button>
+                            </div>
+                            <div className="max-w-xl mt-3 space-y-2">
+                                <Label>Modèle ChatGPT</Label>
+                                <select 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={aiModel} 
+                                    onChange={(e) => setAiModel(e.target.value)}
+                                    disabled={loading}
+                                >
+                                    <option value="">Sélectionnez un modèle</option>
+                                    <option value="gpt-5">GPT-5 (Dernière Génération)</option>
+                                    <option value="o1">o1 (Raisonnement Avancé)</option>
+                                    <option value="o3-mini">o3-mini (Rapide)</option>
+                                    <option value="gpt-4.5-preview">GPT-4.5 Preview (Ancien flagship)</option>
+                                    <option value="gpt-4o">GPT-4o (Standard Performant)</option>
+                                </select>
+                            </div>
+                            {testResult?.provider === "OPENAI" && (
+                                <p className={`text-xs flex items-center gap-1 mt-1 ${testResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`}>
+                                    {testResult.status === "success" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                    {testResult.message}
+                                </p>
+                            )}
                             <p className="text-xs text-muted-foreground">
                                 {t("openai.hint")}{" "}
                                 <a
@@ -152,14 +256,45 @@ export const AiSettingsForm = ({
                     {provider === "ANTHROPIC" && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <Label>{t("anthropic.label")}</Label>
-                            <Input
-                                type="password"
-                                placeholder="sk-ant-..."
-                                className="font-mono text-sm max-w-xl"
-                                value={anthropicApiKey}
-                                onChange={(e) => setAnthropicApiKey(e.target.value)}
-                                disabled={loading}
-                            />
+                            <div className="flex gap-2 max-w-xl">
+                                <Input
+                                    type="password"
+                                    placeholder="sk-ant-..."
+                                    className="font-mono text-sm"
+                                    value={anthropicApiKey}
+                                    onChange={(e) => { setAnthropicApiKey(e.target.value); setTestResult(null); }}
+                                    disabled={loading || testingKey}
+                                />
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => handleTestKey("ANTHROPIC", anthropicApiKey)}
+                                    disabled={testingKey || loading || !anthropicApiKey}
+                                >
+                                    {testingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : "Test"}
+                                </Button>
+                            </div>
+                            <div className="max-w-xl mt-3 space-y-2">
+                                <Label>Modèle Claude</Label>
+                                <select 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={aiModel} 
+                                    onChange={(e) => setAiModel(e.target.value)}
+                                    disabled={loading}
+                                >
+                                    <option value="">Sélectionnez un modèle</option>
+                                    <option value="claude-4.6-opus">Claude 4.6 Opus (Le plus intelligent)</option>
+                                    <option value="claude-4.6-sonnet">Claude 4.6 Sonnet (Équilibré & Puissant)</option>
+                                    <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet (Génération Précédente)</option>
+                                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Ancien)</option>
+                                </select>
+                            </div>
+                            {testResult?.provider === "ANTHROPIC" && (
+                                <p className={`text-xs flex items-center gap-1 mt-1 ${testResult.status === "success" ? "text-emerald-600" : "text-rose-600"}`}>
+                                    {testResult.status === "success" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                    {testResult.message}
+                                </p>
+                            )}
                             <p className="text-xs text-muted-foreground">
                                 {t("anthropic.hint")}{" "}
                                 <a

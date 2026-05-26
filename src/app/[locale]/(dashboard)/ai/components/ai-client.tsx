@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, Send, Trash2, Settings2, ChevronDown, Sparkles, TrendingUp, Package, Users, DollarSign, AlertTriangle, BarChart3, X, Eye, EyeOff, Loader2, Copy, Check, Volume2, Square } from "lucide-react";
+import { Bot, Send, Trash2, Settings2, ChevronDown, Sparkles, TrendingUp, Package, Users, DollarSign, AlertTriangle, BarChart3, X, Eye, EyeOff, Loader2, Copy, Check, Volume2, Square, History, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DateRange } from "react-day-picker";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { saveAiLog, getAiLogs } from "@/actions/ai-logs";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,15 @@ interface Message {
     content: string;
     timestamp: Date;
     provider?: Provider;
+}
+
+interface AiLogEntry {
+    id: string;
+    provider: string;
+    model: string | null;
+    prompt: string;
+    response: string;
+    createdAt: string;
 }
 
 interface ProviderConfig {
@@ -111,6 +121,16 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [speakingId, setSpeakingId] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+    // History tab state
+    const [activeTab, setActiveTab] = useState<"chat" | "history">("chat");
+    const [historyLogs, setHistoryLogs] = useState<AiLogEntry[]>([]);
+    const [historyTotal, setHistoryTotal] = useState(0);
+    const [historyPage, setHistoryPage] = useState(0);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyDateRange, setHistoryDateRange] = useState<DateRange | undefined>(undefined);
+    const [historyProvider, setHistoryProvider] = useState("ALL");
+    const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -242,6 +262,16 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                     )
                 );
             }
+
+            // Save to database after stream completes
+            if (accumulatedAnswer.trim()) {
+                saveAiLog({
+                    provider: selectedProvider.toUpperCase(),
+                    model: provider.model,
+                    prompt: question.trim(),
+                    response: accumulatedAnswer,
+                }).catch(err => console.error("Failed to save AI log:", err));
+            }
         } catch (err: any) {
             setMessages(prev => [...prev, {
                 id: crypto.randomUUID(),
@@ -265,6 +295,33 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
         inputRef.current?.focus();
     };
 
+    // ─── History Loading ────────────────────────────────────────────────────
+    const loadHistory = useCallback(async (page = 0) => {
+        setHistoryLoading(true);
+        try {
+            const result = await getAiLogs({
+                from: historyDateRange?.from?.toISOString(),
+                to: historyDateRange?.to?.toISOString(),
+                provider: historyProvider,
+                page,
+                pageSize: 15,
+            });
+            setHistoryLogs(result.logs);
+            setHistoryTotal(result.total);
+            setHistoryPage(page);
+        } catch (err) {
+            console.error("Failed to load history:", err);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, [historyDateRange, historyProvider]);
+
+    useEffect(() => {
+        if (activeTab === "history") {
+            loadHistory(0);
+        }
+    }, [activeTab, loadHistory]);
+
     return (
         <div className="flex flex-col h-screen bg-[#0a0a0f] text-white overflow-hidden">
 
@@ -281,6 +338,33 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    {/* Chat / History Toggle */}
+                    <div className="flex items-center bg-white/5 rounded-xl p-0.5">
+                        <button
+                            onClick={() => setActiveTab("chat")}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                activeTab === "chat"
+                                    ? "bg-white/10 text-white"
+                                    : "text-white/40 hover:text-white/70"
+                            )}
+                        >
+                            <Sparkles className="h-3 w-3" />
+                            Chat
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("history")}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                                activeTab === "history"
+                                    ? "bg-white/10 text-white"
+                                    : "text-white/40 hover:text-white/70"
+                            )}
+                        >
+                            <History className="h-3 w-3" />
+                            Historique
+                        </button>
+                    </div>
                     {/* DateRange Picker */}
                     <div className="hidden lg:flex">
                         <DatePickerWithRange
@@ -412,8 +496,149 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                             <X className="h-5 w-5" />
                         </button>
                     </div>
-                </div>
+                    </div>
             )}
+
+            {/* ── History Tab ── */}
+            {activeTab === "history" && (
+                <>
+                    {/* History Filters */}
+                    <div className="shrink-0 border-b border-white/5 bg-[#0d0d15] px-4 sm:px-6 py-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <DatePickerWithRange
+                                date={historyDateRange}
+                                setDate={setHistoryDateRange}
+                                className="w-[260px]"
+                            />
+                            <select
+                                value={historyProvider}
+                                onChange={(e) => setHistoryProvider(e.target.value)}
+                                className="h-10 rounded-md border border-white/10 bg-white/5 text-white text-sm px-3 py-2"
+                            >
+                                <option value="ALL">Tous les fournisseurs</option>
+                                <option value="GEMINI">Gemini</option>
+                                <option value="OPENAI">ChatGPT</option>
+                                <option value="ANTHROPIC">Claude</option>
+                            </select>
+                            <Button
+                                onClick={() => loadHistory(0)}
+                                size="sm"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            >
+                                <Calendar className="h-3.5 w-3.5 mr-1.5" />
+                                Filtrer
+                            </Button>
+                            <span className="text-xs text-white/40 ml-auto">
+                                {historyTotal} résultat{historyTotal !== 1 ? "s" : ""}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* History List */}
+                    <ScrollArea className="flex-1 min-h-0">
+                        <div className="px-4 sm:px-6 py-4 space-y-3 max-w-5xl mx-auto">
+                            {historyLoading ? (
+                                <div className="flex items-center justify-center py-16">
+                                    <Loader2 className="h-6 w-6 text-white/40 animate-spin" />
+                                </div>
+                            ) : historyLogs.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-16 space-y-3">
+                                    <History className="h-10 w-10 text-white/20" />
+                                    <p className="text-white/40 text-sm">Aucun historique trouvé</p>
+                                    <p className="text-white/25 text-xs">Les conversations IA seront enregistrées ici automatiquement</p>
+                                </div>
+                            ) : (
+                                historyLogs.map((log) => {
+                                    const isExpanded = expandedLogId === log.id;
+                                    const providerInfo = PROVIDERS.find(p => p.id === log.provider.toLowerCase());
+                                    const date = new Date(log.createdAt);
+                                    return (
+                                        <div
+                                            key={log.id}
+                                            className="border border-white/8 bg-white/3 rounded-xl overflow-hidden hover:border-white/15 transition-all"
+                                        >
+                                            {/* Log Header */}
+                                            <button
+                                                onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
+                                                className="w-full flex items-center gap-3 p-4 text-left"
+                                            >
+                                                <div className={`shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br ${providerInfo?.gradient ?? 'from-gray-600 to-gray-500'} flex items-center justify-center text-white text-sm font-bold`}>
+                                                    {providerInfo?.emoji ?? "?"}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-white/90 truncate font-medium">{log.prompt}</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-white/50">
+                                                            {providerInfo?.name ?? log.provider}
+                                                        </Badge>
+                                                        {log.model && (
+                                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-white/10 text-white/40">
+                                                                {log.model}
+                                                            </Badge>
+                                                        )}
+                                                        <span className="text-[10px] text-white/30">
+                                                            {date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })} à {date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <ChevronDown className={cn("h-4 w-4 text-white/30 transition-transform", isExpanded && "rotate-180")} />
+                                            </button>
+
+                                            {/* Expanded Content */}
+                                            {isExpanded && (
+                                                <div className="border-t border-white/5 p-4 space-y-4">
+                                                    <div>
+                                                        <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold mb-1.5">Votre question</p>
+                                                        <div className="bg-white/5 rounded-lg p-3 text-sm text-white/80">{log.prompt}</div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold mb-1.5">Réponse IA</p>
+                                                        <div className="bg-white/5 rounded-lg p-3 prose prose-invert prose-sm max-w-none text-white/80 prose-headings:text-white prose-strong:text-white prose-code:text-emerald-400 prose-code:bg-white/5 prose-code:px-1 prose-code:rounded">
+                                                            <ReactMarkdown>{log.response}</ReactMarkdown>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
+
+                            {/* Pagination */}
+                            {historyTotal > 15 && (
+                                <div className="flex items-center justify-center gap-3 pt-4">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        disabled={historyPage === 0}
+                                        onClick={() => loadHistory(historyPage - 1)}
+                                        className="text-white/50 hover:text-white"
+                                    >
+                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        Précédent
+                                    </Button>
+                                    <span className="text-xs text-white/40">
+                                        Page {historyPage + 1} / {Math.ceil(historyTotal / 15)}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        disabled={(historyPage + 1) * 15 >= historyTotal}
+                                        onClick={() => loadHistory(historyPage + 1)}
+                                        className="text-white/50 hover:text-white"
+                                    >
+                                        Suivant
+                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </>
+            )}
+
+            {activeTab === "chat" && (
+            <>
 
             {/* ── Messages Area ── */}
             <ScrollArea className="flex-1 min-h-0">
@@ -592,6 +817,8 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
                     L'IA accède à vos données en temps réel. Les clés API sont stockées localement sur votre appareil.
                 </p>
             </div>
+            </>
+            )}
         </div>
     );
 }

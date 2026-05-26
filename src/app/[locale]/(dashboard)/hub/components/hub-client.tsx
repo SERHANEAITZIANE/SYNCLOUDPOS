@@ -36,10 +36,18 @@ import {
     ChevronRight,
     Zap,
     Globe,
+    Smartphone,
+    QrCode,
+    X,
+    Wifi,
+    Laptop,
+    Download,
+    ExternalLink,
     type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
 interface HubClientProps {
     metrics: {
@@ -59,6 +67,8 @@ interface QuickLink {
     href: string;
     icon: LucideIcon;
     description?: string;
+    badge?: string;
+    badgeColor?: string;
 }
 
 interface ModuleSection {
@@ -77,6 +87,8 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
     const t = useTranslations("Hub");
     const [searchQuery, setSearchQuery] = useState("");
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+    const [showQrModal, setShowQrModal] = useState(false);
+    const [activeTab, setActiveTab] = useState<"gerant" | "tournee">("gerant");
 
     // ═══════════════ Quick Actions ═══════════════
     const quickActions: { label: string; href: string; icon: LucideIcon; gradient: string }[] = [
@@ -210,6 +222,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                 { label: t("links.users"), href: "/users", icon: Users },
                 { label: t("links.training"), href: "/formation", icon: BookOpen },
                 { label: t("links.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+                { label: t("links.mobileConnect") || "App Mobile", href: "/mobile-connect", icon: Smartphone, badge: "Expo", badgeColor: "#10b981" },
             ],
         },
     ];
@@ -600,39 +613,73 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
 
                                         {/* Links list */}
                                         <div className="space-y-0.5 mt-auto">
-                                            {section.links.map((link) => (
-                                                <Link
-                                                    key={link.href + link.label}
-                                                    href={link.href}
-                                                    className="group/link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-all duration-200 active:scale-[0.98]"
-                                                >
-                                                    <div
-                                                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 group-hover/link:scale-105"
-                                                        style={{
-                                                            background: `${section.accentFrom}10`,
-                                                        }}
-                                                    >
-                                                        <link.icon className="w-3.5 h-3.5 transition-colors duration-200"
-                                                            style={{ color: `${section.accentFrom}90` }}
-                                                        />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <span className="text-sm font-medium text-foreground/70 group-hover/link:text-foreground transition-colors duration-200 block truncate">
-                                                            {link.label}
-                                                        </span>
-                                                    </div>
-                                                    {link.description && (
-                                                        <span className="text-xs font-bold shrink-0 tabular-nums px-2.5 py-1 rounded-lg"
+                                            {section.links.map((link) => {
+                                                const isMobileConnect = link.href === "/mobile-connect";
+                                                const content = (
+                                                    <>
+                                                        <div
+                                                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 group-hover/link:scale-105"
                                                             style={{
-                                                                background: `${section.accentFrom}12`,
-                                                                color: section.accentFrom,
-                                                            }}>
-                                                            {link.description}
-                                                        </span>
-                                                    )}
-                                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/20 group-hover/link:text-muted-foreground/60 group-hover/link:translate-x-0.5 transition-all duration-200 shrink-0" />
-                                                </Link>
-                                            ))}
+                                                                background: `${section.accentFrom}10`,
+                                                            }}
+                                                        >
+                                                            <link.icon className="w-3.5 h-3.5 transition-colors duration-200"
+                                                                style={{ color: `${section.accentFrom}90` }}
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0 flex items-center gap-2">
+                                                            <span className="text-sm font-medium text-foreground/70 group-hover/link:text-foreground transition-colors duration-200 block truncate">
+                                                                {link.label}
+                                                            </span>
+                                                            {link.badge && (
+                                                                <span 
+                                                                    className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-full animate-pulse shrink-0"
+                                                                    style={{
+                                                                        backgroundColor: `${link.badgeColor || '#10b981'}20`,
+                                                                        color: link.badgeColor || '#10b981',
+                                                                        border: `1px solid ${link.badgeColor || '#10b981'}40`
+                                                                    }}
+                                                                >
+                                                                    {link.badge}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {link.description && (
+                                                            <span className="text-xs font-bold shrink-0 tabular-nums px-2.5 py-1 rounded-lg"
+                                                                style={{
+                                                                    background: `${section.accentFrom}12`,
+                                                                    color: section.accentFrom,
+                                                                }}>
+                                                                {link.description}
+                                                            </span>
+                                                        )}
+                                                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/20 group-hover/link:text-muted-foreground/60 group-hover/link:translate-x-0.5 transition-all duration-200 shrink-0" />
+                                                    </>
+                                                );
+
+                                                if (isMobileConnect) {
+                                                    return (
+                                                        <button
+                                                            key={link.href + link.label}
+                                                            type="button"
+                                                            onClick={() => setShowQrModal(true)}
+                                                            className="w-full text-start group/link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                                                        >
+                                                            {content}
+                                                        </button>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <Link
+                                                        key={link.href + link.label}
+                                                        href={link.href}
+                                                        className="group/link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-all duration-200 active:scale-[0.98]"
+                                                    >
+                                                        {content}
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -674,6 +721,203 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                     </div>
                 </motion.div>
             </div>
+
+            {/* ═══════════ FLOATING ACTION BUTTON ═══════════ */}
+            <motion.button
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                whileHover={{ scale: 1.08, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowQrModal(true)}
+                className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 dark:border-emerald-500/20 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(16,185,129,0.15)] transition-all duration-300 cursor-pointer"
+            >
+                <div className="relative flex items-center justify-center w-5 h-5">
+                    <Smartphone className="w-5 h-5" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full" />
+                </div>
+                <span className="text-sm font-bold tracking-wide uppercase pr-1">
+                    {t("links.mobileConnect") || "App Mobile"}
+                </span>
+            </motion.button>
+
+            {/* ═══════════ GLASSMORPHIC MOBILE CONNECT MODAL ═══════════ */}
+            <AnimatePresence>
+                {showQrModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowQrModal(false)}
+                            className="absolute inset-0 bg-slate-950/60 backdrop-blur-md"
+                        />
+
+                        {/* Modal Dialog */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                            transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
+                            className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-[#090d16] border border-slate-800 shadow-[0_24px_70px_-10px_rgba(0,0,0,0.7)] text-slate-100 flex flex-col z-10"
+                        >
+                            {/* Decorative blur orbs inside modal */}
+                            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+                            <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+
+                            {/* Modal Header */}
+                            <div className="relative p-6 border-b border-slate-800 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                        <Smartphone className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold tracking-tight text-white">
+                                            {t("links.scanQrCode") || "Connexion Mobile App"}
+                                        </h3>
+                                        <p className="text-xs text-slate-400/85 mt-0.5">
+                                            {t("links.mobileConnectDesc") || "Scannez le QR Code pour connecter votre mobile"}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowQrModal(false)}
+                                    className="p-2 rounded-xl bg-slate-800/40 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 transition-all duration-200 cursor-pointer"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="relative p-6 flex flex-col space-y-6">
+                                {/* Segmented control (tabs) */}
+                                <div className="flex p-1 rounded-2xl bg-slate-950 border border-slate-800/80">
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("gerant")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+                                            activeTab === "gerant"
+                                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_2px_12px_rgba(16,185,129,0.1)]"
+                                                : "text-slate-400 hover:text-slate-200 border border-transparent"
+                                        }`}
+                                    >
+                                        <span className={`w-1.5 h-1.5 rounded-full ${activeTab === "gerant" ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
+                                        Application Gérant
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("tournee")}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer ${
+                                            activeTab === "tournee"
+                                                ? "bg-blue-500/15 text-blue-400 border border-blue-500/30 shadow-[0_2px_12px_rgba(59,130,246,0.1)]"
+                                                : "text-slate-400 hover:text-slate-200 border border-transparent"
+                                        }`}
+                                    >
+                                        <span className={`w-1.5 h-1.5 rounded-full ${activeTab === "tournee" ? "bg-blue-400 animate-pulse" : "bg-slate-600"}`} />
+                                        Application Tournée
+                                    </button>
+                                </div>
+
+                                {/* Active App Highlight Card */}
+                                {activeTab === "gerant" ? (
+                                    <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-400">
+                                            <Store className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xs font-bold text-emerald-400">Application Gérant ERP</h4>
+                                            <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                                                Accès complet aux ventes, stocks, caisse et IA pour le gérant de boutique.
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="p-3.5 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-start gap-3">
+                                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0 text-blue-400">
+                                            <Truck className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xs font-bold text-blue-400">Application Tournée Livreur</h4>
+                                            <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                                                Accès aux livraisons, commandes clients et suivi GPS pour les livreurs sur le terrain.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Main layout: QR on the left/center, instructions on the right/bottom */}
+                                <div className="flex flex-col md:flex-row items-center gap-6">
+                                    {/* QR Code Container */}
+                                    <div className="flex flex-col items-center justify-center shrink-0">
+                                        <div 
+                                            className="p-4 bg-white rounded-2xl shadow-2xl relative transition-all duration-500"
+                                            style={{
+                                                border: `4px solid ${activeTab === "gerant" ? "#10b981" : "#3b82f6"}`
+                                            }}
+                                        >
+                                            <QRCodeSVG
+                                                value="exp://192.168.0.132:8081"
+                                                size={160}
+                                                level="H"
+                                                includeMargin={false}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 mt-2">
+                                            Expo Go Bundler
+                                        </span>
+                                    </div>
+
+                                    {/* Instructions list */}
+                                    <div className="flex-1 space-y-4 text-start">
+                                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                            <Wifi className="w-3.5 h-3.5 text-slate-500" />
+                                            {t("links.howToConnect") || "Comment se connecter :"}
+                                        </h4>
+                                        
+                                        <div className="space-y-3">
+                                            <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
+                                                <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">1</div>
+                                                <p className="flex-1">
+                                                    {t("links.installExpoGo") || "Installez l'application Expo Go sur votre smartphone (Android/iOS)."}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
+                                                <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">2</div>
+                                                <p className="flex-1">
+                                                    {t("links.sameWifi") || "Assurez-vous d'être connecté au même réseau Wi-Fi."}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
+                                                <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">3</div>
+                                                <p className="flex-1">
+                                                    {t("links.scanCamera") || "Scannez le code QR ci-contre avec votre caméra ou via l'application Expo Go."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer link / input for manual connect */}
+                                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col space-y-2">
+                                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                                        <Laptop className="w-3.5 h-3.5" />
+                                        {t("links.manualUrl") || "Ou entrez l'adresse URL suivante dans Expo Go :"}
+                                    </span>
+                                    <div className="flex items-center justify-between gap-2 bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
+                                        <code className="text-xs text-slate-300 break-all select-all font-mono">
+                                            exp://192.168.0.132:8081
+                                        </code>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

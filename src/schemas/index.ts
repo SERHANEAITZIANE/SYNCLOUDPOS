@@ -26,12 +26,22 @@ export const BrandSchema = z.object({
     name: z.string().min(1, {
         message: "Name is required",
     }),
+    imageUrl: z.string().optional().nullable(),
+    isArchived: z.boolean().default(false).optional(),
+    commissionWholesale: z.coerce.number().min(0).default(0).optional(),
+    commissionReseller: z.coerce.number().min(0).default(0).optional(),
+    commissionRetail: z.coerce.number().min(0).default(0).optional(),
 })
 
 export const CategorySchema = z.object({
     name: z.string().min(1, {
         message: "Name is required",
     }),
+    imageUrl: z.string().optional().nullable(),
+    isArchived: z.boolean().default(false).optional(),
+    commissionWholesale: z.coerce.number().min(0).default(0).optional(),
+    commissionReseller: z.coerce.number().min(0).default(0).optional(),
+    commissionRetail: z.coerce.number().min(0).default(0).optional(),
 })
 
 export const ProductSchema = z.object({
@@ -84,14 +94,15 @@ export const CustomerSchema = z.object({
     address: z.string().optional(),
     city: z.string().optional(),
     taxId: z.string().optional(),
-    nif: z.string().optional(),
-    nis: z.string().optional(),
-    artImposition: z.string().optional(),
+    nif: z.string().refine(val => !val || /^\d{15}$/.test(val), "Le NIF doit comporter exactement 15 chiffres").optional(),
+    nis: z.string().refine(val => !val || /^\d{15}$/.test(val), "Le NIS doit comporter exactement 15 chiffres").optional(),
+    artImposition: z.string().refine(val => !val || /^\d{11}$/.test(val), "L'article d'imposition doit comporter 11 chiffres").optional(),
     rc: z.string().optional(),
     rib: z.string().optional(),
     barcode: z.string().optional(),
     notes: z.string().optional(),
-    clientType: z.enum(["RETAIL", "RESELLER", "WHOLESALE"]).default("RETAIL")
+    clientType: z.enum(["RETAIL", "RESELLER", "WHOLESALE"]).default("RETAIL"),
+    balance: z.coerce.number().default(0).optional(),
 })
 
 export const SupplierSchema = z.object({
@@ -101,11 +112,13 @@ export const SupplierSchema = z.object({
     email: z.string().optional(),
     address: z.string().optional(),
     taxId: z.string().optional(),
-    nif: z.string().optional(),
-    nis: z.string().optional(),
-    artImposition: z.string().optional(),
+    nif: z.string().refine(val => !val || /^\d{15}$/.test(val), "Le NIF doit comporter exactement 15 chiffres").optional(),
+    nis: z.string().refine(val => !val || /^\d{15}$/.test(val), "Le NIS doit comporter exactement 15 chiffres").optional(),
+    artImposition: z.string().refine(val => !val || /^\d{11}$/.test(val), "L'article d'imposition doit comporter 11 chiffres").optional(),
     rc: z.string().optional(),
-    rib: z.string().optional()
+    rib: z.string().optional(),
+    balance: z.coerce.number().default(0).optional(),
+    notes: z.string().optional(),
 })
 
 export const TreasuryAccountSchema = z.object({

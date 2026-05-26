@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
         const salesOrder = await db.salesOrder.create({
             data: {
                 tenantId: user.tenantId,
+                userId: user.userId,
                 customerId,
                 type: type as any,
                 receiptNumber,
@@ -108,7 +109,8 @@ export async function POST(req: NextRequest) {
                 paymentMethod,
                 paymentStatus: paymentAmount >= totalWithStamp ? "PAID" : paymentAmount > 0 ? "PARTIAL" : "PENDING",
                 amountPaid: paymentAmount,
-                notes: notes ? `[Mobile] ${notes}` : "[Mobile]",
+                notes: notes || null,
+                source: "MOBILE",
                 items: {
                     create: salesItems.map(item => ({
                         productId: item.productId,
@@ -185,7 +187,7 @@ export async function GET(req: NextRequest) {
 
         const where: any = {
             tenantId: user.tenantId,
-            notes: { contains: "[Mobile]" },
+            source: "MOBILE",
         };
 
         if (dateStr) {

@@ -210,6 +210,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     where: { id: originalOrderId },
                     data: {
                         customerId: finalCustomerId,
+                        userId,
+                        amountPaid: paidAmount ?? total,
                         total,
                         items: {
                             create: items.map(item => ({
@@ -226,6 +228,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         tenantId,
                         storeId: storeIdToUse,
                         customerId: finalCustomerId,
+                        userId,
+                        amountPaid: paidAmount ?? total,
                         type: "ORDER", // Bon de Livraison
                         status: "VALIDATED",
                         total,

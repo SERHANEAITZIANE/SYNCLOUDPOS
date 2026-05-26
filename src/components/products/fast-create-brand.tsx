@@ -43,7 +43,7 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
     const tBrand = useTranslations("Brands.fastCreate")
 
     const form = useForm<z.infer<typeof BrandSchema>>({
-        resolver: zodResolver(BrandSchema),
+        resolver: zodResolver(BrandSchema) as any,
         defaultValues: { name: "" }
     })
 

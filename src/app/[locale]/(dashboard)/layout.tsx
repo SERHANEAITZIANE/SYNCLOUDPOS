@@ -9,6 +9,7 @@ import { getSubscriptionStatus } from "@/lib/subscription";
 import { SubscriptionBanner } from "@/components/dashboard/subscription-banner";
 import { getUserTenants } from "@/actions/get-tenants";
 import { getActiveTenantId } from "@/actions/get-active-tenant";
+import { VoiceAssistantWidget } from "@/components/ui/voice-assistant-widget";
 
 export default async function DashboardLayout({
     children,
@@ -52,6 +53,7 @@ export default async function DashboardLayout({
                     />
                 </div>
                 <GlobalShortcuts />
+                <VoiceAssistantWidget />
                 <div className="flex-1 flex flex-col">
                     <DashboardHeader user={session!.user} />
                     {subStatus && (

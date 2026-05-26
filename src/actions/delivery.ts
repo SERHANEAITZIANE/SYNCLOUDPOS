@@ -156,15 +156,25 @@ export async function createDeliveryShipment(data: {
 }
 
 /** Get all delivery shipments for the current tenant */
-export async function getDeliveryShipments() {
+export async function getDeliveryShipments(page = 1, pageSize = 50) {
     const session = await auth()
     const tenantId = session?.user?.tenantId
-    if (!tenantId) return []
+    if (!tenantId) return { data: [], total: 0 }
 
-    return db.deliveryShipment.findMany({
-        where: { tenantId },
-        orderBy: { createdAt: "desc" }
-    })
+    const [data, total] = await Promise.all([
+        db.deliveryShipment.findMany({
+            where: { tenantId },
+            orderBy: { createdAt: "desc" },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            include: {
+                salesOrder: { select: { id: true, receiptNumber: true } }
+            }
+        }),
+        db.deliveryShipment.count({ where: { tenantId } })
+    ]);
+
+    return { data, total }
 }
 
 /** Update shipment status (e.g., DELIVERED, RETURNED) */
@@ -181,3 +191,131 @@ export async function updateShipmentStatus(id: string, status: string) {
     revalidatePath("/[locale]/(dashboard)/delivery", "page")
     return { success: true }
 }
+
+/** Sync shipment statuses by polling delivery provider APIs */
+export async function syncShipmentStatuses() {
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+    if (!tenantId) return { error: "Unauthorized" }
+
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: { yalidineApiId: true, yalidineApiToken: true, dhdApiToken: true, hddApiToken: true }
+    })
+    if (!tenant) return { error: "Tenant not found" }
+
+    // Get all active (non-terminal) shipments
+    const shipments = await db.deliveryShipment.findMany({
+        where: {
+            tenantId,
+            status: { in: ["PENDING", "SENT", "IN_TRANSIT"] },
+            trackingCode: { not: null }
+        }
+    })
+
+    let updated = 0
+    let errors = 0
+
+    // Process in batches of 5 to avoid overwhelming APIs
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < shipments.length; i += BATCH_SIZE) {
+        const batch = shipments.slice(i, i + BATCH_SIZE);
+        
+        const results = await Promise.allSettled(batch.map(async (shipment) => {
+            let newStatus: string | undefined
+
+            if (shipment.provider === "YALIDINE" && tenant.yalidineApiId && tenant.yalidineApiToken && shipment.trackingCode) {
+                const res = await fetch(`${PROVIDERS.YALIDINE.baseUrl}/parcels/?tracking=${shipment.trackingCode}`, {
+                    headers: {
+                        "X-API-ID": tenant.yalidineApiId,
+                        "X-API-TOKEN": tenant.yalidineApiToken,
+                    },
+                })
+                if (res.ok) {
+                    const json = await res.json()
+                    const parcel = Array.isArray(json) ? json[0] : json
+                    if (parcel) {
+                        const statusMap: Record<string, string> = {
+                            "En préparation": "PENDING",
+                            "Expédié": "SENT",
+                            "En cours de livraison": "IN_TRANSIT",
+                            "Livré": "DELIVERED",
+                            "Retourné": "RETURNED",
+                            "Retour reçu": "RETURNED",
+                        }
+                        newStatus = statusMap[parcel.status] || parcel.status
+                    }
+                } else {
+                    throw new Error(`Yalidine API error: ${res.status}`);
+                }
+            } else if (shipment.provider === "DHD" && tenant.dhdApiToken && shipment.providerRef) {
+                const res = await fetch(`${PROVIDERS.DHD.baseUrl}/colis/${shipment.providerRef}`, {
+                    headers: { "Authorization": `Bearer ${tenant.dhdApiToken}` },
+                })
+                if (res.ok) {
+                    const json = await res.json()
+                    const statusMap: Record<string, string> = {
+                        "en_attente": "PENDING",
+                        "expedie": "SENT",
+                        "en_transit": "IN_TRANSIT",
+                        "livre": "DELIVERED",
+                        "retourne": "RETURNED",
+                    }
+                    newStatus = statusMap[json.statut || json.status] || json.statut
+                } else {
+                    throw new Error(`DHD API error: ${res.status}`);
+                }
+            } else if (shipment.provider === "HDD" && tenant.hddApiToken && shipment.providerRef) {
+                const res = await fetch(`${PROVIDERS.HDD.baseUrl}/shipments/${shipment.providerRef}`, {
+                    headers: { "Authorization": `Bearer ${tenant.hddApiToken}` },
+                })
+                if (res.ok) {
+                    const json = await res.json()
+                    const statusMap: Record<string, string> = {
+                        "pending": "PENDING",
+                        "shipped": "SENT",
+                        "in_transit": "IN_TRANSIT",
+                        "delivered": "DELIVERED",
+                        "returned": "RETURNED",
+                    }
+                    newStatus = statusMap[json.status] || json.status
+                } else {
+                    throw new Error(`HDD API error: ${res.status}`);
+                }
+            }
+
+            if (newStatus && newStatus !== shipment.status) {
+                return { id: shipment.id, status: newStatus };
+            }
+            return null;
+        }));
+
+        const updates = results.filter(r => r.status === 'fulfilled' && r.value !== null).map(r => (r as any).value);
+        const errs = results.filter(r => r.status === 'rejected');
+
+        if (updates.length > 0) {
+            // Prisma doesn't support bulk update with different values easily, but we can do a transaction of updates
+            await db.$transaction(
+                updates.map(u => db.deliveryShipment.update({
+                    where: { id: u.id },
+                    data: { status: u.status }
+                }))
+            );
+            updated += updates.length;
+        }
+        errors += errs.length;
+        for (const err of errs) {
+            console.error(`[DELIVERY_SYNC] Error in batch:`, (err as any).reason);
+        }
+    }
+
+    revalidatePath("/[locale]/(dashboard)/delivery", "page")
+    return {
+        success: true,
+        total: shipments.length,
+        updated,
+        errors,
+        message: `${updated} colis mis à jour sur ${shipments.length} vérifiés${errors > 0 ? ` (${errors} erreurs)` : ""}`
+    }
+}
+

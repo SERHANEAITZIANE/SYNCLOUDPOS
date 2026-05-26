@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getDeliveryShipments, createDeliveryShipment, updateShipmentStatus } from "@/actions/delivery"
+import { getDeliveryShipments, createDeliveryShipment, updateShipmentStatus, syncShipmentStatuses } from "@/actions/delivery"
 import { WILAYAS } from "@/lib/wilayas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,15 +49,41 @@ export default function DeliveryPage() {
     const [open, setOpen] = useState(false)
     const [form, setForm] = useState(emptyForm)
     const [saving, setSaving] = useState(false)
+    const [syncing, setSyncing] = useState(false)
+    
+    // Pagination state
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [totalCount, setTotalCount] = useState(0)
+    const PAGE_SIZE = 50
 
-    const load = async () => {
+    const load = async (pageNum = page) => {
         setLoading(true)
-        const data = await getDeliveryShipments()
-        setShipments(data)
+        const response = await getDeliveryShipments(pageNum, PAGE_SIZE)
+        setShipments(response.data || [])
+        setTotalCount(response.total || 0)
+        setTotalPages(Math.ceil((response.total || 0) / PAGE_SIZE) || 1)
+        setPage(pageNum)
         setLoading(false)
     }
 
-    useEffect(() => { load() }, [])
+    useEffect(() => { load(1) }, [])
+
+    const handleSync = async () => {
+        setSyncing(true)
+        try {
+            const result = await syncShipmentStatuses()
+            if ("error" in result && result.error) {
+                toast.error(result.error as string)
+            } else {
+                toast.success(result.message || "Synchronisation terminée")
+                load()
+            }
+        } catch {
+            toast.error("Erreur lors de la synchronisation")
+        }
+        setSyncing(false)
+    }
 
     const handleCreate = async () => {
         if (!form.customerName || !form.customerPhone || !form.customerAddress) {
@@ -97,7 +123,11 @@ export default function DeliveryPage() {
                     <p className="text-muted-foreground mt-1">Yalidine · DHD · HDD · Procolis · Zr Express</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={load} className="gap-2 rounded-xl">
+                    <Button variant="outline" onClick={handleSync} disabled={syncing} className="gap-2 rounded-xl">
+                        <RefreshCw size={14} className={cn(syncing && "animate-spin")} />
+                        {syncing ? "Sync..." : "Sync API"}
+                    </Button>
+                    <Button variant="outline" onClick={() => load()} className="gap-2 rounded-xl">
                         <RefreshCw size={14} />
                     </Button>
                     <Button onClick={() => setOpen(true)} className="gap-2 rounded-xl">
@@ -138,6 +168,7 @@ export default function DeliveryPage() {
                                     <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Transporteur</th>
                                     <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Client</th>
                                     <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Wilaya</th>
+                                    <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Commande</th>
                                     <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">COD</th>
                                     <th className="px-5 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">Tracking</th>
                                     <th className="px-5 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">Statut</th>
@@ -157,6 +188,13 @@ export default function DeliveryPage() {
                                                 <p className="text-xs text-muted-foreground">{s.customerPhone}</p>
                                             </td>
                                             <td className="px-5 py-3 text-xs text-muted-foreground">{s.wilaya}</td>
+                                            <td className="px-5 py-3 text-xs">
+                                                {s.salesOrder ? (
+                                                    <a href={`/sales/${s.salesOrder.id}`} className="text-blue-600 hover:underline font-medium">
+                                                        {s.salesOrder.receiptNumber}
+                                                    </a>
+                                                ) : "—"}
+                                            </td>
                                             <td className="px-5 py-3 text-right font-mono font-semibold">{s.codAmount > 0 ? `${s.codAmount.toLocaleString("fr-DZ")} DA` : "—"}</td>
                                             <td className="px-5 py-3 text-center text-xs font-mono text-blue-600">{s.trackingCode || "—"}</td>
                                             <td className="px-5 py-3 text-center">
@@ -184,6 +222,38 @@ export default function DeliveryPage() {
                 )}
             </div>
 
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800">
+                    <p className="text-sm text-muted-foreground">
+                        Affichage de <span className="font-bold">{(page - 1) * PAGE_SIZE + 1}</span> à <span className="font-bold">{Math.min(page * PAGE_SIZE, totalCount)}</span> sur <span className="font-bold">{totalCount}</span> colis
+                    </p>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => load(page - 1)} 
+                            disabled={page <= 1 || loading}
+                            className="rounded-lg"
+                        >
+                            Précédent
+                        </Button>
+                        <div className="flex items-center justify-center px-4 text-sm font-medium">
+                            Page {page} sur {totalPages}
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => load(page + 1)} 
+                            disabled={page >= totalPages || loading}
+                            className="rounded-lg"
+                        >
+                            Suivant
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             {/* Create Dialog */}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="sm:max-w-lg">
@@ -196,7 +266,7 @@ export default function DeliveryPage() {
                             <Select value={form.provider} onValueChange={v => setForm(f => ({ ...f, provider: v }))}>
                                 <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    {PROVIDERS.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                                    {PROVIDERS.filter(p => !["PROCOLIS", "ZR_EXPRESS"].includes(p.id)).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>

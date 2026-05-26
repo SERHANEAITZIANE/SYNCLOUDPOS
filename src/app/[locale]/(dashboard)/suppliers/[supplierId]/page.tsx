@@ -24,10 +24,18 @@ export default async function SupplierPage({
         })
     }
 
+    let formattedSupplier = null
+    if (supplier) {
+        formattedSupplier = {
+            ...supplier,
+            balance: supplier.balance ? Number(supplier.balance) : 0
+        }
+    }
+
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-                <SupplierForm initialData={supplier} />
+                <SupplierForm initialData={formattedSupplier} />
             </div>
         </div>
     )
