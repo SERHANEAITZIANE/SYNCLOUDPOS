@@ -90,6 +90,19 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
     const [showQrModal, setShowQrModal] = useState(false);
     const [activeTab, setActiveTab] = useState<"gerant" | "tournee">("gerant");
 
+    const isLocal = typeof window !== "undefined" && (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname.startsWith("192.168.")
+    );
+
+    const getExpoUrl = (tab: "gerant" | "tournee") => {
+        if (isLocal) {
+            return "exp://192.168.0.132:8081";
+        }
+        return `exp://u.expo.dev/86e328d1-c7f8-4add-9288-61b09c86dbc8?channel-name=production&runtime-version=1.0.0&app=${tab}`;
+    };
+
     // ═══════════════ Quick Actions ═══════════════
     const quickActions: { label: string; href: string; icon: LucideIcon; gradient: string }[] = [
         { label: "POS", href: "/pos", icon: Store, gradient: "linear-gradient(135deg, #3b82f6, #06b6d4)" },
@@ -858,7 +871,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                             }}
                                         >
                                             <QRCodeSVG
-                                                value="exp://192.168.0.132:8081"
+                                                value={getExpoUrl(activeTab)}
                                                 size={160}
                                                 level="H"
                                                 includeMargin={false}
@@ -909,7 +922,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                     </span>
                                     <div className="flex items-center justify-between gap-2 bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
                                         <code className="text-xs text-slate-300 break-all select-all font-mono">
-                                            exp://192.168.0.132:8081
+                                            {getExpoUrl(activeTab)}
                                         </code>
                                     </div>
                                 </div>

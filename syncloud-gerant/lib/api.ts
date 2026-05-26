@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Change this to your SynCloudPOS server URL
 const API_BASE = __DEV__
     ? "http://192.168.0.132:3000/api/mobile"
-    : "http://155.133.26.217:3000/api/mobile";
+    : "https://chirpedbeo.online/api/mobile";
 
 interface TokenStore {
     accessToken: string | null;
