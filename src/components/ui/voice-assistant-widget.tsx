@@ -15,6 +15,7 @@ export const VoiceAssistantWidget: React.FC = () => {
     const [language, setLanguage] = useState<"darija" | "arabic" | "french">("french");
     const [isMuted, setIsMuted] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [typedQuery, setTypedQuery] = useState("");
 
     const recognitionRef = useRef<any>(null);
     const synthesisUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -157,8 +158,6 @@ export const VoiceAssistantWidget: React.FC = () => {
         }
     };
 
-    if (!isSupported) return null;
-
     return (
         <>
             {/* Custom breathing glow animations */}
@@ -180,7 +179,7 @@ export const VoiceAssistantWidget: React.FC = () => {
             `}</style>
 
             {/* Widget Main UI */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
+            <div className="fixed bottom-6 right-6 z-50 hidden md:flex flex-col items-end gap-3 font-sans">
                 {/* Speech & AI Dashboard Overlay Panel */}
                 {isOpen && (
                     <div className="w-[340px] sm:w-[380px] bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 shadow-2xl flex flex-col gap-4 text-white transition-all transform duration-300 scale-100 ease-out">
@@ -213,11 +212,37 @@ export const VoiceAssistantWidget: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Speech Bubble / Live transcription */}
-                        <div className="flex flex-col gap-1">
+                        {/* Speech Bubble / Live transcription / Text-Input Fallback */}
+                        <div className="flex flex-col gap-1.5">
                             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Votre Commande</span>
-                            <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3 text-sm min-h-[50px] flex items-center text-slate-200">
-                                {transcript || <span className="text-slate-500 italic">Appuyez sur le micro pour parler...</span>}
+                            {isSupported && (
+                                <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-3 text-sm min-h-[50px] flex items-center text-slate-200 mb-1">
+                                    {transcript || <span className="text-slate-500 italic">Appuyez sur le micro pour parler...</span>}
+                                </div>
+                            )}
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={typedQuery}
+                                    onChange={(e) => setTypedQuery(e.target.value)}
+                                    placeholder={isSupported ? "Ou tapez votre commande..." : "Tapez votre commande..."}
+                                    className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-400 outline-none focus:border-indigo-500"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            handleQuerySubmit(typedQuery);
+                                            setTypedQuery("");
+                                        }
+                                    }}
+                                />
+                                <button 
+                                    onClick={() => {
+                                        handleQuerySubmit(typedQuery);
+                                        setTypedQuery("");
+                                    }}
+                                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold transition-all text-white border border-indigo-500/50"
+                                >
+                                    Envoyer
+                                </button>
                             </div>
                         </div>
 
@@ -271,8 +296,10 @@ export const VoiceAssistantWidget: React.FC = () => {
                 {/* Floating Microphone Action Pill */}
                 <button
                     onClick={() => {
-                        setIsOpen(true);
-                        toggleListening();
+                        setIsOpen(!isOpen);
+                        if (isSupported) {
+                            toggleListening();
+                        }
                     }}
                     className={cn(
                         "w-14 h-14 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 transform shadow-xl border focus:outline-none",
@@ -280,12 +307,16 @@ export const VoiceAssistantWidget: React.FC = () => {
                             ? "bg-red-500 border-red-400 text-white voice-pulse-active scale-110" 
                             : "bg-indigo-600 border-indigo-500 hover:bg-indigo-500 text-white hover:scale-105"
                     )}
-                    title={isListening ? "Arrêter d'écouter" : "Parler à l'assistant AI"}
+                    title={isSupported ? (isListening ? "Arrêter d'écouter" : "Parler à l'assistant AI") : "Ouvrir l'assistant AI"}
                 >
-                    {isListening ? (
-                        <MicOff className="h-6 w-6 animate-pulse" />
+                    {isSupported ? (
+                        isListening ? (
+                            <MicOff className="h-6 w-6 animate-pulse" />
+                        ) : (
+                            <Mic className="h-6 w-6" />
+                        )
                     ) : (
-                        <Mic className="h-6 w-6" />
+                        <Sparkles className="h-6 w-6" />
                     )}
                 </button>
             </div>

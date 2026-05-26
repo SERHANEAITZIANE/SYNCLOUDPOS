@@ -18,6 +18,9 @@ const PUBLIC_PATHS = [
     "/api/webhooks",
     "/api/mobile",
     "/landing.html",
+    "/manifest.json",
+    "/manifest.webmanifest",
+    "/sw.js",
 ]
 
 function isPublicPath(pathname: string): boolean {
@@ -47,6 +50,20 @@ function isRateLimited(ip: string): boolean {
 export default auth(async function middleware(request) {
     const { pathname } = request.nextUrl
     const clean = pathname.replace(/^\/(fr|en|ar)/, "") || "/"
+
+    // Static assets, public uploads, _next files, manifest, sw.js - bypass authentication and middleware entirely
+    if (
+        pathname.startsWith("/_next") ||
+        pathname.startsWith("/uploads") ||
+        pathname.includes(".") ||
+        pathname === "/sw.js" ||
+        pathname === "/favicon.ico" ||
+        clean === "/manifest.json" ||
+        clean === "/manifest.webmanifest" ||
+        clean === "/sw.js"
+    ) {
+        return NextResponse.next()
+    }
 
     // API routes bypass intlMiddleware
     if (clean.startsWith("/api")) {
