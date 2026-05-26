@@ -24,6 +24,7 @@ function isPublicPath(pathname: string): boolean {
     if (pathname === "/") return true
     // Strip locale prefix for matching
     const clean = pathname.replace(/^\/(fr|en|ar)/, "") || "/"
+    if (clean === "/") return true
     return PUBLIC_PATHS.some(p => clean.startsWith(p))
 }
 
