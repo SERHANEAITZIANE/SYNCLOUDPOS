@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
     View, Text, StyleSheet, TouchableOpacity, Modal,
     TextInput, ActivityIndicator, Animated, ScrollView,
-    Platform, Alert
+    Platform, Alert, Clipboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
@@ -14,6 +14,11 @@ interface VoiceAssistantWidgetProps {
 }
 
 type LangType = "darija" | "arabic" | "french";
+
+interface ChatMessage {
+    role: "user" | "assistant";
+    content: string;
+}
 
 const quickQueries = {
     darija: [
@@ -87,12 +92,13 @@ const localization = {
 export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWidgetProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
-    const [response, setResponse] = useState("");
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [language, setLanguage] = useState<LangType>("french");
     const [loading, setLoading] = useState(false);
     const [speaking, setSpeaking] = useState(false);
     const [muted, setMuted] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [detailedMode, setDetailedMode] = useState(false);
 
     // AI configurations cached locally
     const [aiProvider, setAiProvider] = useState<string | null>(null);
@@ -100,6 +106,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
 
     // References
     const inputRef = useRef<TextInput>(null);
+    const scrollRef = useRef<ScrollView>(null);
 
     // Soundwave animations
     const pulse1 = useRef(new Animated.Value(1)).current;
@@ -154,7 +161,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
         }
     }, [loading, speaking, isListening]);
 
-    // Handle vocal speech output
+    // Handle vocal speech output with dynamic local voice matching
     const speakText = async (text: string) => {
         if (muted) return;
         
@@ -162,13 +169,36 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
             await Speech.stop();
             setSpeaking(true);
             
-            // Map our custom roles to locale codes
-            const locale = language === "french" ? "fr-FR" : "ar-SA";
+            let selectedVoiceId: string | undefined = undefined;
+            let selectedLanguage = language === "french" ? "fr-FR" : "ar-SA";
             
-            await Speech.speak(text, {
-                language: locale,
+            try {
+                const voices = await Speech.getAvailableVoicesAsync();
+                if (language === "french") {
+                    const frVoice = voices.find(v => v.language.toLowerCase().startsWith("fr"));
+                    if (frVoice) {
+                        selectedVoiceId = frVoice.identifier;
+                        selectedLanguage = frVoice.language;
+                    }
+                } else {
+                    const arVoice = voices.find(v => v.language.toLowerCase().startsWith("ar"));
+                    if (arVoice) {
+                        selectedVoiceId = arVoice.identifier;
+                        selectedLanguage = arVoice.language;
+                    }
+                }
+            } catch (err) {
+                console.warn("Error getting available voices:", err);
+            }
+            
+            // Strip out markdown or brackets for vocal TTS output
+            const cleanedText = text.replace(/[*#_\\-]/g, "");
+
+            await Speech.speak(cleanedText, {
+                voice: selectedVoiceId,
+                language: selectedLanguage,
                 pitch: 1.0,
-                rate: 0.9,
+                rate: 0.95,
                 onComplete: () => setSpeaking(false),
                 onError: () => setSpeaking(false),
                 onStopped: () => setSpeaking(false)
@@ -187,14 +217,15 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     // Autofocus keyboard and play welcome audio greeting upon modal load
     useEffect(() => {
         if (isOpen) {
+            // Set welcome message in history
+            const welcomeText = localization[language].welcome;
+            setMessages([{ role: "assistant", content: welcomeText }]);
+
             // Focus text input after a brief delay to let modal slide open
             setTimeout(() => {
                 inputRef.current?.focus();
                 setIsListening(true);
             }, 600);
-
-            // Vocal greeting welcome
-            const welcomeText = localization[language].welcome;
             
             setTimeout(() => {
                 speakText(welcomeText);
@@ -210,6 +241,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
         setLanguage(newLang);
         if (isOpen) {
             const welcomeText = localization[newLang].welcome;
+            setMessages([{ role: "assistant", content: welcomeText }]);
             speakText(welcomeText);
             inputRef.current?.focus();
         }
@@ -218,36 +250,54 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     const handleQuerySubmit = async (queryText: string) => {
         if (!queryText.trim()) return;
         
+        // Add user query to chat history
+        const userMsg = { role: "user" as const, content: queryText };
+        const updatedMessages = [...messages, userMsg];
+        setMessages(updatedMessages);
+        setQuery(""); // Clear input form
+
         setLoading(true);
         setIsListening(false);
-        setResponse("");
         await handleStopSpeech();
 
         try {
+            // Map our messages to custom API history schema
+            const apiHistory = messages.map(m => ({
+                role: m.role === "assistant" ? "model" as const : "user" as const,
+                content: m.content
+            }));
+
             // POST request to our secure mobile voice-assistant endpoint
             const result = await apiFetch("/voice-assistant", {
                 method: "POST",
                 body: JSON.stringify({ 
                     queryText, 
                     language,
+                    history: apiHistory,
+                    detailedMode,
                     aiProvider,
                     aiModel
                 })
             });
 
             if (result.success && result.text) {
-                setResponse(result.text);
+                setMessages(prev => [...prev, { role: "assistant", content: result.text }]);
                 // Automatically vocalize the response
                 speakText(result.text);
             } else {
-                setResponse(localization[language].noReport);
+                setMessages(prev => [...prev, { role: "assistant", content: localization[language].noReport }]);
             }
         } catch (error: any) {
             console.error(error);
-            setResponse(localization[language].errorMsg);
+            setMessages(prev => [...prev, { role: "assistant", content: localization[language].errorMsg }]);
         } finally {
             setLoading(false);
         }
+    };
+
+    const copyToClipboard = (text: string) => {
+        Clipboard.setString(text);
+        Alert.alert("Copié", "Texte copié dans le presse-papiers !");
     };
 
     if (!active) return null;
@@ -343,7 +393,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                 style={[styles.langTab, language === "arabic" && styles.langTabActive]}
                                 onPress={() => changeLanguage("arabic")}
                             >
-                                <Text style={[styles.langText, language === "arabic" && styles.langTextActive]}>
+                                <Text style={[styles.langText, language === "arabic" && styles.langTabActive]}>
                                     العربية (Fusha)
                                 </Text>
                             </TouchableOpacity>
@@ -353,6 +403,23 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                             >
                                 <Text style={[styles.langText, language === "french" && styles.langTextActive]}>
                                     Français
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Detailed Mode Toggle bar */}
+                        <View style={[styles.controlSubBar, isAr && styles.rtlRow]}>
+                            <TouchableOpacity
+                                style={[styles.detailedToggle, detailedMode && styles.detailedToggleActive]}
+                                onPress={() => setDetailedMode(!detailedMode)}
+                            >
+                                <Ionicons 
+                                    name={detailedMode ? "analytics" : "mic-outline"} 
+                                    size={16} 
+                                    color={detailedMode ? "#22c55e" : "#94a3b8"} 
+                                />
+                                <Text style={[styles.detailedToggleText, detailedMode && styles.detailedToggleTextActive]}>
+                                    {detailedMode ? "Mode Détaillé (Texte / Analyses)" : "Mode Spoken (Vocal / Court)"}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -418,7 +485,6 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                         key={idx}
                                         style={styles.suggestionPill}
                                         onPress={() => {
-                                            setQuery(item.query);
                                             handleQuerySubmit(item.query);
                                         }}
                                         disabled={loading}
@@ -430,27 +496,51 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                         </View>
 
                         {/* Transcript Response details panel */}
-                        <ScrollView style={styles.responseContainer} contentContainerStyle={{ paddingBottom: 20 }}>
-                            {query ? (
-                                <View style={[styles.userBubble, isAr && styles.rtlAlignSelf]}>
-                                    <Text style={[styles.userQueryText, isAr && styles.rtlText]}>{query}</Text>
-                                </View>
-                            ) : null}
+                        <ScrollView 
+                            style={styles.responseContainer} 
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                            ref={scrollRef}
+                            onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+                        >
+                            {messages.map((msg, index) => {
+                                const isUser = msg.role === "user";
+                                return (
+                                    <View 
+                                        key={index} 
+                                        style={[
+                                            isUser ? styles.userBubble : styles.aiBubble,
+                                            isAr && (isUser ? styles.rtlAlignSelf : styles.rtlAlignSelfLeft)
+                                        ]}
+                                    >
+                                        <Text style={[
+                                            isUser ? styles.userQueryText : styles.aiText,
+                                            isAr && styles.rtlText
+                                        ]}>
+                                            {msg.content}
+                                        </Text>
 
-                            {response ? (
-                                <View style={[styles.aiBubble, isAr && styles.rtlAlignSelfLeft]}>
-                                    <Text style={[styles.aiText, isAr && styles.rtlText]}>{response}</Text>
-                                    {speaking && (
-                                        <TouchableOpacity
-                                            style={[styles.stopSpeakRow, isAr && styles.rtlRow]}
-                                            onPress={handleStopSpeech}
-                                        >
-                                            <Ionicons name="volume-mute" size={14} color="#ef4444" />
-                                            <Text style={styles.stopSpeakText}>{activeLoc.stopSpeak}</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
-                            ) : null}
+                                        {!isUser && (
+                                            <View style={[styles.aiMessageActions, isAr && styles.rtlRow]}>
+                                                <TouchableOpacity
+                                                    style={styles.aiActionMiniBtn}
+                                                    onPress={() => copyToClipboard(msg.content)}
+                                                >
+                                                    <Ionicons name="copy-outline" size={13} color="#94a3b8" />
+                                                    <Text style={styles.aiActionMiniText}>Copier</Text>
+                                                </TouchableOpacity>
+
+                                                <TouchableOpacity
+                                                    style={styles.aiActionMiniBtn}
+                                                    onPress={() => speakText(msg.content)}
+                                                >
+                                                    <Ionicons name="volume-medium-outline" size={13} color="#94a3b8" />
+                                                    <Text style={styles.aiActionMiniText}>Parler</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
+                                    </View>
+                                );
+                            })}
                         </ScrollView>
 
                         {/* TextInput Fallback form */}
@@ -534,7 +624,7 @@ const styles = StyleSheet.create({
         borderColor: "#334155",
         paddingTop: 10,
         paddingHorizontal: 20,
-        height: "82%",
+        height: "85%",
     },
     dragBar: {
         width: 40,
@@ -610,7 +700,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0f172a",
         borderRadius: 12,
         padding: 4,
-        marginBottom: 20,
+        marginBottom: 12,
         borderWidth: 1,
         borderColor: "#334155",
     },
@@ -632,33 +722,67 @@ const styles = StyleSheet.create({
         color: "#fff",
     },
 
+    // Sub Control Bar
+    controlSubBar: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 12,
+        paddingHorizontal: 4,
+    },
+    detailedToggle: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#334155",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+        flex: 1,
+        justifyContent: "center",
+    },
+    detailedToggleActive: {
+        borderColor: "#22c55e",
+        backgroundColor: "#22c55e10",
+    },
+    detailedToggleText: {
+        color: "#94a3b8",
+        fontSize: 11,
+        fontWeight: "700",
+    },
+    detailedToggleTextActive: {
+        color: "#22c55e",
+    },
+
     // Soundwave Circle Panel
     soundwavePanel: {
         alignItems: "center",
         justifyContent: "center",
-        marginVertical: 14,
+        marginVertical: 10,
         gap: 12,
     },
     micCircleContainer: {
-        width: 130,
-        height: 130,
+        width: 110,
+        height: 110,
         justifyContent: "center",
         alignItems: "center",
         position: "relative",
     },
     pulseRing: {
         position: "absolute",
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         borderWidth: 2,
         borderColor: "#22c55e",
         backgroundColor: "#22c55e10",
     },
     micBigCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         backgroundColor: "#22c55e",
         justifyContent: "center",
         alignItems: "center",
@@ -683,7 +807,7 @@ const styles = StyleSheet.create({
 
     // Suggestions quick reports
     suggestionSection: {
-        marginBottom: 16,
+        marginBottom: 12,
     },
     suggestionTitle: {
         color: "#64748b",
@@ -754,6 +878,29 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         fontWeight: "500",
     },
+    aiMessageActions: {
+        flexDirection: "row",
+        gap: 12,
+        marginTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: "#33415550",
+        paddingTop: 8,
+    },
+    aiActionMiniBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        backgroundColor: "#0f172a50",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+    },
+    aiActionMiniText: {
+        color: "#94a3b8",
+        fontSize: 10,
+        fontWeight: "600",
+    },
+
     stopSpeakRow: {
         flexDirection: "row",
         alignItems: "center",

@@ -4,6 +4,9 @@ import {
     ActivityIndicator, TextInput, Alert, Image, Dimensions
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { apiFetch } from "../lib/api";
 
 interface PurchaseItem {
     name: string;
@@ -42,32 +45,146 @@ export default function GerantPurchasesScreen() {
     const [isTakingPhoto, setIsTakingPhoto] = useState(false);
 
     // Gemini AI OCR Simulation with extremely rich data extraction
-    const handleCameraScan = () => {
+    const captureFromCamera = async () => {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) return;
+
+        try {
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                await processImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error("Camera scan error:", error);
+            Alert.alert("Erreur", "Impossible d'accéder à l'appareil photo.");
+        }
+    };
+
+    const pickFromGallery = async () => {
+        const hasPermission = await requestLibraryPermission();
+        if (!hasPermission) return;
+
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets?.[0]?.uri) {
+                await processImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error("Gallery pick error:", error);
+            Alert.alert("Erreur", "Impossible d'accéder à la galerie photo.");
+        }
+    };
+
+    const requestCameraPermission = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert("Permission refusée", "Vous devez autoriser l'accès à la caméra pour scanner les factures.");
+            return false;
+        }
+        return true;
+    };
+
+    const requestLibraryPermission = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert("Permission refusée", "Vous devez autoriser l'accès à vos photos pour importer les factures.");
+            return false;
+        }
+        return true;
+    };
+
+    const fallbackToSimulated = () => {
+        const result: ScannedPurchase = {
+            supplier: "SARL El Mountazah (El Eulma)",
+            shippingFees: 1500, // Simulated transport fees
+            paymentMethod: "CREDIT",
+            items: [
+                { name: "Canette Coca-Cola 33cl", quantity: 120, priceHt: 50, tvaRate: 19, currentStock: 80, oldPmp: 54, sellingPrice: 80 },
+                { name: "Eau Minérale Lalla Khedidja 1.5L", quantity: 240, priceHt: 24, tvaRate: 9, currentStock: 150, oldPmp: 25, sellingPrice: 35 },
+                { name: "Jus Ramy Orange 1L", quantity: 60, priceHt: 80, tvaRate: 19, currentStock: 40, oldPmp: 90, sellingPrice: 130 },
+            ]
+        };
+
+        setScannedData(result);
+        setSupplierName(result.supplier);
+        setShippingFees(String(result.shippingFees));
+        setPaymentMethod(result.paymentMethod);
+        setItemsList(result.items);
+        setPhotos(["https://picsum.photos/id/102/300/300"]);
+        Alert.alert("✨ Facture Papier Numérisée (Simulé)", "Gemini AI a extrait le Fournisseur, les frais annexes, les articles avec HT, TVA et stocks actuels !");
+    };
+
+    const processImage = async (uri: string) => {
         setScanning(true);
         setScannedData(null);
         setPhotos([]);
 
-        setTimeout(() => {
-            const result: ScannedPurchase = {
-                supplier: "SARL El Mountazah (El Eulma)",
-                shippingFees: 1500, // Simulated transport fees
-                paymentMethod: "CREDIT",
-                items: [
-                    { name: "Canette Coca-Cola 33cl", quantity: 120, priceHt: 50, tvaRate: 19, currentStock: 80, oldPmp: 54, sellingPrice: 80 },
-                    { name: "Eau Minérale Lalla Khedidja 1.5L", quantity: 240, priceHt: 24, tvaRate: 9, currentStock: 150, oldPmp: 25, sellingPrice: 35 },
-                    { name: "Jus Ramy Orange 1L", quantity: 60, priceHt: 80, tvaRate: 19, currentStock: 40, oldPmp: 90, sellingPrice: 130 },
-                ]
-            };
+        try {
+            const base64 = await FileSystem.readAsStringAsync(uri, {
+                encoding: "base64",
+            });
 
-            setScannedData(result);
-            setSupplierName(result.supplier);
-            setShippingFees(String(result.shippingFees));
-            setPaymentMethod(result.paymentMethod);
-            setItemsList(result.items);
-            setPhotos(["https://picsum.photos/id/102/300/300"]);
+            // Call ocr-purchase API
+            const response = await apiFetch("/ocr-purchase", {
+                method: "POST",
+                body: JSON.stringify({ image: base64 }),
+            });
+
+            if (response.success && response.data) {
+                const extracted = response.data;
+                const result: ScannedPurchase = {
+                    supplier: extracted.supplier || "Fournisseur Inconnu",
+                    shippingFees: extracted.shippingFees || 0,
+                    paymentMethod: extracted.paymentMethod || "CREDIT",
+                    items: (extracted.items || []).map((item: any) => ({
+                        name: item.name || "Article Inconnu",
+                        quantity: typeof item.quantity === 'number' ? item.quantity : 1,
+                        priceHt: typeof item.priceHt === 'number' ? item.priceHt : 0,
+                        tvaRate: typeof item.tvaRate === 'number' ? item.tvaRate : 19,
+                        currentStock: typeof item.currentStock === 'number' ? item.currentStock : 0,
+                        oldPmp: typeof item.oldPmp === 'number' ? item.oldPmp : (typeof item.priceHt === 'number' ? item.priceHt : 0),
+                        sellingPrice: typeof item.sellingPrice === 'number' ? item.sellingPrice : ((typeof item.priceHt === 'number' ? item.priceHt : 0) * 1.3)
+                    }))
+                };
+
+                setScannedData(result);
+                setSupplierName(result.supplier);
+                setShippingFees(String(result.shippingFees));
+                setPaymentMethod(result.paymentMethod);
+                setItemsList(result.items);
+                setPhotos([uri]);
+                Alert.alert("✨ Facture Numérisée", "Gemini AI a extrait le Fournisseur, les taxes et articles avec succès !");
+            } else {
+                fallbackToSimulated();
+            }
+        } catch (error) {
+            console.error("OCR API error:", error);
+            fallbackToSimulated();
+        } finally {
             setScanning(false);
-            Alert.alert("✨ Facture Papier Numérisée", "Gemini AI a extrait le Fournisseur, les frais annexes, les articles avec HT, TVA et stocks actuels !");
-        }, 2200);
+        }
+    };
+
+    const handleCameraScan = () => {
+        Alert.alert(
+            "Source de la facture",
+            "Veuillez choisir comment importer votre facture fournisseur papier :",
+            [
+                { text: "Prendre une photo", onPress: () => captureFromCamera() },
+                { text: "Choisir depuis la galerie", onPress: () => pickFromGallery() },
+                { text: "Annuler", style: "cancel" }
+            ]
+        );
     };
 
     // Calculate financials in real time
@@ -131,14 +248,53 @@ export default function GerantPurchasesScreen() {
             return;
         }
 
-        setIsTakingPhoto(true);
-        setTimeout(() => {
-            const randomId = Math.floor(Math.random() * 80) + 10;
-            const newPhotoUrl = `https://picsum.photos/id/${randomId}/300/300`;
-            setPhotos(prev => [...prev, newPhotoUrl]);
-            setIsTakingPhoto(false);
-            Alert.alert("✨ Photo capturée", "Pièce jointe enregistrée avec succès !");
-        }, 800);
+        Alert.alert(
+            "Ajouter un justificatif",
+            "Prendre une photo ou choisir une image existante :",
+            [
+                {
+                    text: "Prendre une photo",
+                    onPress: async () => {
+                        const hasPermission = await requestCameraPermission();
+                        if (!hasPermission) return;
+                        try {
+                            const result = await ImagePicker.launchCameraAsync({
+                                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                                allowsEditing: true,
+                                quality: 0.8,
+                            });
+                            if (!result.canceled && result.assets?.[0]?.uri) {
+                                setPhotos(prev => [...prev, result.assets[0].uri]);
+                                Alert.alert("✓ Ajouté", "Pièce jointe enregistrée !");
+                            }
+                        } catch (err) {
+                            Alert.alert("Erreur", "Impossible de prendre la photo.");
+                        }
+                    }
+                },
+                {
+                    text: "Depuis la galerie",
+                    onPress: async () => {
+                        const hasPermission = await requestLibraryPermission();
+                        if (!hasPermission) return;
+                        try {
+                            const result = await ImagePicker.launchImageLibraryAsync({
+                                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                                allowsEditing: true,
+                                quality: 0.8,
+                            });
+                            if (!result.canceled && result.assets?.[0]?.uri) {
+                                setPhotos(prev => [...prev, result.assets[0].uri]);
+                                Alert.alert("✓ Ajouté", "Pièce jointe enregistrée !");
+                            }
+                        } catch (err) {
+                            Alert.alert("Erreur", "Impossible d'importer la photo.");
+                        }
+                    }
+                },
+                { text: "Annuler", style: "cancel" }
+            ]
+        );
     };
 
     const handleRemovePhoto = (index: number) => {

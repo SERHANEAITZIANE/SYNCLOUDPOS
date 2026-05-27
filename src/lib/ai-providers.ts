@@ -6,12 +6,18 @@
 
 export type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
 
+interface Message {
+    role: "user" | "assistant" | "model";
+    content: string;
+}
+
 interface AIRequestParams {
     provider: AIProvider;
     model: string;
     apiKey: string;
     systemPrompt: string;
     userMessage: string;
+    history?: Message[];
     temperature?: number;
     maxTokens?: number;
 }
@@ -52,11 +58,21 @@ export const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[
 async function callGemini(params: AIRequestParams): Promise<string> {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${params.model}:generateContent?key=${encodeURIComponent(params.apiKey.trim())}`;
 
+    const geminiHistory = (params.history || []).map(h => ({
+        role: h.role === "assistant" ? "model" : "user",
+        parts: [{ text: h.content }]
+    }));
+
+    const contents = [
+        ...geminiHistory,
+        { role: "user", parts: [{ text: params.userMessage }] }
+    ];
+
     const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: params.userMessage }] }],
+            contents,
             systemInstruction: { parts: [{ text: params.systemPrompt }] },
             generationConfig: {
                 temperature: params.temperature ?? 0.7,
@@ -76,6 +92,11 @@ async function callGemini(params: AIRequestParams): Promise<string> {
 
 // ─── OpenAI API ─────────────────────────────────────────────────────────────
 async function callOpenAI(params: AIRequestParams): Promise<string> {
+    const openAiHistory = (params.history || []).map(h => ({
+        role: h.role === "model" ? "assistant" : h.role,
+        content: h.content
+    }));
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -86,6 +107,7 @@ async function callOpenAI(params: AIRequestParams): Promise<string> {
             model: params.model,
             messages: [
                 { role: "system", content: params.systemPrompt },
+                ...openAiHistory,
                 { role: "user", content: params.userMessage },
             ],
             temperature: params.temperature ?? 0.7,
@@ -104,6 +126,11 @@ async function callOpenAI(params: AIRequestParams): Promise<string> {
 
 // ─── Anthropic API ──────────────────────────────────────────────────────────
 async function callAnthropic(params: AIRequestParams): Promise<string> {
+    const anthropicHistory = (params.history || []).map(h => ({
+        role: h.role === "model" ? "assistant" : h.role,
+        content: h.content
+    }));
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -114,7 +141,10 @@ async function callAnthropic(params: AIRequestParams): Promise<string> {
         body: JSON.stringify({
             model: params.model,
             system: params.systemPrompt,
-            messages: [{ role: "user", content: params.userMessage }],
+            messages: [
+                ...anthropicHistory,
+                { role: "user", content: params.userMessage }
+            ],
             temperature: params.temperature ?? 0.7,
             max_tokens: params.maxTokens ?? 400,
         }),

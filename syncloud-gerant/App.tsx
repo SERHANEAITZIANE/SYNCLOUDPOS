@@ -28,6 +28,7 @@ import InventoryHealthScreen from "./screens/InventoryHealthScreen";
 import G50TaxScreen from "./screens/G50TaxScreen";
 import ChequeManagerScreen from "./screens/ChequeManagerScreen";
 import CatalogScreen from "./screens/CatalogScreen";
+import CreateBLScreen from "./screens/CreateBLScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
 import { startGPSTracking, stopGPSTracking } from "./lib/gps-tracking";
@@ -406,6 +407,13 @@ export default function App() {
                                 title: "Catalogue & Tarifs",
                                 headerStyle: { backgroundColor: "#0f172a" },
                                 headerTintColor: "#f8fafc",
+                            }}
+                        />
+                        <Stack.Screen
+                            name="CreateBL"
+                            component={CreateBLScreen}
+                            options={{
+                                headerShown: false,
                             }}
                         />
                     </>

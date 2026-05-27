@@ -186,10 +186,11 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.quickActions}>
                     {[
                         { icon: "bar-chart-outline", label: "Rapports", color: "#3b82f6", nav: "Rapports" },
+                        { icon: "document-text-outline", label: "Créer BL", color: "#22c55e", nav: "CreateBL" },
                         { icon: "book-outline", label: "Catalogue", color: "#10b981", nav: "Catalog" },
                         { icon: "lock-closed-outline", label: "Clôture", color: "#a855f7", nav: "DailyClose" },
                         { icon: "people-outline", label: "Créances", color: "#f59e0b", nav: "ClientDebts" },
-                        { icon: "cube-outline", label: "Stock", color: "#22c55e", nav: "InventoryHealth" },
+                        { icon: "cube-outline", label: "Stock", color: "#64748b", nav: "InventoryHealth" },
                     ].map((a, i) => (
                         <TouchableOpacity
                             key={i}
@@ -358,8 +359,8 @@ const styles = StyleSheet.create({
 
     // ─── Quick Actions ─────────────────────────────────────────────────────
     quickActions: {
-        flexDirection: "row", justifyContent: "space-around",
-        backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16, paddingVertical: 16,
+        flexDirection: "row", justifyContent: "space-around", flexWrap: "wrap", gap: 12,
+        backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 8,
     },
     quickActionBtn: { alignItems: "center", gap: 8 },
     quickActionIcon: {
