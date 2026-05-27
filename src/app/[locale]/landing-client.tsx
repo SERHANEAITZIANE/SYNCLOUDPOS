@@ -964,7 +964,41 @@ export default function LandingClient({ locale }: { locale: string }) {
   const [ft, setFt] = useState('');
   const [fm, setFm] = useState('');
 
+  // Features Explorer State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+
   const t = useCallback((key: string) => T[lang]?.[key] || T['fr']?.[key] || '', [lang]);
+
+  // Filter features based on search query and selected category
+  const filteredFeatures = FEATURES.map(cat => {
+    // If a category is selected and doesn't match this category's French title, exclude it
+    if (activeCategory !== 'all' && cat.title.fr !== activeCategory) {
+      return null;
+    }
+    
+    const items = cat.items[lang] || cat.items.fr;
+    
+    // If no search query, return all items for this category
+    if (!searchQuery.trim()) {
+      return { ...cat, filteredItems: items };
+    }
+    
+    const query = searchQuery.toLowerCase().trim();
+    const matchedItems = items.filter(item => 
+      item.title.toLowerCase().includes(query) || 
+      item.desc.toLowerCase().includes(query)
+    );
+    
+    if (matchedItems.length === 0) {
+      return null;
+    }
+    
+    return { ...cat, filteredItems: matchedItems };
+  }).filter(Boolean) as (FeatureCategory & { filteredItems: FeatureItem[] })[];
+
+  // Total count of matching features
+  const totalMatchesCount = filteredFeatures.reduce((acc, cat) => acc + cat.filteredItems.length, 0);
   const goTrial = () => { window.location.href = `/${lang}/register`; };
 
   useEffect(() => {
@@ -1182,28 +1216,123 @@ export default function LandingClient({ locale }: { locale: string }) {
             <h2 className="lp-s-title">{t('sec_feat_title')}</h2>
             <p className="lp-s-desc">{t('sec_feat_desc')}</p>
           </div>
-          {FEATURES.map((cat, ci) => (
-            <div key={ci} className="lp-feat-category lp-reveal">
-              <div className="lp-feat-cat-header">
-                <div className="lp-feat-cat-icon" style={{ background: cat.gradient }}>{cat.icon}</div>
-                <div>
-                  <h3 className="lp-feat-cat-title">{cat.title[lang] || cat.title.fr}</h3>
-                  <p className="lp-feat-cat-desc">{cat.desc[lang] || cat.desc.fr}</p>
-                </div>
-              </div>
-              <div className="lp-feat-grid">
-                {(cat.items[lang] || cat.items.fr).map((item, fi) => (
-                  <div key={fi} className="lp-feat-item">
-                    <div className="lp-fi-icon">{item.icon}</div>
-                    <div>
-                      <div className="lp-fi-title">{item.title}</div>
-                      <div className="lp-fi-desc">{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
+
+          <div className="lp-features-explorer lp-reveal">
+            {/* Search Bar */}
+            <div className="lp-search-container">
+              <div className="lp-search-input-wrap">
+                <span className="lp-search-icon">🔍</span>
+                <input
+                  type="text"
+                  className="lp-search-input"
+                  placeholder={
+                    lang === 'ar'
+                      ? "ابحث عن ميزة (مثال: يالدين، المخزون، فاتورة، كريدي)..."
+                      : lang === 'en'
+                      ? "Search for a feature (e.g. Yalidine, Stock, Invoice, Credit)..."
+                      : "Rechercher une fonctionnalité (ex: Yalidine, Stock, Facture, Crédit)..."
+                  }
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    className="lp-search-clear"
+                    onClick={() => setSearchQuery('')}
+                    title={lang === 'ar' ? 'مسح' : lang === 'en' ? 'Clear' : 'Effacer'}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             </div>
-          ))}
+
+            {/* Category Pills */}
+            <div className="lp-categories-scroll">
+              <div className="lp-categories-chips">
+                <button
+                  className={`lp-chip ${activeCategory === 'all' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('all')}
+                >
+                  🌐 {lang === 'ar' ? 'الكل' : lang === 'en' ? 'All' : 'Tous'}
+                </button>
+                {FEATURES.map((cat, index) => {
+                  const isActive = activeCategory === cat.title.fr;
+                  return (
+                    <button
+                      key={index}
+                      className={`lp-chip ${isActive ? 'active' : ''}`}
+                      onClick={() => setActiveCategory(cat.title.fr)}
+                      style={isActive ? { background: cat.gradient, borderColor: 'transparent' } : {}}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.title[lang] || cat.title.fr}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Total count indicator */}
+            {searchQuery.trim() !== '' && (
+              <div className="lp-results-info">
+                <div className="lp-results-count">
+                  {lang === 'ar' ? 'نتائج البحث عن' : lang === 'en' ? 'Search results for' : 'Résultats de recherche pour'} : <strong style={{ color: 'var(--lp-primary-light)' }}>"{searchQuery}"</strong>
+                </div>
+                <div className="lp-results-pill">
+                  {totalMatchesCount} {lang === 'ar' ? 'ميزة' : lang === 'en' ? 'features' : 'fonctionnalités'}
+                </div>
+              </div>
+            )}
+
+            {/* Features Listing */}
+            {filteredFeatures.length > 0 ? (
+              filteredFeatures.map((cat, ci) => (
+                <div key={ci} className="lp-feat-category" style={{ animation: 'lp-fade-in 0.4s ease' }}>
+                  <div className="lp-feat-cat-header">
+                    <div className="lp-feat-cat-icon" style={{ background: cat.gradient }}>{cat.icon}</div>
+                    <div>
+                      <h3 className="lp-feat-cat-title">{cat.title[lang] || cat.title.fr}</h3>
+                      <p className="lp-feat-cat-desc">{cat.desc[lang] || cat.desc.fr}</p>
+                    </div>
+                  </div>
+                  <div className="lp-feat-grid">
+                    {cat.filteredItems.map((item, fi) => (
+                      <div key={fi} className="lp-feat-item">
+                        <div className="lp-fi-icon">{item.icon}</div>
+                        <div>
+                          <div className="lp-fi-title">{item.title}</div>
+                          <div className="lp-fi-desc">{item.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              /* No Results State */
+              <div className="lp-no-results">
+                <span className="lp-no-results-icon">🔍</span>
+                <h4>{lang === 'ar' ? 'لم يتم العثور على ميزات' : lang === 'en' ? 'No features found' : 'Aucun résultat'}</h4>
+                <p>
+                  {lang === 'ar'
+                    ? 'لم نجد أي ميزة تطابق الكلمة المفتاحية المكتوبة. يرجى تجربة كلمة أخرى.'
+                    : lang === 'en'
+                    ? "We couldn't find any feature matching your search term. Please try another keyword."
+                    : 'Aucune fonctionnalité ne correspond à votre terme de recherche. Veuillez essayer un autre mot-clé.'}
+                </p>
+                <button
+                  className="lp-no-results-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('all');
+                  }}
+                >
+                  {lang === 'ar' ? 'إعادة ضبط البحث' : lang === 'en' ? 'Reset search' : 'Réinitialiser la recherche'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

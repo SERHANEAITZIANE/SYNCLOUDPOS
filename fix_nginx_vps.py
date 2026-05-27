@@ -14,7 +14,7 @@ try:
 
     print("Uploading nginx config...")
     sftp = client.open_sftp()
-    sftp.put('nginx-syncloudpos.conf', '/etc/nginx/sites-available/syncloudpos.conf')
+    sftp.put('nginx-syncloudpos.conf', '/etc/nginx/sites-available/syncloudpos')
     sftp.put('nginx-syncloudpos.conf', '/var/www/syncloudpos/nginx-syncloudpos.conf')
     sftp.close()
 
