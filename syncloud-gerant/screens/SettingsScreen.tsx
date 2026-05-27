@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from "react";
 import {
     View, Text, ScrollView, TouchableOpacity, StyleSheet,
-    Switch, Alert, ActivityIndicator,
+    Switch, Alert, ActivityIndicator, TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../lib/store";
 import { useLangStore } from "../lib/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiFetch } from "../lib/api";
+
+type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
+
+const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
+    GEMINI: [
+        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
+        { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash" },
+        { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
+    ],
+    OPENAI: [
+        { id: "gpt-4o-mini", label: "GPT-4o Mini" },
+        { id: "gpt-4o", label: "GPT-4o" },
+        { id: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+        { id: "gpt-4.1", label: "GPT-4.1" },
+    ],
+    ANTHROPIC: [
+        { id: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+        { id: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
+    ]
+};
 
 export default function SettingsScreen() {
     const { user, logout } = useAuthStore();
@@ -21,7 +43,18 @@ export default function SettingsScreen() {
     const [autoSync, setAutoSync] = useState(true);
     const [saving, setSaving] = useState(false);
 
-    // Load saved preferences on mount
+    // AI Settings States
+    const [aiProvider, setAiProvider] = useState<AIProvider>("GEMINI");
+    const [aiModel, setAiModel] = useState("gemini-2.5-flash");
+    const [apiKey, setApiKey] = useState("");
+    const [hasGeminiKey, setHasGeminiKey] = useState(false);
+    const [hasOpenaiKey, setHasOpenaiKey] = useState(false);
+    const [hasAnthropicKey, setHasAnthropicKey] = useState(false);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const [savingAi, setSavingAi] = useState(false);
+    const [testingAi, setTestingAi] = useState(false);
+
+    // Load saved preferences and fetch AI settings from server
     useEffect(() => {
         (async () => {
             try {
@@ -44,7 +77,32 @@ export default function SettingsScreen() {
                 if (as2 !== null) setAutoSync(as2 !== "false");
             } catch { /* silent */ }
         })();
+
+        loadAiConfig();
     }, []);
+
+    const loadAiConfig = async () => {
+        try {
+            setLoadingAi(true);
+            const res = await apiFetch("/settings/ai", { method: "GET" });
+            if (res.success) {
+                const provider = (res.aiProvider || "GEMINI") as AIProvider;
+                setAiProvider(provider);
+                setAiModel(res.aiModel || "gemini-2.5-flash");
+                setHasGeminiKey(res.hasGeminiKey || false);
+                setHasOpenaiKey(res.hasOpenaiKey || false);
+                setHasAnthropicKey(res.hasAnthropicKey || false);
+
+                // Persist locally in AsyncStorage for offline / prompt retrieval speed
+                await AsyncStorage.setItem("setting_aiProvider", provider);
+                await AsyncStorage.setItem("setting_aiModel", res.aiModel || "gemini-2.5-flash");
+            }
+        } catch (err) {
+            console.error("Error loading AI settings:", err);
+        } finally {
+            setLoadingAi(false);
+        }
+    };
 
     const saveSetting = async (key: string, value: string) => {
         try {
@@ -73,6 +131,82 @@ export default function SettingsScreen() {
             newLang === "ar" ? "تم تغيير اللغة" : "Langue modifiée",
             newLang === "ar" ? "أعد تشغيل التطبيق لتطبيق الاتجاه RTL" : "Redémarrez l'application pour appliquer le changement de direction",
         );
+    };
+
+    const handleProviderChange = (provider: AIProvider) => {
+        setAiProvider(provider);
+        setAiModel(AVAILABLE_MODELS[provider][0].id);
+    };
+
+    const handleSaveAiConfig = async () => {
+        try {
+            setSavingAi(true);
+            const res = await apiFetch("/settings/ai", {
+                method: "PUT",
+                body: JSON.stringify({
+                    aiProvider,
+                    aiModel,
+                    apiKey: apiKey.trim() || undefined
+                })
+            });
+
+            if (res.success) {
+                Alert.alert(
+                    isAr ? "نجاح" : "Succès",
+                    isAr ? "تم حفظ إعدادات الذكاء الاصطناعي بنجاح" : "Configuration de l'assistant IA mise à jour avec succès !"
+                );
+                setApiKey(""); // clear password field after saving
+                
+                // Update local visual key state
+                if (apiKey.trim()) {
+                    if (aiProvider === "GEMINI") setHasGeminiKey(true);
+                    if (aiProvider === "OPENAI") setHasOpenaiKey(true);
+                    if (aiProvider === "ANTHROPIC") setHasAnthropicKey(true);
+                }
+
+                // Sync locally
+                await AsyncStorage.setItem("setting_aiProvider", aiProvider);
+                await AsyncStorage.setItem("setting_aiModel", aiModel);
+            } else {
+                Alert.alert(isAr ? "خطأ" : "Erreur", res.error || "Erreur de sauvegarde");
+            }
+        } catch (err: any) {
+            Alert.alert(isAr ? "خطأ" : "Erreur", err.message || "Erreur de connexion");
+        } finally {
+            setSavingAi(false);
+        }
+    };
+
+    const handleTestAiConnection = async () => {
+        try {
+            setTestingAi(true);
+            const res = await apiFetch("/voice-assistant", {
+                method: "POST",
+                body: JSON.stringify({
+                    queryText: "Hello, connection test. Answer with 'Connection OK' and nothing else.",
+                    language: "french"
+                })
+            });
+
+            if (res.success && res.text) {
+                Alert.alert(
+                    isAr ? "نجاح الاتصال" : "Connexion Réussie",
+                    `${isAr ? "الرد من الذكاء الاصطناعي:" : "Réponse de l'assistant IA:"}\n\n"${res.text}"`
+                );
+            } else {
+                Alert.alert(
+                    isAr ? "فشل الاتصال" : "Échec de Connexion",
+                    res.text || (isAr ? "لم نتمكن من الحصول على رد." : "Impossible d'obtenir une réponse de l'assistant.")
+                );
+            }
+        } catch (err: any) {
+            Alert.alert(
+                isAr ? "خطأ في الاتصال" : "Erreur de Connexion",
+                err.message || "Erreur de réseau."
+            );
+        } finally {
+            setTestingAi(false);
+        }
     };
 
     const handleLogout = () => {
@@ -105,6 +239,26 @@ export default function SettingsScreen() {
         stockAlertMailDesc: isAr ? "تنبيه فوري عند نفاد المنتجات الأساسية" : "Alerte instantanée en cas de rupture de stock critique",
         managerPreferences: isAr ? "تفضيلات المدير" : "Préférences Gérant",
     };
+
+    const aiLabels = {
+        sectionTitle: isAr ? "🤖 إعدادات المساعد الذكي" : "🤖 ASSISTANT VOCAL IA",
+        providerTitle: isAr ? "مزود الخدمة" : "Fournisseur d'IA",
+        providerDesc: isAr ? "اختر المحرك الذي يقوم بتشغيل مساعدك الصوتي" : "Choisissez le moteur qui propulse votre assistant vocal",
+        modelTitle: isAr ? "نموذج الذكاء الاصطناعي" : "Modèle d'IA",
+        modelDesc: isAr ? "اختر سرعة وقوة الردود" : "Sélectionnez l'intelligence et la rapidité des réponses",
+        keyTitle: isAr ? "مفتاح API الخاص بك" : "Clé API du Fournisseur",
+        keyDesc: isAr ? "المفتاح مشفر ومحفوظ بأمان" : "Votre clé est cryptée et stockée en toute sécurité",
+        keyPlaceholder: isAr ? "أدخل مفتاح الـ API الجديد..." : "Entrez votre nouvelle clé API...",
+        saveBtn: isAr ? "حفظ التغييرات" : "Enregistrer la config",
+        testBtn: isAr ? "تجربة الاتصال" : "Tester la connexion",
+        statusKeyConfigured: isAr ? "✅ مفتاح الـ API مكوّن حالياً" : "✅ Clé API configurée",
+        statusKeyMissing: isAr ? "⚠️ لم يتم تكوين مفتاح API (سيتم استخدام الافتراضي)" : "⚠️ Aucune clé API (Clé serveur par défaut active)",
+    };
+
+    const hasActiveKey = 
+        aiProvider === "GEMINI" ? hasGeminiKey :
+        aiProvider === "OPENAI" ? hasOpenaiKey :
+        hasAnthropicKey;
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -146,6 +300,115 @@ export default function SettingsScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {/* AI Assistant Configurations Section */}
+            <Text style={styles.sectionLabel}>{aiLabels.sectionTitle}</Text>
+            {loadingAi ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color="#22c55e" />
+                </View>
+            ) : (
+                <View style={styles.settingCard}>
+                    {/* Provider Selectors */}
+                    <Text style={styles.settingTitle}>{aiLabels.providerTitle}</Text>
+                    <Text style={styles.settingDesc}>{aiLabels.providerDesc}</Text>
+                    <View style={styles.optionsRow}>
+                        <TouchableOpacity
+                            style={[styles.optionBtn, aiProvider === "GEMINI" && styles.optionBtnActive]}
+                            onPress={() => handleProviderChange("GEMINI")}
+                        >
+                            <Text style={[styles.optionText, aiProvider === "GEMINI" && styles.optionTextActive]}>
+                                Gemini
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.optionBtn, aiProvider === "OPENAI" && styles.optionBtnActive]}
+                            onPress={() => handleProviderChange("OPENAI")}
+                        >
+                            <Text style={[styles.optionText, aiProvider === "OPENAI" && styles.optionTextActive]}>
+                                OpenAI
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.optionBtn, aiProvider === "ANTHROPIC" && styles.optionBtnActive]}
+                            onPress={() => handleProviderChange("ANTHROPIC")}
+                        >
+                            <Text style={[styles.optionText, aiProvider === "ANTHROPIC" && styles.optionTextActive]}>
+                                Anthropic
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Model Selectors */}
+                    <Text style={[styles.settingTitle, { marginTop: 18 }]}>{aiLabels.modelTitle}</Text>
+                    <Text style={styles.settingDesc}>{aiLabels.modelDesc}</Text>
+                    <View style={styles.modelGrid}>
+                        {AVAILABLE_MODELS[aiProvider].map((model) => (
+                            <TouchableOpacity
+                                key={model.id}
+                                style={[styles.modelPill, aiModel === model.id && styles.modelPillActive]}
+                                onPress={() => setAiModel(model.id)}
+                            >
+                                <Text style={[styles.modelText, aiModel === model.id && styles.modelTextActive]}>
+                                    {model.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    {/* API Key Input */}
+                    <Text style={[styles.settingTitle, { marginTop: 18 }]}>{aiLabels.keyTitle}</Text>
+                    <Text style={styles.settingDesc}>{aiLabels.keyDesc}</Text>
+                    
+                    <Text style={[styles.keyStatusText, hasActiveKey ? styles.keyStatusOk : styles.keyStatusWarn]}>
+                        {hasActiveKey ? aiLabels.statusKeyConfigured : aiLabels.statusKeyMissing}
+                    </Text>
+
+                    <TextInput
+                        style={styles.keyInput}
+                        value={apiKey}
+                        onChangeText={setApiKey}
+                        placeholder={aiLabels.keyPlaceholder}
+                        placeholderTextColor="#475569"
+                        secureTextEntry={true}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+
+                    {/* Actions buttons */}
+                    <View style={styles.aiActionRow}>
+                        <TouchableOpacity
+                            style={[styles.aiActionButton, styles.testButton]}
+                            onPress={handleTestAiConnection}
+                            disabled={testingAi}
+                        >
+                            {testingAi ? (
+                                <ActivityIndicator size="small" color="#22c55e" />
+                            ) : (
+                                <>
+                                    <Ionicons name="flask-outline" size={18} color="#22c55e" />
+                                    <Text style={styles.testButtonText}>{aiLabels.testBtn}</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.aiActionButton, styles.saveButton]}
+                            onPress={handleSaveAiConfig}
+                            disabled={savingAi}
+                        >
+                            {savingAi ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <>
+                                    <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
+                                    <Text style={styles.saveButtonText}>{aiLabels.saveBtn}</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
 
             {/* Manager Preferences */}
             <Text style={styles.sectionLabel}>{labels.managerPreferences.toUpperCase()}</Text>
@@ -253,8 +516,8 @@ export default function SettingsScreen() {
             <View style={styles.settingCard}>
                 <View style={styles.toggleRow}>
                     <View style={{ flex: 1, paddingRight: 8 }}>
-                        <Text style={styles.settingTitle}>{t("autoSync")}</Text>
-                        <Text style={styles.settingDesc}>{t("autoSyncDesc")}</Text>
+                        <Text style={t("autoSync") ? styles.settingTitle : { display: "none" }}>{t("autoSync")}</Text>
+                        <Text style={t("autoSyncDesc") ? styles.settingDesc : { display: "none" }}>{t("autoSyncDesc")}</Text>
                     </View>
                     <Switch
                         value={autoSync}
@@ -326,6 +589,11 @@ const styles = StyleSheet.create({
     settingTitle: { color: "#f8fafc", fontSize: 15, fontWeight: "700" },
     settingDesc: { color: "#64748b", fontSize: 12, marginTop: 4, lineHeight: 16 },
 
+    loadingContainer: {
+        backgroundColor: "#1e293b", marginHorizontal: 16, padding: 24, borderRadius: 14,
+        alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#334155"
+    },
+
     optionsRow: { flexDirection: "row", gap: 8, marginTop: 12 },
     optionBtn: {
         flex: 1, alignItems: "center", gap: 4, padding: 12, borderRadius: 10,
@@ -336,6 +604,92 @@ const styles = StyleSheet.create({
     optionBtnActive: { backgroundColor: "#22c55e", borderColor: "#4ade80" },
     optionText: { color: "#64748b", fontSize: 11, fontWeight: "600" },
     optionTextActive: { color: "#fff" },
+
+    // Model selectors
+    modelGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+        marginTop: 10,
+    },
+    modelPill: {
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#334155",
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    modelPillActive: {
+        backgroundColor: "#22c55e15",
+        borderColor: "#22c55e",
+    },
+    modelText: {
+        color: "#64748b",
+        fontSize: 11,
+        fontWeight: "600",
+    },
+    modelTextActive: {
+        color: "#22c55e",
+    },
+
+    // API Key Input styling
+    keyInput: {
+        backgroundColor: "#0f172a",
+        color: "#f8fafc",
+        borderWidth: 1,
+        borderColor: "#334155",
+        borderRadius: 10,
+        paddingHorizontal: 14,
+        height: 44,
+        fontSize: 12.5,
+        marginTop: 10,
+    },
+    keyStatusText: {
+        fontSize: 11.5,
+        fontWeight: "700",
+        marginTop: 8,
+    },
+    keyStatusOk: {
+        color: "#22c55e",
+    },
+    keyStatusWarn: {
+        color: "#f59e0b",
+    },
+
+    // AI Section Actions
+    aiActionRow: {
+        flexDirection: "row",
+        gap: 10,
+        marginTop: 16,
+    },
+    aiActionButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+    },
+    testButton: {
+        backgroundColor: "#22c55e10",
+        borderWidth: 1,
+        borderColor: "#22c55e",
+    },
+    testButtonText: {
+        color: "#22c55e",
+        fontSize: 12.5,
+        fontWeight: "700",
+    },
+    saveButton: {
+        backgroundColor: "#22c55e",
+    },
+    saveButtonText: {
+        color: "#fff",
+        fontSize: 12.5,
+        fontWeight: "700",
+    },
 
     toggleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 

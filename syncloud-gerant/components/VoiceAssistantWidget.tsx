@@ -6,21 +6,97 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiFetch } from "../lib/api";
 
 interface VoiceAssistantWidgetProps {
     active?: boolean;
 }
 
+type LangType = "darija" | "arabic" | "french";
+
+const quickQueries = {
+    darija: [
+        { label: "💰 شحال دخلنا اليوم؟", query: "شحال دخلنا اليوم؟ واش هو رقم المعاملات؟" },
+        { label: "🔑 واش كاين في الكاسة؟", query: "واش كاين في الكاسة حاليا؟" },
+        { label: "📦 واش السلعة اللي خصات؟", query: "واش السلعة اللي خصات؟ وشنو هي السلعة القليلة في المخزن؟" },
+        { label: "👥 شكون اللي عليه الدين بزاف؟", query: "شكون اللي عليه الدين بزاف؟" },
+    ],
+    arabic: [
+        { label: "💰 كم دخلنا اليوم؟", query: "كم دخلنا اليوم؟ وما هو رقم المعاملات؟" },
+        { label: "🔑 ماذا يوجد في الصندوق؟", query: "ماذا يوجد في الصندوق حالياً؟" },
+        { label: "📦 ما هي السلعة الناقصة؟", query: "ما هي السلعة الناقصة؟ وما هي السلع القليلة في المخزن؟" },
+        { label: "👥 من عليه ديون كثيرة؟", query: "من هم العملاء الذين لديهم ديون كثيرة؟" },
+    ],
+    french: [
+        { label: "📊 Rapport du jour", query: "Combien a-t-on encaissé aujourd'hui et quel est le chiffre d'affaires ?" },
+        { label: "📦 Ruptures de Stock", query: "Quels produits sont en rupture de stock actuellement ?" },
+        { label: "👥 Solde Clients", query: "Quels sont nos plus grands clients débiteurs ?" },
+        { label: "💸 Bilan Trésorerie & Dépenses", query: "Résume-moi l'état de la caisse et les dépenses du mois" },
+    ]
+};
+
+const localization = {
+    darija: {
+        title: "المساعد الصوتي للمدير",
+        statusLoading: "الذكاء الاصطناعي راه يحلل في قاعدة البيانات...",
+        statusSpeaking: "جاري قراءة التقرير صوتياً...",
+        statusListening: "🎙️ إستماع: إضغط على ميكروفون لوحة المفاتيح لتتكلم !",
+        statusIdle: "اسأل سؤال ولا خير تقرير سريع من التحت",
+        suggestionTitle: "تقارير سريعة :",
+        placeholder: "اسأل المساعد الذكي عن أي شيء في المحل...",
+        welcome: "مرحباً يا مدير، كيفاش نقدر نعاونك اليوم؟",
+        stopSpeak: "احبس القراءة",
+        noReport: "الحاصيل، ما قدرتش نجيب التقرير.",
+        errorMsg: "كاين خلل في الاتصال بمساعد الذكاء الاصطناعي.",
+        micAlertTitle: "التحدث الصوتي",
+        micAlertDesc: "🎙️ لتتكلم، الرجاء الضغط على زر الميكروفون الموجود أسفل لوحة مفاتيح هاتفك!"
+    },
+    arabic: {
+        title: "المساعد الصوتي للمدير",
+        statusLoading: "الذكاء الاصطناعي يقوم بتحليل قاعدة البيانات...",
+        statusSpeaking: "جاري قراءة التقرير صوتياً...",
+        statusListening: "🎙️ إستماع: إضغط على ميكروفون لوحة المفاتيح لتتكلم !",
+        statusIdle: "اطرح سؤالاً أو اختر تقريراً سريعاً من الأسفل",
+        suggestionTitle: "تقارير سريعة :",
+        placeholder: "اسأل المساعد الذكي عن أي شيء في المحل...",
+        welcome: "مرحباً بك يا مدير، كيف يمكنني مساعدتك اليوم؟",
+        stopSpeak: "إيقاف القراءة",
+        noReport: "عذراً، لم أتمكن من الحصول على التقرير.",
+        errorMsg: "حدث خطأ أثناء الاتصال بمساعد الذكاء الاصطناعي.",
+        micAlertTitle: "التحدث الصوتي",
+        micAlertDesc: "🎙️ لتتكلم، الرجاء الضغط على زر الميكروفون الموجود أسفل لوحة مفاتيح هاتفك!"
+    },
+    french: {
+        title: "Assistant Vocal Gérant",
+        statusLoading: "Gemini AI analyse les bases de données...",
+        statusSpeaking: "Vocalisation du rapport en cours...",
+        statusListening: "🎙️ Écoute active : Touchez le micro du clavier pour parler !",
+        statusIdle: "Posez une question ou sélectionnez un rapport",
+        suggestionTitle: "RAPPORTS RAPIDES :",
+        placeholder: "Posez une question à l'ERP (Ex: chiffre d'affaires)",
+        welcome: "Bonjour directeur, comment puis-je vous aider aujourd'hui ?",
+        stopSpeak: "Arrêter la lecture",
+        noReport: "Désolé, je n'ai pas pu obtenir le rapport.",
+        errorMsg: "Une erreur est survenue lors de la connexion à l'assistant AI.",
+        micAlertTitle: "Dictée Vocale",
+        micAlertDesc: "🎙️ Pour parler, touchez le bouton Micro (icône Dictée) situé sur le clavier de votre téléphone !"
+    }
+};
+
 export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWidgetProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [response, setResponse] = useState("");
-    const [language, setLanguage] = useState<"darija" | "arabic" | "french">("french");
+    const [language, setLanguage] = useState<LangType>("french");
     const [loading, setLoading] = useState(false);
     const [speaking, setSpeaking] = useState(false);
     const [muted, setMuted] = useState(false);
     const [isListening, setIsListening] = useState(false);
+
+    // AI configurations cached locally
+    const [aiProvider, setAiProvider] = useState<string | null>(null);
+    const [aiModel, setAiModel] = useState<string | null>(null);
 
     // References
     const inputRef = useRef<TextInput>(null);
@@ -30,12 +106,22 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     const pulse2 = useRef(new Animated.Value(1)).current;
     const pulse3 = useRef(new Animated.Value(1)).current;
 
-    const quickQueries = [
-        { label: "📊 Rapport du jour", query: "Combien a-t-on encaissé aujourd'hui et quel est le chiffre d'affaires ?" },
-        { label: "📦 Ruptures de Stock", query: "Quels produits sont en rupture de stock actuellement ?" },
-        { label: "👥 Solde Clients", query: "Quels sont nos plus grands clients débiteurs ?" },
-        { label: "💸 Bilan Trésorerie & Dépenses", query: "Résume-moi l'état de la caisse et les dépenses du mois" },
-    ];
+    // Load AI configurations from AsyncStorage on open
+    useEffect(() => {
+        if (isOpen) {
+            const loadAiConfig = async () => {
+                try {
+                    const provider = await AsyncStorage.getItem("setting_aiProvider");
+                    const model = await AsyncStorage.getItem("setting_aiModel");
+                    if (provider) setAiProvider(provider);
+                    if (model) setAiModel(model);
+                } catch (e) {
+                    console.warn("Failed to load local AI settings:", e);
+                }
+            };
+            loadAiConfig();
+        }
+    }, [isOpen]);
 
     // Trigger looping pulse animations when loading, speaking, or waiting for voice dictation
     useEffect(() => {
@@ -108,10 +194,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
             }, 600);
 
             // Vocal greeting welcome
-            const welcomeText = 
-                language === "darija" ? "مرحباً يا مدير، كيفاش نقدر نعاونك اليوم؟" :
-                language === "arabic" ? "مرحباً بك يا مدير، كيف يمكنني مساعدتك اليوم؟" :
-                "Bonjour directeur, comment puis-je vous aider aujourd'hui ?";
+            const welcomeText = localization[language].welcome;
             
             setTimeout(() => {
                 speakText(welcomeText);
@@ -123,13 +206,10 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     }, [isOpen]);
 
     // Re-trigger welcome when language changes
-    const changeLanguage = (newLang: "darija" | "arabic" | "french") => {
+    const changeLanguage = (newLang: LangType) => {
         setLanguage(newLang);
         if (isOpen) {
-            const welcomeText = 
-                newLang === "darija" ? "مرحباً يا مدير، كيفاش نقدر نعاونك اليوم؟" :
-                newLang === "arabic" ? "مرحباً بك يا مدير، كيف يمكنني مساعدتك اليوم؟" :
-                "Bonjour directeur, comment puis-je vous aider aujourd'hui ?";
+            const welcomeText = localization[newLang].welcome;
             speakText(welcomeText);
             inputRef.current?.focus();
         }
@@ -147,7 +227,12 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
             // POST request to our secure mobile voice-assistant endpoint
             const result = await apiFetch("/voice-assistant", {
                 method: "POST",
-                body: JSON.stringify({ queryText, language })
+                body: JSON.stringify({ 
+                    queryText, 
+                    language,
+                    aiProvider,
+                    aiModel
+                })
             });
 
             if (result.success && result.text) {
@@ -155,11 +240,11 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                 // Automatically vocalize the response
                 speakText(result.text);
             } else {
-                setResponse("Désolé, je n'ai pas pu obtenir le rapport.");
+                setResponse(localization[language].noReport);
             }
         } catch (error: any) {
             console.error(error);
-            setResponse("Une erreur est survenue lors de la connexion à l'assistant AI.");
+            setResponse(localization[language].errorMsg);
         } finally {
             setLoading(false);
         }
@@ -168,6 +253,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     if (!active) return null;
 
     const isAr = language === "darija" || language === "arabic";
+    const activeLoc = localization[language];
 
     return (
         <>
@@ -208,10 +294,10 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                         <View style={styles.dragBar} />
 
                         {/* Top controls header */}
-                        <View style={styles.drawerHeader}>
-                            <View style={styles.headerTitleWrap}>
+                        <View style={[styles.drawerHeader, isAr && styles.rtlRow]}>
+                            <View style={[styles.headerTitleWrap, isAr && styles.rtlRow]}>
                                 <Ionicons name="sparkles" size={18} color="#22c55e" />
-                                <Text style={styles.headerTitle}>Assistant Vocal Gérant</Text>
+                                <Text style={styles.headerTitle}>{activeLoc.title}</Text>
                             </View>
                             
                             <View style={styles.headerActions}>
@@ -290,10 +376,8 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                             inputRef.current?.focus();
                                             setIsListening(true);
                                             Alert.alert(
-                                                isAr ? "التحدث الصوتي" : "Dictée Vocale",
-                                                isAr 
-                                                  ? "🎙️ لتتكلم، الرجاء الضغط على زر الميكروفون الموجود أسفل لوحة مفاتيح هاتفك!"
-                                                  : "🎙️ Pour parler, touchez le bouton Micro (icône Dictée) situé sur le clavier de votre téléphone !",
+                                                activeLoc.micAlertTitle,
+                                                activeLoc.micAlertDesc,
                                                 [{ text: "OK", onPress: () => inputRef.current?.focus() }]
                                             );
                                         }
@@ -312,22 +396,24 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                             </View>
                             
                             <Text style={styles.assistantStatusText}>
-                                {loading ? "Gemini AI analyse les bases de données..." :
-                                 speaking ? "Vocalisation du rapport en cours..." :
-                                 isListening ? (isAr ? "🎙️ إستماع: إضغط على ميكروفون لوحة المفاتيح لتتكلم !" : "🎙️ Écoute active : Touchez le micro du clavier pour parler !") :
-                                 "Posez une question ou sélectionnez un rapport"}
+                                {loading ? activeLoc.statusLoading :
+                                 speaking ? activeLoc.statusSpeaking :
+                                 isListening ? activeLoc.statusListening :
+                                 activeLoc.statusIdle}
                             </Text>
                         </View>
 
                         {/* Suggested quick report pills */}
                         <View style={styles.suggestionSection}>
-                            <Text style={styles.suggestionTitle}>RAPPORTS RAPIDES :</Text>
+                            <Text style={[styles.suggestionTitle, isAr && styles.rtlText]}>
+                                {activeLoc.suggestionTitle}
+                            </Text>
                             <ScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={styles.suggestionScroll}
+                                contentContainerStyle={[styles.suggestionScroll, isAr && styles.rtlRow]}
                             >
-                                {quickQueries.map((item, idx) => (
+                                {quickQueries[language].map((item, idx) => (
                                     <TouchableOpacity
                                         key={idx}
                                         style={styles.suggestionPill}
@@ -346,21 +432,21 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                         {/* Transcript Response details panel */}
                         <ScrollView style={styles.responseContainer} contentContainerStyle={{ paddingBottom: 20 }}>
                             {query ? (
-                                <View style={styles.userBubble}>
-                                    <Text style={styles.userQueryText}>{query}</Text>
+                                <View style={[styles.userBubble, isAr && styles.rtlAlignSelf]}>
+                                    <Text style={[styles.userQueryText, isAr && styles.rtlText]}>{query}</Text>
                                 </View>
                             ) : null}
 
                             {response ? (
-                                <View style={styles.aiBubble}>
-                                    <Text style={styles.aiText}>{response}</Text>
+                                <View style={[styles.aiBubble, isAr && styles.rtlAlignSelfLeft]}>
+                                    <Text style={[styles.aiText, isAr && styles.rtlText]}>{response}</Text>
                                     {speaking && (
                                         <TouchableOpacity
-                                            style={styles.stopSpeakRow}
+                                            style={[styles.stopSpeakRow, isAr && styles.rtlRow]}
                                             onPress={handleStopSpeech}
                                         >
                                             <Ionicons name="volume-mute" size={14} color="#ef4444" />
-                                            <Text style={styles.stopSpeakText}>Arrêter la lecture</Text>
+                                            <Text style={styles.stopSpeakText}>{activeLoc.stopSpeak}</Text>
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -368,16 +454,16 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                         </ScrollView>
 
                         {/* TextInput Fallback form */}
-                        <View style={styles.inputForm}>
+                        <View style={[styles.inputForm, isAr && styles.rtlRow]}>
                             <TextInput
                                 ref={inputRef}
-                                style={styles.textInput}
+                                style={[styles.textInput, isAr && styles.rtlText]}
                                 value={query}
                                 onChangeText={(txt) => {
                                     setQuery(txt);
                                     if (txt.trim()) setIsListening(false);
                                 }}
-                                placeholder="Posez une question à l'ERP (Ex: chiffre d'affaires)"
+                                placeholder={activeLoc.placeholder}
                                 placeholderTextColor="#64748b"
                                 editable={!loading}
                                 onSubmitEditing={() => handleQuerySubmit(query)}
@@ -391,7 +477,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                 onPress={() => handleQuerySubmit(query)}
                                 disabled={loading || !query.trim()}
                             >
-                                <Ionicons name="send" size={18} color="#fff" />
+                                <Ionicons name={isAr ? "arrow-back" : "send"} size={18} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -409,7 +495,7 @@ const styles = StyleSheet.create({
         width: 58,
         height: 58,
         borderRadius: 29,
-        backgroundColor: "#22c55e", // Elegant manager emerald green
+        backgroundColor: "#22c55e",
         justifyContent: "center",
         alignItems: "center",
         shadowColor: "#22c55e",
@@ -504,6 +590,20 @@ const styles = StyleSheet.create({
         borderColor: "#334155",
     },
 
+    // RTL Helper styles
+    rtlRow: {
+        flexDirection: "row-reverse",
+    },
+    rtlText: {
+        textAlign: "right",
+    },
+    rtlAlignSelf: {
+        alignSelf: "flex-start",
+    },
+    rtlAlignSelfLeft: {
+        alignSelf: "flex-end",
+    },
+
     // Languages
     langBar: {
         flexDirection: "row",
@@ -578,6 +678,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
         textAlign: "center",
+        paddingHorizontal: 10,
     },
 
     // Suggestions quick reports
@@ -602,6 +703,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 14,
         paddingVertical: 8,
         borderRadius: 18,
+        marginRight: 8,
     },
     suggestionText: {
         color: "#f8fafc",
@@ -617,7 +719,7 @@ const styles = StyleSheet.create({
         padding: 12,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#334155/30",
+        borderColor: "rgba(51, 65, 85, 0.3)",
     },
     userBubble: {
         alignSelf: "flex-end",
