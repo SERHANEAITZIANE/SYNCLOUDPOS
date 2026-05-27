@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const WA_NUMBER = '213696928227';
 const WA_BASE = `https://wa.me/${WA_NUMBER}`;
@@ -1390,6 +1391,54 @@ export default function LandingClient({ locale }: { locale: string }) {
                   <li key={k}><span className="lp-app-check">✓</span>{t(k)}</li>
                 ))}
               </ul>
+              
+              {/* Premium Direct Download Section */}
+              <div className="lp-app-download-zone">
+                <div className="lp-download-lbl">
+                  {lang === 'ar'
+                    ? 'رابط التحميل المباشر للـ APK (بدون إكسبو) :'
+                    : lang === 'en'
+                    ? 'Direct APK Download Link (No Expo):'
+                    : 'Lien de téléchargement direct APK (Sans Expo) :'}
+                </div>
+                <a
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-download-link"
+                >
+                  expo.dev/aitee/syncloud-gerant/builds/910b6151
+                </a>
+                
+                <a
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-download-btn"
+                  style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
+                >
+                  📥 {lang === 'ar' ? 'تحميل APK المباشر' : lang === 'en' ? 'Download Direct APK' : "Télécharger l'APK Direct"}
+                </a>
+
+                <div className="lp-qr-container">
+                  <div className="lp-qr-box">
+                    <QRCodeSVG
+                      value="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                      size={80}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <div className="lp-qr-lbl">
+                    {lang === 'ar'
+                      ? 'أو امسح الـ QR بهاتفك للتحميل الفوري بدون كابل'
+                      : lang === 'en'
+                      ? 'Or scan QR with your phone to download instantly'
+                      : 'Ou scannez le QR avec votre mobile pour installer direct'}
+                  </div>
+                </div>
+              </div>
+
               <div className="lp-app-mockup">
                 <div className="lp-phone-frame">
                   <div className="lp-phone-notch" />
@@ -1443,6 +1492,54 @@ export default function LandingClient({ locale }: { locale: string }) {
                   <li key={k}><span className="lp-app-check">✓</span>{t(k)}</li>
                 ))}
               </ul>
+              
+              {/* Premium Direct Download Section */}
+              <div className="lp-app-download-zone">
+                <div className="lp-download-lbl">
+                  {lang === 'ar'
+                    ? 'رابط التحميل المباشر للـ APK (بدون إكسبو) :'
+                    : lang === 'en'
+                    ? 'Direct APK Download Link (No Expo):'
+                    : 'Lien de téléchargement direct APK (Sans Expo) :'}
+                </div>
+                <a
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-download-link"
+                >
+                  expo.dev/aitee/syncloud-gerant/builds/910b6151
+                </a>
+                
+                <a
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lp-download-btn"
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
+                >
+                  📥 {lang === 'ar' ? 'تحميل APK المباشر' : lang === 'en' ? 'Download Direct APK' : "Télécharger l'APK Direct"}
+                </a>
+
+                <div className="lp-qr-container">
+                  <div className="lp-qr-box">
+                    <QRCodeSVG
+                      value="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                      size={80}
+                      level="H"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <div className="lp-qr-lbl">
+                    {lang === 'ar'
+                      ? 'أو امسح الـ QR بهاتفك للتحميل الفوري بدون كابل'
+                      : lang === 'en'
+                      ? 'Or scan QR with your phone to download instantly'
+                      : 'Ou scannez le QR avec votre mobile pour installer direct'}
+                  </div>
+                </div>
+              </div>
+
               <div className="lp-app-mockup">
                 <div className="lp-phone-frame">
                   <div className="lp-phone-notch" />
