@@ -75,8 +75,17 @@ export const VoiceAssistantWidget: React.FC = () => {
         }
     }, [language]);
 
-    // Cleanup speech synthesis on unmount
+    // Cleanup speech synthesis and warm up voices on mount/unmount
     useEffect(() => {
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+            // Warm up voices catalog for Chrome/Edge asynchronous loading
+            window.speechSynthesis.getVoices();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+        }
         return () => {
             if (typeof window !== "undefined" && window.speechSynthesis) {
                 window.speechSynthesis.cancel();
@@ -141,8 +150,23 @@ export const VoiceAssistantWidget: React.FC = () => {
         // Match language profiles
         if (language === "french") {
             utterance.lang = "fr-FR";
+            
+            // Try to find a French voice explicitly
+            const voices = window.speechSynthesis.getVoices();
+            const frVoice = voices.find(v => v.lang.startsWith("fr-") || v.lang === "fr");
+            if (frVoice) {
+                utterance.voice = frVoice;
+            }
         } else {
-            utterance.lang = "ar-SA"; // standard Arabic synthesizer handles phonetics perfectly
+            utterance.lang = "ar-SA"; // default fallback
+            
+            // Try to find any Arabic voice installed on the user's browser/system
+            const voices = window.speechSynthesis.getVoices();
+            const arVoice = voices.find(v => v.lang.startsWith("ar-") || v.lang === "ar");
+            if (arVoice) {
+                utterance.voice = arVoice;
+                utterance.lang = arVoice.lang;
+            }
         }
 
         // Apply dynamically configured speed and pitch options
