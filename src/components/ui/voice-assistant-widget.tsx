@@ -145,27 +145,53 @@ export const VoiceAssistantWidget: React.FC = () => {
 
         window.speechSynthesis.cancel(); // Stop current speakings
 
-        const utterance = new SpeechSynthesisUtterance(text);
+        // Helper function to strip markdown for clean Text-to-Speech
+        const stripMarkdownForSpeech = (rawText: string): string => {
+            return rawText
+                .replace(/```[\s\S]*?```/g, "")
+                .replace(/\*\*([^*]+)\*\*/g, "$1")
+                .replace(/\*([^*]+)\*/g, "$1")
+                .replace(/__([^_]+)__/g, "$1")
+                .replace(/_([^_]+)_/g, "$1")
+                .replace(/`([^`]+)`/g, "$1")
+                .replace(/^\s*[-*+]\s+/gm, "")
+                .replace(/^\s*\d+\.\s+/gm, "")
+                .replace(/^\s*#+\s+/gm, "")
+                .replace(/^\s*>\s+/gm, "")
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
+        const cleanText = stripMarkdownForSpeech(text);
+        if (!cleanText) return;
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         
-        // Match language profiles
-        if (language === "french") {
-            utterance.lang = "fr-FR";
-            
-            // Try to find a French voice explicitly
-            const voices = window.speechSynthesis.getVoices();
-            const frVoice = voices.find(v => v.lang.startsWith("fr-") || v.lang === "fr");
-            if (frVoice) {
-                utterance.voice = frVoice;
-            }
-        } else {
+        // Dynamically detect language from the text content itself (Arabic vs French/Western)
+        const hasArabic = /[\u0600-\u06FF]/.test(cleanText);
+        
+        if (hasArabic) {
             utterance.lang = "ar-SA"; // default fallback
             
-            // Try to find any Arabic voice installed on the user's browser/system
             const voices = window.speechSynthesis.getVoices();
-            const arVoice = voices.find(v => v.lang.startsWith("ar-") || v.lang === "ar");
+            // Search for any Arabic voice installed on the user's browser/system (preferring local service)
+            const arVoice = voices.find(v => v.lang.toLowerCase().startsWith("ar") && v.localService)
+                         || voices.find(v => v.lang.toLowerCase().startsWith("ar"));
             if (arVoice) {
                 utterance.voice = arVoice;
                 utterance.lang = arVoice.lang;
+            }
+        } else {
+            utterance.lang = "fr-FR"; // default fallback
+            
+            const voices = window.speechSynthesis.getVoices();
+            // Search for any French voice installed on the user's browser/system (preferring local service)
+            const frVoice = voices.find(v => v.lang.toLowerCase().startsWith("fr") && v.localService)
+                         || voices.find(v => v.lang.toLowerCase().startsWith("fr"));
+            if (frVoice) {
+                utterance.voice = frVoice;
+                utterance.lang = frVoice.lang;
             }
         }
 

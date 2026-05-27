@@ -111,7 +111,7 @@ Instructions:
                     systemInstruction: { parts: [{ text: systemPrompt }] },
                     generationConfig: {
                         temperature: 0.6,
-                        maxOutputTokens: 300,
+                        maxOutputTokens: 2048,
                     },
                 }),
             }
