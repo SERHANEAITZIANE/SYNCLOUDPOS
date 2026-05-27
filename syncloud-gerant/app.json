@@ -88,7 +88,7 @@
     },
     "owner": "aitee",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/71a39a0d-6556-40d4-91d9-b86cc7afa9d9"

@@ -103,7 +103,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
         const projectId = tab === "gerant"
             ? "71a39a0d-6556-40d4-91d9-b86cc7afa9d9"
             : "86e328d1-c7f8-4add-9288-61b09c86dbc8";
-        return `exp://u.expo.dev/${projectId}?channel-name=production&runtime-version=1.0.0&app=${tab}`;
+        return `exp://u.expo.dev/${projectId}?channel-name=production&runtime-version=exposdk:54.0.0&app=${tab}`;
     };
 
     // ═══════════════ Quick Actions ═══════════════
