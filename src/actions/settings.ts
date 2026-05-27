@@ -62,6 +62,8 @@ export async function updateTenantSettings(data: {
 
 export async function updateSystemSettings(data: {
     blTemplate?: string;
+    posBlFormat?: string;
+    posBlColumns?: string;
     aiProvider?: string;
     aiModel?: string;
     geminiApiKey?: string;
@@ -77,6 +79,8 @@ export async function updateSystemSettings(data: {
 
         const updateData: any = {};
         if (data.blTemplate !== undefined) updateData.blTemplate = data.blTemplate || "standard";
+        if (data.posBlFormat !== undefined) updateData.posBlFormat = data.posBlFormat || "A4";
+        if (data.posBlColumns !== undefined) updateData.posBlColumns = data.posBlColumns || "standard";
         if (data.aiProvider !== undefined) updateData.aiProvider = data.aiProvider || "GEMINI";
         if (data.aiModel !== undefined) updateData.aiModel = data.aiModel || null;
         if (data.geminiApiKey !== undefined) updateData.geminiApiKey = data.geminiApiKey || null;

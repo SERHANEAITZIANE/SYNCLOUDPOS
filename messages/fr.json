@@ -710,6 +710,23 @@
           "aitee": "AITEE (Facture Style)"
         }
       },
+      "blFormat": {
+        "label": "Format du document",
+        "hint": "Le document sera redimensionné au format choisi.",
+        "options": {
+          "a4": "A4 (Standard - Page Entière)",
+          "a5": "A5 (Compact - Demi-Page)"
+        }
+      },
+      "blColumns": {
+        "label": "Modèle de Colonnes (Tableau)",
+        "hint": "Colonnes affichées dans la table des articles.",
+        "options": {
+          "standard": "Standard (N°, Désignation, Qté, P.U, Total)",
+          "code": "Avec Code Produit (Code, Désignation, Qté, P.U, Total)",
+          "barcode": "Avec Code-barres (Code-barres, Désignation, Qté, P.U, Total)"
+        }
+      },
       "displayOptions": "Options d'affichage",
       "showBarcodeOnReceipt": {
         "label": "Code-barre sur le reçu POS",

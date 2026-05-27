@@ -710,6 +710,23 @@
           "aitee": "AITEE (Invoice Style)"
         }
       },
+      "blFormat": {
+        "label": "Document Format",
+        "hint": "The document will be auto-resized to the selected format.",
+        "options": {
+          "a4": "A4 (Standard - Full Page)",
+          "a5": "A5 (Compact - Half Page)"
+        }
+      },
+      "blColumns": {
+        "label": "Column Model (Table)",
+        "hint": "Columns displayed in the articles table.",
+        "options": {
+          "standard": "Standard (No., Designation, Qty, U.P, Total)",
+          "code": "With Product Code (Code, Designation, Qty, U.P, Total)",
+          "barcode": "With Barcode (Barcode, Designation, Qty, U.P, Total)"
+        }
+      },
       "displayOptions": "Display Options",
       "showBarcodeOnReceipt": {
         "label": "Barcode on POS Receipt",

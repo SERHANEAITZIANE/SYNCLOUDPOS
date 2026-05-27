@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Receipt } from "./receipt"
+import { BonLivraisonPrintTemplate } from "@/components/print/print-templates"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Label } from "@/components/ui/label"
@@ -28,6 +29,7 @@ interface PaymentModalProps {
     storeAddress?: string
     storePhone?: string
     posTimbreEnabled?: boolean
+    storeData?: any
 }
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -43,7 +45,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     storeName,
     storeAddress,
     storePhone,
-    posTimbreEnabled = false
+    posTimbreEnabled = false,
+    storeData
 }) => {
     const t = useTranslations("PaymentModal")
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
@@ -103,13 +106,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const [finalTotal, setFinalTotal] = useState<number>(0)
     const [finalCustomerName, setFinalCustomerName] = useState<string | undefined>(undefined)
     const [hasAutoPrinted, setHasAutoPrinted] = useState(false)
-    const componentRef = useRef<HTMLDivElement>(null)
+    const receiptRef = useRef<HTMLDivElement>(null)
+    const blRef = useRef<HTMLDivElement>(null)
 
     const tenderedAmount = tenderedStr ? parseInt(tenderedStr, 10) : 0
     const changeAmount = Math.max(0, tenderedAmount - finalTotalTTC)
 
-    const handlePrint = useReactToPrint({
-        contentRef: componentRef,
+    const handlePrintReceipt = useReactToPrint({
+        contentRef: receiptRef,
+    })
+
+    const handlePrintBL = useReactToPrint({
+        contentRef: blRef,
     })
 
     const handleConfirm = async () => {
@@ -206,8 +214,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             // Allow React to mount the <Receipt /> component inside the success view
             timeoutId = setTimeout(() => {
-                if (componentRef.current && handlePrint) {
-                    handlePrint()
+                if (receiptRef.current && handlePrintReceipt) {
+                    handlePrintReceipt()
                 } else {
                     console.log("Print failed: Component ref is null")
                 }
@@ -217,7 +225,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         return () => {
             if (timeoutId) clearTimeout(timeoutId)
         }
-    }, [success, handlePrint, hasAutoPrinted])
+    }, [success, handlePrintReceipt, hasAutoPrinted])
 
     // Success View
     if (success) {
@@ -259,21 +267,27 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
                     )}
 
-                    <div className="flex w-full flex-col gap-3 sm:flex-row mt-4">
-                        <Button variant="outline" size="lg" className="flex-1 h-16 rounded-xl text-lg font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => handlePrint && handlePrint()}>
-                            <Printer size={22} />
-                            {t("printTicket")}
-                        </Button>
-                        <Button size="lg" className="flex-1 h-16 rounded-xl text-lg font-bold gap-3 shadow-xl hover:-translate-y-1 transition-transform" onClick={handleClose}>
+                    <div className="flex w-full flex-col gap-3 mt-4">
+                        <div className="flex w-full flex-col gap-3 sm:flex-row">
+                            <Button variant="outline" size="lg" className="flex-1 h-16 rounded-xl text-base font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => handlePrintReceipt && handlePrintReceipt()}>
+                                <Printer size={20} />
+                                {t("printTicket", { fallback: "Imprimer Ticket (80mm)" })}
+                            </Button>
+                            <Button variant="outline" size="lg" className="flex-1 h-16 rounded-xl text-base font-bold gap-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/20" onClick={() => handlePrintBL && handlePrintBL()}>
+                                <FileText size={20} className="text-emerald-600" />
+                                {storeData?.posBlFormat === "A5" ? "Imprimer BL (A5)" : "Imprimer BL (A4)"}
+                            </Button>
+                        </div>
+                        <Button size="lg" className="w-full h-14 rounded-xl text-lg font-bold gap-3 shadow-xl hover:-translate-y-0.5 transition-transform" onClick={handleClose}>
                             {t("newOrder")}
                             <ArrowRight size={22} />
                         </Button>
                     </div>
 
-                    {/* Hidden Receipt for Printing */}
+                    {/* Hidden Components for Printing */}
                     <div className="hidden">
                         <Receipt
-                            ref={componentRef}
+                            ref={receiptRef}
                             items={finalItems.length > 0 ? finalItems : items}
                             total={success ? finalTotal : finalTotalTTC}
                             stampTax={stampTax}
@@ -287,6 +301,31 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             previousBalance={orderData?.previousBalance}
                             newBalance={orderData?.newBalance}
                         />
+                        <div ref={blRef}>
+                            <BonLivraisonPrintTemplate
+                                items={(finalItems.length > 0 ? finalItems : items).map(item => ({
+                                    product: { name: item.name },
+                                    quantity: item.quantity,
+                                    unitPrice: item.price,
+                                    tvaRate: item.tvaRate ?? 19,
+                                    priceHt: item.priceHt ?? (item.price / 1.19)
+                                }))}
+                                customer={{
+                                    name: success ? (finalCustomerName || "Client Standard") : (customerName || "Client Standard"),
+                                }}
+                                store={storeData}
+                                receiptNumber={orderData?.receiptNumber}
+                                date={new Date()}
+                                subtotalHT={subtotal}
+                                totalTVA={tvaAmount}
+                                stampTax={stampTax}
+                                totalTTC={success ? finalTotal : finalTotalTTC}
+                                paymentMethod={method}
+                                previousBalance={orderData?.previousBalance || 0}
+                                paymentAmount={orderData?.paidAmount || 0}
+                                newBalance={orderData?.newBalance || 0}
+                            />
+                        </div>
                     </div>
                 </div>
             </Modal>

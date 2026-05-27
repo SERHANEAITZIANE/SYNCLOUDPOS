@@ -17,11 +17,15 @@ export const SettingsSchema = z.object({
     bankAccount: z.string().optional(),
     logo: z.string().optional(),
     headerText: z.string().optional(),
-    blTemplate: z.string().optional()
+    blTemplate: z.string().optional(),
+    posBlFormat: z.string().optional(),
+    posBlColumns: z.string().optional()
 })
 
 export const SystemSettingsSchema = z.object({
     blTemplate: z.string().optional(),
+    posBlFormat: z.enum(["A4", "A5"]).optional(),
+    posBlColumns: z.enum(["standard", "code", "barcode"]).optional(),
     databaseUrl: z.string().url("Veuillez entrer une URL de base de données valide."),
     geminiApiKey: z.string().optional()
 })

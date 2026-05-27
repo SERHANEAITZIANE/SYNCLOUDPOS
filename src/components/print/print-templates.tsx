@@ -5,7 +5,12 @@ import { fr } from "date-fns/locale"
 
 // ─── Shared Types ───────────────────────────────────────────────────────────────
 export interface PrintableItem {
-    product?: { name: string }
+    product?: { 
+        name: string
+        id?: string
+        code?: string | null
+        barcodes?: string[] | null
+    }
     quantity: number
     unitPrice: number
     tvaRate?: number
@@ -40,6 +45,8 @@ export interface PrintableStore {
     bankAccount?: string
     logo?: string
     headerText?: string
+    posBlFormat?: string | null
+    posBlColumns?: string | null
 }
 
 export interface PrintTemplateProps {
@@ -189,8 +196,36 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
         tvaBreakdown[rate].amount += tva
     })
 
+    const colModel = store?.posBlColumns || "standard"
+    
+    // First column header label
+    let firstColHeader = "N°"
+    if (colModel === "code") firstColHeader = "Code"
+    else if (colModel === "barcode") firstColHeader = "Code-barres"
+
+    const getFirstColValue = (item: PrintableItem, index: number) => {
+        if (colModel === "code") {
+            return item.product?.code || item.product?.id?.slice(-6).toUpperCase() || `P-${String(index + 1).padStart(3, "0")}`
+        }
+        if (colModel === "barcode") {
+            return item.product?.barcodes?.[0] || "Sans Code"
+        }
+        return String(index + 1).padStart(2, "0")
+    }
+
+    const firstColStyle = colModel === "standard" ? "print-th-num" : "print-th-designation text-left pl-3"
+    const firstColTdStyle = colModel === "standard" ? "print-td-num" : "print-td-num text-left pl-3 font-mono text-[9px] text-gray-600"
+
     return (
-        <div className="print-template print-facture">
+        <div className={`print-template print-facture ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
+            {/* ── Dynamic Page Sizing Styles ── */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
+                    margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
+                }
+            `}} />
+
             {/* ── Decorative Top Strip ── */}
             <div className="print-accent-strip" />
 
@@ -222,7 +257,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                 <table className="print-table">
                     <thead>
                         <tr>
-                            <th className="print-th-num">N°</th>
+                            <th className={firstColStyle}>{firstColHeader}</th>
                             <th className="print-th-designation">Désignation</th>
                             <th className="print-th-center">Qté</th>
                             <th className="print-th-right">P.U HT (DA)</th>
@@ -237,7 +272,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             const lineHT = item.quantity * ht
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
-                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
                                     <td className="print-td-designation">{item.product?.name}</td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(ht)}</td>
@@ -249,7 +284,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                         {/* Empty rows pad to fill space */}
                         {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
                             <tr key={`empty-${i}`} className="print-row-empty">
-                                <td className="print-td-num">&nbsp;</td>
+                                <td className={firstColTdStyle}>&nbsp;</td>
                                 <td className="print-td-designation">&nbsp;</td>
                                 <td className="print-td-center">&nbsp;</td>
                                 <td className="print-td-right">&nbsp;</td>
@@ -358,8 +393,36 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
         previousBalance = 0, paymentAmount = 0, newBalance = 0, documentId
     } = props
 
+    const colModel = store?.posBlColumns || "standard"
+    
+    // First column header label
+    let firstColHeader = "N°"
+    if (colModel === "code") firstColHeader = "Code"
+    else if (colModel === "barcode") firstColHeader = "Code-barres"
+
+    const getFirstColValue = (item: PrintableItem, index: number) => {
+        if (colModel === "code") {
+            return item.product?.code || item.product?.id?.slice(-6).toUpperCase() || `P-${String(index + 1).padStart(3, "0")}`
+        }
+        if (colModel === "barcode") {
+            return item.product?.barcodes?.[0] || "Sans Code"
+        }
+        return String(index + 1).padStart(2, "0")
+    }
+
+    const firstColStyle = colModel === "standard" ? "print-th-num" : "print-th-designation text-left pl-3"
+    const firstColTdStyle = colModel === "standard" ? "print-td-num" : "print-td-num text-left pl-3 font-mono text-[9px] text-gray-600"
+
     return (
-        <div className="print-template print-bl">
+        <div className={`print-template print-bl ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
+            {/* ── Dynamic Page Sizing Styles ── */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
+                    margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
+                }
+            `}} />
+
             {/* ── Decorative Top Strip ── */}
             <div className="print-accent-strip print-accent-strip-emerald" />
 
@@ -391,7 +454,7 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                 <table className="print-table print-table-bl">
                     <thead>
                         <tr>
-                            <th className="print-th-num">N°</th>
+                            <th className={firstColStyle}>{firstColHeader}</th>
                             <th className="print-th-designation">Désignation</th>
                             <th className="print-th-center">Qté</th>
                             <th className="print-th-right">P.U (DA)</th>
@@ -403,7 +466,7 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                             const lineTotal = item.quantity * Number(item.unitPrice)
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
-                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
                                     <td className="print-td-designation">{item.product?.name}</td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(Number(item.unitPrice))}</td>
@@ -413,7 +476,7 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                         })}
                         {items.length < 10 && Array.from({ length: 10 - items.length }).map((_, i) => (
                             <tr key={`empty-${i}`} className="print-row-empty">
-                                <td className="print-td-num">&nbsp;</td>
+                                <td className={firstColTdStyle}>&nbsp;</td>
                                 <td className="print-td-designation">&nbsp;</td>
                                 <td className="print-td-center">&nbsp;</td>
                                 <td className="print-td-right">&nbsp;</td>
@@ -506,8 +569,36 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
     const validityDate = new Date(date)
     validityDate.setDate(validityDate.getDate() + 30)
 
+    const colModel = store?.posBlColumns || "standard"
+    
+    // First column header label
+    let firstColHeader = "N°"
+    if (colModel === "code") firstColHeader = "Code"
+    else if (colModel === "barcode") firstColHeader = "Code-barres"
+
+    const getFirstColValue = (item: PrintableItem, index: number) => {
+        if (colModel === "code") {
+            return item.product?.code || item.product?.id?.slice(-6).toUpperCase() || `P-${String(index + 1).padStart(3, "0")}`
+        }
+        if (colModel === "barcode") {
+            return item.product?.barcodes?.[0] || "Sans Code"
+        }
+        return String(index + 1).padStart(2, "0")
+    }
+
+    const firstColStyle = colModel === "standard" ? "print-th-num" : "print-th-designation text-left pl-3"
+    const firstColTdStyle = colModel === "standard" ? "print-td-num" : "print-td-num text-left pl-3 font-mono text-[9px] text-gray-600"
+
     return (
-        <div className="print-template print-proforma">
+        <div className={`print-template print-proforma ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
+            {/* ── Dynamic Page Sizing Styles ── */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
+                    margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
+                }
+            `}} />
+
             {/* ── Decorative Top Strip ── */}
             <div className="print-accent-strip print-accent-strip-amber" />
 
@@ -545,7 +636,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                 <table className="print-table print-table-proforma">
                     <thead>
                         <tr>
-                            <th className="print-th-num">N°</th>
+                            <th className={firstColStyle}>{firstColHeader}</th>
                             <th className="print-th-designation">Désignation</th>
                             <th className="print-th-center">Qté</th>
                             <th className="print-th-right">P.U HT (DA)</th>
@@ -560,7 +651,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                             const lineHT = item.quantity * ht
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
-                                    <td className="print-td-num">{String(i + 1).padStart(2, "0")}</td>
+                                    <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
                                     <td className="print-td-designation">{item.product?.name}</td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(ht)}</td>
@@ -571,7 +662,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                         })}
                         {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
                             <tr key={`empty-${i}`} className="print-row-empty">
-                                <td className="print-td-num">&nbsp;</td>
+                                <td className={firstColTdStyle}>&nbsp;</td>
                                 <td className="print-td-designation">&nbsp;</td>
                                 <td className="print-td-center">&nbsp;</td>
                                 <td className="print-td-right">&nbsp;</td>

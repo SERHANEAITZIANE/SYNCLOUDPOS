@@ -30,9 +30,10 @@ interface CartSidebarProps {
     storeAddress?: string
     storePhone?: string
     posTimbreEnabled?: boolean
+    storeData?: any
 }
 
-export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone, posTimbreEnabled = false }: CartSidebarProps) => {
+export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone, posTimbreEnabled = false, storeData }: CartSidebarProps) => {
     const t = useTranslations("CartSidebar")
     const cart = usePosStore()
     const router = useRouter()
@@ -259,6 +260,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     storeAddress={storeAddress}
                     storePhone={storePhone}
                     posTimbreEnabled={posTimbreEnabled}
+                    storeData={storeData}
                 />
             </Suspense>
             <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-l border-gray-200 dark:border-slate-800 overflow-hidden">

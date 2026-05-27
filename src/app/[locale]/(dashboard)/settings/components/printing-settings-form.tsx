@@ -230,13 +230,21 @@ const getBarcodeModels = (t: any) => [
 // ─── Main Form ───────────────────────────────────────────────────
 interface PrintingSettingsFormProps {
     initialBlTemplate: string
+    initialPosBlFormat?: string | null
+    initialPosBlColumns?: string | null
 }
 
-export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsFormProps) => {
+export const PrintingSettingsForm = ({ 
+    initialBlTemplate,
+    initialPosBlFormat,
+    initialPosBlColumns
+}: PrintingSettingsFormProps) => {
     const router = useRouter()
     const t = useTranslations("Settings.PrintingSettingsForm")
     const [loading, setLoading] = useState(false)
     const [blTemplate, setBlTemplate] = useState(initialBlTemplate || "standard")
+    const [posBlFormat, setPosBlFormat] = useState(initialPosBlFormat || "A4")
+    const [posBlColumns, setPosBlColumns] = useState(initialPosBlColumns || "standard")
     const [prefs, setPrefs] = useState<PrintingPrefs>(defaults)
 
     useEffect(() => {
@@ -250,7 +258,12 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
         try {
             setLoading(true)
             localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
-            const result = await updateSystemSettings({ blTemplate, geminiApiKey: undefined })
+            const result = await updateSystemSettings({ 
+                blTemplate, 
+                posBlFormat,
+                posBlColumns,
+                geminiApiKey: undefined 
+            })
             if (result.error) { toast.error(result.error); return }
             toast.success(t("success"))
             router.refresh()
@@ -338,19 +351,52 @@ export const PrintingSettingsForm = ({ initialBlTemplate }: PrintingSettingsForm
                     <FileText className="w-5 h-5 text-green-500" />
                     <h3 className="text-base font-semibold">{t("blTemplate.title")}</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/40 p-4 rounded-xl border">
-                    <div className="space-y-2">
-                        <Label>{t("blTemplate.label")}</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-muted/40 p-5 rounded-xl border">
+                    {/* Template Model */}
+                    <div className="space-y-2.5">
+                        <Label className="text-sm font-semibold">{t("blTemplate.label")}</Label>
                         <Select value={blTemplate} onValueChange={setBlTemplate}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="standard">{t("blTemplate.options.standard", { fallback: "Standard" })}</SelectItem>
-                                <SelectItem value="compact">{t("blTemplate.options.compact", { fallback: "Compact" })}</SelectItem>
-                                <SelectItem value="aitee">{t("blTemplate.options.aitee", { fallback: "AITEE" })}</SelectItem>
+                                <SelectItem value="standard">{t("blTemplate.options.standard", { fallback: "Standard (Classique)" })}</SelectItem>
+                                <SelectItem value="compact">{t("blTemplate.options.compact", { fallback: "Compact (Sans Entête)" })}</SelectItem>
+                                <SelectItem value="aitee">{t("blTemplate.options.aitee", { fallback: "AITEE (Facture Style)" })}</SelectItem>
                             </SelectContent>
                         </Select>
+                        <p className="text-xs text-muted-foreground">Style visuel global du document imprimé.</p>
+                    </div>
+
+                    {/* Format A4 / A5 */}
+                    <div className="space-y-2.5">
+                        <Label className="text-sm font-semibold">{t("blFormat.label", { fallback: "Format du document" })}</Label>
+                        <Select value={posBlFormat} onValueChange={setPosBlFormat}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="A4">{t("blFormat.options.a4", { fallback: "A4 (Standard - Page Entière)" })}</SelectItem>
+                                <SelectItem value="A5">{t("blFormat.options.a5", { fallback: "A5 (Compact - Demi-Page)" })}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">{t("blFormat.hint", { fallback: "Le document sera redimensionné au format choisi." })}</p>
+                    </div>
+
+                    {/* Column Configuration */}
+                    <div className="space-y-2.5">
+                        <Label className="text-sm font-semibold">{t("blColumns.label", { fallback: "Modèle de Colonnes (Tableau)" })}</Label>
+                        <Select value={posBlColumns} onValueChange={setPosBlColumns}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="standard">{t("blColumns.options.standard", { fallback: "Standard (N°, Produit, Qté...)" })}</SelectItem>
+                                <SelectItem value="code">{t("blColumns.options.code", { fallback: "Avec Code Produit (Code, Produit...)" })}</SelectItem>
+                                <SelectItem value="barcode">{t("blColumns.options.barcode", { fallback: "Avec Code-barres (Barcode, Produit...)" })}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">{t("blColumns.hint", { fallback: "Colonnes affichées dans la table des articles." })}</p>
                     </div>
                 </div>
             </div>

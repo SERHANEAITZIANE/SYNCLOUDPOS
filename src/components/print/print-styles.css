@@ -683,3 +683,158 @@
             0 4px 16px rgba(0, 0, 0, 0.04);
     }
 }
+
+/* ─── A5 Layout Scaling Overrides ─────────────────────────────────────────── */
+.format-a5.print-template {
+    font-size: 8px !important;
+    line-height: 1.35 !important;
+    padding: 12px 18px 8px !important;
+    max-width: 148mm !important;
+    min-height: 200mm !important;
+}
+
+.format-a5 .print-header {
+    margin-bottom: 8px !important;
+    padding-bottom: 6px !important;
+}
+
+.format-a5 .print-logo {
+    height: 36px !important;
+}
+
+.format-a5 .print-logo-placeholder {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+}
+
+.format-a5 .print-company-name {
+    font-size: 13px !important;
+}
+
+.format-a5 .print-company-activity {
+    font-size: 7px !important;
+    letter-spacing: 0.8px !important;
+}
+
+.format-a5 .print-doc-type {
+    font-size: 16px !important;
+    letter-spacing: 2px !important;
+}
+
+.format-a5 .print-doc-badge {
+    padding: 2px 8px !important;
+    font-size: 8px !important;
+}
+
+.format-a5 .print-parties {
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+}
+
+.format-a5 .print-customer-box,
+.format-a5 .print-store-details {
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+}
+
+.format-a5 .print-customer-name {
+    font-size: 10px !important;
+}
+
+.format-a5 .print-customer-detail,
+.format-a5 .print-fiscal-row {
+    font-size: 7.5px !important;
+    line-height: 1.4 !important;
+}
+
+.format-a5 .print-customer-fiscal {
+    font-size: 7px !important;
+}
+
+.format-a5 .print-table-wrapper {
+    margin-bottom: 8px !important;
+    border-radius: 6px !important;
+}
+
+.format-a5 .print-table th {
+    padding: 4px 6px !important;
+    font-size: 7.5px !important;
+}
+
+.format-a5 .print-table td {
+    padding: 3px 6px !important;
+    font-size: 8px !important;
+}
+
+.format-a5 .print-td-num {
+    font-size: 7.5px !important;
+}
+
+.format-a5 .print-footer-section {
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+}
+
+.format-a5 .print-tva-table {
+    max-width: 160px !important;
+    margin-bottom: 6px !important;
+}
+
+.format-a5 .print-tva-table th,
+.format-a5 .print-tva-table td {
+    padding: 2px 6px !important;
+    font-size: 7.5px !important;
+}
+
+.format-a5 .print-amount-words {
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    margin-bottom: 4px !important;
+}
+
+.format-a5 .print-amount-words-text {
+    font-size: 8px !important;
+}
+
+.format-a5 .print-totals-box,
+.format-a5 .print-totals-box-bl,
+.format-a5 .print-totals-box-proforma {
+    width: 150px !important;
+}
+
+.format-a5 .print-total-row {
+    padding: 3px 6px !important;
+    font-size: 8px !important;
+}
+
+.format-a5 .print-total-final {
+    padding: 6px 10px !important;
+    margin-top: 4px !important;
+}
+
+.format-a5 .print-total-final span:last-child {
+    font-size: 11px !important;
+}
+
+.format-a5 .print-signatures {
+    padding-top: 8px !important;
+    margin-top: auto !important;
+    gap: 12px !important;
+}
+
+.format-a5 .print-signature-space {
+    height: 36px !important;
+}
+
+.format-a5 .print-stamp-ghost {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 5px !important;
+}
+
+.format-a5 .print-footer-bar {
+    margin-top: 6px !important;
+    padding-top: 4px !important;
+    font-size: 6.5px !important;
+}

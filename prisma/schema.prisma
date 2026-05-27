@@ -26,6 +26,8 @@ model Tenant {
   logo                 String?
   headerText           String?
   blTemplate           String?               @default("standard")
+  posBlFormat          String?               @default("A4")
+  posBlColumns         String?               @default("standard")
   aiProvider           String?               @default("GEMINI")
   geminiApiKey         String?
   openaiApiKey         String?

@@ -115,7 +115,7 @@ const PosPage = async () => {
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} />
+            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} storeData={tenant} />
         </div>
     )
 }

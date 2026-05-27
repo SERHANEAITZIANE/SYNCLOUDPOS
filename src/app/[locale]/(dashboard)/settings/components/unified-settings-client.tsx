@@ -33,6 +33,8 @@ interface TenantData {
     logo: string | null
     headerText: string | null
     blTemplate: string
+    posBlFormat: string | null
+    posBlColumns: string | null
     aiProvider: string
     aiModel: string | null
     geminiApiKey: string | null
@@ -50,7 +52,7 @@ interface Account {
 }
 
 interface UnifiedSettingsClientProps {
-    tenant: TenantData
+    tenant: any // Allow dynamic mapper expansion safely
     accounts: Account[]
     databaseUrl: string
 }
@@ -143,7 +145,11 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                                 {t("Printing.description")}
                             </p>
                         </div>
-                        <PrintingSettingsForm initialBlTemplate={tenant.blTemplate} />
+                        <PrintingSettingsForm
+                            initialBlTemplate={tenant.blTemplate}
+                            initialPosBlFormat={tenant.posBlFormat}
+                            initialPosBlColumns={tenant.posBlColumns}
+                        />
                     </div>
                 </TabsContent>
 
