@@ -96,14 +96,12 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
         window.location.hostname.startsWith("192.168.")
     );
 
-    const getExpoUrl = (tab: "gerant" | "tournee") => {
+    const getAppDownloadUrl = (tab: "gerant" | "tournee") => {
         if (isLocal) {
             return "exp://192.168.0.132:8081";
         }
-        const projectId = tab === "gerant"
-            ? "71a39a0d-6556-40d4-91d9-b86cc7afa9d9"
-            : "86e328d1-c7f8-4add-9288-61b09c86dbc8";
-        return `exp://u.expo.dev/${projectId}?channel-name=production&runtime-version=exposdk:54.0.0&app=${tab}`;
+        const slug = tab === "gerant" ? "syncloud-gerant" : "syncloud-tournee";
+        return `https://expo.dev/accounts/aitee/projects/${slug}/builds`;
     };
 
     // ═══════════════ Quick Actions ═══════════════
@@ -874,14 +872,14 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                             }}
                                         >
                                             <QRCodeSVG
-                                                value={getExpoUrl(activeTab)}
+                                                value={getAppDownloadUrl(activeTab)}
                                                 size={160}
                                                 level="H"
                                                 includeMargin={false}
                                             />
                                         </div>
                                         <span className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 mt-2">
-                                            Expo Go Bundler
+                                            Télécharger APK
                                         </span>
                                     </div>
 
@@ -896,21 +894,21 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                             <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
                                                 <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">1</div>
                                                 <p className="flex-1">
-                                                    {t("links.installExpoGo") || "Installez l'application Expo Go sur votre smartphone (Android/iOS)."}
+                                                    Scannez le QR code avec votre caméra pour ouvrir la page de téléchargement.
                                                 </p>
                                             </div>
 
                                             <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
                                                 <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">2</div>
                                                 <p className="flex-1">
-                                                    {t("links.sameWifi") || "Assurez-vous d'être connecté au même réseau Wi-Fi."}
+                                                    Téléchargez le fichier APK et installez-le sur votre téléphone Android.
                                                 </p>
                                             </div>
 
                                             <div className="flex gap-3 text-xs leading-relaxed text-slate-300">
                                                 <div className="w-5 h-5 rounded-md bg-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-400">3</div>
                                                 <p className="flex-1">
-                                                    {t("links.scanCamera") || "Scannez le code QR ci-contre avec votre caméra ou via l'application Expo Go."}
+                                                    Ouvrez l&apos;application et connectez-vous avec vos identifiants SynCloud.
                                                 </p>
                                             </div>
                                         </div>
@@ -920,12 +918,12 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                 {/* Footer link / input for manual connect */}
                                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex flex-col space-y-2">
                                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                                        <Laptop className="w-3.5 h-3.5" />
-                                        {t("links.manualUrl") || "Ou entrez l'adresse URL suivante dans Expo Go :"}
+                                        <Download className="w-3.5 h-3.5" />
+                                        Ou ouvrez ce lien dans votre navigateur mobile :
                                     </span>
                                     <div className="flex items-center justify-between gap-2 bg-slate-900 px-3 py-2 rounded-lg border border-slate-800">
                                         <code className="text-xs text-slate-300 break-all select-all font-mono">
-                                            {getExpoUrl(activeTab)}
+                                            {getAppDownloadUrl(activeTab)}
                                         </code>
                                     </div>
                                 </div>
