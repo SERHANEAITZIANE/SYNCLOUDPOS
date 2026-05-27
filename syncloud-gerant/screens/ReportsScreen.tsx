@@ -38,6 +38,15 @@ const reportCards: ReportCard[] = [
         badge: "💰",
     },
     {
+        id: "catalog",
+        title: "Catalogues & Tarifs",
+        subtitle: "Tarifs de vente, fiches produits & exports clients",
+        icon: "book",
+        color: "#10b981",
+        screen: "Catalog",
+        badge: "📖",
+    },
+    {
         id: "debts",
         title: "Créances Clients",
         subtitle: "Rapport d'âge, relances WhatsApp, encaissements",

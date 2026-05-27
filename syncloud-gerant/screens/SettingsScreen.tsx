@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
     View, Text, ScrollView, TouchableOpacity, StyleSheet,
-    Switch, Alert, ActivityIndicator, TextInput,
+    Switch, Alert, ActivityIndicator, TextInput, Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../lib/store";
@@ -33,6 +33,67 @@ const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
 export default function SettingsScreen() {
     const { user, logout } = useAuthStore();
     const { t, lang, setLang } = useLangStore();
+
+    // Manual update check states
+    const [checkingUpdates, setCheckingUpdates] = useState(false);
+
+    const handleManualUpdateCheck = async () => {
+        try {
+            setCheckingUpdates(true);
+            const API_BASE = "https://chirpedbeo.online/api/mobile";
+            const response = await fetch(`${API_BASE}/version`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.version) {
+                    const currentVersion = "1.0.0";
+                    const remoteParts = data.version.split(".").map(Number);
+                    const localParts = currentVersion.split(".").map(Number);
+                    
+                    let hasUpdate = false;
+                    for (let i = 0; i < 3; i++) {
+                        if ((remoteParts[i] || 0) > (localParts[i] || 0)) {
+                            hasUpdate = true;
+                            break;
+                        } else if ((remoteParts[i] || 0) < (localParts[i] || 0)) {
+                            break;
+                        }
+                    }
+
+                    if (hasUpdate) {
+                        Alert.alert(
+                            isAr ? "تحديث جديد متوفر" : "Mise à jour disponible",
+                            `${isAr ? "الإصدار الجديد:" : "Nouvelle version:"} v${data.version}\n\n${lang === "ar" ? data.releaseNotes.ar : data.releaseNotes.fr}`,
+                            [
+                                { text: isAr ? "إلغاء" : "Annuler", style: "cancel" },
+                                { 
+                                    text: isAr ? "تحديث الآن" : "Mettre à jour", 
+                                    onPress: () => {
+                                        if (data.apkUrl) {
+                                            Linking.openURL(data.apkUrl);
+                                        }
+                                    } 
+                                }
+                            ]
+                        );
+                    } else {
+                        Alert.alert(
+                            isAr ? "تطبيقك محدث" : "Application à jour",
+                            isAr ? "تطبيقك يعمل بأحدث إصدار متوفر." : "Vous disposez déjà de la dernière version de SynCloudPOS."
+                        );
+                    }
+                }
+            } else {
+                throw new Error("Failed to contact update server");
+            }
+        } catch (err) {
+            Alert.alert(
+                isAr ? "خطأ" : "Erreur",
+                isAr ? "فشل الاتصال بخادم التحديثات." : "Impossible de contacter le serveur de mise à jour."
+            );
+        } finally {
+            setCheckingUpdates(false);
+        }
+    };
 
     // Manager Preferences States
     const [lowStockThreshold, setLowStockThreshold] = useState("10");
@@ -543,6 +604,24 @@ export default function SettingsScreen() {
                     <Text style={styles.infoLabel}>{t("tenant")}</Text>
                     <Text style={styles.infoValue}>{user?.tenantId?.slice(-8).toUpperCase() || "DEMO"}</Text>
                 </View>
+
+                {/* Manual update check button */}
+                <TouchableOpacity 
+                    style={styles.updateCheckBtn} 
+                    onPress={handleManualUpdateCheck}
+                    disabled={checkingUpdates}
+                >
+                    {checkingUpdates ? (
+                        <ActivityIndicator size="small" color="#22c55e" />
+                    ) : (
+                        <>
+                            <Ionicons name="cloud-download-outline" size={18} color="#22c55e" />
+                            <Text style={styles.updateCheckBtnText}>
+                                {isAr ? "البحث عن تحديثات" : "Rechercher des mises à jour"}
+                            </Text>
+                        </>
+                    )}
+                </TouchableOpacity>
             </View>
 
             {/* Logout */}
@@ -706,4 +785,22 @@ const styles = StyleSheet.create({
         backgroundColor: "#1e293b", borderWidth: 1, borderColor: "#7f1d1d",
     },
     logoutText: { color: "#ef4444", fontSize: 16, fontWeight: "700" },
+
+    updateCheckBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        borderWidth: 1,
+        borderColor: "#22c55e30",
+        backgroundColor: "#22c55e05",
+        borderRadius: 10,
+        height: 40,
+        marginTop: 14,
+    },
+    updateCheckBtnText: {
+        color: "#22c55e",
+        fontSize: 12.5,
+        fontWeight: "700",
+    },
 });

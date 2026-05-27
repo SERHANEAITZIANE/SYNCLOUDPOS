@@ -186,6 +186,7 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.quickActions}>
                     {[
                         { icon: "bar-chart-outline", label: "Rapports", color: "#3b82f6", nav: "Rapports" },
+                        { icon: "book-outline", label: "Catalogue", color: "#10b981", nav: "Catalog" },
                         { icon: "lock-closed-outline", label: "Clôture", color: "#a855f7", nav: "DailyClose" },
                         { icon: "people-outline", label: "Créances", color: "#f59e0b", nav: "ClientDebts" },
                         { icon: "cube-outline", label: "Stock", color: "#22c55e", nav: "InventoryHealth" },

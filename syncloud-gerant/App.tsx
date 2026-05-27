@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import {
     View, Text, TextInput, TouchableOpacity,
     ActivityIndicator, StyleSheet, Image, KeyboardAvoidingView,
-    Platform, Alert, StatusBar, Dimensions,
+    Platform, Alert, StatusBar, Dimensions, Modal, Linking,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -27,6 +27,7 @@ import DriverMonitorScreen from "./screens/DriverMonitorScreen";
 import InventoryHealthScreen from "./screens/InventoryHealthScreen";
 import G50TaxScreen from "./screens/G50TaxScreen";
 import ChequeManagerScreen from "./screens/ChequeManagerScreen";
+import CatalogScreen from "./screens/CatalogScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
 import { startGPSTracking, stopGPSTracking } from "./lib/gps-tracking";
@@ -208,11 +209,47 @@ function GerantTabs() {
 // ─── Root App ────────────────────────────────────────────────────────────────
 export default function App() {
     const { isLoading, isAuthenticated, loadSession, user } = useAuthStore();
-    const { loadLang } = useLangStore();
+    const { loadLang, lang } = useLangStore();
+
+    const [showUpdateModal, setShowUpdateModal] = React.useState(false);
+    const [updateInfo, setUpdateInfo] = React.useState<any>(null);
+
+    const checkUpdates = async () => {
+        try {
+            const API_BASE = "https://chirpedbeo.online/api/mobile";
+            const response = await fetch(`${API_BASE}/version`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.version) {
+                    const currentVersion = "1.0.0";
+                    const remoteParts = data.version.split(".").map(Number);
+                    const localParts = currentVersion.split(".").map(Number);
+                    
+                    let hasUpdate = false;
+                    for (let i = 0; i < 3; i++) {
+                        if ((remoteParts[i] || 0) > (localParts[i] || 0)) {
+                            hasUpdate = true;
+                            break;
+                        } else if ((remoteParts[i] || 0) < (localParts[i] || 0)) {
+                            break;
+                        }
+                    }
+
+                    if (hasUpdate) {
+                        setUpdateInfo(data);
+                        setShowUpdateModal(true);
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn("Error checking for updates:", err);
+        }
+    };
 
     useEffect(() => {
         loadLang();
         loadSession();
+        checkUpdates();
     }, []);
 
     // Start GPS tracking + offline sync when authenticated
@@ -232,6 +269,12 @@ export default function App() {
             };
         }
     }, [isAuthenticated]);
+
+    const handleUpdateNow = () => {
+        if (updateInfo?.apkUrl) {
+            Linking.openURL(updateInfo.apkUrl);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -289,10 +332,10 @@ export default function App() {
                             name="DailyClose"
                             component={DailyCloseScreen}
                             options={{
-                                headerShown: true,
-                                title: "Clôture de Caisse",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
+                                  headerShown: true,
+                                  title: "Clôture de Caisse",
+                                  headerStyle: { backgroundColor: "#0f172a" },
+                                  headerTintColor: "#f8fafc",
                             }}
                         />
                         <Stack.Screen
@@ -355,9 +398,56 @@ export default function App() {
                                 headerTintColor: "#f8fafc",
                             }}
                         />
+                        <Stack.Screen
+                            name="Catalog"
+                            component={CatalogScreen}
+                            options={{
+                                headerShown: true,
+                                title: "Catalogue & Tarifs",
+                                headerStyle: { backgroundColor: "#0f172a" },
+                                headerTintColor: "#f8fafc",
+                            }}
+                        />
                     </>
                 )}
             </Stack.Navigator>
+            {/* Trilingual Direct APK Update Overlay */}
+            <Modal
+                visible={showUpdateModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => {}}
+            >
+                <View style={styles.updateModalOverlay}>
+                    <View style={styles.updateModalContent}>
+                        <View style={styles.updateIconContainer}>
+                            <Ionicons name="cloud-download" size={40} color="#fff" />
+                        </View>
+                        <Text style={styles.updateModalTitle}>Mise à jour disponible !</Text>
+                        <Text style={styles.updateModalTitleAr}>تحديث جديد متوفر !</Text>
+                        
+                        <Text style={styles.updateVersionText}>
+                            v1.0.0 ➔ v{updateInfo?.version || "1.1.0"}
+                        </Text>
+
+                        <View style={styles.releaseNotesBox}>
+                            <Text style={styles.releaseNotesHeader}>Nouveautés / الجديد :</Text>
+                            <Text style={styles.releaseNotesText}>
+                                {lang === "ar" ? updateInfo?.releaseNotes?.ar : updateInfo?.releaseNotes?.fr}
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity 
+                            style={styles.updateActionBtn}
+                            onPress={handleUpdateNow}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="download-outline" size={20} color="#fff" />
+                            <Text style={styles.updateActionText}>Mettre à jour / تحديث الآن</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </NavigationContainer>
     );
 }
@@ -471,5 +561,106 @@ const styles = StyleSheet.create({
         color: "#475569",
         fontSize: 12,
         marginTop: 20,
+    },
+    // Update Modal Styles
+    updateModalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(15, 23, 42, 0.85)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+    },
+    updateModalContent: {
+        width: "100%",
+        maxWidth: 340,
+        backgroundColor: "#1e293b",
+        borderWidth: 1,
+        borderColor: "#334155",
+        borderRadius: 24,
+        padding: 24,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    updateIconContainer: {
+        width: 64,
+        height: 64,
+        borderRadius: 18,
+        backgroundColor: "#22c55e",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+        shadowColor: "#22c55e",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+    updateModalTitle: {
+        color: "#f8fafc",
+        fontSize: 17,
+        fontWeight: "900",
+        textAlign: "center",
+    },
+    updateModalTitleAr: {
+        color: "#f8fafc",
+        fontSize: 17,
+        fontWeight: "900",
+        textAlign: "center",
+        marginTop: 4,
+    },
+    updateVersionText: {
+        color: "#22c55e",
+        fontSize: 13,
+        fontWeight: "700",
+        marginTop: 8,
+        backgroundColor: "#22c55e10",
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    releaseNotesBox: {
+        width: "100%",
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#334155",
+        borderRadius: 14,
+        padding: 14,
+        marginVertical: 18,
+    },
+    releaseNotesHeader: {
+        color: "#94a3b8",
+        fontSize: 11,
+        fontWeight: "800",
+        marginBottom: 6,
+    },
+    releaseNotesText: {
+        color: "#e2e8f0",
+        fontSize: 12,
+        lineHeight: 16,
+        fontWeight: "500",
+    },
+    updateActionBtn: {
+        flexDirection: "row",
+        width: "100%",
+        height: 48,
+        backgroundColor: "#22c55e",
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 8,
+        shadowColor: "#22c55e",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    updateActionText: {
+        color: "#fff",
+        fontSize: 13.5,
+        fontWeight: "800",
     },
 });
