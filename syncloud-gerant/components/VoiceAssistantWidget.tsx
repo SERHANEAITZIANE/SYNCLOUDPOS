@@ -5,9 +5,9 @@ import {
     Platform, Alert, Clipboard
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as Speech from "expo-speech";
+import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiFetch } from "../lib/api";
+import { apiFetch, API_BASE } from "../lib/api";
 
 interface VoiceAssistantWidgetProps {
     active?: boolean;
@@ -107,6 +107,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     // References
     const inputRef = useRef<TextInput>(null);
     const scrollRef = useRef<ScrollView>(null);
+    const soundRef = useRef<Audio.Sound | null>(null);
 
     // Soundwave animations
     const pulse1 = useRef(new Animated.Value(1)).current;
@@ -161,56 +162,111 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
         }
     }, [loading, speaking, isListening]);
 
-    // Handle vocal speech output with dynamic local voice matching
+    // Handle vocal speech output via server-side Cloud TTS (Azure ar-DZ-AminaNeural for Darja)
     const speakText = async (text: string) => {
         if (muted) return;
         
         try {
-            await Speech.stop();
+            // Stop any currently playing audio
+            await handleStopSpeech();
             setSpeaking(true);
-            
-            let selectedVoiceId: string | undefined = undefined;
-            let selectedLanguage = language === "french" ? "fr-FR" : "ar-SA";
-            
-            try {
-                const voices = await Speech.getAvailableVoicesAsync();
-                if (language === "french") {
-                    const frVoice = voices.find(v => v.language.toLowerCase().startsWith("fr"));
-                    if (frVoice) {
-                        selectedVoiceId = frVoice.identifier;
-                        selectedLanguage = frVoice.language;
-                    }
-                } else {
-                    const arVoice = voices.find(v => v.language.toLowerCase().startsWith("ar"));
-                    if (arVoice) {
-                        selectedVoiceId = arVoice.identifier;
-                        selectedLanguage = arVoice.language;
-                    }
-                }
-            } catch (err) {
-                console.warn("Error getting available voices:", err);
-            }
-            
-            // Strip out markdown or brackets for vocal TTS output
-            const cleanedText = text.replace(/[*#_\\-]/g, "");
 
-            await Speech.speak(cleanedText, {
-                voice: selectedVoiceId,
-                language: selectedLanguage,
-                pitch: 1.0,
-                rate: 0.95,
-                onComplete: () => setSpeaking(false),
-                onError: () => setSpeaking(false),
-                onStopped: () => setSpeaking(false)
-            } as any);
+            // Strip markdown for clean TTS
+            const cleanedText = text.replace(/[*#_\\\-]/g, "").trim();
+            if (!cleanedText) {
+                setSpeaking(false);
+                return;
+            }
+
+            // Request audio from our server TTS endpoint
+            const token = await AsyncStorage.getItem("auth_tokens");
+            const parsedTokens = token ? JSON.parse(token) : {};
+
+            const response = await fetch(`${API_BASE}/tts`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(parsedTokens.accessToken ? { "Authorization": `Bearer ${parsedTokens.accessToken}` } : {}),
+                },
+                body: JSON.stringify({ text: cleanedText, language }),
+            });
+
+            if (!response.ok) {
+                console.warn("Server TTS failed, status:", response.status);
+                setSpeaking(false);
+                return;
+            }
+
+            // Convert response to blob/base64 for playback
+            const audioBlob = await response.blob();
+            const reader = new FileReader();
+            
+            reader.onloadend = async () => {
+                try {
+                    const base64Data = (reader.result as string)?.split(",")[1];
+                    if (!base64Data) {
+                        setSpeaking(false);
+                        return;
+                    }
+
+                    // Write to temp file for expo-av playback
+                    const FileSystem = require("expo-file-system");
+                    const fileUri = FileSystem.cacheDirectory + "tts_audio_" + Date.now() + ".mp3";
+                    await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+                        encoding: FileSystem.EncodingType.Base64,
+                    });
+
+                    // Configure audio mode for playback
+                    await Audio.setAudioModeAsync({
+                        allowsRecordingIOS: false,
+                        playsInSilentModeIOS: true,
+                        staysActiveInBackground: false,
+                    });
+
+                    // Load and play the audio
+                    const { sound } = await Audio.Sound.createAsync(
+                        { uri: fileUri },
+                        { shouldPlay: true, volume: 1.0 }
+                    );
+                    soundRef.current = sound;
+
+                    sound.setOnPlaybackStatusUpdate((status) => {
+                        if (status.isLoaded && status.didJustFinish) {
+                            setSpeaking(false);
+                            sound.unloadAsync();
+                            soundRef.current = null;
+                            // Clean up temp file
+                            FileSystem.deleteAsync(fileUri, { idempotent: true }).catch(() => {});
+                        }
+                    });
+                } catch (playErr) {
+                    console.error("Audio playback error:", playErr);
+                    setSpeaking(false);
+                }
+            };
+
+            reader.onerror = () => {
+                console.error("FileReader error");
+                setSpeaking(false);
+            };
+
+            reader.readAsDataURL(audioBlob);
         } catch (e) {
-            console.error("Speech playback error:", e);
+            console.error("Cloud TTS error:", e);
             setSpeaking(false);
         }
     };
 
     const handleStopSpeech = async () => {
-        await Speech.stop();
+        try {
+            if (soundRef.current) {
+                await soundRef.current.stopAsync();
+                await soundRef.current.unloadAsync();
+                soundRef.current = null;
+            }
+        } catch (e) {
+            // Silence errors during stop
+        }
         setSpeaking(false);
     };
 
