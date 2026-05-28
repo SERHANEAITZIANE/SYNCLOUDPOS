@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { requireMobileAuth, mobileErrorResponse } from "@/lib/mobile-auth";
 import { getBusinessContextForTenant } from "@/actions/ai-context";
-import { queryAI, resolveApiKey, DEFAULT_MODELS, type AIProvider } from "@/lib/ai-providers";
+import { queryAI, resolveApiKey, DEFAULT_MODELS, AVAILABLE_MODELS, type AIProvider } from "@/lib/ai-providers";
 
 export async function POST(req: NextRequest) {
     try {
@@ -29,7 +29,13 @@ export async function POST(req: NextRequest) {
 
         // Resolve provider and model
         const provider = (tenant?.aiProvider as AIProvider) || "GEMINI";
-        const model = tenant?.aiModel || DEFAULT_MODELS[provider] || DEFAULT_MODELS.GEMINI;
+        let model = tenant?.aiModel || DEFAULT_MODELS[provider] || DEFAULT_MODELS.GEMINI;
+
+        // Sanitize model to prevent non-existent model crashes (e.g. if gemini-3.1-flash is in database)
+        const validModelIds = AVAILABLE_MODELS[provider]?.map(m => m.id) || [];
+        if (!validModelIds.includes(model)) {
+            model = DEFAULT_MODELS[provider];
+        }
 
         // Resolve API key with fallback chain
         const apiKey = resolveApiKey(provider, tenant || {});

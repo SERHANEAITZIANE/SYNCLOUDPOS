@@ -30,27 +30,25 @@ interface AIResponse {
 
 // ─── Default models per provider ────────────────────────────────────────────
 export const DEFAULT_MODELS: Record<AIProvider, string> = {
-    GEMINI: "gemini-2.5-flash",
+    GEMINI: "gemini-2.0-flash",
     OPENAI: "gpt-4o-mini",
-    ANTHROPIC: "claude-sonnet-4-20250514",
+    ANTHROPIC: "claude-3-5-sonnet-latest",
 };
 
 export const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
     GEMINI: [
-        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Rapide)" },
-        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-        { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash (Léger)" },
+        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Dernier Stable — Recommandé)" },
+        { id: "gemini-2.0-flash-lite-preview-02-05", label: "Gemini 2.0 Flash Lite (Ultra-Rapide)" },
+        { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash (Standard)" },
         { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Puissant)" },
     ],
     OPENAI: [
         { id: "gpt-4o-mini", label: "GPT-4o Mini (Rapide)" },
         { id: "gpt-4o", label: "GPT-4o (Puissant)" },
-        { id: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-        { id: "gpt-4.1", label: "GPT-4.1 (Dernier)" },
     ],
     ANTHROPIC: [
-        { id: "claude-sonnet-4-20250514", label: "Claude Sonnet 4 (Équilibré)" },
-        { id: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku (Rapide)" },
+        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet (Ultra-Intelligent)" },
+        { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku (Rapide)" },
     ],
 };
 
