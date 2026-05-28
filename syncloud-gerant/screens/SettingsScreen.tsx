@@ -43,7 +43,7 @@ export default function SettingsScreen() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "1.0.0";
+                    const currentVersion = "1.1.2";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     

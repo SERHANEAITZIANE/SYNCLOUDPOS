@@ -134,7 +134,7 @@ function LoginScreen() {
                     )}
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>v1.1.0 — SynCloudPOS</Text>
+                <Text style={styles.versionText}>v1.1.2 — SynCloudPOS</Text>
             </View>
         </KeyboardAvoidingView>
     );
@@ -222,7 +222,7 @@ export default function App() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "1.1.0";
+                    const currentVersion = "1.1.2";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
@@ -435,8 +435,8 @@ export default function App() {
                         <Text style={styles.updateModalTitleAr}>تحديث جديد متوفر !</Text>
                         
                         <Text style={styles.updateVersionText}>
-                            v1.0.0 ➔ v{updateInfo?.version || "1.1.0"}
-                        </Text>
+                             v1.1.2 ➔ v{updateInfo?.version || "1.1.2"}
+                         </Text>
 
                         <View style={styles.releaseNotesBox}>
                             <Text style={styles.releaseNotesHeader}>Nouveautés / الجديد :</Text>
@@ -445,14 +445,24 @@ export default function App() {
                             </Text>
                         </View>
 
-                        <TouchableOpacity 
-                            style={styles.updateActionBtn}
-                            onPress={handleUpdateNow}
-                            activeOpacity={0.8}
-                        >
-                            <Ionicons name="download-outline" size={20} color="#fff" />
-                            <Text style={styles.updateActionText}>Mettre à jour / تحديث الآن</Text>
-                        </TouchableOpacity>
+                         <View style={{ flexDirection: "row", gap: 8, width: "100%" }}>
+                             <TouchableOpacity 
+                                 style={[styles.updateActionBtn, { flex: 2 }]}
+                                 onPress={handleUpdateNow}
+                                 activeOpacity={0.8}
+                             >
+                                 <Ionicons name="download-outline" size={18} color="#fff" />
+                                 <Text style={[styles.updateActionText, { fontSize: 12 }]}>{lang === "ar" ? "تحديث الآن" : "Mettre à jour"}</Text>
+                             </TouchableOpacity>
+
+                             <TouchableOpacity 
+                                 style={[styles.updateActionBtn, { flex: 1, backgroundColor: "#475569" }]}
+                                 onPress={() => setShowUpdateModal(false)}
+                                 activeOpacity={0.8}
+                             >
+                                 <Text style={[styles.updateActionText, { fontSize: 12 }]}>{lang === "ar" ? "لاحقاً" : "Plus tard"}</Text>
+                             </TouchableOpacity>
+                         </View>
                     </View>
                 </View>
             </Modal>
