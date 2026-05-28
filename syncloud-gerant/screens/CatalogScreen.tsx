@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
     View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity,
-    ActivityIndicator, Share, Alert, Platform, Dimensions, Switch
+    ActivityIndicator, Share, Alert, Platform, Dimensions, Switch, Image
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
@@ -26,6 +26,7 @@ interface Product {
     categoryId: string | null;
     category?: { id: string; name: string } | null;
     barcodes?: { value: string; label?: string }[] | null;
+    imageUrl?: string | null;
 }
 
 export default function CatalogScreen({ navigation }: any) {
@@ -41,6 +42,7 @@ export default function CatalogScreen({ navigation }: any) {
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
     const [sharingPdf, setSharingPdf] = useState(false);
+    const [managerMode, setManagerMode] = useState(false);
 
     // Dynamic categories extracted from products list
     const categories = useMemo(() => {
@@ -71,14 +73,14 @@ export default function CatalogScreen({ navigation }: any) {
             } else {
                 // Generous premium mock products for visual correctness
                 setProducts([
-                    { id: "1", name: "Coca-Cola Canette 33cl", price: 80, cost: 58, wholesalePrice: 70, dealerPrice: 65, tvaRate: 19, stock: 240, minStock: 50, categoryId: "c1", category: { id: "c1", name: "Boissons" } },
-                    { id: "2", name: "Eau Minérale Lalla Khedidja 1.5L", price: 35, cost: 28, wholesalePrice: 32, dealerPrice: 30, tvaRate: 9, stock: 580, minStock: 100, categoryId: "c1", category: { id: "c1", name: "Boissons" } },
-                    { id: "3", name: "Jus Ramy Orange 1L", price: 130, cost: 95, wholesalePrice: 115, dealerPrice: 110, tvaRate: 19, stock: 18, minStock: 40, categoryId: "c1", category: { id: "c1", name: "Boissons" } },
-                    { id: "4", name: "Café Prestige 250g", price: 200, cost: 130, wholesalePrice: 175, dealerPrice: 165, tvaRate: 19, stock: 0, minStock: 20, categoryId: "c2", category: { id: "c2", name: "Café & Thé" } },
-                    { id: "5", name: "Lait Soummam UHT 1L", price: 110, cost: 85, wholesalePrice: 100, dealerPrice: 95, tvaRate: 9, stock: 95, minStock: 30, categoryId: "c3", category: { id: "c3", name: "Produits Laitiers" } },
-                    { id: "6", name: "Biscuits Bimo Choco XL", price: 60, cost: 40, wholesalePrice: 52, dealerPrice: 48, tvaRate: 19, stock: 320, minStock: 50, categoryId: "c4", category: { id: "c4", name: "Biscuits & Snacks" } },
-                    { id: "7", name: "Huile Fleurial Sans Cholestérol 1L", price: 250, cost: 190, wholesalePrice: 225, dealerPrice: 215, tvaRate: 9, stock: 4, minStock: 15, categoryId: "c5", category: { id: "c5", name: "Épicerie" } },
-                    { id: "8", name: "Savon Liquide Vénus 500ml", price: 180, cost: 120, wholesalePrice: 155, dealerPrice: 145, tvaRate: 19, stock: 210, minStock: 25, categoryId: "c6", category: { id: "c6", name: "Hygiène" } },
+                    { id: "1", name: "Coca-Cola Canette 33cl", price: 80, cost: 58, wholesalePrice: 70, dealerPrice: 65, tvaRate: 19, stock: 240, minStock: 50, categoryId: "c1", category: { id: "c1", name: "Boissons" }, imageUrl: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=80" },
+                    { id: "2", name: "Eau Minérale Lalla Khedidja 1.5L", price: 35, cost: 28, wholesalePrice: 32, dealerPrice: 30, tvaRate: 9, stock: 580, minStock: 100, categoryId: "c1", category: { id: "c1", name: "Boissons" }, imageUrl: "https://images.unsplash.com/photo-1610836561140-ff40f8084a3f?w=200&q=80" },
+                    { id: "3", name: "Jus Ramy Orange 1L", price: 130, cost: 95, wholesalePrice: 115, dealerPrice: 110, tvaRate: 19, stock: 18, minStock: 40, categoryId: "c1", category: { id: "c1", name: "Boissons" }, imageUrl: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=200&q=80" },
+                    { id: "4", name: "Café Prestige 250g", price: 200, cost: 130, wholesalePrice: 175, dealerPrice: 165, tvaRate: 19, stock: 0, minStock: 20, categoryId: "c2", category: { id: "c2", name: "Café & Thé" }, imageUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&q=80" },
+                    { id: "5", name: "Lait Soummam UHT 1L", price: 110, cost: 85, wholesalePrice: 100, dealerPrice: 95, tvaRate: 9, stock: 95, minStock: 30, categoryId: "c3", category: { id: "c3", name: "Produits Laitiers" }, imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200&q=80" },
+                    { id: "6", name: "Biscuits Bimo Choco XL", price: 60, cost: 40, wholesalePrice: 52, dealerPrice: 48, tvaRate: 19, stock: 320, minStock: 50, categoryId: "c4", category: { id: "c4", name: "Biscuits & Snacks" }, imageUrl: "https://images.unsplash.com/photo-1558961303-1d20210a2e41?w=200&q=80" },
+                    { id: "7", name: "Huile Fleurial Sans Cholestérol 1L", price: 250, cost: 190, wholesalePrice: 225, dealerPrice: 215, tvaRate: 9, stock: 4, minStock: 15, categoryId: "c5", category: { id: "c5", name: "Épicerie" }, imageUrl: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=200&q=80" },
+                    { id: "8", name: "Savon Liquide Vénus 500ml", price: 180, cost: 120, wholesalePrice: 155, dealerPrice: 145, tvaRate: 19, stock: 210, minStock: 25, categoryId: "c6", category: { id: "c6", name: "Hygiène" }, imageUrl: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=200&q=80" },
                 ]);
             }
         } catch (err) {
@@ -142,12 +144,22 @@ export default function CatalogScreen({ navigation }: any) {
         emptyList: isAr ? "لا توجد منتجات مطابقة للبحث" : "Aucun produit trouvé",
         selected: isAr ? "منتجات محددة" : "produits sélectionnés",
         allCategories: isAr ? "الكل" : "Tous",
+        managerMode: isAr ? "وضع المسيّر (عرض كل الأسعار)" : "Mode Gérant (Tous les prix)",
     };
 
     // Calculate profit margin percentage
     const getMargin = (price: number, cost: number | null) => {
         if (!cost || price <= 0) return 0;
         return Math.round(((price - cost) / price) * 100);
+    };
+
+    const getPlaceholderBgColor = (name: string) => {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 35%, 20%)`;
     };
 
     // Compile Selected Items to WhatsApp Format
@@ -167,8 +179,10 @@ export default function CatalogScreen({ navigation }: any) {
             message += `${index + 1}. *${item.name}*\n`;
             if (activeTab === "sales") {
                 message += `   • ${labels.retailPrice}: *${item.price.toLocaleString()} DA*\n`;
-                if (item.wholesalePrice) message += `   • ${labels.wholesalePrice}: *${item.wholesalePrice.toLocaleString()} DA*\n`;
-                if (item.dealerPrice) message += `   • ${labels.dealerPrice}: *${item.dealerPrice.toLocaleString()} DA*\n`;
+                if (managerMode) {
+                    if (item.wholesalePrice) message += `   • ${labels.wholesalePrice}: *${item.wholesalePrice.toLocaleString()} DA*\n`;
+                    if (item.dealerPrice) message += `   • ${labels.dealerPrice}: *${item.dealerPrice.toLocaleString()} DA*\n`;
+                }
             } else {
                 message += `   • ${isAr ? "السعر" : "Tarif"}: *${item.price.toLocaleString()} DA*\n`;
                 message += `   • ${isAr ? "الحالة" : "Statut Stock"}: ${item.stock > 0 ? `🟢 (${item.stock} ${labels.units})` : "🔴 En rupture"}\n`;
@@ -219,14 +233,14 @@ export default function CatalogScreen({ navigation }: any) {
                         <div style="font-size: 10px; color: #64748b; margin-top: 4px;">${item.category?.name || "Général"}</div>
                     </td>
                     <td style="padding: 12px; color: #10b981; font-weight: 800; text-align: right;">${item.price.toLocaleString()} DA</td>
-                    ${activeTab === "sales" ? `
+                    ${(activeTab === "sales" && managerMode) ? `
                         <td style="padding: 12px; color: #3b82f6; font-weight: 700; text-align: right;">${item.wholesalePrice ? `${item.wholesalePrice.toLocaleString()} DA` : "-"}</td>
                         <td style="padding: 12px; color: #a855f7; font-weight: 700; text-align: right;">${item.dealerPrice ? `${item.dealerPrice.toLocaleString()} DA` : "-"}</td>
-                    ` : `
+                    ` : (activeTab === "product" ? `
                         <td style="padding: 12px; font-weight: 700; text-align: center; color: ${isRupture ? "#ef4444" : "#22c55e"};">
                             ${isRupture ? "Rupture" : `${item.stock} u.`}
                         </td>
-                    `}
+                    ` : '')}
                 </tr>
             `;
         }).join("");
@@ -330,12 +344,12 @@ export default function CatalogScreen({ navigation }: any) {
                             <th style="width: 50px; text-align: center;">N°</th>
                             <th style="text-align: left;">Désignation Produit</th>
                             <th style="text-align: right;">Prix Détail</th>
-                            ${activeTab === "sales" ? `
+                            ${(activeTab === "sales" && managerMode) ? `
                                 <th style="text-align: right;">Prix Gros</th>
                                 <th style="text-align: right;">Prix Semi-Gros</th>
-                            ` : `
+                            ` : (activeTab === "product" ? `
                                 <th style="text-align: center;">Disponibilité</th>
-                            `}
+                            ` : '')}
                         </tr>
                     </thead>
                     <tbody>
@@ -426,6 +440,27 @@ export default function CatalogScreen({ navigation }: any) {
                 />
             </View>
 
+            {/* Controls Bar: Manager Mode Toggle */}
+            <View style={styles.controlRow}>
+                <View style={styles.toggleContainer}>
+                    <Ionicons
+                        name={managerMode ? "eye-outline" : "eye-off-outline"}
+                        size={18}
+                        color={managerMode ? "#22c55e" : "#64748b"}
+                    />
+                    <Text style={[styles.toggleLabel, managerMode && styles.toggleLabelActive]}>
+                        {labels.managerMode}
+                    </Text>
+                </View>
+                <Switch
+                    value={managerMode}
+                    onValueChange={setManagerMode}
+                    trackColor={{ false: "#1e293b", true: "#22c55e" }}
+                    thumbColor={managerMode ? "#fff" : "#64748b"}
+                    ios_backgroundColor="#1e293b"
+                />
+            </View>
+
             {/* Segmented Dual Sub-Tabs */}
             <View style={styles.tabContainer}>
                 <TouchableOpacity
@@ -488,6 +523,21 @@ export default function CatalogScreen({ navigation }: any) {
                                     </View>
                                 )}
 
+                                {/* Product Image Thumbnail */}
+                                <View style={styles.productImageContainer}>
+                                    {item.imageUrl ? (
+                                        <Image
+                                            source={{ uri: item.imageUrl }}
+                                            style={styles.productImage}
+                                            resizeMode="cover"
+                                        />
+                                    ) : (
+                                        <View style={[styles.productImagePlaceholder, { backgroundColor: getPlaceholderBgColor(item.name) }]}>
+                                            <Ionicons name="cube-outline" size={22} color="#94a3b8" />
+                                        </View>
+                                    )}
+                                </View>
+
                                 {/* Main Card Details */}
                                 <View style={styles.cardContent}>
                                     <View style={styles.cardHeaderRow}>
@@ -505,8 +555,8 @@ export default function CatalogScreen({ navigation }: any) {
                                     {/* Pricing & Margins Grid (Vente vs Produit Tab views) */}
                                     {activeTab === "sales" ? (
                                         <View style={styles.pricingGrid}>
-                                            {/* Cost price for manager eyes */}
-                                            {item.cost && (
+                                            {/* Cost price for manager eyes - ONLY show if managerMode is active */}
+                                            {managerMode && item.cost && (
                                                 <View style={styles.priceRow}>
                                                     <Text style={styles.priceLabel}>{labels.buyPrice}:</Text>
                                                     <Text style={styles.costValue}>{item.cost.toLocaleString()} DA</Text>
@@ -517,23 +567,23 @@ export default function CatalogScreen({ navigation }: any) {
                                                 <Text style={styles.priceLabel}>{labels.retailPrice}:</Text>
                                                 <Text style={styles.retailValue}>{item.price.toLocaleString()} DA</Text>
                                             </View>
-                                            {/* Wholesale price */}
-                                            {item.wholesalePrice && (
+                                            {/* Wholesale price - ONLY show if managerMode is active */}
+                                            {managerMode && item.wholesalePrice && (
                                                 <View style={styles.priceRow}>
                                                     <Text style={styles.priceLabel}>{labels.wholesalePrice}:</Text>
                                                     <Text style={styles.wholesaleValue}>{item.wholesalePrice.toLocaleString()} DA</Text>
                                                 </View>
                                             )}
-                                            {/* Dealer price */}
-                                            {item.dealerPrice && (
+                                            {/* Dealer price - ONLY show if managerMode is active */}
+                                            {managerMode && item.dealerPrice && (
                                                 <View style={styles.priceRow}>
                                                     <Text style={styles.priceLabel}>{labels.dealerPrice}:</Text>
                                                     <Text style={styles.dealerValue}>{item.dealerPrice.toLocaleString()} DA</Text>
                                                 </View>
                                             )}
 
-                                            {/* Profit Margin Indicator */}
-                                            {item.cost && margin > 0 && (
+                                            {/* Profit Margin Indicator - ONLY show if managerMode is active */}
+                                            {managerMode && item.cost && margin > 0 && (
                                                 <View style={styles.marginRow}>
                                                     <Ionicons name="trending-up-outline" size={14} color="#22c55e" />
                                                     <Text style={styles.marginText}>
@@ -676,6 +726,28 @@ const styles = StyleSheet.create({
         color: "#fff"
     },
 
+    controlRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        marginBottom: 12,
+        height: 40,
+    },
+    toggleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    toggleLabel: {
+        color: "#64748b",
+        fontSize: 12.5,
+        fontWeight: "700",
+    },
+    toggleLabelActive: {
+        color: "#22c55e",
+    },
+
     tabContainer: {
         flexDirection: "row",
         marginHorizontal: 16,
@@ -725,6 +797,23 @@ const styles = StyleSheet.create({
     productCardSelected: {
         borderColor: "#22c55e",
         backgroundColor: "#22c55e05",
+    },
+    productImageContainer: {
+        width: 56,
+        height: 56,
+        borderRadius: 12,
+        overflow: "hidden",
+        marginRight: 12,
+    },
+    productImage: {
+        width: "100%",
+        height: "100%",
+    },
+    productImagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
     },
     checkboxContainer: {
         marginRight: 12,
