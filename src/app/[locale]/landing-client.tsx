@@ -132,6 +132,12 @@ const T: Record<string, Record<string, string>> = {
     app2_f6: 'Chargement camion',
     app2_f7: 'Dashboard journée',
     app2_f8: 'Mode hors-ligne',
+    testi2_quote: '« Depuis que j\'utilise SyncloudPOS, j\'ai divisé mes erreurs de stock par 10. L\'import Excel m\'a fait gagner 3 jours de saisie. Et les alertes WhatsApp pour les reçus ? Mes clientes adorent ! »',
+    testi2_name: 'Samira K.',
+    testi2_role: 'Gérante – Boutique Mode, Oran',
+    testi3_quote: '« En tant que grossiste, j\'avais besoin de 3 prix différents par produit. SyncloudPOS gère ça parfaitement. Les tournées de livraison et la clôture de caisse quotidienne m\'ont changé la vie. »',
+    testi3_name: 'Youcef M.',
+    testi3_role: 'Grossiste – Distribution FMCG, Sétif',
   },
   en: {
     nav_features: 'Features',
@@ -257,6 +263,12 @@ const T: Record<string, Record<string, string>> = {
     app2_f6: 'Truck loading',
     app2_f7: 'Daily dashboard',
     app2_f8: 'Offline mode',
+    testi2_quote: '"Since I started using SyncloudPOS, my stock errors dropped by 90%. The Excel import saved me 3 days of manual entry. And WhatsApp receipts? My customers love it!"',
+    testi2_name: 'Samira K.',
+    testi2_role: 'Manager – Fashion Boutique, Oran',
+    testi3_quote: '"As a wholesaler, I needed 3 different price tiers per product. SyncloudPOS handles that perfectly. Delivery routes and the daily cash close changed my life."',
+    testi3_name: 'Youcef M.',
+    testi3_role: 'Wholesaler – FMCG Distribution, Sétif',
   },
   ar: {
     nav_features: 'المميزات',
@@ -382,6 +394,12 @@ const T: Record<string, Record<string, string>> = {
     app2_f6: 'تحميل الشاحنة',
     app2_f7: 'لوحة تحكم اليوم',
     app2_f8: 'وضع بدون اتصال',
+    testi2_quote: '« من يوم ما بديت نستعمل SyncloudPOS، أخطاء المخزون نقصت بنسبة 90%. استيراد Excel وفّرلي 3 أيام عمل. وإرسال الوصولات عبر واتساب؟ زبائني يحبوها! »',
+    testi2_name: 'سميرة ك.',
+    testi2_role: 'مديرة – بوتيك أزياء، وهران',
+    testi3_quote: '« كتاجر جملة، كنت محتاج 3 أسعار مختلفة لكل منتج. SyncloudPOS يتعامل مع هذا بشكل ممتاز. جولات التوصيل وإغلاق الصندوق اليومي غيّرولي حياتي. »',
+    testi3_name: 'يوسف م.',
+    testi3_role: 'تاجر جملة – توزيع FMCG، سطيف',
   },
 };
 
@@ -959,11 +977,28 @@ const P2_FEATS: Record<string, string[]> = {
 
 const F_OPTS = ['f_opts_0', 'f_opts_1', 'f_opts_2', 'f_opts_3', 'f_opts_4', 'f_opts_5', 'f_opts_6', 'f_opts_7', 'f_opts_8'];
 
+/* ═══════════════ TESTIMONIALS DATA ═══════════════ */
+interface Testimonial {
+  avatar: string;
+  nameKey: string;
+  roleKey: string;
+  quoteKey: string;
+  color: string;
+}
+
+const TESTIMONIALS: Testimonial[] = [
+  { avatar: 'A', nameKey: 'testi_name', roleKey: 'testi_role', quoteKey: 'testi_quote', color: '#22c55e' },
+  { avatar: 'S', nameKey: 'testi2_name', roleKey: 'testi2_role', quoteKey: 'testi2_quote', color: '#a855f7' },
+  { avatar: 'Y', nameKey: 'testi3_name', roleKey: 'testi3_role', quoteKey: 'testi3_quote', color: '#3b82f6' },
+];
+
 /* ═══════════════ COMPONENT ═══════════════ */
 export default function LandingClient({ locale, pageType = 'home' }: { locale: string, pageType?: 'home' | 'features' | 'apps' | 'usecases' | 'pricing' | 'contact' }) {
   const [lang, setLang] = useState(locale === 'ar' || locale === 'en' ? locale : 'fr');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [showFeatureDropdown, setShowFeatureDropdown] = useState(false);
 
   // Form state
   const [fn, setFn] = useState('');
@@ -1037,6 +1072,14 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
     document.documentElement.lang = lang;
   }, [lang]);
 
+  // Testimonials auto-rotate
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const sendWA = () => {
     let msg = 'Bonjour SyncloudPOS!';
     if (fn) msg += '\nNom: ' + fn;
@@ -1062,7 +1105,31 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
             <span className="lp-logo-text">Syncl<span>oud</span>POS</span>
           </a>
           <div className="lp-nav-links">
-            <a href={`/${lang}/features`} className={`lp-nav-link ${pageType === 'features' ? 'active' : ''}`}>{t('nav_features')}</a>
+            <div className="lp-nav-dropdown-wrap"
+                 onMouseEnter={() => setShowFeatureDropdown(true)}
+                 onMouseLeave={() => setShowFeatureDropdown(false)}>
+              <a href={`/${lang}/features`} className={`lp-nav-link ${pageType === 'features' ? 'active' : ''}`}>
+                {t('nav_features')} <span className="lp-nav-caret">▾</span>
+              </a>
+              {showFeatureDropdown && (
+                <div className="lp-mega-menu">
+                  <div className="lp-mega-grid">
+                    {FEATURES.map((cat, i) => (
+                      <a key={i} href={`/${lang}/features`} className="lp-mega-item" onClick={() => setShowFeatureDropdown(false)}>
+                        <span className="lp-mega-icon" style={{ background: cat.gradient }}>{cat.icon}</span>
+                        <div>
+                          <div className="lp-mega-title">{cat.title[lang] || cat.title.fr}</div>
+                          <div className="lp-mega-desc">{cat.desc[lang] || cat.desc.fr}</div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                  <div className="lp-mega-footer">
+                    <a href={`/${lang}/features`} className="lp-mega-all">{t('features_link')}</a>
+                  </div>
+                </div>
+              )}
+            </div>
             <a href={`/${lang}/apps`} className={`lp-nav-link ${pageType === 'apps' ? 'active' : ''}`}>{t('nav_apps')}</a>
             <a href={`/${lang}/usecases`} className={`lp-nav-link ${pageType === 'usecases' ? 'active' : ''}`}>{t('nav_usecases')}</a>
             <a href={`/${lang}/pricing`} className={`lp-nav-link ${pageType === 'pricing' ? 'active' : ''}`}>{t('nav_pricing')}</a>
@@ -1403,7 +1470,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
       )}
 
       {/* ═══ USE CASES ═══ */}
-      {(pageType === 'home' || pageType === 'usecases') && (
+      {pageType === 'usecases' && (
         <section id="usecases" className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
@@ -1430,7 +1497,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
       )}
 
       {/* ═══ MOBILE APPS ═══ */}
-      {(pageType === 'home' || pageType === 'apps') && (
+      {pageType === 'apps' && (
         <section id="apps" className="lp-section">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
@@ -1470,16 +1537,16 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                     : 'Lien de téléchargement direct APK (Sans Expo) :'}
                 </div>
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/c81330fe-e88d-412d-853a-97d63a81e87b"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-link"
                 >
-                  expo.dev/aitee/syncloud-gerant/builds/910b6151
+                  expo.dev/aitee/syncloud-gerant/builds/c81330fe
                 </a>
                 
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/c81330fe-e88d-412d-853a-97d63a81e87b"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-btn"
@@ -1491,7 +1558,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                 <div className="lp-qr-container">
                   <div className="lp-qr-box">
                     <QRCodeSVG
-                      value="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                      value="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/c81330fe-e88d-412d-853a-97d63a81e87b"
                       size={80}
                       level="H"
                       includeMargin={false}
@@ -1571,16 +1638,16 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                     : 'Lien de téléchargement direct APK (Sans Expo) :'}
                 </div>
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-link"
                 >
-                  expo.dev/aitee/syncloud-gerant/builds/910b6151
+                  expo.dev/aitee/syncloud-tournee/builds/c5445edf
                 </a>
                 
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                  href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-btn"
@@ -1592,7 +1659,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                 <div className="lp-qr-container">
                   <div className="lp-qr-box">
                     <QRCodeSVG
-                      value="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds/910b6151-61d1-41f0-adc3-5e5d1d7dfd88"
+                      value="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
                       size={80}
                       level="H"
                       includeMargin={false}
@@ -1659,7 +1726,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
       </section>
       )}
 
-      {/* ═══ TESTIMONIAL ═══ */}
+      {/* ═══ TESTIMONIALS CAROUSEL ═══ */}
       {(pageType === 'home' || pageType === 'usecases') && (
         <section className="lp-section lp-section-alt">
         <div className="lp-container">
@@ -1667,15 +1734,33 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
             <div className="lp-pill lp-pill-purple">{t('sec_testi_tag')}</div>
             <h2 className="lp-s-title">{t('sec_testi_title')}</h2>
           </div>
-          <div className="lp-testi-card lp-reveal">
-            <div className="lp-testi-stars">★★★★★</div>
-            <blockquote className="lp-testi-quote">{t('testi_quote')}</blockquote>
-            <div className="lp-testi-author">
-              <div className="lp-testi-avatar">A</div>
-              <div>
-                <div className="lp-testi-name">{t('testi_name')}</div>
-                <div className="lp-testi-role">{t('testi_role')}</div>
-              </div>
+          <div className="lp-testi-carousel lp-reveal">
+            <div className="lp-testi-track" style={{ transform: `translateX(-${activeTestimonial * 100}%)` }}>
+              {TESTIMONIALS.map((testi, idx) => (
+                <div key={idx} className="lp-testi-slide">
+                  <div className="lp-testi-card">
+                    <div className="lp-testi-stars">★★★★★</div>
+                    <blockquote className="lp-testi-quote">{t(testi.quoteKey)}</blockquote>
+                    <div className="lp-testi-author">
+                      <div className="lp-testi-avatar" style={{ background: testi.color }}>{testi.avatar}</div>
+                      <div>
+                        <div className="lp-testi-name">{t(testi.nameKey)}</div>
+                        <div className="lp-testi-role">{t(testi.roleKey)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="lp-testi-dots">
+              {TESTIMONIALS.map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`lp-testi-dot ${activeTestimonial === idx ? 'active' : ''}`}
+                  onClick={() => setActiveTestimonial(idx)}
+                  aria-label={`Testimonial ${idx + 1}`}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -1753,7 +1838,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
       )}
 
       {/* ═══ CONTACT ═══ */}
-      {(pageType === 'home' || pageType === 'contact') && (
+      {pageType === 'contact' && (
         <section id="contact" className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">

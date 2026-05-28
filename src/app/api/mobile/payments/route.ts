@@ -82,7 +82,8 @@ export async function POST(req: NextRequest) {
                 // Create transaction
                 await db.treasuryTransaction.create({
                     data: {
-                        accountId: finalAccountId,
+                        accountId: finalAccountId as string,
+                        tenantId: user.tenantId as string,
                         type: "INFLOW",
                         amount,
                         balanceBefore,
