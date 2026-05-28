@@ -13,20 +13,18 @@ type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
 
 const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
     GEMINI: [
-        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash" },
         { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-        { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash" },
         { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
     ],
     OPENAI: [
-        { id: "gpt-4o-mini", label: "GPT-4o Mini" },
         { id: "gpt-4o", label: "GPT-4o" },
-        { id: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
-        { id: "gpt-4.1", label: "GPT-4.1" },
+        { id: "gpt-4o-mini", label: "GPT-4o Mini" },
     ],
     ANTHROPIC: [
-        { id: "claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
-        { id: "claude-3-5-haiku-20241022", label: "Claude 3.5 Haiku" },
+        { id: "claude-opus-4-7", label: "Claude Opus 4.7" },
+        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet" },
+        { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku" },
     ]
 };
 

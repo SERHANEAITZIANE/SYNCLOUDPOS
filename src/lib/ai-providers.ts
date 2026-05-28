@@ -30,24 +30,24 @@ interface AIResponse {
 
 // ─── Default models per provider ────────────────────────────────────────────
 export const DEFAULT_MODELS: Record<AIProvider, string> = {
-    GEMINI: "gemini-2.0-flash",
-    OPENAI: "gpt-4o-mini",
-    ANTHROPIC: "claude-3-5-sonnet-latest",
+    GEMINI: "gemini-3.5-flash",
+    OPENAI: "gpt-4o",
+    ANTHROPIC: "claude-opus-4-7",
 };
 
 export const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
     GEMINI: [
-        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Dernier Stable — Recommandé)" },
-        { id: "gemini-2.0-flash-lite-preview-02-05", label: "Gemini 2.0 Flash Lite (Ultra-Rapide)" },
-        { id: "gemini-1.5-flash", label: "Gemini 1.5 Flash (Standard)" },
-        { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Puissant)" },
+        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash (Dernier Ultra-Rapide 2026 — Recommandé)" },
+        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Stable)" },
+        { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Raisonnement Complexe)" },
     ],
     OPENAI: [
-        { id: "gpt-4o-mini", label: "GPT-4o Mini (Rapide)" },
-        { id: "gpt-4o", label: "GPT-4o (Puissant)" },
+        { id: "gpt-4o", label: "GPT-4o (Dernier Flagship OpenAI — Excellent pour le Darija)" },
+        { id: "gpt-4o-mini", label: "GPT-4o Mini (Ultra-Rapide & Économique)" },
     ],
     ANTHROPIC: [
-        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet (Ultra-Intelligent)" },
+        { id: "claude-opus-4-7", label: "Claude Opus 4.7 (Intelligence Suprême 2026 — Recommandé)" },
+        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet (Standard)" },
         { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku (Rapide)" },
     ],
 };

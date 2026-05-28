@@ -45,9 +45,9 @@ export const AiSettingsForm = ({
             // Set default model if empty
             let modelToSave = aiModel;
             if (!modelToSave) {
-                if (provider === "GEMINI") modelToSave = "gemini-1.5-flash";
-                if (provider === "OPENAI") modelToSave = "gpt-4o-mini";
-                if (provider === "ANTHROPIC") modelToSave = "claude-3-haiku-20240307";
+                if (provider === "GEMINI") modelToSave = "gemini-3.5-flash";
+                if (provider === "OPENAI") modelToSave = "gpt-4o";
+                if (provider === "ANTHROPIC") modelToSave = "claude-opus-4-7";
             }
 
             const result = await updateSystemSettings({
@@ -170,10 +170,9 @@ export const AiSettingsForm = ({
                                     disabled={loading}
                                 >
                                     <option value="">Sélectionnez un modèle</option>
-                                    <option value="gemini-3.1-pro">Gemini 3.1 Pro (Le plus avancé)</option>
-                                    <option value="gemini-3.1-flash">Gemini 3.1 Flash (Ultra Rapide)</option>
-                                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Performant)</option>
-                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rapide)</option>
+                                    <option value="gemini-3.5-flash">Gemini 3.5 Flash (Dernier Ultra-Rapide 2026 — Recommandé)</option>
+                                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Stable)</option>
+                                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Raisonnement Complexe)</option>
                                 </select>
                             </div>
                             {testResult?.provider === "GEMINI" && (
@@ -226,11 +225,8 @@ export const AiSettingsForm = ({
                                     disabled={loading}
                                 >
                                     <option value="">Sélectionnez un modèle</option>
-                                    <option value="gpt-5">GPT-5 (Dernière Génération)</option>
-                                    <option value="o1">o1 (Raisonnement Avancé)</option>
-                                    <option value="o3-mini">o3-mini (Rapide)</option>
-                                    <option value="gpt-4.5-preview">GPT-4.5 Preview (Ancien flagship)</option>
-                                    <option value="gpt-4o">GPT-4o (Standard Performant)</option>
+                                    <option value="gpt-4o">GPT-4o (Dernier Flagship OpenAI — Excellent pour le Darija)</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini (Ultra-Rapide & Économique)</option>
                                 </select>
                             </div>
                             {testResult?.provider === "OPENAI" && (
@@ -283,10 +279,9 @@ export const AiSettingsForm = ({
                                     disabled={loading}
                                 >
                                     <option value="">Sélectionnez un modèle</option>
-                                    <option value="claude-4.6-opus">Claude 4.6 Opus (Le plus intelligent)</option>
-                                    <option value="claude-4.6-sonnet">Claude 4.6 Sonnet (Équilibré & Puissant)</option>
-                                    <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet (Génération Précédente)</option>
-                                    <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Ancien)</option>
+                                    <option value="claude-opus-4-7">Claude Opus 4.7 (Intelligence Suprême 2026 — Recommandé)</option>
+                                    <option value="claude-3-5-sonnet-latest">Claude 3.5 Sonnet (Standard)</option>
+                                    <option value="claude-3-5-haiku-latest">Claude 3.5 Haiku (Rapide)</option>
                                 </select>
                             </div>
                             {testResult?.provider === "ANTHROPIC" && (
