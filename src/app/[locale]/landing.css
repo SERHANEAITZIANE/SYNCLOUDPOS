@@ -172,6 +172,14 @@
   width: 100%;
 }
 
+.lp-nav-link.active {
+  color: var(--lp-text);
+}
+
+.lp-nav-link.active::after {
+  width: 100%;
+}
+
 /* Language Switcher */
 .lp-lang-switch {
   display: flex;

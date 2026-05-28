@@ -14,6 +14,8 @@ const T: Record<string, Record<string, string>> = {
     nav_pricing: 'Tarifs',
     nav_contact: 'Contact',
     nav_cta: 'Essai Gratuit',
+    nav_login: 'Se connecter',
+    nav_register: "S'inscrire",
     hero_badge: '🇩🇿 Logiciel de Caisse Algérien N°1',
     hero_h1a: 'Gérez votre commerce avec',
     hero_h1b: 'intelligence',
@@ -137,6 +139,8 @@ const T: Record<string, Record<string, string>> = {
     nav_pricing: 'Pricing',
     nav_contact: 'Contact',
     nav_cta: 'Free Trial',
+    nav_login: 'Login',
+    nav_register: 'Register',
     hero_badge: '🇩🇿 Algeria\'s #1 POS Software',
     hero_h1a: 'Manage your business with',
     hero_h1b: 'intelligence',
@@ -260,6 +264,8 @@ const T: Record<string, Record<string, string>> = {
     nav_pricing: 'الأسعار',
     nav_contact: 'اتصل بنا',
     nav_cta: 'تجربة مجانية',
+    nav_login: 'تسجيل الدخول',
+    nav_register: 'إنشاء حساب',
     hero_badge: '🇩🇿 برنامج الكاشير الجزائري رقم 1',
     hero_h1a: 'أدِر تجارتك بـ',
     hero_h1b: 'ذكاء',
@@ -954,7 +960,7 @@ const P2_FEATS: Record<string, string[]> = {
 const F_OPTS = ['f_opts_0', 'f_opts_1', 'f_opts_2', 'f_opts_3', 'f_opts_4', 'f_opts_5', 'f_opts_6', 'f_opts_7', 'f_opts_8'];
 
 /* ═══════════════ COMPONENT ═══════════════ */
-export default function LandingClient({ locale }: { locale: string }) {
+export default function LandingClient({ locale, pageType = 'home' }: { locale: string, pageType?: 'home' | 'features' | 'apps' | 'usecases' | 'pricing' | 'contact' }) {
   const [lang, setLang] = useState(locale === 'ar' || locale === 'en' ? locale : 'fr');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -1046,7 +1052,7 @@ export default function LandingClient({ locale }: { locale: string }) {
       {/* ═══ NAVBAR ═══ */}
       <nav className={`lp-nav ${scrolled ? 'scrolled' : ''}`} id="landing-nav">
         <div className="lp-nav-inner">
-          <a href="#" className="lp-logo" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+          <a href={`/${lang}`} className="lp-logo">
             <div className="lp-logo-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M3 3h18v18H3z" stroke="currentColor" strokeWidth="2" rx="2" />
@@ -1056,11 +1062,11 @@ export default function LandingClient({ locale }: { locale: string }) {
             <span className="lp-logo-text">Syncl<span>oud</span>POS</span>
           </a>
           <div className="lp-nav-links">
-            <a href="#features" className="lp-nav-link">{t('nav_features')}</a>
-            <a href="#apps" className="lp-nav-link">{t('nav_apps')}</a>
-            <a href="#usecases" className="lp-nav-link">{t('nav_usecases')}</a>
-            <a href="#pricing" className="lp-nav-link">{t('nav_pricing')}</a>
-            <a href="#contact" className="lp-nav-link">{t('nav_contact')}</a>
+            <a href={`/${lang}/features`} className={`lp-nav-link ${pageType === 'features' ? 'active' : ''}`}>{t('nav_features')}</a>
+            <a href={`/${lang}/apps`} className={`lp-nav-link ${pageType === 'apps' ? 'active' : ''}`}>{t('nav_apps')}</a>
+            <a href={`/${lang}/usecases`} className={`lp-nav-link ${pageType === 'usecases' ? 'active' : ''}`}>{t('nav_usecases')}</a>
+            <a href={`/${lang}/pricing`} className={`lp-nav-link ${pageType === 'pricing' ? 'active' : ''}`}>{t('nav_pricing')}</a>
+            <a href={`/${lang}/contact`} className={`lp-nav-link ${pageType === 'contact' ? 'active' : ''}`}>{t('nav_contact')}</a>
             <div className="lp-lang-switch">
               {['fr', 'en', 'ar'].map((l) => (
                 <button key={l} className={`lp-lang-btn ${lang === l ? 'active' : ''}`} onClick={() => setLang(l)}>
@@ -1068,7 +1074,8 @@ export default function LandingClient({ locale }: { locale: string }) {
                 </button>
               ))}
             </div>
-            <button className="lp-nav-cta" onClick={goTrial}>{t('nav_cta')}</button>
+            <a href={`/${lang}/login`} className="lp-nav-link lp-login-btn-nav" style={{ marginRight: '8px', opacity: 0.85 }}>{t('nav_login')}</a>
+            <button className="lp-nav-cta" onClick={() => window.location.href = `/${lang}/register`}>{t('nav_register')}</button>
           </div>
           <button className={`lp-hamburger ${menuOpen ? 'active' : ''}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
             <span /><span /><span />
@@ -1078,11 +1085,12 @@ export default function LandingClient({ locale }: { locale: string }) {
 
       {/* Mobile Menu */}
       <div className={`lp-mob-menu ${menuOpen ? 'open' : ''}`}>
-        <a href="#features" onClick={() => setMenuOpen(false)}>{t('nav_features')}</a>
-        <a href="#apps" onClick={() => setMenuOpen(false)}>{t('nav_apps')}</a>
-        <a href="#usecases" onClick={() => setMenuOpen(false)}>{t('nav_usecases')}</a>
-        <a href="#pricing" onClick={() => setMenuOpen(false)}>{t('nav_pricing')}</a>
-        <a href="#contact" onClick={() => setMenuOpen(false)}>{t('nav_contact')}</a>
+        <a href={`/${lang}/features`} onClick={() => setMenuOpen(false)}>{t('nav_features')}</a>
+        <a href={`/${lang}/apps`} onClick={() => setMenuOpen(false)}>{t('nav_apps')}</a>
+        <a href={`/${lang}/usecases`} onClick={() => setMenuOpen(false)}>{t('nav_usecases')}</a>
+        <a href={`/${lang}/pricing`} onClick={() => setMenuOpen(false)}>{t('nav_pricing')}</a>
+        <a href={`/${lang}/contact`} onClick={() => setMenuOpen(false)}>{t('nav_contact')}</a>
+        <a href={`/${lang}/login`} onClick={() => setMenuOpen(false)} style={{ color: '#4ade80', fontWeight: 'bold' }}>{t('nav_login')}</a>
         <div className="lp-lang-switch" style={{ margin: '8px 0' }}>
           {['fr', 'en', 'ar'].map((l) => (
             <button key={l} className={`lp-lang-btn ${lang === l ? 'active' : ''}`} onClick={() => { setLang(l); setMenuOpen(false); }}>
@@ -1090,11 +1098,36 @@ export default function LandingClient({ locale }: { locale: string }) {
             </button>
           ))}
         </div>
-        <button className="lp-btn-primary" onClick={() => { goTrial(); setMenuOpen(false); }}>{t('nav_cta')}</button>
+        <button className="lp-btn-primary" onClick={() => { window.location.href = `/${lang}/register`; setMenuOpen(false); }}>{t('nav_register')}</button>
       </div>
 
-      {/* ═══ HERO ═══ */}
-      <section className="lp-hero">
+      {pageType !== 'home' && (
+        <section className="lp-hero" style={{ padding: '140px 0 60px 0', minHeight: 'auto', background: 'radial-gradient(circle at top, rgba(124, 58, 237, 0.08), transparent 60%)' }}>
+          <div className="lp-container">
+            <div className="lp-hero-inner" style={{ textAlign: 'center' }}>
+              <h1 className="lp-hero-title" style={{ fontSize: '3rem', marginBottom: '1rem', background: 'linear-gradient(135deg, #fff 30%, #94a3b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                {pageType === 'features' && t('nav_features')}
+                {pageType === 'apps' && t('sec_apps_tag')}
+                {pageType === 'usecases' && t('nav_usecases')}
+                {pageType === 'pricing' && t('sec_price_title')}
+                {pageType === 'contact' && t('nav_contact')}
+              </h1>
+              <p className="lp-hero-desc" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '1.1rem', color: '#94a3b8' }}>
+                {pageType === 'features' && t('sec_feat_desc')}
+                {pageType === 'apps' && t('sec_apps_desc')}
+                {pageType === 'usecases' && t('sec_uc_desc')}
+                {pageType === 'pricing' && t('sec_price_desc')}
+                {pageType === 'contact' && t('sec_cont_desc')}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {pageType === 'home' && (
+        <>
+          {/* ═══ HERO ═══ */}
+          <section className="lp-hero">
         <div className="lp-hero-bg">
           <div className="lp-hero-orb lp-orb1" />
           <div className="lp-hero-orb lp-orb2" />
@@ -1115,7 +1148,7 @@ export default function LandingClient({ locale }: { locale: string }) {
               <p className="lp-hero-desc lp-slide-up">{t('hero_desc')}</p>
               <div className="lp-hero-actions lp-slide-up">
                 <button className="lp-btn-primary" onClick={goTrial}>{t('hero_cta1')}</button>
-                <a href="#features" className="lp-btn-ghost">{t('hero_cta2')}</a>
+                <a href={`/${lang}/features`} className="lp-btn-ghost">{t('hero_cta2')}</a>
               </div>
               <div className="lp-hero-stats lp-slide-up" id="hero-stats">
                 <div className="lp-hstat"><div className="lp-hstat-num">120+</div><div className="lp-hstat-lbl">{t('stat1')}</div></div>
@@ -1208,9 +1241,12 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {/* ═══ FEATURES ═══ */}
-      <section id="features" className="lp-section">
+      {(pageType === 'home' || pageType === 'features') && (
+        <section id="features" className="lp-section">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-purple">{t('sec_feat_tag')}</div>
@@ -1218,7 +1254,8 @@ export default function LandingClient({ locale }: { locale: string }) {
             <p className="lp-s-desc">{t('sec_feat_desc')}</p>
           </div>
 
-          <div className="lp-features-explorer lp-reveal">
+          {pageType === 'features' ? (
+            <div className="lp-features-explorer lp-reveal">
             {/* Search Bar */}
             <div className="lp-search-container">
               <div className="lp-search-input-wrap">
@@ -1331,14 +1368,43 @@ export default function LandingClient({ locale }: { locale: string }) {
                 >
                   {lang === 'ar' ? 'إعادة ضبط البحث' : lang === 'en' ? 'Reset search' : 'Réinitialiser la recherche'}
                 </button>
-              </div>
-            )}
+            </div>
+          )}
           </div>
+          ) : (
+            <div className="lp-features-summary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '40px' }}>
+              {FEATURES.slice(0, 4).map((cat) => (
+                <div key={cat.title.fr} className="lp-feature-sum-card" style={{ background: '#1e293b', padding: '32px', borderRadius: '24px', border: '1px solid #334155' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>{cat.icon}</div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#fff', marginBottom: '12px' }}>
+                    {lang === 'ar' ? cat.title.ar : lang === 'en' ? cat.title.en : cat.title.fr}
+                  </h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '20px', lineHeight: 1.6 }}>
+                    {lang === 'ar' ? cat.desc.ar : lang === 'en' ? cat.desc.en : cat.desc.fr}
+                  </p>
+                  <ul style={{ color: '#f8fafc', paddingLeft: '16px', listStyleType: 'disc', fontSize: '0.9rem' }}>
+                    {(cat.items[lang] || cat.items.fr).slice(0, 4).map((item, idx) => (
+                      <li key={idx} style={{ marginBottom: '8px' }}>
+                        <strong>{item.title}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', marginTop: '32px' }}>
+                <button className="lp-btn-primary" onClick={() => window.location.href = `/${lang}/features`} style={{ padding: '16px 36px', fontSize: '1.1rem' }}>
+                  {lang === 'ar' ? 'اكتشف كل المميزات الـ 120+ ←' : lang === 'en' ? 'Explore all 120+ Features ←' : 'Découvrir toutes les 120+ fonctionnalités ←'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
+      )}
 
       {/* ═══ USE CASES ═══ */}
-      <section id="usecases" className="lp-section lp-section-alt">
+      {(pageType === 'home' || pageType === 'usecases') && (
+        <section id="usecases" className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-teal">{t('sec_uc_tag')}</div>
@@ -1361,9 +1427,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ MOBILE APPS ═══ */}
-      <section id="apps" className="lp-section">
+      {(pageType === 'home' || pageType === 'apps') && (
+        <section id="apps" className="lp-section">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-purple">{t('sec_apps_tag')}</div>
@@ -1563,9 +1631,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="lp-section lp-section-alt">
+      {pageType === 'home' && (
+        <section className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-yellow">{t('sec_how_tag')}</div>
@@ -1587,9 +1657,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ TESTIMONIAL ═══ */}
-      <section className="lp-section lp-section-alt">
+      {(pageType === 'home' || pageType === 'usecases') && (
+        <section className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-purple">{t('sec_testi_tag')}</div>
@@ -1608,9 +1680,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="lp-section">
+      {(pageType === 'home' || pageType === 'pricing') && (
+        <section id="pricing" className="lp-section">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-teal">{t('sec_price_tag')}</div>
@@ -1648,9 +1722,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ TRIAL CTA ═══ */}
-      <section className="lp-trial">
+      {(pageType === 'home' || pageType === 'pricing') && (
+        <section className="lp-trial">
         <div className="lp-container">
           <div className="lp-trial-inner lp-reveal">
             <div className="lp-trial-orb lp-trial-orb1" />
@@ -1674,9 +1750,11 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ CONTACT ═══ */}
-      <section id="contact" className="lp-section lp-section-alt">
+      {(pageType === 'home' || pageType === 'contact') && (
+        <section id="contact" className="lp-section lp-section-alt">
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-purple">{t('sec_cont_tag')}</div>
@@ -1740,6 +1818,7 @@ export default function LandingClient({ locale }: { locale: string }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* ═══ FOOTER ═══ */}
       <footer className="lp-footer">
@@ -1760,18 +1839,18 @@ export default function LandingClient({ locale }: { locale: string }) {
             </div>
             <div className="lp-footer-col">
               <h4>{t('fl1')}</h4>
-              <a href="#features">{lang === 'ar' ? 'الكاشير' : lang === 'en' ? 'POS' : 'Caisse POS'}</a>
-              <a href="#features">{lang === 'ar' ? 'إدارة المخزون' : lang === 'en' ? 'Stock Management' : 'Gestion stock'}</a>
-              <a href="#features">{lang === 'ar' ? 'عملاء وديون' : lang === 'en' ? 'Clients & Credits' : 'Clients & Crédits'}</a>
-              <a href="#features">{lang === 'ar' ? 'استيراد Excel' : lang === 'en' ? 'Excel Import' : 'Import Excel'}</a>
-              <a href="#features">{lang === 'ar' ? 'محلات متعددة' : lang === 'en' ? 'Multi-Store' : 'Multi-magasins'}</a>
+              <a href={`/${lang}/features`}>{lang === 'ar' ? 'الكاشير' : lang === 'en' ? 'POS' : 'Caisse POS'}</a>
+              <a href={`/${lang}/features`}>{lang === 'ar' ? 'إدارة المخزون' : lang === 'en' ? 'Stock Management' : 'Gestion stock'}</a>
+              <a href={`/${lang}/features`}>{lang === 'ar' ? 'عملاء وديون' : lang === 'en' ? 'Clients & Credits' : 'Clients & Crédits'}</a>
+              <a href={`/${lang}/features`}>{lang === 'ar' ? 'استيراد Excel' : lang === 'en' ? 'Excel Import' : 'Import Excel'}</a>
+              <a href={`/${lang}/features`}>{lang === 'ar' ? 'محلات متعددة' : lang === 'en' ? 'Multi-Store' : 'Multi-magasins'}</a>
             </div>
             <div className="lp-footer-col">
               <h4>{t('fl2')}</h4>
               <a href={`${WA_BASE}?text=${encodeURIComponent('Bonjour, support SyncloudPOS')}`} target="_blank" rel="noopener noreferrer">
                 {lang === 'ar' ? 'دعم واتساب' : lang === 'en' ? 'WhatsApp Support' : 'WhatsApp Support'}
               </a>
-              <a href="#contact">{lang === 'ar' ? 'اتصل بنا' : lang === 'en' ? 'Contact us' : 'Nous contacter'}</a>
+              <a href={`/${lang}/contact`}>{lang === 'ar' ? 'اتصل بنا' : lang === 'en' ? 'Contact us' : 'Nous contacter'}</a>
               <a href={`/${lang}/register`}>{lang === 'ar' ? 'تجربة مجانية' : lang === 'en' ? 'Free Trial' : 'Essai gratuit'}</a>
             </div>
             <div className="lp-footer-col">
