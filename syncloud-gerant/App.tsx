@@ -134,7 +134,7 @@ function LoginScreen() {
                     )}
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>v1.0.0 — SynCloudPOS</Text>
+                <Text style={styles.versionText}>v1.1.0 — SynCloudPOS</Text>
             </View>
         </KeyboardAvoidingView>
     );
@@ -222,7 +222,7 @@ export default function App() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "1.0.0";
+                    const currentVersion = "1.1.0";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
