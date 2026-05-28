@@ -2,7 +2,7 @@
   "expo": {
     "name": "SynCloud Gérant",
     "slug": "syncloud-gerant",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -86,6 +86,12 @@
         "projectId": "71a39a0d-6556-40d4-91d9-b86cc7afa9d9"
       }
     },
-    "owner": "aitee"
+    "owner": "aitee",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/71a39a0d-6556-40d4-91d9-b86cc7afa9d9"
+    }
   }
 }
