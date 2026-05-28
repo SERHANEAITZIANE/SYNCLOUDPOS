@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
                     tvaRate: true, stock: true, minStock: true,
                     categoryId: true,
                     category: { select: { id: true, name: true } },
+                    brand: { select: { id: true, name: true, imageUrl: true } },
                     barcodes: { select: { value: true, label: true } },
                     images: { select: { url: true }, take: 1 },
                 },
