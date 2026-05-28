@@ -229,23 +229,25 @@ export default function CatalogScreen({ navigation }: any) {
         loadProducts();
     }, []);
 
-    // Extract Brands dynamically from products list (matching Webapp flow)
+    // Extract Brands dynamically from products list (matching Webapp flow - only showing brands available in stock)
     const brands = useMemo(() => {
         const unique = new Map<string, Brand>();
         products.forEach(p => {
-            const b = p.brand;
-            if (b && b.name) {
-                const existing = unique.get(b.id);
-                unique.set(b.id, {
-                    id: b.id,
-                    name: b.name,
-                    imageUrl: b.imageUrl,
-                    productCount: (existing?.productCount || 0) + 1
-                });
+            if (p.stock > 0) { // Only brands with products available in stock!
+                const b = p.brand;
+                if (b && b.name) {
+                    const existing = unique.get(b.id);
+                    unique.set(b.id, {
+                        id: b.id,
+                        name: b.name,
+                        imageUrl: b.imageUrl,
+                        productCount: (existing?.productCount || 0) + 1
+                    });
+                }
             }
         });
         
-        const noBrandCount = products.filter(p => !p.brand).length;
+        const noBrandCount = products.filter(p => !p.brand && p.stock > 0).length;
         const list = Array.from(unique.values());
         if (noBrandCount > 0) {
             list.push({ 
@@ -275,9 +277,11 @@ export default function CatalogScreen({ navigation }: any) {
         );
     }, [brands, brandSearch]);
 
-    // Filters for Products (Step 3)
+    // Filters for Products (Step 3 - only showing products available in stock)
     const filteredProducts = useMemo(() => {
         return products.filter(p => {
+            if (p.stock <= 0) return false; // ONLY show in-stock products!
+            
             const matchesBrand = selectedBrand
                 ? (selectedBrand.id === "NO_BRAND" ? !p.brand : p.brand?.id === selectedBrand.id)
                 : true;
@@ -800,6 +804,29 @@ export default function CatalogScreen({ navigation }: any) {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Quick navigation return row */}
+                    <View style={styles.quickNavRow}>
+                        <TouchableOpacity 
+                            style={styles.quickNavBtn}
+                            onPress={() => setStep("BRAND")}
+                        >
+                            <Ionicons name="pricetag" size={13} color="#3b82f6" />
+                            <Text style={styles.quickNavText}>
+                                {isAr ? "العودة للعلامات" : "Retour aux Marques"}
+                            </Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity 
+                            style={styles.quickNavBtn}
+                            onPress={() => setStep("CLIENT_TYPE")}
+                        >
+                            <Ionicons name="people" size={13} color="#10b981" />
+                            <Text style={styles.quickNavText}>
+                                {isAr ? "تغيير نوع الزبون" : "Retour Choix Client (Prix)"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
                     {loading ? (
                         <View style={styles.center}>
                             <ActivityIndicator size="large" color="#22c55e" />
@@ -956,125 +983,113 @@ export default function CatalogScreen({ navigation }: any) {
                 transparent={true}
                 onRequestClose={() => setSelectedProduct(null)}
             >
-                {selectedProduct && (
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContent}>
-                            <View style={styles.modalHeader}>
-                                <View style={{ flex: 1 }}>
-                                    <Text style={styles.modalTitle} numberOfLines={1}>{selectedProduct.name}</Text>
-                                    <Text style={styles.modalSubtitle}>
-                                        {selectedProduct.brand?.name || "Sans Marque"} • {selectedProduct.category?.name || "Général"}
-                                    </Text>
+                {selectedProduct ? (() => {
+                    const { price: activePrice, fallback } = getActivePrice(selectedProduct);
+                    const currentProfile = clientType === "RETAIL" ? labels.retailPrice : (clientType === "WHOLESALE" ? labels.wholesalePrice : labels.dealerPrice);
+                    const priceColor = clientType === "RETAIL" ? "#3b82f6" : (clientType === "WHOLESALE" ? "#10b981" : "#a855f7");
+
+                    return (
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContent}>
+                                <View style={styles.modalHeader}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.modalTitle} numberOfLines={1}>{selectedProduct.name}</Text>
+                                        <Text style={styles.modalSubtitle}>
+                                            {selectedProduct.brand?.name || "Sans Marque"} • {selectedProduct.category?.name || "Général"}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity 
+                                        style={styles.modalCloseCircle}
+                                        onPress={() => setSelectedProduct(null)}
+                                    >
+                                        <Ionicons name="close" size={22} color="#fff" />
+                                    </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity 
-                                    style={styles.modalCloseCircle}
-                                    onPress={() => setSelectedProduct(null)}
-                                >
-                                    <Ionicons name="close" size={22} color="#fff" />
-                                </TouchableOpacity>
-                            </View>
 
-                            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-                                {/* Grid Column 1: Image Showcase */}
-                                <View style={styles.modalImageWrapper}>
-                                    {selectedProduct.imageUrl ? (
-                                        <Image
-                                            source={{ uri: selectedProduct.imageUrl }}
-                                            style={styles.modalImage}
-                                            resizeMode="cover"
-                                        />
-                                    ) : (
-                                        <View style={[styles.modalImagePlaceholder, { backgroundColor: getPlaceholderBgColor(selectedProduct.name) }]}>
-                                            <Ionicons name="cube-outline" size={54} color="#94a3b8" />
-                                        </View>
-                                    )}
-
-                                    {/* Float Brand Logo Badge */}
-                                    {selectedProduct.brand?.imageUrl && (
-                                        <View style={styles.modalFloatBrandLogoContainer}>
-                                            <Image 
-                                                source={{ uri: selectedProduct.brand.imageUrl }}
-                                                style={styles.modalFloatBrandLogo}
+                                <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+                                    {/* Grid Column 1: Image Showcase */}
+                                    <View style={styles.modalImageWrapper}>
+                                        {selectedProduct.imageUrl ? (
+                                            <Image
+                                                source={{ uri: selectedProduct.imageUrl }}
+                                                style={styles.modalImage}
                                                 resizeMode="cover"
                                             />
+                                        ) : (
+                                            <View style={[styles.modalImagePlaceholder, { backgroundColor: getPlaceholderBgColor(selectedProduct.name) }]}>
+                                                <Ionicons name="cube-outline" size={54} color="#94a3b8" />
+                                            </View>
+                                        )}
+
+                                        {/* Float Brand Logo Badge */}
+                                        {selectedProduct.brand?.imageUrl && (
+                                            <View style={styles.modalFloatBrandLogoContainer}>
+                                                <Image 
+                                                    source={{ uri: selectedProduct.brand.imageUrl }}
+                                                    style={styles.modalFloatBrandLogo}
+                                                    resizeMode="cover"
+                                                />
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Side Stock & Barcode Pills */}
+                                    <View style={styles.modalDetailsRow}>
+                                        <View style={styles.modalDetailPill}>
+                                            <Text style={styles.modalPillLabel}>{labels.stockQty}</Text>
+                                            <Text style={styles.modalPillValueText} numberOfLines={1}>
+                                                {selectedProduct.stock} {labels.articles}
+                                            </Text>
                                         </View>
-                                    )}
-                                </View>
+                                        <View style={styles.modalDetailPill}>
+                                            <Text style={styles.modalPillLabel}>{labels.barcode}</Text>
+                                            <Text style={styles.modalPillValueText} numberOfLines={1}>
+                                                {selectedProduct.barcodes && selectedProduct.barcodes.length > 0 
+                                                    ? selectedProduct.barcodes[0].value 
+                                                    : "N/A"}
+                                            </Text>
+                                        </View>
+                                    </View>
 
-                                {/* Side Stock & Barcode Pills */}
-                                <View style={styles.modalDetailsRow}>
-                                    <View style={styles.modalDetailPill}>
-                                        <Text style={styles.modalPillLabel}>{labels.stockQty}</Text>
-                                        <Text style={styles.modalPillValueText} numberOfLines={1}>
-                                            {selectedProduct.stock} {labels.articles}
+                                    {/* Selected Price Card - No 3-price matrix shown here */}
+                                    <View style={styles.modalSinglePriceCard}>
+                                        <View style={styles.modalPriceCardHeader}>
+                                            <Ionicons name="wallet-outline" size={16} color={priceColor} />
+                                            <Text style={[styles.modalPriceCardLabel, { color: priceColor }]}>
+                                                {currentProfile}
+                                            </Text>
+                                        </View>
+                                        <Text style={styles.modalPriceCardValue}>
+                                            {activePrice.toLocaleString()} DA
                                         </Text>
+                                        {fallback && (
+                                            <Text style={styles.modalPriceCardFallback}>
+                                                * {labels.standardPrice}
+                                            </Text>
+                                        )}
                                     </View>
-                                    <View style={styles.modalDetailPill}>
-                                        <Text style={styles.modalPillLabel}>{labels.barcode}</Text>
-                                        <Text style={styles.modalPillValueText} numberOfLines={1}>
-                                            {selectedProduct.barcodes && selectedProduct.barcodes.length > 0 
-                                                ? selectedProduct.barcodes[0].value 
-                                                : "N/A"}
-                                        </Text>
-                                    </View>
-                                </View>
 
-                                {/* Grid Column 2: Complex Price Matrix */}
-                                <View style={styles.modalPriceMatrixContainer}>
-                                    <View style={styles.modalPriceMatrixTitleRow}>
-                                        <Ionicons name="layers-outline" size={16} color="#3b82f6" />
-                                        <Text style={styles.modalPriceMatrixTitle}>{labels.priceStructure}</Text>
-                                    </View>
-                                    
-                                    {/* Retail pricing */}
-                                    <View style={styles.matrixRow}>
-                                        <Text style={styles.matrixLabel}>{labels.retailPrice}</Text>
-                                        <Text style={[styles.matrixVal, { color: "#fff" }]}>
-                                            {selectedProduct.price.toLocaleString()} DA
+                                    {/* Description panel */}
+                                    <View style={styles.modalDescContainer}>
+                                        <Text style={styles.modalDescHeader}>{isAr ? "الوصف" : "Description de l'article"}</Text>
+                                        <Text style={styles.modalDescText}>
+                                            {selectedProduct.description || labels.noDescription}
                                         </Text>
                                     </View>
-                                    
-                                    {/* Wholesale pricing */}
-                                    <View style={styles.matrixRow}>
-                                        <Text style={styles.matrixLabel}>{labels.wholesalePrice}</Text>
-                                        <Text style={[styles.matrixVal, { color: selectedProduct.wholesalePrice ? "#10b981" : "#475569" }]}>
-                                            {selectedProduct.wholesalePrice 
-                                                ? `${selectedProduct.wholesalePrice.toLocaleString()} DA` 
-                                                : "Non configuré"}
-                                        </Text>
-                                    </View>
-                                    
-                                    {/* Dealer/Reseller pricing */}
-                                    <View style={styles.matrixRow}>
-                                        <Text style={styles.matrixLabel}>{labels.dealerPrice}</Text>
-                                        <Text style={[styles.matrixVal, { color: selectedProduct.dealerPrice ? "#a855f7" : "#475569" }]}>
-                                            {selectedProduct.dealerPrice 
-                                                ? `${selectedProduct.dealerPrice.toLocaleString()} DA` 
-                                                : "Non configuré"}
-                                        </Text>
-                                    </View>
-                                </View>
+                                </ScrollView>
 
-                                {/* Description panel */}
-                                <View style={styles.modalDescContainer}>
-                                    <Text style={styles.modalDescHeader}>{isAr ? "الوصف" : "Description de l'article"}</Text>
-                                    <Text style={styles.modalDescText}>
-                                        {selectedProduct.description || labels.noDescription}
-                                    </Text>
+                                <View style={styles.modalFooter}>
+                                    <TouchableOpacity 
+                                        style={styles.modalCloseButton}
+                                        onPress={() => setSelectedProduct(null)}
+                                    >
+                                        <Text style={styles.modalCloseButtonText}>{labels.closeBtn}</Text>
+                                    </TouchableOpacity>
                                 </View>
-                            </ScrollView>
-
-                            <View style={styles.modalFooter}>
-                                <TouchableOpacity 
-                                    style={styles.modalCloseButton}
-                                    onPress={() => setSelectedProduct(null)}
-                                >
-                                    <Text style={styles.modalCloseButtonText}>{labels.closeBtn}</Text>
-                                </TouchableOpacity>
                             </View>
                         </View>
-                    </View>
-                )}
+                    );
+                })() : null}
             </Modal>
         </View>
     );
@@ -1755,5 +1770,61 @@ const styles = StyleSheet.create({
         color: "#475569",
         fontSize: 14,
         fontWeight: "600"
+    },
+    quickNavRow: {
+        flexDirection: "row",
+        paddingHorizontal: 16,
+        paddingBottom: 12,
+        gap: 10,
+    },
+    quickNavBtn: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#111116",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.06)",
+        borderRadius: 10,
+        height: 38,
+        gap: 6,
+    },
+    quickNavText: {
+        color: "#94a3b8",
+        fontSize: 11.5,
+        fontWeight: "700",
+    },
+    modalSinglePriceCard: {
+        backgroundColor: "rgba(255, 255, 255, 0.02)",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.05)",
+        borderRadius: 18,
+        padding: 18,
+        marginTop: 14,
+        alignItems: "center",
+    },
+    modalPriceCardHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        marginBottom: 6,
+    },
+    modalPriceCardLabel: {
+        fontSize: 11.5,
+        fontWeight: "800",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+    },
+    modalPriceCardValue: {
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: "900",
+        marginVertical: 4,
+    },
+    modalPriceCardFallback: {
+        color: "#f59e0b",
+        fontSize: 10,
+        fontWeight: "700",
+        marginTop: 4,
     },
 });
