@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         const {
             customerId, tourStopId, type = "ORDER",
             items, paymentMethod = "CASH",
-            paymentAmount = 0, notes,
+            paymentAmount = 0, notes, treasuryAccountId,
         } = body;
 
         if (!customerId || !items?.length) {
@@ -162,6 +162,51 @@ export async function POST(req: NextRequest) {
                     paymentMethod,
                 },
             });
+        }
+
+        // Update treasury account and create inflow transaction if payment amount is positive
+        if (paymentAmount > 0) {
+            let finalAccountId = treasuryAccountId;
+            if (!finalAccountId) {
+                // Fetch first cash account of tenant as fallback default
+                const fallbackAcc = await db.treasuryAccount.findFirst({
+                    where: { tenantId: user.tenantId, type: "CASH" }
+                });
+                if (fallbackAcc) {
+                    finalAccountId = fallbackAcc.id;
+                }
+            }
+
+            if (finalAccountId) {
+                const account = await db.treasuryAccount.findUnique({
+                    where: { id: finalAccountId }
+                });
+
+                if (account) {
+                    const balanceBefore = Number(account.balance);
+                    const balanceAfter = balanceBefore + paymentAmount;
+
+                    // Update balance
+                    await db.treasuryAccount.update({
+                        where: { id: finalAccountId },
+                        data: { balance: { increment: paymentAmount } }
+                    });
+
+                    // Create inflow transaction entry
+                    await db.treasuryTransaction.create({
+                        data: {
+                            accountId: finalAccountId,
+                            type: "INFLOW",
+                            amount: paymentAmount,
+                            balanceBefore,
+                            balanceAfter,
+                            source: "SALE",
+                            referenceId: salesOrder.id,
+                            description: `Encaissé via Bon de Livraison ${receiptNumber} — Client: ${salesOrder.customer.name}`,
+                        }
+                    });
+                }
+            }
         }
 
         return NextResponse.json({

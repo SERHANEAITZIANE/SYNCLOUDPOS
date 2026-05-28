@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
         const user = requireMobileAuth(req);
         const body = await req.json();
 
-        const { customerId, amount, paymentMethod = "CASH", notes, tourStopId } = body;
+        const { customerId, amount, paymentMethod = "CASH", notes, tourStopId, treasuryAccountId } = body;
 
         if (!customerId || !amount || amount <= 0) {
             return NextResponse.json(
@@ -47,6 +47,51 @@ export async function POST(req: NextRequest) {
                     paymentMethod,
                 },
             });
+        }
+
+        // Update treasury account and log inflow transaction if applicable
+        let finalAccountId = treasuryAccountId;
+        if (!finalAccountId) {
+            // Find default cash or bank account based on payment method
+            const defaultAcc = await db.treasuryAccount.findFirst({
+                where: { 
+                    tenantId: user.tenantId, 
+                    type: paymentMethod === "CASH" ? "CASH" : "BANK" 
+                }
+            });
+            if (defaultAcc) {
+                finalAccountId = defaultAcc.id;
+            }
+        }
+
+        if (finalAccountId) {
+            const account = await db.treasuryAccount.findUnique({
+                where: { id: finalAccountId }
+            });
+
+            if (account) {
+                const balanceBefore = Number(account.balance);
+                const balanceAfter = balanceBefore + amount;
+
+                // Update caisse balance
+                await db.treasuryAccount.update({
+                    where: { id: finalAccountId },
+                    data: { balance: { increment: amount } }
+                });
+
+                // Create transaction
+                await db.treasuryTransaction.create({
+                    data: {
+                        accountId: finalAccountId,
+                        type: "INFLOW",
+                        amount,
+                        balanceBefore,
+                        balanceAfter,
+                        source: "PAYMENT",
+                        description: `Paiement de créance mobile — Client: ${customer.name} (${paymentMethod})`,
+                    }
+                });
+            }
         }
 
         // Create audit log for payment tracking

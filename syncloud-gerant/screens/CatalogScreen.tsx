@@ -808,6 +808,8 @@ export default function CatalogScreen({ navigation }: any) {
                         <FlatList
                             data={filteredProducts}
                             keyExtractor={(item) => item.id}
+                            numColumns={2}
+                            columnWrapperStyle={styles.brandGridRow}
                             contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: selectionMode ? 150 : 50 }}
                             ListEmptyComponent={
                                 <View style={styles.emptyContainer}>
@@ -832,7 +834,6 @@ export default function CatalogScreen({ navigation }: any) {
                                             styles.productCard,
                                             isSelected && styles.productCardSelected
                                         ]}
-                                        disabled={selectionMode ? false : false}
                                         onPress={() => {
                                             if (selectionMode) {
                                                 toggleSelectItem(item.id);
@@ -842,16 +843,7 @@ export default function CatalogScreen({ navigation }: any) {
                                         }}
                                         activeOpacity={0.8}
                                     >
-                                        {/* Checkbox inside selection mode */}
-                                        {selectionMode && (
-                                            <View style={styles.checkboxContainer}>
-                                                <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
-                                                    {isSelected && <Ionicons name="checkmark" size={14} color="#fff" />}
-                                                </View>
-                                            </View>
-                                        )}
-
-                                        {/* Product Image Thumbnail */}
+                                        {/* Product Image Container on top */}
                                         <View style={styles.productImageContainer}>
                                             {item.imageUrl ? (
                                                 <Image
@@ -861,46 +853,53 @@ export default function CatalogScreen({ navigation }: any) {
                                                 />
                                             ) : (
                                                 <View style={[styles.productImagePlaceholder, { backgroundColor: getPlaceholderBgColor(item.name) }]}>
-                                                    <Ionicons name="cube-outline" size={22} color="#94a3b8" />
+                                                    <Ionicons name="cube-outline" size={28} color="#94a3b8" />
+                                                </View>
+                                            )}
+
+                                            {/* Floating Stock Badge top-left */}
+                                            <View style={[styles.stockPillFloat, isRupture ? styles.stockRupture : styles.stockNormal]}>
+                                                <Text style={[styles.stockText, isRupture ? styles.stockTextRupture : styles.stockTextNormal]}>
+                                                    {isRupture ? labels.rupture : `${item.stock}`}
+                                                </Text>
+                                            </View>
+
+                                            {/* Floating Checkbox inside selection mode top-right */}
+                                            {selectionMode && (
+                                                <View style={styles.checkboxFloat}>
+                                                    <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
+                                                        {isSelected && <Ionicons name="checkmark" size={12} color="#fff" />}
+                                                    </View>
                                                 </View>
                                             )}
                                         </View>
 
-                                        {/* Main Card Details */}
-                                        <View style={styles.cardContent}>
-                                            <View style={styles.cardHeaderRow}>
-                                                <View style={{ flex: 1 }}>
-                                                    <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-                                                    <Text style={styles.productCat}>
-                                                        {item.brand?.name || "Sans Marque"} • {item.category?.name || "Général"}
-                                                    </Text>
-                                                </View>
-                                                <View style={[styles.stockPill, isRupture ? styles.stockRupture : styles.stockNormal]}>
-                                                    <Text style={[styles.stockText, isRupture ? styles.stockTextRupture : styles.stockTextNormal]}>
-                                                        {isRupture ? labels.rupture : `${item.stock} ${labels.available}`}
-                                                    </Text>
-                                                </View>
+                                        {/* Card content below image */}
+                                        <View style={styles.productCardBody}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.productCardCat} numberOfLines={1}>
+                                                    {item.brand?.name || "Sans Marque"} • {item.category?.name || "Général"}
+                                                </Text>
+                                                <Text style={styles.productCardTitle} numberOfLines={2}>{item.name}</Text>
                                             </View>
 
-                                            {/* Price Display matching Client Type */}
-                                            <View style={styles.priceContainerRow}>
-                                                <View style={{ flexDirection: "column" }}>
-                                                    <Text style={styles.priceSubLabel}>
-                                                        {labels.activePriceTag} ({clientType === "RETAIL" ? "Détail" : (clientType === "WHOLESALE" ? "Gros" : "Revendeur")})
+                                            <View style={styles.productCardFooter}>
+                                                <View style={styles.productCardPriceWrapper}>
+                                                    <Text style={styles.productCardPriceSub}>
+                                                        {labels.activePriceTag} ({clientType === "RETAIL" ? "Dét" : (clientType === "WHOLESALE" ? "Gros" : "Rev")})
                                                     </Text>
-                                                    <Text style={styles.priceValueText}>{activePrice.toLocaleString()} DA</Text>
+                                                    <Text style={styles.productCardPrice}>{activePrice.toLocaleString()} DA</Text>
                                                 </View>
-                                                
+
                                                 {fallback && (
-                                                    <View style={styles.fallbackBadge}>
-                                                        <Ionicons name="information-circle-outline" size={10} color="#f59e0b" />
-                                                        <Text style={styles.fallbackBadgeText}>{labels.standardPrice}</Text>
+                                                    <View style={styles.fallbackBadgeMini}>
+                                                        <Ionicons name="information-circle" size={10} color="#f59e0b" />
                                                     </View>
                                                 )}
-                                                
+
                                                 {!selectionMode && (
-                                                    <View style={styles.openDetailsArrow}>
-                                                        <Ionicons name="chevron-forward" size={16} color="#64748b" />
+                                                    <View style={styles.openDetailsArrowMini}>
+                                                        <Ionicons name="chevron-forward" size={12} color="#64748b" />
                                                     </View>
                                                 )}
                                             </View>
@@ -1347,31 +1346,28 @@ const styles = StyleSheet.create({
         fontWeight: "800",
     },
     productCard: {
-        flexDirection: "row",
+        width: "48%",
         backgroundColor: "#111116",
         borderWidth: 1,
         borderColor: "rgba(255, 255, 255, 0.08)",
         borderRadius: 18,
-        marginBottom: 10,
-        padding: 14,
-        alignItems: "center",
+        overflow: "hidden",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
         elevation: 3,
+        marginBottom: 14,
+        position: "relative",
     },
     productCardSelected: {
         borderColor: "#22c55e",
         backgroundColor: "rgba(34, 197, 94, 0.02)",
     },
-    checkboxContainer: {
-        marginRight: 10,
-    },
     checkbox: {
-        width: 20,
-        height: 20,
-        borderRadius: 6,
+        width: 18,
+        height: 18,
+        borderRadius: 5,
         borderWidth: 2,
         borderColor: "#475569",
         justifyContent: "center",
@@ -1381,12 +1377,21 @@ const styles = StyleSheet.create({
         borderColor: "#22c55e",
         backgroundColor: "#22c55e",
     },
+    checkboxFloat: {
+        position: "absolute",
+        top: 8,
+        right: 8,
+        zIndex: 10,
+    },
     productImageContainer: {
-        width: 60,
-        height: 60,
-        borderRadius: 12,
-        overflow: "hidden",
-        marginRight: 12,
+        width: "100%",
+        height: 110,
+        backgroundColor: "#18181f",
+        justifyContent: "center",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255, 255, 255, 0.04)",
+        position: "relative",
     },
     productImage: {
         width: "100%",
@@ -1398,32 +1403,16 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    cardContent: {
-        flex: 1,
-    },
-    cardHeaderRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        borderBottomWidth: 1,
-        borderBottomColor: "rgba(255, 255, 255, 0.04)",
-        paddingBottom: 6,
-    },
-    productName: {
-        color: "#f8fafc",
-        fontSize: 14,
-        fontWeight: "800",
-    },
-    productCat: {
-        color: "#64748b",
-        fontSize: 10.5,
-        fontWeight: "600",
-        marginTop: 1.5,
-    },
-    stockPill: {
-        paddingHorizontal: 8,
-        paddingVertical: 3,
+    stockPillFloat: {
+        position: "absolute",
+        top: 8,
+        left: 8,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
         borderRadius: 6,
+        backgroundColor: "rgba(7, 7, 10, 0.8)",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.05)",
     },
     stockNormal: {
         backgroundColor: "rgba(34, 197, 94, 0.1)",
@@ -1441,45 +1430,58 @@ const styles = StyleSheet.create({
     stockTextRupture: {
         color: "#ef4444",
     },
-    priceContainerRow: {
+    productCardBody: {
+        padding: 10,
+        flex: 1,
+        justifyContent: "space-between",
+    },
+    productCardTitle: {
+        color: "#f8fafc",
+        fontSize: 11.5,
+        fontWeight: "800",
+        lineHeight: 15,
+        marginTop: 2,
+    },
+    productCardCat: {
+        color: "#64748b",
+        fontSize: 9.5,
+        fontWeight: "600",
+    },
+    productCardFooter: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 8,
+        alignItems: "flex-end",
+        marginTop: 10,
     },
-    priceSubLabel: {
+    productCardPriceWrapper: {
+        flex: 1,
+    },
+    productCardPriceSub: {
         color: "#475569",
-        fontSize: 9.5,
+        fontSize: 8.5,
         fontWeight: "600",
         textTransform: "uppercase",
     },
-    priceValueText: {
+    productCardPrice: {
         color: "#3b82f6",
-        fontSize: 14,
+        fontSize: 12.5,
         fontWeight: "900",
         marginTop: 1,
     },
-    fallbackBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 3,
+    fallbackBadgeMini: {
+        padding: 2,
         backgroundColor: "rgba(245, 158, 11, 0.1)",
-        paddingVertical: 2,
-        paddingHorizontal: 6,
-        borderRadius: 6,
+        borderRadius: 4,
+        marginLeft: 4,
     },
-    fallbackBadgeText: {
-        color: "#f59e0b",
-        fontSize: 9,
-        fontWeight: "800",
-    },
-    openDetailsArrow: {
-        width: 24,
-        height: 24,
-        borderRadius: 6,
+    openDetailsArrowMini: {
+        width: 20,
+        height: 20,
+        borderRadius: 5,
         backgroundColor: "rgba(255, 255, 255, 0.03)",
         justifyContent: "center",
         alignItems: "center",
+        marginLeft: 4,
     },
 
     // FLOATING SELECTION FOOTER (Step 3 selection mode active)

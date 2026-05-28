@@ -98,6 +98,8 @@ export default function SettingsScreen() {
     // Manager Preferences States
     const [lowStockThreshold, setLowStockThreshold] = useState("10");
     const [defaultCaisse, setDefaultCaisse] = useState("caisse_principale");
+    const [caisses, setCaisses] = useState<{ id: string; name: string; type: string }[]>([]);
+    const [loadingCaisses, setLoadingCaisses] = useState(false);
     const [emailDailyClose, setEmailDailyClose] = useState(true);
     const [emailDebtsAlert, setEmailDebtsAlert] = useState(true);
     const [emailStockAlert, setEmailStockAlert] = useState(true);
@@ -114,6 +116,34 @@ export default function SettingsScreen() {
     const [loadingAi, setLoadingAi] = useState(false);
     const [savingAi, setSavingAi] = useState(false);
     const [testingAi, setTestingAi] = useState(false);
+
+    const loadCaisses = async () => {
+        try {
+            setLoadingCaisses(true);
+            const res = await apiFetch("/settings/caisses");
+            if (res && res.success && Array.isArray(res.caisses)) {
+                setCaisses(res.caisses);
+                if (res.caisses.length > 0) {
+                    const saved = await AsyncStorage.getItem("setting_defaultCaisse");
+                    if (!saved || !res.caisses.some((c: any) => c.id === saved)) {
+                        await handleCaisseChange(res.caisses[0].id);
+                    }
+                }
+            } else {
+                setCaisses([
+                    { id: "caisse_principale", name: labels.caisseP, type: "CASH" },
+                    { id: "compte_bancaire", name: labels.caisseB, type: "BANK" }
+                ]);
+            }
+        } catch {
+            setCaisses([
+                { id: "caisse_principale", name: labels.caisseP, type: "CASH" },
+                { id: "compte_bancaire", name: labels.caisseB, type: "BANK" }
+            ]);
+        } finally {
+            setLoadingCaisses(false);
+        }
+    };
 
     // Load saved preferences and fetch AI settings from server
     useEffect(() => {
@@ -140,6 +170,7 @@ export default function SettingsScreen() {
         })();
 
         loadAiConfig();
+        loadCaisses();
     }, []);
 
     const loadAiConfig = async () => {
@@ -478,26 +509,37 @@ export default function SettingsScreen() {
             <View style={styles.settingCard}>
                 <Text style={styles.settingTitle}>{labels.caisseDefaut}</Text>
                 <Text style={styles.settingDesc}>{labels.caisseDefautDesc}</Text>
-                <View style={styles.optionsRow}>
-                    <TouchableOpacity
-                        style={[styles.optionBtn, styles.optionBtnWide, defaultCaisse === "caisse_principale" && styles.optionBtnActive]}
-                        onPress={() => handleCaisseChange("caisse_principale")}
-                    >
-                        <Ionicons name="wallet-outline" size={20} color={defaultCaisse === "caisse_principale" ? "#fff" : "#64748b"} />
-                        <Text style={[styles.optionText, defaultCaisse === "caisse_principale" && styles.optionTextActive]}>
-                            {labels.caisseP}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.optionBtn, styles.optionBtnWide, defaultCaisse === "compte_bancaire" && styles.optionBtnActive]}
-                        onPress={() => handleCaisseChange("compte_bancaire")}
-                    >
-                        <Ionicons name="business-outline" size={20} color={defaultCaisse === "compte_bancaire" ? "#fff" : "#64748b"} />
-                        <Text style={[styles.optionText, defaultCaisse === "compte_bancaire" && styles.optionTextActive]}>
-                            {labels.caisseB}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                {loadingCaisses ? (
+                    <ActivityIndicator size="small" color="#22c55e" style={{ marginVertical: 14 }} />
+                ) : (
+                    <View style={[styles.optionsRow, { flexWrap: "wrap", gap: 10 }]}>
+                        {caisses.map((c) => {
+                            const isActive = defaultCaisse === c.id;
+                            const isBank = c.type === "BANK" || c.id === "compte_bancaire";
+                            return (
+                                <TouchableOpacity
+                                    key={c.id}
+                                    style={[
+                                        styles.optionBtn, 
+                                        styles.optionBtnWide, 
+                                        { width: caisses.length > 2 ? "48%" : "100%", flex: 0 },
+                                        isActive && styles.optionBtnActive
+                                    ]}
+                                    onPress={() => handleCaisseChange(c.id)}
+                                >
+                                    <Ionicons 
+                                        name={isBank ? "business-outline" : "wallet-outline"} 
+                                        size={20} 
+                                        color={isActive ? "#fff" : "#64748b"} 
+                                    />
+                                    <Text style={[styles.optionText, isActive && styles.optionTextActive]} numberOfLines={1}>
+                                        {c.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                )}
             </View>
 
             {/* Low Stock Alert Threshold */}

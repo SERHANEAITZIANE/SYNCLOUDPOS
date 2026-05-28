@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
     TextInput, ActivityIndicator, Alert, FlatList, Dimensions,
-    Vibration, Platform, Modal
+    Vibration, Platform, Modal, Image
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
 import { useLangStore } from "../lib/i18n";
@@ -27,6 +28,10 @@ interface Product {
     tvaRate: number;
     stock: number;
     barcodes?: { value: string }[] | null;
+    imageUrl?: string | null;
+    description?: string | null;
+    brand?: { name: string } | null;
+    category?: { name: string } | null;
 }
 
 interface SelectedItem {
@@ -59,6 +64,19 @@ export default function CreateBLScreen({ navigation }: any) {
     const [showClientSelector, setShowClientSelector] = useState(false);
     const [showProductSelector, setShowProductSelector] = useState(false);
 
+    // Default Caisse and Preview Product states
+    const [defaultCaisseId, setDefaultCaisseId] = useState<string>("caisse_principale");
+    const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+
+    const getPlaceholderBgColor = (name: string) => {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 35%, 20%)`;
+    };
+
     // Mock fallbacks for offline
     const MOCK_CLIENTS: Client[] = [
         { id: "c1", name: "Supérette Horizon", phone: "+213555123456", balance: 32000 },
@@ -77,7 +95,7 @@ export default function CreateBLScreen({ navigation }: any) {
         { id: "p5", name: "Lait Soummam UHT 1L", price: 110, tvaRate: 9, stock: 95 },
     ];
 
-    // Load clients and products
+    // Load clients and products and default caisse
     useEffect(() => {
         const fetchClientsAndProducts = async () => {
             setLoadingClients(true);
@@ -113,7 +131,17 @@ export default function CreateBLScreen({ navigation }: any) {
             }
         };
 
+        const loadDefaultCaisse = async () => {
+            try {
+                const caisse = await AsyncStorage.getItem("setting_defaultCaisse");
+                if (caisse) {
+                    setDefaultCaisseId(caisse);
+                }
+            } catch { /* silent */ }
+        };
+
         fetchClientsAndProducts();
+        loadDefaultCaisse();
     }, []);
 
     // Filter selectors
@@ -237,6 +265,7 @@ export default function CreateBLScreen({ navigation }: any) {
                     paymentMethod,
                     paymentAmount: parsedPaymentAmount,
                     notes,
+                    treasuryAccountId: defaultCaisseId,
                     items: selectedItems.map(item => ({
                         productId: item.product.id,
                         quantity: item.quantity,
@@ -506,6 +535,24 @@ export default function CreateBLScreen({ navigation }: any) {
                         <View style={styles.basketItemsList}>
                             {selectedItems.map((item, index) => (
                                 <View key={index} style={styles.basketItemRow}>
+                                    {/* Thumbnail image with interactive tap zoom */}
+                                    <TouchableOpacity 
+                                        style={styles.basketItemImageContainer}
+                                        onPress={() => setPreviewProduct(item.product)}
+                                    >
+                                        {item.product.imageUrl ? (
+                                            <Image 
+                                                source={{ uri: item.product.imageUrl }} 
+                                                style={styles.basketItemImage} 
+                                                resizeMode="cover"
+                                            />
+                                        ) : (
+                                            <View style={[styles.basketItemImagePlaceholder, { backgroundColor: getPlaceholderBgColor(item.product.name) }]}>
+                                                <Ionicons name="cube-outline" size={14} color="#94a3b8" />
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+
                                     <View style={{ flex: 1 }}>
                                         <Text style={styles.basketItemName} numberOfLines={1}>{item.product.name}</Text>
                                         <Text style={styles.basketItemTva}>TVA: {item.product.tvaRate}% | Stock: {item.product.stock}</Text>
@@ -698,13 +745,25 @@ export default function CreateBLScreen({ navigation }: any) {
                             </TouchableOpacity>
                         </View>
 
-                        <TextInput
-                            style={styles.sheetSearch}
-                            value={productSearch}
-                            onChangeText={setProductSearch}
-                            placeholder="Rechercher par nom..."
-                            placeholderTextColor="#64748b"
-                        />
+                        {/* Search Row with barcode scanner shortcut */}
+                        <View style={styles.sheetSearchRow}>
+                            <TextInput
+                                style={[styles.sheetSearch, { flex: 1, marginBottom: 0 }]}
+                                value={productSearch}
+                                onChangeText={setProductSearch}
+                                placeholder="Rechercher par nom ou code..."
+                                placeholderTextColor="#64748b"
+                            />
+                            <TouchableOpacity
+                                style={styles.sheetScannerBtn}
+                                onPress={() => {
+                                    setShowProductSelector(false);
+                                    setScannerVisible(true);
+                                }}
+                            >
+                                <Ionicons name="barcode" size={20} color="#22c55e" />
+                            </TouchableOpacity>
+                        </View>
 
                         {loadingProducts ? (
                             <ActivityIndicator color="#22c55e" style={{ margin: 20 }} />
@@ -713,21 +772,92 @@ export default function CreateBLScreen({ navigation }: any) {
                                 data={filteredProducts}
                                 keyExtractor={(item) => item.id}
                                 renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.sheetItemRow}
-                                        onPress={() => addItemToBL(item)}
-                                    >
-                                        <View style={{ flex: 1 }}>
-                                            <Text style={styles.sheetItemName}>{item.name}</Text>
-                                            <Text style={styles.sheetItemSub}>P.U: {item.price} DA | Stock: {item.stock}</Text>
-                                        </View>
-                                        <Ionicons name="add-circle-outline" size={24} color="#22c55e" />
-                                    </TouchableOpacity>
+                                    <View style={styles.sheetProductItemWrapper}>
+                                        {/* Product image thumbnail with interactive tap zoom */}
+                                        <TouchableOpacity 
+                                            style={styles.sheetProductImageContainer}
+                                            onPress={() => setPreviewProduct(item)}
+                                        >
+                                            {item.imageUrl ? (
+                                                <Image 
+                                                    source={{ uri: item.imageUrl }} 
+                                                    style={styles.sheetProductImage} 
+                                                    resizeMode="cover"
+                                                />
+                                            ) : (
+                                                <View style={[styles.sheetProductImagePlaceholder, { backgroundColor: getPlaceholderBgColor(item.name) }]}>
+                                                    <Ionicons name="cube-outline" size={16} color="#94a3b8" />
+                                                </View>
+                                            )}
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            style={styles.sheetItemRowMain}
+                                            onPress={() => addItemToBL(item)}
+                                        >
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={styles.sheetItemName} numberOfLines={1}>{item.name}</Text>
+                                                <Text style={styles.sheetItemSub}>P.U: {item.price} DA | Stock: {item.stock}</Text>
+                                            </View>
+                                            <Ionicons name="add-circle-outline" size={24} color="#22c55e" />
+                                        </TouchableOpacity>
+                                    </View>
                                 )}
                             />
                         )}
                     </View>
                 </View>
+            </Modal>
+
+            {/* Interactive high-res product photo zoom preview modal */}
+            <Modal
+                visible={!!previewProduct}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={() => setPreviewProduct(null)}
+            >
+                {previewProduct && (
+                    <View style={styles.zoomOverlay}>
+                        <View style={styles.zoomContent}>
+                            <View style={styles.zoomHeader}>
+                                <Text style={styles.zoomTitle} numberOfLines={1}>{previewProduct.name}</Text>
+                                <TouchableOpacity onPress={() => setPreviewProduct(null)} style={styles.zoomCloseBtn}>
+                                    <Ionicons name="close" size={24} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.zoomImageWrapper}>
+                                {previewProduct.imageUrl ? (
+                                    <Image 
+                                        source={{ uri: previewProduct.imageUrl }} 
+                                        style={styles.zoomImage}
+                                        resizeMode="contain"
+                                    />
+                                ) : (
+                                    <View style={[styles.zoomImagePlaceholder, { backgroundColor: getPlaceholderBgColor(previewProduct.name) }]}>
+                                        <Ionicons name="cube-outline" size={80} color="#94a3b8" />
+                                    </View>
+                                )}
+                            </View>
+
+                            <View style={styles.zoomDetails}>
+                                <Text style={styles.zoomDetailsHeader}>Détails de l'article</Text>
+                                <Text style={styles.zoomDetailsText}>
+                                    • Prix Unitaire: <Text style={{ color: "#3b82f6", fontWeight: "800" }}>{previewProduct.price} DA</Text>
+                                    {"\n"}• Stock en magasin: <Text style={{ color: previewProduct.stock > 0 ? "#22c55e" : "#ef4444", fontWeight: "800" }}>{previewProduct.stock} disponibles</Text>
+                                    {previewProduct.brand?.name ? `\n• Marque: ${previewProduct.brand.name}` : ""}
+                                    {previewProduct.category?.name ? `\n• Catégorie: ${previewProduct.category.name}` : ""}
+                                </Text>
+                                {previewProduct.description ? (
+                                    <>
+                                        <Text style={[styles.zoomDetailsHeader, { marginTop: 12 }]}>Description</Text>
+                                        <Text style={styles.zoomDetailsDescText}>{previewProduct.description}</Text>
+                                    </>
+                                ) : null}
+                            </View>
+                        </View>
+                    </View>
+                )}
             </Modal>
         </View>
     );
@@ -822,5 +952,174 @@ const styles = StyleSheet.create({
     sheetSearch: { backgroundColor: "#0f172a", borderRadius: 12, borderWidth: 1, borderColor: "#334155", height: 44, color: "#fff", paddingHorizontal: 12, fontSize: 13, marginBottom: 14 },
     sheetItemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#33415540", paddingVertical: 12 },
     sheetItemName: { color: "#f8fafc", fontSize: 14, fontWeight: "700" },
-    sheetItemSub: { color: "#64748b", fontSize: 11, marginTop: 2 }
+    sheetItemSub: { color: "#64748b", fontSize: 11, marginTop: 2 },
+
+    // Photo thumbnails in BL basket list
+    basketItemImageContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: 8,
+        overflow: "hidden",
+        marginRight: 10,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#33415580",
+    },
+    basketItemImage: {
+        width: "100%",
+        height: "100%",
+    },
+    basketItemImagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    // Barcode scanner inside product picker modal
+    sheetSearchRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        marginBottom: 14,
+    },
+    sheetScannerBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#334155",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    // Picker product item wrapper with images
+    sheetProductItemWrapper: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#33415540",
+        paddingVertical: 10,
+    },
+    sheetProductImageContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 10,
+        overflow: "hidden",
+        marginRight: 12,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#33415580",
+    },
+    sheetProductImage: {
+        width: "100%",
+        height: "100%",
+    },
+    sheetProductImagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    sheetItemRowMain: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    // Interactive high-res product photo zoom preview modal styles
+    zoomOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(7, 7, 10, 0.95)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
+    zoomContent: {
+        width: "100%",
+        maxWidth: 440,
+        backgroundColor: "#1e293b",
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: "#334155",
+        overflow: "hidden",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    zoomHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#33415580",
+    },
+    zoomTitle: {
+        color: "#f8fafc",
+        fontSize: 16,
+        fontWeight: "900",
+        flex: 1,
+        marginRight: 10,
+    },
+    zoomCloseBtn: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.05)",
+    },
+    zoomImageWrapper: {
+        width: "100%",
+        height: 260,
+        backgroundColor: "#0f172a",
+        justifyContent: "center",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#33415580",
+    },
+    zoomImage: {
+        width: "100%",
+        height: "100%",
+    },
+    zoomImagePlaceholder: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    zoomDetails: {
+        padding: 16,
+        backgroundColor: "#1e293b",
+    },
+    zoomDetailsHeader: {
+        color: "#94a3b8",
+        fontSize: 10.5,
+        fontWeight: "800",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginBottom: 6,
+    },
+    zoomDetailsText: {
+        color: "#f8fafc",
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    zoomDetailsDescText: {
+        color: "#94a3b8",
+        fontSize: 12,
+        lineHeight: 16,
+        backgroundColor: "#0f172a40",
+        padding: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#33415540",
+    },
 });
