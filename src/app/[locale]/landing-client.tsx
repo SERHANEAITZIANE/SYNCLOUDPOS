@@ -1552,7 +1552,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                   className="lp-download-btn"
                   style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
                 >
-                  📥 {lang === 'ar' ? 'تحميل APK المباشر (تحديث v1.1.2)' : lang === 'en' ? 'Download Direct APK (v1.1.2)' : "Télécharger l'APK Direct (Mise à jour v1.1.2)"}
+                  📥 {lang === 'ar' ? 'تحميل APK المباشر (تحديث v1.1.3)' : lang === 'en' ? 'Download Direct APK (v1.1.3)' : "Télécharger l'APK Direct (Mise à jour v1.1.3)"}
                 </a>
 
                 <div className="lp-qr-container">

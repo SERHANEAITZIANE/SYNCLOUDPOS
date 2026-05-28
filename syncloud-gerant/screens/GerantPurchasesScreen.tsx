@@ -121,7 +121,7 @@ export default function GerantPurchasesScreen() {
         setPaymentMethod(result.paymentMethod);
         setItemsList(result.items);
         setPhotos(["https://picsum.photos/id/102/300/300"]);
-        Alert.alert("✨ Facture Papier Numérisée (Simulé)", "Gemini AI a extrait le Fournisseur, les frais annexes, les articles avec HT, TVA et stocks actuels !");
+        Alert.alert("✨ Facture Papier Numérisée (Simulé)", "L'IA a extrait le Fournisseur, les frais annexes, les articles avec HT, TVA et stocks actuels !");
     };
 
     const processImage = async (uri: string) => {
@@ -163,7 +163,7 @@ export default function GerantPurchasesScreen() {
                 setPaymentMethod(result.paymentMethod);
                 setItemsList(result.items);
                 setPhotos([uri]);
-                Alert.alert("✨ Facture Numérisée", "Gemini AI a extrait le Fournisseur, les taxes et articles avec succès !");
+                Alert.alert("✨ Facture Numérisée", "L'assistant IA a extrait le Fournisseur, les taxes et articles avec succès !");
             } else {
                 fallbackToSimulated();
             }
@@ -354,7 +354,7 @@ export default function GerantPurchasesScreen() {
             <View style={styles.scanCard}>
                 <View style={styles.scanBadge}>
                     <Ionicons name="sparkles" size={14} color="#22c55e" />
-                    <Text style={styles.scanBadgeText}>OCR Gemini AI enrichi</Text>
+                    <Text style={styles.scanBadgeText}>OCR IA — Analyse intelligente</Text>
                 </View>
                 
                 <Text style={styles.scanTitle}>Saisie rapide par Caméra</Text>
@@ -365,7 +365,7 @@ export default function GerantPurchasesScreen() {
                 {scanning ? (
                     <View style={styles.scanningWrap}>
                         <ActivityIndicator size="large" color="#22c55e" />
-                        <Text style={styles.scanningText}>Gemini AI extrait les taxes et articles...</Text>
+                        <Text style={styles.scanningText}>L'IA extrait les taxes et articles...</Text>
                     </View>
                 ) : (
                     <TouchableOpacity style={styles.scanBtn} onPress={handleCameraScan}>

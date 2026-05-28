@@ -74,7 +74,7 @@ const localization = {
     },
     french: {
         title: "Assistant Vocal Gérant",
-        statusLoading: "Gemini AI analyse les bases de données...",
+        statusLoading: "L'assistant IA analyse les bases de données...",
         statusSpeaking: "Vocalisation du rapport en cours...",
         statusListening: "🎙️ Écoute active : Touchez le micro du clavier pour parler !",
         statusIdle: "Posez une question ou sélectionnez un rapport",

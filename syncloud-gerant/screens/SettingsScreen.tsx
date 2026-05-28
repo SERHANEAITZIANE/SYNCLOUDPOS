@@ -11,18 +11,25 @@ import { apiFetch } from "../lib/api";
 
 type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
 
-const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
+const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string; badge?: string }[]> = {
     GEMINI: [
-        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash" },
-        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-        { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
+        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", badge: "🆕 DERNIER" },
+        { id: "gemini-3.1-pro", label: "Gemini 3.1 Pro", badge: "🔥" },
+        { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", badge: "⚡ Rapide" },
+        { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
     ],
     OPENAI: [
+        { id: "gpt-5-5", label: "GPT-5.5 Pro", badge: "🆕 DERNIER" },
+        { id: "gpt-5-5-instant", label: "GPT-5.5 Instant", badge: "⚡ Rapide" },
+        { id: "gpt-5", label: "GPT-5" },
         { id: "gpt-4o", label: "GPT-4o" },
         { id: "gpt-4o-mini", label: "GPT-4o Mini" },
     ],
     ANTHROPIC: [
-        { id: "claude-opus-4-7", label: "Claude Opus 4.7" },
+        { id: "claude-opus-4-8", label: "Claude Opus 4.8", badge: "🆕 DERNIER" },
+        { id: "claude-opus-4-7", label: "Claude Opus 4.7", badge: "🔥 Dialecte" },
+        { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "⚡ Rapide" },
         { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet" },
         { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku" },
     ]
@@ -43,7 +50,7 @@ export default function SettingsScreen() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "1.1.2";
+                    const currentVersion = "1.1.3";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
@@ -439,9 +446,24 @@ export default function SettingsScreen() {
                                 style={[styles.modelPill, aiModel === model.id && styles.modelPillActive]}
                                 onPress={() => setAiModel(model.id)}
                             >
-                                <Text style={[styles.modelText, aiModel === model.id && styles.modelTextActive]}>
-                                    {model.label}
-                                </Text>
+                                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                                    <Text style={[styles.modelText, aiModel === model.id && styles.modelTextActive]}>
+                                        {model.label}
+                                    </Text>
+                                    {model.badge && (
+                                        <Text style={{ 
+                                            fontSize: 9, 
+                                            fontWeight: "800", 
+                                            color: aiModel === model.id ? "#fff" : "#22c55e",
+                                            backgroundColor: aiModel === model.id ? "rgba(255,255,255,0.2)" : "rgba(34,197,94,0.12)",
+                                            paddingHorizontal: 5,
+                                            paddingVertical: 2,
+                                            borderRadius: 4,
+                                        }}>
+                                            {model.badge}
+                                        </Text>
+                                    )}
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -638,7 +660,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("version")}</Text>
-                    <Text style={styles.infoValue}>1.0.0 (SDK 54)</Text>
+                    <Text style={styles.infoValue}>v1.1.3 (SDK 54)</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("tenant")}</Text>
