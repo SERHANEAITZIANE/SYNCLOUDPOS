@@ -47,6 +47,7 @@ const localization = {
         statusLoading: "الذكاء الاصطناعي راه يحلل في قاعدة البيانات...",
         statusSpeaking: "جاري قراءة التقرير صوتياً...",
         statusListening: "🎙️ إستماع: إضغط على ميكروفون لوحة المفاتيح لتتكلم !",
+        statusRecording: "🎙️ راني نسمع: اهدر درك، واضغط باش تحبس وتسأل !",
         statusIdle: "اسأل سؤال ولا خير تقرير سريع من التحت",
         suggestionTitle: "تقارير سريعة :",
         placeholder: "اسأل المساعد الذكي عن أي شيء في المحل...",
@@ -62,6 +63,7 @@ const localization = {
         statusLoading: "الذكاء الاصطناعي يقوم بتحليل قاعدة البيانات...",
         statusSpeaking: "جاري قراءة التقرير صوتياً...",
         statusListening: "🎙️ إستماع: إضغط على ميكروفون لوحة المفاتيح لتتكلم !",
+        statusRecording: "🎙️ جاري الاستماع: تحدث الآن، واضغط لإيقاف التسجيل !",
         statusIdle: "اطرح سؤالاً أو اختر تقريراً سريعاً من الأسفل",
         suggestionTitle: "تقارير سريعة :",
         placeholder: "اسأل المساعد الذكي عن أي شيء في المحل...",
@@ -77,6 +79,7 @@ const localization = {
         statusLoading: "L'assistant IA analyse les bases de données...",
         statusSpeaking: "Vocalisation du rapport en cours...",
         statusListening: "🎙️ Écoute active : Touchez le micro du clavier pour parler !",
+        statusRecording: "🎙️ Écoute active : Parlez maintenant, puis touchez pour envoyer !",
         statusIdle: "Posez une question ou sélectionnez un rapport",
         suggestionTitle: "RAPPORTS RAPIDES :",
         placeholder: "Posez une question à l'ERP (Ex: chiffre d'affaires)",
@@ -99,6 +102,10 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
     const [muted, setMuted] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [detailedMode, setDetailedMode] = useState(false);
+
+    // Audio recording state
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
 
     // AI configurations cached locally
     const [aiProvider, setAiProvider] = useState<string | null>(null);
@@ -131,9 +138,9 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
         }
     }, [isOpen]);
 
-    // Trigger looping pulse animations when loading, speaking, or waiting for voice dictation
+    // Trigger looping pulse animations when loading, speaking, or recording voice
     useEffect(() => {
-        if (loading || speaking || isListening) {
+        if (loading || speaking || isRecording) {
             const startPulse = (anim: Animated.Value, delay: number) => {
                 Animated.loop(
                     Animated.sequence([
@@ -160,7 +167,122 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
             pulse2.setValue(1);
             pulse3.setValue(1);
         }
-    }, [loading, speaking, isListening]);
+    }, [loading, speaking, isRecording]);
+
+    // Native voice recording handlers using expo-av
+    const startRecording = async () => {
+        try {
+            await handleStopSpeech();
+            
+            const permission = await Audio.requestPermissionsAsync();
+            if (permission.status !== "granted") {
+                Alert.alert("Permission requise", "L'accès au microphone est nécessaire pour utiliser l'assistant vocal.");
+                return;
+            }
+
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: true,
+                playsInSilentModeIOS: true,
+            });
+
+            const { recording } = await Audio.Recording.createAsync(
+                Audio.RecordingOptionsPresets.HIGH_QUALITY
+            );
+            setRecordingInstance(recording);
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Failed to start recording:", err);
+            Alert.alert("Erreur", "Impossible de démarrer l'enregistrement vocal.");
+        }
+    };
+
+    const stopRecording = async () => {
+        if (!recordingInstance) return;
+        try {
+            setIsRecording(false);
+            await recordingInstance.stopAndUnloadAsync();
+            const uri = recordingInstance.getURI();
+            setRecordingInstance(null);
+
+            // Re-configure audio mode back to playback
+            await Audio.setAudioModeAsync({
+                allowsRecordingIOS: false,
+                playsInSilentModeIOS: true,
+            });
+
+            if (uri) {
+                await handleAudioSubmit(uri);
+            }
+        } catch (err) {
+            console.error("Failed to stop recording:", err);
+        }
+    };
+
+    const handleAudioSubmit = async (audioUri: string) => {
+        setLoading(true);
+        setIsListening(false);
+        await handleStopSpeech();
+
+        try {
+            const apiHistory = messages.map(m => ({
+                role: m.role === "assistant" ? "model" as const : "user" as const,
+                content: m.content
+            }));
+
+            const formData = new FormData();
+            
+            const filename = audioUri.split("/").pop() || "recording.m4a";
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `audio/${match[1]}` : `audio/m4a`;
+
+            // Append audio file standard for React Native
+            formData.append("audio", {
+                uri: Platform.OS === "android" ? audioUri : audioUri.replace("file://", ""),
+                name: filename,
+                type,
+            } as any);
+
+            formData.append("language", language);
+            formData.append("detailedMode", String(detailedMode));
+            formData.append("history", JSON.stringify(apiHistory));
+            if (aiProvider) formData.append("aiProvider", aiProvider);
+            if (aiModel) formData.append("aiModel", aiModel);
+
+            const token = await AsyncStorage.getItem("auth_tokens");
+            const parsedTokens = token ? JSON.parse(token) : {};
+
+            const response = await fetch(`${API_BASE}/voice-assistant`, {
+                method: "POST",
+                headers: {
+                    ...(parsedTokens.accessToken ? { "Authorization": `Bearer ${parsedTokens.accessToken}` } : {}),
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.text) {
+                const transcribedQuery = result.queryText || "🎙️ [Message vocal]";
+                setMessages(prev => [
+                    ...prev,
+                    { role: "user", content: transcribedQuery },
+                    { role: "assistant", content: result.text }
+                ]);
+                speakText(result.text);
+            } else {
+                setMessages(prev => [
+                    ...prev,
+                    { role: "assistant", content: result.text || localization[language].noReport }
+                ]);
+                if (result.text) speakText(result.text);
+            }
+        } catch (error: any) {
+            console.error("Failed to process audio:", error);
+            setMessages(prev => [...prev, { role: "assistant", content: localization[language].errorMsg }]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handle vocal speech output via server-side Cloud TTS (Azure ar-DZ-AminaNeural for Darja)
     const speakText = async (text: string) => {
@@ -488,21 +610,20 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                 <Animated.View style={[styles.pulseRing, { transform: [{ scale: pulse1 }], opacity: pulse1.interpolate({ inputRange: [1, 2.2], outputRange: [0.6, 0] }) }]} />
                                 
                                 <TouchableOpacity
-                                    style={[styles.micBigCircle, (loading || speaking || isListening) && styles.micBigCircleActive]}
+                                    style={[
+                                        styles.micBigCircle, 
+                                        (loading || speaking || isRecording) && styles.micBigCircleActive,
+                                        isRecording && { backgroundColor: "#ef4444" } // Red background while actively recording voice
+                                    ]}
                                     onPress={() => {
                                         if (speaking) {
                                             handleStopSpeech();
+                                        } else if (isRecording) {
+                                            stopRecording();
                                         } else if (query.trim()) {
                                             handleQuerySubmit(query);
                                         } else {
-                                            // Programmatically focus the keyboard so the native dictation mic is active
-                                            inputRef.current?.focus();
-                                            setIsListening(true);
-                                            Alert.alert(
-                                                activeLoc.micAlertTitle,
-                                                activeLoc.micAlertDesc,
-                                                [{ text: "OK", onPress: () => inputRef.current?.focus() }]
-                                            );
+                                            startRecording();
                                         }
                                     }}
                                 >
@@ -510,7 +631,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                                         <ActivityIndicator color="#fff" size="large" />
                                     ) : (
                                         <Ionicons
-                                            name={speaking ? "stop" : isListening ? "pulse" : "mic"}
+                                            name={speaking || isRecording ? "square" : "mic"}
                                             size={32}
                                             color="#fff"
                                         />
@@ -521,6 +642,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                             <Text style={styles.assistantStatusText}>
                                 {loading ? activeLoc.statusLoading :
                                  speaking ? activeLoc.statusSpeaking :
+                                 isRecording ? activeLoc.statusRecording :
                                  isListening ? activeLoc.statusListening :
                                  activeLoc.statusIdle}
                             </Text>

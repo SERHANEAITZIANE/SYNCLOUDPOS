@@ -8,13 +8,6 @@ export async function POST(req: NextRequest) {
     try {
         const user = requireMobileAuth(req);
 
-        // Parse request body
-        const { queryText, language = "french", history = [], detailedMode = false } = await req.json().catch(() => ({}));
-
-        if (!queryText || !queryText.trim()) {
-            return NextResponse.json({ error: "Texte de requête manquant" }, { status: 400 });
-        }
-
         // Fetch tenant settings including AI configuration
         const tenant = await db.tenant.findUnique({
             where: { id: user.tenantId },
@@ -27,9 +20,61 @@ export async function POST(req: NextRequest) {
             }
         });
 
+        const contentType = req.headers.get("content-type") || "";
+        let queryText = "";
+        let language = "french";
+        let history = [];
+        let detailedMode = false;
+        let aiProviderOverride: string | null = null;
+        let aiModelOverride: string | null = null;
+
+        if (contentType.includes("multipart/form-data")) {
+            const formData = await req.formData();
+            const audioFile = formData.get("audio") as Blob | null;
+            language = (formData.get("language") as string) || "french";
+            detailedMode = (formData.get("detailedMode") as string) === "true";
+            const historyStr = formData.get("history") as string;
+            history = historyStr ? JSON.parse(historyStr) : [];
+            aiProviderOverride = formData.get("aiProvider") as string | null;
+            aiModelOverride = formData.get("aiModel") as string | null;
+
+            if (audioFile) {
+                try {
+                    queryText = await transcribeAudio(audioFile, language, tenant);
+                } catch (transcribeErr: any) {
+                    console.error("[Voice] Transcription error:", transcribeErr);
+                    return NextResponse.json({
+                        success: false,
+                        text: language === "darija"
+                            ? "خلل في تحويل الصوت إلى كتابة. عاود من فضلك."
+                            : "Erreur de transcription audio. Veuillez réessayer."
+                    });
+                }
+            }
+        } else {
+            const body = await req.json().catch(() => ({}));
+            queryText = body.queryText;
+            language = body.language || "french";
+            history = body.history || [];
+            detailedMode = body.detailedMode || false;
+            aiProviderOverride = body.aiProvider;
+            aiModelOverride = body.aiModel;
+        }
+
+        if (!queryText || !queryText.trim()) {
+            return NextResponse.json({
+                success: false,
+                text: language === "darija"
+                    ? "ما سمعتكش مليح، تقدر تعاود من فضلك؟"
+                    : language === "arabic"
+                    ? "لم أسمعك جيداً، هل يمكنك الإعادة من فضلك؟"
+                    : "Je ne vous ai pas bien entendu, pouvez-vous répéter s'il vous plaît ?"
+            });
+        }
+
         // Resolve provider and model
-        const provider = (tenant?.aiProvider as AIProvider) || "GEMINI";
-        let model = tenant?.aiModel || DEFAULT_MODELS[provider] || DEFAULT_MODELS.GEMINI;
+        const provider = (aiProviderOverride as AIProvider) || (tenant?.aiProvider as AIProvider) || "GEMINI";
+        let model = aiModelOverride || tenant?.aiModel || DEFAULT_MODELS[provider] || DEFAULT_MODELS.GEMINI;
 
         // Sanitize model to prevent non-existent model crashes (e.g. if gemini-3.1-flash is in database)
         const validModelIds = AVAILABLE_MODELS[provider]?.map(m => m.id) || [];
@@ -75,6 +120,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             text: result.text,
+            queryText, // Return the transcribed text so mobile can display the user bubble correctly
             detectedLanguage: language,
             provider: result.provider,
             model: result.model,
@@ -83,6 +129,92 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         return mobileErrorResponse(error);
     }
+}
+
+async function transcribeAudio(audioFile: Blob, language: string, tenant: any): Promise<string> {
+    const openaiApiKey = tenant?.openaiApiKey || process.env.OPENAI_API_KEY;
+    const geminiApiKey = tenant?.geminiApiKey || process.env.GEMINI_API_KEY;
+
+    if (openaiApiKey) {
+        try {
+            console.log("[Voice] Transcribing audio with OpenAI Whisper...");
+            const formData = new FormData();
+            formData.append("file", audioFile, "audio.m4a");
+            formData.append("model", "whisper-1");
+            if (language === "darija" || language === "arabic") {
+                formData.append("language", "ar");
+            } else {
+                formData.append("language", "fr");
+            }
+
+            const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${openaiApiKey.trim()}`,
+                },
+                body: formData,
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                console.log("[Voice] Whisper transcription success:", data.text);
+                return data.text || "";
+            } else {
+                const err = await res.text();
+                console.warn("[Voice] Whisper API error:", err);
+            }
+        } catch (whisperErr) {
+            console.error("[Voice] Whisper failed:", whisperErr);
+        }
+    }
+
+    if (geminiApiKey) {
+        try {
+            console.log("[Voice] Transcribing audio with Gemini...");
+            const buffer = Buffer.from(await audioFile.arrayBuffer());
+            const base64Audio = buffer.toString("base64");
+            
+            const mimeType = audioFile.type && audioFile.type !== "application/octet-stream"
+                ? audioFile.type
+                : "audio/m4a";
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiApiKey.trim())}`;
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            {
+                                inlineData: {
+                                    mimeType,
+                                    data: base64Audio
+                                }
+                            },
+                            {
+                                text: "Transcribe the spoken audio. If the speech is in Algerian Arabic (Darija), transcribe it exactly in Arabic script as spoken. Return ONLY the transcription text, nothing else. If you cannot hear anything or the audio is silent, reply with empty text."
+                            }
+                        ]
+                    }]
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+                console.log("[Voice] Gemini transcription success:", transcription);
+                return transcription;
+            } else {
+                const err = await response.text();
+                console.warn("[Voice] Gemini Transcription API error:", err);
+            }
+        } catch (geminiErr) {
+            console.error("[Voice] Gemini transcription failed:", geminiErr);
+        }
+    }
+
+    throw new Error("No available API key or transcription service configured.");
 }
 
 
