@@ -1,0 +1,42 @@
+# Dependencies (installed on EAS servers)
+node_modules/
+
+# Expo build artifacts
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native (generated during build)
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+/ios
+/android
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# Env
+.env*.local
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Large unnecessary files
+*.log
+*.map
+.git/

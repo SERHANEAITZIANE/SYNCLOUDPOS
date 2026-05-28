@@ -19,15 +19,15 @@ async function generateAudio(text: string, voiceName: string): Promise<Buffer> {
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
 
-    const readable = tts.toStream(text);
+    const { audioStream } = tts.toStream(text);
     const chunks: Buffer[] = [];
 
     await new Promise<void>((resolve, reject) => {
-        readable.on("data", (chunk: Buffer) => {
+        audioStream.on("data", (chunk: Buffer) => {
             chunks.push(chunk);
         });
-        readable.on("end", () => resolve());
-        readable.on("error", (err: Error) => reject(err));
+        audioStream.on("end", () => resolve());
+        audioStream.on("error", (err: Error) => reject(err));
     });
 
     return Buffer.concat(chunks);
