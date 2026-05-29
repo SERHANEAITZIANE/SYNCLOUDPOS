@@ -360,7 +360,11 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                     "Content-Type": "application/json",
                     ...(ttsParsed.accessToken ? { "Authorization": `Bearer ${ttsParsed.accessToken}` } : {}),
                 },
-                body: JSON.stringify({ text: cleanedText, language }),
+                body: JSON.stringify({ 
+                    text: cleanedText, 
+                    language,
+                    responseFormat: "base64"
+                }),
             });
 
             if (!response.ok) {
@@ -369,16 +373,15 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                 return;
             }
 
-            const arrayBuffer = await response.arrayBuffer();
-            const base64Data = bufferToBase64(arrayBuffer);
+            const result = await response.json();
 
-            if (!base64Data || base64Data.length < 100) {
-                console.warn("TTS returned empty or too small audio");
+            if (!result.success || !result.audio || result.audio.length < 100) {
+                console.warn("TTS returned empty or invalid base64 audio");
                 setSpeaking(false);
                 return;
             }
 
-            await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+            await FileSystem.writeAsStringAsync(fileUri, result.audio, {
                 encoding: FileSystem.EncodingType.Base64,
             });
 

@@ -190,23 +190,26 @@ export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
         return await callProvider({ ...params, apiKey: key, model });
     };
 
+    let currentKey = usedKey;
+
     try {
-        text = await makeCall(usedKey, usedModel);
+        text = await makeCall(currentKey, usedModel);
     } catch (primaryError: any) {
         console.warn(`[AI] Primary call failed with model ${usedModel}:`, primaryError?.message || primaryError);
 
         // If the key was a custom tenant key and it failed, retry using the platform's default API key
-        if (usedKey !== defaultKey && defaultKey) {
+        if (currentKey !== defaultKey && defaultKey) {
+            console.log(`[AI] Custom key failed. Retrying primary model ${usedModel} with platform default API key...`);
+            currentKey = defaultKey;
             try {
-                console.log(`[AI] Custom key failed. Retrying with platform default API key...`);
-                text = await makeCall(defaultKey, usedModel);
+                text = await makeCall(currentKey, usedModel);
                 usedKey = defaultKey;
             } catch (defaultKeyError: any) {
-                console.warn(`[AI] Retrying with platform default key also failed:`, defaultKeyError?.message || defaultKeyError);
+                console.warn(`[AI] Retrying primary model with platform default key also failed:`, defaultKeyError?.message || defaultKeyError);
             }
         }
 
-        // If we still don't have a successful response, try fallback models using the best key we have
+        // If we still don't have a successful response, try fallback models using the active key
         if (!text) {
             const fallbacks = FALLBACK_MODELS[params.provider] || [];
             let fallbackSuccess = false;
@@ -214,9 +217,10 @@ export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
             for (const fallbackModel of fallbacks) {
                 if (fallbackModel === params.model) continue;
                 try {
-                    console.log(`[AI] Trying fallback model: ${fallbackModel}`);
-                    text = await makeCall(usedKey, fallbackModel);
+                    console.log(`[AI] Trying fallback model: ${fallbackModel} with key...`);
+                    text = await makeCall(currentKey, fallbackModel);
                     usedModel = fallbackModel;
+                    usedKey = currentKey;
                     fallbackSuccess = true;
                     console.log(`[AI] Fallback model ${fallbackModel} succeeded!`);
                     break;
@@ -224,12 +228,13 @@ export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
                     console.warn(`[AI] Fallback model ${fallbackModel} failed:`, fbErr?.message || fbErr);
                     
                     // If fallback failed and we haven't tried defaultKey yet for this model, try it
-                    if (usedKey !== defaultKey && defaultKey) {
+                    if (currentKey !== defaultKey && defaultKey) {
                         try {
                             console.log(`[AI] Retrying fallback ${fallbackModel} with platform default API key...`);
                             text = await makeCall(defaultKey, fallbackModel);
                             usedModel = fallbackModel;
                             usedKey = defaultKey;
+                            currentKey = defaultKey;
                             fallbackSuccess = true;
                             console.log(`[AI] Fallback model ${fallbackModel} succeeded with default key!`);
                             break;

@@ -36,7 +36,7 @@ async function generateAudio(text: string, voiceName: string): Promise<Buffer> {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json().catch(() => ({}));
-        const { text, language = "french" } = body;
+        const { text, language = "french", responseFormat } = body;
 
         if (!text || !text.trim()) {
             return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -59,6 +59,16 @@ export async function POST(req: NextRequest) {
             // Try fallback voice
             const fallbackVoice = FALLBACK_VOICES[language] || FALLBACK_VOICES.french;
             audioBuffer = await generateAudio(cleanText, fallbackVoice);
+        }
+
+        // Return Base64 JSON if requested
+        if (responseFormat === "base64") {
+            return NextResponse.json({
+                success: true,
+                audio: audioBuffer.toString("base64"),
+                voice: voiceName,
+                language
+            });
         }
 
         // Return the MP3 audio as a binary response
