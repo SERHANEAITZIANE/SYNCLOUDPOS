@@ -63,17 +63,48 @@ export async function POST(req: NextRequest) {
 
         // Call the appropriate Vision API
         let extractedData;
-        if (provider === "GEMINI") {
-            extractedData = await callGeminiVision(apiKey, limitedImages, language);
-        } else {
-            extractedData = await callOpenAIVision(apiKey, limitedImages, language);
+        let isMock = false;
+
+        try {
+            if (provider === "GEMINI") {
+                extractedData = await callGeminiVision(apiKey, limitedImages, language);
+            } else {
+                extractedData = await callOpenAIVision(apiKey, limitedImages, language);
+            }
+        } catch (apiErr: any) {
+            console.warn("[OCR] Primary OCR call failed:", apiErr?.message || apiErr);
+
+            // Resolve platform default Gemini key
+            const defaultGeminiKey = process.env.GEMINI_API_KEY;
+            if (apiKey !== defaultGeminiKey && defaultGeminiKey) {
+                try {
+                    console.log("[OCR] Retrying OCR with platform default Gemini key...");
+                    extractedData = await callGeminiVision(defaultGeminiKey, limitedImages, language);
+                    apiKey = defaultGeminiKey;
+                    provider = "GEMINI";
+                } catch (retryErr: any) {
+                    console.error("[OCR] Default key fallback also failed:", retryErr?.message || retryErr);
+                }
+            }
+
+            // If still no extracted data, fall back to mock data
+            if (!extractedData) {
+                console.warn("[OCR] Both primary and fallback API calls failed. Falling back to structured demo mock.");
+                extractedData = getMockOCRResult();
+                isMock = true;
+            }
         }
 
         return NextResponse.json({
             success: true,
-            mock: false,
+            mock: isMock,
             data: extractedData,
             provider,
+            message: isMock 
+                ? (language === "french" 
+                    ? "Mode démonstration (Secours) — Configurez une clé API valide pour l'OCR réel" 
+                    : "وضع تجريبي (احتياطي) — قم بإعداد مفتاح API صالح للتعرف الحقيقي")
+                : undefined
         });
 
     } catch (error) {

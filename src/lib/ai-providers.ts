@@ -180,41 +180,69 @@ async function callProvider(params: AIRequestParams): Promise<string> {
 
 // ─── Unified entry point with automatic fallback on rate limits ─────────────
 export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
-    let text: string;
+    let text: string = "";
     let usedModel = params.model;
+    let usedKey = params.apiKey;
+
+    const defaultKey = resolveApiKey(params.provider, {});
+
+    const makeCall = async (key: string, model: string) => {
+        return await callProvider({ ...params, apiKey: key, model });
+    };
 
     try {
-        text = await callProvider(params);
+        text = await makeCall(usedKey, usedModel);
     } catch (primaryError: any) {
-        const errMsg = primaryError?.message || "";
-        const isRateLimit = errMsg.includes("quota") || errMsg.includes("rate") || errMsg.includes("429") || errMsg.includes("exceeded");
-        const isNotFound = errMsg.includes("not found") || errMsg.includes("not supported") || errMsg.includes("404");
+        console.warn(`[AI] Primary call failed with model ${usedModel}:`, primaryError?.message || primaryError);
 
-        if (isRateLimit || isNotFound) {
-            console.warn(`[AI] Primary model ${params.model} failed (${isRateLimit ? 'rate limit' : 'not found'}), trying fallbacks...`);
+        // If the key was a custom tenant key and it failed, retry using the platform's default API key
+        if (usedKey !== defaultKey && defaultKey) {
+            try {
+                console.log(`[AI] Custom key failed. Retrying with platform default API key...`);
+                text = await makeCall(defaultKey, usedModel);
+                usedKey = defaultKey;
+            } catch (defaultKeyError: any) {
+                console.warn(`[AI] Retrying with platform default key also failed:`, defaultKeyError?.message || defaultKeyError);
+            }
+        }
+
+        // If we still don't have a successful response, try fallback models using the best key we have
+        if (!text) {
             const fallbacks = FALLBACK_MODELS[params.provider] || [];
             let fallbackSuccess = false;
 
             for (const fallbackModel of fallbacks) {
-                if (fallbackModel === params.model) continue; // Skip the one that already failed
+                if (fallbackModel === params.model) continue;
                 try {
                     console.log(`[AI] Trying fallback model: ${fallbackModel}`);
-                    text = await callProvider({ ...params, model: fallbackModel });
+                    text = await makeCall(usedKey, fallbackModel);
                     usedModel = fallbackModel;
                     fallbackSuccess = true;
                     console.log(`[AI] Fallback model ${fallbackModel} succeeded!`);
                     break;
                 } catch (fbErr: any) {
-                    console.warn(`[AI] Fallback ${fallbackModel} also failed: ${fbErr?.message}`);
-                    continue;
+                    console.warn(`[AI] Fallback model ${fallbackModel} failed:`, fbErr?.message || fbErr);
+                    
+                    // If fallback failed and we haven't tried defaultKey yet for this model, try it
+                    if (usedKey !== defaultKey && defaultKey) {
+                        try {
+                            console.log(`[AI] Retrying fallback ${fallbackModel} with platform default API key...`);
+                            text = await makeCall(defaultKey, fallbackModel);
+                            usedModel = fallbackModel;
+                            usedKey = defaultKey;
+                            fallbackSuccess = true;
+                            console.log(`[AI] Fallback model ${fallbackModel} succeeded with default key!`);
+                            break;
+                        } catch (fbDefaultErr) {
+                            // continue
+                        }
+                    }
                 }
             }
 
             if (!fallbackSuccess) {
-                throw primaryError; // All fallbacks failed
+                throw primaryError; // All attempts failed
             }
-        } else {
-            throw primaryError;
         }
     }
 

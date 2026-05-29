@@ -42,7 +42,7 @@ export async function clearTokens() {
 }
 
 // Refresh the access token
-async function refreshAccessToken(): Promise<boolean> {
+export async function refreshAccessToken(): Promise<boolean> {
     if (!tokens.refreshToken) return false;
 
     try {

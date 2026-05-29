@@ -7,7 +7,29 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { apiFetch, API_BASE } from "../lib/api";
+import { apiFetch, API_BASE, refreshAccessToken } from "../lib/api";
+
+const b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function bufferToBase64(arrayBuffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(arrayBuffer);
+    let base64 = '';
+    const len = bytes.length;
+    for (let i = 0; i < len; i += 3) {
+        const b1 = bytes[i];
+        const b2 = i + 1 < len ? bytes[i + 1] : 0;
+        const b3 = i + 2 < len ? bytes[i + 2] : 0;
+        
+        const c1 = b1 >> 2;
+        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+        const c3 = i + 1 < len ? (((b2 & 15) << 2) | (b3 >> 6)) : 64;
+        const c4 = i + 2 < len ? (b3 & 63) : 64;
+        
+        base64 += b64chars.charAt(c1) + b64chars.charAt(c2) + 
+                  (c3 === 64 ? '=' : b64chars.charAt(c3)) + 
+                  (c4 === 64 ? '=' : b64chars.charAt(c4));
+    }
+    return base64;
+}
 
 interface VoiceAssistantWidgetProps {
     active?: boolean;
@@ -185,8 +207,22 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
                 playsInSilentModeIOS: true,
             });
 
+            const customOptions: any = {
+                android: {
+                    ...Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
+                    extension: '.m4a',
+                    outputFormat: 2, // MPEG_4
+                    audioEncoder: 3, // AAC
+                },
+                ios: {
+                    ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
+                    extension: '.m4a',
+                },
+                web: Audio.RecordingOptionsPresets.HIGH_QUALITY.web,
+            };
+
             const { recording } = await Audio.Recording.createAsync(
-                Audio.RecordingOptionsPresets.HIGH_QUALITY
+                customOptions
             );
             setRecordingInstance(recording);
             setIsRecording(true);
@@ -224,37 +260,55 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
         await handleStopSpeech();
 
         try {
-            const formData = new FormData();
             const filename = audioUri.split("/").pop() || "recording.m4a";
             const match = /\.(\w+)$/.exec(filename);
             const type = match ? `audio/${match[1]}` : `audio/m4a`;
 
-            formData.append("audio", {
-                uri: Platform.OS === "android" ? audioUri : audioUri.replace("file://", ""),
-                name: filename,
-                type,
-            } as any);
+            const buildFormData = () => {
+                const fd = new FormData();
+                fd.append("audio", {
+                    uri: audioUri,
+                    name: filename,
+                    type,
+                } as any);
+                fd.append("language", language);
+                fd.append("detailedMode", String(detailedMode));
+                fd.append("history", JSON.stringify(messages.map(m => ({
+                    role: m.role === "assistant" ? "model" : "user",
+                    content: m.content
+                }))));
+                if (aiProvider) fd.append("aiProvider", aiProvider);
+                if (aiModel) fd.append("aiModel", aiModel);
+                return fd;
+            };
 
-            formData.append("language", language);
-            formData.append("detailedMode", String(detailedMode));
-            formData.append("history", JSON.stringify(messages.map(m => ({
-                role: m.role === "assistant" ? "model" : "user",
-                content: m.content
-            }))));
-
-            if (aiProvider) formData.append("aiProvider", aiProvider);
-            if (aiModel) formData.append("aiModel", aiModel);
+            const sendAudioRequest = async (tokenStr: string | null) => {
+                return await fetch(`${API_BASE}/voice-assistant`, {
+                    method: "POST",
+                    headers: {
+                        ...(tokenStr ? { "Authorization": `Bearer ${tokenStr}` } : {}),
+                    },
+                    body: buildFormData(),
+                });
+            };
 
             const token = await AsyncStorage.getItem("auth_tokens");
             const parsedTokens = token ? JSON.parse(token) : {};
+            let accessToken = parsedTokens.accessToken || null;
 
-            const response = await fetch(`${API_BASE}/voice-assistant`, {
-                method: "POST",
-                headers: {
-                    ...(parsedTokens.accessToken ? { "Authorization": `Bearer ${parsedTokens.accessToken}` } : {}),
-                },
-                body: formData,
-            });
+            let response = await sendAudioRequest(accessToken);
+
+            if (response.status === 401 && parsedTokens.refreshToken) {
+                console.log("Audio upload returned 401, refreshing token...");
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    const freshTokenObj = await AsyncStorage.getItem("auth_tokens");
+                    const freshTokens = freshTokenObj ? JSON.parse(freshTokenObj) : {};
+                    accessToken = freshTokens.accessToken || null;
+                    console.log("Token refreshed. Retrying audio upload...");
+                    response = await sendAudioRequest(accessToken);
+                }
+            }
 
             const result = await response.json();
 
@@ -316,13 +370,7 @@ export default function VoiceAssistantWidget({ active = true }: VoiceAssistantWi
             }
 
             const arrayBuffer = await response.arrayBuffer();
-            const bytes = new Uint8Array(arrayBuffer);
-            
-            let binary = '';
-            for (let i = 0; i < bytes.length; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            const base64Data = btoa(binary);
+            const base64Data = bufferToBase64(arrayBuffer);
 
             if (!base64Data || base64Data.length < 100) {
                 console.warn("TTS returned empty or too small audio");

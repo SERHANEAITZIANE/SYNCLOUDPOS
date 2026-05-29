@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         let aiModelOverride: string | null = null;
 
         if (contentType.includes("multipart/form-data")) {
-            const formData = await req.formData();
+            const formData = await req.formData() as any;
             const audioFile = formData.get("audio") as Blob | null;
             language = (formData.get("language") as string) || "french";
             detailedMode = (formData.get("detailedMode") as string) === "true";
@@ -131,9 +131,53 @@ export async function POST(req: NextRequest) {
     }
 }
 
+async function callGeminiTranscription(audioFile: Blob, language: string, apiKey: string): Promise<string> {
+    console.log("[Voice] Transcribing audio with Gemini...");
+    const buffer = Buffer.from(await audioFile.arrayBuffer());
+    const base64Audio = buffer.toString("base64");
+    
+    const mimeType = audioFile.type && audioFile.type !== "application/octet-stream"
+        ? audioFile.type
+        : "audio/m4a";
+
+    // Use gemini-2.5-flash for outstanding multimodal audio transcription in 2026
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            contents: [{
+                parts: [
+                    {
+                        inlineData: {
+                            mimeType,
+                            data: base64Audio
+                        }
+                    },
+                    {
+                        text: "Transcribe the spoken audio. If the speech is in Algerian Arabic (Darija), transcribe it exactly in Arabic script as spoken. Return ONLY the transcription text, nothing else. If you cannot hear anything or the audio is silent, reply with empty text."
+                    }
+                ]
+            }]
+        }),
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `Gemini Transcription API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    console.log("[Voice] Gemini transcription success:", transcription);
+    return transcription;
+}
+
 async function transcribeAudio(audioFile: Blob, language: string, tenant: any): Promise<string> {
     const openaiApiKey = tenant?.openaiApiKey || process.env.OPENAI_API_KEY;
-    const geminiApiKey = tenant?.geminiApiKey || process.env.GEMINI_API_KEY;
+    const tenantGeminiApiKey = tenant?.geminiApiKey;
+    const defaultGeminiApiKey = process.env.GEMINI_API_KEY;
 
     if (openaiApiKey) {
         try {
@@ -168,53 +212,23 @@ async function transcribeAudio(audioFile: Blob, language: string, tenant: any): 
         }
     }
 
-    if (geminiApiKey) {
+    if (tenantGeminiApiKey) {
         try {
-            console.log("[Voice] Transcribing audio with Gemini...");
-            const buffer = Buffer.from(await audioFile.arrayBuffer());
-            const base64Audio = buffer.toString("base64");
-            
-            const mimeType = audioFile.type && audioFile.type !== "application/octet-stream"
-                ? audioFile.type
-                : "audio/m4a";
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiApiKey.trim())}`;
-
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            {
-                                inlineData: {
-                                    mimeType,
-                                    data: base64Audio
-                                }
-                            },
-                            {
-                                text: "Transcribe the spoken audio. If the speech is in Algerian Arabic (Darija), transcribe it exactly in Arabic script as spoken. Return ONLY the transcription text, nothing else. If you cannot hear anything or the audio is silent, reply with empty text."
-                            }
-                        ]
-                    }]
-                }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-                console.log("[Voice] Gemini transcription success:", transcription);
-                return transcription;
-            } else {
-                const err = await response.text();
-                console.warn("[Voice] Gemini Transcription API error:", err);
-            }
-        } catch (geminiErr) {
-            console.error("[Voice] Gemini transcription failed:", geminiErr);
+            return await callGeminiTranscription(audioFile, language, tenantGeminiApiKey);
+        } catch (geminiErr: any) {
+            console.warn("[Voice] Tenant Gemini transcription failed, trying default...", geminiErr?.message || geminiErr);
         }
     }
 
-    throw new Error("No available API key or transcription service configured.");
+    if (defaultGeminiApiKey) {
+        try {
+            return await callGeminiTranscription(audioFile, language, defaultGeminiApiKey);
+        } catch (geminiErr: any) {
+            console.error("[Voice] Default Gemini transcription failed:", geminiErr?.message || geminiErr);
+        }
+    }
+
+    throw new Error("No available API key or transcription service succeeded.");
 }
 
 
