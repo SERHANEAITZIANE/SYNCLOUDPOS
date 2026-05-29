@@ -134,10 +134,10 @@ export default function GerantPurchasesScreen() {
                 encoding: "base64",
             });
 
-            // Call ocr-purchase API
+            // Call ocr-purchase API — backend expects { images: string[] }
             const response = await apiFetch("/ocr-purchase", {
                 method: "POST",
-                body: JSON.stringify({ image: base64 }),
+                body: JSON.stringify({ images: [base64] }),
             });
 
             if (response.success && response.data) {
