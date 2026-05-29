@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { getActiveTenantId } from "@/actions/get-active-tenant";
 import { getBusinessContext } from "@/actions/ai-context";
+import { queryAI, resolveApiKey, type AIProvider, DEFAULT_MODELS } from "@/lib/ai-providers";
 
 interface VoiceResponse {
     success: boolean;
@@ -14,29 +15,45 @@ interface VoiceResponse {
 
 export async function processVocalQuery(
     queryText: string,
-    requestedLanguage: "darija" | "arabic" | "french" = "french"
+    requestedLanguage: "darija" | "arabic" | "french" = "french",
+    aiEngine: "gemini" | "gpt4" | "claude" = "gemini"
 ): Promise<VoiceResponse> {
     try {
         const session = await auth();
         const isLoggedIn = !!session?.user?.id;
         
-        let apiKey = process.env.GEMINI_API_KEY;
         let systemPrompt = "";
+        let provider: AIProvider = "GEMINI";
+        let model = DEFAULT_MODELS.GEMINI;
+
+        // Map ui selections to providers & models
+        if (aiEngine === "gpt4") {
+            provider = "OPENAI";
+            model = DEFAULT_MODELS.OPENAI;
+        } else if (aiEngine === "claude") {
+            provider = "ANTHROPIC";
+            model = DEFAULT_MODELS.ANTHROPIC;
+        }
+
+        let tenantSettings: any = {};
 
         if (isLoggedIn) {
             const tenantId = await getActiveTenantId();
-            if (!tenantId) {
-                return { success: false, text: "Aucun locataire actif", detectedLanguage: requestedLanguage, error: "No active tenant" };
-            }
-
-            // Fetch tenant settings to get Gemini API key
-            const tenant = await db.tenant.findUnique({
-                where: { id: tenantId },
-                select: { geminiApiKey: true }
-            });
-
-            if (tenant?.geminiApiKey) {
-                apiKey = tenant.geminiApiKey;
+            if (tenantId) {
+                // Fetch tenant settings to get keys
+                const tenant = await db.tenant.findUnique({
+                    where: { id: tenantId },
+                    select: {
+                        geminiApiKey: true,
+                        openaiApiKey: true,
+                        anthropicApiKey: true,
+                        aiProvider: true,
+                        aiModel: true,
+                    }
+                });
+                if (tenant) {
+                    tenantSettings = tenant;
+                }
             }
 
             // Get the real-time business context
@@ -89,7 +106,18 @@ Instructions:
 `.trim();
         }
 
-                if (!apiKey) {
+        // Resolve API key using centralized resolver
+        let resolvedKey = resolveApiKey(provider, tenantSettings);
+
+        if (!resolvedKey) {
+            // Self-healing: if no custom or default key for chosen provider, fallback to GEMINI default key
+            console.log(`[Vocal] No API key resolved for ${provider}. Falling back to GEMINI default.`);
+            provider = "GEMINI";
+            model = DEFAULT_MODELS.GEMINI;
+            resolvedKey = resolveApiKey("GEMINI", tenantSettings);
+        }
+
+        if (!resolvedKey) {
             return {
                 success: false,
                 text: "Assistant vocal indisponible : Clé API non configurée.",
@@ -98,57 +126,20 @@ Instructions:
             };
         }
 
-        const makeCall = async (key: string) => {
-            const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key.trim())}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: queryText }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: {
-                            temperature: 0.6,
-                            maxOutputTokens: 2048,
-                        },
-                    }),
-                }
-            );
-
-            if (!res.ok) {
-                const errJson = await res.json().catch(() => ({}));
-                console.error("Gemini API Error:", errJson);
-                throw new Error(errJson?.error?.message || `API error ${res.status}`);
-            }
-
-            const data = await res.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Je n'ai pas pu analyser la réponse.";
-        };
-
-        let textResponse = "";
-        try {
-            textResponse = await makeCall(apiKey);
-        } catch (primaryError: any) {
-            console.warn("[Vocal] Primary call failed, checking fallback...", primaryError?.message || primaryError);
-            const defaultKey = process.env.GEMINI_API_KEY;
-            if (apiKey !== defaultKey && defaultKey) {
-                console.log("[Vocal] Custom key failed. Retrying with platform default API key...");
-                try {
-                    textResponse = await makeCall(defaultKey);
-                } catch (fallbackError: any) {
-                    console.error("[Vocal] Default key attempt also failed:", fallbackError?.message || fallbackError);
-                    throw primaryError;
-                }
-            } else {
-                throw primaryError;
-            }
-        }
+        // Run the query through our robust queryAI utility
+        const result = await queryAI({
+            provider,
+            model,
+            apiKey: resolvedKey,
+            systemPrompt,
+            userMessage: queryText,
+            temperature: 0.6,
+            maxTokens: 2048,
+        });
 
         return {
             success: true,
-            text: textResponse,
+            text: result.text,
             detectedLanguage: requestedLanguage,
         };
 

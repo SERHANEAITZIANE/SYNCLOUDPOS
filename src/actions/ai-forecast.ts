@@ -99,7 +99,7 @@ Give strategic advice.`
                 contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }]
             }
             const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`,
                 { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
             )
             if (!res.ok) throw new Error(`Gemini API error: ${res.statusText}`)

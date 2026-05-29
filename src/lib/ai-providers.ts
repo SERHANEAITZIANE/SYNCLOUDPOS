@@ -30,23 +30,23 @@ interface AIResponse {
 
 // ─── Default models per provider ────────────────────────────────────────────
 export const DEFAULT_MODELS: Record<AIProvider, string> = {
-    GEMINI: "gemini-2.5-flash",
+    GEMINI: "gemini-2.0-flash",
     OPENAI: "gpt-4o",
     ANTHROPIC: "claude-opus-4-7",
 };
 
 // Fallback models to try when primary model hits rate limits
 export const FALLBACK_MODELS: Record<AIProvider, string[]> = {
-    GEMINI: ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-2.0-flash"],
+    GEMINI: ["gemini-2.0-flash", "gemini-3.5-flash", "gemini-3-flash-preview"],
     OPENAI: ["gpt-4o", "gpt-4o-mini"],
     ANTHROPIC: ["claude-opus-4-7", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
 };
 
 export const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
     GEMINI: [
-        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Recommandé — Excellent Darija & Rapide)" },
+        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Stable — Recommandé)" },
         { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash (Dernier 2026 — Ultra-Rapide)" },
-        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Stable)" },
+        { id: "gemini-3-flash-preview", label: "Gemini 3 Flash Preview" },
         { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Raisonnement Profond)" },
     ],
     OPENAI: [

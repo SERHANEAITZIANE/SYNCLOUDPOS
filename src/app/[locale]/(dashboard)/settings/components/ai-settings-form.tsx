@@ -45,7 +45,7 @@ export const AiSettingsForm = ({
             // Set default model if empty
             let modelToSave = aiModel;
             if (!modelToSave) {
-                if (provider === "GEMINI") modelToSave = "gemini-2.5-flash";
+                if (provider === "GEMINI") modelToSave = "gemini-2.0-flash";
                 if (provider === "OPENAI") modelToSave = "gpt-4o";
                 if (provider === "ANTHROPIC") modelToSave = "claude-opus-4-7";
             }
@@ -170,9 +170,9 @@ export const AiSettingsForm = ({
                                     disabled={loading}
                                 >
                                     <option value="">Sélectionnez un modèle</option>
-                                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommandé — Excellent Darija & Rapide)</option>
+                                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Stable — Recommandé — Excellent Darija & Rapide)</option>
                                     <option value="gemini-3.5-flash">Gemini 3.5 Flash (Dernier 2026 — Ultra-Rapide)</option>
-                                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Stable)</option>
+                                    <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
                                     <option value="gemini-2.5-pro">Gemini 2.5 Pro (Raisonnement Profond)</option>
                                 </select>
                             </div>

@@ -123,7 +123,7 @@ export const VoiceAssistantWidget: React.FC = () => {
                 promptText += " (Réponds de manière chaleureuse, amicale et proche du commerçant)";
             }
 
-            const result = await processVocalQuery(promptText, language);
+            const result = await processVocalQuery(promptText, language, aiEngine);
             if (result.success) {
                 setAiResponse(result.text);
                 if (!isMuted) {
@@ -269,7 +269,10 @@ export const VoiceAssistantWidget: React.FC = () => {
             `}</style>
 
             {/* Widget Main UI */}
-            <div className="fixed bottom-6 right-6 z-50 hidden md:flex flex-col items-end gap-3 font-sans">
+            <div 
+                className="fixed z-50 hidden md:flex flex-col items-end gap-3 font-sans"
+                style={{ bottom: "24px", right: "96px" }}
+            >
                 
                 {/* Speech & AI Dashboard Overlay Panel */}
                 {isOpen && (
