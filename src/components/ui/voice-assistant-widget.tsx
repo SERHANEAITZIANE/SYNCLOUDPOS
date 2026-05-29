@@ -19,18 +19,18 @@ export const VoiceAssistantWidget: React.FC = () => {
 
     // Widget settings options
     const [showSettings, setShowSettings] = useState(false);
-    const [aiEngine, setAiEngine] = useState<"gemini" | "gpt4" | "claude">("gemini");
+    const [aiEngine, setAiEngine] = useState<"gemini" | "gpt4" | "claude">("gpt4"); // Default to gpt4 for premium quality
     const [voiceSpeed, setVoiceSpeed] = useState<number>(1.0);
     const [voicePitch, setVoicePitch] = useState<number>(1.0);
     const [persona, setPersona] = useState<"pro" | "friendly" | "brief">("friendly");
 
     const recognitionRef = useRef<any>(null);
-    const synthesisUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null); // Server-side Neural Edge TTS player
 
     useEffect(() => {
-        // Check if Web Speech API is supported
+        // Check if Web Speech API is supported for microphone input
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (SpeechRecognition && typeof window !== "undefined" && window.speechSynthesis) {
+        if (SpeechRecognition && typeof window !== "undefined") {
             setIsSupported(true);
             
             const rec = new SpeechRecognition();
@@ -40,21 +40,17 @@ export const VoiceAssistantWidget: React.FC = () => {
             rec.onstart = () => {
                 setIsListening(true);
                 setTranscript("Listening / Écoute en cours...");
-                // Stop any running speech synthesis
-                window.speechSynthesis.cancel();
-                setIsSpeaking(false);
+                stopSpeaking();
             };
 
             rec.onerror = (event: any) => {
                 if (event.error !== "no-speech" && event.error !== "not-allowed") {
                     console.error("Speech Recognition Error:", event.error);
-                } else {
-                    console.warn("Speech Recognition Info (Handled):", event.error);
                 }
                 if (event.error === "no-speech") {
                     setTranscript("Aucune voix détectée. Réessayez.");
                 } else if (event.error === "not-allowed") {
-                    setTranscript("Accès au microphone refusé. Veuillez autoriser le micro dans votre navigateur.");
+                    setTranscript("Accès au microphone refusé. Veuillez l'autoriser.");
                 } else {
                     setTranscript(`Erreur: ${event.error}`);
                 }
@@ -75,20 +71,12 @@ export const VoiceAssistantWidget: React.FC = () => {
         }
     }, [language]);
 
-    // Cleanup speech synthesis and warm up voices on mount/unmount
+    // Cleanup audio playback on unmount
     useEffect(() => {
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-            // Warm up voices catalog for Chrome/Edge asynchronous loading
-            window.speechSynthesis.getVoices();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = () => {
-                    window.speechSynthesis.getVoices();
-                };
-            }
-        }
         return () => {
-            if (typeof window !== "undefined" && window.speechSynthesis) {
-                window.speechSynthesis.cancel();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
             }
         };
     }, []);
@@ -141,9 +129,13 @@ export const VoiceAssistantWidget: React.FC = () => {
     };
 
     const speakText = (text: string) => {
-        if (typeof window === "undefined" || !window.speechSynthesis) return;
+        if (typeof window === "undefined") return;
 
-        window.speechSynthesis.cancel(); // Stop current speakings
+        // Stop and pause any currently playing audio
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
 
         // Helper function to strip markdown for clean Text-to-Speech
         const stripMarkdownForSpeech = (rawText: string): string => {
@@ -166,61 +158,57 @@ export const VoiceAssistantWidget: React.FC = () => {
         const cleanText = stripMarkdownForSpeech(text);
         if (!cleanText) return;
 
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        
-        // Dynamically detect language from the text content itself (Arabic vs French/Western)
-        const hasArabic = /[\u0600-\u06FF]/.test(cleanText);
-        
-        if (hasArabic) {
-            utterance.lang = "ar-SA"; // default fallback
-            
-            const voices = window.speechSynthesis.getVoices();
-            // Search for any Arabic voice installed on the user's browser/system (preferring local service)
-            const arVoice = voices.find(v => v.lang.toLowerCase().startsWith("ar") && v.localService)
-                         || voices.find(v => v.lang.toLowerCase().startsWith("ar"));
-            if (arVoice) {
-                utterance.voice = arVoice;
-                utterance.lang = arVoice.lang;
+        setIsSpeaking(true);
+
+        // Fetch high-quality neural voice stream from our server TTS
+        fetch("/api/mobile/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: cleanText,
+                language: language,
+                responseFormat: "base64"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.audio) {
+                const audio = new Audio("data:audio/mp3;base64," + data.audio);
+                audioRef.current = audio;
+                
+                // Adjust speed if set
+                audio.playbackRate = voiceSpeed;
+                
+                audio.play()
+                    .catch(err => {
+                        console.error("Audio playback failed:", err);
+                        setIsSpeaking(false);
+                    });
+
+                audio.onended = () => {
+                    setIsSpeaking(false);
+                    audioRef.current = null;
+                };
+                audio.onerror = () => {
+                    setIsSpeaking(false);
+                    audioRef.current = null;
+                };
+            } else {
+                setIsSpeaking(false);
             }
-        } else {
-            utterance.lang = "fr-FR"; // default fallback
-            
-            const voices = window.speechSynthesis.getVoices();
-            // Search for any French voice installed on the user's browser/system (preferring local service)
-            const frVoice = voices.find(v => v.lang.toLowerCase().startsWith("fr") && v.localService)
-                         || voices.find(v => v.lang.toLowerCase().startsWith("fr"));
-            if (frVoice) {
-                utterance.voice = frVoice;
-                utterance.lang = frVoice.lang;
-            }
-        }
-
-        // Apply dynamically configured speed and pitch options
-        utterance.rate = voiceSpeed;
-        utterance.pitch = voicePitch;
-
-        utterance.onstart = () => {
-            setIsSpeaking(true);
-        };
-
-        utterance.onend = () => {
+        })
+        .catch(err => {
+            console.error("TTS fetch error:", err);
             setIsSpeaking(false);
-        };
-
-        utterance.onerror = (e) => {
-            console.error("Speech Synthesis Error:", e);
-            setIsSpeaking(false);
-        };
-
-        synthesisUtteranceRef.current = utterance;
-        window.speechSynthesis.speak(utterance);
+        });
     };
 
     const stopSpeaking = () => {
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-            setIsSpeaking(false);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
         }
+        setIsSpeaking(false);
     };
 
     // Quick suggestion questions based on the active language
@@ -268,65 +256,72 @@ export const VoiceAssistantWidget: React.FC = () => {
                 }
             `}</style>
 
-            {/* Widget Main UI */}
-            <div 
-                className="fixed z-50 hidden md:flex flex-col items-end gap-3 font-sans"
-                style={{ bottom: "24px", right: "96px" }}
-            >
-                
-                {/* Speech & AI Dashboard Overlay Panel */}
-                {isOpen && (
-                    <div className="w-[350px] sm:w-[400px] bg-slate-950/95 border border-slate-800/80 rounded-3xl p-5 shadow-3xl flex flex-col gap-4 text-white transition-all transform duration-300 scale-100 ease-out backdrop-filter backdrop-blur-xl">
-                        
-                        {/* Header */}
-                        <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                            <div className="flex items-center gap-2">
-                                <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
-                                    <Sparkles className="h-4.5 w-4.5 animate-pulse" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text text-transparent">Syncloud AI</span>
-                                    <span className="text-[10px] text-slate-500 font-semibold leading-none mt-0.5">Assistant Vocal Intelligent</span>
-                                </div>
+            {/* Speech & AI Dashboard Overlay Panel */}
+            {isOpen && (
+                <div 
+                    className={cn(
+                        "bg-slate-950/95 border border-slate-800/80 p-5 shadow-3xl flex flex-col gap-4 text-white transition-all transform duration-300 ease-out backdrop-filter backdrop-blur-xl",
+                        // Desktop positioning & size (floating card on right)
+                        "md:fixed md:bottom-24 md:right-[96px] md:w-[400px] md:h-auto md:rounded-3xl md:z-50 md:max-h-[82vh]",
+                        // Mobile bottom sheet positioning & size (attached to bottom, full width, 85% height)
+                        "fixed bottom-0 left-0 right-0 w-full h-[85vh] rounded-t-[32px] border-t border-slate-800/90 z-[999] shadow-2xl"
+                    )}
+                >
+                    {/* Cool mobile drag handle */}
+                    <div className="w-12 h-1.5 bg-slate-800 rounded-full mx-auto mb-1 md:hidden shrink-0" />
+                    
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-slate-850 pb-3 shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
+                                <Sparkles className="h-4.5 w-4.5 animate-pulse" />
                             </div>
-                            
-                            <div className="flex items-center gap-1.5">
-                                {/* Language Select Chip */}
-                                <div className="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-full text-[10px] font-bold border border-slate-800 text-slate-300 hover:text-white">
-                                    <Languages className="h-3 w-3 text-indigo-400" />
-                                    <select 
-                                        value={language}
-                                        onChange={(e) => setLanguage(e.target.value as any)}
-                                        className="bg-transparent border-none outline-none text-[10px] font-extrabold cursor-pointer pr-1"
-                                    >
-                                        <option value="french" className="bg-slate-950 text-white">Français</option>
-                                        <option value="arabic" className="bg-slate-950 text-white">العربية</option>
-                                        <option value="darija" className="bg-slate-950 text-white">الدارجة</option>
-                                    </select>
-                                </div>
-
-                                {/* Settings Toggle Cog */}
-                                <button
-                                    onClick={() => setShowSettings(!showSettings)}
-                                    className={cn(
-                                        "p-1.5 rounded-lg border border-slate-800 transition-all hover:bg-slate-900",
-                                        showSettings ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/30" : "bg-slate-900/40 text-slate-400"
-                                    )}
-                                    title="Options avancées"
-                                >
-                                    <Settings className="h-3.5 w-3.5" />
-                                </button>
-
-                                {/* Close Button */}
-                                <button 
-                                    onClick={() => setIsOpen(false)} 
-                                    className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-white"
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </button>
+                            <div className="flex flex-col">
+                                <span className="font-extrabold text-sm tracking-wide bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text text-transparent">Syncloud AI</span>
+                                <span className="text-[10px] text-slate-500 font-semibold leading-none mt-0.5">Assistant Vocal Intelligent</span>
                             </div>
                         </div>
+                        
+                        <div className="flex items-center gap-1.5">
+                            {/* Language Select Chip */}
+                            <div className="flex items-center gap-1 bg-slate-900/80 px-2 py-1 rounded-full text-[10px] font-bold border border-slate-800 text-slate-300 hover:text-white">
+                                <Languages className="h-3 w-3 text-indigo-400" />
+                                <select 
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value as any)}
+                                    className="bg-transparent border-none outline-none text-[10px] font-extrabold cursor-pointer pr-1"
+                                >
+                                    <option value="french" className="bg-slate-950 text-white">Français</option>
+                                    <option value="arabic" className="bg-slate-950 text-white">العربية</option>
+                                    <option value="darija" className="bg-slate-950 text-white">الدارجة</option>
+                                </select>
+                            </div>
 
+                            {/* Settings Toggle Cog */}
+                            <button
+                                onClick={() => setShowSettings(!showSettings)}
+                                className={cn(
+                                    "p-1.5 rounded-lg border border-slate-800 transition-all hover:bg-slate-900",
+                                    showSettings ? "bg-indigo-600/20 text-indigo-400 border-indigo-500/30" : "bg-slate-900/40 text-slate-400"
+                                )}
+                                title="Options avancées"
+                            >
+                                <Settings className="h-3.5 w-3.5" />
+                            </button>
+
+                            {/* Close Button */}
+                            <button 
+                                onClick={() => setIsOpen(false)} 
+                                className="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-white"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Scrollable content container for mobile friendliness */}
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none">
+                        
                         {/* Options Settings View (Active Toggle) */}
                         {showSettings && (
                             <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3.5 flex flex-col gap-3.5 animate-lp-fade-in">
@@ -343,9 +338,9 @@ export const VoiceAssistantWidget: React.FC = () => {
                                         onChange={(e) => setAiEngine(e.target.value as any)}
                                         className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs outline-none"
                                     >
-                                        <option value="gemini">Gemini 2.5 Flash</option>
-                                        <option value="gpt4">GPT-4o Mini (Pro)</option>
-                                        <option value="claude">Claude 3.5 Haiku</option>
+                                        <option value="gpt4">GPT-4o (Ultra-Performant & Darija)</option>
+                                        <option value="gemini">Gemini 2.0 Flash (Stable)</option>
+                                        <option value="claude">Claude 3.5 Sonnet</option>
                                     </select>
                                 </div>
 
@@ -363,23 +358,6 @@ export const VoiceAssistantWidget: React.FC = () => {
                                         value={voiceSpeed}
                                         onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
                                         className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                                    />
-                                </div>
-
-                                {/* Voice Pitch Slider */}
-                                <div className="flex flex-col gap-1">
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-slate-400 font-medium">Hauteur de ton :</span>
-                                        <span className="text-teal-400 font-bold">{voicePitch === 1 ? "Normal" : voicePitch < 1 ? "Grave" : "Aigu"}</span>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="0.7"
-                                        max="1.3"
-                                        step="0.1"
-                                        value={voicePitch}
-                                        onChange={(e) => setVoicePitch(parseFloat(e.target.value))}
-                                        className="w-full h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-teal-500"
                                     />
                                 </div>
 
@@ -509,7 +487,7 @@ export const VoiceAssistantWidget: React.FC = () => {
                             )}
 
                             <div className={cn(
-                                "bg-indigo-950/15 border border-indigo-950 rounded-2xl p-4 text-sm min-h-[90px] text-slate-100 flex flex-col justify-between leading-relaxed shadow-inner",
+                                "bg-indigo-950/15 border border-indigo-950 rounded-2xl p-4 text-sm min-h-[90px] text-slate-100 flex flex-col justify-between leading-relaxed shadow-inner overflow-y-auto max-h-[30vh] md:max-h-none",
                                 loading && "animate-pulse border-indigo-800/40"
                             )}>
                                 <p className="mb-2 text-slate-200">{aiResponse || <span className="text-slate-500 italic">L'assistant vocal parlera après votre commande...</span>}</p>
@@ -533,16 +511,20 @@ export const VoiceAssistantWidget: React.FC = () => {
                                 )}
                             </div>
                         </div>
-
-                        {/* Status bar */}
-                        <div className="text-[9px] text-slate-600 flex items-center justify-between border-t border-slate-900/60 pt-2">
-                            <span>Statut: {loading ? "Analyse Gemini AI..." : isListening ? "Micro activé..." : "En attente"}</span>
-                            <span>Powered by {aiEngine === "gemini" ? "Gemini 2.5" : aiEngine === "gpt4" ? "GPT-4o" : "Claude 3.5"}</span>
-                        </div>
                     </div>
-                )}
 
-                {/* Floating Microphone Action Pill */}
+                    {/* Status bar */}
+                    <div className="text-[9px] text-slate-600 flex items-center justify-between border-t border-slate-900/60 pt-2 shrink-0">
+                        <span>Statut: {loading ? "Analyse..." : isListening ? "Micro activé..." : "En attente"}</span>
+                        <span>Powered by {aiEngine === "gemini" ? "Gemini 2.0" : aiEngine === "gpt4" ? "GPT-4o" : "Claude 3.5"}</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Floating Microphone Action Pill Container */}
+            <div 
+                className="fixed z-50 flex flex-col items-end gap-3 font-sans md:right-[96px] md:bottom-6 right-6 bottom-[96px]"
+            >
                 <button
                     onClick={() => {
                         setIsOpen(!isOpen);
