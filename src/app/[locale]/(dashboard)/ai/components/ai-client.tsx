@@ -134,7 +134,7 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
 
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const synthRef = useRef<SpeechSynthesis | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const provider = PROVIDERS.find(p => p.id === selectedProvider) || PROVIDERS[0];
     const currentKey = dbKeys[selectedProvider] || "";
@@ -145,28 +145,32 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, loading]);
 
-    // Initialize speech synthesis
+    // Cleanup audio playback on unmount
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            synthRef.current = window.speechSynthesis;
-        }
         return () => {
-            if (synthRef.current) synthRef.current.cancel();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
         };
     }, []);
 
     const handleSpeak = (id: string, text: string) => {
-        if (!synthRef.current) return;
-
         // If it's already speaking this exact message, stop it
         if (speakingId === id) {
-            synthRef.current.cancel();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
             setSpeakingId(null);
             return;
         }
 
         // Stop any currently playing audio
-        synthRef.current.cancel();
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
 
         // Helper function to strip markdown for clean Text-to-Speech
         const stripMarkdownForSpeech = (rawText: string): string => {
@@ -189,44 +193,49 @@ export function AiClient({ dbProvider, dbKeys }: AiClientProps) {
         const cleanText = stripMarkdownForSpeech(text);
         if (!cleanText) return;
 
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        
-        // Dynamically detect language from the text content itself (Arabic vs French/Western)
+        // Dynamically detect language from the text content itself (Arabic/Darja vs French/Western)
         const hasArabic = /[\u0600-\u06FF]/.test(cleanText);
-        
-        if (hasArabic) {
-            utterance.lang = "ar-SA"; // default fallback
-            
-            const voices = synthRef.current.getVoices();
-            // Search for any Arabic voice installed on the user's browser/system (preferring local service)
-            const arVoice = voices.find(v => v.lang.toLowerCase().startsWith("ar") && v.localService)
-                         || voices.find(v => v.lang.toLowerCase().startsWith("ar"));
-            if (arVoice) {
-                utterance.voice = arVoice;
-                utterance.lang = arVoice.lang;
-            }
-        } else {
-            utterance.lang = "fr-FR"; // default fallback
-            
-            const voices = synthRef.current.getVoices();
-            // Search for any French voice installed on the user's browser/system (preferring local service)
-            const frVoice = voices.find(v => v.lang.toLowerCase().startsWith("fr") && v.localService)
-                         || voices.find(v => v.lang.toLowerCase().startsWith("fr"));
-            if (frVoice) {
-                utterance.voice = frVoice;
-                utterance.lang = frVoice.lang;
-            }
-        }
-
-        utterance.onend = () => {
-            setSpeakingId(prev => (prev === id ? null : prev));
-        };
-        utterance.onerror = () => {
-            setSpeakingId(prev => (prev === id ? null : prev));
-        };
+        const language = hasArabic ? "darija" : "french";
 
         setSpeakingId(id);
-        synthRef.current.speak(utterance);
+
+        fetch("/api/mobile/tts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: cleanText,
+                language: language,
+                responseFormat: "base64"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.audio) {
+                const audio = new Audio("data:audio/mp3;base64," + data.audio);
+                audioRef.current = audio;
+                
+                audio.play()
+                    .catch(err => {
+                        console.error("Audio playback failed:", err);
+                        setSpeakingId(null);
+                    });
+
+                audio.onended = () => {
+                    setSpeakingId(null);
+                    audioRef.current = null;
+                };
+                audio.onerror = () => {
+                    setSpeakingId(null);
+                    audioRef.current = null;
+                };
+            } else {
+                setSpeakingId(null);
+            }
+        })
+        .catch(err => {
+            console.error("TTS fetch error:", err);
+            setSpeakingId(null);
+        });
     };
 
     const handleCopy = (id: string, text: string) => {
