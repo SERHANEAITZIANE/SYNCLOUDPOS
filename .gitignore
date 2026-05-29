@@ -53,3 +53,6 @@ scripts/license.private.pem
 # Local machine files
 .machine-id
 license.key
+
+# Android builds
+*.apk
