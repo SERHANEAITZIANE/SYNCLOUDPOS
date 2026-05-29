@@ -89,7 +89,7 @@ Instructions:
 `.trim();
         }
 
-        if (!apiKey) {
+                if (!apiKey) {
             return {
                 success: false,
                 text: "Assistant vocal indisponible : Clé API non configurée.",
@@ -98,33 +98,53 @@ Instructions:
             };
         }
 
-        // Query the Gemini API using generateContent
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    contents: [{ role: "user", parts: [{ text: queryText }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: {
-                        temperature: 0.6,
-                        maxOutputTokens: 2048,
+        const makeCall = async (key: string) => {
+            const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key.trim())}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
                     },
-                }),
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: queryText }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: {
+                            temperature: 0.6,
+                            maxOutputTokens: 2048,
+                        },
+                    }),
+                }
+            );
+
+            if (!res.ok) {
+                const errJson = await res.json().catch(() => ({}));
+                console.error("Gemini API Error:", errJson);
+                throw new Error(errJson?.error?.message || `API error ${res.status}`);
             }
-        );
 
-        if (!response.ok) {
-            const errJson = await response.json().catch(() => ({}));
-            console.error("Gemini API Error:", errJson);
-            throw new Error(errJson?.error?.message || `API error ${response.status}`);
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Je n'ai pas pu analyser la réponse.";
+        };
+
+        let textResponse = "";
+        try {
+            textResponse = await makeCall(apiKey);
+        } catch (primaryError: any) {
+            console.warn("[Vocal] Primary call failed, checking fallback...", primaryError?.message || primaryError);
+            const defaultKey = process.env.GEMINI_API_KEY;
+            if (apiKey !== defaultKey && defaultKey) {
+                console.log("[Vocal] Custom key failed. Retrying with platform default API key...");
+                try {
+                    textResponse = await makeCall(defaultKey);
+                } catch (fallbackError: any) {
+                    console.error("[Vocal] Default key attempt also failed:", fallbackError?.message || fallbackError);
+                    throw primaryError;
+                }
+            } else {
+                throw primaryError;
+            }
         }
-
-        const data = await response.json();
-        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Je n'ai pas pu analyser la réponse.";
 
         return {
             success: true,
