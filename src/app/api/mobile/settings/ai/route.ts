@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
             success: true,
             aiProvider: tenant?.aiProvider || "GEMINI",
-            aiModel: tenant?.aiModel || "gemini-3.5-flash",
+            aiModel: tenant?.aiModel || "gemini-2.5-flash",
             hasGeminiKey: !!tenant?.geminiApiKey || !!process.env.GEMINI_API_KEY,
             hasOpenaiKey: !!tenant?.openaiApiKey || !!process.env.OPENAI_API_KEY,
             hasAnthropicKey: !!tenant?.anthropicApiKey || !!process.env.ANTHROPIC_API_KEY,

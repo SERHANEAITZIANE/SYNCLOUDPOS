@@ -1,8 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
-// Change this to your SynCloudPOS server URL
+// Resolve local host IP dynamically in development to automatically connect to Next.js dev server on port 3000
+const getDevApiBase = () => {
+    const hostUri = Constants.expoConfig?.hostUri || "";
+    const ip = hostUri.split(":")[0];
+    return ip ? `http://${ip}:3000/api/mobile` : "http://localhost:3000/api/mobile";
+};
+
 const API_BASE = __DEV__
-    ? "http://192.168.0.132:3000/api/mobile"
+    ? getDevApiBase()
     : "https://chirpedbeo.online/api/mobile";
 
 interface TokenStore {

@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
 // ─── Gemini Vision API ──────────────────────────────────────────────────────
 async function callGeminiVision(apiKey: string, images: string[], language: string) {
-    const model = "gemini-3.5-flash";
+    const model = "gemini-2.5-flash";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
 
     // Build parts: system instruction + images

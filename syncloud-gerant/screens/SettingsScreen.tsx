@@ -13,25 +13,19 @@ type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
 
 const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string; badge?: string }[]> = {
     GEMINI: [
+        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", badge: "⭐ RECOMMANDÉ" },
         { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", badge: "🆕 DERNIER" },
-        { id: "gemini-3.1-pro", label: "Gemini 3.1 Pro", badge: "🔥" },
-        { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", badge: "⚡ Rapide" },
-        { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+        { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", badge: "✅ Stable" },
+        { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro", badge: "🧠 Profond" },
     ],
     OPENAI: [
-        { id: "gpt-5-5", label: "GPT-5.5 Pro", badge: "🆕 DERNIER" },
-        { id: "gpt-5-5-instant", label: "GPT-5.5 Instant", badge: "⚡ Rapide" },
-        { id: "gpt-5", label: "GPT-5" },
-        { id: "gpt-4o", label: "GPT-4o" },
-        { id: "gpt-4o-mini", label: "GPT-4o Mini" },
+        { id: "gpt-4o", label: "GPT-4o", badge: "⭐ RECOMMANDÉ" },
+        { id: "gpt-4o-mini", label: "GPT-4o Mini", badge: "⚡ Rapide" },
     ],
     ANTHROPIC: [
-        { id: "claude-opus-4-8", label: "Claude Opus 4.8", badge: "🆕 DERNIER" },
-        { id: "claude-opus-4-7", label: "Claude Opus 4.7", badge: "🔥 Dialecte" },
-        { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "⚡ Rapide" },
-        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet" },
-        { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku" },
+        { id: "claude-opus-4-7", label: "Claude Opus 4.7", badge: "⭐ RECOMMANDÉ" },
+        { id: "claude-3-5-sonnet-latest", label: "Claude 3.5 Sonnet", badge: "✅ Standard" },
+        { id: "claude-3-5-haiku-latest", label: "Claude 3.5 Haiku", badge: "⚡ Rapide" },
     ]
 };
 

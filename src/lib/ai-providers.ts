@@ -30,16 +30,24 @@ interface AIResponse {
 
 // ─── Default models per provider ────────────────────────────────────────────
 export const DEFAULT_MODELS: Record<AIProvider, string> = {
-    GEMINI: "gemini-3.5-flash",
+    GEMINI: "gemini-2.5-flash",
     OPENAI: "gpt-4o",
     ANTHROPIC: "claude-opus-4-7",
 };
 
+// Fallback models to try when primary model hits rate limits
+export const FALLBACK_MODELS: Record<AIProvider, string[]> = {
+    GEMINI: ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-2.0-flash"],
+    OPENAI: ["gpt-4o", "gpt-4o-mini"],
+    ANTHROPIC: ["claude-opus-4-7", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"],
+};
+
 export const AVAILABLE_MODELS: Record<AIProvider, { id: string; label: string }[]> = {
     GEMINI: [
-        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash (Dernier Ultra-Rapide 2026 — Recommandé)" },
+        { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash (Recommandé — Excellent Darija & Rapide)" },
+        { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash (Dernier 2026 — Ultra-Rapide)" },
         { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash (Stable)" },
-        { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Raisonnement Complexe)" },
+        { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Raisonnement Profond)" },
     ],
     OPENAI: [
         { id: "gpt-4o", label: "GPT-4o (Dernier Flagship OpenAI — Excellent pour le Darija)" },
@@ -74,7 +82,7 @@ async function callGemini(params: AIRequestParams): Promise<string> {
             systemInstruction: { parts: [{ text: params.systemPrompt }] },
             generationConfig: {
                 temperature: params.temperature ?? 0.7,
-                maxOutputTokens: params.maxTokens ?? 400,
+                maxOutputTokens: params.maxTokens ?? 1500, // Arabic script needs higher token budget (3-5x vs Latin)
             },
         }),
     });
@@ -109,7 +117,7 @@ async function callOpenAI(params: AIRequestParams): Promise<string> {
                 { role: "user", content: params.userMessage },
             ],
             temperature: params.temperature ?? 0.7,
-            max_tokens: params.maxTokens ?? 400,
+            max_tokens: params.maxTokens ?? 1500,
         }),
     });
 
@@ -144,7 +152,7 @@ async function callAnthropic(params: AIRequestParams): Promise<string> {
                 { role: "user", content: params.userMessage }
             ],
             temperature: params.temperature ?? 0.7,
-            max_tokens: params.maxTokens ?? 400,
+            max_tokens: params.maxTokens ?? 1500,
         }),
     });
 
@@ -157,27 +165,63 @@ async function callAnthropic(params: AIRequestParams): Promise<string> {
     return data.content?.[0]?.text?.trim() || "";
 }
 
-// ─── Unified entry point ────────────────────────────────────────────────────
-export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
-    let text: string;
-
+// ─── Call a single provider ─────────────────────────────────────────────────
+async function callProvider(params: AIRequestParams): Promise<string> {
     switch (params.provider) {
         case "OPENAI":
-            text = await callOpenAI(params);
-            break;
+            return await callOpenAI(params);
         case "ANTHROPIC":
-            text = await callAnthropic(params);
-            break;
+            return await callAnthropic(params);
         case "GEMINI":
         default:
-            text = await callGemini(params);
-            break;
+            return await callGemini(params);
+    }
+}
+
+// ─── Unified entry point with automatic fallback on rate limits ─────────────
+export async function queryAI(params: AIRequestParams): Promise<AIResponse> {
+    let text: string;
+    let usedModel = params.model;
+
+    try {
+        text = await callProvider(params);
+    } catch (primaryError: any) {
+        const errMsg = primaryError?.message || "";
+        const isRateLimit = errMsg.includes("quota") || errMsg.includes("rate") || errMsg.includes("429") || errMsg.includes("exceeded");
+        const isNotFound = errMsg.includes("not found") || errMsg.includes("not supported") || errMsg.includes("404");
+
+        if (isRateLimit || isNotFound) {
+            console.warn(`[AI] Primary model ${params.model} failed (${isRateLimit ? 'rate limit' : 'not found'}), trying fallbacks...`);
+            const fallbacks = FALLBACK_MODELS[params.provider] || [];
+            let fallbackSuccess = false;
+
+            for (const fallbackModel of fallbacks) {
+                if (fallbackModel === params.model) continue; // Skip the one that already failed
+                try {
+                    console.log(`[AI] Trying fallback model: ${fallbackModel}`);
+                    text = await callProvider({ ...params, model: fallbackModel });
+                    usedModel = fallbackModel;
+                    fallbackSuccess = true;
+                    console.log(`[AI] Fallback model ${fallbackModel} succeeded!`);
+                    break;
+                } catch (fbErr: any) {
+                    console.warn(`[AI] Fallback ${fallbackModel} also failed: ${fbErr?.message}`);
+                    continue;
+                }
+            }
+
+            if (!fallbackSuccess) {
+                throw primaryError; // All fallbacks failed
+            }
+        } else {
+            throw primaryError;
+        }
     }
 
     return {
         text: text || "لم أتمكن من معالجة الطلب. حاول مرة أخرى.",
         provider: params.provider,
-        model: params.model,
+        model: usedModel,
     };
 }
 
