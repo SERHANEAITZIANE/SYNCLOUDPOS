@@ -67,16 +67,29 @@ export async function POST(req: NextRequest) {
 
         try {
             if (provider === "GEMINI") {
-                extractedData = await callGeminiVision(apiKey, limitedImages, language);
+                try {
+                    extractedData = await callGeminiVision(apiKey, limitedImages, language);
+                } catch (geminiErr: any) {
+                    // If primary Gemini failed, try OpenAI if an OpenAI key is available
+                    const openAiKey = tenant?.openaiApiKey || process.env.OPENAI_API_KEY;
+                    if (openAiKey?.trim()) {
+                        console.log("[OCR] Primary Gemini failed. Retrying OCR with OpenAI Vision...");
+                        extractedData = await callOpenAIVision(openAiKey, limitedImages, language);
+                        apiKey = openAiKey;
+                        provider = "OPENAI";
+                    } else {
+                        throw geminiErr;
+                    }
+                }
             } else {
                 extractedData = await callOpenAIVision(apiKey, limitedImages, language);
             }
         } catch (apiErr: any) {
             console.warn("[OCR] Primary OCR call failed:", apiErr?.message || apiErr);
 
-            // Resolve platform default Gemini key
+            // Resolve platform default Gemini key (if we haven't already used it)
             const defaultGeminiKey = process.env.GEMINI_API_KEY;
-            if (apiKey !== defaultGeminiKey && defaultGeminiKey) {
+            if (apiKey !== defaultGeminiKey && defaultGeminiKey?.trim()) {
                 try {
                     console.log("[OCR] Retrying OCR with platform default Gemini key...");
                     extractedData = await callGeminiVision(defaultGeminiKey, limitedImages, language);
@@ -84,6 +97,21 @@ export async function POST(req: NextRequest) {
                     provider = "GEMINI";
                 } catch (retryErr: any) {
                     console.error("[OCR] Default key fallback also failed:", retryErr?.message || retryErr);
+                }
+            }
+
+            // If still no extracted data, check if we can try default OpenAI key as a last resort before mock!
+            if (!extractedData) {
+                const defaultOpenAIKey = process.env.OPENAI_API_KEY;
+                if (apiKey !== defaultOpenAIKey && defaultOpenAIKey?.trim()) {
+                    try {
+                        console.log("[OCR] Retrying OCR with platform default OpenAI key...");
+                        extractedData = await callOpenAIVision(defaultOpenAIKey, limitedImages, language);
+                        apiKey = defaultOpenAIKey;
+                        provider = "OPENAI";
+                    } catch (openAiRetryErr: any) {
+                        console.error("[OCR] Default OpenAI key fallback also failed:", openAiRetryErr?.message || openAiRetryErr);
+                    }
                 }
             }
 
@@ -114,8 +142,8 @@ export async function POST(req: NextRequest) {
 
 // ─── Gemini Vision API ──────────────────────────────────────────────────────
 async function callGeminiVision(apiKey: string, images: string[], language: string) {
-    const model = "gemini-2.0-flash";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
+    const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash"];
+    let lastError: any = null;
 
     // Build parts: system instruction + images
     const imageParts = images.map((base64Img: string) => {
@@ -129,45 +157,56 @@ async function callGeminiVision(apiKey: string, images: string[], language: stri
         };
     });
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{
-                role: "user",
-                parts: [
-                    { text: buildOCRPrompt(language) },
-                    ...imageParts,
-                ]
-            }],
-            generationConfig: {
-                temperature: 0.1, // Low temperature for accuracy
-                maxOutputTokens: 2000,
-                responseMimeType: "application/json",
-            },
-        }),
-    });
+    for (const model of models) {
+        try {
+            console.log(`[OCR] Attempting Gemini Vision with model: ${model}`);
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
 
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `Gemini Vision API error ${response.status}`);
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: buildOCRPrompt(language) },
+                            ...imageParts,
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.1, // Low temperature for accuracy
+                        maxOutputTokens: 2000,
+                        responseMimeType: "application/json",
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err?.error?.message || `Gemini Vision API error ${response.status}`);
+            }
+
+            const data = await response.json();
+            const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+
+            try {
+                return JSON.parse(rawText);
+            } catch {
+                return {
+                    supplier: "Non détecté",
+                    items: [],
+                    shippingFees: 0,
+                    rawText: rawText,
+                    parseError: true,
+                };
+            }
+        } catch (err: any) {
+            console.warn(`[OCR] Gemini Vision with model ${model} failed:`, err?.message || err);
+            lastError = err;
+        }
     }
 
-    const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    try {
-        return JSON.parse(rawText);
-    } catch {
-        // If JSON parsing fails, return the raw text with a fallback structure
-        return {
-            supplier: "Non détecté",
-            items: [],
-            shippingFees: 0,
-            rawText: rawText,
-            parseError: true,
-        };
-    }
+    throw lastError || new Error("All Gemini Vision models failed");
 }
 
 // ─── OpenAI Vision API ──────────────────────────────────────────────────────

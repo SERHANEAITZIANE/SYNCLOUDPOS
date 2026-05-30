@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBusinessContext } from "@/actions/ai-context";
+import { getActiveTenantId } from "@/actions/get-active-tenant";
+import { db } from "@/lib/db";
 
 type Provider = "gemini" | "openai" | "claude" | "kimi";
 
@@ -116,7 +118,36 @@ export async function POST(req: NextRequest) {
 
         if (!question?.trim()) return NextResponse.json({ error: "Question vide." }, { status: 400 });
         if (!provider) return NextResponse.json({ error: "Fournisseur manquant." }, { status: 400 });
-        if (!apiKey?.trim()) return NextResponse.json({ error: "Clé API manquante." }, { status: 400 });
+
+        // Try getting tenantId to resolve custom keys from DB if frontend didn't supply them
+        const tenantId = await getActiveTenantId().catch(() => null);
+        let tenant = null;
+        if (tenantId) {
+            tenant = await db.tenant.findUnique({
+                where: { id: tenantId },
+                select: {
+                    geminiApiKey: true,
+                    openaiApiKey: true,
+                    anthropicApiKey: true,
+                }
+            }).catch(() => null);
+        }
+
+        // Server-side fallback resolution for keys
+        let resolvedApiKey = apiKey?.trim();
+        if (!resolvedApiKey) {
+            if (provider === "gemini") {
+                resolvedApiKey = tenant?.geminiApiKey || process.env.GEMINI_API_KEY;
+            } else if (provider === "openai") {
+                resolvedApiKey = tenant?.openaiApiKey || process.env.OPENAI_API_KEY;
+            } else if (provider === "claude") {
+                resolvedApiKey = tenant?.anthropicApiKey || process.env.ANTHROPIC_API_KEY;
+            }
+        }
+
+        if (!resolvedApiKey?.trim()) {
+            return NextResponse.json({ error: "Clé API manquante pour ce fournisseur." }, { status: 400 });
+        }
 
         const startDate = dateRange?.from ? new Date(dateRange.from) : undefined;
         const endDate = dateRange?.to ? new Date(dateRange.to) : undefined;
@@ -144,18 +175,63 @@ Lorsque tu analyses des données:
                 })),
                 { role: "user", parts: [{ text: question }] },
             ];
-            const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey.trim())}`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: systemPrompt }] },
-                        contents,
-                        generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
-                    }),
+
+            const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.5-flash"];
+            let res: Response | null = null;
+            let lastErrorMsg = "";
+
+            for (const model of modelsToTry) {
+                try {
+                    console.log(`[AI Analysis] Trying Gemini model: ${model}`);
+                    const response = await fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(resolvedApiKey.trim())}`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                system_instruction: { parts: [{ text: systemPrompt }] },
+                                contents,
+                                generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
+                            }),
+                        }
+                    );
+                    
+                    if (response.ok) {
+                        res = response;
+                        break;
+                    } else {
+                        const err = await response.json().catch(() => ({}));
+                        lastErrorMsg = err?.error?.message || `Status ${response.status}`;
+                        console.warn(`[AI Analysis] Gemini model ${model} failed: ${lastErrorMsg}`);
+                    }
+                } catch (err: any) {
+                    lastErrorMsg = err?.message || "Unknown error";
+                    console.warn(`[AI Analysis] Gemini model ${model} error:`, err);
                 }
-            );
+            }
+
+            if (!res) {
+                // Dynamic self-healing route using OpenAI SK if Gemini fails
+                const openAiKey = tenant?.openaiApiKey || process.env.OPENAI_API_KEY;
+                if (openAiKey?.trim()) {
+                    console.log("[AI Analysis] All Gemini models exhausted. Self-healing fallback to OpenAI GPT-4o...");
+                    const messages = [
+                        { role: "system", content: systemPrompt },
+                        ...history.map(m => ({ role: m.role, content: m.content })),
+                        { role: "user", content: question },
+                    ];
+                    const openAiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openAiKey.trim()}` },
+                        body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 4096, temperature: 0.7, stream: true }),
+                    });
+                    if (openAiRes.ok) {
+                        return startStream(openAiRes, openaiParser);
+                    }
+                }
+                return NextResponse.json({ error: `Tous les modèles Gemini ont échoué. Détails: ${lastErrorMsg}` }, { status: 500 });
+            }
+
             return startStream(res, geminiParser);
         }
 
@@ -167,7 +243,7 @@ Lorsque tu analyses des données:
             ];
             const res = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${resolvedApiKey.trim()}` },
                 body: JSON.stringify({ model: "gpt-4o", messages, max_tokens: 4096, temperature: 0.7, stream: true }),
             });
             return startStream(res, openaiParser);
@@ -182,7 +258,7 @@ Lorsque tu analyses des données:
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-api-key": apiKey,
+                    "x-api-key": resolvedApiKey.trim(),
                     "anthropic-version": "2023-06-01",
                 },
                 body: JSON.stringify({
@@ -204,7 +280,7 @@ Lorsque tu analyses des données:
             ];
             const res = await fetch("https://api.moonshot.cn/v1/chat/completions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${resolvedApiKey.trim()}` },
                 body: JSON.stringify({ model: "moonshot-v1-8k", messages, temperature: 0.7, stream: true }),
             });
             return startStream(res, openaiParser);

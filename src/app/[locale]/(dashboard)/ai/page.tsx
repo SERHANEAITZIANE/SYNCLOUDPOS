@@ -26,9 +26,9 @@ export default async function AiPage() {
         <AiClient
             dbProvider={tenant?.aiProvider || "GEMINI"}
             dbKeys={{
-                gemini: tenant?.geminiApiKey || "",
-                openai: tenant?.openaiApiKey || "",
-                claude: tenant?.anthropicApiKey || "",
+                gemini: tenant?.geminiApiKey || process.env.GEMINI_API_KEY || "",
+                openai: tenant?.openaiApiKey || process.env.OPENAI_API_KEY || "",
+                claude: tenant?.anthropicApiKey || process.env.ANTHROPIC_API_KEY || "",
                 kimi: ""
             }}
             initialStats={initialStats}
