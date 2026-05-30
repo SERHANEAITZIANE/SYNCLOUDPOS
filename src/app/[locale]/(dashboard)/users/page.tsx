@@ -37,6 +37,7 @@ export default async function UsersPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
+                            <TableHead>Username (Identifiant)</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Joined</TableHead>
@@ -47,6 +48,9 @@ export default async function UsersPage() {
                         {users.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell className="font-medium">{user.name}</TableCell>
+                                <TableCell className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                    {user.username ? `@${user.username}` : "—"}
+                                </TableCell>
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>
                                     <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
@@ -60,6 +64,8 @@ export default async function UsersPage() {
                                     <EditUserModal user={{
                                         id: user.id,
                                         name: user.name,
+                                        email: user.email,
+                                        username: user.username || "",
                                         role: user.role,
                                         canEdit: user.canEdit,
                                         canDelete: user.canDelete
@@ -69,7 +75,7 @@ export default async function UsersPage() {
                         ))}
                         {users.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
+                                <TableCell colSpan={6} className="h-24 text-center">
                                     No users found.
                                 </TableCell>
                             </TableRow>

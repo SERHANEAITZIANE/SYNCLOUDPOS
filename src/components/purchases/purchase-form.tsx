@@ -29,6 +29,8 @@ import {
     createSupplierPayment
 } from "@/actions/purchase-orders"
 import { createProduct, updateProductPrices } from "@/actions/products"
+import { createCategory } from "@/actions/categories"
+import { createBrand } from "@/actions/brands"
 import { createSupplier } from "@/actions/suppliers"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { OcrReceiptUploader } from "./ocr-receipt-uploader"
@@ -96,6 +98,61 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const printRef = useRef<HTMLDivElement>(null)
 
     const [localProducts, setLocalProducts] = useState(products)
+    const [localCategories, setLocalCategories] = useState<any[]>(categories || [])
+    const [localBrands, setLocalBrands] = useState<any[]>(brands || [])
+    const [showNewCategoryInput, setShowNewCategoryInput] = useState(false)
+    const [showNewBrandInput, setShowNewBrandInput] = useState(false)
+    const [newCategoryName, setNewCategoryName] = useState("")
+    const [newBrandName, setNewBrandName] = useState("")
+    const [creatingCat, setCreatingCat] = useState(false)
+    const [creatingBrand, setCreatingBrand] = useState(false)
+
+    // Initial Payment State on Creation
+    const [payImmediately, setPayImmediately] = useState(false)
+    const [initialPayAmount, setInitialPayAmount] = useState(0)
+    const [initialPayMethod, setInitialPayMethod] = useState("CASH")
+    const [initialPayAccountId, setInitialPayAccountId] = useState(accounts[0]?.id || "")
+    const [initialPayNotes, setInitialPayNotes] = useState("")
+
+    const handleCreateCategory = async () => {
+        if (!newCategoryName.trim()) return
+        try {
+            setCreatingCat(true)
+            const result = await createCategory({ name: newCategoryName.trim() })
+            if (result.error) {
+                toast.error(result.error)
+            } else if (result.data) {
+                toast.success("Catégorie créée avec succès !")
+                setLocalCategories(prev => [...prev, result.data])
+                setQuickCategoryId(result.data.id)
+                setShowNewCategoryInput(false)
+            }
+        } catch {
+            toast.error("Erreur de création de la catégorie")
+        } finally {
+            setCreatingCat(false)
+        }
+    }
+
+    const handleCreateBrand = async () => {
+        if (!newBrandName.trim()) return
+        try {
+            setCreatingBrand(true)
+            const result = await createBrand({ name: newBrandName.trim() })
+            if (result.error) {
+                toast.error(result.error)
+            } else if (result.data) {
+                toast.success("Marque créée avec succès !")
+                setLocalBrands(prev => [...prev, result.data])
+                setQuickBrandId(result.data.id)
+                setShowNewBrandInput(false)
+            }
+        } catch {
+            toast.error("Erreur de création de la marque")
+        } finally {
+            setCreatingBrand(false)
+        }
+    }
 
     // Quick Product Dialog State (Matching full product sheet)
     const [quickProductOpen, setQuickProductOpen] = useState(false)
@@ -490,7 +547,15 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         try {
             setLoading(true)
             if (!isEditMode) {
-                const result = await createPurchaseOrder({ ...values, total })
+                const payload = {
+                    ...values,
+                    total,
+                    paymentAmount: payImmediately ? initialPayAmount : 0,
+                    paymentMethod: payImmediately ? initialPayMethod : "CASH",
+                    paymentAccountId: payImmediately ? initialPayAccountId : undefined,
+                    paymentNotes: payImmediately ? initialPayNotes : undefined
+                }
+                const result = await createPurchaseOrder(payload)
                 if (result?.error) { toast.error(result.error); return }
                 toast.success("Bon créé avec succès.")
                 router.push(`/purchases`)
@@ -1174,6 +1239,100 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                      </Card>
                                  )}
 
+                                 {/* ── initial payment on creation panel ────────────────── */}
+                                 {!isEditMode && form.watch("status") === "FACTURE" && (
+                                     <Card className="shadow-lg border border-indigo-100 dark:border-indigo-950/60 rounded-2xl overflow-hidden my-6 bg-slate-50/40 dark:bg-slate-900/10">
+                                         <CardHeader className="pb-3 flex flex-row items-center justify-between bg-indigo-500/5 border-b border-indigo-100 dark:border-indigo-950/40">
+                                             <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
+                                                 <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
+                                                 Règlement Initial (Optionnel - Facture d'Achat)
+                                             </CardTitle>
+                                             <div className="flex items-center gap-2">
+                                                 <Checkbox
+                                                     id="pay-immediately-checkbox"
+                                                     checked={payImmediately}
+                                                     onCheckedChange={(checked) => {
+                                                         setPayImmediately(!!checked);
+                                                         if (checked) {
+                                                             setInitialPayAmount(total);
+                                                         }
+                                                     }}
+                                                 />
+                                                 <label
+                                                     htmlFor="pay-immediately-checkbox"
+                                                     className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+                                                 >
+                                                     Enregistrer un règlement immédiat
+                                                 </label>
+                                             </div>
+                                         </CardHeader>
+                                         {payImmediately && (
+                                             <CardContent className="space-y-4 pt-5 animate-in slide-in-from-top duration-200">
+                                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                     <div className="space-y-1.5">
+                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Caisse / Banque</label>
+                                                         <Select
+                                                             value={initialPayAccountId}
+                                                             onValueChange={setInitialPayAccountId}
+                                                         >
+                                                             <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                                                                 <SelectValue placeholder="Choisir la caisse/banque..." />
+                                                             </SelectTrigger>
+                                                             <SelectContent>
+                                                                 {accounts.map(acc => (
+                                                                     <SelectItem key={acc.id} value={acc.id}>
+                                                                         {acc.name} ({Number(acc.balance).toLocaleString()} DA)
+                                                                     </SelectItem>
+                                                                 ))}
+                                                             </SelectContent>
+                                                         </Select>
+                                                     </div>
+                                                     <div className="space-y-1.5">
+                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Montant (DA)</label>
+                                                         <div className="relative">
+                                                             <Input
+                                                                 type="number"
+                                                                 placeholder="0.00"
+                                                                 value={initialPayAmount || ""}
+                                                                 onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
+                                                                 className="font-bold pr-8 border-slate-250 focus-visible:ring-indigo-500"
+                                                             />
+                                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                                         </div>
+                                                     </div>
+                                                     <div className="space-y-1.5">
+                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mode de règlement</label>
+                                                         <Select
+                                                             value={initialPayMethod}
+                                                             onValueChange={setInitialPayMethod}
+                                                         >
+                                                             <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                                                                 <SelectValue placeholder="Choisir le mode..." />
+                                                             </SelectTrigger>
+                                                             <SelectContent>
+                                                                 <SelectItem value="CASH">Espèce</SelectItem>
+                                                                 <SelectItem value="VERSEMENT">Versement</SelectItem>
+                                                                 <SelectItem value="VIREMENT">Virement</SelectItem>
+                                                                 <SelectItem value="CHEQUE">Chèque</SelectItem>
+                                                                 <SelectItem value="CARTE">Carte Bancaire</SelectItem>
+                                                             </SelectContent>
+                                                         </Select>
+                                                     </div>
+                                                     <div className="space-y-1.5">
+                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Observation</label>
+                                                         <Input
+                                                             placeholder="Observation (ex: Acompte, Solde, etc.)"
+                                                             value={initialPayNotes}
+                                                             onChange={e => setInitialPayNotes(e.target.value)}
+                                                             className="border-slate-200 dark:border-slate-800"
+                                                         />
+                                                     </div>
+                                                 </div>
+                                             </CardContent>
+                                         )}
+                                     </Card>
+                                 )}
+
                                  {/* Notes & Visual Proof (Photos) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
                                     <Card className="md:col-span-1 shadow-sm">
@@ -1364,22 +1523,114 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Catégorie *</label>
-                                            <Select value={quickCategoryId} onValueChange={setQuickCategoryId} disabled={loading}>
-                                                <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la catégorie..." /></SelectTrigger>
-                                                <SelectContent>
-                                                    {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Catégorie *</label>
+                                                {!showNewCategoryInput ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setShowNewCategoryInput(true); setNewCategoryName(""); }}
+                                                        className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-0.5 cursor-pointer"
+                                                    >
+                                                        <Plus className="h-3 w-3" /> Nouvelle
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                            {!showNewCategoryInput ? (
+                                                <Select value={quickCategoryId} onValueChange={setQuickCategoryId} disabled={loading}>
+                                                    <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la catégorie..." /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {localCategories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <div className="flex gap-1.5 items-center animate-in fade-in duration-200">
+                                                    <Input
+                                                        placeholder="Nom catégorie..."
+                                                        value={newCategoryName}
+                                                        onChange={e => setNewCategoryName(e.target.value)}
+                                                        className="h-9 text-xs border-indigo-200 dark:border-indigo-900/50"
+                                                        onKeyDown={e => {
+                                                            if (e.key === "Enter") {
+                                                                e.preventDefault();
+                                                                handleCreateCategory();
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        className="h-9 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+                                                        onClick={handleCreateCategory}
+                                                        disabled={creatingCat}
+                                                    >
+                                                        ✓
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-9 px-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                                                        onClick={() => setShowNewCategoryInput(false)}
+                                                    >
+                                                        ✕
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Marque *</label>
-                                            <Select value={quickBrandId} onValueChange={setQuickBrandId} disabled={loading}>
-                                                <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la marque..." /></SelectTrigger>
-                                                <SelectContent>
-                                                    {brands.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Marque *</label>
+                                                {!showNewBrandInput ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setShowNewBrandInput(true); setNewBrandName(""); }}
+                                                        className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-0.5 cursor-pointer"
+                                                    >
+                                                        <Plus className="h-3 w-3" /> Nouvelle
+                                                    </button>
+                                                ) : null}
+                                            </div>
+                                            {!showNewBrandInput ? (
+                                                <Select value={quickBrandId} onValueChange={setQuickBrandId} disabled={loading}>
+                                                    <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la marque..." /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {localBrands.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <div className="flex gap-1.5 items-center animate-in fade-in duration-200">
+                                                    <Input
+                                                        placeholder="Nom marque..."
+                                                        value={newBrandName}
+                                                        onChange={e => setNewBrandName(e.target.value)}
+                                                        className="h-9 text-xs border-indigo-200 dark:border-indigo-900/50"
+                                                        onKeyDown={e => {
+                                                            if (e.key === "Enter") {
+                                                                e.preventDefault();
+                                                                handleCreateBrand();
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        className="h-9 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+                                                        onClick={handleCreateBrand}
+                                                        disabled={creatingBrand}
+                                                    >
+                                                        ✓
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-9 px-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                                                        onClick={() => setShowNewBrandInput(false)}
+                                                    >
+                                                        ✕
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">

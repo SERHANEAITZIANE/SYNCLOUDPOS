@@ -32,8 +32,13 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Pencil } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 const formSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email"),
+    username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
+    password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean(),
     canDelete: z.boolean(),
@@ -43,6 +48,8 @@ interface EditUserModalProps {
     user: {
         id: string;
         name: string | null;
+        email: string;
+        username: string;
         role: string;
         canEdit: boolean;
         canDelete: boolean;
@@ -57,6 +64,10 @@ export function EditUserModal({ user }: EditUserModalProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            name: user.name || "",
+            email: user.email || "",
+            username: user.username || "",
+            password: "",
             role: user.role as "ADMIN" | "MANAGER" | "CASHIER" | "ACCOUNTANT" | "STOCK_MANAGER",
             canEdit: user.canEdit,
             canDelete: user.canDelete,
@@ -70,6 +81,10 @@ export function EditUserModal({ user }: EditUserModalProps) {
         startTransition(() => {
             const payload = {
                 id: user.id,
+                name: values.name,
+                email: values.email,
+                username: values.username,
+                password: values.password || undefined,
                 role: values.role,
                 canEdit: values.canEdit ?? false,
                 canDelete: values.canDelete ?? false,
@@ -79,6 +94,7 @@ export function EditUserModal({ user }: EditUserModalProps) {
                     setError(data.error)
                 } else {
                     setOpen(false)
+                    form.setValue("password", "") // reset password field
                 }
             })
         })
@@ -93,13 +109,65 @@ export function EditUserModal({ user }: EditUserModalProps) {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Mettre à jour le rôle</DialogTitle>
+                    <DialogTitle>Modifier l'utilisateur</DialogTitle>
                     <DialogDescription>
-                        Modifier les permissions de l'utilisateur {user.name}.
+                        Modifier les informations, identifiants et permissions de l'utilisateur {user.name}.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nom complet</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="john@example.com" type="email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Username (Identifiant unique - non sensible à la casse)</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="johndoe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Nouveau mot de passe (Laisser vide pour ne pas changer)</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="******" type="password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="role"

@@ -9,6 +9,7 @@ import { z } from "zod"
 const CreateUserSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email"),
+    username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean().optional(),
@@ -32,7 +33,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Invalid fields" }
     }
 
-    const { name, email, password, role, canEdit, canDelete } = validatedFields.data
+    const { name, email, username, password, role, canEdit, canDelete } = validatedFields.data
 
     // Get current user's tenant
     const currentUser = await db.user.findUnique({
@@ -43,12 +44,25 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Current user has no tenant" }
     }
 
+    // Check unique email
     const existingUser = await db.user.findUnique({
         where: { email }
     })
 
     if (existingUser) {
-        return { error: "User with this email already exists" }
+        return { error: "Un utilisateur avec cet email existe déjà !" }
+    }
+
+    // Check unique username (case-insensitively)
+    let lowerUsername = null;
+    if (username && username.trim().length > 0) {
+        lowerUsername = username.trim().toLowerCase();
+        const existingUsername = await db.user.findFirst({
+            where: { username: lowerUsername }
+        });
+        if (existingUsername) {
+            return { error: "Ce nom d'utilisateur est déjà pris !" }
+        }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -62,6 +76,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
             data: {
                 name,
                 email,
+                username: lowerUsername || null,
                 password: hashedPassword,
                 role,
                 canEdit: finalCanEdit,

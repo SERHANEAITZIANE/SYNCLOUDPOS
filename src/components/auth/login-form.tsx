@@ -100,13 +100,13 @@ export const LoginForm = () => {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-sm font-medium" style={{ color: "#9ca3af" }}>
-                                    Email ou Téléphone
+                                    Identifiant (Email, Nom d'utilisateur ou Téléphone)
                                 </FormLabel>
                                 <FormControl>
                                     <Input
                                         disabled={isPending}
                                         {...field}
-                                        placeholder="email@exemple.com ou 0600000000"
+                                        placeholder="Email, nom d'utilisateur ou téléphone..."
                                         type="text"
                                         className="h-12 rounded-xl border text-white placeholder:text-gray-600 bg-transparent focus-visible:ring-1 focus-visible:ring-purple-500"
                                         style={{ background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.1)" }}

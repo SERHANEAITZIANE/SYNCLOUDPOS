@@ -22,11 +22,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 if (validatedFields.success) {
                     const { identifier, password } = validatedFields.data
 
-                    // Allow login by email OR phone number
+                    const lowerIdentifier = identifier.trim().toLowerCase()
+                    // Allow login by email, username OR phone number (case-insensitive)
                     const user = await db.user.findFirst({
                         where: {
                             OR: [
-                                { email: identifier },
+                                { email: { equals: lowerIdentifier, mode: 'insensitive' } },
+                                { username: { equals: lowerIdentifier, mode: 'insensitive' } },
                                 { phone: identifier }
                             ]
                         }

@@ -25,6 +25,10 @@ interface PurchaseOrderData {
     imageUrl1?: string
     imageUrl2?: string
     imageUrl3?: string
+    paymentAmount?: number
+    paymentMethod?: string
+    paymentAccountId?: string
+    paymentNotes?: string
 }
 
 export const getPurchaseOrders = async () => {
@@ -188,6 +192,47 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                             tenantId
                         }
                     })
+                }
+            }
+
+            // If there's an initial payment amount provided (only for non-COMPLETED since COMPLETED is already fully paid above)
+            if (data.status !== "COMPLETED" && data.paymentAmount && data.paymentAmount > 0 && data.paymentAccountId && data.paymentAccountId !== "none") {
+                const payAccount = await tx.treasuryAccount.findUnique({
+                    where: { id: data.paymentAccountId, tenantId }
+                });
+                if (!payAccount) throw new Error("Compte de trésorerie introuvable");
+                if (Number(payAccount.balance) < data.paymentAmount) {
+                    throw new Error("Solde insuffisant dans la caisse/banque sélectionnée");
+                }
+
+                // 1. Debit treasury account
+                const updatedAccount = await tx.treasuryAccount.update({
+                    where: { id: data.paymentAccountId },
+                    data: { balance: { decrement: data.paymentAmount } }
+                });
+
+                // 2. Create Treasury Transaction
+                const payMethod = data.paymentMethod || "CASH";
+                await tx.treasuryTransaction.create({
+                    data: {
+                        tenantId,
+                        accountId: data.paymentAccountId,
+                        type: "DEBIT",
+                        amount: data.paymentAmount,
+                        balanceBefore: payAccount.balance,
+                        balanceAfter: updatedAccount.balance,
+                        source: "PURCHASE",
+                        referenceId: purchaseOrder.id,
+                        description: `Règlement Initial [${payMethod}] Bon #${purchaseOrder.id.slice(-8).toUpperCase()}${data.paymentNotes ? ` - ${data.paymentNotes}` : ""}`
+                    }
+                });
+
+                // 3. Decrement Supplier Balance (only for FACTURE, since the full amount was added to supplier balance)
+                if (data.status === "FACTURE") {
+                    await tx.supplier.update({
+                        where: { id: data.supplierId },
+                        data: { balance: { decrement: data.paymentAmount } }
+                    });
                 }
             }
 

@@ -37,6 +37,7 @@ import { Plus } from "lucide-react"
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email"),
+    username: z.string().min(3, "Username must be at least 3 characters").optional().or(z.literal("")),
     password: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean(),
@@ -53,6 +54,7 @@ export function AddUserModal() {
         defaultValues: {
             name: "",
             email: "",
+            username: "",
             password: "",
             role: "CASHIER",
             canEdit: false,
@@ -68,6 +70,7 @@ export function AddUserModal() {
             const payload = {
                 name: values.name,
                 email: values.email,
+                username: values.username,
                 password: values.password,
                 role: values.role,
                 canEdit: values.canEdit ?? false,
@@ -122,6 +125,19 @@ export function AddUserModal() {
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input placeholder="john@example.com" type="email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Username (Identifiant unique - non sensible à la casse)</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="johndoe" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
