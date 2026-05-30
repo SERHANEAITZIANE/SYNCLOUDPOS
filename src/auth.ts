@@ -136,6 +136,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 session.user.canDelete = token.role === "ADMIN" ? true : token.canDelete
                 // @ts-expect-error custom fields
                 session.user.defaultStoreId = token.defaultStoreId
+                // @ts-expect-error custom fields
+                session.user.username = token.username
             } else if (token.sub && session.user && !token.role) {
                 // Backward compatibility for users with old session cookies
                 // If the token lacks a role, we fetch it dynamically from the DB
@@ -153,6 +155,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
                     session.user.isBlocked = existingUser.tenant?.isBlocked;
                     session.user.defaultStoreId = existingUser.defaultStoreId;
+                    // @ts-expect-error custom fields
+                    session.user.username = existingUser.username;
                 }
             }
             return session
@@ -175,6 +179,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
             token.isBlocked = existingUser.tenant?.isBlocked;
             token.defaultStoreId = existingUser.defaultStoreId;
+            token.username = existingUser.username;
             return token
         }
     },
