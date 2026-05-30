@@ -245,48 +245,66 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 })
             }
 
-            // 2. Decrement stock for each item (Parallelized)
+            // 2. Decrement stock for each item — BATCHED & RACE-SAFE
+            // Step 1: Fetch all product stock in a single query (instead of N individual queries)
+            const productIds = items.map((i: any) => i.productId);
+            const productsWithStock = await tx.product.findMany({
+                where: { id: { in: productIds } },
+                include: { storeProducts: { where: { storeId: storeIdToUse } } }
+            });
+            const stockMap = new Map(productsWithStock.map(p => [
+                p.id, 
+                { stock: p.storeProducts[0]?.stock || 0, minStock: p.storeProducts[0]?.minStock || 10, hasStoreProduct: p.storeProducts.length > 0 }
+            ]));
+
+            // Step 2: Ensure StoreProduct records exist for all items (upsert only missing ones)
+            const missingStoreProducts = items.filter((item: any) => !stockMap.get(item.productId)?.hasStoreProduct);
+            if (missingStoreProducts.length > 0) {
+                for (const item of missingStoreProducts) {
+                    await tx.storeProduct.upsert({
+                        where: { storeId_productId: { storeId: storeIdToUse, productId: item.productId } },
+                        update: {},
+                        create: { storeId: storeIdToUse, productId: item.productId, stock: 0, minStock: 10 }
+                    });
+                }
+            }
+
+            // Step 3: Atomic stock decrements (race-safe — no read-compute-write gap)
             await Promise.all(
                 items.map(async (item: any) => {
-                    const stockStoreId = storeIdToUse;
-                    const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
-                    const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
-                    const stockBefore = spBefore?.stock || 0;
-                    const stockAfter = stockBefore - item.quantity;
-                    
-                    // if (stockAfter < 0) {
-                    //    throw new Error(`Stock insuffisant pour: ${pBefore?.name || "Produit inconnu"}. Disponible: ${stockBefore}, Requis: ${item.quantity}`);
-                    // }
-                    // ⬆️ We deliberately allow negative stock for POS sales to prevent blocking checkouts when physical inventory differs from system inventory.
-
-                    if (stockStoreId) {
-                        await tx.storeProduct.upsert({
-                            where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                            update: { stock: stockAfter },
-                            create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
-                        });
-                    }
-
+                    // Atomic decrement on StoreProduct — safe under concurrent transactions
+                    await tx.storeProduct.update({
+                        where: { storeId_productId: { storeId: storeIdToUse, productId: item.productId } },
+                        data: { stock: { decrement: item.quantity } }
+                    });
+                    // Atomic decrement on Product global stock
                     await tx.product.update({
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
                     });
-
-                    await tx.stockMovement.create({
-                        data: {
-                            productId: item.productId,
-                            type: "SALE",
-                            quantity: -item.quantity,
-                            stockBefore,
-                            stockAfter,
-                            referenceId: newOrder.id,
-                            reason: `Vente N° ${receiptNumber}`,
-                            userId,
-                            tenantId
-                        }
-                    });
                 })
             );
+
+            // Step 4: Batch create stock movements (single query instead of N)
+            await tx.stockMovement.createMany({
+                data: items.map((item: any) => {
+                    const existing = stockMap.get(item.productId);
+                    const stockBefore = existing?.stock || 0;
+                    return {
+                        productId: item.productId,
+                        type: "SALE",
+                        quantity: -item.quantity,
+                        stockBefore,
+                        stockAfter: stockBefore - item.quantity,
+                        referenceId: newOrder.id,
+                        reason: `Vente N° ${receiptNumber}`,
+                        userId,
+                        tenantId
+                    };
+                })
+            });
+            // Note: We deliberately allow negative stock for POS to prevent blocking checkouts
+            // when physical inventory differs from system inventory.
 
             // 3. Update Customer Balance (Debt)
             let previousBalance = 0;

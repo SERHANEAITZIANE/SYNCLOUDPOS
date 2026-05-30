@@ -58,7 +58,18 @@ export const getPurchaseOrder = async (id: string) => {
                 items: { include: { product: { include: { barcodes: true } } } }
             }
         })
-        return { purchaseOrder: JSON.parse(JSON.stringify(purchaseOrder)) }
+        if (!purchaseOrder) return { error: "Not found" }
+
+        const payments = await db.treasuryTransaction.findMany({
+            where: { referenceId: id, source: "PURCHASE", tenantId },
+            include: { account: true },
+            orderBy: { createdAt: "desc" }
+        })
+
+        return { 
+            purchaseOrder: JSON.parse(JSON.stringify(purchaseOrder)),
+            payments: JSON.parse(JSON.stringify(payments))
+        }
     } catch { return { error: "Failed to fetch purchase order" } }
 }
 
@@ -204,14 +215,44 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
     try {
         const existing = await db.purchaseOrder.findUnique({ where: { id, tenantId } })
         if (!existing) return { error: "Bon de commande introuvable" }
-        if (existing.status !== "PENDING" && existing.status !== "BON_COMMANDE") {
-            return { error: "Seuls les bons PENDING ou BON_COMMANDE peuvent être modifiés" }
-        }
+
+        const stockStatuses = ["BON_LIVRAISON", "FACTURE", "COMPLETED"]
+        const isStockStatus = stockStatuses.includes(existing.status)
 
         await db.$transaction(async (tx) => {
-            // Delete existing items
+            const stockStoreId = existing.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+
+            if (isStockStatus) {
+                // Fetch old items to revert their stocks
+                const oldItems = await tx.purchaseOrderItem.findMany({
+                    where: { purchaseOrderId: id }
+                })
+
+                for (const oldItem of oldItems) {
+                    const p = await tx.product.findUnique({ where: { id: oldItem.productId }, include: { storeProducts: true } })
+                    if (p) {
+                        const globalStockAfter = Math.max(0, (p.stock || 0) - oldItem.quantity)
+                        await tx.product.update({
+                            where: { id: oldItem.productId },
+                            data: { stock: globalStockAfter }
+                        })
+                        if (stockStoreId) {
+                            const spBefore = p.storeProducts.find(sp => sp.storeId === stockStoreId)
+                            const storeStockAfter = Math.max(0, (spBefore?.stock || 0) - oldItem.quantity)
+                            await tx.storeProduct.upsert({
+                                where: { storeId_productId: { storeId: stockStoreId, productId: oldItem.productId } },
+                                update: { stock: storeStockAfter },
+                                create: { storeId: stockStoreId, productId: oldItem.productId, stock: storeStockAfter }
+                            })
+                        }
+                    }
+                }
+            }
+
+            // Delete existing old items
             await tx.purchaseOrderItem.deleteMany({ where: { purchaseOrderId: id } })
-            // Update order
+
+            // Update order details
             await tx.purchaseOrder.update({
                 where: { id },
                 data: {
@@ -233,10 +274,102 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     }
                 }
             })
+
+            if (isStockStatus) {
+                // Apply new stock additions and recalculate CUMP/PMP
+                for (const item of data.items) {
+                    const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } })
+                    if (!pBefore) continue
+
+                    const globalStockBefore = pBefore.stock || 0
+                    const globalStockAfter = globalStockBefore + item.quantity
+
+                    // CUMP calculation (Weighted Average Cost)
+                    const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0
+                    const newPurchaseValue = item.quantity * Number(item.costPrice)
+                    const newCump = globalStockAfter > 0 
+                        ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
+                        : Number(item.costPrice)
+
+                    await tx.product.update({
+                        where: { id: item.productId },
+                        data: {
+                            cost: newCump,
+                            stock: globalStockAfter
+                        }
+                    })
+
+                    if (stockStoreId) {
+                        const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId)
+                        const stockBefore = spBefore?.stock || 0
+                        const stockAfter = stockBefore + item.quantity
+
+                        await tx.storeProduct.upsert({
+                            where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                            update: { stock: stockAfter },
+                            create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                        })
+
+                        await tx.stockMovement.create({
+                            data: {
+                                productId: item.productId,
+                                type: "PURCHASE",
+                                quantity: item.quantity,
+                                stockBefore,
+                                stockAfter,
+                                referenceId: id,
+                                reason: `Modification Achat (Corrigé) N° ${id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
+                                tenantId
+                            }
+                        })
+                    }
+                }
+            }
+
+            // Deduct nets from treasury if order goes COMPLETED now
+            if (data.status === "COMPLETED" && existing.status !== "COMPLETED" && data.accountId && data.accountId !== "none" && data.total > 0) {
+                const prevPayments = await tx.treasuryTransaction.findMany({
+                    where: { referenceId: id, source: "PURCHASE", tenantId }
+                })
+                const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+                
+                const supplier = await tx.supplier.findUnique({ where: { id: data.supplierId }, select: { withholdingRate: true } })
+                const withholdingRate = supplier?.withholdingRate ?? 0
+                const withholdingAmount = withholdingRate > 0 ? data.total * (withholdingRate / 100) : 0
+                
+                const netTotal = data.total - Number(withholdingAmount)
+                const netPayment = netTotal - alreadyPaid
+
+                if (netPayment > 0) {
+                    const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
+                    if (account) {
+                        if (Number(account.balance) < netPayment) throw new Error("Solde insuffisant dans le compte sélectionné")
+                        const updated = await tx.treasuryAccount.update({
+                            where: { id: data.accountId },
+                            data: { balance: { decrement: netPayment } }
+                        })
+                        await tx.treasuryTransaction.create({
+                            data: {
+                                accountId: data.accountId,
+                                type: "DEBIT",
+                                amount: netPayment,
+                                balanceBefore: account.balance,
+                                balanceAfter: updated.balance,
+                                source: "PURCHASE",
+                                referenceId: id,
+                                description: withholdingAmount > 0 
+                                    ? `Paiement solde final (net: ${netPayment.toLocaleString()} DA, retenue: ${Number(withholdingAmount).toLocaleString()} DA)`
+                                    : `Mise à jour Bon - Solde Payé`,
+                                tenantId
+                            }
+                        })
+                    }
+                }
+            }
         })
 
         revalidatePath("/(dashboard)/purchases")
-        return { success: "Bon de commande modifié" }
+        return { success: "Bon de commande modifié avec succès" }
     } catch (error) {
         console.error("Update Purchase Order Error:", error)
         return { error: "Erreur lors de la modification" }
@@ -372,36 +505,45 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
             // Pay supplier: deduct NET amount (total - withholding) from treasury
             // Per Algerian law: retenue à la source is kept and remitted to DGI
             if (newStatus === "COMPLETED" && accountId && accountId !== "none" && total > 0) {
+                const prevPayments = await tx.treasuryTransaction.findMany({
+                    where: { referenceId: id, source: "PURCHASE", tenantId }
+                })
+                const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
                 const withholdingAmt = Number(order.withholdingAmount ?? 0)
-                const netPayment = total - withholdingAmt
-                const account = await tx.treasuryAccount.findUnique({ where: { id: accountId, tenantId } })
-                if (account) {
-                    if (Number(account.balance) < netPayment) throw new Error("Solde insuffisant")
-                    const updated = await tx.treasuryAccount.update({
-                        where: { id: accountId },
-                        data: { balance: { decrement: netPayment } }
-                    })
-                    await tx.treasuryTransaction.create({
-                        data: {
-                            accountId,
-                            type: "DEBIT",
-                            amount: netPayment,
-                            balanceBefore: account.balance,
-                            balanceAfter: updated.balance,
-                            source: "PURCHASE",
-                            referenceId: id,
-                            description: withholdingAmt > 0
-                                ? `Paiement fournisseur #${id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${withholdingAmt.toLocaleString()} DA)`
-                                : `Paiement fournisseur - Bon #${id.slice(-6)}`,
-                            tenantId
-                        }
-                    })
-                    // If supplier had balance (was invoiced), reduce it
-                    if (prevStatus === "FACTURE") {
-                        await (tx as any).supplier.update({
-                            where: { id: order.supplierId },
-                            data: { balance: { decrement: total } }
+                const netTotal = total - withholdingAmt
+                const netPayment = netTotal - alreadyPaid
+
+                if (netPayment > 0) {
+                    const account = await tx.treasuryAccount.findUnique({ where: { id: accountId, tenantId } })
+                    if (account) {
+                        if (Number(account.balance) < netPayment) throw new Error("Solde insuffisant")
+                        const updated = await tx.treasuryAccount.update({
+                            where: { id: accountId },
+                            data: { balance: { decrement: netPayment } }
                         })
+                        await tx.treasuryTransaction.create({
+                            data: {
+                                accountId,
+                                type: "DEBIT",
+                                amount: netPayment,
+                                balanceBefore: account.balance,
+                                balanceAfter: updated.balance,
+                                source: "PURCHASE",
+                                referenceId: id,
+                                description: withholdingAmt > 0
+                                    ? `Paiement solde final #${id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${withholdingAmt.toLocaleString()} DA)`
+                                    : `Paiement solde final - Bon #${id.slice(-6)}`,
+                                tenantId
+                            }
+                        })
+                        // If supplier had balance (was invoiced), reduce it
+                        if (prevStatus === "FACTURE") {
+                            await (tx as any).supplier.update({
+                                where: { id: order.supplierId },
+                                data: { balance: { decrement: netPayment } }
+                            })
+                        }
                     }
                 }
             }
@@ -431,11 +573,12 @@ export const deletePurchaseOrder = async (id: string) => {
                 include: { items: true }
             });
 
-            if (!order) throw new Error("Not found");
+            if (!order) throw new Error("Bon d'achat introuvable");
 
-            // If order was COMPLETED, stock was incremented, so we must restore it
-            if (order.status === "COMPLETED") {
-                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            // 1. Revert any stock changes (if status was BON_LIVRAISON, FACTURE, or COMPLETED)
+            const stockStatuses = ["BON_LIVRAISON", "FACTURE", "COMPLETED"];
+            if (stockStatuses.includes(order.status)) {
+                const storeId = order.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 
                 await Promise.all(
                     order.items.map(async (item) => {
@@ -458,7 +601,34 @@ export const deletePurchaseOrder = async (id: string) => {
                 );
             }
 
-            // Restore supplier balance if we owed them money
+            // 2. Refund and delete all related treasury transactions (cash/bank payments)
+            const transactions = await tx.treasuryTransaction.findMany({
+                where: { referenceId: id, source: "PURCHASE", tenantId }
+            });
+
+            for (const t of transactions) {
+                // Refund the treasury account balance
+                await tx.treasuryAccount.update({
+                    where: { id: t.accountId },
+                    data: { balance: { increment: t.amount } }
+                });
+
+                // If it was a FACTURE, the transaction was a partial payment, which had decremented supplier balance.
+                // We must increment the supplier balance to cancel that payment decrement.
+                if (order.status === "FACTURE") {
+                    await tx.supplier.update({
+                        where: { id: order.supplierId },
+                        data: { balance: { increment: t.amount } }
+                    });
+                }
+            }
+
+            // Delete the treasury transactions
+            await tx.treasuryTransaction.deleteMany({
+                where: { referenceId: id, source: "PURCHASE", tenantId }
+            });
+
+            // 3. Restore supplier balance if we owed them money initially (FACTURE status increments supplier balance)
             if (order.status === "FACTURE") {
                 await tx.supplier.update({
                     where: { id: order.supplierId },
@@ -466,12 +636,87 @@ export const deletePurchaseOrder = async (id: string) => {
                 });
             }
 
+            // 4. Finally delete the order itself (cascade deletes items)
             await tx.purchaseOrder.delete({ where: { id, tenantId } });
         });
 
         revalidatePath("/(dashboard)/purchases")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        return { success: "Supprimé et stock restauré" }
-    } catch { return { error: "Erreur lors de la suppression" } }
+        return { success: "Supprimé et stock/trésorerie restaurés avec succès" }
+    } catch (error) {
+        console.error("Delete Purchase Order Error:", error)
+        const msg = error instanceof Error ? error.message : "Erreur lors de la suppression"
+        return { error: msg }
+    }
 }
+
+export const createSupplierPayment = async (data: {
+    purchaseOrderId: string
+    accountId: string
+    amount: number
+    paymentMethod: string
+    notes?: string
+}) => {
+    await checkSubscription();
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    const tenantId = session.user.tenantId
+
+    if (data.amount <= 0) return { error: "Le montant doit être supérieur à 0" }
+
+    try {
+        const result = await db.$transaction(async (tx) => {
+            const order = await tx.purchaseOrder.findUnique({
+                where: { id: data.purchaseOrderId, tenantId }
+            })
+            if (!order) throw new Error("Bon d'achat introuvable")
+
+            const account = await tx.treasuryAccount.findUnique({
+                where: { id: data.accountId, tenantId }
+            })
+            if (!account) throw new Error("Compte de trésorerie introuvable")
+
+            if (Number(account.balance) < data.amount) {
+                throw new Error("Solde insuffisant dans la caisse/banque sélectionnée")
+            }
+
+            // 1. Debit treasury account
+            const updatedAccount = await tx.treasuryAccount.update({
+                where: { id: data.accountId },
+                data: { balance: { decrement: data.amount } }
+            })
+
+            // 2. Create Treasury Transaction
+            const transaction = await tx.treasuryTransaction.create({
+                data: {
+                    tenantId,
+                    accountId: data.accountId,
+                    type: "DEBIT",
+                    amount: data.amount,
+                    balanceBefore: account.balance,
+                    balanceAfter: updatedAccount.balance,
+                    source: "PURCHASE",
+                    referenceId: data.purchaseOrderId,
+                    description: `Paiement Partiel [${data.paymentMethod}] Bon #${order.id.slice(-8).toUpperCase()}${data.notes ? ` - ${data.notes}` : ""}`
+                }
+            })
+
+            // 3. Decrement Supplier Balance
+            await tx.supplier.update({
+                where: { id: order.supplierId },
+                data: { balance: { decrement: data.amount } }
+            })
+
+            return transaction
+        })
+
+        revalidatePath("/(dashboard)/purchases")
+        return { success: "Règlement enregistré avec succès", transaction: JSON.parse(JSON.stringify(result)) }
+    } catch (error) {
+        console.error("Create Supplier Payment Error:", error)
+        const msg = error instanceof Error ? error.message : "Erreur lors de l'enregistrement du règlement"
+        return { error: msg }
+    }
+}
+

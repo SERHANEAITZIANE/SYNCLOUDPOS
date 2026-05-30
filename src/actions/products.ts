@@ -58,6 +58,8 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             return { error: `Un produit avec le nom "${existingProduct.name}" existe déjà.` }
         }
 
+        let createdProduct: any = null;
+
         await db.$transaction(async (tx) => {
             const product = await tx.product.create({
                 data: {
@@ -92,6 +94,8 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
                     } : undefined
                 } as any
             });
+
+            createdProduct = product;
 
             // Always create StoreProduct to ensure POS visibility
             const initialStock = stock ?? 0;
@@ -128,7 +132,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
-        return { success: "Product created!" }
+        return { success: "Product created!", product: createdProduct }
     } catch (error) {
         console.error("Error creating product:", error)
         return { error: "Something went wrong!" }
@@ -593,5 +597,52 @@ export async function getProductsForSelect() {
         orderBy: { name: "asc" },
     })
     return { data: products }
+}
+
+export const updateProductPrices = async (
+    id: string,
+    prices: {
+        cost: number;
+        price: number;
+        wholesalePrice?: number | null;
+        dealerPrice?: number | null;
+    }
+) => {
+    const session = await auth()
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    
+    await checkSubscription();
+    const tenantId = session?.user?.tenantId
+    if (!tenantId) return { error: "Unauthorized" }
+
+    try {
+        const product = await db.product.update({
+            where: { id, tenantId },
+            data: {
+                cost: prices.cost,
+                price: prices.price,
+                wholesalePrice: prices.wholesalePrice ?? null,
+                dealerPrice: prices.dealerPrice ?? null,
+            }
+        })
+        
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        revalidatePath("/[locale]/(dashboard)/products", "page")
+        
+        logAudit({
+            action: "UPDATE",
+            entity: "PRODUCT",
+            entityId: id,
+            description: `Prix du produit mis à jour via Achat: Coût=${prices.cost}, Public=${prices.price}`,
+            after: prices
+        }).catch(() => null)
+        
+        return { success: "Prix mis à jour avec succès !", product }
+    } catch (error) {
+        console.error("updateProductPrices error:", error)
+        return { error: "Erreur lors de la mise à jour des prix." }
+    }
 }
 

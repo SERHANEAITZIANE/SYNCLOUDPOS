@@ -28,6 +28,7 @@ const TreasuryPage = async () => {
         type: item.type,
         rib: item.rib,
         balance: formatter.format(Number(item.balance)),
+        rawBalance: Number(item.balance),
         createdAt: format(item.createdAt, "MMMM do, yyyy"),
     }))
 

@@ -280,6 +280,42 @@ export async function getAllTreasuryTransactions() {
     }
 }
 
+export async function updateTreasuryAccount(id: string, values: z.infer<typeof TreasuryAccountSchema>) {
+    await checkSubscription();
+    try {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error("Unauthorized")
+
+        const tenantId = session.user.tenantId
+
+        const validatedFields = TreasuryAccountSchema.safeParse(values)
+        if (!validatedFields.success) return { error: "Invalid fields!" }
+
+        const { name, type, rib } = validatedFields.data
+
+        const account = await db.treasuryAccount.update({
+            where: { id, tenantId },
+            data: {
+                name,
+                type,
+                rib
+            }
+        })
+
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        return {
+            success: "Compte mis à jour !",
+            account: {
+                ...account,
+                balance: Number(account.balance)
+            }
+        }
+    } catch (error) {
+        console.error("[UPDATE_TREASURY_ACCOUNT]", error)
+        return { error: "Internal Error" }
+    }
+}
+
 export async function deleteTreasuryAccount(id: string) {
     await checkSubscription();
     try {

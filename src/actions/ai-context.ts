@@ -203,3 +203,121 @@ ${debtorLines || "  Aucun débiteur"}
 
   return context;
 }
+
+export async function getBusinessStats(startDate?: Date, endDate?: Date): Promise<{
+  totalRevenue: number;
+  estimatedGrossProfit: number;
+  estimatedNetProfit: number;
+  totalExpenses: number;
+  posOrdersCount: number;
+  posRevenue: number;
+  blCount: number;
+  blRevenue: number;
+  outOfStockCount: number;
+  lowStockCount: number;
+  totalCustomerDebt: number;
+  totalSupplierDebt: number;
+  expenseCount: number;
+  purchaseCount: number;
+  categoryCount: number;
+} | null> {
+  const tenantId = await getActiveTenantId();
+  if (!tenantId) return null;
+
+  const now = new Date();
+  const queryStartDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+  const queryEndDate = endDate || now;
+
+  const [
+    posOrders,
+    salesOrders,
+    outOfStockCount,
+    customers,
+    suppliers,
+    expenses,
+    purchases,
+    categoryCount,
+  ] = await Promise.all([
+    db.order.aggregate({
+      where: { tenantId, createdAt: { gte: queryStartDate, lte: queryEndDate }, status: "COMPLETED" },
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+    db.salesOrder.aggregate({
+      where: { tenantId, createdAt: { gte: queryStartDate, lte: queryEndDate } },
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+    db.product.count({ where: { tenantId, isArchived: false, storeProducts: { some: { stock: { lte: 0 } } } } }),
+    db.customer.aggregate({
+      where: { tenantId },
+      _count: { id: true },
+      _sum: { balance: true },
+    }),
+    db.supplier.aggregate({
+      where: { tenantId },
+      _count: { id: true },
+      _sum: { balance: true },
+    }),
+    db.expense.aggregate({
+      where: { tenantId, date: { gte: queryStartDate, lte: queryEndDate } },
+      _sum: { amount: true },
+      _count: { id: true },
+    }),
+    db.purchaseOrder.aggregate({
+      where: { tenantId, createdAt: { gte: queryStartDate, lte: queryEndDate } },
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+    db.category.count({ where: { tenantId } }),
+  ]);
+
+  // Fetch low stock count
+  const lowStockProductsRaw = await db.$queryRaw<{ count: number }[]>`
+      SELECT COUNT(*)::int as count
+      FROM "Product"
+      WHERE "tenantId" = ${tenantId}
+        AND stock > 0
+        AND stock < "minStock"
+  `.catch(() => [{ count: 0 }]);
+  const lowStockCount = lowStockProductsRaw[0]?.count || 0;
+
+  // Get COGS using raw query
+  const topOrderItems = (await db.$queryRaw<{ revenue: number; cogs: number }[]>`
+      SELECT oi."productId", 
+             SUM(oi.quantity * oi.price)::float AS revenue, 
+             SUM(oi.quantity * COALESCE(p.cost, 0))::float AS cogs
+      FROM "OrderItem" oi
+      INNER JOIN "Order" o ON o.id = oi."orderId"
+      INNER JOIN "Product" p ON p.id = oi."productId"
+      WHERE o."tenantId" = ${tenantId}
+        AND o."createdAt" >= ${queryStartDate}
+        AND o."createdAt" <= ${queryEndDate}
+        AND o.status = 'COMPLETED'
+      GROUP BY oi."productId"
+  `.catch(() => [])) as { revenue: number; cogs: number }[];
+
+  const totalCogsItems = topOrderItems.reduce((sum, item) => sum + (item.cogs || 0), 0);
+  const totalRevenue = Number(posOrders._sum.total ?? 0) + Number(salesOrders._sum.total ?? 0);
+  const totalExpenses = Number(expenses._sum.amount ?? 0);
+  const grossProfitEst = totalRevenue - totalCogsItems;
+  const netProfitEst = grossProfitEst - totalExpenses;
+
+  return {
+    totalRevenue,
+    estimatedGrossProfit: grossProfitEst,
+    estimatedNetProfit: netProfitEst,
+    totalExpenses,
+    posOrdersCount: posOrders._count.id,
+    posRevenue: Number(posOrders._sum.total ?? 0),
+    blCount: salesOrders._count.id,
+    blRevenue: Number(salesOrders._sum.total ?? 0),
+    outOfStockCount,
+    lowStockCount,
+    totalCustomerDebt: Number(customers._sum.balance ?? 0),
+    totalSupplierDebt: Number(suppliers._sum.balance ?? 0),
+    expenseCount: expenses._count.id,
+    purchaseCount: purchases._count.id,
+    categoryCount,
+  };
+}

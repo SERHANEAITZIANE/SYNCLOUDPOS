@@ -3,12 +3,12 @@
 import * as z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
 import { Landmark, Wallet } from "lucide-react"
 
 import { TreasuryAccountSchema } from "@/schemas"
-import { createTreasuryAccount } from "@/actions/treasury"
+import { createTreasuryAccount, updateTreasuryAccount } from "@/actions/treasury"
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -19,25 +19,65 @@ import { cn } from "@/lib/utils"
 interface AccountModalProps {
     isOpen: boolean
     onClose: () => void
+    initialData?: any | null
 }
 
-export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) => {
+export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, initialData = null }) => {
     const [loading, setLoading] = useState(false)
+    const isEdit = !!initialData
 
     const form = useForm<any>({
         resolver: zodResolver(TreasuryAccountSchema),
         defaultValues: { name: "", type: "CAISSE", balance: 0, rib: "" }
     })
 
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                let parsedBalance = Number(initialData.rawBalance)
+                if (isNaN(parsedBalance)) {
+                    const cleanStr = String(initialData.balance || "0").replace(/[^0-9.-]/g, "")
+                    parsedBalance = Number(cleanStr) || 0
+                }
+
+                form.reset({
+                    name: initialData.name,
+                    type: initialData.type,
+                    balance: parsedBalance,
+                    rib: initialData.rib || ""
+                })
+            } else {
+                form.reset({ name: "", type: "CAISSE", balance: 0, rib: "" })
+            }
+        }
+    }, [initialData, isOpen, form])
+
     const onSubmit = async (values: any) => {
         try {
             setLoading(true)
-            await createTreasuryAccount(values)
-            toast.success("Compte créé avec succès.")
-            form.reset()
-            onClose()
-        } catch { toast.error("Une erreur est survenue.") }
-        finally { setLoading(false) }
+            if (isEdit && initialData) {
+                const res = await updateTreasuryAccount(initialData.id, values)
+                if (res?.error) {
+                    toast.error(res.error)
+                } else {
+                    toast.success("Compte mis à jour avec succès.")
+                    onClose()
+                }
+            } else {
+                const res = await createTreasuryAccount(values)
+                if (res?.error) {
+                    toast.error(res.error)
+                } else {
+                    toast.success("Compte créé avec succès.")
+                    form.reset()
+                    onClose()
+                }
+            }
+        } catch { 
+            toast.error("Une erreur est survenue.") 
+        } finally { 
+            setLoading(false) 
+        }
     }
 
     const accountType = form.watch("type")
@@ -53,8 +93,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
                     }
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold">Nouveau compte de trésorerie</h2>
-                    <p className="text-sm text-muted-foreground">Ajouter une caisse ou un compte bancaire</p>
+                    <h2 className="text-lg font-semibold">
+                        {isEdit ? "Modifier le compte de trésorerie" : "Nouveau compte de trésorerie"}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        {isEdit ? "Modifier le nom, le type ou l'identifiant bancaire" : "Ajouter une caisse ou un compte bancaire"}
+                    </p>
                 </div>
             </div>
             <Separator className="mb-4" />
@@ -70,6 +114,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
                                 <button
                                     type="button"
                                     onClick={() => field.onChange("CAISSE")}
+                                    disabled={loading}
                                     className={cn(
                                         "flex items-center gap-2 justify-center p-3 rounded-lg border-2 transition-all font-medium text-sm",
                                         field.value === "CAISSE"
@@ -82,6 +127,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
                                 <button
                                     type="button"
                                     onClick={() => field.onChange("BANK")}
+                                    disabled={loading}
                                     className={cn(
                                         "flex items-center gap-2 justify-center p-3 rounded-lg border-2 transition-all font-medium text-sm",
                                         field.value === "BANK"
@@ -107,13 +153,22 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
                         </FormItem>
                     )} />
 
-                    {/* BALANCE */}
+                    {/* BALANCE - Disabled in edit mode to preserve accounting safety */}
                     <FormField control={form.control} name="balance" render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Solde initial</FormLabel>
+                            <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                {isEdit ? "Solde actuel (Non modifiable)" : "Solde initial"}
+                            </FormLabel>
                             <FormControl>
                                 <div className="relative">
-                                    <Input type="number" step="0.01" disabled={loading} placeholder="0.00" className="text-xl font-bold pr-14 h-12" {...field} />
+                                    <Input 
+                                        type="number" 
+                                        step="0.01" 
+                                        disabled={loading || isEdit} 
+                                        placeholder="0.00" 
+                                        className={cn("text-xl font-bold pr-14 h-12", isEdit && "bg-slate-50 dark:bg-slate-900 text-slate-500")} 
+                                        {...field} 
+                                    />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-semibold">DA</span>
                                 </div>
                             </FormControl>
@@ -138,8 +193,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
 
                     <div className="flex items-center justify-end gap-2 pt-1">
                         <Button disabled={loading} variant="outline" type="button" onClick={onClose}>Annuler</Button>
-                        <Button disabled={loading} type="submit" className="min-w-24 bg-blue-600 hover:bg-blue-700">
-                            {loading ? "Création..." : "Créer le compte"}
+                        <Button disabled={loading} type="submit" className="min-w-24 bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                            {loading ? (isEdit ? "Enregistrement..." : "Création...") : (isEdit ? "Enregistrer" : "Créer le compte")}
                         </Button>
                     </div>
                 </form>

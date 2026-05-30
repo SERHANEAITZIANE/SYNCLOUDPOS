@@ -12,11 +12,12 @@ export default async function PurchaseOrderPage({
 }) {
     const { id } = await params;
     let purchaseOrder = null
-
+    let payments = []
     if (id !== "new") {
         const result = await getPurchaseOrder(id)
         if (result.purchaseOrder) {
             purchaseOrder = result.purchaseOrder
+            payments = result.payments || []
         }
     }
 
@@ -44,6 +45,7 @@ export default async function PurchaseOrderPage({
             <div className="flex-1 space-y-4 p-8 pt-6">
                 <PurchaseOrderForm
                     initialData={purchaseOrder ? JSON.parse(JSON.stringify(purchaseOrder)) : null}
+                    payments={payments}
                     suppliers={JSON.parse(JSON.stringify(suppliers))}
                     products={JSON.parse(JSON.stringify(products))}
                     accounts={accounts}

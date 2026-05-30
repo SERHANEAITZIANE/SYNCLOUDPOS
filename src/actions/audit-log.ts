@@ -7,7 +7,7 @@ import { auth } from "@/auth"
  * Log an audit event. Fire-and-forget — never throws, never blocks the caller.
  */
 export async function logAudit(params: {
-    action: "CREATE" | "UPDATE" | "DELETE" | "VOID" | "LOGIN" | "EXPORT" | "PRINT" | "SETTINGS_CHANGE"
+    action: string
     entity: string
     entityId?: string
     description?: string

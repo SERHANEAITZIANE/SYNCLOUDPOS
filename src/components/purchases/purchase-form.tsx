@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useReactToPrint } from "react-to-print"
-import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package } from "lucide-react"
+import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package, Sparkles, FileSpreadsheet, Percent, Info, ZoomIn, TrendingUp, Sliders, Clipboard, Eye, Wand2, Star, Archive, DollarSign, ShoppingCart, Store, Users as UsersIcon, Barcode, Tag } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
@@ -24,8 +24,11 @@ import { ProductSearchCombobox } from "@/components/ui/product-search-combobox"
 import {
     createPurchaseOrder,
     updatePurchaseOrder,
-    updatePurchaseOrderStatus
+    updatePurchaseOrderStatus,
+    deletePurchaseOrder,
+    createSupplierPayment
 } from "@/actions/purchase-orders"
+import { createProduct, updateProductPrices } from "@/actions/products"
 import { createSupplier } from "@/actions/suppliers"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { OcrReceiptUploader } from "./ocr-receipt-uploader"
@@ -33,6 +36,8 @@ import { MissingProductsForm } from "./missing-products-form"
 import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { Checkbox } from "@/components/ui/checkbox"
+import { generateNextBarcode } from "@/actions/barcode"
 
 const formSchema = z.object({
     supplierId: z.string().min(1, "Fournisseur requis"),
@@ -55,6 +60,7 @@ type FormValues = z.infer<typeof formSchema>
 
 interface PurchaseOrderFormProps {
     initialData: any | null
+    payments?: any[]
     suppliers: any[]
     products: any[]
     categories: any[]
@@ -73,6 +79,7 @@ const STATUS_CONFIG = {
 
 export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     initialData,
+    payments = [],
     suppliers,
     products,
     categories,
@@ -88,8 +95,354 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const [newSupplierPhone, setNewSupplierPhone] = useState("")
     const printRef = useRef<HTMLDivElement>(null)
 
+    const [localProducts, setLocalProducts] = useState(products)
+
+    // Quick Product Dialog State (Matching full product sheet)
+    const [quickProductOpen, setQuickProductOpen] = useState(false)
+    const [quickProductRowIndex, setQuickProductRowIndex] = useState<number | null>(null)
+    const [quickTab, setQuickTab] = useState<"general" | "pricing" | "barcodes" | "stock">("general")
+    const [quickName, setQuickName] = useState("")
+    const [quickDescription, setQuickDescription] = useState("")
+    const [quickCategoryId, setQuickCategoryId] = useState("")
+    const [quickBrandId, setQuickBrandId] = useState("")
+    
+    // Pricing
+    const [quickCost, setQuickCost] = useState(0)
+    const [quickPrice, setQuickPrice] = useState(0)
+    const [quickWholesalePrice, setQuickWholesalePrice] = useState(0)
+    const [quickDealerPrice, setQuickDealerPrice] = useState(0)
+    const [quickTva, setQuickTva] = useState(19)
+    
+    // Barcodes
+    const [quickBarcodes, setQuickBarcodes] = useState<{ value: string; label: string }[]>([])
+    
+    // Images
+    const [quickImages, setQuickImages] = useState<{ url: string }[]>([])
+    
+    // Stock & Status
+    const [quickStock, setQuickStock] = useState(0)
+    const [quickMinStock, setQuickMinStock] = useState(0)
+    const [quickIsFeatured, setQuickIsFeatured] = useState(false)
+    const [quickIsArchived, setQuickIsArchived] = useState(false)
+
+    // PMP Live Calculator Dialog State
+    const [pmpOpen, setPmpOpen] = useState(false)
+    const [pmpRowIndex, setPmpRowIndex] = useState<number | null>(null)
+    const [pmpRetailMargin, setPmpRetailMargin] = useState(30)
+    const [pmpDealerMargin, setPmpDealerMargin] = useState(20)
+    const [pmpWholesaleMargin, setPmpWholesaleMargin] = useState(15)
+    const [pmpRetailPrice, setPmpRetailPrice] = useState(0)
+    const [pmpDealerPrice, setPmpDealerPrice] = useState(0)
+    const [pmpWholesalePrice, setPmpWholesalePrice] = useState(0)
+
+    // Clipboard Paste Importer State
+    const [clipboardOpen, setClipboardOpen] = useState(false)
+    const [clipboardText, setClipboardText] = useState("")
+
+    // Lightbox State
+    const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+
+    // Delete Form State
+    const [deleteFormOpen, setDeleteFormOpen] = useState(false)
+    const [deleteFormPassword, setDeleteFormPassword] = useState("")
+
+    // Partial Supplier Payment State
+    const [localPayments, setLocalPayments] = useState<any[]>(payments)
+    const [payModalOpen, setPayModalOpen] = useState(false)
+    const [payAmount, setPayAmount] = useState(0)
+    const [payMethod, setPayMethod] = useState("Espèce")
+    const [payAccountId, setPayAccountId] = useState("")
+    const [payNotes, setPayNotes] = useState("")
+
+    const handleRegisterPayment = async () => {
+        if (!initialData?.id) return
+        if (payAmount <= 0) {
+            toast.error("Veuillez saisir un montant valide supérieur à 0")
+            return
+        }
+        if (!payAccountId) {
+            toast.error("Veuillez sélectionner un compte de trésorerie")
+            return
+        }
+        
+        try {
+            setLoading(true)
+            const result = await createSupplierPayment({
+                purchaseOrderId: initialData.id,
+                accountId: payAccountId,
+                amount: payAmount,
+                paymentMethod: payMethod,
+                notes: payNotes
+            })
+            
+            if (result?.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Règlement enregistré avec succès !")
+                if (result.transaction) {
+                    setLocalPayments(prev => [result.transaction, ...prev])
+                }
+                setPayModalOpen(false)
+                setPayAmount(0)
+                setPayNotes("")
+                router.refresh()
+            }
+        } catch {
+            toast.error("Erreur lors de l'enregistrement du règlement")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleFormDelete = async () => {
+        if (!initialData?.id) return
+        if (deleteFormPassword !== "111") {
+            toast.error("Mot de passe incorrect !")
+            return
+        }
+        try {
+            setLoading(true)
+            const result = await deletePurchaseOrder(initialData.id)
+            if (result?.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Bon d'achat supprimé avec succès.")
+                setDeleteFormOpen(false)
+                setDeleteFormPassword("")
+                router.push("/purchases")
+                router.refresh()
+            }
+        } catch {
+            toast.error("Une erreur est survenue lors de la suppression.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Quick margin/cost calculations
+    const handleQuickCostChange = (val: number) => {
+        setQuickCost(val)
+        if (val > 0) {
+            setQuickPrice(Number((val * 1.30).toFixed(2)))
+            setQuickWholesalePrice(Number((val * 1.15).toFixed(2)))
+            setQuickDealerPrice(Number((val * 1.20).toFixed(2)))
+        } else {
+            setQuickPrice(0)
+            setQuickWholesalePrice(0)
+            setQuickDealerPrice(0)
+        }
+    }
+
+    const handleGenerateQuickBarcode = async () => {
+        try {
+            setLoading(true)
+            const res = await generateNextBarcode()
+            if (res.success && res.barcode) {
+                setQuickBarcodes(prev => [...prev, { value: res.barcode, label: "Principal" }])
+                toast.success("Code-barre généré !")
+            } else {
+                toast.error("Erreur de génération.")
+            }
+        } catch {
+            toast.error("Erreur lors de la génération.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleOpenQuickProductModal = (rowIndex: number) => {
+        setQuickProductRowIndex(rowIndex)
+        setQuickTab("general")
+        setQuickName("")
+        setQuickDescription("")
+        setQuickCategoryId(categories[0]?.id || "")
+        setQuickBrandId(brands[0]?.id || "")
+        setQuickCost(0)
+        setQuickPrice(0)
+        setQuickWholesalePrice(0)
+        setQuickDealerPrice(0)
+        setQuickTva(19)
+        setQuickBarcodes([])
+        setQuickImages([])
+        setQuickStock(0)
+        setQuickMinStock(0)
+        setQuickIsFeatured(false)
+        setQuickIsArchived(false)
+        setQuickProductOpen(true)
+    }
+
+    const handleCreateQuickProduct = async () => {
+        if (!quickName.trim() || !quickCategoryId || !quickBrandId) {
+            toast.error("Veuillez remplir les champs obligatoires (*)")
+            return
+        }
+        try {
+            setLoading(true)
+            const payload = {
+                name: quickName,
+                description: quickDescription || "",
+                price: quickPrice || 0,
+                cost: quickCost || 0,
+                wholesalePrice: quickWholesalePrice || 0,
+                dealerPrice: quickDealerPrice || 0,
+                categoryId: quickCategoryId,
+                brandId: quickBrandId,
+                tvaRate: quickTva,
+                images: quickImages.map(img => ({ url: img.url })),
+                stock: quickStock || 0,
+                minStock: quickMinStock || 0,
+                isFeatured: quickIsFeatured,
+                isArchived: quickIsArchived,
+                barcodes: quickBarcodes.map(b => ({ value: b.value, label: b.label || "" }))
+            }
+            const result = await createProduct(payload)
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Produit créé et sélectionné !")
+                const newProduct = result.product
+                if (newProduct) {
+                    setLocalProducts((prev) => [newProduct, ...prev])
+                    if (quickProductRowIndex !== null) {
+                        form.setValue(`items.${quickProductRowIndex}.productId`, newProduct.id)
+                        form.setValue(`items.${quickProductRowIndex}.costPrice`, quickCost)
+                    }
+                }
+                setQuickProductOpen(false)
+            }
+        } catch (err) {
+            toast.error("Erreur de création du produit.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleOpenPmpSuggester = (index: number) => {
+        const prodId = watchItems[index]?.productId
+        const activeProduct = localProducts.find(p => p.id === prodId)
+        if (!activeProduct) return
+        
+        const oldStock = Number(activeProduct.stock || 0)
+        const oldCost = Number(activeProduct.cost || 0)
+        const newQty = Number(watchItems[index]?.quantity || 0)
+        const newCost = Number(watchItems[index]?.costPrice || 0)
+        
+        const totalStock = oldStock + newQty
+        const totalValue = (oldStock * oldCost) + (newQty * newCost)
+        const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
+        
+        setPmpRowIndex(index)
+        setPmpRetailMargin(30)
+        setPmpDealerMargin(20)
+        setPmpWholesaleMargin(15)
+        setPmpRetailPrice(Number((calculatedPmp * 1.30).toFixed(2)))
+        setPmpDealerPrice(Number((calculatedPmp * 1.20).toFixed(2)))
+        setPmpWholesalePrice(Number((calculatedPmp * 1.15).toFixed(2)))
+        setPmpOpen(true)
+    }
+
+    const handleApplyPmpPrices = async () => {
+        if (pmpRowIndex === null) return
+        const prodId = watchItems[pmpRowIndex]?.productId
+        const activeProduct = localProducts.find(p => p.id === prodId)
+        if (!activeProduct) return
+        
+        const oldStock = Number(activeProduct.stock || 0)
+        const oldCost = Number(activeProduct.cost || 0)
+        const newQty = Number(watchItems[pmpRowIndex]?.quantity || 0)
+        const newCost = Number(watchItems[pmpRowIndex]?.costPrice || 0)
+        const totalStock = oldStock + newQty
+        const totalValue = (oldStock * oldCost) + (newQty * newCost)
+        const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
+
+        try {
+            setLoading(true)
+            const prices = {
+                cost: Number(calculatedPmp.toFixed(2)),
+                price: pmpRetailPrice,
+                wholesalePrice: pmpWholesalePrice,
+                dealerPrice: pmpDealerPrice
+            }
+            
+            const result = await updateProductPrices(activeProduct.id, prices)
+            
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Prix de vente et coût PMP mis à jour avec succès !")
+                
+                setLocalProducts((prev) =>
+                    prev.map((p) =>
+                        p.id === activeProduct.id
+                            ? {
+                                  ...p,
+                                  cost: prices.cost,
+                                  price: prices.price,
+                                  wholesalePrice: prices.wholesalePrice,
+                                  dealerPrice: prices.dealerPrice
+                              }
+                            : p
+                    )
+                )
+                
+                form.setValue(`items.${pmpRowIndex}.costPrice`, Number(calculatedPmp.toFixed(2)))
+                setPmpOpen(false)
+            }
+        } catch (err) {
+            toast.error("Erreur de mise à jour des prix.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleImportClipboard = async () => {
+        if (!clipboardText.trim()) return
+        const rows = clipboardText.split("\n")
+        const importedItems: any[] = []
+        let missingCount = 0
+        
+        for (const row of rows) {
+            if (!row.trim()) continue
+            const cols = row.split("\t")
+            if (cols.length < 2) continue
+            
+            const nameOrBarcode = cols[0].trim()
+            const qty = Number(cols[1]) || 1
+            const cost = Number(cols[2]) || 0
+            
+            const match = localProducts.find(p =>
+                p.name.toLowerCase() === nameOrBarcode.toLowerCase() ||
+                p.barcodes?.some(b => b.value === nameOrBarcode)
+            )
+            
+            if (match) {
+                importedItems.push({
+                    productId: match.id,
+                    quantity: qty,
+                    costPrice: cost || Number(match.cost || 0),
+                    tvaRate: 19
+                })
+            } else {
+                missingCount++
+            }
+        }
+        
+        if (importedItems.length > 0) {
+            const currentItems = form.getValues("items")
+            const cleanCurrent = (currentItems.length === 1 && !currentItems[0].productId) ? [] : currentItems
+            form.setValue("items", [...cleanCurrent, ...importedItems])
+            toast.success(`${importedItems.length} articles importés avec succès !`)
+            setClipboardText("")
+            setClipboardOpen(false)
+        }
+        
+        if (missingCount > 0) {
+            toast.error(`${missingCount} articles non trouvés dans votre catalogue.`)
+        }
+    }
+
     const isEditMode = !!initialData
-    const canEdit = !isEditMode || ["PENDING", "BON_COMMANDE"].includes(initialData?.status)
+    const canEdit = true
 
     const title = isEditMode ? `Bon #${initialData?.id?.slice(-8).toUpperCase()}` : "Nouveau bon d'achat"
     const currentStatus = initialData?.status || "PENDING"
@@ -352,6 +705,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     <CheckCircle className="h-4 w-4 mr-1.5" /> Marquer Payé
                                 </Button>
                             )}
+                            <Button variant="destructive" size="sm" disabled={loading} onClick={() => setDeleteFormOpen(true)}>
+                                <Trash className="h-4 w-4 mr-1.5" /> Supprimer
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -409,7 +765,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             <FormField control={form.control} name="status" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Type de document</FormLabel>
-                                    <Select disabled={loading || isEditMode} onValueChange={field.onChange} value={field.value}>
+                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
                                         <FormControl>
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                         </FormControl>
@@ -482,102 +838,209 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             <Badge variant="outline">{fields.length}</Badge>
                                         </h3>
                                         {canEdit && (
-                                            <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, costPrice: 0 })}>
-                                                <Plus className="h-4 w-4 mr-1.5" /> Ajouter (Insert)
-                                            </Button>
+                                            <div className="flex items-center gap-2">
+                                                <Button type="button" variant="outline" size="sm" onClick={() => setClipboardOpen(!clipboardOpen)} className="text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all font-semibold">
+                                                    <FileSpreadsheet className="h-4 w-4 mr-1.5" /> Import Excel/Coller
+                                                </Button>
+                                                <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, costPrice: 0 })}>
+                                                    <Plus className="h-4 w-4 mr-1.5" /> Ajouter (Insert)
+                                                </Button>
+                                            </div>
                                         )}
                                     </div>
 
-                                    {/* Column headers */}
-                                    <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                        <div className="col-span-4">Produit</div>
-                                        <div className="col-span-2 text-center">Qté</div>
-                                        <div className="col-span-2">Prix U. HT (DA)</div>
-                                        <div className="col-span-2 text-center">TVA</div>
-                                        <div className="col-span-1 text-right">Total</div>
-                                        <div className="col-span-1"></div>
-                                    </div>
+                                    {clipboardOpen && (
+                                        <Card className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 dark:from-emerald-500/10 dark:to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 p-5 space-y-4 rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300">
+                                            <div className="flex items-start justify-between">
+                                                <div className="space-y-1.5">
+                                                    <h4 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                                                        <Clipboard className="h-4.5 w-4.5 text-emerald-600" />
+                                                        Importateur depuis le Presse-papiers Excel
+                                                    </h4>
+                                                    <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+                                                        Copiez vos lignes depuis Excel (Colonnes dans l'ordre : <span className="font-semibold text-emerald-600 dark:text-emerald-400">Nom du produit ou Code-barre</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Quantité</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Prix d'achat unitaire</span>) puis collez-les ci-dessous.
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-3 text-xs text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                                                    onClick={() => setClipboardOpen(false)}
+                                                >
+                                                    Fermer
+                                                </Button>
+                                            </div>
+                                            <Textarea
+                                                placeholder="Exemple de ligne à coller :&#10;Coca Cola 33cl	12	80&#10;789456123	24	120"
+                                                className="font-mono text-xs h-28 bg-background/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-emerald-500 focus-visible:border-emerald-500 shadow-sm resize-none rounded-xl"
+                                                value={clipboardText}
+                                                onChange={e => setClipboardText(e.target.value)}
+                                            />
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white w-full sm:w-auto font-semibold shadow-md hover:shadow-emerald-500/10 transition-all rounded-xl"
+                                                onClick={handleImportClipboard}
+                                                disabled={!clipboardText.trim()}
+                                            >
+                                                <CheckCircle className="h-4 w-4 mr-2" /> Analyser et Insérer les lignes
+                                            </Button>
+                                        </Card>
+                                    )}
 
-                                    {fields.map((field, index) => {
-                                        const lineTotal = (watchItems[index]?.quantity || 0) * (watchItems[index]?.costPrice || 0)
-                                        return (
-                                            <Card key={field.id} className="overflow-hidden">
-                                                <CardContent className="p-3 grid grid-cols-12 gap-3 items-center">
-                                                    <div className="col-span-12 md:col-span-4 min-w-0 overflow-hidden">
-                                                        <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <ProductSearchCombobox
-                                                                        products={products}
-                                                                        value={f.value}
-                                                                        onChange={f.onChange}
-                                                                        disabled={loading || !canEdit}
-                                                                        placeholder="Rechercher produit..."
-                                                                        priceField="cost"
-                                                                        onPriceSelect={price => form.setValue(`items.${index}.costPrice`, price)}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )} />
-                                                    </div>
-                                                    <div className="col-span-3 md:col-span-2">
-                                                        <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <Input type="number" min={1} disabled={loading || !canEdit} className="text-center font-bold"
-                                                                        {...f} onChange={e => f.onChange(e.target.valueAsNumber || 1)} />
-                                                                </FormControl>
-                                                            </FormItem>
-                                                        )} />
-                                                    </div>
-                                                    <div className="col-span-4 md:col-span-2">
-                                                        <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
-                                                            <FormItem>
-                                                                <FormControl>
-                                                                    <div className="relative">
-                                                                        <Input type="number" step="0.01" min={0} disabled={loading || !canEdit}
-                                                                            className="pr-6" {...f} onChange={e => f.onChange(e.target.valueAsNumber || 0)} />
-                                                                    </div>
-                                                                </FormControl>
-                                                            </FormItem>
-                                                        )} />
-                                                    </div>
-                                                    <div className="col-span-2 md:col-span-2">
-                                                        <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => (
-                                                            <FormItem>
-                                                                <Select disabled={loading || !canEdit} onValueChange={(v) => f.onChange(Number(v))} value={f.value?.toString()}>
+                                    {/* Unified Premium Table Card */}
+                                    <Card className="shadow-sm border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                                        <div className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-950">
+                                            {/* Column headers (Desktop only) */}
+                                            <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3.5 bg-slate-50 dark:bg-slate-900/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider items-center border-b border-slate-100 dark:border-slate-800">
+                                                <div className="col-span-4">Produit</div>
+                                                <div className="col-span-2 text-center">Quantité</div>
+                                                <div className="col-span-2">Prix U. HT (DA)</div>
+                                                <div className="col-span-2 text-center">TVA</div>
+                                                <div className="col-span-1 text-right">Total HT</div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+
+                                            {fields.map((field, index) => {
+                                                const lineTotal = (watchItems[index]?.quantity || 0) * (watchItems[index]?.costPrice || 0)
+                                                return (
+                                                    <div 
+                                                        key={field.id} 
+                                                        className="grid grid-cols-12 gap-3 px-4 py-4 md:px-5 md:py-3.5 items-center hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors"
+                                                    >
+                                                        {/* Product Search */}
+                                                        <div className="col-span-12 md:col-span-4 min-w-0">
+                                                            <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
+                                                                <FormItem className="m-0 space-y-0">
                                                                     <FormControl>
-                                                                        <SelectTrigger className="font-bold">
-                                                                            <SelectValue />
-                                                                        </SelectTrigger>
+                                                                        <div className="flex items-center gap-1.5 w-full">
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <ProductSearchCombobox
+                                                                                    products={localProducts}
+                                                                                    value={f.value}
+                                                                                    onChange={f.onChange}
+                                                                                    disabled={loading || !canEdit}
+                                                                                    placeholder="Rechercher produit..."
+                                                                                    priceField="cost"
+                                                                                    onPriceSelect={price => form.setValue(`items.${index}.costPrice`, price)}
+                                                                                />
+                                                                            </div>
+                                                                            {canEdit && (
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    className="h-9 w-9 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/20 shrink-0 border border-slate-200 dark:border-slate-800 rounded-xl"
+                                                                                    onClick={() => handleOpenQuickProductModal(index)}
+                                                                                    title="Ajouter un produit inline"
+                                                                                >
+                                                                                    <Plus className="h-4 w-4" />
+                                                                                </Button>
+                                                                            )}
+                                                                        </div>
                                                                     </FormControl>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="19">19%</SelectItem>
-                                                                        <SelectItem value="9">9%</SelectItem>
-                                                                        <SelectItem value="0">0%</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </FormItem>
-                                                        )} />
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )} />
+                                                        </div>
+
+                                                        {/* Quantity */}
+                                                        <div className="col-span-4 md:col-span-2">
+                                                            <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
+                                                                <FormItem className="m-0 space-y-0">
+                                                                    <FormControl>
+                                                                        <Input 
+                                                                            type="number" 
+                                                                            min={1} 
+                                                                            disabled={loading || !canEdit} 
+                                                                            className="text-center font-bold h-9 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
+                                                                            {...f} 
+                                                                            onChange={e => f.onChange(e.target.valueAsNumber || 1)} 
+                                                                        />
+                                                                    </FormControl>
+                                                                </FormItem>
+                                                            )} />
+                                                        </div>
+
+                                                        {/* Unit Price with absolute Sparkle button */}
+                                                        <div className="col-span-4 md:col-span-2">
+                                                            <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
+                                                                <FormItem className="m-0 space-y-0">
+                                                                    <FormControl>
+                                                                        <div className="relative flex items-center w-full">
+                                                                            <Input 
+                                                                                type="number" 
+                                                                                step="0.01" 
+                                                                                min={0} 
+                                                                                disabled={loading || !canEdit}
+                                                                                className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
+                                                                                {...f} 
+                                                                                onChange={e => f.onChange(e.target.valueAsNumber || 0)} 
+                                                                            />
+                                                                            {watchItems[index]?.productId && (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleOpenPmpSuggester(index)}
+                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 rounded transition-colors shrink-0"
+                                                                                    title="Simuler PMP & Ajuster les Prix"
+                                                                                >
+                                                                                    <Sparkles className="h-4 w-4 animate-pulse" />
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    </FormControl>
+                                                                </FormItem>
+                                                            )} />
+                                                        </div>
+
+                                                        {/* TVA */}
+                                                        <div className="col-span-4 md:col-span-2">
+                                                            <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => (
+                                                                <FormItem className="m-0 space-y-0">
+                                                                    <Select disabled={loading || !canEdit} onValueChange={(v) => f.onChange(Number(v))} value={f.value?.toString()}>
+                                                                        <FormControl>
+                                                                            <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
+                                                                                <SelectValue placeholder="TVA..." />
+                                                                            </SelectTrigger>
+                                                                        </FormControl>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="19">19%</SelectItem>
+                                                                            <SelectItem value="9">9%</SelectItem>
+                                                                            <SelectItem value="0">0%</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </FormItem>
+                                                            )} />
+                                                        </div>
+
+                                                        {/* Total Line (HT) */}
+                                                        <div className="col-span-8 md:col-span-1 text-right">
+                                                            <span className="text-sm font-black text-slate-900 dark:text-slate-100">
+                                                                {lineTotal.toLocaleString("fr-DZ")} <span className="text-[10px] font-bold text-slate-400">DA</span>
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Trash Action */}
+                                                        <div className="col-span-4 md:col-span-1 flex justify-end">
+                                                            {canEdit && (
+                                                                <Button 
+                                                                    type="button" 
+                                                                    variant="ghost" 
+                                                                    size="icon" 
+                                                                    className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all"
+                                                                    onClick={() => remove(index)} 
+                                                                    disabled={fields.length === 1}
+                                                                >
+                                                                    <Trash className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="col-span-3 md:col-span-1 text-right">
-                                                        <span className="text-sm font-bold text-primary">
-                                                            {lineTotal.toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="col-span-1 flex justify-end">
-                                                        {canEdit && (
-                                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                                onClick={() => remove(index)} disabled={fields.length === 1}>
-                                                                <Trash className="h-3.5 w-3.5" />
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        )
-                                    })}
+                                                )
+                                            })}
+                                        </div>
+                                    </Card>
                                 </div>
 
                                 {/* Total + Withholding breakdown */}
@@ -610,7 +1073,108 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     </div>
                                 </div>
 
-                                {/* Notes & Visual Proof (Photos) */}
+                                 {/* ── supplier partial payments panel ────────────────── */}
+                                 {isEditMode && (
+                                     <Card className="shadow-lg border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden my-6">
+                                         <CardHeader className="pb-3 flex flex-row items-center justify-between bg-muted/10 border-b border-slate-100 dark:border-slate-800">
+                                             <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
+                                                 <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
+                                                 Historique des Règlements & Paiements Fournisseur
+                                             </CardTitle>
+                                             <Button
+                                                 type="button"
+                                                 size="sm"
+                                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-9"
+                                                 onClick={() => {
+                                                     const alreadyPaid = localPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+                                                     const remaining = Math.max(0, total - alreadyPaid)
+                                                     setPayAmount(remaining)
+                                                     setPayAccountId(accounts[0]?.id || "")
+                                                     setPayModalOpen(true)
+                                                 }}
+                                             >
+                                                 <Plus className="h-4 w-4 mr-1.5" /> Enregistrer un paiement
+                                             </Button>
+                                         </CardHeader>
+                                         <CardContent className="space-y-4 pt-4">
+                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                                                 <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border rounded-2xl">
+                                                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Total du Bon</p>
+                                                     <p className="text-xl font-bold text-slate-800 dark:text-slate-200 mt-1">
+                                                         {total.toLocaleString()} DA
+                                                     </p>
+                                                 </div>
+                                                 <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                                                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Déjà Réglé</p>
+                                                     <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                                                         {localPayments.reduce((sum, p) => sum + Number(p.amount), 0).toLocaleString()} DA
+                                                     </p>
+                                                 </div>
+                                                 {(() => {
+                                                     const alreadyPaid = localPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+                                                     const remaining = total - alreadyPaid
+                                                     const isCleared = remaining <= 0
+                                                     return (
+                                                         <div className={cn("p-3.5 border rounded-2xl", isCleared ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400")}>
+                                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Reste à payer</p>
+                                                             <p className="text-xl font-black mt-1">
+                                                                 {remaining.toLocaleString()} DA
+                                                             </p>
+                                                         </div>
+                                                     )
+                                                 })()}
+                                             </div>
+
+                                             {/* Previous payments list */}
+                                             <div className="border rounded-2xl overflow-hidden bg-white dark:bg-slate-900/40">
+                                                 <table className="w-full text-xs text-left">
+                                                     <thead className="bg-slate-50 dark:bg-slate-900 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-slate-100 dark:border-slate-800">
+                                                         <tr>
+                                                             <th className="p-3">Date</th>
+                                                             <th className="p-3">Caisse / Banque</th>
+                                                             <th className="p-3 text-center">Mode</th>
+                                                             <th className="p-3">Observation</th>
+                                                             <th className="p-3 text-right">Montant</th>
+                                                         </tr>
+                                                     </thead>
+                                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                                                         {localPayments.length === 0 ? (
+                                                             <tr>
+                                                                 <td colSpan={5} className="p-4 text-center text-muted-foreground italic">
+                                                                     Aucun règlement enregistré sur ce bon.
+                                                                 </td>
+                                                             </tr>
+                                                         ) : (
+                                                             localPayments.map((pay: any, idx: number) => (
+                                                                 <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+                                                                     <td className="p-3 font-semibold text-muted-foreground">
+                                                                         {format(new Date(pay.date || pay.createdAt), "dd/MM/yyyy HH:mm")}
+                                                                     </td>
+                                                                     <td className="p-3 font-bold text-slate-700 dark:text-slate-300">
+                                                                         {pay.account?.name || "Caisse Générale"}
+                                                                     </td>
+                                                                     <td className="p-3 text-center">
+                                                                         <Badge variant="outline" className="font-bold border-indigo-250 text-indigo-700 dark:text-indigo-400 bg-indigo-500/5">
+                                                                             {pay.description?.match(/\[(.*?)\]/)?.[1] || "Espèce"}
+                                                                         </Badge>
+                                                                     </td>
+                                                                     <td className="p-3 text-slate-500 dark:text-slate-400 max-w-[200px] truncate" title={pay.description}>
+                                                                         {pay.description?.includes(" - ") ? pay.description.split(" - ").slice(1).join(" - ") : "—"}
+                                                                     </td>
+                                                                     <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400">
+                                                                         {Number(pay.amount).toLocaleString()} DA
+                                                                     </td>
+                                                                 </tr>
+                                                             ))
+                                                         )}
+                                                     </tbody>
+                                                 </table>
+                                             </div>
+                                         </CardContent>
+                                     </Card>
+                                 )}
+
+                                 {/* Notes & Visual Proof (Photos) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
                                     <Card className="md:col-span-1 shadow-sm">
                                         <CardHeader className="pb-3">
@@ -652,7 +1216,14 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                     name="imageUrl1"
                                                     render={({ field }) => (
                                                         <FormItem className="flex flex-col items-center">
-                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 1</FormLabel>
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5 justify-center">
+                                                                Photo 1
+                                                                {field.value && (
+                                                                    <button type="button" onClick={() => setLightboxUrl(field.value)} className="text-indigo-600 hover:text-indigo-800 p-0.5 rounded hover:bg-indigo-50 transition-colors" title="Agrandir">
+                                                                        <ZoomIn className="h-3.5 w-3.5" />
+                                                                    </button>
+                                                                )}
+                                                            </FormLabel>
                                                             <FormControl>
                                                                 <ImageUpload
                                                                     value={field.value ? [field.value] : []}
@@ -670,7 +1241,14 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                     name="imageUrl2"
                                                     render={({ field }) => (
                                                         <FormItem className="flex flex-col items-center">
-                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 2</FormLabel>
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5 justify-center">
+                                                                Photo 2
+                                                                {field.value && (
+                                                                    <button type="button" onClick={() => setLightboxUrl(field.value)} className="text-indigo-600 hover:text-indigo-800 p-0.5 rounded hover:bg-indigo-50 transition-colors" title="Agrandir">
+                                                                        <ZoomIn className="h-3.5 w-3.5" />
+                                                                    </button>
+                                                                )}
+                                                            </FormLabel>
                                                             <FormControl>
                                                                 <ImageUpload
                                                                     value={field.value ? [field.value] : []}
@@ -688,7 +1266,14 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                     name="imageUrl3"
                                                     render={({ field }) => (
                                                         <FormItem className="flex flex-col items-center">
-                                                            <FormLabel className="text-xs text-muted-foreground mb-2">Photo 3</FormLabel>
+                                                            <FormLabel className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5 justify-center">
+                                                                Photo 3
+                                                                {field.value && (
+                                                                    <button type="button" onClick={() => setLightboxUrl(field.value)} className="text-indigo-600 hover:text-indigo-800 p-0.5 rounded hover:bg-indigo-50 transition-colors" title="Agrandir">
+                                                                        <ZoomIn className="h-3.5 w-3.5" />
+                                                                    </button>
+                                                                )}
+                                                            </FormLabel>
                                                             <FormControl>
                                                                 <ImageUpload
                                                                     value={field.value ? [field.value] : []}
@@ -717,6 +1302,741 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                         )}
                     </form>
                 </Form>
+
+                {/* Stunning inline Quick Product Dialog with Tabbed Navigation (Fiche Produit Complète Express) */}
+                <Dialog open={quickProductOpen} onOpenChange={setQuickProductOpen}>
+                    <DialogContent className="max-w-3xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 overflow-hidden">
+                        <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-900">
+                            <DialogTitle className="text-xl font-bold flex items-center justify-between text-indigo-950 dark:text-indigo-400">
+                                <span className="flex items-center gap-2">
+                                    <Package className="h-6 w-6 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+                                    Fiche Produit Express
+                                </span>
+                                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 border-none text-xs px-2.5 py-0.5 rounded-full font-bold">
+                                    Modèle Complet
+                                </Badge>
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        {/* Navigation Tabs bar */}
+                        <div className="flex gap-1.5 p-1 bg-slate-50 dark:bg-slate-900/60 rounded-xl my-4 border border-slate-100 dark:border-slate-800/80">
+                            {[
+                                { id: "general", label: "Général", icon: Package },
+                                { id: "pricing", label: "Prix & Tarifs", icon: DollarSign },
+                                { id: "barcodes", label: "Codes-barres & Photos", icon: Barcode },
+                                { id: "stock", label: "Stock & Visibilité", icon: Tag }
+                            ].map((t) => {
+                                const Icon = t.icon
+                                const isActive = quickTab === t.id
+                                return (
+                                    <button
+                                        key={t.id}
+                                        type="button"
+                                        onClick={() => setQuickTab(t.id as any)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 flex-1 justify-center py-2 text-xs font-bold transition-all rounded-lg",
+                                            isActive
+                                                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10 scale-[1.02]"
+                                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                                        )}
+                                    >
+                                        <Icon className="h-4 w-4" />
+                                        {t.label}
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        {/* Tab Contents */}
+                        <div className="min-h-[300px] max-h-[50vh] overflow-y-auto px-1 py-2 space-y-4">
+                            {/* GENERAL TAB */}
+                            {quickTab === "general" && (
+                                <div className="space-y-4 animate-in fade-in duration-300">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nom du Produit *</label>
+                                        <Input
+                                            disabled={loading}
+                                            placeholder="Ex: Coca Cola 33cl ou iPhone 14 Pro Max"
+                                            value={quickName}
+                                            onChange={e => setQuickName(e.target.value)}
+                                            className="text-sm font-semibold border-slate-200 dark:border-slate-800"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Catégorie *</label>
+                                            <Select value={quickCategoryId} onValueChange={setQuickCategoryId} disabled={loading}>
+                                                <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la catégorie..." /></SelectTrigger>
+                                                <SelectContent>
+                                                    {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Marque *</label>
+                                            <Select value={quickBrandId} onValueChange={setQuickBrandId} disabled={loading}>
+                                                <SelectTrigger className="border-slate-200 dark:border-slate-800"><SelectValue placeholder="Choisir la marque..." /></SelectTrigger>
+                                                <SelectContent>
+                                                    {brands.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description du produit</label>
+                                        <Textarea
+                                            disabled={loading}
+                                            placeholder="Fiche technique ou description rapide du produit..."
+                                            value={quickDescription}
+                                            onChange={e => setQuickDescription(e.target.value)}
+                                            className="text-sm min-h-[100px] border-slate-200 dark:border-slate-800"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* PRICING TAB */}
+                            {quickTab === "pricing" && (
+                                <div className="space-y-4 animate-in fade-in duration-300">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+                                                <ShoppingCart className="h-3.5 w-3.5" /> Coût d'achat HT (DA) *
+                                            </label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    disabled={loading}
+                                                    placeholder="0.00"
+                                                    value={quickCost || ""}
+                                                    onChange={e => handleQuickCostChange(e.target.valueAsNumber || 0)}
+                                                    className="font-bold border-indigo-200 dark:border-indigo-900/50 pr-12 focus-visible:ring-indigo-500"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Taux de TVA (%)</label>
+                                            <Select value={String(quickTva)} onValueChange={v => setQuickTva(Number(v))} disabled={loading}>
+                                                <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold"><SelectValue placeholder="TVA..." /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="19">19% (Taux normal)</SelectItem>
+                                                    <SelectItem value="9">9% (Taux réduit)</SelectItem>
+                                                    <SelectItem value="0">0% (Exonéré)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    <Separator />
+
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                                <Store className="h-3.5 w-3.5" /> Vente Public TTC
+                                            </label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    disabled={loading}
+                                                    placeholder="0.00"
+                                                    value={quickPrice || ""}
+                                                    onChange={e => setQuickPrice(e.target.valueAsNumber || 0)}
+                                                    className="font-bold border-blue-100 dark:border-blue-900/40 pr-12 text-blue-700 dark:text-blue-300"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                <Package className="h-3.5 w-3.5" /> Demi-Gros / Gros
+                                            </label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    disabled={loading}
+                                                    placeholder="0.00"
+                                                    value={quickWholesalePrice || ""}
+                                                    onChange={e => setQuickWholesalePrice(e.target.valueAsNumber || 0)}
+                                                    className="font-bold border-emerald-100 dark:border-emerald-900/40 pr-12 text-emerald-700 dark:text-emerald-300"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                                <UsersIcon className="h-3.5 w-3.5" /> Revendeur TTC
+                                            </label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    disabled={loading}
+                                                    placeholder="0.00"
+                                                    value={quickDealerPrice || ""}
+                                                    onChange={e => setQuickDealerPrice(e.target.valueAsNumber || 0)}
+                                                    className="font-bold border-purple-100 dark:border-purple-900/40 pr-12 text-purple-700 dark:text-purple-300"
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Visual Margins calculator */}
+                                    <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl">
+                                        <p className="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1">
+                                            <Percent className="h-3.5 w-3.5 text-emerald-500" /> Marges calculées live
+                                        </p>
+                                        <div className="grid grid-cols-3 gap-3 text-center">
+                                            {[
+                                                { label: "Marge Public", cost: quickCost, price: quickPrice, color: "text-blue-600 dark:text-blue-400 bg-blue-500/5" },
+                                                { label: "Marge Gros", cost: quickCost, price: quickWholesalePrice, color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/5" },
+                                                { label: "Marge Revendeur", cost: quickCost, price: quickDealerPrice, color: "text-purple-600 dark:text-purple-400 bg-purple-500/5" }
+                                            ].map((m, idx) => {
+                                                const margin = m.cost > 0 && m.price > 0 ? (((m.price - m.cost) / m.cost) * 100).toFixed(0) : "—"
+                                                const isPositive = margin !== "—" && Number(margin) >= 0
+                                                return (
+                                                    <div key={idx} className={cn("p-2 rounded-xl border border-slate-200/60 dark:border-slate-800", m.color)}>
+                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">{m.label}</p>
+                                                        <p className={cn("text-sm font-black mt-0.5", isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
+                                                            {margin !== "—" ? `${margin}%` : "—"}
+                                                        </p>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* BARCODES & PHOTOS TAB */}
+                            {quickTab === "barcodes" && (
+                                <div className="space-y-4 animate-in fade-in duration-300">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                                <Barcode className="h-4 w-4 text-slate-500" /> Codes-barres
+                                            </label>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="xs"
+                                                    onClick={() => setQuickBarcodes(prev => [...prev, { value: "", label: "" }])}
+                                                    className="h-7 text-[10px] font-bold py-1 px-2.5 rounded-lg border-indigo-200 dark:border-indigo-800 text-indigo-600"
+                                                >
+                                                    <Plus className="h-3 w-3 mr-1" /> Ajouter
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    size="xs"
+                                                    onClick={handleGenerateQuickBarcode}
+                                                    className="h-7 text-[10px] font-bold py-1 px-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300"
+                                                    disabled={loading}
+                                                >
+                                                    <Wand2 className="h-3 w-3 mr-1" /> Générer
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-2 max-h-36 overflow-y-auto border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50/50">
+                                            {quickBarcodes.length === 0 ? (
+                                                <p className="text-xs text-muted-foreground text-center py-4 italic">Aucun code-barre. Cliquez sur Générer ou Ajouter.</p>
+                                            ) : (
+                                                quickBarcodes.map((bar, index) => (
+                                                    <div key={index} className="flex gap-2 items-center bg-white dark:bg-slate-900 p-1.5 rounded-lg border shadow-sm">
+                                                        <Input
+                                                            disabled={loading}
+                                                            placeholder="Code-barre (scanner ou taper)..."
+                                                            value={bar.value}
+                                                            onChange={e => {
+                                                                const val = e.target.value
+                                                                setQuickBarcodes(prev => prev.map((b, i) => i === index ? { ...b, value: val } : b))
+                                                            }}
+                                                            className="h-8 text-xs font-mono text-center flex-1"
+                                                        />
+                                                        <Input
+                                                            disabled={loading}
+                                                            placeholder="Type (ex: Cartouche)..."
+                                                            value={bar.label}
+                                                            onChange={e => {
+                                                                const val = e.target.value
+                                                                setQuickBarcodes(prev => prev.map((b, i) => i === index ? { ...b, label: val } : b))
+                                                            }}
+                                                            className="h-8 text-xs w-28 text-center"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-red-500 hover:text-red-700"
+                                                            onClick={() => setQuickBarcodes(prev => prev.filter((_, i) => i !== index))}
+                                                        >
+                                                            <Trash className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <Separator />
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Images du produit (Max 3)</label>
+                                        <div className="flex justify-center p-3 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50">
+                                            <ImageUpload
+                                                value={quickImages.map(img => img.url)}
+                                                disabled={loading}
+                                                onChange={(url) => setQuickImages(prev => [...prev, { url }])}
+                                                onRemove={(url) => setQuickImages(prev => prev.filter(img => img.url !== url))}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* STOCK & OPTIONS TAB */}
+                            {quickTab === "stock" && (
+                                <div className="space-y-4 animate-in fade-in duration-300">
+                                    <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 p-4 rounded-2xl">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stock Initial</label>
+                                            <Input
+                                                type="number"
+                                                disabled={loading}
+                                                placeholder="0"
+                                                value={quickStock || ""}
+                                                onChange={e => setQuickStock(e.target.valueAsNumber || 0)}
+                                                className="font-bold border-slate-200 dark:border-slate-800 text-center"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stock Minimum</label>
+                                            <Input
+                                                type="number"
+                                                disabled={loading}
+                                                placeholder="5"
+                                                value={quickMinStock || ""}
+                                                onChange={e => setQuickMinStock(e.target.valueAsNumber || 0)}
+                                                className="font-bold border-slate-200 dark:border-slate-800 text-center"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Paramètres de visibilité</label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div
+                                                onClick={() => setQuickIsFeatured(!quickIsFeatured)}
+                                                className={cn(
+                                                    "flex items-center gap-3 p-3.5 border rounded-2xl cursor-pointer transition-all hover:scale-[1.01] shadow-sm select-none",
+                                                    quickIsFeatured
+                                                        ? "bg-amber-500/5 border-amber-500/20 text-amber-700 dark:text-amber-400"
+                                                        : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                                                )}
+                                            >
+                                                <Checkbox checked={quickIsFeatured} onCheckedChange={() => {}} className="pointer-events-none" />
+                                                <div className="space-y-0.5">
+                                                    <p className="text-xs font-bold flex items-center gap-1.5">
+                                                        <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" /> Produit Vedette
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground">Mettre en avant sur la caisse tactile.</p>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                onClick={() => setQuickIsArchived(!quickIsArchived)}
+                                                className={cn(
+                                                    "flex items-center gap-3 p-3.5 border rounded-2xl cursor-pointer transition-all hover:scale-[1.01] shadow-sm select-none",
+                                                    quickIsArchived
+                                                        ? "bg-slate-100 border-slate-300 text-slate-800 dark:bg-slate-900/50 dark:border-slate-700"
+                                                        : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                                                )}
+                                            >
+                                                <Checkbox checked={quickIsArchived} onCheckedChange={() => {}} className="pointer-events-none" />
+                                                <div className="space-y-0.5">
+                                                    <p className="text-xs font-bold flex items-center gap-1.5">
+                                                        <Archive className="h-3.5 w-3.5 text-slate-500" /> Archiver le Produit
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground">Masquer du POS et du catalogue.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Dialog Footer Actions */}
+                        <DialogFooter className="gap-2 border-t border-slate-100 dark:border-slate-900 pt-4 mt-2">
+                            <Button type="button" variant="outline" onClick={() => setQuickProductOpen(false)} disabled={loading} className="text-xs font-bold rounded-xl h-10 px-4">
+                                Annuler
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleCreateQuickProduct}
+                                disabled={loading || !quickName.trim()}
+                                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white text-xs font-black shadow-md hover:shadow-emerald-500/10 transition-all rounded-xl h-10 px-5 flex items-center gap-1.5"
+                            >
+                                <CheckCircle className="h-4.5 w-4.5" />
+                                {loading ? "Création..." : "Enregistrer & Insérer"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                {/* Live Weighted Average Price (PMP) & Selling Price Suggester */}
+                <Dialog open={pmpOpen} onOpenChange={setPmpOpen}>
+                    <DialogContent className="max-w-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6">
+                        <DialogHeader>
+                            <DialogTitle className="text-lg font-black flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
+                                <Sparkles className="h-5 w-5 text-indigo-500 animate-pulse" />
+                                Simulateur PMP & Prix de Vente
+                            </DialogTitle>
+                        </DialogHeader>
+                        {pmpRowIndex !== null && (() => {
+                            const prodId = watchItems[pmpRowIndex]?.productId
+                            const activeProduct = localProducts.find(p => p.id === prodId)
+                            if (!activeProduct) return null
+                            
+                            const oldStock = Number(activeProduct.stock || 0)
+                            const oldCost = Number(activeProduct.cost || 0)
+                            const newQty = Number(watchItems[pmpRowIndex]?.quantity || 0)
+                            const newCost = Number(watchItems[pmpRowIndex]?.costPrice || 0)
+                            
+                            const totalStock = oldStock + newQty
+                            const totalValue = (oldStock * oldCost) + (newQty * newCost)
+                            const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
+
+                            return (
+                                <div className="space-y-4 py-3">
+                                    {/* Product Details Banner */}
+                                    <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 p-3.5 rounded-2xl flex items-center gap-3">
+                                        <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400 shrink-0">
+                                            <Package className="h-5 w-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-[9px] text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-wider">Produit sélectionné</p>
+                                            <h4 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm truncate mt-0.5" title={activeProduct.name}>
+                                                {activeProduct.name}
+                                            </h4>
+                                        </div>
+                                    </div>
+
+                                    {/* Real-time comparison grid */}
+                                    <div className="grid grid-cols-3 gap-2.5">
+                                        <div className="p-3 bg-slate-50 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/80 rounded-xl flex flex-col justify-between">
+                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Stock Actuel</span>
+                                            <span className="text-xs font-extrabold text-slate-850 dark:text-slate-200 mt-2">{oldStock} unités</span>
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1">Coût: {oldCost.toLocaleString()} DA</span>
+                                        </div>
+
+                                        <div className="p-3 bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/10 dark:border-indigo-500/20 rounded-xl flex flex-col justify-between relative overflow-hidden">
+                                            <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-wider">Nouvel Achat</span>
+                                            <span className="text-xs font-extrabold text-indigo-700 dark:text-indigo-300 mt-2">+{newQty} unités</span>
+                                            <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 mt-1">Coût: {newCost.toLocaleString()} DA</span>
+                                        </div>
+
+                                        <div className="p-3 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 dark:from-emerald-500/20 dark:to-teal-500/5 border border-emerald-500/25 dark:border-emerald-500/35 rounded-xl flex flex-col justify-between relative overflow-hidden shadow-sm">
+                                            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-wider flex items-center gap-0.5">
+                                                <Sparkles className="h-3 w-3 text-emerald-500" /> Nouveau PMP
+                                            </span>
+                                            <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 mt-2">
+                                                {calculatedPmp.toLocaleString(undefined, { maximumFractionDigits: 2 })} <span className="text-[8px] font-bold">DA</span>
+                                            </span>
+                                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-1">Total: {totalStock} unités</span>
+                                        </div>
+                                    </div>
+
+                                    <Separator className="border-slate-100 dark:border-slate-800" />
+
+                                    <div className="space-y-2.5">
+                                        <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                            <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                                            Ajustement des Prix de Vente TTC (Calculateur de Marges)
+                                        </h5>
+                                        
+                                        <div className="space-y-3 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                                            {/* Retail margin */}
+                                            <div className="grid grid-cols-12 gap-3 items-center">
+                                                <div className="col-span-4 flex flex-col">
+                                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Détail / Public</span>
+                                                    <span className="text-[10px] text-slate-400">Prix public conseillé</span>
+                                                </div>
+                                                <div className="col-span-3 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpRetailMargin}
+                                                        onChange={e => {
+                                                            const m = Number(e.target.value) || 0
+                                                            setPmpRetailMargin(m)
+                                                            setPmpRetailPrice(Number((calculatedPmp * (1 + m / 100)).toFixed(2)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-emerald-600 dark:text-emerald-400 focus:outline-none border-none bg-transparent text-center"
+                                                    />
+                                                    <span className="text-[10px] font-black text-slate-450">%</span>
+                                                </div>
+                                                <div className="col-span-5 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpRetailPrice}
+                                                        onChange={e => {
+                                                            const p = Number(e.target.value) || 0
+                                                            setPmpRetailPrice(p)
+                                                            if (calculatedPmp > 0) setPmpRetailMargin(Number((((p - calculatedPmp) / calculatedPmp) * 100).toFixed(1)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-slate-800 dark:text-slate-100 focus:outline-none border-none bg-transparent text-right"
+                                                    />
+                                                    <span className="text-[9px] font-bold text-slate-400 ml-1.5">DA</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Dealer margin */}
+                                            <div className="grid grid-cols-12 gap-3 items-center">
+                                                <div className="col-span-4 flex flex-col">
+                                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Revendeur</span>
+                                                    <span className="text-[10px] text-slate-400">Prix revendeurs B2B</span>
+                                                </div>
+                                                <div className="col-span-3 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpDealerMargin}
+                                                        onChange={e => {
+                                                            const m = Number(e.target.value) || 0
+                                                            setPmpDealerMargin(m)
+                                                            setPmpDealerPrice(Number((calculatedPmp * (1 + m / 100)).toFixed(2)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-indigo-600 dark:text-indigo-400 focus:outline-none border-none bg-transparent text-center"
+                                                    />
+                                                    <span className="text-[10px] font-black text-slate-455">%</span>
+                                                </div>
+                                                <div className="col-span-5 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpDealerPrice}
+                                                        onChange={e => {
+                                                            const p = Number(e.target.value) || 0
+                                                            setPmpDealerPrice(p)
+                                                            if (calculatedPmp > 0) setPmpDealerMargin(Number((((p - calculatedPmp) / calculatedPmp) * 100).toFixed(1)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-slate-800 dark:text-slate-100 focus:outline-none border-none bg-transparent text-right"
+                                                    />
+                                                    <span className="text-[9px] font-bold text-slate-400 ml-1.5">DA</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Wholesale margin */}
+                                            <div className="grid grid-cols-12 gap-3 items-center">
+                                                <div className="col-span-4 flex flex-col">
+                                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Demi-Gros / Gros</span>
+                                                    <span className="text-[10px] text-slate-400">Prix de vente de gros</span>
+                                                </div>
+                                                <div className="col-span-3 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpWholesaleMargin}
+                                                        onChange={e => {
+                                                            const m = Number(e.target.value) || 0
+                                                            setPmpWholesaleMargin(m)
+                                                            setPmpWholesalePrice(Number((calculatedPmp * (1 + m / 100)).toFixed(2)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-purple-600 dark:text-purple-400 focus:outline-none border-none bg-transparent text-center"
+                                                    />
+                                                    <span className="text-[10px] font-black text-slate-460">%</span>
+                                                </div>
+                                                <div className="col-span-5 flex items-center border border-slate-200 dark:border-slate-850 rounded-xl bg-white dark:bg-slate-950 px-2 py-1.5 focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500 transition-colors shadow-sm">
+                                                    <input
+                                                        type="number"
+                                                        value={pmpWholesalePrice}
+                                                        onChange={e => {
+                                                            const p = Number(e.target.value) || 0
+                                                            setPmpWholesalePrice(p)
+                                                            if (calculatedPmp > 0) setPmpWholesaleMargin(Number((((p - calculatedPmp) / calculatedPmp) * 100).toFixed(1)))
+                                                        }}
+                                                        className="w-full text-xs font-black text-slate-800 dark:text-slate-100 focus:outline-none border-none bg-transparent text-right"
+                                                    />
+                                                    <span className="text-[9px] font-bold text-slate-400 ml-1.5">DA</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })()}
+                        <DialogFooter className="gap-2 border-t border-slate-100 dark:border-slate-900 pt-4 mt-2">
+                            <Button variant="outline" onClick={() => setPmpOpen(false)} disabled={loading} className="text-xs font-bold rounded-xl h-10 px-4">
+                                Fermer
+                            </Button>
+                            <Button onClick={handleApplyPmpPrices} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-black shadow-md hover:shadow-indigo-500/10 transition-all rounded-xl h-10 px-5 flex items-center gap-1.5">
+                                <CheckCircle className="h-4 w-4" /> Enregistrer & Mettre à jour
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Fullscreen click-to-zoom Lightbox for Invoice justifications */}
+                <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
+                    <DialogContent className="max-w-4xl bg-black/90 border-none p-0 overflow-hidden flex flex-col items-center justify-center rounded-2xl">
+                        {lightboxUrl && (
+                            <div className="relative w-full h-[80vh] flex items-center justify-center p-4">
+                                <img
+                                    src={lightboxUrl}
+                                    alt="Invoice verification Lightbox"
+                                    className="max-h-full max-w-full object-contain rounded-lg shadow-2xl transition-transform duration-300 hover:scale-105"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setLightboxUrl(null)}
+                                    className="absolute top-4 right-4 text-white hover:bg-white/20 h-8 w-8 rounded-full p-0 flex items-center justify-center"
+                                >
+                                    ✕
+                                </Button>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Sleek Delete Form Confirmation Dialog */}
+                <Dialog open={deleteFormOpen} onOpenChange={setDeleteFormOpen}>
+                    <DialogContent className="max-w-sm bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl shadow-2xl p-6 transition-all duration-250">
+                        <DialogHeader className="space-y-1">
+                            <DialogTitle className="text-lg font-bold text-red-600 dark:text-red-400 flex items-center gap-2.5">
+                                <span className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400">
+                                    <Trash className="h-5 w-5 animate-pulse" />
+                                </span>
+                                Supprimer ce bon d'achat
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-3">
+                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                                Cette action est <span className="text-red-600 dark:text-red-400 font-bold">définitive</span>. Elle annulera la commande, restaurera les stocks physiques, et créditera/débitera les comptes de trésorerie associés.
+                            </p>
+                            <div className="space-y-1.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850">
+                                <label className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 block mb-1">
+                                    Mot de passe de sécurité (111)
+                                </label>
+                                <Input
+                                    type="password"
+                                    placeholder="Saisir le mot de passe..."
+                                    value={deleteFormPassword}
+                                    onChange={e => setDeleteFormPassword(e.target.value)}
+                                    disabled={loading}
+                                    className="text-sm font-mono text-center tracking-widest font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus-visible:ring-red-500 h-10"
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter" && deleteFormPassword) handleFormDelete()
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="flex flex-row items-center justify-end gap-2 mt-2">
+                            <Button 
+                                type="button"
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setDeleteFormOpen(false)} 
+                                disabled={loading}
+                                className="rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 dark:hover:bg-slate-800/60 font-semibold"
+                            >
+                                Annuler
+                            </Button>
+                            <Button 
+                                type="button"
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={handleFormDelete} 
+                                disabled={loading || !deleteFormPassword}
+                                className="rounded-xl bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700 font-semibold shadow-md shadow-red-500/10 flex items-center gap-1.5"
+                            >
+                                {loading ? "Suppression..." : "✓ Confirmer la suppression"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Sleek Partial Payment Dialog Form */}
+                <Dialog open={payModalOpen} onOpenChange={setPayModalOpen}>
+                    <DialogContent className="max-w-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-2xl shadow-xl p-6">
+                        <DialogHeader>
+                            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
+                                <DollarSign className="h-5 w-5 text-emerald-600" />
+                                Enregistrer un règlement fournisseur
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-3">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Montant du règlement (DA) *</label>
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        disabled={loading}
+                                        placeholder="0.00"
+                                        value={payAmount || ""}
+                                        onChange={e => setPayAmount(e.target.valueAsNumber || 0)}
+                                        className="font-bold text-emerald-600 border-slate-200 dark:border-slate-800 text-lg pr-12"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">DA</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mode de règlement</label>
+                                    <Select value={payMethod} onValueChange={setPayMethod} disabled={loading}>
+                                        <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold text-xs"><SelectValue placeholder="Mode..." /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Espèce">Espèce</SelectItem>
+                                            <SelectItem value="Chèque">Chèque</SelectItem>
+                                            <SelectItem value="Carte Bancaire">Carte Bancaire</SelectItem>
+                                            <SelectItem value="Virement">Virement</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Caisse / Banque</label>
+                                    <Select value={payAccountId} onValueChange={setPayAccountId} disabled={loading}>
+                                        <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold text-xs"><SelectValue placeholder="Compte..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {accounts.map(a => (
+                                                <SelectItem key={a.id} value={a.id} className="text-xs">
+                                                    {a.name} ({Number(a.balance).toLocaleString()} DA)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Observation / Notes (Optionnel)</label>
+                                <Input
+                                    disabled={loading}
+                                    placeholder="Ex: Acompte n°1, chèque reçu..."
+                                    value={payNotes}
+                                    onChange={e => setPayNotes(e.target.value)}
+                                    className="text-xs"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2 border-t border-slate-100 dark:border-slate-900 pt-4 mt-2">
+                            <Button variant="outline" size="sm" onClick={() => setPayModalOpen(false)} disabled={loading}>
+                                Annuler
+                            </Button>
+                            <Button
+                                onClick={handleRegisterPayment}
+                                disabled={loading || payAmount <= 0 || !payAccountId}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1"
+                            >
+                                <CheckCircle className="h-4 w-4" />
+                                {loading ? "Enregistrement..." : "✓ Confirmer le règlement"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </>
     )

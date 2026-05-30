@@ -90,18 +90,23 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                     orderBy: { createdAt: 'desc' },
                     take: 8
                 }),
-                // 11-13. Revenue over time charts
-                db.order.findMany({
+                // 11-13. Revenue over time charts — GROUP BY at DB level instead of fetching all rows
+                db.order.groupBy({
+                    by: ['createdAt'],
                     where: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-                    select: { createdAt: true, total: true }
+                    _sum: { total: true },
+                    _count: { id: true }
                 }),
-                db.salesOrder.findMany({
+                db.salesOrder.groupBy({
+                    by: ['createdAt'],
                     where: { tenantId, storeId: storeIdToUse, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-                    select: { createdAt: true, total: true }
+                    _sum: { total: true },
+                    _count: { id: true }
                 }),
-                db.expense.findMany({
+                db.expense.groupBy({
+                    by: ['date'],
                     where: { tenantId, date: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-                    select: { date: true, amount: true }
+                    _sum: { amount: true }
                 }),
                 // 14. Top customers data
                 db.order.groupBy({
@@ -136,7 +141,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
 
             const customerIds = topCustomersData.map(tc => tc.customerId).filter(Boolean) as string[];
 
-            const [productsCost, topCustomersDetails] = await Promise.all([
+            const [productsCost, topCustomersDetails, topProductsData, categoryPerfData] = await Promise.all([
                 db.product.findMany({
                     where: { id: { in: productIds } },
                     select: { id: true, cost: true }
@@ -144,6 +149,20 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 db.customer.findMany({
                     where: { id: { in: customerIds } },
                     select: { id: true, name: true }
+                }),
+                // Top selling products — aggregated at DB level
+                db.orderItem.groupBy({
+                    by: ['productId'],
+                    where: { order: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } } },
+                    _sum: { quantity: true, price: true },
+                    orderBy: { _sum: { price: 'desc' } },
+                    take: 10
+                }),
+                // Category performance — aggregated at DB level
+                db.product.groupBy({
+                    by: ['categoryId'],
+                    where: { tenantId, isArchived: false, categoryId: { not: null } },
+                    _count: { id: true }
                 })
             ]);
 
@@ -179,6 +198,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 date: format(o.createdAt, "dd/MM HH:mm")
             }));
 
+            // Build revenue over time chart from pre-aggregated data
             const revenueMap = new Map<string, { revenue: number; expenses: number }>();
 
             // Initialize the map with 0s for every day in the interval
@@ -187,11 +207,12 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 revenueMap.set(format(day, "MMM dd"), { revenue: 0, expenses: 0 });
             });
 
+            // Now iterate pre-grouped data (much fewer rows)
             ordersForChart.forEach(o => {
                 const dateStr = format(o.createdAt, "MMM dd");
                 if (revenueMap.has(dateStr)) {
                     const cur = revenueMap.get(dateStr)!;
-                    cur.revenue += Number(o.total);
+                    cur.revenue += Number(o._sum.total || 0);
                 }
             });
 
@@ -199,7 +220,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 const dateStr = format(o.createdAt, "MMM dd");
                 if (revenueMap.has(dateStr)) {
                     const cur = revenueMap.get(dateStr)!;
-                    cur.revenue += Number(o.total);
+                    cur.revenue += Number(o._sum.total || 0);
                 }
             });
 
@@ -207,7 +228,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 const dateStr = format(e.date, "MMM dd");
                 if (revenueMap.has(dateStr)) {
                     const cur = revenueMap.get(dateStr)!;
-                    cur.expenses += Number(e.amount);
+                    cur.expenses += Number(e._sum.amount || 0);
                 }
             });
 
@@ -221,9 +242,35 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 spent: Number(tc._sum.total || 0)
             }));
 
+            // Build top products list from aggregated data
+            const topProductIds = topProductsData.map(tp => tp.productId);
+            const topProductNames = topProductIds.length > 0
+                ? await db.product.findMany({
+                    where: { id: { in: topProductIds } },
+                    select: { id: true, name: true, cost: true }
+                })
+                : [];
+            const productNameMap = new Map(topProductNames.map(p => [p.id, { name: p.name, cost: Number(p.cost || 0) }]));
+            const topProducts = topProductsData.map(tp => ({
+                id: tp.productId,
+                name: productNameMap.get(tp.productId)?.name || "Unknown",
+                quantity: tp._sum.quantity || 0,
+                revenue: Number(tp._sum.price || 0),
+            }));
 
-            const topProducts: any[] = [];
-            const categoryPerformance: any[] = [];
+            // Build category performance from aggregated data
+            const categoryIds = categoryPerfData.map(c => c.categoryId).filter(Boolean) as string[];
+            const categoryNames = categoryIds.length > 0
+                ? await db.category.findMany({
+                    where: { id: { in: categoryIds } },
+                    select: { id: true, name: true }
+                })
+                : [];
+            const categoryNameMap = new Map(categoryNames.map(c => [c.id, c.name]));
+            const categoryPerformance = categoryPerfData.map(cp => ({
+                name: categoryNameMap.get(cp.categoryId as string) || "Sans catégorie",
+                products: cp._count.id,
+            }));
 
             return JSON.parse(JSON.stringify({
                 totalRevenue, posRevenue, invoiceRevenue,

@@ -3,6 +3,7 @@ export type TreasuryAccountColumn = {
     name: string
     type: string
     balance: string
+    rawBalance?: number
     rib: string | null
     createdAt: string
 }

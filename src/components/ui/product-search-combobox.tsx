@@ -90,36 +90,40 @@ export const ProductSearchCombobox: React.FC<ProductSearchComboboxProps> = ({
                     role="combobox"
                     aria-expanded={open}
                     disabled={disabled}
-                    className="w-full justify-between h-9 text-left font-normal overflow-hidden"
+                    className="w-full justify-between min-h-[36px] h-auto py-1.5 px-3 text-left font-normal border-slate-200 dark:border-slate-800"
                 >
                     {selectedProduct ? (
-                        <span className="flex items-center gap-2 flex-1 min-w-0">
-                            <Package className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                            <span className="truncate">{selectedProduct.name}</span>
-                            {selectedProduct.stock !== undefined && (
-                                <Badge variant="outline" className="text-xs shrink-0">
-                                    Stock: {selectedProduct.stock}
-                                </Badge>
-                            )}
+                        <span className="flex items-start gap-2 flex-1 min-w-0 py-0.5">
+                            <Package className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500 mt-0.5" />
+                            <span className="flex flex-col flex-1 min-w-0">
+                                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 break-words whitespace-normal leading-tight">
+                                    {selectedProduct.name}
+                                </span>
+                                {selectedProduct.stock !== undefined && (
+                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                                        Stock actuel: <span className={cn("font-bold", selectedProduct.stock > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>{selectedProduct.stock}</span>
+                                    </span>
+                                )}
+                            </span>
                         </span>
                     ) : (
-                        <span className="text-muted-foreground flex items-center gap-2">
+                        <span className="text-muted-foreground flex items-center gap-2 text-xs">
                             <Search className="h-3.5 w-3.5" />
                             {placeholder}
                         </span>
                     )}
-                    <span className="flex items-center gap-1 ml-2 shrink-0">
+                    <span className="flex items-center gap-1 ml-2 shrink-0 self-center">
                         {selectedProduct && (
                             <span
                                 role="button"
                                 tabIndex={0}
                                 onClick={handleClear}
-                                className="rounded p-0.5 hover:bg-muted"
+                                className="rounded p-0.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                             >
-                                <X className="h-3 w-3" />
+                                <X className="h-3.5 w-3.5" />
                             </span>
                         )}
-                        <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
+                        <ChevronsUpDown className="h-4 w-4 opacity-50 text-slate-400" />
                     </span>
                 </Button>
             </PopoverTrigger>
@@ -161,9 +165,9 @@ export const ProductSearchCombobox: React.FC<ProductSearchComboboxProps> = ({
                                 >
                                     <Check className={cn("h-4 w-4 shrink-0 text-primary", value !== product.id && "opacity-0")} />
                                     <div className="flex-1 min-w-0">
-                                        <div className="font-medium text-sm truncate">{product.name}</div>
+                                        <div className="font-semibold text-xs text-slate-800 dark:text-slate-200 break-words whitespace-normal leading-tight">{product.name}</div>
                                         {product.barcodes && product.barcodes.length > 0 && (
-                                            <div className="text-xs text-muted-foreground font-mono">{product.barcodes[0].value}</div>
+                                            <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">{product.barcodes[0].value}</div>
                                         )}
                                     </div>
                                     <div className="shrink-0 text-right">
