@@ -38,6 +38,9 @@ model Tenant {
   loyaltyPointsPerDa   Int                   @default(1)
   loyaltyDaPerPoint    Int                   @default(100)
   subscriptionEndsAt   DateTime?
+  warrantyEnabled      Boolean               @default(false)
+  isElectronics        Boolean               @default(false)
+  blockNegativeStock   Boolean               @default(false)
   isBlocked            Boolean               @default(false)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -102,6 +105,7 @@ model Store {
   tenantId       String
   name           String
   address        String?
+  isElectronics  Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   dailyCloses    DailyClose[]
@@ -443,13 +447,14 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Decimal
-  priceHt   Decimal @default(0)
-  tvaRate   Decimal @default(0)
+  id           String  @id @default(uuid())
+  orderId      String
+  productId    String
+  quantity     Int
+  price        Decimal
+  priceHt      Decimal @default(0)
+  tvaRate      Decimal @default(0)
+  serialNumber String?
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
 }
@@ -488,6 +493,7 @@ model PurchaseOrderItem {
   quantity        Int
   costPrice       Decimal
   tvaRate         Decimal       @default(19)
+  serialNumber    String?
   product         Product       @relation(fields: [productId], references: [id])
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
 }
@@ -545,6 +551,7 @@ model SalesOrderItem {
   unitPrice    Decimal
   tvaRate      Decimal    @default(0)
   priceHt      Decimal    @default(0)
+  serialNumber String?
   product      Product    @relation(fields: [productId], references: [id])
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
 }

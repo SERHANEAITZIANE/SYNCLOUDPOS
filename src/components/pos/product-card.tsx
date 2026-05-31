@@ -27,10 +27,12 @@ interface ProductCardProps {
         stock: number
         barcodes: string[]
     }
+    blockNegativeStock?: boolean
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
-    data
+    data,
+    blockNegativeStock = false
 }) => {
     const cart = usePosStore()
     const t = useTranslations("ProductCard")
@@ -86,33 +88,58 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         threshold: 50,
         preventDefaultTouchmoveEvent: true
     });
+    const outOfStock = blockNegativeStock && (data.stock - quantityInCart) <= 0;
+    const isLowStock = (data.stock - quantityInCart) > 0 && (data.stock - quantityInCart) <= data.minStock;
 
     return (
         <Card
             ref={ref}
             className={cn(
-                "group cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1e293b] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-primary/20 transition-all duration-200 flex flex-col p-2.5 lg:p-4 h-[100px] lg:h-32 justify-between relative",
-                (data.stock - quantityInCart) <= 0 ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-900/10" : ""
+                "group cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border bg-white dark:bg-[#131418] transition-all duration-300 ease-out flex flex-col p-2.5 lg:p-4 h-[100px] lg:h-32 justify-between relative select-none hover:-translate-y-1 active:scale-[0.98]",
+                quantityInCart > 0
+                    ? "border-emerald-500/40 dark:border-emerald-500/30 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.02] shadow-[0_4px_20px_rgba(16,185,129,0.08)]"
+                    : "border-slate-100 dark:border-slate-900/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_12px_24px_rgba(0,0,0,0.3)] hover:border-slate-300/80 dark:hover:border-slate-800",
+                outOfStock ? "opacity-40 cursor-not-allowed select-none bg-gray-50/20 dark:bg-slate-900/20" : "",
+                isLowStock && quantityInCart === 0 ? "border-amber-300 dark:border-amber-800/80 bg-amber-50/10 dark:bg-amber-950/5 shadow-amber-500/5" : ""
             )}
-            onClick={onAddToCart}
+            onClick={outOfStock ? undefined : onAddToCart}
         >
+            {/* Out of Stock Overlay */}
+            {outOfStock && (
+                <div className="absolute inset-0 bg-[#0f1115]/50 dark:bg-[#0f1115]/75 backdrop-blur-[0.5px] flex items-center justify-center z-10 select-none">
+                    <span className="bg-red-600 dark:bg-red-700 text-white text-[9px] font-black uppercase tracking-wider py-1 px-3 rounded-md shadow-lg border border-red-500/20 transform -rotate-3">
+                        ÉPUISÉ
+                    </span>
+                </div>
+            )}
+
             {/* Top row: Name and Stock */}
             <div className="relative w-full">
                 <h3 className="font-bold text-gray-800 dark:text-slate-200 text-[11px] lg:text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors duration-200 pr-7" title={data.name}>
                     {data.name}
                 </h3>
                 <div className={cn(
-                    "absolute -top-0.5 right-0 shrink-0 text-[9px] lg:text-[10px] font-bold px-1.5 py-0.5 rounded-md border",
+                    "absolute -top-0.5 right-0 shrink-0 text-[9px] lg:text-[10px] font-bold px-1.5 py-0.5 rounded-md border flex items-center gap-1.5",
                     (data.stock - quantityInCart) > 0
-                        ? "bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-900/50"
+                        ? isLowStock
+                            ? "bg-amber-100/90 text-amber-700 border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-900/50"
+                            : "bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-900/50"
                         : "bg-red-100/80 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-900/50"
                 )}>
+                    {isLowStock && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />}
                     {data.stock - quantityInCart}
                 </div>
             </div>
 
-            {/* Bottom row: Price */}
-            <div className="flex justify-end items-end">
+            {/* Bottom row: Price and Cart Quantity */}
+            <div className="flex justify-between items-end w-full">
+                <div>
+                    {quantityInCart > 0 && (
+                        <span className="inline-flex items-center gap-1 text-[9px] lg:text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/20 animate-in fade-in duration-300">
+                            {quantityInCart} en panier
+                        </span>
+                    )}
+                </div>
                 <div className="flex items-baseline gap-1 text-gray-900 dark:text-white">
                     <span className="font-black text-sm lg:text-xl leading-none">
                         {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}

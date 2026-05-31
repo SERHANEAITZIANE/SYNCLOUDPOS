@@ -18,7 +18,9 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FormDescription,
 } from "@/components/ui/form"
+import { Switch } from "@/components/ui/switch"
 import {
     Select,
     SelectContent,
@@ -50,6 +52,7 @@ interface GeneralFormProps {
         logo: string | null;
         headerText: string | null;
         blTemplate: string;
+        isElectronics: boolean;
     }
 }
 
@@ -78,6 +81,7 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
             logo: initialData.logo || "",
             headerText: initialData.headerText || "",
             blTemplate: initialData.blTemplate || "standard",
+            isElectronics: initialData.isElectronics || false,
         }
     })
 
@@ -196,6 +200,32 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ initialData }) => {
                         </div>
 
                         <Field name="bankAccount" label={t("bankAccount.label")} placeholder={t("bankAccount.placeholder")} />
+
+                        <div className="bg-indigo-50/50 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 mt-6">
+                            <FormField
+                                control={form.control}
+                                name="isElectronics"
+                                render={({ field }) => (
+                                    <FormItem className="flex items-center justify-between space-y-0 gap-4">
+                                        <div className="space-y-1">
+                                            <FormLabel className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                🔌 Boutique Électronique / Matériel
+                                            </FormLabel>
+                                            <FormDescription className="text-xs text-muted-foreground">
+                                                Activez cette option pour activer la gestion des numéros de série (S/N), bons de garantie automatiques et traçabilité avancée.
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                disabled={loading}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
 
                     {/* Right Column: Logo + Header */}

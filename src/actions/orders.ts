@@ -198,7 +198,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             quantity: item.quantity,
                             price: item.price,
                             priceHt: item.priceHt ?? item.price,
-                            tvaRate: item.tvaRate ?? 19
+                            tvaRate: item.tvaRate ?? 19,
+                            serialNumber: item.serialNumber || null
                         }))
                     }
                 }
@@ -217,7 +218,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             create: items.map(item => ({
                                 productId: item.productId,
                                 quantity: item.quantity,
-                                unitPrice: item.price
+                                unitPrice: item.price,
+                                serialNumber: item.serialNumber || null
                             }))
                         }
                     }
@@ -238,7 +240,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             create: items.map(item => ({
                                 productId: item.productId,
                                 quantity: item.quantity,
-                                unitPrice: item.price
+                                unitPrice: item.price,
+                                serialNumber: item.serialNumber || null
                             }))
                         }
                     }

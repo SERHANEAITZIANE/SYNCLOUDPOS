@@ -16,6 +16,7 @@ export interface CartItem {
     discountedPrice?: number
     discountLabel?: string
     discountAmount?: number
+    serialNumber?: string
 }
 
 export interface ActivePromotion {

@@ -6,7 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
 import { Trash, Plus, Printer, CheckCircle, FileText, TruckIcon, Package, Send } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
-import { InvoicePrintTemplate, BonLivraisonPrintTemplate, ProformaPrintTemplate } from "@/components/print/print-templates"
+import { InvoicePrintTemplate, BonLivraisonPrintTemplate, ProformaPrintTemplate, BonGarantiePrintTemplate } from "@/components/print/print-templates"
+import { useReactToPrint } from "react-to-print"
+import { useRef } from "react"
 import { toast } from "react-hot-toast"
 import { format } from "date-fns"
 
@@ -33,7 +35,8 @@ const formSchema = z.object({
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
         quantity: z.number().min(1),
-        unitPrice: z.number().min(0)
+        unitPrice: z.number().min(0),
+        serialNumber: z.string().optional()
     })).min(1, "Ajoutez au moins un article")
 })
 
@@ -108,6 +111,10 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [sendDialogOpen, setSendDialogOpen] = useState(false)
+    const warrantyRef = useRef<HTMLDivElement>(null)
+    const handlePrintWarranty = useReactToPrint({
+        contentRef: warrantyRef,
+    })
     const [relatedSalesOrderId, setRelatedSalesOrderId] = useState<string | null>(initialData?.relatedSalesOrderId || null)
     const [invoiceSearch, setInvoiceSearch] = useState("")
     const [invoiceResults, setInvoiceResults] = useState<any[]>([])
@@ -117,6 +124,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
     const canEdit = !isEditMode || initialData?.status === "DRAFT"
     const currentStatus = initialData?.status || "DRAFT"
     const currentType = initialData?.type || "QUOTE"
+    const isElectronics = storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
 
     const form = useForm<SalesOrderFormValues>({
         resolver: zodResolver(formSchema),
@@ -129,7 +137,8 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             items: initialData.items.map((item: any) => ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
-                unitPrice: Number(item.unitPrice)
+                unitPrice: Number(item.unitPrice),
+                serialNumber: item.serialNumber || ""
             }))
         } : {
             customerId: "",
@@ -137,7 +146,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             status: "DRAFT",
             paymentMethod: "CASH",
             receiptNumber: "",
-            items: [{ productId: "", quantity: 1, unitPrice: 0 }]
+            items: [{ productId: "", quantity: 1, unitPrice: 0, serialNumber: "" }]
         }
     })
 
@@ -156,6 +165,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         const priceHt = item.unitPrice / (1 + (tvaRate / 100));
         return {
             ...item,
+            product,
             tvaRate,
             priceHt,
             lineTotalTTC: item.quantity * item.unitPrice,
@@ -225,7 +235,8 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     quantity: i.quantity,
                     unitPrice: i.unitPrice,
                     tvaRate: i.tvaRate,
-                    priceHt: i.priceHt
+                    priceHt: i.priceHt,
+                    serialNumber: i.serialNumber
                 }))
             }
 
@@ -283,12 +294,13 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             <div className="hidden print:block print-page">
                 {currentType === "INVOICE" ? (
                     <InvoicePrintTemplate
-                        items={(initialData?.items || []).map((item: any) => ({
+                        items={enrichedItems.map((item: any) => ({
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
                             tvaRate: Number(item.tvaRate || 19),
                             priceHt: Number(item.priceHt || 0),
+                            serialNumber: item.serialNumber,
                         }))}
                         customer={selectedCustomer}
                         store={storeData}
@@ -302,12 +314,13 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     />
                 ) : currentType === "QUOTE" ? (
                     <ProformaPrintTemplate
-                        items={(initialData?.items || []).map((item: any) => ({
+                        items={enrichedItems.map((item: any) => ({
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
                             tvaRate: Number(item.tvaRate || 19),
                             priceHt: Number(item.priceHt || 0),
+                            serialNumber: item.serialNumber,
                         }))}
                         customer={selectedCustomer}
                         store={storeData}
@@ -321,12 +334,13 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     />
                 ) : (
                     <BonLivraisonPrintTemplate
-                        items={(initialData?.items || []).map((item: any) => ({
+                        items={enrichedItems.map((item: any) => ({
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
                             tvaRate: Number(item.tvaRate || 19),
                             priceHt: Number(item.priceHt || 0),
+                            serialNumber: item.serialNumber,
                         }))}
                         customer={selectedCustomer}
                         store={storeData}
@@ -363,6 +377,12 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             <Button variant="outline" size="sm" onClick={() => window.print()}>
                                 <Printer className="h-4 w-4 mr-1.5" /> Imprimer
                             </Button>
+                            {storeData?.warrantyEnabled && (
+                                <Button variant="outline" size="sm" onClick={() => handlePrintWarranty && handlePrintWarranty()}
+                                    className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                                    <FileText className="h-4 w-4 mr-1.5 text-blue-500" /> Garantie
+                                </Button>
+                            )}
                             <Button variant="outline" size="sm" onClick={() => setSendDialogOpen(true)}
                                 className="text-blue-600 border-blue-200 hover:bg-blue-50">
                                 <Send className="h-4 w-4 mr-1.5" /> Envoyer
@@ -603,9 +623,9 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                 return (
                                     <Card key={field.id} className="overflow-hidden">
                                         <CardContent className="p-3 grid grid-cols-12 gap-3 items-center">
-                                            <div className="col-span-12 md:col-span-5">
+                                            <div className="col-span-12 md:col-span-5 flex flex-col gap-1.5">
                                                 <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
-                                                    <FormItem>
+                                                    <FormItem className="m-0 space-y-0">
                                                         <FormControl>
                                                             <ProductSearchCombobox
                                                                 products={products}
@@ -620,6 +640,25 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                                         <FormMessage />
                                                     </FormItem>
                                                 )} />
+                                                {isElectronics && (
+                                                    <FormField control={form.control} name={`items.${index}.serialNumber`} render={({ field: f }) => (
+                                                        <FormItem className="m-0 space-y-0">
+                                                            <FormControl>
+                                                                <div className="relative flex items-center">
+                                                                    <span className="absolute left-2.5 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">S/N</span>
+                                                                    <Input
+                                                                        type="text"
+                                                                        placeholder="N° de Série (Optionnel)..."
+                                                                        className="pl-8 text-xs font-mono h-7 border-slate-150 focus-visible:ring-indigo-500 bg-slate-50/50 dark:bg-slate-900/50 rounded-lg"
+                                                                        disabled={loading || !canEdit}
+                                                                        {...f}
+                                                                    />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )} />
+                                                )}
                                             </div>
                                             <div className="col-span-3 md:col-span-2">
                                                 <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
@@ -707,6 +746,30 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     total={finalTotalTTC}
                 />
             )}
+            {/* Hidden Warranty Print markup */}
+            <div className="hidden">
+                <div ref={warrantyRef}>
+                    <BonGarantiePrintTemplate
+                        items={enrichedItems.map((item: any) => ({
+                            product: item.product,
+                            quantity: item.quantity,
+                            unitPrice: Number(item.unitPrice),
+                            tvaRate: Number(item.tvaRate || 19),
+                            priceHt: Number(item.priceHt || 0),
+                            serialNumber: item.serialNumber,
+                        }))}
+                        customer={selectedCustomer}
+                        store={storeData}
+                        receiptNumber={initialData?.receiptNumber}
+                        documentId={initialData?.id}
+                        date={new Date()}
+                        subtotalHT={subtotalHT}
+                        totalTVA={totalTVA}
+                        stampTax={stampTax}
+                        totalTTC={finalTotalTTC}
+                    />
+                </div>
+            </div>
         </>
     )
 }

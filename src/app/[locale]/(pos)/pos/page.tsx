@@ -1,4 +1,5 @@
 import { getCategories } from "@/actions/categories"
+import { getBrands } from "@/actions/brands"
 import { getTreasuryAccounts } from "@/actions/treasury"
 import { PosClient } from "@/components/pos/pos-client"
 import { db } from "@/lib/db"
@@ -30,10 +31,11 @@ const PosPage = async () => {
     }
 
     // ── Run ALL independent queries in parallel ──────────────────────
-    const [tenant, store, categories, accounts, rawCustomers, rawProducts] = await Promise.all([
+    const [tenant, store, categories, brands, accounts, rawCustomers, rawProducts] = await Promise.all([
         db.tenant.findUnique({ where: { id: tenantId } }),
         db.store.findUnique({ where: { id: storeIdToUse } }),
         getCategories(),
+        getBrands(false),
         getTreasuryAccounts(),
         // Lightweight Customers
         db.customer.findMany({
@@ -113,9 +115,11 @@ const PosPage = async () => {
         }
     })
 
+    const isElectronicsStore = store?.isElectronics || store?.name?.toLowerCase().includes("electr") || false;
+
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} storeData={tenant} />
+            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} brands={brands} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} storeData={tenant} isElectronicsStore={isElectronicsStore} />
         </div>
     )
 }

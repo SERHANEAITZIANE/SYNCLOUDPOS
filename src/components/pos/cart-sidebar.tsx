@@ -31,12 +31,19 @@ interface CartSidebarProps {
     storePhone?: string
     posTimbreEnabled?: boolean
     storeData?: any
+    isElectronicsStore?: boolean
 }
 
-export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone, posTimbreEnabled = false, storeData }: CartSidebarProps) => {
+export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAddress, storePhone, posTimbreEnabled = false, storeData, isElectronicsStore = false }: CartSidebarProps) => {
     const t = useTranslations("CartSidebar")
     const cart = usePosStore()
+    const isElectronics = cart.forceElectronicsMode || isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
     const router = useRouter()
+
+    useEffect(() => {
+        const isCurrentlyElectronics = !!(isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr"));
+        cart.setForceElectronicsMode(isCurrentlyElectronics);
+    }, [isElectronicsStore, storeData?.isElectronics, storeData?.name, cart.setForceElectronicsMode]);
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [openCustomer, setOpenCustomer] = useState(false)
@@ -141,7 +148,8 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     quantity: item.quantity,
                     price: item.price,
                     tvaRate: item.tvaRate,
-                    priceHt: item.priceHt
+                    priceHt: item.priceHt,
+                    serialNumber: item.serialNumber
                 })),
                 total: totalTTC,
                 subtotal: subtotal,
@@ -265,53 +273,23 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
             </Suspense>
             <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-l border-gray-200 dark:border-slate-800 overflow-hidden">
 
-                {/* Session Tabs */}
-                <div className="bg-[#1f2937] p-2 border-b-0">
-                    <ScrollArea className="w-full whitespace-nowrap">
-                        <div className="flex w-max space-x-2">
-                            {cart.sessions.map((session, index) => (
-                                <div
-                                    key={session.id}
-                                    onClick={() => cart.setActiveSession(session.id)}
-                                    className={cn(
-                                        "flex items-center gap-2 px-4 py-2 rounded-full text-base font-bold cursor-pointer transition-all border-2",
-                                        cart.activeSessionId === session.id
-                                            ? "bg-white text-gray-900 border-gray-200 shadow-sm"
-                                            : "bg-transparent border-transparent hover:bg-white/50 text-gray-500"
-                                    )}
-                                >
-                                    <span>{t("order")} {index + 1}</span>
-                                    {cart.sessions.length > 1 && (
-                                        <div
-                                            role="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                cart.removeSession(session.id)
-                                            }}
-                                            className="hover:text-red-500 rounded-full p-1 transition-colors hover:bg-white/20"
-                                        >
-                                            <X size={14} />
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-10 w-10 rounded-full bg-white border-2 border-gray-100 shadow-sm ml-1 text-gray-500 hover:text-gray-900"
-                                onClick={cart.createSession}
-                            >
-                                <Plus size={16} />
-                            </Button>
-                        </div>
-                        <ScrollBar orientation="horizontal" className="h-1.5" />
-                    </ScrollArea>
-                </div>
-
                 <div className="flex shrink-0 items-center justify-between p-6 pb-4">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
-                        {t("order")} {cart.sessions.findIndex(s => s.id === cart.activeSessionId) + 1}
-                    </h2>
+                    <div className="flex flex-col gap-1.5">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
+                            {t("order")} {cart.sessions.findIndex(s => s.id === cart.activeSessionId) + 1}
+                        </h2>
+                        <div 
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 select-none w-fit",
+                                isElectronics 
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400" 
+                                    : "bg-gray-100 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700/50"
+                            )}
+                        >
+                            <span className={cn("w-1.5 h-1.5 rounded-full", isElectronics ? "bg-emerald-500 animate-pulse" : "bg-gray-300 dark:bg-slate-600")} />
+                            Mode Électronique (S/N): {isElectronics ? "ACTIF" : "INACTIF"}
+                        </div>
+                    </div>
                     <Button variant="ghost" size="sm" onClick={cart.resetSession} disabled={items.length === 0} className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full px-4 h-8 text-sm font-black uppercase tracking-wider">
                         {t("clearTicket")}
                     </Button>
@@ -450,6 +428,18 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                                 <span className="text-gray-400 dark:text-gray-500 mr-1.5">{index + 1}.</span>
                                                 {item.name}
                                             </h4>
+                                            {isElectronics && (
+                                                <div className="mt-1 flex items-center gap-2">
+                                                    <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">S/N:</span>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="N° de Série..."
+                                                        className="flex-1 text-[11px] font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        value={item.serialNumber || ""}
+                                                        onChange={(e) => cart.updateSerialNumber(item.id, e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
                                             {/* Promo badge */}
                                             {item.discountLabel && (
                                                 <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-violet-700 bg-violet-100 dark:bg-violet-900/30 dark:text-violet-400 rounded-full px-2 py-0.5 w-fit">

@@ -19,7 +19,8 @@ export const SettingsSchema = z.object({
     headerText: z.string().optional(),
     blTemplate: z.string().optional(),
     posBlFormat: z.string().optional(),
-    posBlColumns: z.string().optional()
+    posBlColumns: z.string().optional(),
+    isElectronics: z.boolean().optional()
 })
 
 export const SystemSettingsSchema = z.object({

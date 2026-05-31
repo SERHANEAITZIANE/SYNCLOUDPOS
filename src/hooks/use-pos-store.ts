@@ -19,6 +19,7 @@ export interface CartItem {
     image?: string
     discount?: number
     categoryId?: string
+    serialNumber?: string
 }
 
 export interface Session {
@@ -47,6 +48,7 @@ interface PosStore {
     removeItem: (id: string) => void
     updateQuantity: (id: string, quantity: number) => void
     updatePrice: (id: string, price: number) => void
+    updateSerialNumber: (id: string, serialNumber: string) => void
     removeAll: () => void // Clear active session items
     total: () => number // Total of active session
 
@@ -59,12 +61,18 @@ interface PosStore {
 
     showImages: boolean
     toggleImages: () => void
+    forceElectronicsMode: boolean
+    toggleElectronicsMode: () => void
+    setForceElectronicsMode: (val: boolean) => void
 }
 
 export const usePosStore = create(
     persist<PosStore>((set, get) => ({
         showImages: true,
         toggleImages: () => set((state) => ({ showImages: !state.showImages })),
+        forceElectronicsMode: false,
+        toggleElectronicsMode: () => set((state) => ({ forceElectronicsMode: !state.forceElectronicsMode })),
+        setForceElectronicsMode: (val: boolean) => set({ forceElectronicsMode: val }),
         sessions: [{ id: 'default', name: 'Order 1', items: [], clientType: 'RETAIL' }],
         activeSessionId: 'default',
 
@@ -105,6 +113,22 @@ export const usePosStore = create(
             set((state) => {
                 const session = state.sessions.find(s => s.id === state.activeSessionId)
                 if (!session) return state
+
+                // In electronics mode, each item is a separate row of quantity 1
+                if (state.forceElectronicsMode) {
+                    const qtyToAdd = data.quantity || 1;
+                    const additionalItems = Array.from({ length: qtyToAdd }).map(() => ({
+                        ...data,
+                        id: `${data.productId || data.id}-${uuidv4().slice(0, 8)}`,
+                        quantity: 1
+                    }));
+                    const newItems = [...session.items, ...additionalItems];
+                    return {
+                        sessions: state.sessions.map(s =>
+                            s.id === state.activeSessionId ? { ...s, items: newItems } : s
+                        )
+                    }
+                }
 
                 const existingItem = session.items.find((item) => item.id === data.id)
                 let newItems
@@ -166,6 +190,21 @@ export const usePosStore = create(
                     sessions: state.sessions.map(s =>
                         s.id === state.activeSessionId
                             ? { ...s, items: s.items.map(item => item.id === id ? { ...item, price } : item) }
+                            : s
+                    )
+                }
+            })
+        },
+
+        updateSerialNumber: (id: string, serialNumber: string) => {
+            set((state) => {
+                const session = state.sessions.find(s => s.id === state.activeSessionId)
+                if (!session) return state
+
+                return {
+                    sessions: state.sessions.map(s =>
+                        s.id === state.activeSessionId
+                            ? { ...s, items: s.items.map(item => item.id === id ? { ...item, serialNumber } : item) }
                             : s
                     )
                 }

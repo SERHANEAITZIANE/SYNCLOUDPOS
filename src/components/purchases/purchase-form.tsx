@@ -53,7 +53,8 @@ const formSchema = z.object({
         productId: z.string().min(1, "Produit requis"),
         quantity: z.number().min(1),
         costPrice: z.number().min(0),
-        tvaRate: z.number().optional()
+        tvaRate: z.number().optional(),
+        serialNumber: z.string().optional()
     })).min(1, "Ajoutez au moins un article"),
     reference: z.string().optional()
 })
@@ -68,6 +69,7 @@ interface PurchaseOrderFormProps {
     categories: any[]
     brands: any[]
     accounts: any[]
+    storeData?: any
 }
 
 const STATUS_CONFIG = {
@@ -86,11 +88,13 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     products,
     categories,
     brands,
-    accounts
+    accounts,
+    storeData
 }) => {
     const params = useParams()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const isElectronics = storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
     const [ocrItems, setOcrItems] = useState<{ name: string, price: number, quantity: number }[]>([])
     const [supplierModalOpen, setSupplierModalOpen] = useState(false)
     const [newSupplierName, setNewSupplierName] = useState("")
@@ -519,7 +523,8 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
                 costPrice: Number(item.costPrice),
-                tvaRate: Number(item.tvaRate ?? 19)
+                tvaRate: Number(item.tvaRate ?? 19),
+                serialNumber: item.serialNumber || ""
             })),
             reference: initialData.reference || ""
         } : {
@@ -531,7 +536,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             imageUrl2: "",
             imageUrl3: "",
             reference: "",
-            items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 19 }]
+            items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 19, serialNumber: "" }]
         }
     })
 
@@ -966,7 +971,6 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                 <div className="col-span-1 text-right">Total HT</div>
                                                 <div className="col-span-1"></div>
                                             </div>
-
                                             {fields.map((field, index) => {
                                                 const lineTotal = (watchItems[index]?.quantity || 0) * (watchItems[index]?.costPrice || 0)
                                                 return (
@@ -975,7 +979,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                         className="grid grid-cols-12 gap-3 px-4 py-4 md:px-5 md:py-3.5 items-center hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors"
                                                     >
                                                         {/* Product Search */}
-                                                        <div className="col-span-12 md:col-span-4 min-w-0">
+                                                        <div className="col-span-12 md:col-span-4 min-w-0 flex flex-col gap-1.5">
                                                             <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
                                                                 <FormItem className="m-0 space-y-0">
                                                                     <FormControl>
@@ -1008,6 +1012,25 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                     <FormMessage />
                                                                 </FormItem>
                                                             )} />
+                                                            {isElectronics && (
+                                                                <FormField control={form.control} name={`items.${index}.serialNumber`} render={({ field: f }) => (
+                                                                    <FormItem className="m-0 space-y-0">
+                                                                        <FormControl>
+                                                                            <div className="relative flex items-center">
+                                                                                <span className="absolute left-2.5 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">S/N</span>
+                                                                                <Input
+                                                                                    type="text"
+                                                                                    placeholder="N° de Série (Optionnel)..."
+                                                                                    className="pl-8 text-xs font-mono h-7 border-slate-150 focus-visible:ring-indigo-500 bg-slate-50/50 dark:bg-slate-900/50 rounded-lg"
+                                                                                    disabled={loading || !canEdit}
+                                                                                    {...f}
+                                                                                />
+                                                                            </div>
+                                                                        </FormControl>
+                                                                        <FormMessage />
+                                                                    </FormItem>
+                                                                )} />
+                                                            )}
                                                         </div>
 
                                                         {/* Quantity */}

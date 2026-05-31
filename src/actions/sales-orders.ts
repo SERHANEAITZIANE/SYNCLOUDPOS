@@ -51,7 +51,7 @@ export const createSalesOrder = async (data: {
     subtotal: number
     tvaAmount: number
     stampTax: number
-    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; serialNumber?: string }[]
     total: number
     receiptNumber?: string
     relatedSalesOrderId?: string
@@ -86,7 +86,8 @@ export const createSalesOrder = async (data: {
                             quantity: item.quantity,
                             unitPrice: item.unitPrice,
                             tvaRate: item.tvaRate,
-                            priceHt: item.priceHt
+                            priceHt: item.priceHt,
+                            serialNumber: item.serialNumber || null
                         }))
                     }
                 }
@@ -314,7 +315,7 @@ export const updateSalesOrder = async (id: string, data: {
     subtotal: number
     tvaAmount: number
     stampTax: number
-    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number }[]
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; serialNumber?: string }[]
     total: number
 }) => {
     await checkSubscription();
@@ -345,7 +346,8 @@ export const updateSalesOrder = async (id: string, data: {
                             quantity: item.quantity,
                             unitPrice: item.unitPrice,
                             tvaRate: item.tvaRate,
-                            priceHt: item.priceHt
+                            priceHt: item.priceHt,
+                            serialNumber: item.serialNumber || null
                         }))
                     }
                 }

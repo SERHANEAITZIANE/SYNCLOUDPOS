@@ -58,6 +58,7 @@ export default async function SettingsPage() {
                         anthropicApiKey: store.anthropicApiKey,
                         loyaltyPointsPerDa: store.loyaltyPointsPerDa ?? 1,
                         loyaltyDaPerPoint: store.loyaltyDaPerPoint ?? 100,
+                        isElectronics: store.isElectronics || false,
                     }}
                     accounts={accounts}
                     databaseUrl={databaseUrl || ""}

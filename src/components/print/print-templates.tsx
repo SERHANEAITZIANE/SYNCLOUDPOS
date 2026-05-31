@@ -15,6 +15,7 @@ export interface PrintableItem {
     unitPrice: number
     tvaRate?: number
     priceHt?: number
+    serialNumber?: string | null
 }
 
 export interface PrintableCustomer {
@@ -273,7 +274,14 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
-                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-designation">
+                                        <div>{item.product?.name}</div>
+                                        {item.serialNumber && (
+                                            <div className="text-[10px] text-gray-500 font-mono italic mt-0.5 pl-1">
+                                                S/N: {item.serialNumber}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(ht)}</td>
                                     <td className="print-td-center">{rate}%</td>
@@ -467,7 +475,14 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
-                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-designation">
+                                        <div>{item.product?.name}</div>
+                                        {item.serialNumber && (
+                                            <div className="text-[10px] text-gray-500 font-mono italic mt-0.5 pl-1">
+                                                S/N: {item.serialNumber}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(Number(item.unitPrice))}</td>
                                     <td className="print-td-right print-td-bold">{formatNumber(lineTotal)}</td>
@@ -652,7 +667,14 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
-                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-designation">
+                                        <div>{item.product?.name}</div>
+                                        {item.serialNumber && (
+                                            <div className="text-[10px] text-gray-500 font-mono italic mt-0.5 pl-1">
+                                                S/N: {item.serialNumber}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td className="print-td-center">{item.quantity}</td>
                                     <td className="print-td-right">{formatNumber(ht)}</td>
                                     <td className="print-td-center">{rate}%</td>
@@ -736,6 +758,154 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                 {store?.headerText || `${store?.name || "SYNCLOUDPOS"} — ${store?.address || ""}`}
                 {store?.phone && ` | Tél: ${store.phone}`}
                 {store?.nif && ` | NIF: ${store.nif}`}
+            </div>
+        </div>
+    )
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  4. BON DE GARANTIE (Warranty Slip) — Clean Professional Design
+// ═════════════════════════════════════════════════════════════════════════════
+export function BonGarantiePrintTemplate(props: PrintTemplateProps) {
+    const {
+        items, customer, store, receiptNumber, date = new Date(), documentId
+    } = props
+
+    const colModel = store?.posBlColumns || "standard"
+    
+    // First column header label
+    let firstColHeader = "N°"
+    if (colModel === "code") firstColHeader = "Code"
+    else if (colModel === "barcode") firstColHeader = "Code-barres"
+
+    const getFirstColValue = (item: PrintableItem, index: number) => {
+        if (colModel === "code") {
+            return item.product?.code || item.product?.id?.slice(-6).toUpperCase() || `P-${String(index + 1).padStart(3, "0")}`
+        }
+        if (colModel === "barcode") {
+            return item.product?.barcodes?.[0] || "Sans Code"
+        }
+        return String(index + 1).padStart(2, "0")
+    }
+
+    const firstColStyle = colModel === "standard" ? "print-th-num" : "print-th-designation text-left pl-3"
+    const firstColTdStyle = colModel === "standard" ? "print-td-num" : "print-td-num text-left pl-3 font-mono text-[9px] text-gray-600"
+
+    // Only filter items that have serial numbers for the warranty slip
+    const serialItems = items.filter(item => item.serialNumber);
+
+    return (
+        <div className={`print-template print-garantie ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
+            {/* ── Dynamic Page Sizing Styles ── */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @page {
+                    size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
+                    margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
+                }
+            `}} />
+
+            {/* ── Decorative Top Strip ── */}
+            <div className="print-accent-strip" style={{ height: "4px", backgroundColor: "#3b82f6" }} />
+
+            {/* ── Header ── */}
+            <div className="print-header">
+                <CompanyHeaderBlock store={store} />
+                <div className="print-header-right">
+                    <div className="print-doc-type" style={{ color: "#3b82f6", borderColor: "#3b82f6" }}>BON DE GARANTIE</div>
+                    <div className="print-doc-badge" style={{ backgroundColor: "#3b82f6", color: "#fff" }}>
+                        N° {receiptNumber || `GA-${documentId?.slice(-6) || "000000"}`}
+                    </div>
+                    <div className="print-doc-date">
+                        {format(date, "dd MMMM yyyy", { locale: fr })}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Client Info Row ── */}
+            <div className="print-parties">
+                <CustomerBlock customer={customer} label="Client (Bénéficiaire)" />
+                <div className="print-store-details">
+                    <div className="print-customer-label">Garant émetteur</div>
+                    <CompanyFiscalBlock store={store} />
+                </div>
+            </div>
+
+            {/* ── Items Table ── */}
+            <div className="print-table-wrapper">
+                <table className="print-table">
+                    <thead>
+                        <tr>
+                            <th className={firstColStyle}>{firstColHeader}</th>
+                            <th className="print-th-designation">Désignation de l'article</th>
+                            <th className="print-th-designation">Numéro de Série (S/N)</th>
+                            <th className="print-th-center">Qté</th>
+                            <th className="print-th-center">Garantie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(serialItems.length > 0 ? serialItems : items).map((item, i) => {
+                            return (
+                                <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
+                                    <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
+                                    <td className="print-td-designation">{item.product?.name}</td>
+                                    <td className="print-td-designation font-mono font-bold text-xs" style={{ color: "#1e3a8a" }}>
+                                        {item.serialNumber || "N/A"}
+                                    </td>
+                                    <td className="print-td-center">{item.quantity}</td>
+                                    <td className="print-td-center font-bold text-emerald-600">12 Mois</td>
+                                </tr>
+                            )
+                        })}
+                        {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
+                            <tr key={`empty-${i}`} className="print-row-empty">
+                                <td className={firstColTdStyle}>&nbsp;</td>
+                                <td className="print-td-designation">&nbsp;</td>
+                                <td className="print-td-designation">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                                <td className="print-td-center">&nbsp;</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ── Conditions + Notice ── */}
+            <div className="print-footer-section">
+                <div className="print-bl-notes" style={{ width: "100%" }}>
+                    <div className="print-tva-title" style={{ color: "#3b82f6" }}>Conditions Générales de Garantie</div>
+                    <div className="text-[10px] text-gray-600 leading-relaxed border p-3 rounded-lg bg-gray-50/50 mt-1.5 space-y-1">
+                        <p>1. Les articles désignés ci-dessus bénéficient d&apos;une garantie pièces et main-d&apos;œuvre pendant une période de <strong>12 mois</strong> à compter de la date de livraison.</p>
+                        <p>2. La garantie couvre uniquement les défauts de fabrication et vices cachés, sous réserve d&apos;une utilisation conforme aux spécifications techniques.</p>
+                        <p>3. Sont exclus de la garantie : les pannes résultant de chocs, chutes, surtension électrique, humidité, ou toute intervention ou modification effectuée par un tiers non agréé.</p>
+                        <p>4. La présentation de ce bon muni du numéro de série lisible est obligatoire pour toute demande de prise en charge sous garantie.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Signatures ── */}
+            <div className="print-signatures">
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Signature du Client</div>
+                    <div className="print-signature-space" />
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">L&apos;Agent Émetteur</div>
+                    <div className="print-signature-space" />
+                </div>
+                <div className="print-signature-block">
+                    <div className="print-signature-label">Cachet de la Caisse</div>
+                    <div className="print-signature-space">
+                        <div className="print-stamp-ghost" style={{ color: "#3b82f6", borderColor: "#3b82f6" }}>
+                            {store?.name?.substring(0, 10) || "SOCIÉTÉ"}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Footer ── */}
+            <div className="print-footer-bar" style={{ backgroundColor: "#3b82f6" }}>
+                {store?.headerText || `${store?.name || "SYNCLOUDPOS"} — ${store?.address || ""}`}
+                {store?.phone && ` | Tél: ${store.phone}`}
             </div>
         </div>
     )

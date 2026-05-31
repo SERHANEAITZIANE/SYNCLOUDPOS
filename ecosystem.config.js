@@ -35,7 +35,7 @@ module.exports = {
             exec_mode: "fork",
             watch: false,
             autorestart: false, // crucial for a cron script, we don't want it looping
-            cron_restart: "0 3 * * *", // Run every day at 3:00 AM
+            cron_restart: "0 */2 * * *", // Run every 2 hours
             env: {
                 NODE_ENV: "production",
             },

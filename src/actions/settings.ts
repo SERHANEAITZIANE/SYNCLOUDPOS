@@ -11,6 +11,7 @@ export async function updateTenantSettings(data: {
     email?: string; nif?: string; rc?: string; artImposition?: string;
     nis?: string; bankAccount?: string; logo?: string; headerText?: string;
     blTemplate?: string;
+    isElectronics?: boolean;
 }) {
     try {
         const tenantId = await getActiveTenantId();
@@ -44,7 +45,8 @@ export async function updateTenantSettings(data: {
                 bankAccount: data.bankAccount || null,
                 logo: data.logo || null,
                 headerText: data.headerText || null,
-                blTemplate: data.blTemplate || "standard"
+                blTemplate: data.blTemplate || "standard",
+                isElectronics: data.isElectronics ?? false
             }
         });
 

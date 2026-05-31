@@ -26,6 +26,8 @@ export function AlgerianSettingsForm() {
         yalidineApiToken: "",
         dhdApiToken: "",
         hddApiToken: "",
+        warrantyEnabled: false,
+        blockNegativeStock: false,
     })
 
     useEffect(() => {
@@ -43,6 +45,8 @@ export function AlgerianSettingsForm() {
                 yalidineApiToken: data.yalidineApiToken ?? "",
                 dhdApiToken: data.dhdApiToken ?? "",
                 hddApiToken: data.hddApiToken ?? "",
+                warrantyEnabled: (data as any).warrantyEnabled ?? false,
+                blockNegativeStock: (data as any).blockNegativeStock ?? false,
             })
             setLoading(false)
         })
@@ -203,6 +207,28 @@ export function AlgerianSettingsForm() {
                     <Switch
                         checked={settings.posTimbreEnabled}
                         onCheckedChange={v => setSettings(s => ({ ...s, posTimbreEnabled: v }))}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
+                    <div>
+                        <p className="font-medium text-sm">Bon de Garantie Client (A4/A5)</p>
+                        <p className="text-xs text-muted-foreground">Active la possibilité d'imprimer un bon de garantie pour vos clients détail lors d'une vente</p>
+                    </div>
+                    <Switch
+                        checked={settings.warrantyEnabled}
+                        onCheckedChange={v => setSettings(s => ({ ...s, warrantyEnabled: v }))}
+                    />
+                </div>
+
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
+                    <div>
+                        <p className="font-medium text-sm">Bloquer la vente hors-stock</p>
+                        <p className="text-xs text-muted-foreground">Bloque l'ajout au panier POS des produits épuisés (stock égal ou inférieur à zéro)</p>
+                    </div>
+                    <Switch
+                        checked={settings.blockNegativeStock}
+                        onCheckedChange={v => setSettings(s => ({ ...s, blockNegativeStock: v }))}
                     />
                 </div>
 

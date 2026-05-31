@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getLocalBackups, BackupFile } from "@/actions/backups"
+import { getLocalBackups, createLocalBackup, BackupFile } from "@/actions/backups"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -11,6 +11,7 @@ import toast from "react-hot-toast"
 export function BackupsListClient() {
     const [backups, setBackups] = useState<BackupFile[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [isCreating, setIsCreating] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -28,10 +29,25 @@ export function BackupsListClient() {
         setIsLoading(false)
     }
 
+    const handleCreateBackup = async () => {
+        setIsCreating(true)
+        const toastId = toast.loading("Création de la sauvegarde en cours...")
+        try {
+            const res = await createLocalBackup()
+            if (res.error) {
+                toast.error(res.error, { id: toastId })
+            } else if (res.success) {
+                toast.success("Sauvegarde créée avec succès !", { id: toastId })
+                await fetchBackups()
+            }
+        } catch (err: any) {
+            toast.error("Erreur lors de la création de la sauvegarde.", { id: toastId })
+        } finally {
+            setIsCreating(false)
+        }
+    }
+
     const handleDownload = (filename: string) => {
-        // In reality, we'd need a route handler to stream the file securely to the client.
-        // E.g. /api/download-backup?file=filename
-        // We'll mock the click for now or point to the route if we create it.
         window.location.href = `/api/download-backup?file=${filename}`
     }
 
@@ -53,17 +69,36 @@ export function BackupsListClient() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Sauvegardes Locales (VPS)</h3>
                     <p className="text-sm text-slate-500 mt-1">
-                        Les bases de données sont sauvegardées automatiquement chaque nuit par le script PM2.
+                        Les bases de données sont sauvegardées automatiquement toutes les 2 heures par le script PM2.
                         Les archives de plus de 7 jours sont effacées pour économiser l'espace disque.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-200 dark:border-emerald-800">
-                    <ShieldCheck className="w-4 h-4" />
-                    Cron Actif
+                <div className="flex items-center gap-3">
+                    <Button 
+                        disabled={isCreating} 
+                        onClick={handleCreateBackup}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow-sm flex items-center"
+                    >
+                        {isCreating ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Création...
+                            </>
+                        ) : (
+                            <>
+                                <Database className="w-4 h-4 mr-2" />
+                                Sauvegarder maintenant
+                            </>
+                        )}
+                    </Button>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-xs font-medium border border-emerald-200 dark:border-emerald-800">
+                        <ShieldCheck className="w-4 h-4" />
+                        Cron Actif
+                    </div>
                 </div>
             </div>
 
@@ -114,3 +149,4 @@ export function BackupsListClient() {
         </div>
     )
 }
+

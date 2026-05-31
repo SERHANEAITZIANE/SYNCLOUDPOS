@@ -11,6 +11,7 @@ interface PurchaseOrderItemData {
     quantity: number
     costPrice: number
     tvaRate?: number
+    serialNumber?: string
 }
 
 interface PurchaseOrderData {
@@ -108,7 +109,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                             productId: item.productId,
                             quantity: item.quantity,
                             costPrice: item.costPrice,
-                            tvaRate: item.tvaRate ?? 19
+                            tvaRate: item.tvaRate ?? 19,
+                            serialNumber: item.serialNumber ?? null
                         }))
                     }
                 },
@@ -314,7 +316,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                             productId: item.productId,
                             quantity: item.quantity,
                             costPrice: item.costPrice,
-                            tvaRate: item.tvaRate ?? 19
+                            tvaRate: item.tvaRate ?? 19,
+                            serialNumber: item.serialNumber ?? null
                         }))
                     }
                 }

@@ -53,3 +53,24 @@ export async function getLocalBackups(): Promise<{ data?: BackupFile[], error?: 
         return { error: "Impossible de lire le dossier de sauvegarde." }
     }
 }
+
+import { exec } from "child_process"
+import { promisify } from "util"
+const execAsync = promisify(exec)
+
+export async function createLocalBackup(): Promise<{ success?: boolean, error?: string }> {
+    const session = await auth()
+    // Restrict this to SUPERADMIN or at least ADMIN
+    if (!session?.user || ((session.user as any).role !== "SUPERADMIN" && (session.user as any).role !== "ADMIN")) {
+        return { error: "Non autorisé." }
+    }
+
+    try {
+        const backupScript = path.join(process.cwd(), "scripts", "backup.js")
+        await execAsync(`node "${backupScript}"`)
+        return { success: true }
+    } catch (e: any) {
+        console.error("Error creating backup:", e)
+        return { error: e.message || "Erreur lors de la création de la sauvegarde." }
+    }
+}

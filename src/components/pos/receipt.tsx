@@ -8,6 +8,7 @@ interface ReceiptItem {
     name: string
     quantity: number
     price: number
+    serialNumber?: string
 }
 
 interface ReceiptProps {
@@ -86,7 +87,12 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         {items?.map((item, index) => (
                             <tr key={index} className="border-b border-gray-100 last:border-0">
                                 <td className="py-2 pr-2 leading-tight break-words text-left">
-                                    {item.quantity} X {item.name}
+                                    <div>{item.quantity} X {item.name}</div>
+                                    {item.serialNumber && (
+                                        <div className="text-[11px] text-gray-700 italic font-mono mt-0.5">
+                                            S/N: {item.serialNumber}
+                                        </div>
+                                    )}
                                 </td>
                                 <td className="text-right py-2 align-top whitespace-nowrap min-w-[20mm]">
                                     {formatCurrency(item.price * item.quantity)}
