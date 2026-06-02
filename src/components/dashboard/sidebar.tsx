@@ -89,6 +89,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
             routes: [
                 { label: t("salesCatalog") || "Catalogue de Vente", icon: BookOpen, href: "/catalog", color: "text-amber-300", visible: true },
                 { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: isAdmin || isSTOCK_MANAGER || isCASHIER },
+                { label: t("stockControl") || "Contrôle du Stock", icon: ClipboardList, href: "/products/stock", color: "text-emerald-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER },
                 { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER },
