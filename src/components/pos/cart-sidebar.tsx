@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, Suspense } from "react"
-import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag } from "lucide-react"
+import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag, History, Clock } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { createOrder } from "@/actions/orders"
+import { createOrder, getProductCustomerSellHistory } from "@/actions/orders"
 import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
 import { createCustomer } from "@/actions/customers"
 import dynamic from "next/dynamic"
@@ -102,6 +102,34 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
     const [activePromotions, setActivePromotions] = useState<ActivePromotion[]>([])
     const [loyaltyPointsToUse, setLoyaltyPointsToUse] = useState(0)
     const [usePointsMode, setUsePointsMode] = useState(false)
+
+    const [historyItem, setHistoryItem] = useState<any | null>(null)
+    const [sellHistory, setSellHistory] = useState<any[]>([])
+    const [loadingHistory, setLoadingHistory] = useState(false)
+
+    const handleViewHistory = async (item: any) => {
+        const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId)
+        if (!activeSession?.customerId) {
+            toast.error("Veuillez sélectionner un client pour voir l'historique d'achat")
+            return
+        }
+        try {
+            setHistoryItem(item)
+            setLoadingHistory(true)
+            setSellHistory([])
+            
+            const res = await getProductCustomerSellHistory(item.productId, activeSession.customerId)
+            if (res.error) {
+                toast.error(res.error)
+            } else if (res.history) {
+                setSellHistory(res.history)
+            }
+        } catch (error) {
+            toast.error("Erreur lors de la récupération de l'historique")
+        } finally {
+            setLoadingHistory(false)
+        }
+    }
 
     const handleEditItem = (item: any) => {
         setEditingItem(item)
@@ -617,6 +645,16 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                             </button>
                                         </div>
                                         <div className="flex items-center gap-2 text-gray-300 dark:text-gray-600">
+                                            {activeSession?.customerId && activeSession.customerName?.toUpperCase() !== "DIVERS" && activeSession.customerName?.toUpperCase() !== "PASSAGER" && (
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-8 flex items-center justify-center hover:text-indigo-500 text-slate-400 dark:text-slate-500 transition-colors"
+                                                    onClick={() => handleViewHistory(item)}
+                                                    title="Historique d'achat du client"
+                                                >
+                                                    <History strokeWidth={2.5} size={15} />
+                                                </button>
+                                            )}
                                             <button
                                                 className="w-8 h-8 flex items-center justify-center hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                                                 onClick={() => handleEditItem(item)}
@@ -668,6 +706,62 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     </Button>
                 </div>
             </div>
+
+            {/* Sell History Modal */}
+            <Dialog open={!!historyItem} onOpenChange={(open) => !open && setHistoryItem(null)}>
+                <DialogContent className="max-w-md rounded-2xl bg-white dark:bg-[#181920] border-slate-200 dark:border-slate-800">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-slate-100">
+                            <History className="h-5 w-5 text-indigo-650 shrink-0" />
+                            Historique d'achat
+                        </DialogTitle>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Historique des ventes du produit <strong className="text-slate-800 dark:text-slate-200">{historyItem?.name}</strong> pour le client <strong className="text-slate-850 dark:text-slate-150">{activeSession?.customerName}</strong>
+                        </p>
+                    </DialogHeader>
+                    
+                    <div className="py-4 max-h-[300px] overflow-y-auto space-y-3 pr-1">
+                         {loadingHistory ? (
+                             <div className="flex flex-col items-center justify-center py-8 space-y-2">
+                                 <Clock className="h-8 w-8 text-indigo-650 animate-spin" />
+                                 <p className="text-xs text-muted-foreground">Chargement de l'historique...</p>
+                             </div>
+                         ) : sellHistory.length === 0 ? (
+                             <div className="flex flex-col items-center justify-center py-10 text-center">
+                                 <p className="text-sm font-semibold text-slate-500">Aucun historique d'achat trouvé</p>
+                                 <p className="text-xs text-muted-foreground mt-1">C'est la première fois que ce client achète ce produit.</p>
+                             </div>
+                         ) : (
+                             <div className="space-y-2.5">
+                                 {sellHistory.map((h, i) => (
+                                     <div key={i} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors">
+                                         <div className="space-y-0.5">
+                                             <div className="flex items-center gap-2">
+                                                 <span className={cn(
+                                                     "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md",
+                                                     h.type === "POS" ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20" : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20"
+                                                 )}>
+                                                     {h.type}
+                                                 </span>
+                                                 <span className="text-xs font-semibold text-muted-foreground">{new Date(h.date).toLocaleDateString("fr-FR", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                             </div>
+                                             <p className="text-[10px] font-bold text-muted-foreground">{h.receiptNumber}</p>
+                                         </div>
+                                         <div className="text-right">
+                                             <p className="text-sm font-black text-slate-900 dark:text-slate-100">{h.price.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</p>
+                                             <p className="text-[10px] text-muted-foreground">Qté: <strong className="text-slate-800 dark:text-slate-200">{h.quantity}</strong></p>
+                                         </div>
+                                     </div>
+                                 ))}
+                             </div>
+                         )}
+                    </div>
+                    
+                    <DialogFooter>
+                        <Button variant="outline" className="w-full rounded-xl" onClick={() => setHistoryItem(null)}>Fermer</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }

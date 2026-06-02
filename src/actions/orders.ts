@@ -430,3 +430,83 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         return { error: "Erreur lors de la création de la commande. Veuillez réessayer." }
     }
 }
+
+export const getProductCustomerSellHistory = async (productId: string, customerId: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    const tenantId = session.user.tenantId
+
+    try {
+        // 1. Fetch POS orders for this customer and product
+        const posOrders = await db.order.findMany({
+            where: {
+                tenantId,
+                customerId,
+                items: {
+                    some: { productId }
+                }
+            },
+            include: {
+                items: {
+                    where: { productId }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+
+        // 2. Fetch B2B sales orders for this customer and product
+        const salesOrders = await db.salesOrder.findMany({
+            where: {
+                tenantId,
+                customerId,
+                items: {
+                    some: { productId }
+                }
+            },
+            include: {
+                items: {
+                    where: { productId }
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        })
+
+        // 3. Map POS orders to history items
+        const posHistory = posOrders.flatMap(order => 
+            order.items.map(item => ({
+                id: order.id,
+                date: order.createdAt,
+                type: "POS",
+                quantity: item.quantity,
+                price: Number(item.price),
+                receiptNumber: `POS-${order.id.slice(-6).toUpperCase()}`
+            }))
+        )
+
+        // 4. Map B2B Sales Orders to history items
+        const b2bHistory = salesOrders.flatMap(order => 
+            order.items.map(item => ({
+                id: order.id,
+                date: order.createdAt,
+                type: "BL",
+                quantity: item.quantity,
+                price: Number(item.unitPrice),
+                receiptNumber: order.receiptNumber || `BL-${order.id.slice(-6).toUpperCase()}`
+            }))
+        )
+
+        // 5. Combine and sort from last (most recent) to first (oldest)
+        const combined = [...posHistory, ...b2bHistory].sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+
+        return { success: true, history: combined }
+    } catch (error) {
+        console.error("Error fetching product customer sell history:", error)
+        return { error: "Failed to fetch sell history" }
+    }
+}

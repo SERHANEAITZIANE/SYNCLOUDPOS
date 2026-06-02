@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useReactToPrint } from "react-to-print"
-import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package, Sparkles, FileSpreadsheet, Percent, Info, ZoomIn, TrendingUp, Sliders, Clipboard, Eye, Wand2, Star, Archive, DollarSign, ShoppingCart, Store, Users as UsersIcon, Barcode, Tag } from "lucide-react"
+import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package, Sparkles, FileSpreadsheet, Percent, Info, ZoomIn, TrendingUp, Sliders, Clipboard, Eye, Wand2, Star, Archive, DollarSign, ShoppingCart, Store, Users as UsersIcon, Barcode, Tag, Wallet, CreditCard, Coins, MessageSquare } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
@@ -1206,97 +1206,167 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     </div>
                                 </div>
 
-                                 {/* ── integrated payment panel ────────────────── */}
-                                 <Card className="shadow-lg border border-indigo-100 dark:border-indigo-950/60 rounded-2xl overflow-hidden my-6 bg-slate-50/40 dark:bg-slate-900/10">
-                                     <CardHeader className="pb-3 flex flex-row items-center justify-between bg-indigo-500/5 border-b border-indigo-100 dark:border-indigo-950/40">
-                                         <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
-                                             <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
-                                             Règlement (Optionnel)
-                                         </CardTitle>
-                                         <div className="flex items-center gap-2">
-                                             <Checkbox
-                                                 id="pay-immediately-checkbox"
-                                                 checked={payImmediately}
-                                                 onCheckedChange={(checked) => {
-                                                     setPayImmediately(!!checked);
-                                                     if (checked) {
-                                                         setInitialPayAmount(total);
-                                                     }
-                                                 }}
-                                             />
-                                             <label
-                                                 htmlFor="pay-immediately-checkbox"
-                                                 className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
-                                             >
-                                                 Enregistrer un règlement
-                                             </label>
-                                         </div>
-                                     </CardHeader>
-                                     {payImmediately && (
-                                         <CardContent className="space-y-4 pt-5 animate-in slide-in-from-top duration-200">
-                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                 <div className="space-y-1.5">
-                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Caisse / Banque</label>
-                                                     <Select
-                                                         value={initialPayAccountId}
-                                                         onValueChange={setInitialPayAccountId}
-                                                     >
-                                                         <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                                                             <SelectValue placeholder="Choisir la caisse/banque..." />
-                                                         </SelectTrigger>
-                                                         <SelectContent>
-                                                             {accounts.map(acc => (
-                                                                 <SelectItem key={acc.id} value={acc.id}>
-                                                                     {acc.name} ({Number(acc.balance).toLocaleString()} DA)
-                                                                 </SelectItem>
-                                                             ))}
-                                                         </SelectContent>
-                                                     </Select>
-                                                 </div>
-                                                 <div className="space-y-1.5">
-                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Montant (DA)</label>
-                                                     <div className="relative">
-                                                         <Input
-                                                             type="number"
-                                                             placeholder="0.00"
-                                                             value={initialPayAmount || ""}
-                                                             onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
-                                                             className="font-bold pr-8 border-slate-250 focus-visible:ring-indigo-500"
-                                                         />
-                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
-                                                     </div>
-                                                 </div>
-                                                 <div className="space-y-1.5">
-                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mode de règlement</label>
-                                                     <Select
-                                                         value={initialPayMethod}
-                                                         onValueChange={setInitialPayMethod}
-                                                     >
-                                                         <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                                                             <SelectValue placeholder="Choisir le mode..." />
-                                                         </SelectTrigger>
-                                                         <SelectContent>
-                                                             <SelectItem value="CASH">Espèce</SelectItem>
-                                                             <SelectItem value="VERSEMENT">Versement</SelectItem>
-                                                             <SelectItem value="VIREMENT">Virement</SelectItem>
-                                                             <SelectItem value="CHEQUE">Chèque</SelectItem>
-                                                             <SelectItem value="CARTE">Carte Bancaire</SelectItem>
-                                                         </SelectContent>
-                                                     </Select>
-                                                 </div>
-                                                 <div className="space-y-1.5">
-                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Observation</label>
-                                                     <Input
-                                                         placeholder="Observation (ex: Acompte, Solde, etc.)"
-                                                         value={initialPayNotes}
-                                                         onChange={e => setInitialPayNotes(e.target.value)}
-                                                         className="border-slate-200 dark:border-slate-800"
-                                                     />
-                                                 </div>
-                                             </div>
-                                         </CardContent>
-                                     )}
-                                 </Card>
+                                  {/* ── integrated payment panel ────────────────── */}
+                                  <Card className={cn(
+                                      "shadow-xl border rounded-2xl overflow-hidden my-8 transition-all duration-300",
+                                      payImmediately 
+                                          ? "border-emerald-500/30 dark:border-emerald-500/20 bg-gradient-to-br from-slate-50/90 to-emerald-50/5 dark:from-slate-950/90 dark:to-emerald-950/5 shadow-emerald-500/5"
+                                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
+                                  )}>
+                                      <CardHeader className={cn(
+                                          "pb-4 pt-4 flex flex-row items-center justify-between border-b transition-colors duration-300",
+                                          payImmediately
+                                              ? "bg-emerald-500/10 border-emerald-500/10 dark:bg-emerald-500/5 dark:border-emerald-500/5"
+                                              : "bg-slate-50/50 border-slate-100 dark:bg-slate-900/20 dark:border-slate-900/50"
+                                      )}>
+                                          <CardTitle className="text-base font-bold flex items-center gap-2">
+                                              <div className={cn(
+                                                  "p-2 rounded-xl transition-all duration-300",
+                                                  payImmediately 
+                                                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20 scale-105" 
+                                                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                              )}>
+                                                  <DollarSign className="h-4.5 w-4.5 font-bold" />
+                                              </div>
+                                              <div>
+                                                  <span className="text-slate-900 dark:text-slate-100 font-extrabold tracking-tight">Règlement Initial</span>
+                                                  <span className="text-[10px] text-muted-foreground block font-medium mt-0.5">Enregistrer un versement immédiat</span>
+                                              </div>
+                                          </CardTitle>
+                                          <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2 rounded-2xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer">
+                                              <Checkbox
+                                                  id="pay-immediately-checkbox"
+                                                  checked={payImmediately}
+                                                  onCheckedChange={(checked) => {
+                                                      setPayImmediately(!!checked);
+                                                      if (checked) {
+                                                          setInitialPayAmount(total);
+                                                      }
+                                                  }}
+                                                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                                              />
+                                              <label
+                                                  htmlFor="pay-immediately-checkbox"
+                                                  className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none"
+                                              >
+                                                  Enregistrer un règlement
+                                              </label>
+                                          </div>
+                                      </CardHeader>
+                                      {payImmediately && (
+                                          <CardContent className="p-6 space-y-6 animate-in slide-in-from-top-4 duration-300 ease-out">
+                                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                                                  {/* 1. Caisse / Banque */}
+                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                          <Wallet className="h-3.5 w-3.5 text-indigo-500" />
+                                                          <span>Caisse / Banque</span>
+                                                      </div>
+                                                      <Select
+                                                          value={initialPayAccountId}
+                                                          onValueChange={setInitialPayAccountId}
+                                                      >
+                                                          <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
+                                                              <SelectValue placeholder="Choisir la caisse/banque..." />
+                                                          </SelectTrigger>
+                                                          <SelectContent className="rounded-xl">
+                                                              {accounts.map(acc => (
+                                                                  <SelectItem key={acc.id} value={acc.id} className="font-semibold rounded-lg my-0.5">
+                                                                      <span className="flex items-center gap-1.5">
+                                                                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                                                          {acc.name} <strong className="text-emerald-600 dark:text-emerald-450 ml-1">({Number(acc.balance).toLocaleString()} DA)</strong>
+                                                                      </span>
+                                                                  </SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                  </div>
+
+                                                  {/* 2. Montant */}
+                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                      <div className="flex items-center justify-between">
+                                                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                              <Coins className="h-3.5 w-3.5 text-amber-500" />
+                                                              <span>Montant à régler</span>
+                                                          </div>
+                                                      </div>
+                                                      <div className="relative">
+                                                          <Input
+                                                              type="number"
+                                                              placeholder="0.00"
+                                                              value={initialPayAmount || ""}
+                                                              onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
+                                                              className="font-extrabold text-base pr-10 border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 transition-all text-emerald-600 dark:text-emerald-400"
+                                                          />
+                                                          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">DA</span>
+                                                      </div>
+                                                      
+                                                      {/* Quick Actions buttons */}
+                                                      <div className="flex gap-1.5 pt-1">
+                                                          <button 
+                                                              type="button"
+                                                              onClick={() => setInitialPayAmount(total)}
+                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/40 transition-colors uppercase tracking-wider"
+                                                          >
+                                                              100% (Total)
+                                                          </button>
+                                                          <button 
+                                                              type="button"
+                                                              onClick={() => setInitialPayAmount(Number((total / 2).toFixed(2)))}
+                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-400 border border-amber-200/40 transition-colors uppercase tracking-wider"
+                                                          >
+                                                              50% (Acompte)
+                                                          </button>
+                                                          <button 
+                                                              type="button"
+                                                              onClick={() => setInitialPayAmount(0)}
+                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 border border-slate-200/30 transition-colors uppercase tracking-wider"
+                                                          >
+                                                              Vider
+                                                          </button>
+                                                      </div>
+                                                  </div>
+
+                                                  {/* 3. Mode de Règlement */}
+                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                          <CreditCard className="h-3.5 w-3.5 text-emerald-500" />
+                                                          <span>Mode de règlement</span>
+                                                      </div>
+                                                      <Select
+                                                          value={initialPayMethod}
+                                                          onValueChange={setInitialPayMethod}
+                                                      >
+                                                          <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
+                                                              <SelectValue placeholder="Choisir le mode..." />
+                                                          </SelectTrigger>
+                                                          <SelectContent className="rounded-xl">
+                                                              <SelectItem value="CASH" className="font-semibold rounded-lg my-0.5">💵 Espèce</SelectItem>
+                                                              <SelectItem value="VERSEMENT" className="font-semibold rounded-lg my-0.5">🏦 Versement</SelectItem>
+                                                              <SelectItem value="VIREMENT" className="font-semibold rounded-lg my-0.5">⚡ Virement</SelectItem>
+                                                              <SelectItem value="CHEQUE" className="font-semibold rounded-lg my-0.5">✍️ Chèque</SelectItem>
+                                                              <SelectItem value="CARTE" className="font-semibold rounded-lg my-0.5">💳 Carte Bancaire</SelectItem>
+                                                          </SelectContent>
+                                                      </Select>
+                                                  </div>
+
+                                                  {/* 4. Observation */}
+                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                          <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
+                                                          <span>Observation / Notes</span>
+                                                      </div>
+                                                      <Input
+                                                          placeholder="Acompte, paiement solde..."
+                                                          value={initialPayNotes}
+                                                          onChange={e => setInitialPayNotes(e.target.value)}
+                                                          className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 font-semibold"
+                                                      />
+                                                  </div>
+                                              </div>
+                                          </CardContent>
+                                      )}
+                                  </Card>
 
                                  {/* Notes & Visual Proof (Photos) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
