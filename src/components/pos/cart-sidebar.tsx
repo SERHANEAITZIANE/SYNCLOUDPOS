@@ -114,6 +114,10 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         const qty = parseFloat(editQuantity)
         const price = parseFloat(editPrice)
         if (!isNaN(qty) && !isNaN(price)) {
+            if (editingItem.cost && price < editingItem.cost) {
+                const proceed = window.confirm(`⚠️ Attention : Le prix saisi (${price} DA) est inférieur au coût d'achat (${editingItem.cost} DA).\n\nVoulez-vous vraiment confirmer cette vente à perte ?`)
+                if (!proceed) return
+            }
             cart.updateQuantity(editingItem.id, qty)
             cart.updatePrice(editingItem.id, price)
         }
@@ -292,6 +296,11 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                     value={editPrice}
                                     onChange={(e) => setEditPrice(e.target.value)}
                                 />
+                                {parseFloat(editPrice) < (editingItem?.cost || 0) && (
+                                    <p className="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1 animate-pulse">
+                                        ⚠️ Attention : Prix inférieur au coût d'achat ({editingItem?.cost} DA)
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}
@@ -564,11 +573,21 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                                             <div className="flex items-center gap-1 group/price">
                                                 <input
                                                     type="number"
-                                                    className="w-24 text-sm font-semibold text-gray-800 dark:text-gray-200 bg-transparent py-0 px-0 focus:outline-none focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                    className={cn(
+                                                        "w-24 text-sm font-semibold bg-transparent py-0 px-0 focus:outline-none focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                                                        item.cost && item.price < item.cost
+                                                            ? "text-red-500 font-black underline decoration-wavy decoration-red-500 animate-pulse"
+                                                            : "text-gray-800 dark:text-gray-200"
+                                                    )}
                                                     value={item.price}
                                                     onChange={(e) => {
                                                         const newPrice = parseFloat(e.target.value)
                                                         if (!isNaN(newPrice) && newPrice >= 0) {
+                                                            if (item.cost && newPrice < item.cost) {
+                                                                toast.error(`⚠️ Vente à perte ! Le prix (${newPrice} DA) est inférieur au coût (${item.cost} DA)`, {
+                                                                    id: `under-cost-${item.id}`
+                                                                })
+                                                            }
                                                             cart.updatePrice(item.id, newPrice)
                                                         }
                                                     }}

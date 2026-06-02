@@ -103,6 +103,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 isLowStock && quantityInCart === 0 ? "border-amber-300 dark:border-amber-800/80 bg-amber-50/10 dark:bg-amber-950/5 shadow-amber-500/5" : ""
             )}
             onClick={outOfStock ? undefined : onAddToCart}
+            onContextMenu={(e) => {
+                e.preventDefault();
+                setShowInfo(true);
+            }}
         >
             {/* Out of Stock Overlay */}
             {outOfStock && (

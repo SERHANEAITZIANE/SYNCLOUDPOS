@@ -10,6 +10,7 @@ export interface CartItem {
     name: string
     quantity: number
     price: number
+    cost?: number
     priceHt?: number
     tvaRate?: number
     categoryId?: string
