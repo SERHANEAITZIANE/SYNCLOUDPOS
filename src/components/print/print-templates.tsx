@@ -407,6 +407,12 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             <span>{formatNumber(stampTax)}</span>
                         </div>
                     )}
+                    {Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
+                        <div className="print-total-row">
+                            <span>Arrondi de Caisse</span>
+                            <span>{formatNumber(totalTTC - (subtotalHT + totalTVA + stampTax))}</span>
+                        </div>
+                    )}
                     <div className="print-total-row print-total-final">
                         <span>NET À PAYER</span>
                         <span>{formatNumber(totalTTC)} DA</span>
@@ -585,6 +591,12 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                         <div className="print-total-row print-total-row-muted">
                             <span>dont Timbre</span>
                             <span>{formatNumber(stampTax)}</span>
+                        </div>
+                    )}
+                    {Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
+                        <div className="print-total-row print-total-row-muted">
+                            <span>dont Arrondi</span>
+                            <span>{formatNumber(totalTTC - (subtotalHT + totalTVA + stampTax))}</span>
                         </div>
                     )}
                     <div className="print-total-row print-total-row-muted">

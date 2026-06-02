@@ -22,6 +22,7 @@ export function AlgerianSettingsForm() {
         tapRate: 2,
         stampTaxEnabled: true,
         posTimbreEnabled: false,
+        posCashRounding: true,
         yalidineApiId: "",
         yalidineApiToken: "",
         dhdApiToken: "",
@@ -42,6 +43,7 @@ export function AlgerianSettingsForm() {
                 tapRate: data.tapRate ?? 2,
                 stampTaxEnabled: data.stampTaxEnabled ?? true,
                 posTimbreEnabled: data.posTimbreEnabled ?? false,
+                posCashRounding: (data as any).posCashRounding ?? true,
                 yalidineApiId: data.yalidineApiId ?? "",
                 yalidineApiToken: data.yalidineApiToken ?? "",
                 dhdApiToken: data.dhdApiToken ?? "",
@@ -223,6 +225,18 @@ export function AlgerianSettingsForm() {
                     <Switch
                         checked={settings.posTimbreEnabled}
                         onCheckedChange={v => setSettings(s => ({ ...s, posTimbreEnabled: v }))}
+                    />
+                </div>
+
+                {/* Arrondi de Caisse POS (Espèces) */}
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
+                    <div>
+                        <p className="font-medium text-sm">Arrondi de Caisse POS (Espèces)</p>
+                        <p className="text-xs text-muted-foreground">Arrondit automatiquement le total des ventes en espèces au 5 DA le plus proche</p>
+                    </div>
+                    <Switch
+                        checked={settings.posCashRounding}
+                        onCheckedChange={v => setSettings(s => ({ ...s, posCashRounding: v }))}
                     />
                 </div>
 

@@ -57,6 +57,7 @@ model Tenant {
   tapRate              Float                 @default(2)
   stampTaxEnabled      Boolean               @default(true)
   posTimbreEnabled     Boolean               @default(false)
+  posCashRounding      Boolean               @default(true)
   aiModel              String?               @default("gemini-1.5-flash")
   smtpHost             String?
   smtpPort             String?

@@ -15,6 +15,7 @@ interface ReceiptProps {
     items: ReceiptItem[]
     total: number
     stampTax?: number
+    rounding?: number
     date: Date
     orderId?: string
     storeName?: string
@@ -30,6 +31,7 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
     items,
     total,
     stampTax = 0,
+    rounding = 0,
     date,
     orderId = "12345",
     storeName = "SYNCLOUDPOS",
@@ -118,7 +120,7 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
 
                     {(() => {
                         const sumOriginal = items?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0
-                        const remise = sumOriginal - total
+                        const remise = sumOriginal + stampTax + rounding - total
                         if (remise > 0) {
                             return (
                                 <div className="flex justify-between font-bold text-sm text-black">
@@ -134,6 +136,13 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                         <div className="flex justify-between font-bold text-sm text-black">
                             <span>Droit de Timbre</span>
                             <span>+{formatCurrency(stampTax)}</span>
+                        </div>
+                    )}
+
+                    {rounding !== 0 && (
+                        <div className="flex justify-between font-bold text-sm text-black">
+                            <span>Arrondi</span>
+                            <span>{rounding > 0 ? "+" : ""}{formatCurrency(rounding)}</span>
                         </div>
                     )}
 

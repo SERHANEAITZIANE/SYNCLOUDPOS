@@ -102,7 +102,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
 
     const stampTax = (posTimbreEnabled && method === "CASH") ? getStampTaxAmount(total) : 0
-    const finalTotalTTC = total + stampTax
+    const unroundedTotalTTC = total + stampTax
+    const posCashRoundingEnabled = storeData?.posCashRounding ?? true
+    const getRoundedAmount = (val: number) => Math.round(val / 5) * 5
+    const finalTotalTTC = (method === "CASH" && posCashRoundingEnabled) ? getRoundedAmount(unroundedTotalTTC) : unroundedTotalTTC
+    const roundingDifference = finalTotalTTC - unroundedTotalTTC
 
     const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
     const [success, setSuccess] = useState(false)
@@ -132,7 +136,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const handleConfirm = async () => {
         const finalAccountId = accountId === "none" ? undefined : accountId
-        const result = await onConfirm(method, method === "CASH" ? tenderedAmount : finalTotalTTC, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC)
+        const actualPaidAmount = method === "CASH" ? Math.min(tenderedAmount, finalTotalTTC) : finalTotalTTC
+        const result = await onConfirm(method, actualPaidAmount, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC)
         if (result && result.success) {
             setFinalItems(items)
             setFinalTotal(finalTotalTTC)
@@ -307,6 +312,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             items={finalItems.length > 0 ? finalItems : items}
                             total={success ? finalTotal : finalTotalTTC}
                             stampTax={stampTax}
+                            rounding={roundingDifference}
                             date={new Date()}
                             orderId={orderData?.receiptNumber}
                             storeName={storeName}
@@ -414,10 +420,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
                                 <span className="text-xl text-gray-400 font-bold ml-2">DA</span>
                             </div>
-                            {stampTax > 0 && (
-                                <div className="mt-2 flex items-center justify-center gap-3 text-xs text-gray-500">
+                            {(stampTax > 0 || roundingDifference !== 0) && (
+                                <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-gray-500 font-medium">
                                     <span>Sous-total: {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(total)} DA</span>
-                                    <span className="text-amber-600 font-bold">Timbre: +{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(stampTax)} DA</span>
+                                    {stampTax > 0 && (
+                                        <span className="text-amber-600 font-bold">Timbre: +{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(stampTax)} DA</span>
+                                    )}
+                                    {roundingDifference !== 0 && (
+                                        <span className={cn(
+                                            "font-bold font-mono px-2.5 py-0.5 rounded-full text-[10px] shadow-sm select-none border",
+                                            roundingDifference > 0 
+                                                ? "bg-amber-50/80 border-amber-200 text-amber-600 dark:bg-amber-950/20 dark:border-amber-900/30" 
+                                                : "bg-emerald-50/80 border-emerald-200 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/30"
+                                        )}>
+                                            Arrondi: {roundingDifference > 0 ? "+" : ""}{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(roundingDifference)} DA
+                                        </span>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -511,7 +529,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             <span className={cn("text-xl font-black", changeAmount > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400")}>
                                 {changeAmount > 0
                                     ? `+${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}`
-                                    : new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, total - tenderedAmount))
+                                    : new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, finalTotalTTC - tenderedAmount))
                                 }
                             </span>
                         </div>

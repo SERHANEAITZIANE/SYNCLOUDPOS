@@ -22,6 +22,7 @@ export async function getAlgerianSettings() {
             tapRate: true,
             stampTaxEnabled: true,
             posTimbreEnabled: true,
+            posCashRounding: true,
             yalidineApiId: true,
             yalidineApiToken: true,
             dhdApiToken: true,
@@ -43,6 +44,7 @@ export async function updateAlgerianSettings(data: {
     tapRate?: number
     stampTaxEnabled?: boolean
     posTimbreEnabled?: boolean
+    posCashRounding?: boolean
     yalidineApiId?: string
     yalidineApiToken?: string
     dhdApiToken?: string
@@ -62,7 +64,7 @@ export async function updateAlgerianSettings(data: {
         select: {
             ramadanMode: true, commissionRate: true, commissionMode: true, taxRegime: true,
             ifuRate: true, tapRate: true, stampTaxEnabled: true, posTimbreEnabled: true,
-            warrantyEnabled: true, blockNegativeStock: true, tvaEnabled: true,
+            posCashRounding: true, warrantyEnabled: true, blockNegativeStock: true, tvaEnabled: true,
         }
     })
 
