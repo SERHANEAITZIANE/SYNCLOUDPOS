@@ -81,13 +81,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         }
     }, [isOpen, accounts])
 
+    const tvaEnabled = storeData?.tvaEnabled ?? false
+    const effectiveTvaRate = (itemTvaRate: number | undefined) => tvaEnabled ? (itemTvaRate ?? 0) : 0
+
     // Core Math
-    const originalSubtotal = items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + (item.tvaRate ?? 19) / 100))) * item.quantity, 0)
+    const originalSubtotal = tvaEnabled
+        ? items.reduce((acc, item) => acc + (item.priceHt || (item.price / (1 + effectiveTvaRate(item.tvaRate) / 100))) * item.quantity, 0)
+        : total
     const originalTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
     const discountRatio = originalTotal > 0 ? total / originalTotal : 1
 
-    const subtotal = originalSubtotal * discountRatio
-    const tvaAmount = total - subtotal
+    const subtotal = tvaEnabled ? originalSubtotal * discountRatio : total
+    const tvaAmount = tvaEnabled ? total - subtotal : 0
 
     const getStampTaxAmount = (amount: number) => {
         if (amount <= 300) return 0;
@@ -314,14 +319,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         />
                         <div ref={blRef}>
                             <BonLivraisonPrintTemplate
-                                items={(finalItems.length > 0 ? finalItems : items).map(item => ({
-                                    product: { name: item.name },
-                                    quantity: item.quantity,
-                                    unitPrice: item.price,
-                                    tvaRate: item.tvaRate ?? 19,
-                                    priceHt: item.priceHt ?? (item.price / 1.19),
-                                    serialNumber: item.serialNumber
-                                }))}
+                                items={(finalItems.length > 0 ? finalItems : items).map(item => {
+                                    const rate = tvaEnabled ? (item.tvaRate ?? 0) : 0;
+                                    return {
+                                        product: { name: item.name },
+                                        quantity: item.quantity,
+                                        unitPrice: item.price,
+                                        tvaRate: rate,
+                                        priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                        serialNumber: item.serialNumber
+                                    };
+                                })}
                                 customer={{
                                     name: success ? (finalCustomerName || "Client Standard") : (customerName || "Client Standard"),
                                 }}
@@ -340,14 +348,17 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
                         <div ref={warrantyRef}>
                             <BonGarantiePrintTemplate
-                                items={(finalItems.length > 0 ? finalItems : items).map(item => ({
-                                    product: { name: item.name },
-                                    quantity: item.quantity,
-                                    unitPrice: item.price,
-                                    tvaRate: item.tvaRate ?? 19,
-                                    priceHt: item.priceHt ?? (item.price / 1.19),
-                                    serialNumber: item.serialNumber
-                                }))}
+                                items={(finalItems.length > 0 ? finalItems : items).map(item => {
+                                    const rate = tvaEnabled ? (item.tvaRate ?? 0) : 0;
+                                    return {
+                                        product: { name: item.name },
+                                        quantity: item.quantity,
+                                        unitPrice: item.price,
+                                        tvaRate: rate,
+                                        priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                        serialNumber: item.serialNumber
+                                    };
+                                })}
                                 customer={{
                                     name: success ? (finalCustomerName || "Client Standard") : (customerName || "Client Standard"),
                                 }}

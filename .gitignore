@@ -56,3 +56,9 @@ license.key
 
 # Android builds
 *.apk
+
+# AI assistant local files
+.agents/
+graphify-out/
+scratch/
+deploy_*.py

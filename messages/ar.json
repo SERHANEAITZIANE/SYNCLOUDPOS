@@ -130,7 +130,8 @@
     "salesJournal": "دفتر المبيعات",
     "purchaseJournal": "دفتر المشتريات",
     "cheques": "الشيكات",
-    "reconciliation": "المطابقة"
+    "reconciliation": "المطابقة",
+    "returns": "المرجوعات"
   },
   "Common": {
     "quantity": "الكمية",
@@ -1272,6 +1273,8 @@
       "driverTracking": "تتبع السائقين",
       "driverPortal": "بوابة السائق",
       "journals": "الدفاتر المحاسبية",
+      "returns": "المرتجعات",
+      "salesJournal": "الدفاتر المحاسبية",
       "superAdmin": "مشرف عام",
       "mobileConnect": "تطبيق الهاتف",
       "mobileConnectDesc": "امسح رمز الاستجابة السريعة (QR) لتوصيل هاتفك",

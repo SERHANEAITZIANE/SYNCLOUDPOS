@@ -108,7 +108,7 @@ const PosPage = async () => {
             categoryId: item.categoryId || "",
             wholesalePrice: Number(item.wholesalePrice || item.price),
             dealerPrice: Number(item.dealerPrice || item.price),
-            tvaRate: Number(item.tvaRate ?? 19),
+            tvaRate: tenant?.tvaEnabled ? Number(item.tvaRate ?? 0) : 0,
             imageUrl: item.images?.[0]?.url || "",
             isFeatured: item.isFeatured || false,
             barcodes: item.barcodes?.map((b: any) => b.value) || []

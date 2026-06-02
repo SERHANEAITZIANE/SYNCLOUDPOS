@@ -481,7 +481,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     productId: match.id,
                     quantity: qty,
                     costPrice: cost || Number(match.cost || 0),
-                    tvaRate: 19
+                    tvaRate: 0
                 })
             } else {
                 missingCount++
@@ -491,7 +491,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         if (importedItems.length > 0) {
             const currentItems = form.getValues("items")
             const cleanCurrent = (currentItems.length === 1 && !currentItems[0].productId) ? [] : currentItems
-            form.setValue("items", [...cleanCurrent, ...importedItems])
+            form.setValue("items", [...importedItems, ...cleanCurrent])
             toast.success(`${importedItems.length} articles importés avec succès !`)
             setClipboardText("")
             setClipboardOpen(false)
@@ -504,6 +504,38 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
     const isEditMode = !!initialData
     const canEdit = true
+
+    useEffect(() => {
+        if (isEditMode && payments && payments.length > 0) {
+            const firstPay = payments[0]
+            setPayImmediately(true)
+            setInitialPayAmount(Number(firstPay.amount))
+            setInitialPayAccountId(firstPay.accountId)
+            
+            // Extract method
+            const methodMatch = firstPay.description?.match(/\[(.*?)\]/)?.[1]
+            if (methodMatch) {
+                const mappedMethod = methodMatch.toUpperCase()
+                if (["CASH", "VERSEMENT", "VIREMENT", "CHEQUE", "CARTE"].includes(mappedMethod)) {
+                    setInitialPayMethod(mappedMethod)
+                } else if (methodMatch === "Espèce" || methodMatch === "Espece") {
+                    setInitialPayMethod("CASH")
+                } else {
+                    setInitialPayMethod("CASH")
+                }
+            } else {
+                setInitialPayMethod("CASH")
+            }
+            
+            // Extract notes
+            const notesParts = firstPay.description?.split(" - ")
+            if (notesParts && notesParts.length > 1) {
+                setInitialPayNotes(notesParts.slice(1).join(" - "))
+            } else {
+                setInitialPayNotes("")
+            }
+        }
+    }, [isEditMode, payments])
 
     const title = isEditMode ? `Bon #${initialData?.id?.slice(-8).toUpperCase()}` : "Nouveau bon d'achat"
     const currentStatus = initialData?.status || "PENDING"
@@ -523,24 +555,24 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
                 costPrice: Number(item.costPrice),
-                tvaRate: Number(item.tvaRate ?? 19),
+                tvaRate: Number(item.tvaRate ?? 0),
                 serialNumber: item.serialNumber || ""
             })),
             reference: initialData.reference || ""
         } : {
             supplierId: "",
             accountId: "none",
-            status: "BON_COMMANDE",
+            status: "BON_LIVRAISON",
             notes: "",
             imageUrl1: "",
             imageUrl2: "",
             imageUrl3: "",
             reference: "",
-            items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 19, serialNumber: "" }]
+            items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 0, serialNumber: "" }]
         }
     })
 
-    const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" })
+    const { fields, prepend, remove } = useFieldArray({ control: form.control, name: "items" })
 
     const watchItems = form.watch("items")
     const watchSupplierId = form.watch("supplierId")
@@ -566,7 +598,15 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 router.push(`/purchases`)
                 router.refresh()
             } else {
-                const result = await updatePurchaseOrder(initialData.id, { ...values, total })
+                const payload = {
+                    ...values,
+                    total,
+                    paymentAmount: payImmediately ? initialPayAmount : 0,
+                    paymentMethod: payImmediately ? initialPayMethod : "CASH",
+                    paymentAccountId: payImmediately ? initialPayAccountId : undefined,
+                    paymentNotes: payImmediately ? initialPayNotes : undefined
+                }
+                const result = await updatePurchaseOrder(initialData.id, payload)
                 if (result?.error) { toast.error(result.error); return }
                 toast.success("Bon modifié.")
                 router.refresh()
@@ -624,12 +664,12 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Insert" && ocrItems.length === 0) {
                 e.preventDefault()
-                append({ productId: "", quantity: 1, costPrice: 0, tvaRate: 19 })
+                prepend({ productId: "", quantity: 1, costPrice: 0, tvaRate: 0 })
             }
         }
         window.addEventListener("keydown", handler)
         return () => window.removeEventListener("keydown", handler)
-    }, [append, ocrItems.length])
+    }, [prepend, ocrItems.length])
 
     const handleOcrExtracted = (items: { name: string, price: number, quantity: number }[], supplierName?: string) => {
         setOcrItems(items)
@@ -654,7 +694,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         // Remove the empty default row if it's the only one and empty
         const itemsToSet = (currentItems.length === 1 && !currentItems[0].productId)
             ? matchedItems
-            : [...currentItems, ...matchedItems]
+            : [...matchedItems, ...currentItems]
 
         form.setValue("items", itemsToSet)
         setOcrItems([]) // close the OCR flow
@@ -840,8 +880,8 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="BON_COMMANDE">Bon de Commande</SelectItem>
                                             <SelectItem value="BON_LIVRAISON">Bon de Réception (BR) (+Stock)</SelectItem>
+                                            <SelectItem value="BON_COMMANDE">Bon de Commande</SelectItem>
                                             <SelectItem value="FACTURE">Facture</SelectItem>
                                             <SelectItem value="PENDING">Brouillon</SelectItem>
                                         </SelectContent>
@@ -912,7 +952,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                 <Button type="button" variant="outline" size="sm" onClick={() => setClipboardOpen(!clipboardOpen)} className="text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all font-semibold">
                                                     <FileSpreadsheet className="h-4 w-4 mr-1.5" /> Import Excel/Coller
                                                 </Button>
-                                                <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, costPrice: 0 })}>
+                                                <Button type="button" variant="outline" size="sm" onClick={() => prepend({ productId: "", quantity: 1, costPrice: 0 })}>
                                                     <Plus className="h-4 w-4 mr-1.5" /> Ajouter (Insert)
                                                 </Button>
                                             </div>
@@ -1084,22 +1124,27 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
                                                         {/* TVA */}
                                                         <div className="col-span-4 md:col-span-2">
-                                                            <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => (
-                                                                <FormItem className="m-0 space-y-0">
-                                                                    <Select disabled={loading || !canEdit} onValueChange={(v) => f.onChange(Number(v))} value={f.value?.toString()}>
-                                                                        <FormControl>
-                                                                            <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
-                                                                                <SelectValue placeholder="TVA..." />
-                                                                            </SelectTrigger>
-                                                                        </FormControl>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="19">19%</SelectItem>
-                                                                            <SelectItem value="9">9%</SelectItem>
-                                                                            <SelectItem value="0">0%</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </FormItem>
-                                                            )} />
+                                                            <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => {
+                                                                const tvaEnabled = storeData?.tvaEnabled ?? false;
+                                                                const isDisabled = loading || !canEdit || !tvaEnabled;
+                                                                const val = tvaEnabled ? (f.value?.toString() ?? "0") : "0";
+                                                                return (
+                                                                    <FormItem className="m-0 space-y-0">
+                                                                        <Select disabled={isDisabled} onValueChange={(v) => f.onChange(Number(v))} value={val}>
+                                                                            <FormControl>
+                                                                                <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
+                                                                                    <SelectValue placeholder="TVA..." />
+                                                                                </SelectTrigger>
+                                                                            </FormControl>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="19">19%</SelectItem>
+                                                                                <SelectItem value="9">9%</SelectItem>
+                                                                                <SelectItem value="0">0%</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </FormItem>
+                                                                );
+                                                            }} />
                                                         </div>
 
                                                         {/* Total Line (HT) */}
@@ -1161,200 +1206,97 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     </div>
                                 </div>
 
-                                 {/* ── supplier partial payments panel ────────────────── */}
-                                 {isEditMode && (
-                                     <Card className="shadow-lg border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden my-6">
-                                         <CardHeader className="pb-3 flex flex-row items-center justify-between bg-muted/10 border-b border-slate-100 dark:border-slate-800">
-                                             <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
-                                                 <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
-                                                 Historique des Règlements & Paiements Fournisseur
-                                             </CardTitle>
-                                             <Button
-                                                 type="button"
-                                                 size="sm"
-                                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-9"
-                                                 onClick={() => {
-                                                     const alreadyPaid = localPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-                                                     const remaining = Math.max(0, total - alreadyPaid)
-                                                     setPayAmount(remaining)
-                                                     setPayAccountId(accounts[0]?.id || "")
-                                                     setPayModalOpen(true)
+                                 {/* ── integrated payment panel ────────────────── */}
+                                 <Card className="shadow-lg border border-indigo-100 dark:border-indigo-950/60 rounded-2xl overflow-hidden my-6 bg-slate-50/40 dark:bg-slate-900/10">
+                                     <CardHeader className="pb-3 flex flex-row items-center justify-between bg-indigo-500/5 border-b border-indigo-100 dark:border-indigo-950/40">
+                                         <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
+                                             <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
+                                             Règlement (Optionnel)
+                                         </CardTitle>
+                                         <div className="flex items-center gap-2">
+                                             <Checkbox
+                                                 id="pay-immediately-checkbox"
+                                                 checked={payImmediately}
+                                                 onCheckedChange={(checked) => {
+                                                     setPayImmediately(!!checked);
+                                                     if (checked) {
+                                                         setInitialPayAmount(total);
+                                                     }
                                                  }}
+                                             />
+                                             <label
+                                                 htmlFor="pay-immediately-checkbox"
+                                                 className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
                                              >
-                                                 <Plus className="h-4 w-4 mr-1.5" /> Enregistrer un paiement
-                                             </Button>
-                                         </CardHeader>
-                                         <CardContent className="space-y-4 pt-4">
-                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                                                 <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border rounded-2xl">
-                                                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Total du Bon</p>
-                                                     <p className="text-xl font-bold text-slate-800 dark:text-slate-200 mt-1">
-                                                         {total.toLocaleString()} DA
-                                                     </p>
+                                                 Enregistrer un règlement
+                                             </label>
+                                         </div>
+                                     </CardHeader>
+                                     {payImmediately && (
+                                         <CardContent className="space-y-4 pt-5 animate-in slide-in-from-top duration-200">
+                                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                 <div className="space-y-1.5">
+                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Caisse / Banque</label>
+                                                     <Select
+                                                         value={initialPayAccountId}
+                                                         onValueChange={setInitialPayAccountId}
+                                                     >
+                                                         <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                                                             <SelectValue placeholder="Choisir la caisse/banque..." />
+                                                         </SelectTrigger>
+                                                         <SelectContent>
+                                                             {accounts.map(acc => (
+                                                                 <SelectItem key={acc.id} value={acc.id}>
+                                                                     {acc.name} ({Number(acc.balance).toLocaleString()} DA)
+                                                                 </SelectItem>
+                                                             ))}
+                                                         </SelectContent>
+                                                     </Select>
                                                  </div>
-                                                 <div className="p-3.5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                                                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">Déjà Réglé</p>
-                                                     <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
-                                                         {localPayments.reduce((sum, p) => sum + Number(p.amount), 0).toLocaleString()} DA
-                                                     </p>
+                                                 <div className="space-y-1.5">
+                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Montant (DA)</label>
+                                                     <div className="relative">
+                                                         <Input
+                                                             type="number"
+                                                             placeholder="0.00"
+                                                             value={initialPayAmount || ""}
+                                                             onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
+                                                             className="font-bold pr-8 border-slate-250 focus-visible:ring-indigo-500"
+                                                         />
+                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
+                                                     </div>
                                                  </div>
-                                                 {(() => {
-                                                     const alreadyPaid = localPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-                                                     const remaining = total - alreadyPaid
-                                                     const isCleared = remaining <= 0
-                                                     return (
-                                                         <div className={cn("p-3.5 border rounded-2xl", isCleared ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-700 dark:text-emerald-400" : "bg-red-500/5 border-red-500/10 text-red-600 dark:text-red-400")}>
-                                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Reste à payer</p>
-                                                             <p className="text-xl font-black mt-1">
-                                                                 {remaining.toLocaleString()} DA
-                                                             </p>
-                                                         </div>
-                                                     )
-                                                 })()}
-                                             </div>
-
-                                             {/* Previous payments list */}
-                                             <div className="border rounded-2xl overflow-hidden bg-white dark:bg-slate-900/40">
-                                                 <table className="w-full text-xs text-left">
-                                                     <thead className="bg-slate-50 dark:bg-slate-900 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-slate-100 dark:border-slate-800">
-                                                         <tr>
-                                                             <th className="p-3">Date</th>
-                                                             <th className="p-3">Caisse / Banque</th>
-                                                             <th className="p-3 text-center">Mode</th>
-                                                             <th className="p-3">Observation</th>
-                                                             <th className="p-3 text-right">Montant</th>
-                                                         </tr>
-                                                     </thead>
-                                                     <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-                                                         {localPayments.length === 0 ? (
-                                                             <tr>
-                                                                 <td colSpan={5} className="p-4 text-center text-muted-foreground italic">
-                                                                     Aucun règlement enregistré sur ce bon.
-                                                                 </td>
-                                                             </tr>
-                                                         ) : (
-                                                             localPayments.map((pay: any, idx: number) => (
-                                                                 <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                                                                     <td className="p-3 font-semibold text-muted-foreground">
-                                                                         {format(new Date(pay.date || pay.createdAt), "dd/MM/yyyy HH:mm")}
-                                                                     </td>
-                                                                     <td className="p-3 font-bold text-slate-700 dark:text-slate-300">
-                                                                         {pay.account?.name || "Caisse Générale"}
-                                                                     </td>
-                                                                     <td className="p-3 text-center">
-                                                                         <Badge variant="outline" className="font-bold border-indigo-250 text-indigo-700 dark:text-indigo-400 bg-indigo-500/5">
-                                                                             {pay.description?.match(/\[(.*?)\]/)?.[1] || "Espèce"}
-                                                                         </Badge>
-                                                                     </td>
-                                                                     <td className="p-3 text-slate-500 dark:text-slate-400 max-w-[200px] truncate" title={pay.description}>
-                                                                         {pay.description?.includes(" - ") ? pay.description.split(" - ").slice(1).join(" - ") : "—"}
-                                                                     </td>
-                                                                     <td className="p-3 text-right font-black text-emerald-600 dark:text-emerald-400">
-                                                                         {Number(pay.amount).toLocaleString()} DA
-                                                                     </td>
-                                                                 </tr>
-                                                             ))
-                                                         )}
-                                                     </tbody>
-                                                 </table>
+                                                 <div className="space-y-1.5">
+                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mode de règlement</label>
+                                                     <Select
+                                                         value={initialPayMethod}
+                                                         onValueChange={setInitialPayMethod}
+                                                     >
+                                                         <SelectTrigger className="border-slate-200 dark:border-slate-800">
+                                                             <SelectValue placeholder="Choisir le mode..." />
+                                                         </SelectTrigger>
+                                                         <SelectContent>
+                                                             <SelectItem value="CASH">Espèce</SelectItem>
+                                                             <SelectItem value="VERSEMENT">Versement</SelectItem>
+                                                             <SelectItem value="VIREMENT">Virement</SelectItem>
+                                                             <SelectItem value="CHEQUE">Chèque</SelectItem>
+                                                             <SelectItem value="CARTE">Carte Bancaire</SelectItem>
+                                                         </SelectContent>
+                                                     </Select>
+                                                 </div>
+                                                 <div className="space-y-1.5">
+                                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Observation</label>
+                                                     <Input
+                                                         placeholder="Observation (ex: Acompte, Solde, etc.)"
+                                                         value={initialPayNotes}
+                                                         onChange={e => setInitialPayNotes(e.target.value)}
+                                                         className="border-slate-200 dark:border-slate-800"
+                                                     />
+                                                 </div>
                                              </div>
                                          </CardContent>
-                                     </Card>
-                                 )}
-
-                                 {/* ── initial payment on creation panel ────────────────── */}
-                                 {!isEditMode && form.watch("status") === "FACTURE" && (
-                                     <Card className="shadow-lg border border-indigo-100 dark:border-indigo-950/60 rounded-2xl overflow-hidden my-6 bg-slate-50/40 dark:bg-slate-900/10">
-                                         <CardHeader className="pb-3 flex flex-row items-center justify-between bg-indigo-500/5 border-b border-indigo-100 dark:border-indigo-950/40">
-                                             <CardTitle className="text-base font-bold flex items-center gap-2 text-indigo-950 dark:text-indigo-400">
-                                                 <DollarSign className="h-5 w-5 text-emerald-500 animate-pulse" />
-                                                 Règlement Initial (Optionnel - Facture d'Achat)
-                                             </CardTitle>
-                                             <div className="flex items-center gap-2">
-                                                 <Checkbox
-                                                     id="pay-immediately-checkbox"
-                                                     checked={payImmediately}
-                                                     onCheckedChange={(checked) => {
-                                                         setPayImmediately(!!checked);
-                                                         if (checked) {
-                                                             setInitialPayAmount(total);
-                                                         }
-                                                     }}
-                                                 />
-                                                 <label
-                                                     htmlFor="pay-immediately-checkbox"
-                                                     className="text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
-                                                 >
-                                                     Enregistrer un règlement immédiat
-                                                 </label>
-                                             </div>
-                                         </CardHeader>
-                                         {payImmediately && (
-                                             <CardContent className="space-y-4 pt-5 animate-in slide-in-from-top duration-200">
-                                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                     <div className="space-y-1.5">
-                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Caisse / Banque</label>
-                                                         <Select
-                                                             value={initialPayAccountId}
-                                                             onValueChange={setInitialPayAccountId}
-                                                         >
-                                                             <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                                                                 <SelectValue placeholder="Choisir la caisse/banque..." />
-                                                             </SelectTrigger>
-                                                             <SelectContent>
-                                                                 {accounts.map(acc => (
-                                                                     <SelectItem key={acc.id} value={acc.id}>
-                                                                         {acc.name} ({Number(acc.balance).toLocaleString()} DA)
-                                                                     </SelectItem>
-                                                                 ))}
-                                                             </SelectContent>
-                                                         </Select>
-                                                     </div>
-                                                     <div className="space-y-1.5">
-                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Montant (DA)</label>
-                                                         <div className="relative">
-                                                             <Input
-                                                                 type="number"
-                                                                 placeholder="0.00"
-                                                                 value={initialPayAmount || ""}
-                                                                 onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
-                                                                 className="font-bold pr-8 border-slate-250 focus-visible:ring-indigo-500"
-                                                             />
-                                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
-                                                         </div>
-                                                     </div>
-                                                     <div className="space-y-1.5">
-                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mode de règlement</label>
-                                                         <Select
-                                                             value={initialPayMethod}
-                                                             onValueChange={setInitialPayMethod}
-                                                         >
-                                                             <SelectTrigger className="border-slate-200 dark:border-slate-800">
-                                                                 <SelectValue placeholder="Choisir le mode..." />
-                                                             </SelectTrigger>
-                                                             <SelectContent>
-                                                                 <SelectItem value="CASH">Espèce</SelectItem>
-                                                                 <SelectItem value="VERSEMENT">Versement</SelectItem>
-                                                                 <SelectItem value="VIREMENT">Virement</SelectItem>
-                                                                 <SelectItem value="CHEQUE">Chèque</SelectItem>
-                                                                 <SelectItem value="CARTE">Carte Bancaire</SelectItem>
-                                                             </SelectContent>
-                                                         </Select>
-                                                     </div>
-                                                     <div className="space-y-1.5">
-                                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Observation</label>
-                                                         <Input
-                                                             placeholder="Observation (ex: Acompte, Solde, etc.)"
-                                                             value={initialPayNotes}
-                                                             onChange={e => setInitialPayNotes(e.target.value)}
-                                                             className="border-slate-200 dark:border-slate-800"
-                                                         />
-                                                     </div>
-                                                 </div>
-                                             </CardContent>
-                                         )}
-                                     </Card>
-                                 )}
+                                     )}
+                                 </Card>
 
                                  {/* Notes & Visual Proof (Photos) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">

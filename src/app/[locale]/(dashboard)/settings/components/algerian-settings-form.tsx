@@ -28,6 +28,7 @@ export function AlgerianSettingsForm() {
         hddApiToken: "",
         warrantyEnabled: false,
         blockNegativeStock: false,
+        tvaEnabled: false,
     })
 
     useEffect(() => {
@@ -47,6 +48,7 @@ export function AlgerianSettingsForm() {
                 hddApiToken: data.hddApiToken ?? "",
                 warrantyEnabled: (data as any).warrantyEnabled ?? false,
                 blockNegativeStock: (data as any).blockNegativeStock ?? false,
+                tvaEnabled: (data as any).tvaEnabled ?? false,
             })
             setLoading(false)
         })
@@ -181,14 +183,27 @@ export function AlgerianSettingsForm() {
                 </div>
             )}
 
-            {/* Stamp Tax / Timbre Settings */}
+            {/* Taxes & Paramètres Facturation */}
             <div className="p-5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                     <Stamp className="h-5 w-5 text-amber-600" />
-                    <h3 className="font-bold">Droit de Timbre (حقوق الطابع)</h3>
+                    <h3 className="font-bold">Taxes & Paramètres Facturation</h3>
                 </div>
 
+                {/* TVA parameter toggle */}
                 <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-medium text-sm">Calcul de la TVA (Taxe sur la Valeur Ajoutée)</p>
+                        <p className="text-xs text-muted-foreground">Active l'application et le calcul de la TVA sur vos produits, ventes et POS</p>
+                    </div>
+                    <Switch
+                        checked={settings.tvaEnabled}
+                        onCheckedChange={v => setSettings(s => ({ ...s, tvaEnabled: v }))}
+                    />
+                </div>
+
+                {/* Timbre sur Factures & BL */}
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
                     <div>
                         <p className="font-medium text-sm">Timbre sur Factures & BL</p>
                         <p className="text-xs text-muted-foreground">Applique le timbre fiscal sur les factures et bons de livraison (paiements espèce)</p>
@@ -199,6 +214,7 @@ export function AlgerianSettingsForm() {
                     />
                 </div>
 
+                {/* Timbre sur Ventes POS (Caisse) */}
                 <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
                     <div>
                         <p className="font-medium text-sm">Timbre sur Ventes POS (Caisse)</p>
@@ -210,6 +226,7 @@ export function AlgerianSettingsForm() {
                     />
                 </div>
 
+                {/* Bon de Garantie Client */}
                 <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
                     <div>
                         <p className="font-medium text-sm">Bon de Garantie Client (A4/A5)</p>
@@ -221,6 +238,7 @@ export function AlgerianSettingsForm() {
                     />
                 </div>
 
+                {/* Bloquer la vente hors-stock */}
                 <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
                     <div>
                         <p className="font-medium text-sm">Bloquer la vente hors-stock</p>

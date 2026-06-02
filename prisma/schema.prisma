@@ -39,6 +39,7 @@ model Tenant {
   loyaltyDaPerPoint    Int                   @default(100)
   subscriptionEndsAt   DateTime?
   warrantyEnabled      Boolean               @default(false)
+  tvaEnabled           Boolean               @default(false)
   isElectronics        Boolean               @default(false)
   blockNegativeStock   Boolean               @default(false)
   isBlocked            Boolean               @default(false)
@@ -266,7 +267,7 @@ model Product {
   cost           Decimal?
   wholesalePrice Decimal?
   dealerPrice    Decimal?
-  tvaRate        Decimal                @default(19)
+  tvaRate        Decimal                @default(0)
   isFeatured     Boolean                @default(false)
   isArchived     Boolean                @default(false)
   stock          Int                    @default(0)
@@ -492,7 +493,7 @@ model PurchaseOrderItem {
   productId       String
   quantity        Int
   costPrice       Decimal
-  tvaRate         Decimal       @default(19)
+  tvaRate         Decimal       @default(0)
   serialNumber    String?
   product         Product       @relation(fields: [productId], references: [id])
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)

@@ -1,9 +1,11 @@
 "use client"
 
-import { Plus, FileSpreadsheet, FileText, LayoutGrid, List } from "lucide-react"
-import { useState, useEffect } from "react"
-import { useRouter } from "@/i18n/routing"
+import { Plus, FileSpreadsheet, FileText, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { useRouter, usePathname } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
+import { useDebounce } from "use-debounce"
 
 import { Button } from "@/components/ui/button"
 import { ServerDataTable } from "@/components/ui/server-data-table"
@@ -15,6 +17,7 @@ import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { cn } from "@/lib/utils"
 import { importProducts } from "@/actions/products"
 import { PriceListModal } from "@/components/products/price-list-modal"
+import { Input } from "@/components/ui/input"
 
 interface ProductClientProps {
     data: ProductColumn[]
@@ -30,13 +33,52 @@ export const ProductClient: React.FC<ProductClientProps> = ({
     currentPage
 }) => {
     const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
     const locale = useLocale()
     const t = useTranslations("Products")
     const tCommon = useTranslations("Common")
+    const tDataTable = useTranslations("DataTable")
     const columns = useProductColumns()
     const [importOpen, setImportOpen] = useState(false)
     const [isPriceListOpen, setIsPriceListOpen] = useState(false)
     const [viewMode, setViewMode] = useState<"grid" | "table">("grid")
+
+    const [searchQuery, setSearchQuery] = useState(searchParams?.get("name") || "")
+    const [debouncedSearch] = useDebounce(searchQuery, 500)
+
+    const createQueryString = useCallback(
+        (name: string, value: string) => {
+            const params = new URLSearchParams(searchParams?.toString() || "")
+            params.set(name, value)
+            return params.toString()
+        },
+        [searchParams]
+    )
+
+    useEffect(() => {
+        if (viewMode !== "grid") return
+        if (searchParams) {
+            const currentSearch = searchParams.get("name") || ""
+            if (debouncedSearch !== currentSearch) {
+                const params = new URLSearchParams(searchParams.toString())
+                if (debouncedSearch) {
+                    params.set("name", debouncedSearch)
+                } else {
+                    params.delete("name")
+                }
+                params.set("page", "1") // reset page on new search
+                router.push(pathname + "?" + params.toString())
+            }
+        }
+    }, [debouncedSearch, pathname, router, searchParams, viewMode])
+
+    useEffect(() => {
+        if (viewMode !== "grid") return
+        if (searchParams) {
+            setSearchQuery(searchParams.get("name") || "")
+        }
+    }, [searchParams, viewMode])
 
     // Load saved preference on mount
     useEffect(() => {
@@ -92,8 +134,45 @@ export const ProductClient: React.FC<ProductClientProps> = ({
 
             {viewMode === "grid" ? (
                 <div className="mt-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0">
+                        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+                            <Input
+                                id="global-search-input-grid"
+                                placeholder={tDataTable("search")}
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                                className="max-w-sm w-full"
+                            />
+                        </div>
+                    </div>
+
                     <ProductGridView data={data} />
-                    {/* Pagination will eventually need to be wired up for grid but relying on server-data-table pagination logic right now is tricky. We'll show the grid for the current page. */}
+
+                    <div className="flex items-center justify-end space-x-2 py-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                const newPage = Math.max(1, currentPage - 1)
+                                router.push(pathname + "?" + createQueryString("page", String(newPage)))
+                            }}
+                            disabled={currentPage <= 1}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="text-sm font-medium">{tDataTable("page")} {currentPage} / {pageCount}</div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                const newPage = Math.min(pageCount, currentPage + 1)
+                                router.push(pathname + "?" + createQueryString("page", String(newPage)))
+                            }}
+                            disabled={currentPage >= pageCount}
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             ) : (
                 <ServerDataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="name" columns={columns} data={data} pageCount={pageCount} currentPage={currentPage} />

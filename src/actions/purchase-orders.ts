@@ -414,13 +414,145 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     }
                 }
             }
+
+            // ─── Payment Update Logic ───
+            const existingPayment = await tx.treasuryTransaction.findFirst({
+                where: { referenceId: id, source: "PURCHASE", tenantId }
+            });
+            const oldPaymentAmount = existingPayment ? Number(existingPayment.amount) : 0;
+            const oldPaymentAccountId = existingPayment ? existingPayment.accountId : null;
+
+            const newPaymentAmount = data.paymentAmount || 0;
+            const newPaymentAccountId = data.paymentAccountId;
+            const newPaymentMethod = data.paymentMethod || "CASH";
+            const newPaymentNotes = data.paymentNotes || "";
+
+            if (existingPayment) {
+                if (newPaymentAmount === 0 || !newPaymentAccountId || newPaymentAccountId === "none") {
+                    // Delete the payment transaction and refund old account
+                    await tx.treasuryTransaction.delete({ where: { id: existingPayment.id } });
+                    await tx.treasuryAccount.update({
+                        where: { id: oldPaymentAccountId! },
+                        data: { balance: { increment: oldPaymentAmount } }
+                    });
+                } else {
+                    // Update the payment
+                    if (oldPaymentAccountId === newPaymentAccountId) {
+                        const account = await tx.treasuryAccount.findUnique({ where: { id: newPaymentAccountId, tenantId } });
+                        if (!account) throw new Error("Compte de trésorerie introuvable");
+                        
+                        if (Number(account.balance) + oldPaymentAmount < newPaymentAmount) {
+                            throw new Error("Solde insuffisant dans la caisse/banque sélectionnée");
+                        }
+
+                        const updatedAcc = await tx.treasuryAccount.update({
+                            where: { id: newPaymentAccountId },
+                            data: { balance: { decrement: newPaymentAmount - oldPaymentAmount } }
+                        });
+
+                        await tx.treasuryTransaction.update({
+                            where: { id: existingPayment.id },
+                            data: {
+                                amount: newPaymentAmount,
+                                balanceBefore: Number(updatedAcc.balance) + newPaymentAmount,
+                                balanceAfter: updatedAcc.balance,
+                                description: `Règlement Initial [${newPaymentMethod}] Bon #${existing.id.slice(-8).toUpperCase()}${newPaymentNotes ? ` - ${newPaymentNotes}` : ""}`
+                            }
+                        });
+                    } else {
+                        // Different accounts: refund old, debit new
+                        await tx.treasuryAccount.update({
+                            where: { id: oldPaymentAccountId! },
+                            data: { balance: { increment: oldPaymentAmount } }
+                        });
+
+                        const newAccount = await tx.treasuryAccount.findUnique({ where: { id: newPaymentAccountId, tenantId } });
+                        if (!newAccount) throw new Error("Compte de trésorerie introuvable");
+
+                        if (Number(newAccount.balance) < newPaymentAmount) {
+                            throw new Error("Solde insuffisant dans la caisse/banque sélectionnée");
+                        }
+
+                        const updatedAcc = await tx.treasuryAccount.update({
+                            where: { id: newPaymentAccountId },
+                            data: { balance: { decrement: newPaymentAmount } }
+                        });
+
+                        await tx.treasuryTransaction.update({
+                            where: { id: existingPayment.id },
+                            data: {
+                                accountId: newPaymentAccountId,
+                                amount: newPaymentAmount,
+                                balanceBefore: Number(updatedAcc.balance) + newPaymentAmount,
+                                balanceAfter: updatedAcc.balance,
+                                description: `Règlement Initial [${newPaymentMethod}] Bon #${existing.id.slice(-8).toUpperCase()}${newPaymentNotes ? ` - ${newPaymentNotes}` : ""}`
+                            }
+                        });
+                    }
+                }
+            } else {
+                if (newPaymentAmount > 0 && newPaymentAccountId && newPaymentAccountId !== "none") {
+                    const payAccount = await tx.treasuryAccount.findUnique({ where: { id: newPaymentAccountId, tenantId } });
+                    if (!payAccount) throw new Error("Compte de trésorerie introuvable");
+
+                    if (Number(payAccount.balance) < newPaymentAmount) {
+                        throw new Error("Solde insuffisant dans la caisse/banque sélectionnée");
+                    }
+
+                    const updatedAcc = await tx.treasuryAccount.update({
+                        where: { id: newPaymentAccountId },
+                        data: { balance: { decrement: newPaymentAmount } }
+                    });
+
+                    await tx.treasuryTransaction.create({
+                        data: {
+                            tenantId,
+                            accountId: newPaymentAccountId,
+                            type: "DEBIT",
+                            amount: newPaymentAmount,
+                            balanceBefore: payAccount.balance,
+                            balanceAfter: updatedAcc.balance,
+                            source: "PURCHASE",
+                            referenceId: id,
+                            description: `Règlement Initial [${newPaymentMethod}] Bon #${existing.id.slice(-8).toUpperCase()}${newPaymentNotes ? ` - ${newPaymentNotes}` : ""}`
+                        }
+                    });
+                }
+            }
+
+            // ─── Supplier Balance Adjustments ───
+            const oldNet = existing.status === "FACTURE" ? (Number(existing.total) - oldPaymentAmount) : 0;
+            const newNet = data.status === "FACTURE" ? (data.total - newPaymentAmount) : 0;
+
+            if (existing.supplierId === data.supplierId) {
+                if (newNet !== oldNet) {
+                    await tx.supplier.update({
+                        where: { id: data.supplierId },
+                        data: { balance: { increment: newNet - oldNet } }
+                    });
+                }
+            } else {
+                if (oldNet !== 0) {
+                    await tx.supplier.update({
+                        where: { id: existing.supplierId },
+                        data: { balance: { decrement: oldNet } }
+                    });
+                }
+                if (newNet !== 0) {
+                    await tx.supplier.update({
+                        where: { id: data.supplierId },
+                        data: { balance: { increment: newNet } }
+                    });
+                }
+            }
         })
 
         revalidatePath("/(dashboard)/purchases")
         return { success: "Bon de commande modifié avec succès" }
     } catch (error) {
         console.error("Update Purchase Order Error:", error)
-        return { error: "Erreur lors de la modification" }
+        const msg = error instanceof Error ? error.message : "Erreur lors de la modification"
+        return { error: msg }
     }
 }
 
@@ -544,9 +676,15 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
             // Supplier balance: increment when moving to FACTURE (first time)
             if (newStatus === "FACTURE" && prevStatus !== "FACTURE") {
+                const prevPayments = await tx.treasuryTransaction.findMany({
+                    where: { referenceId: id, source: "PURCHASE", tenantId }
+                })
+                const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+                const balanceIncrement = total - alreadyPaid
+
                 await (tx as any).supplier.update({
                     where: { id: order.supplierId },
-                    data: { balance: { increment: total } }
+                    data: { balance: { increment: balanceIncrement } }
                 })
             }
 

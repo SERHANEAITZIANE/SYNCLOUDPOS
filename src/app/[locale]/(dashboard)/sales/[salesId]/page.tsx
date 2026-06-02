@@ -60,6 +60,7 @@ const SalesOrderPage = async ({
         categoryId: p.categoryId,
         supplierId: p.supplierId,
         barcodes: p.barcodes || [],
+        tvaRate: p.tvaRate ? Number(p.tvaRate) : 0,
     }))
 
     const formattedSalesOrder = salesOrder ? plainify({

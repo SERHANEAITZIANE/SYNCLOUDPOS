@@ -44,6 +44,8 @@ export default async function PurchaseOrderPage({
     const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
     const store = storeIdToUse ? await db.store.findUnique({ where: { id: storeIdToUse } }) : null;
 
+    const tenant = tenantId ? await db.tenant.findUnique({ where: { id: tenantId } }) : null;
+
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
@@ -55,7 +57,7 @@ export default async function PurchaseOrderPage({
                     accounts={accounts}
                     categories={JSON.parse(JSON.stringify(categories))}
                     brands={JSON.parse(JSON.stringify(brands))}
-                    storeData={store ? JSON.parse(JSON.stringify(store)) : null}
+                    storeData={store ? { ...JSON.parse(JSON.stringify(store)), tvaEnabled: tenant?.tvaEnabled ?? false } : null}
                 />
             </div>
         </div>

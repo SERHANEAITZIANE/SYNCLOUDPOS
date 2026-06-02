@@ -28,6 +28,7 @@ export async function getAlgerianSettings() {
             hddApiToken: true,
             warrantyEnabled: true,
             blockNegativeStock: true,
+            tvaEnabled: true,
         }
     })
 }
@@ -48,6 +49,7 @@ export async function updateAlgerianSettings(data: {
     hddApiToken?: string
     warrantyEnabled?: boolean
     blockNegativeStock?: boolean
+    tvaEnabled?: boolean
 }) {
     const session = await auth()
     const tenantId = session?.user?.tenantId
@@ -60,7 +62,7 @@ export async function updateAlgerianSettings(data: {
         select: {
             ramadanMode: true, commissionRate: true, commissionMode: true, taxRegime: true,
             ifuRate: true, tapRate: true, stampTaxEnabled: true, posTimbreEnabled: true,
-            warrantyEnabled: true, blockNegativeStock: true,
+            warrantyEnabled: true, blockNegativeStock: true, tvaEnabled: true,
         }
     })
 

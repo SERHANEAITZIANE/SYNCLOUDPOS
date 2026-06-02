@@ -3,6 +3,7 @@ import { ModeToggle } from "@/components/dashboard/mode-toggle";
 import { MobileSidebar } from "@/components/dashboard/mobile-sidebar";
 import { LanguageSwitcher } from "@/components/dashboard/language-switcher";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { HeaderMobileConnect } from "@/components/dashboard/header-mobile-connect";
 
 import { HeaderStoreSelector } from "./header-store-selector";
 import { getStores } from "@/actions/stores";
@@ -20,13 +21,14 @@ export async function DashboardHeader({ user }: { user: any }) {
                 <Input
                 type="search"
                 placeholder="Search products..."
-                className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                className="w-full appearance-none bg-[#020205] pl-8 shadow-none md:w-2/3 lg:w-1/3"
                 /> */}
                     </div>
                 </form>
             </div>
             <div className="flex items-center gap-4">
                 <HeaderStoreSelector stores={stores} currentStoreId={user.defaultStoreId} />
+                <HeaderMobileConnect />
                 <NotificationBell />
                 <LanguageSwitcher />
                 <ModeToggle />

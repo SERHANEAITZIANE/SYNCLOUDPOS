@@ -2,6 +2,8 @@ import { getProduct } from "@/actions/products"
 import { getCategories } from "@/actions/categories"
 import { getBrands } from "@/actions/brands"
 import { ProductForm } from "@/components/products/product-form"
+import { getActiveTenantId } from "@/actions/get-active-tenant"
+import { db } from "@/lib/db"
 
 const ProductPage = async ({
     params
@@ -11,6 +13,10 @@ const ProductPage = async ({
     const { productId } = await params
 
     const isNew = productId === "new"
+
+    const tenantId = await getActiveTenantId()
+    const tenant = tenantId ? await db.tenant.findUnique({ where: { id: tenantId } }) : null
+    const tvaEnabled = tenant?.tvaEnabled ?? false
 
     // Parallel fetching — exclude archived categories/brands from dropdowns
     const categoriesPromise = getCategories(false)
@@ -33,6 +39,7 @@ const ProductPage = async ({
                     categories={categories}
                     brands={brands}
                     initialData={safeProduct as any}
+                    tvaEnabled={tvaEnabled}
                 />
             </div>
         </div>

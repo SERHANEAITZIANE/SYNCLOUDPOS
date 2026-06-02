@@ -81,6 +81,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER },
                 { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
+                { label: t("returns") || "Retours", icon: ArrowRightLeft, href: "/retours", color: "text-purple-400", visible: isAdmin || isCASHIER || isACCOUNTANT },
             ]
         },
         {

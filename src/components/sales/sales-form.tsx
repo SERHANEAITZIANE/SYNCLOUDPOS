@@ -150,7 +150,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         }
     })
 
-    const { fields, append, remove } = useFieldArray({ control: form.control, name: "items" })
+    const { fields, prepend, remove } = useFieldArray({ control: form.control, name: "items" })
     const watchItems = form.watch("items")
     const watchCustomerId = form.watch("customerId")
     const watchType = form.watch("type")
@@ -158,10 +158,12 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
 
     const selectedCustomer = customers.find(c => c.id === watchCustomerId)
 
+    const tvaEnabled = storeData?.tvaEnabled ?? false;
+
     // Tax calculations
     const enrichedItems = watchItems.map(item => {
         const product = products.find(p => p.id === item.productId);
-        const tvaRate = product?.tvaRate ? Number(product.tvaRate) : 19;
+        const tvaRate = tvaEnabled ? (product?.tvaRate ? Number(product.tvaRate) : 0) : 0;
         const priceHt = item.unitPrice / (1 + (tvaRate / 100));
         return {
             ...item,
@@ -276,12 +278,12 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         const handler = (e: KeyboardEvent) => {
             if (e.key === "Insert") {
                 e.preventDefault()
-                append({ productId: "", quantity: 1, unitPrice: 0 })
+                prepend({ productId: "", quantity: 1, unitPrice: 0 })
             }
         }
         window.addEventListener("keydown", handler)
         return () => window.removeEventListener("keydown", handler)
-    }, [append])
+    }, [prepend])
 
     const typeConf = TYPE_CONFIG[currentType as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.QUOTE
     const statusConf = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.DRAFT
@@ -298,7 +300,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
-                            tvaRate: Number(item.tvaRate || 19),
+                            tvaRate: Number(item.tvaRate ?? 0),
                             priceHt: Number(item.priceHt || 0),
                             serialNumber: item.serialNumber,
                         }))}
@@ -318,7 +320,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
-                            tvaRate: Number(item.tvaRate || 19),
+                            tvaRate: Number(item.tvaRate ?? 0),
                             priceHt: Number(item.priceHt || 0),
                             serialNumber: item.serialNumber,
                         }))}
@@ -338,7 +340,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
-                            tvaRate: Number(item.tvaRate || 19),
+                            tvaRate: Number(item.tvaRate ?? 0),
                             priceHt: Number(item.priceHt || 0),
                             serialNumber: item.serialNumber,
                         }))}
@@ -604,7 +606,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                     <Badge variant="outline">{fields.length}</Badge>
                                 </h3>
                                 {canEdit && (
-                                    <Button type="button" variant="outline" size="sm" onClick={() => append({ productId: "", quantity: 1, unitPrice: 0 })}>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => prepend({ productId: "", quantity: 1, unitPrice: 0 })}>
                                         <Plus className="h-4 w-4 mr-1.5" /> Ajouter (Insert)
                                     </Button>
                                 )}
@@ -754,7 +756,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             product: item.product,
                             quantity: item.quantity,
                             unitPrice: Number(item.unitPrice),
-                            tvaRate: Number(item.tvaRate || 19),
+                            tvaRate: Number(item.tvaRate ?? 0),
                             priceHt: Number(item.priceHt || 0),
                             serialNumber: item.serialNumber,
                         }))}

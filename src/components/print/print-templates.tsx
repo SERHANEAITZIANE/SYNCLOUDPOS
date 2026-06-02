@@ -189,7 +189,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
     // Group TVA by rate
     const tvaBreakdown: Record<number, { base: number, amount: number }> = {}
     items.forEach(item => {
-        const rate = Number(item.tvaRate || 19)
+        const rate = Number(item.tvaRate ?? 0)
         const ht = item.quantity * (item.priceHt || item.unitPrice / (1 + rate / 100))
         const tva = ht * (rate / 100)
         if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 }
@@ -268,7 +268,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                     </thead>
                     <tbody>
                         {items.map((item, i) => {
-                            const rate = Number(item.tvaRate || 19)
+                            const rate = Number(item.tvaRate ?? 0)
                             const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
                             const lineHT = item.quantity * ht
                             return (
@@ -661,7 +661,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                     </thead>
                     <tbody>
                         {items.map((item, i) => {
-                            const rate = Number(item.tvaRate || 19)
+                            const rate = Number(item.tvaRate ?? 0)
                             const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
                             const lineHT = item.quantity * ht
                             return (

@@ -133,7 +133,7 @@ export const PosClient: FC<PosClientProps> = ({
     const [quickPrice, setQuickPrice] = useState(0)
     const [quickWholesalePrice, setQuickWholesalePrice] = useState(0)
     const [quickDealerPrice, setQuickDealerPrice] = useState(0)
-    const [quickTva, setQuickTva] = useState(19)
+    const [quickTva, setQuickTva] = useState(storeData?.tvaEnabled ? 19 : 0)
     const [quickBarcodes, setQuickBarcodes] = useState<{ value: string; label: string }[]>([])
     const [quickImages, setQuickImages] = useState<{ url: string }[]>([])
     const [quickStock, setQuickStock] = useState(0)
@@ -288,7 +288,7 @@ export const PosClient: FC<PosClientProps> = ({
                         categoryId: quickCategoryId,
                         wholesalePrice: Number(newProduct.wholesalePrice || newProduct.price),
                         dealerPrice: Number(newProduct.dealerPrice || newProduct.price),
-                        tvaRate: Number(newProduct.tvaRate ?? 19),
+                        tvaRate: storeData?.tvaEnabled ? Number(newProduct.tvaRate ?? 0) : 0,
                         imageUrl: newProduct.images?.[0]?.url || "",
                         isFeatured: newProduct.isFeatured || false,
                         barcodes: newProduct.barcodes?.map((b: any) => b.value) || []
@@ -314,7 +314,7 @@ export const PosClient: FC<PosClientProps> = ({
                         dealerPrice: derivedProduct.dealerPrice,
                         cost: derivedProduct.cost,
                         tvaRate: derivedProduct.tvaRate,
-                        priceHt: currentPrice / (1 + (derivedProduct.tvaRate ?? 19) / 100),
+                        priceHt: currentPrice / (1 + (derivedProduct.tvaRate ?? 0) / 100),
                         quantity: 1,
                         image: derivedProduct.imageUrl
                     })
@@ -475,7 +475,7 @@ export const PosClient: FC<PosClientProps> = ({
                 price: Number(item.unitPrice), // Keep historical order unit price
                 retailPrice: Number(item.unitPrice),
                 cost: Number(item.product.cost || 0),
-                tvaRate: Number(item.tvaRate || 19),
+                tvaRate: storeData?.tvaEnabled ? Number(item.tvaRate ?? 0) : 0,
                 priceHt: Number(item.priceHt || item.unitPrice),
                 quantity: item.quantity,
                 image: item.product.images?.[0]?.url,
@@ -545,7 +545,7 @@ export const PosClient: FC<PosClientProps> = ({
                         dealerPrice: p.dealerPrice,
                         cost: p.cost,
                         tvaRate: p.tvaRate,
-                        priceHt: currentPrice / (1 + (p.tvaRate ?? 19) / 100),
+                        priceHt: currentPrice / (1 + (p.tvaRate ?? 0) / 100),
                         quantity: parsedQuantity,
                         image: p.imageUrl
                     });
@@ -584,7 +584,7 @@ export const PosClient: FC<PosClientProps> = ({
                 dealerPrice: product.dealerPrice,
                 cost: product.cost,
                 tvaRate: product.tvaRate,
-                priceHt: currentPrice / (1 + (product.tvaRate ?? 19) / 100),
+                priceHt: currentPrice / (1 + (product.tvaRate ?? 0) / 100),
                 quantity: 1,
                 image: product.imageUrl
             })
@@ -908,7 +908,7 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                         <ScrollArea className="w-full whitespace-nowrap">
-                            <div className="flex w-max space-x-1.5 lg:space-x-3 pb-2 px-0.5">
+                            <div className="grid grid-rows-2 grid-flow-col gap-1.5 lg:gap-3 pb-2 px-0.5 w-max">
                                 <Button
                                     variant={selectedCategory === null ? "default" : "outline"}
                                     onClick={() => setSelectedCategory(null)}
@@ -983,7 +983,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                     dealerPrice: product.dealerPrice,
                                                     cost: product.cost,
                                                     tvaRate: product.tvaRate,
-                                                    priceHt: currentPrice / (1 + (product.tvaRate ?? 19) / 100),
+                                                    priceHt: currentPrice / (1 + (product.tvaRate ?? 0) / 100),
                                                     quantity: 1,
                                                     image: product.imageUrl
                                                 })

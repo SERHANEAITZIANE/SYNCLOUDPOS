@@ -3,7 +3,7 @@
 import * as z from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
 import { ArrowDownCircle, ArrowUpCircle, Calendar, Clock } from "lucide-react"
 import { format } from "date-fns"
@@ -31,6 +31,7 @@ interface TransactionModalProps {
     isOpen: boolean
     onClose: () => void
     accounts: TreasuryAccountColumn[]
+    defaultType?: "CREDIT" | "DEBIT"
 }
 
 const now = () => {
@@ -38,7 +39,7 @@ const now = () => {
     return { date: format(d, "yyyy-MM-dd"), time: format(d, "HH:mm") }
 }
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, accounts }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, accounts, defaultType = "CREDIT" }) => {
     const [loading, setLoading] = useState(false)
     const { date: defaultDate, time: defaultTime } = now()
 
@@ -46,13 +47,26 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
         resolver: zodResolver(TransactionFormSchema),
         defaultValues: {
             accountId: "",
-            type: "CREDIT",
+            type: defaultType,
             amount: 0,
             description: "",
             date: defaultDate,
             time: defaultTime,
         }
     })
+
+    useEffect(() => {
+        if (isOpen) {
+            form.reset({
+                accountId: "",
+                type: defaultType,
+                amount: 0,
+                description: "",
+                date: defaultDate,
+                time: defaultTime,
+            })
+        }
+    }, [isOpen, defaultType])
 
     const onSubmit = async (values: any) => {
         try {
@@ -82,8 +96,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                     }
                 </div>
                 <div>
-                    <h2 className="text-lg font-semibold">Saisie manuelle</h2>
-                    <p className="text-sm text-muted-foreground">Enregistrer une entrée ou une sortie de fonds</p>
+                    <h2 className="text-lg font-semibold">Saisie Hors-ERP (Non-justifiée)</h2>
+                    <p className="text-sm text-muted-foreground">Enregistrer une entrée ou sortie de caisse / banque (Hors ventes/achats)</p>
                 </div>
             </div>
             <Separator className="mb-4" />

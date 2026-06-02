@@ -247,7 +247,7 @@ export async function generateSalesOrderPDF(
         : [["N°", "Désignation", "Qté", "P.U (DA)", "Montant (DA)"]]
 
     const tableBody = salesOrder.items.map((item, i) => {
-        const rate = Number(item.tvaRate || 19)
+        const rate = Number(item.tvaRate ?? 0)
         const ht = Number(item.priceHt) || Number(item.unitPrice) / (1 + rate / 100)
         const lineHT = item.quantity * ht
         if (isInvoiceOrQuote) {
@@ -296,7 +296,7 @@ export async function generateSalesOrderPDF(
     if (isInvoiceOrQuote) {
         const tvaBreakdown: Record<number, { base: number; amount: number }> = {}
         salesOrder.items.forEach(item => {
-            const rate = Number(item.tvaRate || 19)
+            const rate = Number(item.tvaRate ?? 0)
             const ht = Number(item.priceHt) || Number(item.unitPrice) / (1 + rate / 100)
             const htLine = item.quantity * ht
             const tva = htLine * (rate / 100)

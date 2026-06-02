@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { createOrder } from "@/actions/orders"
 import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
+import { createCustomer } from "@/actions/customers"
 import dynamic from "next/dynamic"
 const PaymentModal = dynamic(() => import("./payment-modal").then(m => m.PaymentModal), { ssr: false })
 import { cn } from "@/lib/utils"
@@ -44,9 +45,57 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         const isCurrentlyElectronics = !!(isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr"));
         cart.setForceElectronicsMode(isCurrentlyElectronics);
     }, [isElectronicsStore, storeData?.isElectronics, storeData?.name, cart.setForceElectronicsMode]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "F3") {
+                e.preventDefault();
+                setOpenCustomer(prev => !prev);
+            }
+            if (e.key === "F4") {
+                e.preventDefault();
+                setOpenCustomer(false);
+                setNewCustomerModalOpen(true);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const [openCustomer, setOpenCustomer] = useState(false)
+
+    const [newCustomerModalOpen, setNewCustomerModalOpen] = useState(false)
+    const [newCustomerName, setNewCustomerName] = useState("")
+    const [newCustomerPhone, setNewCustomerPhone] = useState("")
+
+    const handleCreateCustomer = async () => {
+        if (!newCustomerName.trim()) return
+        try {
+            setLoading(true)
+            const result = await createCustomer({
+                name: newCustomerName.trim(),
+                phone: newCustomerPhone.trim() || undefined,
+                clientType: "RETAIL"
+            })
+            if (result.error) {
+                toast.error(result.error)
+            } else if (result.id) {
+                toast.success("Client créé et sélectionné !")
+                cart.setCustomer(result.id, newCustomerName.trim())
+                cart.setClientType("RETAIL")
+                setNewCustomerModalOpen(false)
+                setNewCustomerName("")
+                setNewCustomerPhone("")
+                router.refresh()
+            }
+        } catch (error) {
+            toast.error("Erreur lors de la création du client")
+        } finally {
+            setLoading(false)
+        }
+    }
     const [editingItem, setEditingItem] = useState<any>(null)
     const [editQuantity, setEditQuantity] = useState("")
     const [editPrice, setEditPrice] = useState("")
@@ -253,6 +302,41 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={newCustomerModalOpen} onOpenChange={setNewCustomerModalOpen}>
+                <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-black">Nouveau Client</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="cust-name" className="text-xs font-bold text-gray-700 dark:text-slate-300">Nom complet *</Label>
+                            <Input
+                                id="cust-name"
+                                value={newCustomerName}
+                                onChange={(e) => setNewCustomerName(e.target.value)}
+                                placeholder="Ahmed Benali"
+                                className="rounded-xl border-gray-200 dark:border-slate-800"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="cust-phone" className="text-xs font-bold text-gray-700 dark:text-slate-300">Téléphone (Optionnel)</Label>
+                            <Input
+                                id="cust-phone"
+                                value={newCustomerPhone}
+                                onChange={(e) => setNewCustomerPhone(e.target.value)}
+                                placeholder="0555123456"
+                                className="rounded-xl border-gray-200 dark:border-slate-800"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setNewCustomerModalOpen(false)} className="rounded-xl font-bold">Annuler</Button>
+                        <Button onClick={handleCreateCustomer} disabled={loading || !newCustomerName.trim()} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Enregistrer</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <Suspense fallback={null}>
                 <PaymentModal
                     isOpen={open}
@@ -298,75 +382,106 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
 
                 {/* Customer section */}
                 <div className="px-6 pb-2 border-b border-gray-100 dark:border-slate-800 shrink-0 space-y-2">
-                    <Popover open={openCustomer} onOpenChange={setOpenCustomer}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={openCustomer}
-                                className="w-full justify-between h-12 rounded-2xl bg-[#f8f9fa] dark:bg-[#1e293b] border-gray-200 dark:border-slate-700 text-base font-semibold text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-[#f8f9fa] dark:hover:bg-[#1e293b] shadow-sm"
-                            >
-                                <span className="truncate pr-2 border-none">
-                                    {activeSession?.customerId
-                                        ? customers.find((c) => c.id === activeSession.customerId)?.name
-                                        : t("walkingCustomer")}
-                                </span>
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[340px] md:w-[400px] p-0 rounded-2xl z-[99999]" align="start">
-                            <Command>
-                                <CommandInput placeholder={t("searchClient")} className="h-11" />
-                                <CommandList>
-                                    <CommandEmpty>{t("noClientFound")}</CommandEmpty>
-                                    <CommandGroup>
-                                        <CommandItem
-                                            value="Walking Customer No Name"
-                                            onSelect={() => {
-                                                cart.clearCustomer();
-                                                cart.setClientType("RETAIL");
-                                                setOpenCustomer(false);
-                                                setUsePointsMode(false);
-                                                setLoyaltyPointsToUse(0);
-                                            }}
-                                            className="font-medium cursor-pointer py-3"
-                                        >
-                                            <Check className={cn("mr-2 h-4 w-4", !activeSession?.customerId ? "opacity-100" : "opacity-0")} />
-                                            {t("walkingCustomer")}
-                                        </CommandItem>
-                                        {customers.map((c) => (
+                    <div className="flex gap-2 w-full">
+                        <Popover open={openCustomer} onOpenChange={setOpenCustomer}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openCustomer}
+                                    className="flex-1 justify-between h-12 rounded-2xl bg-[#f8f9fa] dark:bg-[#1e293b] border-gray-200 dark:border-slate-700 text-base font-semibold text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-[#f8f9fa] dark:hover:bg-[#1e293b] shadow-sm truncate"
+                                >
+                                    <div className="flex items-center gap-2 truncate pr-2 border-none">
+                                        <span className="bg-slate-200 dark:bg-slate-800 text-[10px] font-black px-1.5 py-0.5 rounded border border-gray-300/30 dark:border-slate-700/50 shrink-0 text-gray-500 dark:text-slate-400">F3</span>
+                                        <span className="truncate">
+                                            {activeSession?.customerId
+                                                ? customers.find((c) => c.id === activeSession.customerId)?.name
+                                                : t("walkingCustomer")}
+                                        </span>
+                                    </div>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[340px] md:w-[400px] p-0 rounded-2xl z-[99999]" align="start">
+                                <Command>
+                                    <CommandInput placeholder={t("searchClient")} className="h-11" />
+                                    <CommandList>
+                                        <CommandEmpty>
+                                            <div className="p-3 text-center">
+                                                <p className="text-sm text-muted-foreground">{t("noClientFound")}</p>
+                                                <Button 
+                                                    type="button" 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="mt-2 text-xs font-bold gap-1 rounded-xl text-emerald-600 border-emerald-250 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800"
+                                                    onClick={() => {
+                                                        setOpenCustomer(false);
+                                                        setNewCustomerModalOpen(true);
+                                                    }}
+                                                >
+                                                    <PlusCircle className="h-3.5 w-3.5" /> Créer ce client (F4)
+                                                </Button>
+                                            </div>
+                                        </CommandEmpty>
+                                        <CommandGroup>
                                             <CommandItem
-                                                key={c.id}
-                                                value={`${c.name} ${c.phone || ''} ${c.barcode || ''}`}
+                                                value="Walking Customer No Name"
                                                 onSelect={() => {
-                                                    cart.setCustomer(c.id, c.name);
-                                                    if (c.clientType) {
-                                                        cart.setClientType(c.clientType as any);
-                                                    } else {
-                                                        cart.setClientType("RETAIL");
-                                                    }
+                                                    cart.clearCustomer();
+                                                    cart.setClientType("RETAIL");
                                                     setOpenCustomer(false);
                                                     setUsePointsMode(false);
                                                     setLoyaltyPointsToUse(0);
                                                 }}
                                                 className="font-medium cursor-pointer py-3"
                                             >
-                                                <Check className={cn("mr-2 h-4 w-4", activeSession?.customerId === c.id ? "opacity-100" : "opacity-0")} />
-                                                <div className="flex flex-col">
-                                                    <span>{c.name}</span>
-                                                    <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                                                        {c.phone}{c.phone && (c.barcode || c.loyaltyPoints) ? ' ·' : ''}
-                                                        {c.barcode && ` ${c.barcode}`}
-                                                        {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
-                                                    </span>
-                                                </div>
+                                                <Check className={cn("mr-2 h-4 w-4", !activeSession?.customerId ? "opacity-100" : "opacity-0")} />
+                                                {t("walkingCustomer")}
                                             </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
+                                            {customers.map((c) => (
+                                                <CommandItem
+                                                    key={c.id}
+                                                    value={`${c.name} ${c.phone || ''} ${c.barcode || ''}`}
+                                                    onSelect={() => {
+                                                        cart.setCustomer(c.id, c.name);
+                                                        if (c.clientType) {
+                                                            cart.setClientType(c.clientType as any);
+                                                        } else {
+                                                            cart.setClientType("RETAIL");
+                                                        }
+                                                        setOpenCustomer(false);
+                                                        setUsePointsMode(false);
+                                                        setLoyaltyPointsToUse(0);
+                                                    }}
+                                                    className="font-medium cursor-pointer py-3"
+                                                >
+                                                    <Check className={cn("mr-2 h-4 w-4", activeSession?.customerId === c.id ? "opacity-100" : "opacity-0")} />
+                                                    <div className="flex flex-col">
+                                                        <span>{c.name}</span>
+                                                        <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                                                            {c.phone}{c.phone && (c.barcode || c.loyaltyPoints) ? ' ·' : ''}
+                                                            {c.barcode && ` ${c.barcode}`}
+                                                            {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
+                                                        </span>
+                                                    </div>
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 border-emerald-250 hover:bg-emerald-100 hover:border-emerald-300 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-900/30 shrink-0 shadow-sm"
+                            onClick={() => setNewCustomerModalOpen(true)}
+                            title="Ajouter un client (F4)"
+                        >
+                            <PlusCircle className="h-5 w-5" />
+                        </Button>
+                    </div>
 
                     {/* Loyalty Points Panel (shown only when a customer with points is selected) */}
                     {selectedCustomer && customerLoyaltyPoints > 0 && (

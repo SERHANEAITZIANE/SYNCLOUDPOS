@@ -122,7 +122,7 @@ export const usePosStore = create(
                         id: `${data.productId || data.id}-${uuidv4().slice(0, 8)}`,
                         quantity: 1
                     }));
-                    const newItems = [...session.items, ...additionalItems];
+                    const newItems = [...additionalItems, ...session.items];
                     return {
                         sessions: state.sessions.map(s =>
                             s.id === state.activeSessionId ? { ...s, items: newItems } : s
@@ -140,7 +140,7 @@ export const usePosStore = create(
                             : item
                     )
                 } else {
-                    newItems = [...session.items, data]
+                    newItems = [data, ...session.items]
                 }
 
                 return {

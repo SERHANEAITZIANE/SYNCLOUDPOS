@@ -49,9 +49,10 @@ interface ProductFormProps {
     initialData: Product | null
     categories: Category[]
     brands: Brand[]
+    tvaEnabled?: boolean
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, brands }) => {
+export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, brands, tvaEnabled = false }) => {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -71,7 +72,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
             dealerPrice: initialData.dealerPrice ? parseFloat(String(initialData.dealerPrice)) : 0,
             stock: initialData.stock,
             minStock: initialData.minStock,
-            tvaRate: initialData.tvaRate ?? 19,
+            tvaRate: initialData.tvaRate ?? 0,
             barcodes: initialData.barcodes?.map(b => ({ value: b.value, label: b.label || "" })) || [],
             description: initialData.description || "",
             categoryId: initialData.categoryId || "",
@@ -82,7 +83,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
         } : {
             name: "", images: [], price: 0, cost: 0, wholesalePrice: 0, dealerPrice: 0,
             stock: 0, minStock: 0, categoryId: "", brandId: "", description: "", barcodes: [],
-            isFeatured: false, isArchived: false, tvaRate: 19,
+            isFeatured: false, isArchived: false, tvaRate: 0,
         }
     } as any)
 
@@ -295,31 +296,38 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                         {renderPriceInput({ name: "wholesalePrice", label: t("fields.wholesalePrice"), description: t("form.wholesalePriceDesc"), icon: Package, color: "green" })}
                                         {renderPriceInput({ name: "dealerPrice", label: t("fields.dealerPrice"), description: t("form.dealerPriceDesc"), icon: Users, color: "purple" })}
                                     </div>
-                                    <div className="mt-4">
-                                        <FormField
-                                            control={form.control}
-                                            name="tvaRate"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel className="text-sm font-semibold text-indigo-700">{t("form.tvaRate")}</FormLabel>
-                                                    <Select disabled={loading} onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
-                                                        <FormControl>
-                                                            <SelectTrigger>
-                                                                <SelectValue placeholder={t("form.selectTva")} />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
-                                                            <SelectItem value="19">{t("form.tva19")}</SelectItem>
-                                                            <SelectItem value="9">{t("form.tva9")}</SelectItem>
-                                                            <SelectItem value="0">{t("form.tva0")}</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormDescription className="text-xs">{t("form.tvaDesc")}</FormDescription>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
+                                    {tvaEnabled ? (
+                                        <div className="mt-4">
+                                            <FormField
+                                                control={form.control}
+                                                name="tvaRate"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-sm font-semibold text-indigo-700">{t("form.tvaRate")}</FormLabel>
+                                                        <Select disabled={loading} onValueChange={(v) => field.onChange(Number(v))} value={String(field.value)}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder={t("form.selectTva")} />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="19">{t("form.tva19")}</SelectItem>
+                                                                <SelectItem value="9">{t("form.tva9")}</SelectItem>
+                                                                <SelectItem value="0">{t("form.tva0")}</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormDescription className="text-xs">{t("form.tvaDesc")}</FormDescription>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-semibold flex items-center gap-2">
+                                            <Wand2 className="h-4 w-4 shrink-0 text-amber-600 animate-pulse" />
+                                            <span>La TVA est désactivée dans les paramètres généraux. Elle ne sera pas appliquée.</span>
+                                        </div>
+                                    )}
 
                                     {/* Visual margin helper */}
                                     <div className="mt-4 p-3 rounded-lg bg-muted/50 border">

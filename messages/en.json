@@ -130,7 +130,8 @@
     "salesJournal": "Sales Journal",
     "purchaseJournal": "Purchase Journal",
     "cheques": "Checks",
-    "reconciliation": "Reconciliation"
+    "reconciliation": "Reconciliation",
+    "returns": "Returns"
   },
   "Common": {
     "quantity": "Quantity",
@@ -1272,6 +1273,8 @@
       "driverTracking": "Driver Tracking",
       "driverPortal": "Driver Portal",
       "journals": "Accounting Journals",
+      "returns": "Returns",
+      "salesJournal": "Accounting Journals",
       "superAdmin": "Super Admin",
       "mobileConnect": "Mobile App",
       "mobileConnectDesc": "Scan QR Code to connect your mobile device",
