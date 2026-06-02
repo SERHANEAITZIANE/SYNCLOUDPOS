@@ -2,6 +2,7 @@
 
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { QRCodeSVG } from "qrcode.react"
 
 // ─── Shared Types ───────────────────────────────────────────────────────────────
 export interface PrintableItem {
@@ -177,6 +178,50 @@ const CustomerBlock = ({ customer, label = "Client" }: { customer?: PrintableCus
 )
 
 
+// ─── BaridiMob Payment Block (Algérie Poste Integration) ─────────────────────
+const BaridiMobPaymentBlock = ({
+    bankAccount,
+    storeName,
+    amount,
+    receiptNumber
+}: {
+    bankAccount?: string | null
+    storeName?: string | null
+    amount: number
+    receiptNumber?: string
+}) => {
+    if (!bankAccount) return null
+
+    // Format BaridiMob structured payment text
+    const qrValue = `Algérie Poste - BaridiMob
+Bénéficiaire: ${storeName || "SYNCLOUDPOS Merchant"}
+RIB/CCP: ${bankAccount}
+Montant: ${amount.toFixed(2)} DA
+Réf: ${receiptNumber || "N/A"}`.trim()
+
+    return (
+        <div className="print-baridimob-box border border-dashed border-gray-300 rounded-lg p-3 mt-4 flex items-center justify-between gap-4 max-w-[340px] bg-gray-50/50" style={{ pageBreakInside: "avoid" }}>
+            <div className="flex-1 space-y-1">
+                <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[#e67e22]">BaridiMob Pay</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+                <p className="text-[9px] text-gray-500 leading-normal font-medium">
+                    Scannez ce QR Code avec votre application BaridiMob pour effectuer le virement instantané sans erreur de saisie.
+                </p>
+                <div className="text-[8.5px] font-mono text-gray-600 mt-1 space-y-0.5">
+                    <div><span className="text-[8px] text-gray-400 font-sans uppercase">RIB:</span> {bankAccount}</div>
+                    {storeName && <div><span className="text-[8px] text-gray-400 font-sans uppercase">Titu:</span> {storeName}</div>}
+                </div>
+            </div>
+            <div className="p-1.5 bg-white border border-gray-200 rounded-md shrink-0 flex items-center justify-center">
+                <QRCodeSVG value={qrValue} size={65} level="M" />
+            </div>
+        </div>
+    )
+}
+
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  1. FACTURE (Invoice) — Premium Modern Design
 // ═════════════════════════════════════════════════════════════════════════════
@@ -338,6 +383,12 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             Mode de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
                         </div>
                     )}
+                    <BaridiMobPaymentBlock
+                        bankAccount={store?.bankAccount}
+                        storeName={store?.name}
+                        amount={totalTTC}
+                        receiptNumber={receiptNumber || `FA-${documentId?.slice(-6) || "000000"}`}
+                    />
                 </div>
 
                 {/* Totals column */}
@@ -507,6 +558,12 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                 <div className="print-bl-notes">
                     <div className="print-tva-title">Observations</div>
                     <div className="print-bl-notes-area" />
+                    <BaridiMobPaymentBlock
+                        bankAccount={store?.bankAccount}
+                        storeName={store?.name}
+                        amount={totalTTC}
+                        receiptNumber={receiptNumber || `BL-${documentId?.slice(-6) || "000000"}`}
+                    />
                 </div>
 
                 <div className="print-totals-box print-totals-box-bl">
@@ -712,6 +769,12 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                         <strong>Note :</strong> Ce document est un devis estimatif et ne constitue pas une facture.
                         Il est valable 30 jours à compter de sa date d&apos;émission.
                     </div>
+                    <BaridiMobPaymentBlock
+                        bankAccount={store?.bankAccount}
+                        storeName={store?.name}
+                        amount={totalTTC}
+                        receiptNumber={receiptNumber || `DE-${documentId?.slice(-6) || "000000"}`}
+                    />
                 </div>
 
                 <div className="print-totals-box print-totals-box-proforma">
