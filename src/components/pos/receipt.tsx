@@ -9,6 +9,8 @@ interface ReceiptItem {
     quantity: number
     price: number
     serialNumber?: string
+    discountAmount?: number
+    discountLabel?: string
 }
 
 interface ReceiptProps {
@@ -87,17 +89,33 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                 <table className="w-full text-sm font-bold">
                     <tbody className="font-black">
                         {items?.map((item, index) => (
-                            <tr key={index} className="border-b border-gray-100 last:border-0">
+                            <tr key={index} className="border-b border-black last:border-0">
                                 <td className="py-2 pr-2 leading-tight break-words text-left">
                                     <div>{item.quantity} X {item.name}</div>
                                     {item.serialNumber && (
-                                        <div className="text-[11px] text-gray-700 italic font-mono mt-0.5">
+                                        <div>
                                             S/N: {item.serialNumber}
+                                        </div>
+                                    )}
+                                    {item.discountAmount && item.discountAmount > 0 && (
+                                        <div className="text-[10px] text-black font-bold mt-0.5">
+                                            🏷️ {item.discountLabel} (-{formatCurrency(item.discountAmount)} DA)
                                         </div>
                                     )}
                                 </td>
                                 <td className="text-right py-2 align-top whitespace-nowrap min-w-[20mm]">
-                                    {formatCurrency(item.price * item.quantity)}
+                                    {item.discountAmount && item.discountAmount > 0 ? (
+                                        <>
+                                            <div className="line-through text-black text-xs font-normal">
+                                                {formatCurrency(item.price * item.quantity)}
+                                            </div>
+                                            <div className="text-black font-black">
+                                                {formatCurrency((item.price * item.quantity) - item.discountAmount)}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        formatCurrency(item.price * item.quantity)
+                                    )}
                                 </td>
                             </tr>
                         ))}

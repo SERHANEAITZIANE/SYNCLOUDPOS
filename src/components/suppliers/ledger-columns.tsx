@@ -20,7 +20,7 @@ export const useSupplierLedgerColumns = (): ColumnDef<LedgerLine>[] => {
         },
         {
             accessorKey: "debit",
-            header: "Achat/Dette",
+            header: "Achat/Emprunt",
             cell: ({ row }) => (
                 <div className="text-right text-red-600 font-medium">
                     {formatCurrency(row.original.debit)}

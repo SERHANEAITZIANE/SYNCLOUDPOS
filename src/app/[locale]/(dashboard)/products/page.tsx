@@ -6,15 +6,15 @@ import { ProductColumn } from "@/components/products/columns"
 const ProductsPage = async ({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string, name?: string }>
+    searchParams: Promise<{ page?: string, name?: string, limit?: string }>
 }) => {
     const params = await searchParams
     const page = Number(params.page) || 1
-    const pageSize = 20
+    const limit = Number(params.limit) || 20
     const search = params.name || ""
 
     // Explicitly destructure items and totalCount from the updated action
-    const { items: products, totalCount } = await getProducts(page, pageSize, search) as { items: any[], totalCount: number }
+    const { items: products, totalCount } = await getProducts(page, limit, search) as { items: any[], totalCount: number }
 
     const formattedProducts: ProductColumn[] = (products || []).map((item) => ({
         id: item.id,
@@ -33,7 +33,7 @@ const ProductsPage = async ({
         images: item.images ? item.images.map((img: any) => ({ url: img.url })) : []
     }))
 
-    const pageCount = Math.ceil(totalCount / pageSize)
+    const pageCount = Math.ceil(totalCount / limit)
 
     return (
         <div className="flex-col">
@@ -43,6 +43,7 @@ const ProductsPage = async ({
                     totalCount={totalCount}
                     pageCount={pageCount}
                     currentPage={page}
+                    currentLimit={limit}
                 />
             </div>
         </div>

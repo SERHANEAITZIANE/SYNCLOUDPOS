@@ -79,7 +79,7 @@ export const OrderSchema = z.object({
     stampTax: z.coerce.number().optional().default(0),
     total: z.coerce.number(),
     paymentMethod: z.enum(["CASH", "CARD", "TRANSFER", "CHECK", "TERM"]).optional().default("CASH"),
-    paidAmount: z.number().min(0).optional(),
+    paidAmount: z.coerce.number().optional(),
     customerId: z.string().optional().nullable(),
     accountId: z.string().optional().nullable(),
     status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]).default("COMPLETED"),

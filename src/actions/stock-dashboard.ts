@@ -29,6 +29,21 @@ export async function getStockDashboardData() {
             orderBy: { name: "asc" }
         })
 
+        // Fetch the latest sale date for each product
+        const lastSales = await db.stockMovement.groupBy({
+            by: ["productId"],
+            where: { tenantId, type: "SALE" },
+            _max: { createdAt: true }
+        })
+
+        // Map product last sale date for fast lookup
+        const lastSaleMap = new Map<string, Date>()
+        lastSales.forEach(s => {
+            if (s._max.createdAt) {
+                lastSaleMap.set(s.productId, s._max.createdAt)
+            }
+        })
+
         // Fetch all stock movements to aggregate
         const movements = await db.stockMovement.findMany({
             where: { tenantId },
@@ -67,6 +82,7 @@ export async function getStockDashboardData() {
         })
 
         // Formulate the product stock records
+        const now = new Date()
         const stockItems = products.map(p => {
             const summary = movementSummary.get(p.id) || { entries: 0, exits: 0, returns: 0, supplierReturns: 0 }
             const activeReservations = p.reservations.reduce((sum, r) => sum + Number(r.quantity), 0)
@@ -75,6 +91,13 @@ export async function getStockDashboardData() {
 
             const cost = Number(p.cost || 0)
             const price = Number(p.price || 0)
+
+            const lastSaleDate = lastSaleMap.get(p.id) || null
+            let daysSinceLastSale: number | null = null
+            if (lastSaleDate) {
+                const diffTime = Math.abs(now.getTime() - lastSaleDate.getTime())
+                daysSinceLastSale = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+            }
 
             return {
                 id: p.id,
@@ -93,7 +116,9 @@ export async function getStockDashboardData() {
                 cost,
                 price,
                 montantAchat: stock * cost,
-                montantVente: stock * price
+                montantVente: stock * price,
+                lastSaleDate: lastSaleDate ? lastSaleDate.toISOString() : null,
+                daysSinceLastSale
             }
         })
 

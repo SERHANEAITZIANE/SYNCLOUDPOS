@@ -183,7 +183,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
     }, [items, activePromotions])
 
     const baseTotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0)
-    const totalAfterPromo = Math.max(0, baseTotal - totalDiscount)
+    const totalAfterPromo = baseTotal - totalDiscount
 
     // Loyalty points: 100 pts = 10 DA => 1 DA = 10 pts
     const POINTS_TO_DA_RATIO = 0.10
@@ -199,7 +199,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
 
     const pointsDiscount = usePointsMode ? (maxUsablePoints * POINTS_TO_DA_RATIO) : 0
 
-    const total = Math.max(0, totalAfterPromo - pointsDiscount)
+    const total = totalAfterPromo - pointsDiscount
 
     useEffect(() => {
         try {
@@ -224,14 +224,20 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
         try {
             const response = await createOrder({
                 storeId: "default",
-                items: items.map((item) => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: item.price,
-                    tvaRate: item.tvaRate,
-                    priceHt: item.priceHt,
-                    serialNumber: item.serialNumber
-                })),
+                items: promotedItems.map((item) => {
+                    const itemDiscount = item.discountAmount || 0;
+                    const netPrice = item.quantity === 0 ? item.price : item.price - (itemDiscount / item.quantity);
+                    const rate = item.tvaRate ?? 19;
+                    const netPriceHt = netPrice / (1 + rate / 100);
+                    return {
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        price: netPrice,
+                        tvaRate: rate,
+                        priceHt: netPriceHt,
+                        serialNumber: item.serialNumber
+                    };
+                }),
                 total: totalTTC,
                 subtotal: subtotal,
                 tvaAmount: tvaAmount,
@@ -381,7 +387,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC) => onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC)}
                     loading={loading}
                     total={total}
-                    items={items}
+                    items={promotedItems}
                     customerName={activeSession?.customerName || undefined}
                     hasCustomer={!!activeSession?.customerId}
                     accounts={accounts}
@@ -392,7 +398,7 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     storeData={storeData}
                 />
             </Suspense>
-            <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-l border-gray-200 dark:border-slate-800 overflow-hidden">
+            <div className="flex h-full flex-col bg-white dark:bg-[#18181b] border-gray-200 dark:border-slate-800 overflow-hidden">
 
                 <div className="flex shrink-0 items-center justify-between p-6 pb-4">
                     <div className="flex flex-col gap-1.5">
@@ -559,113 +565,121 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                             <p className="text-sm opacity-70">{t("scanToAdd")}</p>
                         </div>
                     )}
-                    <div className="flex flex-col gap-1 py-1">
+                    <div className="flex flex-col gap-0.5 py-1">
                         {(() => {
                             const bgColors = [
-                                "bg-rose-50/70 hover:bg-rose-100/70 dark:bg-rose-950/20 dark:hover:bg-rose-900/40",
-                                "bg-sky-50/70 hover:bg-sky-100/70 dark:bg-sky-950/20 dark:hover:bg-sky-900/40",
-                                "bg-emerald-50/70 hover:bg-emerald-100/70 dark:bg-emerald-950/20 dark:hover:bg-emerald-900/40",
-                                "bg-amber-50/70 hover:bg-amber-100/70 dark:bg-amber-950/20 dark:hover:bg-amber-900/40",
-                                "bg-purple-50/70 hover:bg-purple-100/70 dark:bg-purple-950/20 dark:hover:bg-purple-900/40",
-                                "bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-950/20 dark:hover:bg-indigo-900/40"
+                                "bg-rose-50/50 hover:bg-rose-50 dark:bg-rose-950/15 dark:hover:bg-rose-900/30",
+                                "bg-sky-50/50 hover:bg-sky-50 dark:bg-sky-950/15 dark:hover:bg-sky-900/30",
+                                "bg-emerald-50/50 hover:bg-emerald-50 dark:bg-emerald-950/15 dark:hover:bg-emerald-900/30",
+                                "bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-950/15 dark:hover:bg-amber-900/30",
+                                "bg-purple-50/50 hover:bg-purple-50 dark:bg-purple-950/15 dark:hover:bg-purple-900/30",
+                                "bg-indigo-50/50 hover:bg-indigo-50 dark:bg-indigo-950/15 dark:hover:bg-indigo-900/30"
                             ];
                             return [...promotedItems].reverse().map((item, index) => (
                                 <div key={item.id} className={cn(
-                                    "flex flex-col py-4 px-5 rounded-sm border border-transparent transition-all duration-200 group/item",
+                                    "flex flex-col py-2.5 px-3 rounded-lg border border-transparent transition-all duration-150 group/item",
                                     bgColors[index % bgColors.length]
                                 )}>
-                                    <div className="flex justify-between items-start gap-4">
-                                        <div className="flex flex-col gap-2 overflow-hidden w-full">
-                                            <h4 className="font-bold text-gray-900 dark:text-slate-200 uppercase tracking-widest text-[11px] leading-tight pr-4 group-hover/item:text-primary dark:group-hover/item:text-primary transition-colors">
-                                                <span className="text-gray-400 dark:text-gray-500 mr-1.5">{index + 1}.</span>
-                                                {item.name}
-                                            </h4>
-                                            {isElectronics && (
-                                                <div className="mt-1 flex items-center gap-2">
-                                                    <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">S/N:</span>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="N° de Série..."
-                                                        className="flex-1 text-[11px] font-bold text-gray-800 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                                                        value={item.serialNumber || ""}
-                                                        onChange={(e) => cart.updateSerialNumber(item.id, e.target.value)}
-                                                    />
-                                                </div>
-                                            )}
-                                            {/* Promo badge */}
-                                            {item.discountLabel && (
-                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-violet-700 bg-violet-100 dark:bg-violet-900/30 dark:text-violet-400 rounded-full px-2 py-0.5 w-fit">
-                                                    <Tag size={9} /> {item.discountLabel} (-{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(item.discountAmount!)} DA)
-                                                </span>
-                                            )}
-                                            <div className="flex items-center gap-1 group/price">
-                                                <input
-                                                    type="number"
-                                                    className={cn(
-                                                        "w-24 text-sm font-semibold bg-transparent py-0 px-0 focus:outline-none focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-                                                        item.cost && item.price < item.cost
-                                                            ? "text-red-500 font-black underline decoration-wavy decoration-red-500 animate-pulse"
-                                                            : "text-gray-800 dark:text-gray-200"
-                                                    )}
-                                                    value={item.price}
-                                                    onChange={(e) => {
-                                                        const newPrice = parseFloat(e.target.value)
-                                                        if (!isNaN(newPrice) && newPrice >= 0) {
-                                                            if (item.cost && newPrice < item.cost) {
-                                                                toast.error(`⚠️ Vente à perte ! Le prix (${newPrice} DA) est inférieur au coût (${item.cost} DA)`, {
-                                                                    id: `under-cost-${item.id}`
-                                                                })
-                                                            }
-                                                            cart.updatePrice(item.id, newPrice)
-                                                        }
-                                                    }}
-                                                />
-                                                <svg className="text-gray-300 dark:text-gray-600 w-3 h-3 mx-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 10 12 5 17 10" /><polyline points="7 14 12 19 17 14" /></svg>
-                                                <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">DA</span>
-                                            </div>
-                                        </div>
-                                        <div className="font-black text-xl text-gray-900 dark:text-white mt-0.5 whitespace-nowrap leading-none tracking-tight">
+                                    {/* Row 1: Name + Line Total */}
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h4 className="font-semibold text-gray-900 dark:text-slate-200 text-[10px] leading-tight pr-1 group-hover/item:text-primary transition-colors flex-1 min-w-0 truncate">
+                                            <span className="text-gray-400 dark:text-gray-500 mr-1 text-[9px]">{index + 1}.</span>
+                                            {item.name}
+                                        </h4>
+                                        <div className="font-black text-sm text-gray-900 dark:text-white whitespace-nowrap leading-none tracking-tight tabular-nums shrink-0">
                                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.price * item.quantity)}
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between mt-4">
-                                        <div className="flex items-center gap-4">
+
+                                    {/* Electronics S/N */}
+                                    {isElectronics && (
+                                        <div className="mt-1.5 flex items-center gap-1.5">
+                                            <span className="text-[8px] font-bold uppercase text-gray-400 tracking-wider shrink-0">S/N:</span>
+                                            <input
+                                                type="text"
+                                                placeholder="N° de Série..."
+                                                className="flex-1 text-[10px] font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 rounded py-0.5 px-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                value={item.serialNumber || ""}
+                                                onChange={(e) => cart.updateSerialNumber(item.id, e.target.value)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Promo badge */}
+                                    {item.discountLabel && (
+                                        <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider text-violet-700 bg-violet-100 dark:bg-violet-900/30 dark:text-violet-400 rounded-full px-1.5 py-px w-fit mt-1">
+                                            <Tag size={8} /> {item.discountLabel} (-{new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(item.discountAmount!)} DA)
+                                        </span>
+                                    )}
+
+                                    {/* Row 2: Price + Qty Controls + Actions */}
+                                    <div className="flex items-center justify-between mt-1.5 gap-2">
+                                        {/* Editable price */}
+                                        <div className="flex items-center gap-0.5 min-w-0">
+                                            <input
+                                                type="number"
+                                                className={cn(
+                                                    "w-16 text-[11px] font-semibold bg-transparent py-0 px-0 focus:outline-none focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none tabular-nums",
+                                                    item.cost && item.price < item.cost
+                                                        ? "text-red-500 font-black underline decoration-wavy decoration-red-500"
+                                                        : "text-gray-600 dark:text-gray-300"
+                                                )}
+                                                value={item.price}
+                                                onChange={(e) => {
+                                                    const newPrice = parseFloat(e.target.value)
+                                                    if (!isNaN(newPrice) && newPrice >= 0) {
+                                                        if (item.cost && newPrice < item.cost) {
+                                                            toast.error(`⚠️ Vente à perte ! Le prix (${newPrice} DA) est inférieur au coût (${item.cost} DA)`, {
+                                                                id: `under-cost-${item.id}`
+                                                            })
+                                                        }
+                                                        cart.updatePrice(item.id, newPrice)
+                                                    }
+                                                }}
+                                            />
+                                            <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500">DA</span>
+                                        </div>
+
+                                        {/* Quantity controls */}
+                                        <div className="flex items-center gap-0 bg-gray-100/80 dark:bg-slate-800/60 rounded-lg border border-gray-200/50 dark:border-slate-700/50">
                                             <button
-                                                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center -ml-2"
+                                                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center rounded-l-lg hover:bg-gray-200/50 dark:hover:bg-slate-700/50"
                                                 onClick={() => cart.updateQuantity(item.id, item.quantity - 1)}
                                             >
-                                                <Minus strokeWidth={2} size={16} />
+                                                <Minus strokeWidth={2} size={12} />
                                             </button>
-                                            <span className="w-4 text-center font-black text-gray-900 dark:text-gray-100 text-base">{item.quantity}</span>
+                                            <span className="w-6 text-center font-black text-gray-900 dark:text-gray-100 text-[11px] tabular-nums">{item.quantity}</span>
                                             <button
-                                                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center"
+                                                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center rounded-r-lg hover:bg-gray-200/50 dark:hover:bg-slate-700/50"
                                                 onClick={() => cart.updateQuantity(item.id, item.quantity + 1)}
                                             >
-                                                <Plus strokeWidth={2} size={16} />
+                                                <Plus strokeWidth={2} size={12} />
                                             </button>
                                         </div>
-                                        <div className="flex items-center gap-2 text-gray-300 dark:text-gray-600">
+
+                                        {/* Action buttons */}
+                                        <div className="flex items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity duration-150">
                                             {activeSession?.customerId && activeSession.customerName?.toUpperCase() !== "DIVERS" && activeSession.customerName?.toUpperCase() !== "PASSAGER" && (
                                                 <button
                                                     type="button"
-                                                    className="w-8 h-8 flex items-center justify-center hover:text-indigo-500 text-slate-400 dark:text-slate-500 transition-colors"
+                                                    className="w-6 h-6 flex items-center justify-center hover:text-indigo-500 text-slate-400 dark:text-slate-500 transition-colors rounded"
                                                     onClick={() => handleViewHistory(item)}
                                                     title="Historique d'achat du client"
                                                 >
-                                                    <History strokeWidth={2.5} size={15} />
+                                                    <History strokeWidth={2.5} size={12} />
                                                 </button>
                                             )}
                                             <button
-                                                className="w-8 h-8 flex items-center justify-center hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                                className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded"
                                                 onClick={() => handleEditItem(item)}
                                             >
-                                                <Edit2 strokeWidth={2.5} size={15} />
+                                                <Edit2 strokeWidth={2.5} size={12} />
                                             </button>
                                             <button
-                                                className="w-8 h-8 flex items-center justify-center hover:text-red-500 transition-colors"
+                                                className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded"
                                                 onClick={() => cart.removeItem(item.id)}
                                             >
-                                                <Trash strokeWidth={2.5} size={15} />
+                                                <Trash strokeWidth={2.5} size={12} />
                                             </button>
                                         </div>
                                     </div>
@@ -675,34 +689,34 @@ export const CartSidebar = ({ customers = [], accounts = [], storeName, storeAdd
                     </div>
                 </ScrollArea>
 
-                <div className="px-6 py-6 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-[#18181b] z-30 shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
-                    <div className="mb-4 space-y-1">
+                <div className="px-5 py-4 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-[#18181b] z-30 shrink-0 shadow-[0_-2px_16px_rgba(0,0,0,0.02)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.15)]">
+                    <div className="mb-3 space-y-1">
                         {/* Discount summary */}
                         {(totalDiscount > 0 || pointsDiscount > 0) && (
-                            <div className="flex justify-between items-center text-sm text-violet-600 dark:text-violet-400 font-semibold bg-violet-50 dark:bg-violet-900/20 px-3 py-1.5 rounded-lg">
-                                <span className="flex items-center gap-1.5"><Gift size={14} /> {t("promoSavings")}</span>
+                            <div className="flex justify-between items-center text-xs text-violet-600 dark:text-violet-400 font-semibold bg-violet-50 dark:bg-violet-900/20 px-2.5 py-1 rounded-lg">
+                                <span className="flex items-center gap-1"><Gift size={12} /> {t("promoSavings")}</span>
                                 <span>-{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(totalDiscount + pointsDiscount)} DA</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center text-gray-900 dark:text-slate-100">
-                            <span className="text-3xl font-black">{t("total")}</span>
-                            <div className="text-right flex items-baseline gap-2">
-                                <span className="text-[3rem] leading-none font-black tracking-tighter">
+                            <span className="text-xl font-black">{t("total")}</span>
+                            <div className="text-right flex items-baseline gap-1.5">
+                                <span className="text-[2.25rem] leading-none font-black tracking-tighter tabular-nums">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}
                                 </span>
-                                <span className="text-lg font-black uppercase">DA</span>
+                                <span className="text-sm font-black uppercase">DA</span>
                             </div>
                         </div>
                     </div>
 
                     <Button
                         id="checkout-button"
-                        className="w-full h-[72px] rounded-2xl text-2xl font-black bg-emerald-600 text-white hover:bg-emerald-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 hover:-translate-y-0.5 flex flex-col items-center justify-center gap-1"
+                        className="w-full h-[56px] rounded-xl text-xl font-black bg-emerald-600 text-white hover:bg-emerald-700 shadow-md hover:shadow-lg transition-all disabled:opacity-50 hover:-translate-y-0.5 flex flex-col items-center justify-center gap-0.5"
                         disabled={items.length === 0 || loading}
                         onClick={() => setOpen(true)}
                     >
                         <span>{t("checkout")}</span>
-                        <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest leading-none">Space / F9</span>
+                        <span className="text-[9px] font-bold opacity-60 uppercase tracking-widest leading-none">Space / F9</span>
                     </Button>
                 </div>
             </div>

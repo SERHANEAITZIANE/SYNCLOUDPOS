@@ -81,6 +81,7 @@
   "Navigation": {
     "dashboard": "Tableau de bord",
     "pos": "Caisse (POS)",
+    "stockControl": "Contrôle du Stock",
     "users": "Utilisateurs",
     "products": "Produits",
     "sales": "Ventes",
@@ -215,6 +216,7 @@
     "catalogue": "Catalogue",
     "importExcel": "Import Excel",
     "outOfStock": "Rupture Stock",
+    "stockControl": "Contrôle du Stock",
     "stockHistoryLabel": "Historique Stock",
     "stockHistory": {
       "title": "Historique des mouvements de stock",
@@ -333,7 +335,13 @@
       "inStock": "En stock",
       "units": "unités",
       "productStatus": "Statut du produit",
-      "saving": "Enregistrement..."
+      "saving": "Enregistrement...",
+      "unsavedChanges": "Modifications non enregistrées"
+    },
+    "messages": {
+      "deleted": "Produit supprimé.",
+      "error": "Erreur lors de la suppression.",
+      "saved": "Produit enregistré avec succès."
     }
   },
   "Suppliers": {

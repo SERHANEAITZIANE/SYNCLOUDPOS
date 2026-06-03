@@ -49,8 +49,8 @@ export const LedgerClient: React.FC<LedgerClientProps> = ({
     const printRef = useRef<HTMLDivElement>(null)
     const [printTemplate, setPrintTemplate] = useState<PrintTemplate>("classique")
 
-    const totalDebits = data.reduce((acc, curr) => acc + curr.debit, 0)
-    const totalCredits = data.reduce((acc, curr) => acc + curr.credit, 0)
+    const totalDebits = data.filter(line => !line.id.startsWith("initial-balance-")).reduce((acc, curr) => acc + curr.debit, 0)
+    const totalCredits = data.filter(line => !line.id.startsWith("initial-balance-")).reduce((acc, curr) => acc + curr.credit, 0)
 
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

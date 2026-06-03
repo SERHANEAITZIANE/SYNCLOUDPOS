@@ -34,12 +34,12 @@ const PosPage = async () => {
     const [tenant, store, categories, brands, accounts, rawCustomers, rawProducts] = await Promise.all([
         db.tenant.findUnique({ where: { id: tenantId } }),
         db.store.findUnique({ where: { id: storeIdToUse } }),
-        getCategories(),
+        getCategories(false),
         getBrands(false),
         getTreasuryAccounts(),
         // Lightweight Customers
         db.customer.findMany({
-            where: { tenantId },
+            where: { tenantId, isArchived: false },
             select: {
                 id: true,
                 name: true,
@@ -54,7 +54,7 @@ const PosPage = async () => {
         // Lightweight Products (cached in Redis for 60s)
         withCache(`pos-products:${tenantId}:${storeIdToUse}`, () =>
             db.product.findMany({
-                where: { tenantId },
+                where: { tenantId, isArchived: false },
                 select: {
                     id: true,
                     name: true,

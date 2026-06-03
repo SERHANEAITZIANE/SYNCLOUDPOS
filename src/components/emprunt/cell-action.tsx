@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Trash } from "lucide-react"
+import { Edit, Trash, ScrollText } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
@@ -160,6 +160,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             )}
 
             <div className="flex items-center gap-1">
+                {data.customerId && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        onClick={() => router.push(`/customers/${data.customerId}/ledger`)}
+                        title="Voir Historique / Log"
+                    >
+                        <ScrollText className="h-4 w-4" />
+                    </Button>
+                )}
                 {canEdit && (
                     <Button
                         variant="ghost"

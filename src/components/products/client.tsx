@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, FileSpreadsheet, FileText, LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, FileSpreadsheet, FileText, LayoutGrid, List, ChevronLeft, ChevronRight, ClipboardList } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, usePathname } from "@/i18n/routing"
 import { useLocale, useTranslations } from "next-intl"
@@ -24,13 +24,15 @@ interface ProductClientProps {
     totalCount: number
     pageCount: number
     currentPage: number
+    currentLimit?: number
 }
 
 export const ProductClient: React.FC<ProductClientProps> = ({
     data,
     totalCount,
     pageCount,
-    currentPage
+    currentPage,
+    currentLimit = 20
 }) => {
     const router = useRouter()
     const pathname = usePathname()
@@ -121,6 +123,9 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                     <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
                         <FileSpreadsheet className="mr-2 h-4 w-4" /> {t("importExcel")}
                     </Button>
+                    <Button variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50" onClick={() => router.push(`/products/stock`)}>
+                        <ClipboardList className="mr-2 h-4 w-4" /> {t("stockControl") || "Contrôle du Stock"}
+                    </Button>
                     <Button variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700 dark:bg-orange-950/30 dark:border-orange-900/50 dark:hover:bg-orange-900/50" onClick={() => router.push(`/products/inventory`)}>
                         {t("outOfStock")}
                     </Button>
@@ -148,30 +153,60 @@ export const ProductClient: React.FC<ProductClientProps> = ({
 
                     <ProductGridView data={data} />
 
-                    <div className="flex items-center justify-end space-x-2 py-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                const newPage = Math.max(1, currentPage - 1)
-                                router.push(pathname + "?" + createQueryString("page", String(newPage)))
-                            }}
-                            disabled={currentPage <= 1}
-                        >
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <div className="text-sm font-medium">{tDataTable("page")} {currentPage} / {pageCount}</div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                const newPage = Math.min(pageCount, currentPage + 1)
-                                router.push(pathname + "?" + createQueryString("page", String(newPage)))
-                            }}
-                            disabled={currentPage >= pageCount}
-                        >
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-zinc-100 dark:border-zinc-800/40 mt-4">
+                        {/* Page size selector on the left */}
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
+                            {[20, 50, 100, 200].map((size) => {
+                                const active = currentLimit === size
+                                return (
+                                    <Button
+                                        key={size}
+                                        variant={active ? "default" : "outline"}
+                                        className={cn(
+                                            "h-7 w-10 text-xs font-semibold p-0",
+                                            active
+                                                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-blue-600"
+                                                : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850"
+                                        )}
+                                        onClick={() => {
+                                            const params = new URLSearchParams(searchParams?.toString() || "")
+                                            params.set("limit", String(size))
+                                            params.set("page", "1")
+                                            router.push(pathname + "?" + params.toString())
+                                        }}
+                                    >
+                                        {size}
+                                    </Button>
+                                )
+                            })}
+                        </div>
+                        {/* Pagination on the right */}
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    const newPage = Math.max(1, currentPage - 1)
+                                    router.push(pathname + "?" + createQueryString("page", String(newPage)))
+                                }}
+                                disabled={currentPage <= 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <div className="text-sm font-medium">{tDataTable("page")} {currentPage} / {pageCount}</div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    const newPage = Math.min(pageCount, currentPage + 1)
+                                    router.push(pathname + "?" + createQueryString("page", String(newPage)))
+                                }}
+                                disabled={currentPage >= pageCount}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             ) : (

@@ -188,6 +188,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
             statLabel: t("stats.products") || "Articles",
             links: [
                 { label: t("links.products") || "Catalogue Produits", href: "/products", icon: Package, description: `${metrics.productsCount}` },
+                { label: t("links.stock") || "Contrôle du Stock", href: "/products/stock", icon: ClipboardList },
                 { label: t("links.categories") || "Familles / Catégories", href: "/categories", icon: List, description: `${metrics.categoriesCount}` },
                 { label: t("links.brands") || "Marques de Produits", href: "/brands", icon: Tag, description: `${metrics.brandsCount}` },
                 { label: t("links.promotions") || "Promotions & Offres", href: "/promotions", icon: Gift },

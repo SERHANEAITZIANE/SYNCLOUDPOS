@@ -740,10 +740,6 @@ export const PosClient: FC<PosClientProps> = ({
             </div>
 
             <div className="flex flex-1 overflow-hidden relative">
-                {/* Cart Sidebar - Hidden on mobile, Left on Desktop */}
-                <div className="hidden lg:flex w-[440px] h-full shrink-0 z-20 transition-all bg-white dark:bg-[#18181b] shadow-[4px_0_24px_rgba(0,0,0,0.2)] border-r border-gray-200 dark:border-gray-800 flex-col">
-                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} />
-                </div>
 
                 {/* Mobile Cart Drawer */}
                 <Sheet open={isMobileCartOpen} onOpenChange={setIsMobileCartOpen}>
@@ -908,35 +904,40 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                         <ScrollArea className="w-full whitespace-nowrap">
-                            <div className="grid grid-rows-2 grid-flow-col gap-1.5 lg:gap-3 pb-2 px-0.5 w-max">
+                            <div className="flex gap-1.5 lg:gap-2 pb-2 px-0.5 w-max">
                                 <Button
                                     variant={selectedCategory === null ? "default" : "outline"}
                                     onClick={() => setSelectedCategory(null)}
                                     className={cn(
-                                        "group rounded-full px-3.5 lg:px-6 h-8 lg:h-10 text-xs lg:text-sm font-extrabold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200",
+                                        "group rounded-full px-2.5 lg:px-4 h-7 lg:h-8 text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
                                         selectedCategory === null 
-                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent shadow-[0_4px_16px_rgba(99,102,241,0.25)] dark:shadow-[0_4px_16px_rgba(99,102,241,0.15)]" 
-                                            : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
+                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.2)]" 
+                                            : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
                                     )}
                                 >
-                                    {getCategoryIcon("all")}
+                                    <span className={cn("h-2 w-2 rounded-full shrink-0 transition-colors", selectedCategory === null ? "bg-white/80" : "bg-indigo-400")} />
                                     <span>{t("allCategories")}</span>
                                 </Button>
                                 {categories.map((category, index) => {
                                     const isActive = selectedCategory === category.id;
+                                    const dotColors = [
+                                        "bg-emerald-400", "bg-sky-400", "bg-rose-400", "bg-amber-400", "bg-purple-400",
+                                        "bg-teal-400", "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-lime-400"
+                                    ];
+                                    const dotColor = dotColors[(index) % dotColors.length];
                                     return (
                                         <Button
                                             key={category.id}
                                             variant={isActive ? "default" : "outline"}
                                             onClick={() => setSelectedCategory(category.id)}
                                             className={cn(
-                                                "group rounded-full px-3.5 lg:px-6 h-8 lg:h-10 text-xs lg:text-sm font-extrabold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200",
+                                                "group rounded-full px-2.5 lg:px-4 h-7 lg:h-8 text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
                                                 isActive 
                                                     ? getCategoryActiveStyle(index + 1)
-                                                    : "bg-white hover:bg-slate-50 text-slate-600 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-300 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
+                                                    : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
                                             )}
                                         >
-                                            {getCategoryIcon(category.name)}
+                                            <span className={cn("h-2 w-2 rounded-full shrink-0 transition-all", isActive ? "bg-white/80 scale-110" : dotColor)} />
                                             <span>{category.name}</span>
                                         </Button>
                                     );
@@ -948,7 +949,7 @@ export const PosClient: FC<PosClientProps> = ({
                     {/* Content Area (Grid or List) */}
                     <ScrollArea className="flex-1 px-3 lg:px-6 pb-20 lg:pb-6">
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1800px]:grid-cols-6 gap-2 lg:gap-3 pb-8">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7 gap-1.5 lg:gap-2 pb-8">
                                 {renderedProducts.map((product) => (
                                     <ProductCard key={product.id} data={product} blockNegativeStock={storeData?.blockNegativeStock ?? false} />
                                 ))}
@@ -1071,6 +1072,11 @@ export const PosClient: FC<PosClientProps> = ({
                             </div>
                         </Button>
                     </div>
+                </div>
+
+                {/* Cart Sidebar - Hidden on mobile, Right on Desktop */}
+                <div className="hidden lg:flex w-[440px] h-full shrink-0 z-20 transition-all bg-white dark:bg-[#18181b] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[-4px_0_24px_rgba(0,0,0,0.3)] border-l border-gray-200 dark:border-gray-800 flex-col">
+                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} />
                 </div>
 
             </div>

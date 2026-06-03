@@ -24,6 +24,8 @@ import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
+import { AlertModal } from "@/components/modals/alert-modal"
+import { toast } from "react-hot-toast"
 import {
     Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form"
@@ -94,12 +96,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                 ? await updateProduct(initialData.id, values)
                 : await createProduct(values)
             if (!result.error) {
+                toast.success(t("messages.saved"))
                 router.refresh()
                 router.push(`/products`)
             } else {
+                toast.error(result.error || tCommon("error"))
                 console.error(result.error)
             }
         } catch (error) {
+            toast.error(tCommon("error"))
             console.error("Something went wrong", error)
         } finally {
             setLoading(false)
@@ -110,10 +115,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
         try {
             setLoading(true)
             const result = await deleteProduct(initialData?.id as string)
-            if (!result.error) { router.refresh(); router.push(`/products`) }
+            if (!result.error) {
+                toast.success(t("messages.deleted"))
+                router.refresh()
+                router.push(`/products`)
+            } else {
+                toast.error(result.error || t("messages.error"))
+            }
         } catch (error) {
+            toast.error(t("messages.error"))
             console.error(error)
-        } finally { setLoading(false); setOpen(false) }
+        } finally {
+            setLoading(false)
+            setOpen(false)
+        }
     }
 
     const renderPriceInput = ({
@@ -171,20 +186,24 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
 
     return (
         <>
+            <AlertModal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onConfirm={onDelete}
+                loading={loading}
+            />
             <div className="flex items-center justify-between">
                 <Heading title={title} description={t("subtitle")} />
                 <div className="flex items-center gap-2">
+                    <PrintBarcodeModal
+                        productName={form.watch("name") || ""}
+                        price={Number(form.watch("price") || 0)}
+                        barcodes={(form.watch("barcodes") || []).map(b => ({ value: b.value, label: b.label || "" }))}
+                    />
                     {initialData && (
-                        <>
-                            <PrintBarcodeModal
-                                productName={initialData.name}
-                                price={initialData.price}
-                                barcodes={initialData.barcodes || []}
-                            />
-                            <Button disabled={loading} variant="destructive" size="icon" onClick={() => setOpen(true)}>
-                                <Trash className="h-4 w-4" />
-                            </Button>
-                        </>
+                        <Button disabled={loading} variant="destructive" size="icon" onClick={() => setOpen(true)}>
+                            <Trash className="h-4 w-4" />
+                        </Button>
                     )}
                 </div>
             </div>
@@ -215,7 +234,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             <FormItem>
                                                 <FormLabel>{t("fields.name")}</FormLabel>
                                                 <FormControl>
-                                                    <Input disabled={loading} placeholder={t("form.namePlaceholder")} {...field} />
+                                                    <Input autoFocus={!initialData} disabled={loading} placeholder={t("form.namePlaceholder")} {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -526,8 +545,35 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                 </CardContent>
                             </Card>
 
-                            {/* SAVE */}
-                            <Button id="global-save-button" disabled={loading} className="w-full" size="lg" type="submit">
+                        </div>
+                    </div>
+
+                    {/* STICKY SAVE FOOTER */}
+                    <div className="sticky bottom-0 z-20 -mx-6 -mb-6 mt-8 p-4 bg-background/95 backdrop-blur border-t flex items-center justify-between gap-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+                        <div>
+                            {form.formState.isDirty && (
+                                <Badge variant="outline" className="animate-pulse bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900 flex items-center gap-1.5 px-3 py-1 text-xs">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+                                    {t("form.unsavedChanges")}
+                                </Badge>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={loading}
+                                onClick={() => router.push(`/products`)}
+                            >
+                                {tCommon("cancel")}
+                            </Button>
+                            <Button
+                                id="global-save-button"
+                                disabled={loading}
+                                size="lg"
+                                type="submit"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md rounded-lg px-6 transition-all"
+                            >
                                 {loading ? t("form.saving") : action}
                                 <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>
                             </Button>

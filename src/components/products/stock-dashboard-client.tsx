@@ -72,6 +72,8 @@ interface StockItem {
     price: number
     montantAchat: number
     montantVente: number
+    lastSaleDate?: string | null
+    daysSinceLastSale?: number | null
 }
 
 interface KPI {
@@ -120,6 +122,9 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
     const [categoryFilter, setCategoryFilter] = useState("all")
     const [brandFilter, setBrandFilter] = useState("all")
     const [alertFilter, setAlertFilter] = useState("all")
+    const [deadStockFilter, setDeadStockFilter] = useState("all")
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
 
     // Detailed Drawer states
     const [selectedProduct, setSelectedProduct] = useState<StockItem | null>(null)
@@ -186,25 +191,58 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
             matchesAlert = item.stock > item.minStock
         }
 
-        return matchesSearch && matchesCategory && matchesBrand && matchesAlert
+        let matchesDeadStock = true
+        if (deadStockFilter !== "all") {
+            if (deadStockFilter === "never") {
+                matchesDeadStock = (item.daysSinceLastSale === null || item.daysSinceLastSale === undefined) && item.stock > 0
+            } else {
+                const limit = parseInt(deadStockFilter, 10)
+                matchesDeadStock = item.daysSinceLastSale !== null && item.daysSinceLastSale !== undefined && item.daysSinceLastSale >= limit && item.stock > 0
+            }
+        }
+
+        return matchesSearch && matchesCategory && matchesBrand && matchesAlert && matchesDeadStock
     })
 
     // Reset pagination when filter changes
     useEffect(() => {
         setCurrentPage(1)
-    }, [searchQuery, categoryFilter, brandFilter, alertFilter])
+    }, [searchQuery, categoryFilter, brandFilter, alertFilter, deadStockFilter])
 
     // --- Tab 2: Entries Filter Logic ---
-    const filteredEntries = initialEntries.filter(entry => 
-        entry.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entry.reason.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredEntries = initialEntries.filter(entry => {
+        const matchesSearch = 
+            entry.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            entry.reason.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const entryDateStr = entry.createdAt.split('T')[0] // 'YYYY-MM-DD'
+        const matchesStartDate = !startDate || entryDateStr >= startDate
+        const matchesEndDate = !endDate || entryDateStr <= endDate
+
+        return matchesSearch && matchesStartDate && matchesEndDate
+    })
 
     // --- Tab 3: Exits Filter Logic ---
-    const filteredExits = initialExits.filter(exit => 
-        exit.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        exit.reason.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredExits = initialExits.filter(exit => {
+        const matchesSearch = 
+            exit.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            exit.reason.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const exitDateStr = exit.createdAt.split('T')[0] // 'YYYY-MM-DD'
+        const matchesStartDate = !startDate || exitDateStr >= startDate
+        const matchesEndDate = !endDate || exitDateStr <= endDate
+
+        return matchesSearch && matchesStartDate && matchesEndDate
+    })
+
+    // Reset pagination for entries/exits when filters change
+    useEffect(() => {
+        setEntriesPage(1)
+    }, [searchQuery, startDate, endDate])
+
+    useEffect(() => {
+        setExitsPage(1)
+    }, [searchQuery, startDate, endDate])
 
     // Paginated Slices
     const indexOfLastItem = currentPage * itemsPerPage
@@ -377,6 +415,57 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                         <SelectItem value="in_stock">Stock Correct</SelectItem>
                                     </SelectContent>
                                 </Select>
+
+                                {/* Dead Stock filter select */}
+                                <Select value={deadStockFilter} onValueChange={setDeadStockFilter}>
+                                    <SelectTrigger className="w-[180px] bg-zinc-50 dark:bg-zinc-900">
+                                        <History className="h-4 w-4 mr-2 opacity-60 text-rose-500" />
+                                        <SelectValue placeholder="Inactivité / Stock Mort" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Toute Inactivité</SelectItem>
+                                        <SelectItem value="30">Inactif &gt; 30 jours</SelectItem>
+                                        <SelectItem value="60">Inactif &gt; 60 jours</SelectItem>
+                                        <SelectItem value="90">Inactif &gt; 90 jours</SelectItem>
+                                        <SelectItem value="never">Jamais vendu</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {(activeTab === "entries" || activeTab === "exits") && (
+                            <div className="flex flex-wrap gap-4 items-center">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Date Début</span>
+                                    <Input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={e => setStartDate(e.target.value)}
+                                        className="w-[140px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs text-slate-700 dark:text-slate-300 border-border/80"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Date Fin</span>
+                                    <Input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={e => setEndDate(e.target.value)}
+                                        className="w-[140px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs text-slate-700 dark:text-slate-300 border-border/80"
+                                    />
+                                </div>
+                                {(startDate || endDate) && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setStartDate("")
+                                            setEndDate("")
+                                        }}
+                                        className="h-8 px-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                                    >
+                                        Effacer
+                                    </Button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -409,6 +498,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                     <tr className="bg-zinc-50 dark:bg-zinc-900/60 border-b border-border/80 text-xs font-semibold uppercase text-slate-500">
                                         <th className="p-4 pl-6">Produit / Caractéristiques</th>
                                         <th className="p-4 text-center">Niveau de Stock</th>
+                                        <th className="p-4 text-center">Dernière Vente</th>
                                         <th className="p-4 text-center">Entrées</th>
                                         <th className="p-4 text-center">Sorties</th>
                                         <th className="p-4 text-center">Retour Client</th>
@@ -423,7 +513,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                 <tbody className="divide-y divide-border/60 text-sm">
                                     {currentStockItems.length === 0 ? (
                                         <tr>
-                                            <td colSpan={11} className="p-8 text-center text-muted-foreground font-medium">
+                                            <td colSpan={12} className="p-8 text-center text-muted-foreground font-medium">
                                                 Aucun produit ne correspond à ces critères.
                                             </td>
                                         </tr>
@@ -457,6 +547,33 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     {getStockStatusBadge(item.stock, item.minStock)}
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    {item.daysSinceLastSale === null || item.daysSinceLastSale === undefined ? (
+                                                        <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400 border border-slate-200/60 font-semibold px-2 py-0.5">
+                                                            Aucune vente
+                                                        </Badge>
+                                                    ) : item.daysSinceLastSale === 0 ? (
+                                                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 font-semibold px-2 py-0.5 animate-pulse">
+                                                            Aujourd'hui
+                                                        </Badge>
+                                                    ) : item.daysSinceLastSale === 1 ? (
+                                                        <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200/60 font-semibold px-2 py-0.5">
+                                                            Hier
+                                                        </Badge>
+                                                    ) : item.daysSinceLastSale > 90 ? (
+                                                        <Badge className="bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 font-semibold px-2 py-0.5">
+                                                            &gt; 90 j ({item.daysSinceLastSale} j)
+                                                        </Badge>
+                                                    ) : item.daysSinceLastSale > 30 ? (
+                                                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 font-semibold px-2 py-0.5">
+                                                            &gt; 30 j ({item.daysSinceLastSale} j)
+                                                        </Badge>
+                                                    ) : (
+                                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                            {item.daysSinceLastSale} {item.daysSinceLastSale > 1 ? "jours" : "jour"}
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
                                                     {item.entries}

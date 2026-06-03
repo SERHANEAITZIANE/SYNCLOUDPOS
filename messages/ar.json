@@ -81,6 +81,7 @@
   "Navigation": {
     "dashboard": "لوحة القيادة",
     "pos": "نقاط البيع",
+    "stockControl": "مراقبة المخزون",
     "users": "المستخدمين",
     "products": "المنتجات",
     "sales": "المبيعات",
@@ -215,6 +216,7 @@
     "catalogue": "الكتالوج",
     "importExcel": "استيراد من إكسل",
     "outOfStock": "نفاد الكمية",
+    "stockControl": "مراقبة المخزون",
     "stockHistoryLabel": "سجل المخزون",
     "stockHistory": {
       "title": "سجل حركات المخزون",
@@ -333,7 +335,13 @@
       "inStock": "متوفر في المخزون",
       "units": "وحدات",
       "productStatus": "حالة المنتج",
-      "saving": "جاري الحفظ..."
+      "saving": "جاري الحفظ...",
+      "unsavedChanges": "تعديلات غير محفوظة"
+    },
+    "messages": {
+      "deleted": "تم حذف المنتج.",
+      "error": "خطأ أثناء الحذف.",
+      "saved": "تم حفظ المنتج بنجاح."
     }
   },
   "Suppliers": {

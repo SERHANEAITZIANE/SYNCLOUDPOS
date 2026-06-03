@@ -133,3 +133,39 @@ export async function updateLoyaltySettings(data: {
     }
 }
 
+export async function getLocalPrinters(): Promise<string[]> {
+    try {
+        const { exec } = await import("child_process")
+        const { promisify } = await import("util")
+        const execAsync = promisify(exec)
+
+        let stdout = ""
+        if (process.platform === "win32") {
+            try {
+                const res = await execAsync('powershell -Command "Get-Printer | Select-Object -ExpandProperty Name"')
+                stdout = res.stdout
+            } catch (err) {
+                const res = await execAsync('wmic printer get name')
+                stdout = res.stdout
+            }
+        } else if (process.platform === "darwin") {
+            const res = await execAsync('lpstat -a | cut -d" " -f1')
+            stdout = res.stdout
+        } else {
+            const res = await execAsync('lpstat -p | cut -d" " -f2')
+            stdout = res.stdout
+        }
+
+        const lines = stdout
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line && line !== "Name" && !line.includes("------"))
+
+        return Array.from(new Set(lines))
+    } catch (error) {
+        console.error("[GET_LOCAL_PRINTERS_ERROR]", error)
+        return []
+    }
+}
+
+

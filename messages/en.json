@@ -81,6 +81,7 @@
   "Navigation": {
     "dashboard": "Dashboard",
     "pos": "POS",
+    "stockControl": "Stock Control",
     "users": "Users",
     "products": "Products",
     "sales": "Sales",
@@ -215,6 +216,7 @@
     "catalogue": "Catalogue",
     "importExcel": "Import Excel",
     "outOfStock": "Out of Stock",
+    "stockControl": "Stock Control",
     "stockHistoryLabel": "Stock History",
     "stockHistory": {
       "title": "Stock Movement History",
@@ -333,7 +335,13 @@
       "inStock": "In Stock",
       "units": "units",
       "productStatus": "Product Status",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "unsavedChanges": "Unsaved changes"
+    },
+    "messages": {
+      "deleted": "Product deleted.",
+      "error": "Error during deletion.",
+      "saved": "Product saved successfully."
     }
   },
   "Suppliers": {

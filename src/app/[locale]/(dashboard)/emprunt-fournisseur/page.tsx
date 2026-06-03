@@ -1,6 +1,7 @@
 import { getSupplierLoans, getSuppliers } from "@/actions/suppliers"
 import { getTreasuryAccounts } from "@/actions/treasury"
 import { EmpruntFournisseurClient } from "@/components/emprunt-fournisseur/client"
+import LoanLayout from "@/components/emprunt/loan-layout"
 
 export default async function EmpruntFournisseurPage() {
     const loans = await getSupplierLoans()
@@ -16,10 +17,12 @@ export default async function EmpruntFournisseurPage() {
     }
 
     return (
-        <div className="flex-col">
-            <div className="flex-1 space-y-4 p-8 pt-6">
-                <EmpruntFournisseurClient data={loans as any[]} suppliers={suppliersList} treasuryAccounts={treasuryAccounts} />
+        <LoanLayout>
+            <div className="flex-col">
+                <div className="flex-1 space-y-4 p-8 pt-6">
+                    <EmpruntFournisseurClient data={loans as any[]} suppliers={suppliersList} treasuryAccounts={treasuryAccounts} />
+                </div>
             </div>
-        </div>
+        </LoanLayout>
     )
 }

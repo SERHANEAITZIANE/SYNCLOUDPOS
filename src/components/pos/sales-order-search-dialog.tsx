@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { Search, Loader2 } from "lucide-react"
+import { Search, Loader2, Ban } from "lucide-react"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
@@ -89,44 +90,72 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                             {t("noOrdersFound", { query })}
                         </div>
                     ) : (
-                        filteredOrders.map((order) => (
-                            <div
-                                key={order.id}
-                                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-primary/50 transition-colors cursor-pointer group"
-                                onClick={() => onSelectOrder(order)}
-                            >
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h4 className="font-bold text-gray-900 dark:text-white uppercase">
-                                            {order.receiptNumber}
-                                        </h4>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${order.status === "VALIDATED" ? "bg-amber-100 text-amber-700" :
-                                            order.status === "PAID" ? "bg-green-100 text-green-700" :
+                        filteredOrders.map((order) => {
+                            const isCancelled = order.status === "CANCELLED";
+                            return (
+                                <div
+                                    key={order.id}
+                                    className={cn(
+                                        "flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group relative overflow-hidden",
+                                        isCancelled
+                                            ? "bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800"
+                                            : "bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-primary/50"
+                                    )}
+                                    onClick={() => onSelectOrder(order)}
+                                >
+                                    {isCancelled && (
+                                        <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-red-200 dark:border-red-800/50">
+                                            <Ban className="h-3 w-3" />
+                                            ANNULÉ
+                                        </div>
+                                    )}
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className={cn(
+                                                "font-bold uppercase",
+                                                isCancelled ? "text-red-600 dark:text-red-400 line-through" : "text-gray-900 dark:text-white"
+                                            )}>
+                                                {order.receiptNumber}
+                                            </h4>
+                                            <span className={cn(
+                                                "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
+                                                order.status === "CANCELLED" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400" :
+                                                order.status === "VALIDATED" ? "bg-amber-100 text-amber-700" :
+                                                order.status === "PAID" ? "bg-green-100 text-green-700" :
                                                 "bg-gray-100 text-gray-700"
-                                            }`}>
-                                            {order.status}
-                                        </span>
+                                            )}>
+                                                {order.status}
+                                            </span>
+                                        </div>
+                                        <div className={cn("text-sm", isCancelled ? "text-red-400 dark:text-red-500" : "text-gray-500")}>
+                                            <span className={cn("font-medium", isCancelled ? "text-red-500 dark:text-red-400" : "text-gray-700 dark:text-gray-300")}>
+                                                {order.customer?.name || t("noCustomer")}
+                                            </span>
+                                            {" • "}
+                                            {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
+                                            {" • "}
+                                            {order.items.length} {t("items")}
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-gray-500">
-                                        <span className="font-medium text-gray-700 dark:text-gray-300">
-                                            {order.customer?.name || t("noCustomer")}
-                                        </span>
-                                        {" • "}
-                                        {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
-                                        {" • "}
-                                        {order.items.length} {t("items")}
+                                    <div className="text-right">
+                                        <div className={cn(
+                                            "font-black text-lg",
+                                            isCancelled ? "text-red-500 dark:text-red-400 line-through" : "text-primary"
+                                        )}>
+                                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(order.total)} DA
+                                        </div>
+                                        <Button size="sm" variant="outline" className={cn(
+                                            "mt-2 h-8 rounded-lg transition-colors",
+                                            isCancelled
+                                                ? "border-red-200 text-red-600 hover:bg-red-100 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/40"
+                                                : "group-hover:bg-primary group-hover:text-white"
+                                        )}>
+                                            {t("loadOrder")}
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className="font-black text-lg text-primary">
-                                        {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(order.total)} DA
-                                    </div>
-                                    <Button size="sm" variant="outline" className="mt-2 h-8 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
-                                        {t("loadOrder")}
-                                    </Button>
-                                </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>

@@ -23,8 +23,8 @@ export const SupplierLedgerClient: React.FC<SupplierLedgerClientProps> = ({
 }) => {
     const columns = useSupplierLedgerColumns()
 
-    const totalDebits = data.reduce((acc, curr) => acc + curr.debit, 0)
-    const totalCredits = data.reduce((acc, curr) => acc + curr.credit, 0)
+    const totalDebits = data.filter(line => !line.id.startsWith("initial-balance-")).reduce((acc, curr) => acc + curr.debit, 0)
+    const totalCredits = data.filter(line => !line.id.startsWith("initial-balance-")).reduce((acc, curr) => acc + curr.credit, 0)
 
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -38,7 +38,7 @@ export const SupplierLedgerClient: React.FC<SupplierLedgerClientProps> = ({
             <div className="flex items-center justify-between pb-4">
                 <Heading
                     title={`Log d'un fournisseur: ${supplierName}`}
-                    description="Historique détaillé des achats, dettes et paiements fournisseurs"
+                    description="Historique détaillé des achats, emprunts et paiements fournisseurs"
                 />
                 <Button variant="outline" onClick={() => window.print()}>
                     <Printer className="mr-2 h-4 w-4" /> Imprimer
@@ -50,7 +50,7 @@ export const SupplierLedgerClient: React.FC<SupplierLedgerClientProps> = ({
             {/* Top Summary Bar */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-6">
                 <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 rounded-lg flex flex-col items-center justify-center">
-                    <span className="text-sm text-red-600 font-semibold mb-1">Total Achats (Dettes)</span>
+                    <span className="text-sm text-red-600 font-semibold mb-1">Total Achats / Emprunts</span>
                     <span className="text-xl font-bold text-red-700">{formatCurrency(totalDebits)}</span>
                 </div>
                 <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900 rounded-lg flex flex-col items-center justify-center">

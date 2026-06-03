@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
-import { updateSystemSettings } from "@/actions/settings"
+import { updateSystemSettings, getLocalPrinters } from "@/actions/settings"
 import { useRouter } from "@/i18n/routing"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -38,45 +38,6 @@ const defaults: PrintingPrefs = {
     showBarcodeOnReceipt: true,
     showLogoOnBL: true,
 }
-
-// ─── Printer presets ───
-const getPrintersA4 = (t: any) => [
-    { value: "default", label: t("printersOptions.default") },
-    { value: "HP LaserJet Pro", label: "HP LaserJet Pro" },
-    { value: "HP DeskJet", label: "HP DeskJet" },
-    { value: "Canon LBP", label: "Canon LBP" },
-    { value: "Brother HL", label: "Brother HL" },
-    { value: "Samsung Xpress", label: "Samsung Xpress" },
-    { value: "Epson EcoTank", label: "Epson EcoTank" },
-    { value: "Gprinter GP-2120TL", label: "Gprinter GP-2120TL" },
-    { value: "custom", label: t("printersOptions.custom") },
-]
-
-const getPrintersThermal = (t: any) => [
-    { value: "default", label: t("printersOptions.default") },
-    { value: "Xprinter XP-58IIH", label: "Xprinter XP-58IIH (58mm)" },
-    { value: "Xprinter XP-80C", label: "Xprinter XP-80C (80mm)" },
-    { value: "Xprinter XP-480B", label: "Xprinter XP-480B" },
-    { value: "Gprinter GP-58130", label: "Gprinter GP-58130 (58mm)" },
-    { value: "Gprinter GP-80160", label: "Gprinter GP-80160 (80mm)" },
-    { value: "Epson TM-T20", label: "Epson TM-T20" },
-    { value: "Epson TM-T88", label: "Epson TM-T88" },
-    { value: "Star TSP100", label: "Star TSP100" },
-    { value: "custom", label: t("printersOptions.custom") },
-]
-
-const getPrintersBarcode = (t: any) => [
-    { value: "default", label: t("printersOptions.default") },
-    { value: "Zebra ZD220", label: "Zebra ZD220" },
-    { value: "Zebra ZD421", label: "Zebra ZD421" },
-    { value: "Zebra ZP450", label: "Zebra ZP450" },
-    { value: "Xprinter XP-480B", label: "Xprinter XP-480B" },
-    { value: "Xprinter XP-235B", label: "Xprinter XP-235B" },
-    { value: "Gprinter GP-1324D", label: "Gprinter GP-1324D" },
-    { value: "Brother QL-820", label: "Brother QL-820" },
-    { value: "DYMO LabelWriter", label: "DYMO LabelWriter" },
-    { value: "custom", label: t("printersOptions.custom") },
-]
 
 // ─── Printer select with optional custom input ───────────────────
 const PrinterSelect = ({
@@ -246,13 +207,38 @@ export const PrintingSettingsForm = ({
     const [posBlFormat, setPosBlFormat] = useState(initialPosBlFormat || "A4")
     const [posBlColumns, setPosBlColumns] = useState(initialPosBlColumns || "standard")
     const [prefs, setPrefs] = useState<PrintingPrefs>(defaults)
+    const [localPrinters, setLocalPrinters] = useState<string[]>([])
 
     useEffect(() => {
         try {
             const stored = localStorage.getItem(STORAGE_KEY)
             if (stored) setPrefs({ ...defaults, ...JSON.parse(stored) })
         } catch { /* noop */ }
+
+        getLocalPrinters().then(printers => {
+            if (printers && printers.length > 0) {
+                setLocalPrinters(printers)
+            }
+        }).catch(err => console.error("Failed to load local printers:", err))
     }, [])
+
+    const getOptions = (currentValue: string) => {
+        const base = [
+            { value: "default", label: t("printersOptions.default") }
+        ]
+        
+        const uniquePrinters = new Set(localPrinters)
+        if (currentValue && currentValue !== "default" && currentValue !== "custom") {
+            uniquePrinters.add(currentValue)
+        }
+        
+        uniquePrinters.forEach(p => {
+            base.push({ value: p, label: p })
+        })
+        
+        base.push({ value: "custom", label: t("printersOptions.custom") })
+        return base
+    }
 
     const handleSave = async () => {
         try {
@@ -295,7 +281,7 @@ export const PrintingSettingsForm = ({
                         hint={t("printerA4.hint")}
                         value={prefs.printerA4}
                         onChange={(v) => setPrefs(p => ({ ...p, printerA4: v }))}
-                        options={getPrintersA4(t)}
+                        options={getOptions(prefs.printerA4)}
                         placeholder={t("printersOptions.customPlaceholder")}
                     />
                     <PrinterSelect
@@ -304,7 +290,7 @@ export const PrintingSettingsForm = ({
                         hint={t("printerReceipt.hint")}
                         value={prefs.printerReceipt}
                         onChange={(v) => setPrefs(p => ({ ...p, printerReceipt: v }))}
-                        options={getPrintersThermal(t)}
+                        options={getOptions(prefs.printerReceipt)}
                         placeholder={t("printersOptions.customPlaceholder")}
                     />
                     <PrinterSelect
@@ -313,7 +299,7 @@ export const PrintingSettingsForm = ({
                         hint={t("printerBarcode.hint")}
                         value={prefs.printerBarcode}
                         onChange={(v) => setPrefs(p => ({ ...p, printerBarcode: v }))}
-                        options={getPrintersBarcode(t)}
+                        options={getOptions(prefs.printerBarcode)}
                         placeholder={t("printersOptions.customPlaceholder")}
                     />
                 </div>

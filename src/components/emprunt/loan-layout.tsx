@@ -5,24 +5,24 @@ import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { Users, Truck } from "lucide-react"
 
-export default function PaymentsLayout({
+export default function LoanLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
     const pathname = usePathname()
-    const isSupplier = pathname.includes("/payments/suppliers")
+    const isSupplier = pathname.includes("/emprunt-fournisseur")
 
     const tabs = [
         {
-            label: "Paiements Clients",
-            href: "/payments" as const,
+            label: "Emprunts Clients",
+            href: "/emprunt" as const,
             icon: Users,
             active: !isSupplier,
         },
         {
-            label: "Paiements Fournisseurs",
-            href: "/payments/suppliers" as const,
+            label: "Emprunts Fournisseurs",
+            href: "/emprunt-fournisseur" as const,
             icon: Truck,
             active: isSupplier,
         },
@@ -34,7 +34,7 @@ export default function PaymentsLayout({
             <div className="border-b px-8 pt-6">
                 <nav className="flex gap-1">
                     {tabs.map((tab) => {
-                        const isFournisseur = tab.href.includes("suppliers");
+                        const isFournisseur = tab.href.includes("fournisseur")
                         return (
                             <Link
                                 key={tab.href}
@@ -53,13 +53,15 @@ export default function PaymentsLayout({
                                 <tab.icon className={cn("h-4 w-4", tab.active ? (isFournisseur ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400") : "")} />
                                 {tab.label}
                             </Link>
-                        );
+                        )
                     })}
                 </nav>
             </div>
 
             {/* Content */}
-            {children}
+            <div className="flex-1">
+                {children}
+            </div>
         </div>
     )
 }

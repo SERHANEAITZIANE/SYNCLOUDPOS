@@ -17,6 +17,8 @@ export interface PrintableItem {
     tvaRate?: number
     priceHt?: number
     serialNumber?: string | null
+    discountAmount?: number
+    discountLabel?: string
 }
 
 export interface PrintableCustomer {
@@ -235,7 +237,9 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
     const tvaBreakdown: Record<number, { base: number, amount: number }> = {}
     items.forEach(item => {
         const rate = Number(item.tvaRate ?? 0)
-        const ht = item.quantity * (item.priceHt || item.unitPrice / (1 + rate / 100))
+        const discountAmount = item.discountAmount || 0
+        const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
+        const ht = item.quantity * (netUnitPriceTTC / (1 + rate / 100))
         const tva = ht * (rate / 100)
         if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 }
         tvaBreakdown[rate].base += ht
@@ -314,8 +318,12 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                     <tbody>
                         {items.map((item, i) => {
                             const rate = Number(item.tvaRate ?? 0)
-                            const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
-                            const lineHT = item.quantity * ht
+                            const originalHT = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const discountAmount = item.discountAmount || 0
+                            
+                            const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
+                            const netHT = netUnitPriceTTC / (1 + rate / 100)
+                            const lineHT = item.quantity * netHT
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
@@ -326,9 +334,27 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                                                 S/N: {item.serialNumber}
                                             </div>
                                         )}
+                                        {discountAmount > 0 && (
+                                            <div className="text-[9px] text-violet-700 dark:text-violet-400 font-bold mt-0.5 pl-1">
+                                                🏷️ {item.discountLabel} (-{formatNumber(discountAmount)} DA)
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="print-td-center">{item.quantity}</td>
-                                    <td className="print-td-right">{formatNumber(ht)}</td>
+                                    <td className="print-td-right">
+                                        {discountAmount > 0 ? (
+                                            <>
+                                                <div className="line-through text-gray-400 text-xs">
+                                                    {formatNumber(originalHT)}
+                                                </div>
+                                                <div>
+                                                    {formatNumber(netHT)}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            formatNumber(originalHT)
+                                        )}
+                                    </td>
                                     <td className="print-td-center">{rate}%</td>
                                     <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
                                 </tr>
@@ -528,7 +554,9 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                     </thead>
                     <tbody>
                         {items.map((item, i) => {
-                            const lineTotal = item.quantity * Number(item.unitPrice)
+                            const originalLineTotal = item.quantity * Number(item.unitPrice)
+                            const discountAmount = item.discountAmount || 0
+                            const lineTotal = originalLineTotal - discountAmount
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
@@ -539,9 +567,27 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                                                 S/N: {item.serialNumber}
                                             </div>
                                         )}
+                                        {discountAmount > 0 && (
+                                            <div className="text-[9px] text-violet-700 dark:text-violet-400 font-bold mt-0.5 pl-1">
+                                                🏷️ {item.discountLabel} (-{formatNumber(discountAmount)} DA)
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="print-td-center">{item.quantity}</td>
-                                    <td className="print-td-right">{formatNumber(Number(item.unitPrice))}</td>
+                                    <td className="print-td-right">
+                                        {discountAmount > 0 ? (
+                                            <>
+                                                <div className="line-through text-gray-400 text-xs">
+                                                    {formatNumber(Number(item.unitPrice))}
+                                                </div>
+                                                <div>
+                                                    {formatNumber(item.quantity === 0 ? 0 : (originalLineTotal - discountAmount) / item.quantity)}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            formatNumber(Number(item.unitPrice))
+                                        )}
+                                    </td>
                                     <td className="print-td-right print-td-bold">{formatNumber(lineTotal)}</td>
                                 </tr>
                             )
@@ -731,8 +777,12 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                     <tbody>
                         {items.map((item, i) => {
                             const rate = Number(item.tvaRate ?? 0)
-                            const ht = item.priceHt || item.unitPrice / (1 + rate / 100)
-                            const lineHT = item.quantity * ht
+                            const originalHT = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const discountAmount = item.discountAmount || 0
+                            
+                            const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
+                            const netHT = netUnitPriceTTC / (1 + rate / 100)
+                            const lineHT = item.quantity * netHT
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
                                     <td className={firstColTdStyle}>{getFirstColValue(item, i)}</td>
@@ -743,9 +793,27 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                                                 S/N: {item.serialNumber}
                                             </div>
                                         )}
+                                        {discountAmount > 0 && (
+                                            <div className="text-[9px] text-violet-700 dark:text-violet-400 font-bold mt-0.5 pl-1">
+                                                🏷️ {item.discountLabel} (-{formatNumber(discountAmount)} DA)
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="print-td-center">{item.quantity}</td>
-                                    <td className="print-td-right">{formatNumber(ht)}</td>
+                                    <td className="print-td-right">
+                                        {discountAmount > 0 ? (
+                                            <>
+                                                <div className="line-through text-gray-400 text-xs">
+                                                    {formatNumber(originalHT)}
+                                                </div>
+                                                <div>
+                                                    {formatNumber(netHT)}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            formatNumber(originalHT)
+                                        )}
+                                    </td>
                                     <td className="print-td-center">{rate}%</td>
                                     <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
                                 </tr>

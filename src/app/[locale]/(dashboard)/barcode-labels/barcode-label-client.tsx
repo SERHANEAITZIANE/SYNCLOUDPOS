@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Printer, Search, Plus, Minus, Tag, X, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,20 @@ interface LabelItem {
 export function BarcodeLabelClient({ products }: { products: Product[] }) {
     const [search, setSearch] = useState("");
     const [labels, setLabels] = useState<LabelItem[]>([]);
-    const [labelSize, setLabelSize] = useState<"small" | "medium" | "large">("medium");
+    const [labelSize, setLabelSize] = useState<"small" | "medium" | "large">("small");
     const [showPrice, setShowPrice] = useState(true);
     const printRef = useRef<HTMLDivElement>(null);
+    const [printerBarcode, setPrinterBarcode] = useState("default");
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs");
+            if (stored) {
+                const prefs = JSON.parse(stored);
+                if (prefs.printerBarcode) setPrinterBarcode(prefs.printerBarcode);
+            }
+        } catch { /* noop */ }
+    }, []);
 
     const filteredProducts = useMemo(() => {
         if (!search) return products.slice(0, 50);
@@ -73,9 +84,9 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
     const totalLabels = labels.reduce((sum, l) => sum + l.quantity, 0);
 
     const labelDimensions = {
-        small: { w: "38mm", h: "21mm", cols: 5, fontSize: "6px", barcodeH: 25, barcodeW: 1.2 },
-        medium: { w: "52mm", h: "30mm", cols: 4, fontSize: "7px", barcodeH: 35, barcodeW: 1.5 },
-        large: { w: "70mm", h: "37mm", cols: 3, fontSize: "8px", barcodeH: 45, barcodeW: 1.8 },
+        small: { w: "40mm", h: "20mm", cols: 5, fontSize: "6.5px", priceFontSize: "17px", barcodeH: 38, barcodeW: 1.2, barcodeWidthCss: "36mm" },
+        medium: { w: "52mm", h: "30mm", cols: 4, fontSize: "8px", priceFontSize: "22px", barcodeH: 55, barcodeW: 1.5, barcodeWidthCss: "46mm" },
+        large: { w: "70mm", h: "37mm", cols: 3, fontSize: "9.5px", priceFontSize: "26px", barcodeH: 70, barcodeW: 1.8, barcodeWidthCss: "64mm" },
     };
 
     const dim = labelDimensions[labelSize];
@@ -85,31 +96,51 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
         const printWindow = window.open("", "_blank");
         if (!printWindow) return;
 
+        const printTitle = printerBarcode !== "default" ? printerBarcode : "Étiquettes Code-barres - SYNCLOUDPOS";
+
         printWindow.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Étiquettes Code-barres - SYNCLOUDPOS</title>
+                <title>${printTitle}</title>
+                <meta name="printer" content="${printerBarcode}" />
+                <meta name="printer-name" content="${printerBarcode}" />
+                <meta name="selected-printer" content="${printerBarcode}" />
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
-                    @page { margin: 5mm; }
-                    body { font-family: Arial, Helvetica, sans-serif; }
+                    @page { 
+                        size: ${dim.w} ${dim.h}; 
+                        margin: 0; 
+                    }
+                    body { 
+                        font-family: Arial, Helvetica, sans-serif; 
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                    }
                     .label-grid {
-                        display: grid;
-                        grid-template-columns: repeat(${dim.cols}, 1fr);
-                        gap: 2mm;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
                     }
                     .label {
                         width: ${dim.w};
                         height: ${dim.h};
-                        border: 0.5px dashed #ccc;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        padding: 1.5mm;
+                        padding: 1mm;
                         page-break-inside: avoid;
+                        page-break-after: always;
+                        break-after: page;
                         overflow: hidden;
+                        box-sizing: border-box;
+                        border: none;
+                    }
+                    .label:last-child {
+                        page-break-after: avoid;
+                        break-after: avoid;
                     }
                     .label-name {
                         font-size: ${dim.fontSize};
@@ -121,19 +152,21 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
                         max-width: 100%;
                         line-height: 1.2;
                     }
-                    .label-barcode { display: flex; justify-content: center; margin: 1mm 0; }
-                    .label-barcode svg { max-width: 100%; height: ${dim.barcodeH}px; }
+                    .label-barcode { display: flex; justify-content: center; margin: 0.5mm 0 0 0; }
+                    .label-barcode svg { width: ${dim.barcodeWidthCss}; height: ${dim.barcodeH}px; }
                     .label-price {
-                        font-size: ${parseInt(dim.fontSize) + 3}px;
+                        font-size: ${dim.priceFontSize};
                         font-weight: 900;
                         letter-spacing: -0.5px;
-                    }
-                    @media print {
-                        .label { border: 0.5px dashed #ddd; }
+                        margin-top: -0.5mm;
                     }
                 </style>
             </head>
-            <body>
+            <body data-printer="${printerBarcode}" data-printer-name="${printerBarcode}" data-selected-printer="${printerBarcode}">
+                <script>
+                    window.printerName = "${printerBarcode}";
+                    window.selectedPrinter = "${printerBarcode}";
+                </script>
                 ${printRef.current.innerHTML}
                 <script>window.onload = () => { window.print(); window.close(); }<\/script>
             </body>
@@ -266,7 +299,7 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
                                         className="rounded-lg text-xs"
                                         onClick={() => setLabelSize(size)}
                                     >
-                                        {size === "small" ? "38×21mm" : size === "medium" ? "52×30mm" : "70×37mm"}
+                                        {size === "small" ? "40×20mm" : size === "medium" ? "52×30mm" : "70×37mm"}
                                     </Button>
                                 ))}
                             </div>
@@ -361,7 +394,7 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
                                         width={dim.barcodeW}
                                         fontSize={10}
                                         margin={2}
-                                        displayValue={true}
+                                        displayValue={false}
                                     />
                                 </div>
                                 {showPrice && (

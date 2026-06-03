@@ -446,7 +446,6 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     )
                 )
                 
-                form.setValue(`items.${pmpRowIndex}.costPrice`, Number(calculatedPmp.toFixed(2)))
                 setPmpOpen(false)
             }
         } catch (err) {

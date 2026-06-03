@@ -527,10 +527,76 @@ export const deleteSalesOrder = async (id: string) => {
             // Restore customer balance if they owed money
             const DEBT_STATUSES = ["VALIDATED"];
             if (DEBT_STATUSES.includes(order.status)) {
-                await tx.customer.update({
-                    where: { id: order.customerId },
-                    data: { balance: { decrement: order.total } }
+                // If it's a POS order, the customer balance was only incremented by total - amountPaid (debt)
+                const decrementAmount = order.source === "POS"
+                    ? Number(order.total) - Number(order.amountPaid)
+                    : Number(order.total);
+                if (decrementAmount !== 0) {
+                    await tx.customer.update({
+                        where: { id: order.customerId },
+                        data: { balance: { decrement: decrementAmount } }
+                    });
+                }
+            }
+
+            // Revert and delete all treasury transactions directly linked to this SalesOrder (e.g. for payments received)
+            const linkedSalesOrderTxs = await tx.treasuryTransaction.findMany({
+                where: { referenceId: id, source: "SALE" }
+            });
+
+            for (const t of linkedSalesOrderTxs) {
+                const amount = Number(t.amount);
+                if (amount > 0) {
+                    await tx.treasuryAccount.update({
+                        where: { id: t.accountId },
+                        data: { balance: { decrement: amount } }
+                    });
+                }
+            }
+
+            await tx.treasuryTransaction.deleteMany({
+                where: { referenceId: id, source: "SALE" }
+            });
+
+            // Revert associated POS Order, order items, and Treasury Transactions if receiptNumber exists
+            if (order.receiptNumber) {
+                const linkedTx = await tx.treasuryTransaction.findFirst({
+                    where: { description: { contains: order.receiptNumber }, source: "SALE" }
                 });
+
+                let linkedOrder = null;
+                if (linkedTx && linkedTx.referenceId) {
+                    linkedOrder = await tx.order.findUnique({ where: { id: linkedTx.referenceId } });
+                } else {
+                    const timeMin = new Date(order.createdAt.getTime() - 60000);
+                    const timeMax = new Date(order.createdAt.getTime() + 60000);
+                    linkedOrder = await tx.order.findFirst({
+                        where: { 
+                            tenantId, 
+                            customerId: order.customerId, 
+                            createdAt: { gte: timeMin, lte: timeMax } 
+                        }
+                    });
+                }
+
+                if (linkedOrder) {
+                    const oldPaidAmount = Number(linkedOrder.paidAmount);
+
+                    // Revert treasury balance
+                    if (oldPaidAmount > 0 && linkedOrder.accountId) {
+                        await tx.treasuryAccount.update({
+                            where: { id: linkedOrder.accountId },
+                            data: { balance: { decrement: oldPaidAmount } }
+                        });
+                        await tx.treasuryTransaction.deleteMany({
+                            where: { referenceId: linkedOrder.id, source: "SALE" }
+                        });
+                    }
+
+                    // Delete the POS order items and the order
+                    await tx.orderItem.deleteMany({ where: { orderId: linkedOrder.id } });
+                    await tx.order.delete({ where: { id: linkedOrder.id } });
+                }
             }
 
             if (isNumberedDocument) {

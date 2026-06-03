@@ -85,20 +85,29 @@ export function applyPromotionsToCart(
                 }
             }
 
-            const totalItemDiscount = discountPerTrigger * triggerCount
-            totalDiscount += totalItemDiscount
-
-            // Attach discount info to the item
             const idx = result.findIndex(i => i.id === item.id)
             if (idx >= 0) {
-                const discountLabel = promo.type === "BUY_X_GET_Y_FREE"
-                    ? `1 acheté = 1 offert`
-                    : `${promo.triggerQty}ème article -${promo.discountType === "PERCENT" ? `${promo.discountValue}%` : `${promo.discountValue} DA`}`
+                const currentItem = result[idx]
+                const existingDiscount = currentItem.discountAmount || 0
+                const maxPossibleDiscount = currentItem.price * currentItem.quantity - existingDiscount
+                const totalItemDiscount = Math.min(maxPossibleDiscount, discountPerTrigger * triggerCount)
 
-                result[idx] = {
-                    ...result[idx],
-                    discountAmount: totalItemDiscount,
-                    discountLabel
+                if (totalItemDiscount > 0) {
+                    totalDiscount += totalItemDiscount
+
+                    const discountLabel = promo.type === "BUY_X_GET_Y_FREE"
+                        ? `${promo.triggerQty - 1} acheté${promo.triggerQty - 1 > 1 ? 's' : ''} = 1 offert`
+                        : `${promo.triggerQty}ème article -${promo.discountType === "PERCENT" ? `${promo.discountValue}%` : `${promo.discountValue} DA`}`
+
+                    const newLabel = currentItem.discountLabel
+                        ? `${currentItem.discountLabel}, ${discountLabel}`
+                        : discountLabel
+
+                    result[idx] = {
+                        ...currentItem,
+                        discountAmount: existingDiscount + totalItemDiscount,
+                        discountLabel: newLabel
+                    }
                 }
             }
         }

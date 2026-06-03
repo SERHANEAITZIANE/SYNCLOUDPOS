@@ -132,7 +132,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
-        return { success: "Product created!", product: createdProduct }
+        return { success: "Product created!", product: JSON.parse(JSON.stringify(createdProduct)) }
     } catch (error) {
         console.error("Error creating product:", error)
         return { error: "Something went wrong!" }
@@ -639,7 +639,7 @@ export const updateProductPrices = async (
             after: prices
         }).catch(() => null)
         
-        return { success: "Prix mis à jour avec succès !", product }
+        return { success: "Prix mis à jour avec succès !", product: JSON.parse(JSON.stringify(product)) }
     } catch (error) {
         console.error("updateProductPrices error:", error)
         return { error: "Erreur lors de la mise à jour des prix." }

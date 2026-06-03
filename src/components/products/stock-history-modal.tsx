@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { ArrowDownRight, ArrowUpRight, History, Loader2, RefreshCcw, Tag } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, History, Loader2, RefreshCcw } from "lucide-react"
 
 import {
     Dialog,

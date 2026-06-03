@@ -21,7 +21,16 @@ interface PaymentModalProps {
     onConfirm: (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => Promise<{ success: boolean; data?: any } | void>
     loading: boolean
     total: number
-    items?: { name: string; quantity: number; price: number; tvaRate?: number; priceHt?: number; serialNumber?: string }[]
+    items?: { 
+        name: string; 
+        quantity: number; 
+        price: number; 
+        tvaRate?: number; 
+        priceHt?: number; 
+        serialNumber?: string;
+        discountAmount?: number;
+        discountLabel?: string;
+    }[]
     customerName?: string
     hasCustomer?: boolean
     accounts?: any[]
@@ -136,7 +145,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const handleConfirm = async () => {
         const finalAccountId = accountId === "none" ? undefined : accountId
-        const actualPaidAmount = method === "CASH" ? Math.min(tenderedAmount, finalTotalTTC) : finalTotalTTC
+        const actualPaidAmount = method === "CASH"
+            ? (finalTotalTTC < 0 ? Math.max(tenderedAmount, finalTotalTTC) : Math.min(tenderedAmount, finalTotalTTC))
+            : finalTotalTTC
         const result = await onConfirm(method, actualPaidAmount, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC)
         if (result && result.success) {
             setFinalItems(items)
@@ -333,7 +344,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                         unitPrice: item.price,
                                         tvaRate: rate,
                                         priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
-                                        serialNumber: item.serialNumber
+                                        serialNumber: item.serialNumber,
+                                        discountAmount: item.discountAmount,
+                                        discountLabel: item.discountLabel
                                     };
                                 })}
                                 customer={{
@@ -362,7 +375,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                         unitPrice: item.price,
                                         tvaRate: rate,
                                         priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
-                                        serialNumber: item.serialNumber
+                                        serialNumber: item.serialNumber,
+                                        discountAmount: item.discountAmount,
+                                        discountLabel: item.discountLabel
                                     };
                                 })}
                                 customer={{

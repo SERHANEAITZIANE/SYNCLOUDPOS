@@ -298,7 +298,7 @@ export const registerSupplierLoan = async (data: { supplierId: string; amount: n
                     balanceAfter: updatedAccount.balance,
                     source: "MANUAL_IN",
                     referenceId: data.supplierId,
-                    description: `Avance reçue du fournisseur: ${supplier?.name || "Inconnu"}`,
+                    description: `Emprunt Fournisseur: ${supplier?.name || "Inconnu"}${data.notes ? ` - ${data.notes}` : ""}`,
                     tenantId
                 }
             })
