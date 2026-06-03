@@ -87,9 +87,10 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
+        const { balance, ...rest } = data
         const customer = await db.customer.update({
             where: { id, tenantId },
-            data
+            data: rest
         })
         revalidatePath("/(dashboard)/customers")
         return { success: "Customer updated", id: customer.id }

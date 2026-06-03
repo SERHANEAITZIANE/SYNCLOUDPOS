@@ -87,9 +87,10 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
+        const { balance, ...rest } = data
         const supplier = await db.supplier.update({
             where: { id, tenantId },
-            data
+            data: rest
         })
         revalidatePath("/(dashboard)/suppliers")
         return { success: "Supplier updated", id: supplier.id }

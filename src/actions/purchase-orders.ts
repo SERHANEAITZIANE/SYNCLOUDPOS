@@ -532,8 +532,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
             }
 
             // ─── Supplier Balance Adjustments ───
-            const oldNet = (existing.status === "FACTURE" || existing.status === "BON_LIVRAISON") ? (Number(existing.total) - oldPaymentAmount) : 0;
-            const newNet = (data.status === "FACTURE" || data.status === "BON_LIVRAISON") ? (data.total - newPaymentAmount) : 0;
+            const oldNet = (existing.status === "FACTURE" || existing.status === "BON_LIVRAISON") ? (Number(existing.total) - oldPaymentAmount) : (-oldPaymentAmount);
+            const newNet = (data.status === "FACTURE" || data.status === "BON_LIVRAISON") ? (data.total - newPaymentAmount) : (-newPaymentAmount);
 
             if (existing.supplierId === data.supplierId) {
                 if (newNet !== oldNet) {
@@ -705,7 +705,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                     where: { referenceId: id, source: "PURCHASE", tenantId }
                 })
                 const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-                const balanceDecrement = total - alreadyPaid
+                const balanceDecrement = total
 
                 await (tx as any).supplier.update({
                     where: { id: order.supplierId },
@@ -824,14 +824,11 @@ export const deletePurchaseOrder = async (id: string) => {
                     data: { balance: { increment: t.amount } }
                 });
 
-                // If it was a FACTURE or BON_LIVRAISON, the transaction was a partial payment, which had decremented supplier balance.
-                // We must increment the supplier balance to cancel that payment decrement.
-                if (order.status === "FACTURE" || order.status === "BON_LIVRAISON") {
-                    await tx.supplier.update({
-                        where: { id: order.supplierId },
-                        data: { balance: { increment: t.amount } }
-                    });
-                }
+                // Always increment the supplier balance to cancel that payment decrement.
+                await tx.supplier.update({
+                    where: { id: order.supplierId },
+                    data: { balance: { increment: t.amount } }
+                });
             }
 
             // Delete the treasury transactions
@@ -839,8 +836,8 @@ export const deletePurchaseOrder = async (id: string) => {
                 where: { referenceId: id, source: "PURCHASE", tenantId }
             });
 
-            // 3. Restore supplier balance if we owed them money initially (FACTURE or BON_LIVRAISON status increments supplier balance)
-            if (order.status === "FACTURE" || order.status === "BON_LIVRAISON") {
+            // 3. Restore supplier balance if the order had incremented it (FACTURE, BON_LIVRAISON, or COMPLETED status)
+            if (["FACTURE", "BON_LIVRAISON", "COMPLETED"].includes(order.status)) {
                 await tx.supplier.update({
                     where: { id: order.supplierId },
                     data: { balance: { decrement: order.total } }

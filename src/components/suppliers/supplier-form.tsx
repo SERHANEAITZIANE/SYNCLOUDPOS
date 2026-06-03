@@ -188,18 +188,33 @@ export const SupplierForm: React.FC<SupplierFormProps> = ({
 
                     {/* Solde Initial */}
                     <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Solde Initial</h3>
+                        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                            {initialData ? "Solde Actuel" : "Solde Initial"}
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormField
                                 control={form.control}
                                 name="balance"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Solde Initial (DA)</FormLabel>
+                                        <FormLabel>{initialData ? "Solde Actuel (DA)" : "Solde Initial (DA)"}</FormLabel>
                                         <FormControl>
-                                            <Input disabled={loading} type="number" min={0} step={0.01} placeholder="0.00" {...field} value={field.value ?? 0} />
+                                            <Input 
+                                                disabled={loading || !!initialData} 
+                                                type="number" 
+                                                min={initialData ? undefined : 0} 
+                                                step={0.01} 
+                                                placeholder="0.00" 
+                                                {...field} 
+                                                value={field.value ?? 0} 
+                                            />
                                         </FormControl>
-                                        <p className="text-xs text-muted-foreground">Le montant que vous devez initialement à ce fournisseur</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {initialData 
+                                                ? "Le solde actuel de ce fournisseur (calculé et non modifiable)" 
+                                                : "Le montant que vous devez initialement à ce fournisseur"
+                                            }
+                                        </p>
                                         <FormMessage />
                                     </FormItem>
                                 )}
