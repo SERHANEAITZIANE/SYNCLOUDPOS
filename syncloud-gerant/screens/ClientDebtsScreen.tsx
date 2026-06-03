@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
     View, Text, ScrollView, StyleSheet, TouchableOpacity,
-    Alert, Linking, Dimensions,
+    ActivityIndicator, RefreshControl, Alert, TextInput, Modal,
+    Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiFetch } from "../lib/api";
 
 type AgingBucket = "0-30" | "30-60" | "60-90" | "90+";
 
@@ -11,23 +13,17 @@ interface ClientDebt {
     id: string;
     name: string;
     phone: string;
-    totalDebt: number;
-    aging: AgingBucket;
-    lastPaymentDate: string;
+    balance: number;
+    agingBucket: AgingBucket;
+    lastSaleDate: string | null;
     daysOverdue: number;
-    status: "normal" | "warned" | "critical";
 }
 
-const MOCK_DEBTS: ClientDebt[] = [
-    { id: "1", name: "Supérette Horizon", phone: "+213555123456", totalDebt: 32000, aging: "90+", lastPaymentDate: "12/02/2026", daysOverdue: 103, status: "critical" },
-    { id: "2", name: "Alimentation El Hanaa", phone: "+213555234567", totalDebt: 15000, aging: "60-90", lastPaymentDate: "08/03/2026", daysOverdue: 78, status: "critical" },
-    { id: "3", name: "Café du Centre", phone: "+213555345678", totalDebt: 12000, aging: "30-60", lastPaymentDate: "28/03/2026", daysOverdue: 58, status: "warned" },
-    { id: "4", name: "Epicerie La Source", phone: "+213555456789", totalDebt: 6000, aging: "30-60", lastPaymentDate: "15/04/2026", daysOverdue: 40, status: "warned" },
-    { id: "5", name: "Mini Market Étoile", phone: "+213555567890", totalDebt: 8500, aging: "0-30", lastPaymentDate: "05/05/2026", daysOverdue: 20, status: "normal" },
-    { id: "6", name: "Dépôt El Baraka", phone: "+213555678901", totalDebt: 4200, aging: "0-30", lastPaymentDate: "12/05/2026", daysOverdue: 13, status: "normal" },
-    { id: "7", name: "Magasin Yasmine", phone: "+213555789012", totalDebt: 18700, aging: "90+", lastPaymentDate: "25/01/2026", daysOverdue: 120, status: "critical" },
-    { id: "8", name: "Café El Mawrid", phone: "+213555890123", totalDebt: 3200, aging: "0-30", lastPaymentDate: "18/05/2026", daysOverdue: 7, status: "normal" },
-];
+interface DebtsData {
+    debtors: ClientDebt[];
+    aging: { bucket0_30: number; bucket30_60: number; bucket60_90: number; bucket90plus: number };
+    totals: { clientsOweUs: number; clientDebtorCount: number };
+}
 
 const AGING_COLORS: Record<AgingBucket, string> = {
     "0-30": "#22c55e",
@@ -36,237 +32,302 @@ const AGING_COLORS: Record<AgingBucket, string> = {
     "90+": "#ef4444",
 };
 
-export default function ClientDebtsScreen() {
+export default function ClientDebtsScreen({ navigation }: any) {
+    const [data, setData] = useState<DebtsData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [filter, setFilter] = useState<AgingBucket | "all">("all");
-    const [debts, setDebts] = useState(MOCK_DEBTS);
 
-    const fmt = (n: number) => n.toLocaleString("fr-FR");
+    // Quick payment modal
+    const [payModal, setPayModal] = useState(false);
+    const [selectedClient, setSelectedClient] = useState<ClientDebt | null>(null);
+    const [payAmount, setPayAmount] = useState("");
+    const [paying, setPaying] = useState(false);
 
-    const filtered = filter === "all" ? debts : debts.filter(d => d.aging === filter);
+    const fmt = (n: number) => Math.abs(n).toLocaleString("fr-FR");
 
-    // Aging summary
-    const agingSummary = {
-        "0-30": debts.filter(d => d.aging === "0-30").reduce((s, d) => s + d.totalDebt, 0),
-        "30-60": debts.filter(d => d.aging === "30-60").reduce((s, d) => s + d.totalDebt, 0),
-        "60-90": debts.filter(d => d.aging === "60-90").reduce((s, d) => s + d.totalDebt, 0),
-        "90+": debts.filter(d => d.aging === "90+").reduce((s, d) => s + d.totalDebt, 0),
+    const fetchDebts = useCallback(async () => {
+        try {
+            const result: DebtsData = await apiFetch("/gerant/debts");
+            setData(result);
+        } catch (e: any) {
+            console.error("[ClientDebts]", e);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => { fetchDebts(); }, [fetchDebts]);
+
+    const handleWhatsApp = (client: ClientDebt) => {
+        const msg = encodeURIComponent(
+            `Bonjour ${client.name}, nous vous rappelons aimablement que votre solde de ${fmt(client.balance)} DA est en attente depuis ${client.daysOverdue} jours. Merci de régulariser. — SynCloudPOS`
+        );
+        Linking.openURL(`whatsapp://send?phone=${client.phone}&text=${msg}`).catch(() =>
+            Alert.alert("Erreur", "WhatsApp non installé")
+        );
     };
-    const totalDebt = debts.reduce((s, d) => s + d.totalDebt, 0);
+
+    const handleCall = (client: ClientDebt) => Linking.openURL(`tel:${client.phone}`);
+
+    const openPayModal = (client: ClientDebt) => {
+        setSelectedClient(client);
+        setPayAmount(String(Math.round(client.balance)));
+        setPayModal(true);
+    };
+
+    const handlePay = async () => {
+        if (!selectedClient || !payAmount || isNaN(Number(payAmount))) return;
+        setPaying(true);
+        try {
+            const res = await apiFetch(`/gerant/client/${selectedClient.id}/payment`, {
+                method: "POST",
+                body: JSON.stringify({ amount: Number(payAmount), note: "Encaissement mobile gérant" }),
+            });
+            Alert.alert("✅ Succès", res.message || "Paiement enregistré");
+            setPayModal(false);
+            setPayAmount("");
+            fetchDebts();
+        } catch (e: any) {
+            Alert.alert("Erreur", e.message || "Erreur lors de l'enregistrement");
+        } finally {
+            setPaying(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color="#f59e0b" />
+            </View>
+        );
+    }
+
+    const debtors = data?.debtors || [];
+    const aging = data?.aging;
+    const totals = data?.totals;
+    const filtered = filter === "all" ? debtors : debtors.filter(d => d.agingBucket === filter);
+
+    const agingSummary = {
+        "0-30": aging?.bucket0_30 || 0,
+        "30-60": aging?.bucket30_60 || 0,
+        "60-90": aging?.bucket60_90 || 0,
+        "90+": aging?.bucket90plus || 0,
+    };
     const maxBucket = Math.max(...Object.values(agingSummary));
 
-    const handleWhatsAppReminder = (client: ClientDebt) => {
-        const message = encodeURIComponent(
-            `Bonjour, nous vous rappelons aimablement que votre solde impayé de ${fmt(client.totalDebt)} DA est en attente depuis ${client.daysOverdue} jours. Merci de régulariser votre situation. — SynCloudPOS`
-        );
-        const url = `whatsapp://send?phone=${client.phone}&text=${message}`;
-        Linking.openURL(url).catch(() => {
-            Alert.alert("Erreur", "WhatsApp n'est pas installé sur cet appareil.");
-        });
-    };
-
-    const handleCall = (client: ClientDebt) => {
-        Linking.openURL(`tel:${client.phone}`);
-    };
-
-    const handleMarkPaid = (clientId: string) => {
-        Alert.alert(
-            "Confirmer l'encaissement",
-            "Marquer cette créance comme totalement payée ?",
-            [
-                { text: "Annuler", style: "cancel" },
-                {
-                    text: "Oui, Encaissé",
-                    style: "destructive",
-                    onPress: () => {
-                        setDebts(prev => prev.filter(d => d.id !== clientId));
-                        Alert.alert("✓ Succès", "Créance encaissée avec succès !");
-                    }
-                },
-            ]
-        );
-    };
-
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-            {/* Total Debt Summary */}
-            <View style={styles.totalCard}>
-                <View style={styles.totalHeader}>
-                    <Ionicons name="warning" size={22} color="#f59e0b" />
-                    <Text style={styles.totalTitle}>Créances Clients Totales</Text>
+        <>
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDebts(); }} tintColor="#f59e0b" />
+                }
+            >
+                {/* Total */}
+                <View style={styles.totalCard}>
+                    <View style={styles.totalHeader}>
+                        <Ionicons name="warning" size={22} color="#f59e0b" />
+                        <Text style={styles.totalTitle}>Créances Clients Totales</Text>
+                    </View>
+                    <Text style={styles.totalValue}>{fmt(totals?.clientsOweUs || 0)} DA</Text>
+                    <Text style={styles.totalSub}>{totals?.clientDebtorCount || 0} clients débiteurs</Text>
                 </View>
-                <Text style={styles.totalValue}>{fmt(totalDebt)} DA</Text>
-                <Text style={styles.totalSub}>{debts.length} clients débiteurs</Text>
-            </View>
 
-            {/* Aging Breakdown Bars */}
-            <Text style={styles.sectionTitle}>RAPPORT D'ÂGE DES CRÉANCES</Text>
-            <View style={styles.agingCard}>
-                {(["0-30", "30-60", "60-90", "90+"] as AgingBucket[]).map(bucket => {
-                    const amount = agingSummary[bucket];
-                    const barWidth = maxBucket > 0 ? (amount / maxBucket) * 100 : 0;
-                    const count = debts.filter(d => d.aging === bucket).length;
-                    return (
-                        <TouchableOpacity
-                            key={bucket}
-                            style={[styles.agingRow, filter === bucket && styles.agingRowActive]}
-                            onPress={() => setFilter(filter === bucket ? "all" : bucket)}
-                            activeOpacity={0.7}
-                        >
-                            <View style={styles.agingLeft}>
-                                <View style={[styles.agingDot, { backgroundColor: AGING_COLORS[bucket] }]} />
-                                <Text style={styles.agingLabel}>{bucket} jours</Text>
-                                <View style={styles.agingCountBadge}>
-                                    <Text style={styles.agingCountText}>{count}</Text>
+                {/* Aging bars */}
+                <Text style={styles.sectionTitle}>RAPPORT D'ÂGE DES CRÉANCES</Text>
+                <View style={styles.agingCard}>
+                    {(["0-30", "30-60", "60-90", "90+"] as AgingBucket[]).map(bucket => {
+                        const amount = agingSummary[bucket];
+                        const count = debtors.filter(d => d.agingBucket === bucket).length;
+                        const barWidth = maxBucket > 0 ? (amount / maxBucket) * 100 : 0;
+                        return (
+                            <TouchableOpacity
+                                key={bucket}
+                                style={[styles.agingRow, filter === bucket && styles.agingRowActive]}
+                                onPress={() => setFilter(filter === bucket ? "all" : bucket)}
+                            >
+                                <View style={styles.agingLeft}>
+                                    <View style={[styles.agingDot, { backgroundColor: AGING_COLORS[bucket] }]} />
+                                    <Text style={styles.agingLabel}>{bucket} jours</Text>
+                                    <View style={styles.agingCountBadge}>
+                                        <Text style={styles.agingCountText}>{count}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.agingBarTrack}>
+                                    <View style={[styles.agingBarFill, { width: `${barWidth}%`, backgroundColor: AGING_COLORS[bucket] }]} />
+                                </View>
+                                <Text style={[styles.agingAmount, { color: AGING_COLORS[bucket] }]}>
+                                    {fmt(amount)} DA
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+
+                {filter !== "all" && (
+                    <TouchableOpacity style={styles.filterBadge} onPress={() => setFilter("all")}>
+                        <Ionicons name="funnel" size={14} color="#3b82f6" />
+                        <Text style={styles.filterText}>Filtre: {filter} jours</Text>
+                        <Ionicons name="close-circle" size={16} color="#64748b" />
+                    </TouchableOpacity>
+                )}
+
+                <Text style={styles.sectionTitle}>
+                    {filter === "all" ? "TOUS LES DÉBITEURS" : `DÉBITEURS ${filter} JOURS`} ({filtered.length})
+                </Text>
+
+                {filtered.length === 0 && (
+                    <View style={styles.emptyCard}>
+                        <Ionicons name="checkmark-circle" size={40} color="#22c55e" />
+                        <Text style={styles.emptyText}>Aucune créance dans cette tranche</Text>
+                    </View>
+                )}
+
+                {filtered.map(client => (
+                    <View key={client.id} style={styles.clientCard}>
+                        <View style={styles.clientHeader}>
+                            <View style={[styles.clientStatusDot, { backgroundColor: AGING_COLORS[client.agingBucket] }]} />
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.clientName}>{client.name}</Text>
+                                <Text style={styles.clientPhone}>{client.phone || "—"}</Text>
+                            </View>
+                            <View style={styles.clientAmountWrap}>
+                                <Text style={[styles.clientAmount, { color: AGING_COLORS[client.agingBucket] }]}>
+                                    {fmt(client.balance)} DA
+                                </Text>
+                                <View style={[styles.agingTag, { backgroundColor: `${AGING_COLORS[client.agingBucket]}20` }]}>
+                                    <Text style={[styles.agingTagText, { color: AGING_COLORS[client.agingBucket] }]}>
+                                        {client.daysOverdue}j
+                                    </Text>
                                 </View>
                             </View>
-                            <View style={styles.agingBarTrack}>
-                                <View style={[styles.agingBarFill, {
-                                    width: `${barWidth}%`,
-                                    backgroundColor: AGING_COLORS[bucket],
-                                }]} />
-                            </View>
-                            <Text style={[styles.agingAmount, { color: AGING_COLORS[bucket] }]}>
-                                {fmt(amount)} DA
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-
-            {/* Filter indicator */}
-            {filter !== "all" && (
-                <TouchableOpacity style={styles.filterBadge} onPress={() => setFilter("all")}>
-                    <Ionicons name="funnel" size={14} color="#3b82f6" />
-                    <Text style={styles.filterText}>Filtre : {filter} jours</Text>
-                    <Ionicons name="close-circle" size={16} color="#64748b" />
-                </TouchableOpacity>
-            )}
-
-            {/* Client Debt Cards */}
-            <Text style={styles.sectionTitle}>
-                {filter === "all" ? "TOUS LES DÉBITEURS" : `DÉBITEURS ${filter} JOURS`} ({filtered.length})
-            </Text>
-
-            {filtered.map(client => (
-                <View key={client.id} style={styles.clientCard}>
-                    {/* Header */}
-                    <View style={styles.clientHeader}>
-                        <View style={[styles.clientStatusDot, {
-                            backgroundColor: client.status === "critical" ? "#ef4444"
-                                : client.status === "warned" ? "#f59e0b" : "#22c55e"
-                        }]} />
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.clientName}>{client.name}</Text>
-                            <Text style={styles.clientPhone}>{client.phone}</Text>
                         </View>
-                        <View style={styles.clientAmountWrap}>
-                            <Text style={[styles.clientAmount, { color: AGING_COLORS[client.aging] }]}>
-                                {fmt(client.totalDebt)} DA
-                            </Text>
-                            <View style={[styles.agingTag, { backgroundColor: `${AGING_COLORS[client.aging]}20` }]}>
-                                <Text style={[styles.agingTagText, { color: AGING_COLORS[client.aging] }]}>
-                                    {client.daysOverdue}j
+
+                        {client.lastSaleDate && (
+                            <View style={styles.clientMeta}>
+                                <Text style={styles.clientMetaText}>
+                                    Dernière vente: {new Date(client.lastSaleDate).toLocaleDateString("fr-FR")}
                                 </Text>
                             </View>
+                        )}
+
+                        <View style={styles.clientActions}>
+                            <TouchableOpacity style={styles.actionBtn} onPress={() => handleWhatsApp(client)}>
+                                <Ionicons name="logo-whatsapp" size={16} color="#22c55e" />
+                                <Text style={[styles.actionText, { color: "#22c55e" }]}>Relancer</Text>
+                            </TouchableOpacity>
+                            {client.phone && (
+                                <TouchableOpacity style={styles.actionBtn} onPress={() => handleCall(client)}>
+                                    <Ionicons name="call-outline" size={16} color="#3b82f6" />
+                                    <Text style={[styles.actionText, { color: "#3b82f6" }]}>Appeler</Text>
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={[styles.actionBtn, styles.actionBtnPay]}
+                                onPress={() => openPayModal(client)}
+                            >
+                                <Ionicons name="cash-outline" size={16} color="#fff" />
+                                <Text style={[styles.actionText, { color: "#fff" }]}>Encaisser</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
+                ))}
+            </ScrollView>
 
-                    {/* Meta */}
-                    <View style={styles.clientMeta}>
-                        <Text style={styles.clientMetaText}>
-                            Dernier paiement : {client.lastPaymentDate}
-                        </Text>
-                    </View>
+            {/* Quick Payment Modal */}
+            <Modal visible={payModal} transparent animationType="slide" onRequestClose={() => setPayModal(false)}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalCard}>
+                        <View style={styles.modalHeader}>
+                            <Ionicons name="cash" size={24} color="#22c55e" />
+                            <Text style={styles.modalTitle}>Encaisser Paiement</Text>
+                            <TouchableOpacity onPress={() => setPayModal(false)}>
+                                <Ionicons name="close-circle" size={24} color="#64748b" />
+                            </TouchableOpacity>
+                        </View>
 
-                    {/* Actions */}
-                    <View style={styles.clientActions}>
-                        <TouchableOpacity
-                            style={styles.actionBtn}
-                            onPress={() => handleWhatsAppReminder(client)}
-                        >
-                            <Ionicons name="logo-whatsapp" size={16} color="#22c55e" />
-                            <Text style={[styles.actionText, { color: "#22c55e" }]}>Relancer</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.actionBtn}
-                            onPress={() => handleCall(client)}
-                        >
-                            <Ionicons name="call-outline" size={16} color="#3b82f6" />
-                            <Text style={[styles.actionText, { color: "#3b82f6" }]}>Appeler</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.actionBtn, styles.actionBtnPay]}
-                            onPress={() => handleMarkPaid(client.id)}
-                        >
-                            <Ionicons name="checkmark-done" size={16} color="#fff" />
-                            <Text style={[styles.actionText, { color: "#fff" }]}>Encaisser</Text>
-                        </TouchableOpacity>
+                        {selectedClient && (
+                            <>
+                                <View style={styles.modalClient}>
+                                    <Text style={styles.modalClientName}>{selectedClient.name}</Text>
+                                    <Text style={styles.modalClientDebt}>
+                                        Solde: {fmt(selectedClient.balance)} DA
+                                    </Text>
+                                </View>
+
+                                <Text style={styles.modalLabel}>Montant encaissé (DA)</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    value={payAmount}
+                                    onChangeText={setPayAmount}
+                                    keyboardType="numeric"
+                                    placeholder="Entrez le montant"
+                                    placeholderTextColor="#475569"
+                                    autoFocus
+                                />
+
+                                <TouchableOpacity
+                                    style={[styles.modalPayBtn, paying && { opacity: 0.6 }]}
+                                    onPress={handlePay}
+                                    disabled={paying}
+                                >
+                                    {paying
+                                        ? <ActivityIndicator color="#fff" />
+                                        : <>
+                                            <Ionicons name="checkmark-done" size={20} color="#fff" />
+                                            <Text style={styles.modalPayBtnText}>Confirmer l'encaissement</Text>
+                                          </>
+                                    }
+                                </TouchableOpacity>
+                            </>
+                        )}
                     </View>
                 </View>
-            ))}
-        </ScrollView>
+            </Modal>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#0f172a" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a" },
 
-    // Total summary
     totalCard: {
-        backgroundColor: "#1e293b", margin: 16, borderRadius: 20,
-        padding: 20, alignItems: "center",
+        backgroundColor: "#1e293b", margin: 16, borderRadius: 20, padding: 20, alignItems: "center",
         borderWidth: 1, borderColor: "#f59e0b30",
-        shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15, shadowRadius: 12, elevation: 5,
     },
     totalHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
     totalTitle: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
     totalValue: { color: "#f59e0b", fontSize: 32, fontWeight: "900" },
     totalSub: { color: "#64748b", fontSize: 12, fontWeight: "600", marginTop: 4 },
 
-    sectionTitle: {
-        color: "#64748b", fontSize: 11, fontWeight: "700", letterSpacing: 2,
-        paddingHorizontal: 16, marginTop: 20, marginBottom: 10,
-    },
+    sectionTitle: { color: "#64748b", fontSize: 11, fontWeight: "700", letterSpacing: 2, paddingHorizontal: 16, marginTop: 20, marginBottom: 10 },
 
-    // Aging breakdown
-    agingCard: {
-        backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16,
-        padding: 16, gap: 12,
-    },
-    agingRow: {
-        flexDirection: "row", alignItems: "center", gap: 8,
-        paddingVertical: 4, paddingHorizontal: 4, borderRadius: 8,
-    },
+    agingCard: { backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16, padding: 16, gap: 12 },
+    agingRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 4, paddingHorizontal: 4, borderRadius: 8 },
     agingRowActive: { backgroundColor: "#33415540" },
     agingLeft: { flexDirection: "row", alignItems: "center", gap: 6, width: 100 },
     agingDot: { width: 8, height: 8, borderRadius: 4 },
     agingLabel: { color: "#f8fafc", fontSize: 12, fontWeight: "600" },
-    agingCountBadge: {
-        backgroundColor: "#0f172a", paddingHorizontal: 5, paddingVertical: 1,
-        borderRadius: 4,
-    },
+    agingCountBadge: { backgroundColor: "#0f172a", paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 },
     agingCountText: { color: "#94a3b8", fontSize: 9, fontWeight: "700" },
-    agingBarTrack: {
-        flex: 1, height: 8, backgroundColor: "#334155", borderRadius: 4, overflow: "hidden",
-    },
+    agingBarTrack: { flex: 1, height: 8, backgroundColor: "#334155", borderRadius: 4, overflow: "hidden" },
     agingBarFill: { height: "100%", borderRadius: 4 },
     agingAmount: { fontSize: 12, fontWeight: "800", width: 80, textAlign: "right" },
 
-    // Filter badge
     filterBadge: {
-        flexDirection: "row", alignItems: "center", gap: 6,
-        alignSelf: "flex-start", marginLeft: 16, marginTop: 8,
-        backgroundColor: "#3b82f615", paddingHorizontal: 10, paddingVertical: 6,
-        borderRadius: 8, borderWidth: 1, borderColor: "#3b82f630",
+        flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginLeft: 16, marginTop: 8,
+        backgroundColor: "#3b82f615", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: "#3b82f630",
     },
     filterText: { color: "#3b82f6", fontSize: 11, fontWeight: "700" },
 
-    // Client cards
-    clientCard: {
-        backgroundColor: "#1e293b", marginHorizontal: 16, marginBottom: 10,
-        borderRadius: 16, padding: 16, gap: 12,
-    },
+    emptyCard: { alignItems: "center", padding: 32, gap: 12 },
+    emptyText: { color: "#64748b", fontSize: 14 },
+
+    clientCard: { backgroundColor: "#1e293b", marginHorizontal: 16, marginBottom: 10, borderRadius: 16, padding: 16, gap: 12 },
     clientHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
     clientStatusDot: { width: 10, height: 10, borderRadius: 5 },
     clientName: { color: "#f8fafc", fontSize: 15, fontWeight: "800" },
@@ -275,18 +336,37 @@ const styles = StyleSheet.create({
     clientAmount: { fontSize: 16, fontWeight: "900" },
     agingTag: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 4 },
     agingTagText: { fontSize: 10, fontWeight: "800" },
-    clientMeta: {
-        backgroundColor: "#0f172a", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6,
-    },
+    clientMeta: { backgroundColor: "#0f172a", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
     clientMetaText: { color: "#94a3b8", fontSize: 11, fontWeight: "600" },
 
-    // Action buttons
     clientActions: { flexDirection: "row", gap: 8 },
     actionBtn: {
         flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
-        gap: 4, paddingVertical: 8, borderRadius: 10,
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        gap: 4, paddingVertical: 8, borderRadius: 10, backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
     },
     actionBtnPay: { backgroundColor: "#22c55e", borderColor: "#22c55e" },
     actionText: { fontSize: 11, fontWeight: "700" },
+
+    // Modal
+    modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" },
+    modalCard: {
+        backgroundColor: "#1e293b", borderTopLeftRadius: 24, borderTopRightRadius: 24,
+        padding: 24, gap: 16,
+    },
+    modalHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+    modalTitle: { flex: 1, color: "#f8fafc", fontSize: 18, fontWeight: "900" },
+    modalClient: { backgroundColor: "#0f172a", borderRadius: 14, padding: 16, gap: 4 },
+    modalClientName: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
+    modalClientDebt: { color: "#f59e0b", fontSize: 14, fontWeight: "700" },
+    modalLabel: { color: "#64748b", fontSize: 12, fontWeight: "700" },
+    modalInput: {
+        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14,
+        color: "#f8fafc", fontSize: 22, fontWeight: "900",
+    },
+    modalPayBtn: {
+        flexDirection: "row", alignItems: "center", justifyContent: "center",
+        gap: 8, backgroundColor: "#22c55e", borderRadius: 14, paddingVertical: 16,
+    },
+    modalPayBtnText: { color: "#fff", fontSize: 16, fontWeight: "800" },
 });

@@ -127,9 +127,17 @@ export default function GerantDashboardScreen({ navigation }: any) {
                     <View style={styles.headerTitleRow}>
                         <Ionicons name="sparkles" size={24} color="#f59e0b" />
                         <Text style={styles.versionText}>v2.0.0 — SynCloudPOS Gérant</Text>
+                        <TouchableOpacity
+                            style={styles.briefingBtn}
+                            onPress={() => (navigation as any)?.navigate?.("MorningBrief")}
+                        >
+                            <Ionicons name="sunny" size={16} color="#f59e0b" />
+                            <Text style={styles.briefingBtnText}>Briefing IA</Text>
+                        </TouchableOpacity>
                     </View>
                     <Text style={styles.headerSubtitle}>Tableau de bord — données temps réel</Text>
                 </View>
+
 
                 {/* ── AI Business Health Score ───────────────────────────── */}
                 <Text style={styles.sectionTitle}>SCORE SANTÉ ENTREPRISE</Text>
@@ -411,4 +419,12 @@ const styles = StyleSheet.create({
     alertName: { color: "#f8fafc", fontSize: 14, fontWeight: "600", flex: 1 },
     alertValue: { color: "#f59e0b", fontSize: 13, fontWeight: "700" },
     red: { color: "#ef4444" },
+
+    // Morning Brief button
+    briefingBtn: {
+        flexDirection: "row", alignItems: "center", gap: 4, marginLeft: "auto",
+        backgroundColor: "#f59e0b20", paddingHorizontal: 10, paddingVertical: 5,
+        borderRadius: 12, borderWidth: 1, borderColor: "#f59e0b40",
+    },
+    briefingBtnText: { color: "#f59e0b", fontSize: 11, fontWeight: "700" },
 });
