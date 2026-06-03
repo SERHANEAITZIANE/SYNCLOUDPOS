@@ -29,6 +29,8 @@ import G50TaxScreen from "./screens/G50TaxScreen";
 import ChequeManagerScreen from "./screens/ChequeManagerScreen";
 import CatalogScreen from "./screens/CatalogScreen";
 import CreateBLScreen from "./screens/CreateBLScreen";
+import AlertsScreen from "./screens/AlertsScreen";
+import AiAdvisorScreen from "./screens/AiAdvisorScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
 import { startGPSTracking, stopGPSTracking } from "./lib/gps-tracking";
@@ -134,7 +136,7 @@ function LoginScreen() {
                     )}
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>v1.2.1 — SynCloudPOS</Text>
+                <Text style={styles.versionText}>v2.0.0 — SynCloudPOS</Text>
             </View>
         </KeyboardAvoidingView>
     );
@@ -150,9 +152,9 @@ function GerantTabs() {
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName: any;
                     if (route.name === "Dashboard") iconName = focused ? "analytics" : "analytics-outline";
+                    else if (route.name === "Alerts") iconName = focused ? "notifications" : "notifications-outline";
+                    else if (route.name === "AI") iconName = focused ? "sparkles" : "sparkles-outline";
                     else if (route.name === "Rapports") iconName = focused ? "bar-chart" : "bar-chart-outline";
-                    else if (route.name === "Achats AI") iconName = focused ? "camera" : "camera-outline";
-                    else if (route.name === "Dépenses") iconName = focused ? "cash" : "cash-outline";
                     else if (route.name === "Paramètres") iconName = focused ? "settings" : "settings-outline";
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
@@ -181,22 +183,25 @@ function GerantTabs() {
             <Tab.Screen
                 name="Dashboard"
                 component={GerantDashboardScreen}
-                options={{ title: "Tableau de bord" }}
+                options={{ title: "Dashboard" }}
+            />
+            <Tab.Screen
+                name="Alerts"
+                component={AlertsScreen}
+                options={{
+                    title: "Alertes",
+                    tabBarBadgeStyle: { backgroundColor: "#ef4444" },
+                }}
+            />
+            <Tab.Screen
+                name="AI"
+                component={AiAdvisorScreen}
+                options={{ title: "Conseiller IA" }}
             />
             <Tab.Screen
                 name="Rapports"
                 component={ReportsScreen}
                 options={{ title: "Rapports" }}
-            />
-            <Tab.Screen
-                name="Achats AI"
-                component={GerantPurchasesScreen}
-                options={{ title: "Achats AI" }}
-            />
-            <Tab.Screen
-                name="Dépenses"
-                component={GerantExpensesScreen}
-                options={{ title: "Dépenses" }}
             />
             <Tab.Screen
                 name="Paramètres"

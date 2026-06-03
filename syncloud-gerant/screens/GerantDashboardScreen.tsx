@@ -65,36 +65,32 @@ export default function GerantDashboardScreen({ navigation }: any) {
 
     const fetchDashboard = useCallback(async () => {
         try {
-            // Fetch live manager dashboard metrics
-            const result = await apiFetch("/mobile/dashboard/gerant").catch(() => {
-                // Return high-fidelity mock data if offline or route not yet deployed
-                return {
-                    revenue: 450000,
-                    grossProfit: 125000,
-                    netProfit: 95000,
-                    expenses: 30000,
-                    caisseEspeces: 185000,
-                    caisseBanque: 235000,
-                    outOfStockCount: 4,
-                    debtorsCount: 8,
-                    totalDebts: 65000,
-                    lowStockList: [
-                        { name: "Coca-Cola Canette 33cl", stock: 2 },
-                        { name: "Jus Ramy Orange 1L", stock: 5 },
-                        { name: "Café Prestige 250g", stock: 0 },
-                        { name: "Eau Minérale Lalla Khedidja 1.5L", stock: 8 },
-                    ],
-                    topDebtors: [
-                        { name: "Supérette Horizon", balance: -32000 },
-                        { name: "Alimentation Générale El Hanaa", balance: -15000 },
-                        { name: "Café du Centre", balance: -12000 },
-                        { name: "Epicerie La Source", balance: -6000 },
-                    ]
-                };
+            const result = await apiFetch("/gerant/dashboard");
+            setData({
+                revenue: result.today.revenue.total,
+                grossProfit: result.today.netCashFlow,
+                netProfit: result.today.netCashFlow,
+                expenses: result.today.expenses.total,
+                caisseEspeces: result.treasury.accounts
+                    .filter((a: any) => a.type === "CASH")
+                    .reduce((s: number, a: any) => s + a.balance, 0),
+                caisseBanque: result.treasury.accounts
+                    .filter((a: any) => a.type !== "CASH")
+                    .reduce((s: number, a: any) => s + a.balance, 0),
+                outOfStockCount: result.stock.lowStockCount,
+                debtorsCount: result.debts.clientDebtorCount,
+                totalDebts: result.debts.clientsOweUs,
+                lowStockList: [],
+                topDebtors: [],
             });
-            setData(result);
         } catch (e) {
-            console.error(e);
+            console.error("[Dashboard]", e);
+            setData({
+                revenue: 0, grossProfit: 0, netProfit: 0, expenses: 0,
+                caisseEspeces: 0, caisseBanque: 0,
+                outOfStockCount: 0, debtorsCount: 0, totalDebts: 0,
+                lowStockList: [], topDebtors: [],
+            });
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -130,9 +126,9 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.header}>
                     <View style={styles.headerTitleRow}>
                         <Ionicons name="sparkles" size={24} color="#f59e0b" />
-                        <Text style={styles.headerTitle}>SynCloud Gérant</Text>
+                        <Text style={styles.versionText}>v2.0.0 — SynCloudPOS Gérant</Text>
                     </View>
-                    <Text style={styles.headerSubtitle}>Tableau de bord exécutif en temps réel</Text>
+                    <Text style={styles.headerSubtitle}>Tableau de bord — données temps réel</Text>
                 </View>
 
                 {/* ── AI Business Health Score ───────────────────────────── */}
