@@ -12,6 +12,7 @@ export type LedgerLine = {
     balance: number
     observation: string
     reference: string
+    category?: "PURCHASE" | "SALE" | "LOAN" | "PAYMENT" | "RETURN" | "INITIAL"
 }
 
 export async function getCustomerLedger(customerId: string) {
@@ -58,6 +59,7 @@ export async function getCustomerLedger(customerId: string) {
                     id: true,
                     createdAt: true,
                     totalAmount: true,
+                    returnType: true,
                     product: {
                         select: {
                             name: true
@@ -135,7 +137,8 @@ export async function getCustomerLedger(customerId: string) {
                 debit: Number(sale.total),
                 credit: 0,
                 observation: `${label} N°: ${sale.receiptNumber || '-'}`,
-                reference: sale.id
+                reference: sale.id,
+                category: "SALE"
             })
         }
 
@@ -148,7 +151,8 @@ export async function getCustomerLedger(customerId: string) {
                 debit: Number(loan.amount),
                 credit: 0,
                 observation: loan.description || "Emprunt accordé (Avance)",
-                reference: loan.referenceId || ''
+                reference: loan.referenceId || '',
+                category: "LOAN"
             })
         }
 
@@ -165,20 +169,23 @@ export async function getCustomerLedger(customerId: string) {
                 debit: 0,
                 credit: Number(pay.amount),
                 observation: label,
-                reference: pay.referenceId || ''
+                reference: pay.referenceId || '',
+                category: "PAYMENT"
             })
         }
 
         // Map Client Returns (Credits - decreases what they owe us)
         for (const ret of clientReturns) {
+            const isCash = ret.returnType === "CASH"
             ledgerLines.push({
                 id: `return-${ret.id}`,
                 date: ret.createdAt.toISOString(),
                 type: "PAYMENT",
                 debit: 0,
                 credit: Number(ret.totalAmount),
-                observation: `Retour Client: ${ret.product?.name || "Produit"} (N° ${ret.id.substring(0, 8)})`,
-                reference: ret.id
+                observation: `Retour Client ${isCash ? "Remboursé (Cash)" : "Crédité (Solde)"}: ${ret.product?.name || "Produit"} (N° ${ret.id.substring(0, 8)})`,
+                reference: ret.id,
+                category: "RETURN"
             })
         }
 
@@ -200,7 +207,8 @@ export async function getCustomerLedger(customerId: string) {
             debit: initialBalance > 0 ? initialBalance : 0,
             credit: initialBalance < 0 ? -initialBalance : 0,
             observation: "Solde Initial",
-            reference: customerId
+            reference: customerId,
+            category: "INITIAL"
         })
 
         // Sort strictly chronologically
@@ -236,7 +244,7 @@ export async function getSupplierLedger(supplierId: string) {
         const tenantId = session.user.tenantId
 
         // Step 1: Fetch purchases, supplier details, returns, and cheques in parallel
-        const [purchases, supplier, movements, cheques] = await Promise.all([
+        const [purchases, supplier, supplierReturns, cheques] = await Promise.all([
             db.purchaseOrder.findMany({
                 where: {
                     tenantId,
@@ -253,17 +261,15 @@ export async function getSupplierLedger(supplierId: string) {
                 where: { id: supplierId, tenantId },
                 select: { name: true, balance: true, createdAt: true }
             }),
-            db.stockMovement.findMany({
+            db.supplierReturn.findMany({
                 where: {
                     tenantId,
-                    reason: { startsWith: "Retour Fournisseur:" }
+                    supplierId,
                 },
                 include: {
                     product: {
                         select: {
-                            name: true,
-                            cost: true,
-                            price: true
+                            name: true
                         }
                     }
                 }
@@ -297,9 +303,6 @@ export async function getSupplierLedger(supplierId: string) {
             }
         })
 
-        // Filter returns in memory for this specific supplier
-        const supplierReturns = movements.filter(m => m.reason?.includes(`Retour Fournisseur: ${supplier.name}`))
-
         // Map into a unified chronological ledger
         const ledgerLines: Omit<LedgerLine, "balance">[] = []
 
@@ -327,7 +330,8 @@ export async function getSupplierLedger(supplierId: string) {
                 debit: debitValue,
                 credit: 0,
                 observation: `${label} N°: ${purchase.id.substring(0, 8)}`,
-                reference: purchase.id
+                reference: purchase.id,
+                category: "PURCHASE"
             })
         }
 
@@ -346,7 +350,8 @@ export async function getSupplierLedger(supplierId: string) {
                     debit: 0,
                     credit: Number(tx.amount),
                     observation: label,
-                    reference: tx.referenceId || ''
+                    reference: tx.referenceId || '',
+                    category: "PAYMENT"
                 })
             } else if (tx.type === "CREDIT") {
                 // Money entering our treasury => Loan from supplier (increases our debt to them)
@@ -362,24 +367,24 @@ export async function getSupplierLedger(supplierId: string) {
                     debit: Number(tx.amount),
                     credit: 0,
                     observation: label,
-                    reference: tx.referenceId || ''
+                    reference: tx.referenceId || '',
+                    category: "LOAN"
                 })
             }
         }
 
         // Map Supplier Returns (Credits => Decreases Supplier Balance / we owe them less)
         for (const ret of supplierReturns) {
-            const costPrice = Number(ret.product.cost ?? ret.product.price)
-            const totalAmount = Math.abs(ret.quantity) * costPrice
-
+            const isCash = ret.returnType === "CASH"
             ledgerLines.push({
                 id: `return-${ret.id}`,
                 date: ret.createdAt.toISOString(),
                 type: "PAYMENT",
                 debit: 0,
-                credit: totalAmount,
-                observation: `Retour Fournisseur: ${ret.product.name} (Qté: ${Math.abs(ret.quantity)})`,
-                reference: ret.id
+                credit: Number(ret.totalAmount),
+                observation: `Retour Fournisseur ${isCash ? "Remboursé (Cash)" : "Crédité (Solde)"}: ${ret.product?.name || "Produit"} (Qté: ${ret.quantity})`,
+                reference: ret.id,
+                category: "RETURN"
             })
         }
 
@@ -401,7 +406,8 @@ export async function getSupplierLedger(supplierId: string) {
             debit: initialBalance > 0 ? initialBalance : 0,
             credit: initialBalance < 0 ? -initialBalance : 0,
             observation: "Solde Initial",
-            reference: supplierId
+            reference: supplierId,
+            category: "INITIAL"
         })
 
         // Sort strictly chronologically

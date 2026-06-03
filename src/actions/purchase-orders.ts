@@ -171,8 +171,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                 );
             }
 
-            // If FACTURE: add to supplier balance (we owe them)
-            if (data.status === "FACTURE") {
+            // If FACTURE or BON_LIVRAISON: add to supplier balance (we owe them)
+            if (data.status === "FACTURE" || data.status === "BON_LIVRAISON") {
                 await (tx as any).supplier.update({
                     where: { id: data.supplierId },
                     data: { balance: { increment: data.total } }
@@ -240,8 +240,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     }
                 });
 
-                // 3. Decrement Supplier Balance (only for FACTURE, since the full amount was added to supplier balance)
-                if (data.status === "FACTURE") {
+                // 3. Decrement Supplier Balance (for FACTURE and BON_LIVRAISON, since the full amount was added to supplier balance)
+                if (data.status === "FACTURE" || data.status === "BON_LIVRAISON") {
                     await tx.supplier.update({
                         where: { id: data.supplierId },
                         data: { balance: { decrement: data.paymentAmount } }
@@ -532,8 +532,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
             }
 
             // ─── Supplier Balance Adjustments ───
-            const oldNet = existing.status === "FACTURE" ? (Number(existing.total) - oldPaymentAmount) : 0;
-            const newNet = data.status === "FACTURE" ? (data.total - newPaymentAmount) : 0;
+            const oldNet = (existing.status === "FACTURE" || existing.status === "BON_LIVRAISON") ? (Number(existing.total) - oldPaymentAmount) : 0;
+            const newNet = (data.status === "FACTURE" || data.status === "BON_LIVRAISON") ? (data.total - newPaymentAmount) : 0;
 
             if (existing.supplierId === data.supplierId) {
                 if (newNet !== oldNet) {
@@ -685,8 +685,11 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                 );
             }
 
-            // Supplier balance: increment when moving to FACTURE (first time)
-            if (newStatus === "FACTURE" && prevStatus !== "FACTURE") {
+            // Supplier balance: increment when moving to FACTURE or BON_LIVRAISON (first time)
+            const isNewImpactful = newStatus === "FACTURE" || newStatus === "BON_LIVRAISON";
+            const isPrevImpactful = prevStatus === "FACTURE" || prevStatus === "BON_LIVRAISON";
+
+            if (isNewImpactful && !isPrevImpactful) {
                 const prevPayments = await tx.treasuryTransaction.findMany({
                     where: { referenceId: id, source: "PURCHASE", tenantId }
                 })
@@ -696,6 +699,17 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                 await (tx as any).supplier.update({
                     where: { id: order.supplierId },
                     data: { balance: { increment: balanceIncrement } }
+                })
+            } else if (!isNewImpactful && isPrevImpactful && newStatus !== "COMPLETED") {
+                const prevPayments = await tx.treasuryTransaction.findMany({
+                    where: { referenceId: id, source: "PURCHASE", tenantId }
+                })
+                const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+                const balanceDecrement = total - alreadyPaid
+
+                await (tx as any).supplier.update({
+                    where: { id: order.supplierId },
+                    data: { balance: { decrement: balanceDecrement } }
                 })
             }
 
@@ -734,8 +748,8 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 tenantId
                             }
                         })
-                        // If supplier had balance (was invoiced), reduce it
-                        if (prevStatus === "FACTURE") {
+                        // If supplier had balance (was invoiced or BL received), reduce it
+                        if (prevStatus === "FACTURE" || prevStatus === "BON_LIVRAISON") {
                             await (tx as any).supplier.update({
                                 where: { id: order.supplierId },
                                 data: { balance: { decrement: netPayment } }
@@ -810,9 +824,9 @@ export const deletePurchaseOrder = async (id: string) => {
                     data: { balance: { increment: t.amount } }
                 });
 
-                // If it was a FACTURE, the transaction was a partial payment, which had decremented supplier balance.
+                // If it was a FACTURE or BON_LIVRAISON, the transaction was a partial payment, which had decremented supplier balance.
                 // We must increment the supplier balance to cancel that payment decrement.
-                if (order.status === "FACTURE") {
+                if (order.status === "FACTURE" || order.status === "BON_LIVRAISON") {
                     await tx.supplier.update({
                         where: { id: order.supplierId },
                         data: { balance: { increment: t.amount } }
@@ -825,8 +839,8 @@ export const deletePurchaseOrder = async (id: string) => {
                 where: { referenceId: id, source: "PURCHASE", tenantId }
             });
 
-            // 3. Restore supplier balance if we owed them money initially (FACTURE status increments supplier balance)
-            if (order.status === "FACTURE") {
+            // 3. Restore supplier balance if we owed them money initially (FACTURE or BON_LIVRAISON status increments supplier balance)
+            if (order.status === "FACTURE" || order.status === "BON_LIVRAISON") {
                 await tx.supplier.update({
                     where: { id: order.supplierId },
                     data: { balance: { decrement: order.total } }

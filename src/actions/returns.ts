@@ -41,7 +41,8 @@ export const getClientReturns = async () => {
             include: {
                 customer: { select: { name: true } },
                 product: { select: { name: true } },
-                driver: { select: { name: true } }
+                driver: { select: { name: true } },
+                salesOrder: { include: { store: true } }
             },
             orderBy: { createdAt: "desc" }
         })
@@ -173,7 +174,8 @@ export const processClientReturn = async (params: ClientReturnParams) => {
                     reason,
                     notes: notes || null,
                     status: "COMPLETED",
-                    tourStopId: null
+                    tourStopId: null,
+                    returnType: returnType
                 }
             })
 
@@ -202,42 +204,23 @@ export const getSupplierReturns = async () => {
     const tenantId = session.user.tenantId
 
     try {
-        // Since there is no SupplierReturn table in schema.prisma,
-        // we fetch the stock movements of type "RETURN_SUPPLIER" or "RETURN"
-        // which indicate supplier return movements (where reason starts with "Retour Fournisseur").
-        const movements = await db.stockMovement.findMany({
-            where: {
-                tenantId,
-                reason: { startsWith: "Retour Fournisseur" }
-            },
+        const returns = await db.supplierReturn.findMany({
+            where: { tenantId },
             include: {
+                supplier: { select: { name: true } },
                 product: { select: { name: true } },
-                user: { select: { name: true } }
+                user: { select: { name: true } },
+                purchaseOrder: { include: { store: true } }
             },
             orderBy: { createdAt: "desc" }
         })
-
-        // Let's also fetch related transactions to get details on supplier and amounts if necessary.
-        // For simple representation in the table, we'll map movements.
-        const returns = movements.map(m => {
-            // Parse details from the reason string "Retour Fournisseur: [SupplierName] - [Reason] (Montant: [Amount])"
-            const match = m.reason?.match(/Retour Fournisseur: ([^-]+) - (.*)/)
-            const supplierName = match ? match[1].trim() : "Fournisseur"
-            const parsedReason = match ? match[2].trim() : (m.reason || "")
-
-            return {
-                id: m.id,
-                productId: m.productId,
-                productName: m.product.name,
-                quantity: Math.abs(m.quantity),
-                supplierName,
-                reason: parsedReason,
-                userName: m.user?.name || "Inconnu",
-                createdAt: m.createdAt
-            }
-        })
-
-        return { returns: JSON.parse(JSON.stringify(returns)) }
+        const mapped = returns.map(r => ({
+            ...r,
+            supplierName: r.supplier?.name || "Inconnu",
+            productName: r.product?.name || "Inconnu",
+            userName: r.user?.name || "Inconnu"
+        }))
+        return { returns: JSON.parse(JSON.stringify(mapped)) }
     } catch (error) {
         console.error("getSupplierReturns error:", error)
         return { error: "Erreur lors de la récupération des retours fournisseurs", returns: [] }
@@ -305,10 +288,10 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             }
 
             // 5. Create Stock Movement (Negative quantity for deduction)
-            const movement = await tx.stockMovement.create({
+            await tx.stockMovement.create({
                 data: {
                     productId,
-                    type: "SPOILAGE", // Categorize as reduction/deduction
+                    type: "SUPPLIER_RETURN",
                     quantity: -quantity,
                     stockBefore: storeStockBefore || globalStockBefore,
                     stockAfter: storeStockAfter || globalStockAfter,
@@ -355,7 +338,24 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
                 })
             }
 
-            return movement
+            // 7. Create SupplierReturn record
+            const supplierReturn = await tx.supplierReturn.create({
+                data: {
+                    tenantId,
+                    supplierId,
+                    userId,
+                    productId,
+                    quantity,
+                    unitPrice: costPrice,
+                    totalAmount,
+                    reason,
+                    notes: notes || null,
+                    status: "COMPLETED",
+                    returnType: returnType
+                }
+            })
+
+            return supplierReturn
         })
 
         revalidatePath("/(dashboard)/retours")
@@ -562,7 +562,8 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
                         reason: `${reason} (BL N°: ${salesOrder.receiptNumber || 'N/A'})`,
                         notes: notes || null,
                         status: "COMPLETED",
-                        salesOrderId: salesOrder.id
+                        salesOrderId: salesOrder.id,
+                        returnType: refundCash ? "CASH" : "CREDIT"
                     }
                 })
             }
@@ -589,6 +590,258 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
         return { success: "Retour client enregistré avec succès et stock réapprovisionné." }
     } catch (error) {
         console.error("processBulkClientReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors du traitement" }
+    }
+}
+
+export interface BulkSupplierReturnItem {
+    productId: string
+    quantity: number
+    unitCostPrice: number
+}
+
+export interface BulkSupplierReturnParams {
+    supplierId: string
+    purchaseOrderId: string
+    items: BulkSupplierReturnItem[]
+    storeId?: string
+    refundCash: boolean
+    accountId?: string
+    reason: string
+    notes?: string
+}
+
+export async function getSupplierPurchaseOrders(supplierId: string) {
+    const session = await auth()
+    if (!session?.user?.id) return []
+    const tenantId = session.user.tenantId
+
+    try {
+        const orders = await db.purchaseOrder.findMany({
+            where: {
+                tenantId,
+                supplierId,
+                status: { in: ["BON_LIVRAISON", "FACTURE", "COMPLETED"] }
+            },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                cost: true,
+                                stock: true,
+                                barcodes: { select: { value: true } }
+                            }
+                        }
+                    }
+                },
+                supplierReturns: {
+                    select: {
+                        productId: true,
+                        quantity: true
+                    }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        const orderIds = orders.map(o => o.id)
+        const transactions = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                source: "PURCHASE",
+                referenceId: { in: orderIds },
+                type: "DEBIT"
+            }
+        })
+
+        const ordersWithPaid = orders.map(o => {
+            const orderTransactions = transactions.filter(t => t.referenceId === o.id)
+            const amountPaid = o.status === "COMPLETED"
+                ? Number(o.total)
+                : orderTransactions.reduce((sum, t) => sum + Number(t.amount), 0)
+            return {
+                ...o,
+                amountPaid
+            }
+        })
+
+        return JSON.parse(JSON.stringify(ordersWithPaid))
+    } catch (error) {
+        console.error("getSupplierPurchaseOrders error:", error)
+        return []
+    }
+}
+
+export async function processBulkSupplierReturn(params: BulkSupplierReturnParams) {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+    const userId = session.user.id
+
+    const { supplierId, purchaseOrderId, items, storeId, refundCash, accountId, reason, notes } = params
+
+    if (!supplierId || !purchaseOrderId || !items || items.length === 0 || !reason) {
+        return { error: "Veuillez remplir tous les champs requis" }
+    }
+
+    const validItems = items.filter(item => item.quantity > 0)
+    if (validItems.length === 0) {
+        return { error: "Veuillez spécifier au moins une quantité à retourner supérieure à 0" }
+    }
+
+    try {
+        const result = await db.$transaction(async (tx) => {
+            // 1. Fetch purchase order (BL/Facture) details
+            const purchaseOrder = await tx.purchaseOrder.findFirst({
+                where: { id: purchaseOrderId, tenantId, supplierId }
+            })
+            if (!purchaseOrder) throw new Error("Bon de commande/achat introuvable")
+
+            const returnTotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unitCostPrice), 0)
+
+            // Fetch any treasury transactions associated with the purchase order
+            const transactions = await tx.treasuryTransaction.findMany({
+                where: {
+                    tenantId,
+                    source: "PURCHASE",
+                    referenceId: purchaseOrderId,
+                    type: "DEBIT"
+                }
+            })
+
+            const amountPaid = purchaseOrder.status === "COMPLETED" 
+                ? Number(purchaseOrder.total) 
+                : transactions.reduce((sum, t) => sum + Number(t.amount), 0)
+
+            const poTotal = Number(purchaseOrder.total)
+            const totalRefundCapacity = Math.max(0, amountPaid - (poTotal - returnTotal))
+
+            let refundCashAmount = 0
+            if (refundCash && accountId) {
+                refundCashAmount = Math.min(totalRefundCapacity, returnTotal)
+                if (refundCashAmount > 0) {
+                    const account = await tx.treasuryAccount.findUnique({
+                        where: { id: accountId, tenantId }
+                    })
+                    if (!account) throw new Error("Compte de trésorerie introuvable")
+
+                    // Supplier refunds us: credit treasury account (we receive cash)
+                    const updatedAccount = await tx.treasuryAccount.update({
+                        where: { id: accountId },
+                        data: { balance: { increment: refundCashAmount } }
+                    })
+
+                    // Create Treasury Transaction record
+                    await tx.treasuryTransaction.create({
+                        data: {
+                            accountId,
+                            type: "CREDIT",
+                            amount: refundCashAmount,
+                            balanceBefore: account.balance,
+                            balanceAfter: updatedAccount.balance,
+                            source: "MANUAL_IN",
+                            referenceId: supplierId,
+                            description: `Remboursement Retour Fournisseur (Bon N°: ${purchaseOrder.reference || 'N/A'} / ID: ${purchaseOrder.id.slice(-8).toUpperCase()}): ${reason}`,
+                            tenantId
+                        }
+                    })
+                }
+            }
+
+            const stockStoreId = storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id
+
+            // Process each item
+            for (const item of validItems) {
+                const product = await tx.product.findUnique({
+                    where: { id: item.productId, tenantId },
+                    include: { storeProducts: true }
+                })
+                if (!product) throw new Error(`Produit introuvable: ${item.productId}`)
+
+                // Deduct Product Stock (Global)
+                const globalStockBefore = product.stock || 0
+                const globalStockAfter = Math.max(0, globalStockBefore - item.quantity)
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: globalStockAfter }
+                })
+
+                // Deduct Product Stock (Store specific)
+                let storeStockBefore = 0
+                let storeStockAfter = 0
+                if (stockStoreId) {
+                    const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
+                    storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
+                    storeStockAfter = Math.max(0, storeStockBefore - item.quantity)
+
+                    await tx.storeProduct.upsert({
+                        where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                        update: { stock: storeStockAfter },
+                        create: { storeId: stockStoreId, productId: item.productId, stock: storeStockAfter }
+                    })
+                }
+
+                // Create Stock Movement (negative quantity since stock is decremented)
+                await tx.stockMovement.create({
+                    data: {
+                        productId: item.productId,
+                        type: "SUPPLIER_RETURN",
+                        quantity: -item.quantity,
+                        stockBefore: storeStockBefore || globalStockBefore,
+                        stockAfter: storeStockAfter || globalStockAfter,
+                        reason: `Retour Fournisseur sur Bon N°: ${purchaseOrder.reference || 'N/A'}. Motif: ${reason}`,
+                        tenantId,
+                        storeId: stockStoreId || undefined,
+                        userId
+                    }
+                })
+
+                // Create SupplierReturn record
+                await tx.supplierReturn.create({
+                    data: {
+                        tenantId,
+                        supplierId,
+                        userId,
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        unitPrice: item.unitCostPrice,
+                        totalAmount: item.quantity * item.unitCostPrice,
+                        reason: `${reason} (Bon N°: ${purchaseOrder.reference || 'N/A'})`,
+                        notes: notes || null,
+                        status: "COMPLETED",
+                        returnType: refundCash ? "CASH" : "CREDIT",
+                        purchaseOrderId: purchaseOrder.id
+                    }
+                })
+            }
+
+            // Adjust Supplier Balance: decrement by returnTotal - refundCashAmount
+            const balanceDecrement = returnTotal - refundCashAmount
+            if (balanceDecrement > 0) {
+                await tx.supplier.update({
+                    where: { id: supplierId },
+                    data: { balance: { decrement: balanceDecrement } }
+                })
+            }
+
+            return { success: true }
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        revalidatePath("/(dashboard)/products")
+        revalidatePath("/(dashboard)/suppliers")
+        revalidatePath("/(dashboard)/treasury")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
+        return { success: "Retour fournisseur enregistré avec succès et stock mis à jour." }
+    } catch (error) {
+        console.error("processBulkSupplierReturn error:", error)
         return { error: error instanceof Error ? error.message : "Erreur interne lors du traitement" }
     }
 }

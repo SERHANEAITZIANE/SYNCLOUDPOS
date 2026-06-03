@@ -80,6 +80,7 @@ model Tenant {
   orders               Order[]
   products             Product[]
   productReturns       ProductReturn[]
+  supplierReturns      SupplierReturn[]
   proformas            Proforma[]
   promotions           Promotion[]
   purchaseOrders       PurchaseOrder[]
@@ -234,6 +235,7 @@ model User {
   mobileTokens    MobileRefreshToken[]
   orders          Order[]
   productReturns  ProductReturn[]
+  supplierReturns SupplierReturn[]
   spoilages       Spoilage[]
   stockMovements  StockMovement[]
   tenantUsers        TenantUser[]
@@ -286,6 +288,7 @@ model Product {
   category       Category?              @relation(fields: [categoryId], references: [id])
   tenant         Tenant                 @relation(fields: [tenantId], references: [id])
   productReturns ProductReturn[]
+  supplierReturns SupplierReturn[]
   proformaItems  ProformaItem[]
   purchaseItems  PurchaseOrderItem[]
   recurringItems RecurringInvoiceItem[]
@@ -413,6 +416,7 @@ model Supplier {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   purchaseOrders  PurchaseOrder[]
+  supplierReturns SupplierReturn[]
   tenant          Tenant          @relation(fields: [tenantId], references: [id])
   Cheque          Cheque[]
 }
@@ -482,6 +486,7 @@ model PurchaseOrder {
   supplier          Supplier            @relation(fields: [supplierId], references: [id])
   tenant            Tenant              @relation(fields: [tenantId], references: [id])
   items             PurchaseOrderItem[]
+  supplierReturns   SupplierReturn[]
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -919,6 +924,7 @@ model ProductReturn {
   photoUrl    String?
   notes       String?
   status      String   @default("PENDING")
+  returnType  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   customer    Customer @relation(fields: [customerId], references: [id])
@@ -930,6 +936,34 @@ model ProductReturn {
 
   @@index([tenantId])
   @@index([customerId])
+  @@index([tenantId, createdAt])
+}
+
+model SupplierReturn {
+  id              String         @id @default(uuid())
+  tenantId        String
+  supplierId      String
+  userId          String
+  productId       String
+  quantity        Int
+  unitPrice       Float          @default(0)
+  totalAmount     Float          @default(0)
+  reason          String
+  photoUrl        String?
+  notes           String?
+  status          String         @default("COMPLETED")
+  returnType      String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  purchaseOrderId String?
+  purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  supplier        Supplier       @relation(fields: [supplierId], references: [id])
+  user            User           @relation(fields: [userId], references: [id])
+  product         Product        @relation(fields: [productId], references: [id])
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([supplierId])
   @@index([tenantId, createdAt])
 }
 
