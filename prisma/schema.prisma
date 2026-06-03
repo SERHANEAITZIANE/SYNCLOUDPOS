@@ -533,6 +533,7 @@ model SalesOrder {
   items               SalesOrderItem[]
   deliveryShipments   DeliveryShipment[]
   source              String            @default("POS") // POS, MOBILE, ECOMMERCE
+  productReturns      ProductReturn[]
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -924,6 +925,8 @@ model ProductReturn {
   driver      User     @relation(fields: [driverId], references: [id])
   product     Product  @relation(fields: [productId], references: [id])
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  salesOrderId String?
+  salesOrder   SalesOrder? @relation(fields: [salesOrderId], references: [id])
 
   @@index([tenantId])
   @@index([customerId])

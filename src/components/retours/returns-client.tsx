@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { 
     Plus, 
@@ -16,7 +16,8 @@ import {
     Search,
     CheckCircle2
 } from "lucide-react"
-import { processClientReturn, processSupplierReturn } from "@/actions/returns"
+import { processSupplierReturn, getCustomerSalesOrders, processBulkClientReturn } from "@/actions/returns"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 
 interface ProductOption {
     id: string
@@ -79,13 +80,33 @@ export function ReturnsClient({
 
     // Form inputs state (Client)
     const [clientCustomerId, setClientCustomerId] = useState("")
-    const [clientProductId, setClientProductId] = useState("")
-    const [clientQty, setClientQty] = useState(1)
+    const [salesOrders, setSalesOrders] = useState<any[]>([])
+    const [selectedSalesOrderId, setSelectedSalesOrderId] = useState("")
+    const [returnedQuantities, setReturnedQuantities] = useState<Record<string, number>>({})
+    const [refundCash, setRefundCash] = useState(false)
     const [clientStoreId, setClientStoreId] = useState("")
-    const [clientReturnType, setClientReturnType] = useState<"CREDIT" | "CASH">("CREDIT")
     const [clientAccountId, setClientAccountId] = useState("")
     const [clientReason, setClientReason] = useState("")
     const [clientNotes, setClientNotes] = useState("")
+
+    // Fetch client's BLs when selected client changes
+    useEffect(() => {
+        if (!clientCustomerId) {
+            setSalesOrders([])
+            setSelectedSalesOrderId("")
+            setReturnedQuantities({})
+            return
+        }
+
+        const fetchSalesOrders = async () => {
+            const data = await getCustomerSalesOrders(clientCustomerId)
+            setSalesOrders(data)
+            setSelectedSalesOrderId("")
+            setReturnedQuantities({})
+        }
+
+        fetchSalesOrders()
+    }, [clientCustomerId])
 
     // Form inputs state (Supplier)
     const [supplierId, setSupplierId] = useState("")
@@ -105,10 +126,11 @@ export function ReturnsClient({
     // Reset Client Form
     const resetClientForm = () => {
         setClientCustomerId("")
-        setClientProductId("")
-        setClientQty(1)
+        setSalesOrders([])
+        setSelectedSalesOrderId("")
+        setReturnedQuantities({})
+        setRefundCash(false)
         setClientStoreId(stores[0]?.id || "")
-        setClientReturnType("CREDIT")
         setClientAccountId(accounts[0]?.id || "")
         setClientReason("")
         setClientNotes("")
@@ -131,9 +153,21 @@ export function ReturnsClient({
     }
 
     // Live calculators
-    const selectedClientProduct = products.find(p => p.id === clientProductId)
-    const clientPrice = selectedClientProduct ? selectedClientProduct.price : 0
-    const clientTotal = clientQty * clientPrice
+    const selectedSalesOrder = salesOrders.find(so => so.id === selectedSalesOrderId)
+    
+    // Return client calculations
+    const clientTotal = selectedSalesOrder
+        ? selectedSalesOrder.items.reduce((sum: number, item: any) => {
+            const qty = returnedQuantities[item.productId] || 0
+            return sum + (qty * Number(item.unitPrice))
+          }, 0)
+        : 0
+
+    const amountPaid = selectedSalesOrder ? Number(selectedSalesOrder.amountPaid) : 0
+    const salesOrderTotal = selectedSalesOrder ? Number(selectedSalesOrder.total) : 0
+    const maxRefundCapacity = selectedSalesOrder
+        ? Math.max(0, amountPaid - (salesOrderTotal - clientTotal))
+        : 0
 
     const selectedSupplierProduct = products.find(p => p.id === supplierProductId)
     const supplierCost = selectedSupplierProduct ? selectedSupplierProduct.cost : 0
@@ -150,13 +184,31 @@ export function ReturnsClient({
         setErrorMsg("")
         setSuccessMsg("")
 
-        const res = await processClientReturn({
+        if (!selectedSalesOrderId) {
+            setErrorMsg("Veuillez sélectionner un bon de livraison (BL)")
+            setLoading(false)
+            return
+        }
+
+        const itemsToReturn = selectedSalesOrder.items.map((item: any) => ({
+            productId: item.productId,
+            quantity: returnedQuantities[item.productId] || 0,
+            unitPrice: Number(item.unitPrice)
+        })).filter((item: any) => item.quantity > 0)
+
+        if (itemsToReturn.length === 0) {
+            setErrorMsg("Veuillez saisir au moins une quantité à retourner")
+            setLoading(false)
+            return
+        }
+
+        const res = await processBulkClientReturn({
             customerId: clientCustomerId,
-            productId: clientProductId,
-            quantity: Number(clientQty),
+            salesOrderId: selectedSalesOrderId,
+            items: itemsToReturn,
             storeId: clientStoreId || undefined,
-            returnType: clientReturnType,
-            accountId: clientReturnType === "CASH" ? clientAccountId : undefined,
+            refundCash: refundCash,
+            accountId: refundCash ? clientAccountId : undefined,
             reason: clientReason,
             notes: clientNotes || undefined
         })
@@ -404,64 +456,116 @@ export function ReturnsClient({
             {/* Modal: New Client Return */}
             {isClientModalOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-slate-950 border border-purple-500/20 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                    <div className="bg-slate-950 border border-purple-500/20 rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <ArrowDownLeft className="h-5 w-5 text-purple-400" />
                             Nouveau Retour Client
                         </h3>
 
-                        <form onSubmit={handleClientReturnSubmit} className="space-y-4">
+                        <form onSubmit={handleClientReturnSubmit} className="space-y-5">
                             {/* Customer Select */}
-                            <div>
-                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Client *</label>
-                                <select
-                                    required
-                                    value={clientCustomerId}
-                                    onChange={(e) => setClientCustomerId(e.target.value)}
-                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                >
-                                    <option value="">Sélectionnez un client...</option>
-                                    {customers.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name} (Dette: {c.balance.toLocaleString()} DA)
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Product Select */}
-                            <div>
-                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Produit à Retourner *</label>
-                                <select
-                                    required
-                                    value={clientProductId}
-                                    onChange={(e) => setClientProductId(e.target.value)}
-                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                >
-                                    <option value="">Sélectionnez un produit...</option>
-                                    {products.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.name} (Stock: {p.stock} unités — P.U: {p.price.toLocaleString()} DA)
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Qty & Store */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Quantité *</label>
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        required
-                                        value={clientQty}
-                                        onChange={(e) => setClientQty(Math.max(1, Number(e.target.value)))}
-                                        className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700 font-bold"
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Client *</label>
+                                    <SearchableSelect
+                                        options={customers.map(c => ({
+                                            label: `${c.name} (Solde: ${c.balance.toLocaleString()} DA)`,
+                                            value: c.id
+                                        }))}
+                                        value={clientCustomerId}
+                                        onChange={setClientCustomerId}
+                                        placeholder="Sélectionner un client..."
+                                        searchPlaceholder="Rechercher un client..."
+                                        emptyMessage="Aucun client trouvé."
+                                        className="bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl h-9 text-xs"
                                     />
                                 </div>
+
+                                {/* BL Select */}
                                 <div>
-                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Dépôt / Magasin</label>
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Bon de Livraison (BL) *</label>
+                                    <SearchableSelect
+                                        options={salesOrders.map(so => ({
+                                            label: `${so.receiptNumber || `N° ${so.id.substring(0,8)}`} (${new Date(so.createdAt).toLocaleDateString()} — Total: ${Number(so.total).toLocaleString()} DA — Payé: ${Number(so.amountPaid).toLocaleString()} DA)`,
+                                            value: so.id
+                                        }))}
+                                        disabled={!clientCustomerId}
+                                        value={selectedSalesOrderId}
+                                        onChange={setSelectedSalesOrderId}
+                                        placeholder={!clientCustomerId ? "Sélectionnez d'abord un client..." : "Sélectionner un BL..."}
+                                        searchPlaceholder="Rechercher un BL (N° reçu)..."
+                                        emptyMessage="Aucun BL trouvé."
+                                        className="bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl h-9 text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Products Sold Table */}
+                            {selectedSalesOrder && (
+                                <div className="border border-slate-900 rounded-xl overflow-hidden bg-slate-900/10">
+                                    <div className="p-3 bg-slate-900/50 border-b border-slate-900">
+                                        <span className="text-[11px] font-bold text-purple-400 uppercase">Produits du bon de livraison</span>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-xs border-collapse">
+                                            <thead>
+                                                <tr className="border-b border-slate-900 text-slate-500 font-bold bg-slate-900/20">
+                                                    <th className="p-3">Produit</th>
+                                                    <th className="p-3">Codebarre</th>
+                                                    <th className="p-3 text-center">Qté Vendue</th>
+                                                    <th className="p-3 text-center">Retournée Précédemment</th>
+                                                    <th className="p-3 text-center w-28">Qté à Retourner</th>
+                                                    <th className="p-3 text-right">P.U</th>
+                                                    <th className="p-3 text-right">Montant</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-900">
+                                                {selectedSalesOrder.items.map((item: any) => {
+                                                    const previouslyReturned = selectedSalesOrder.productReturns
+                                                        ?.filter((pr: any) => pr.productId === item.productId)
+                                                        .reduce((sum: number, pr: any) => sum + pr.quantity, 0) || 0
+                                                    
+                                                    const maxQtyToReturn = Math.max(0, item.quantity - previouslyReturned)
+                                                    const currentReturnQty = returnedQuantities[item.productId] || 0
+                                                    const lineTotal = currentReturnQty * Number(item.unitPrice)
+
+                                                    return (
+                                                        <tr key={item.id} className="hover:bg-slate-900/20 text-slate-300">
+                                                            <td className="p-3 font-medium text-slate-200">{item.product?.name}</td>
+                                                            <td className="p-3 text-slate-500">{item.product?.barcodes?.[0]?.value || "-"}</td>
+                                                            <td className="p-3 text-center font-semibold text-slate-400">{item.quantity}</td>
+                                                            <td className="p-3 text-center text-amber-500 font-semibold">{previouslyReturned}</td>
+                                                            <td className="p-2 text-center">
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    max={maxQtyToReturn}
+                                                                    value={returnedQuantities[item.productId] ?? ""}
+                                                                    onChange={(e) => {
+                                                                        const val = Math.min(maxQtyToReturn, Math.max(0, parseInt(e.target.value) || 0))
+                                                                        setReturnedQuantities(prev => ({
+                                                                            ...prev,
+                                                                            [item.productId]: val
+                                                                        }))
+                                                                    }}
+                                                                    className="w-20 bg-slate-900 text-slate-100 border border-slate-800 rounded-lg px-2 py-1 text-center font-bold text-xs outline-none focus:border-purple-500"
+                                                                />
+                                                            </td>
+                                                            <td className="p-3 text-right text-slate-400">{Number(item.unitPrice).toLocaleString()} DA</td>
+                                                            <td className="p-3 text-right font-bold text-purple-400">{lineTotal.toLocaleString()} DA</td>
+                                                        </tr>
+                                                    )
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Store and Reason */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Dépôt / Magasin de restockage</label>
                                     <select
                                         value={clientStoreId}
                                         onChange={(e) => setClientStoreId(e.target.value)}
@@ -472,111 +576,118 @@ export function ReturnsClient({
                                         ))}
                                     </select>
                                 </div>
-                            </div>
 
-                            {/* Live Pricing Summary card */}
-                            {selectedClientProduct && (
-                                <div className="bg-purple-950/20 border border-purple-500/10 p-3.5 rounded-xl flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-2 text-slate-300">
-                                        <Package className="h-4 w-4 text-purple-400" />
-                                        <span>Total Marchandise</span>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-[10px] text-slate-500 block">
-                                            {clientQty} x {clientPrice.toLocaleString()} DA
-                                        </span>
-                                        <span className="font-extrabold text-purple-400">
-                                            {clientTotal.toLocaleString()} DA
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Return Type Select */}
-                            <div>
-                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Mode de Remboursement / Compensation</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <label className={`flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                                        clientReturnType === "CREDIT"
-                                            ? "bg-purple-950/15 border-purple-500 text-white shadow-sm"
-                                            : "bg-slate-900/50 border-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-900"
-                                    }`}>
-                                        <input
-                                            type="radio"
-                                            name="clientReturnType"
-                                            value="CREDIT"
-                                            checked={clientReturnType === "CREDIT"}
-                                            onChange={() => setClientReturnType("CREDIT")}
-                                            className="sr-only"
-                                        />
-                                        <FileText className="h-5 w-5 mb-1 text-purple-400" />
-                                        <span className="text-xs font-bold">Déduire de la dette</span>
-                                        <span className="text-[9px] text-slate-500 mt-0.5">Ajuste le solde client</span>
-                                    </label>
-
-                                    <label className={`flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer select-none transition-all ${
-                                        clientReturnType === "CASH"
-                                            ? "bg-purple-950/15 border-purple-500 text-white shadow-sm"
-                                            : "bg-slate-900/50 border-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-900"
-                                    }`}>
-                                        <input
-                                            type="radio"
-                                            name="clientReturnType"
-                                            value="CASH"
-                                            checked={clientReturnType === "CASH"}
-                                            onChange={() => setClientReturnType("CASH")}
-                                            className="sr-only"
-                                        />
-                                        <Wallet className="h-5 w-5 mb-1 text-purple-400" />
-                                        <span className="text-xs font-bold">Rembourser Cash</span>
-                                        <span className="text-[9px] text-slate-500 mt-0.5">Déduit de la Caisse</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Caisse Account (only if CASH) */}
-                            {clientReturnType === "CASH" && (
-                                <div className="space-y-2">
-                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Caisse de Remboursement *</label>
-                                    <select
+                                <div>
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Motif du Retour *</label>
+                                    <input
+                                        type="text"
                                         required
-                                        value={clientAccountId}
-                                        onChange={(e) => setClientAccountId(e.target.value)}
+                                        placeholder="ex: Article défectueux, Non conforme..."
+                                        value={clientReason}
+                                        onChange={(e) => setClientReason(e.target.value)}
                                         className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                    >
-                                        <option value="">Sélectionnez un compte...</option>
-                                        {accounts.map((a) => (
-                                            <option key={a.id} value={a.id}>
-                                                {a.name} (Disponible: {a.balance.toLocaleString()} DA)
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
+                                </div>
+                            </div>
 
-                                    {/* Warnings if cash insufficient */}
-                                    {selectedAccountInfo && Number(selectedAccountInfo.balance) < clientTotal && (
-                                        <div className="bg-red-950/15 border border-red-500/20 p-3 rounded-lg text-[10px] text-red-400 flex items-start gap-2">
-                                            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                                            <span>Attention: Solde insuffisant dans ce compte. Solde actuel: {selectedAccountInfo.balance.toLocaleString()} DA. Requis: {clientTotal.toLocaleString()} DA.</span>
+                            {/* Summary and Financial Options */}
+                            {selectedSalesOrder && clientTotal > 0 && (
+                                <div className="space-y-4">
+                                    <div className="bg-purple-950/20 border border-purple-500/10 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
+                                        <div className="flex items-center gap-2 text-slate-300">
+                                            <Package className="h-5 w-5 text-purple-400" />
+                                            <div>
+                                                <span className="font-bold text-slate-200 block">Total Retour Marchandise</span>
+                                                <span className="text-[10px] text-slate-500">
+                                                    Défini à partir de la grille des quantités
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-xl font-black text-purple-400">
+                                                {clientTotal.toLocaleString()} DA
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Mode de Compensation / Remboursement */}
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Mode de Compensation</label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <label className={`flex flex-col items-center justify-center p-4 rounded-xl border cursor-pointer select-none transition-all ${
+                                                !refundCash
+                                                    ? "bg-purple-950/15 border-purple-500 text-white shadow-sm"
+                                                    : "bg-slate-900/50 border-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                                            }`}>
+                                                <input
+                                                    type="radio"
+                                                    name="clientRefundType"
+                                                    checked={!refundCash}
+                                                    onChange={() => setRefundCash(false)}
+                                                    className="sr-only"
+                                                />
+                                                <FileText className="h-5 w-5 mb-1 text-purple-400" />
+                                                <span className="text-xs font-bold">Crédit Client (Solde)</span>
+                                                <span className="text-[9px] text-slate-500 mt-0.5 text-center">Génère un crédit ou réduit sa dette pour un futur BL</span>
+                                            </label>
+
+                                            <label className={`flex flex-col items-center justify-center p-4 rounded-xl border select-none transition-all ${
+                                                maxRefundCapacity <= 0 
+                                                    ? "opacity-40 cursor-not-allowed bg-slate-950/30 border-slate-900 text-slate-600" 
+                                                    : refundCash
+                                                        ? "bg-purple-950/15 border-purple-500 text-white shadow-sm cursor-pointer"
+                                                        : "bg-slate-900/50 border-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-900 cursor-pointer"
+                                            }`}>
+                                                <input
+                                                    type="radio"
+                                                    name="clientRefundType"
+                                                    disabled={maxRefundCapacity <= 0}
+                                                    checked={refundCash}
+                                                    onChange={() => setRefundCash(true)}
+                                                    className="sr-only"
+                                                />
+                                                <Wallet className="h-5 w-5 mb-1 text-purple-400" />
+                                                <span className="text-xs font-bold">Rembourser Cash (Caisse)</span>
+                                                <span className="text-[9px] text-slate-500 mt-0.5 text-center">
+                                                    Remboursement immédiat (Max: {maxRefundCapacity.toLocaleString()} DA)
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Treasury Account select if refund is active */}
+                                    {refundCash && maxRefundCapacity > 0 && (
+                                        <div className="space-y-2">
+                                            <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Caisse de Remboursement *</label>
+                                            <select
+                                                required
+                                                value={clientAccountId}
+                                                onChange={(e) => setClientAccountId(e.target.value)}
+                                                className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
+                                            >
+                                                <option value="">Sélectionnez un compte...</option>
+                                                {accounts.map((a) => (
+                                                    <option key={a.id} value={a.id}>
+                                                        {a.name} (Disponible: {a.balance.toLocaleString()} DA)
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {/* Warning if cash insufficient */}
+                                            {selectedAccountInfo && Number(selectedAccountInfo.balance) < Math.min(maxRefundCapacity, clientTotal) && (
+                                                <div className="bg-red-950/15 border border-red-500/20 p-3 rounded-lg text-[10px] text-red-400 flex items-start gap-2">
+                                                    <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                                                    <span>Attention: Solde insuffisant dans ce compte. Disponible: {selectedAccountInfo.balance.toLocaleString()} DA. Requis: {Math.min(maxRefundCapacity, clientTotal).toLocaleString()} DA.</span>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Reason & Notes */}
+                            {/* Notes Internes */}
                             <div>
-                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Motif du Retour *</label>
-                                <input
-                                    type="text"
-                                    required
-                                    placeholder="ex: Article défectueux, Erreur de livraison, Non conforme..."
-                                    value={clientReason}
-                                    onChange={(e) => setClientReason(e.target.value)}
-                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Notes Internes</label>
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Notes Internes (facultatif)</label>
                                 <textarea
                                     rows={2}
                                     placeholder="Notes de commentaires internes..."
@@ -612,7 +723,7 @@ export function ReturnsClient({
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={loading || (clientReturnType === "CASH" && selectedAccountInfo && Number(selectedAccountInfo.balance) < clientTotal)}
+                                    disabled={loading || (refundCash && selectedAccountInfo && Number(selectedAccountInfo.balance) < Math.min(maxRefundCapacity, clientTotal))}
                                     className="px-5 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-500/10 transition-all"
                                 >
                                     {loading ? "Enregistrement..." : "Enregistrer le Retour"}
@@ -636,37 +747,35 @@ export function ReturnsClient({
                             {/* Supplier Select */}
                             <div>
                                 <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Fournisseur *</label>
-                                <select
-                                    required
+                                <SearchableSelect
+                                    options={suppliers.map(s => ({
+                                        label: `${s.name} (Solde dû: ${s.balance.toLocaleString()} DA)`,
+                                        value: s.id
+                                    }))}
                                     value={supplierId}
-                                    onChange={(e) => setSupplierId(e.target.value)}
-                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                >
-                                    <option value="">Sélectionnez un fournisseur...</option>
-                                    {suppliers.map((s) => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.name} (Solde dû: {s.balance.toLocaleString()} DA)
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setSupplierId}
+                                    placeholder="Sélectionner un fournisseur..."
+                                    searchPlaceholder="Rechercher un fournisseur..."
+                                    emptyMessage="Aucun fournisseur trouvé."
+                                    className="bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl h-9 text-xs"
+                                />
                             </div>
 
                             {/* Product Select */}
                             <div>
                                 <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Produit à Renvoyer *</label>
-                                <select
-                                    required
+                                <SearchableSelect
+                                    options={products.map(p => ({
+                                        label: `${p.name} (Stock: ${p.stock} units — Coût: ${p.cost.toLocaleString()} DA)`,
+                                        value: p.id
+                                    }))}
                                     value={supplierProductId}
-                                    onChange={(e) => setSupplierProductId(e.target.value)}
-                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-xl px-3.5 py-2 text-xs outline-none focus:border-slate-700"
-                                >
-                                    <option value="">Sélectionnez un produit...</option>
-                                    {products.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.name} (Stock: {p.stock} unités — Coût: {p.cost.toLocaleString()} DA)
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setSupplierProductId}
+                                    placeholder="Sélectionner un produit..."
+                                    searchPlaceholder="Rechercher un produit..."
+                                    emptyMessage="Aucun produit trouvé."
+                                    className="bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl h-9 text-xs"
+                                />
                             </div>
 
                             {/* Qty & Store */}

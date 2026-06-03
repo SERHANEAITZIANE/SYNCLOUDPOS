@@ -96,7 +96,7 @@ export const processClientReturn = async (params: ClientReturnParams) => {
             let storeStockAfter = 0
             if (stockStoreId) {
                 const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
-                storeStockBefore = spBefore?.stock || 0
+                storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
                 storeStockAfter = storeStockBefore + quantity
 
                 await tx.storeProduct.upsert({
@@ -294,7 +294,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             let storeStockAfter = 0
             if (stockStoreId) {
                 const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
-                storeStockBefore = spBefore?.stock || 0
+                storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
                 storeStockAfter = Math.max(0, storeStockBefore - quantity)
 
                 await tx.storeProduct.upsert({
@@ -371,3 +371,225 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
         return { error: error instanceof Error ? error.message : "Erreur interne lors du traitement" }
     }
 }
+
+export interface BulkClientReturnItem {
+    productId: string
+    quantity: number
+    unitPrice: number
+}
+
+export interface BulkClientReturnParams {
+    customerId: string
+    salesOrderId: string
+    items: BulkClientReturnItem[]
+    storeId?: string
+    refundCash: boolean
+    accountId?: string
+    reason: string
+    notes?: string
+}
+
+export async function getCustomerSalesOrders(customerId: string) {
+    const session = await auth()
+    if (!session?.user?.id) return []
+    const tenantId = session.user.tenantId
+
+    try {
+        const orders = await db.salesOrder.findMany({
+            where: {
+                tenantId,
+                customerId,
+                type: "ORDER",
+                status: { in: ["VALIDATED", "PAID"] }
+            },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true,
+                                cost: true,
+                                stock: true,
+                                barcodes: { select: { value: true } }
+                            }
+                        }
+                    }
+                },
+                productReturns: {
+                    select: {
+                        productId: true,
+                        quantity: true
+                    }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+        return JSON.parse(JSON.stringify(orders))
+    } catch (error) {
+        console.error("getCustomerSalesOrders error:", error)
+        return []
+    }
+}
+
+export async function processBulkClientReturn(params: BulkClientReturnParams) {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+    const userId = session.user.id
+
+    const { customerId, salesOrderId, items, storeId, refundCash, accountId, reason, notes } = params
+
+    if (!customerId || !salesOrderId || !items || items.length === 0 || !reason) {
+        return { error: "Veuillez remplir tous les champs requis" }
+    }
+
+    const validItems = items.filter(item => item.quantity > 0)
+    if (validItems.length === 0) {
+        return { error: "Veuillez spécifier au moins une quantité à retourner supérieure à 0" }
+    }
+
+    try {
+        const result = await db.$transaction(async (tx) => {
+            // 1. Fetch sales order (BL) details
+            const salesOrder = await tx.salesOrder.findFirst({
+                where: { id: salesOrderId, tenantId, customerId }
+            })
+            if (!salesOrder) throw new Error("Bon de livraison introuvable")
+
+            const returnTotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0)
+
+            // Calculate refund capacity: amountPaid - (total - returnTotal)
+            const amountPaid = Number(salesOrder.amountPaid)
+            const total = Number(salesOrder.total)
+            const totalRefundCapacity = Math.max(0, amountPaid - (total - returnTotal))
+
+            let refundCashAmount = 0
+            if (refundCash && accountId) {
+                refundCashAmount = Math.min(totalRefundCapacity, returnTotal)
+                if (refundCashAmount > 0) {
+                    const account = await tx.treasuryAccount.findUnique({
+                        where: { id: accountId, tenantId }
+                    })
+                    if (!account) throw new Error("Compte de trésorerie introuvable")
+                    if (Number(account.balance) < refundCashAmount) {
+                        throw new Error("Solde de caisse insuffisant pour effectuer le remboursement")
+                    }
+
+                    // Decrement treasury account balance
+                    const updatedAccount = await tx.treasuryAccount.update({
+                        where: { id: accountId },
+                        data: { balance: { decrement: refundCashAmount } }
+                    })
+
+                    // Create Treasury Transaction record
+                    await tx.treasuryTransaction.create({
+                        data: {
+                            accountId,
+                            type: "DEBIT",
+                            amount: refundCashAmount,
+                            balanceBefore: account.balance,
+                            balanceAfter: updatedAccount.balance,
+                            source: "MANUAL_OUT",
+                            referenceId: customerId,
+                            description: `Remboursement Retour Client (BL N°: ${salesOrder.receiptNumber || 'N/A'}): ${reason}`,
+                            tenantId
+                        }
+                    })
+                }
+            }
+
+            const stockStoreId = storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id
+
+            // Process each item
+            for (const item of validItems) {
+                const product = await tx.product.findUnique({
+                    where: { id: item.productId, tenantId },
+                    include: { storeProducts: true }
+                })
+                if (!product) throw new Error(`Produit introuvable: ${item.productId}`)
+
+                // Restock Product (Global)
+                const globalStockBefore = product.stock || 0
+                const globalStockAfter = globalStockBefore + item.quantity
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: globalStockAfter }
+                })
+
+                // Restock Product (Store specific)
+                let storeStockBefore = 0
+                let storeStockAfter = 0
+                if (stockStoreId) {
+                    const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
+                    storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
+                    storeStockAfter = storeStockBefore + item.quantity
+
+                    await tx.storeProduct.upsert({
+                        where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
+                        update: { stock: storeStockAfter },
+                        create: { storeId: stockStoreId, productId: item.productId, stock: storeStockAfter, minStock: spBefore?.minStock || 10 }
+                    })
+                }
+
+                // Create Stock Movement
+                await tx.stockMovement.create({
+                    data: {
+                        productId: item.productId,
+                        type: "RETURN",
+                        quantity: item.quantity,
+                        stockBefore: storeStockBefore || globalStockBefore,
+                        stockAfter: storeStockAfter || globalStockAfter,
+                        reason: `Retour Client sur BL N°: ${salesOrder.receiptNumber || 'N/A'}. Motif: ${reason}`,
+                        tenantId,
+                        storeId: stockStoreId || undefined,
+                        userId
+                    }
+                })
+
+                // Create ProductReturn record
+                await tx.productReturn.create({
+                    data: {
+                        tenantId,
+                        customerId,
+                        driverId: userId,
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        totalAmount: item.quantity * item.unitPrice,
+                        reason: `${reason} (BL N°: ${salesOrder.receiptNumber || 'N/A'})`,
+                        notes: notes || null,
+                        status: "COMPLETED",
+                        salesOrderId: salesOrder.id
+                    }
+                })
+            }
+
+            // Adjust Customer Balance: decrement by returnTotal - refundCashAmount
+            const balanceDecrement = returnTotal - refundCashAmount
+            if (balanceDecrement > 0) {
+                await tx.customer.update({
+                    where: { id: customerId },
+                    data: { balance: { decrement: balanceDecrement } }
+                })
+            }
+
+            return { success: true }
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        revalidatePath("/(dashboard)/products")
+        revalidatePath("/(dashboard)/customers")
+        revalidatePath("/(dashboard)/treasury")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
+        return { success: "Retour client enregistré avec succès et stock réapprovisionné." }
+    } catch (error) {
+        console.error("processBulkClientReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors du traitement" }
+    }
+}
+

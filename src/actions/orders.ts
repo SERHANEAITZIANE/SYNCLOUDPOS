@@ -73,7 +73,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             const stockStoreId = oldSalesOrder.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
                             const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
                             const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
-                            const stockBefore = spBefore?.stock || 0;
+                            const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : (pBefore?.stock || 0);
                             const stockAfter = stockBefore + item.quantity;
 
                             if (stockStoreId) {
@@ -255,19 +255,29 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 where: { id: { in: productIds } },
                 include: { storeProducts: { where: { storeId: storeIdToUse } } }
             });
-            const stockMap = new Map(productsWithStock.map(p => [
-                p.id, 
-                { stock: p.storeProducts[0]?.stock || 0, minStock: p.storeProducts[0]?.minStock || 10, hasStoreProduct: p.storeProducts.length > 0 }
-            ]));
+            const stockMap = new Map(productsWithStock.map(p => {
+                const sp = p.storeProducts[0];
+                return [
+                    p.id, 
+                    { 
+                        stock: sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0), 
+                        minStock: sp?.minStock !== undefined && sp?.minStock !== null ? sp.minStock : (p.minStock || 10), 
+                        hasStoreProduct: p.storeProducts.length > 0 
+                    }
+                ];
+            }));
 
             // Step 2: Ensure StoreProduct records exist for all items (upsert only missing ones)
             const missingStoreProducts = items.filter((item: any) => !stockMap.get(item.productId)?.hasStoreProduct);
             if (missingStoreProducts.length > 0) {
                 for (const item of missingStoreProducts) {
+                    const existing = stockMap.get(item.productId);
+                    const initialStock = existing?.stock || 0;
+                    const initialMinStock = existing?.minStock || 10;
                     await tx.storeProduct.upsert({
                         where: { storeId_productId: { storeId: storeIdToUse, productId: item.productId } },
                         update: {},
-                        create: { storeId: storeIdToUse, productId: item.productId, stock: 0, minStock: 10 }
+                        create: { storeId: storeIdToUse, productId: item.productId, stock: initialStock, minStock: initialMinStock }
                     });
                 }
             }
@@ -386,6 +396,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         revalidatePath("/[locale]/(dashboard)/products", "page")
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
         revalidatePath("/[locale]/(dashboard)/sales", "page")
+        revalidatePath("/[locale]/(pos)/pos", "page")
 
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)

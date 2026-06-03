@@ -125,13 +125,24 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     data.items.map(async (item: any) => {
                         const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
                         const spBefore = pBefore?.storeProducts.find(sp => sp.storeId === stockStoreId);
-                        const stockBefore = spBefore?.stock || 0;
+                        
+                        const globalStockBefore = pBefore?.stock || 0;
+                        const globalStockAfter = globalStockBefore + item.quantity;
+
+                        // CUMP calculation (Weighted Average Cost / PMP)
+                        const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore?.cost || 0) : 0;
+                        const newPurchaseValue = item.quantity * Number(item.costPrice);
+                        const newCump = globalStockAfter > 0 
+                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
+                            : Number(item.costPrice);
+
+                        const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore;
                         const stockAfter = stockBefore + item.quantity;
 
                         await tx.product.update({
                             where: { id: item.productId },
                             data: { 
-                                cost: item.costPrice,
+                                cost: newCump,
                                 stock: { increment: item.quantity }
                             }
                         });
@@ -152,7 +163,7 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                                 stockBefore,
                                 stockAfter,
                                 referenceId: purchaseOrder.id,
-                                reason: `Achat Fournisseur N° ${purchaseOrder.id.slice(-6)}`,
+                                reason: `Achat Fournisseur N° ${purchaseOrder.id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
                                 tenantId
                             }
                         });
@@ -349,7 +360,7 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 
                     if (stockStoreId) {
                         const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId)
-                        const stockBefore = spBefore?.stock || 0
+                        const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
                         const stockAfter = stockBefore + item.quantity
 
                         await tx.storeProduct.upsert({
@@ -590,11 +601,11 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                         if (!pBefore) return;
 
                         const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId);
-                        const stockBefore = spBefore?.stock || 0;
-                        const stockAfter = stockBefore + item.quantity;
-
                         const globalStockBefore = pBefore.stock || 0;
                         const globalStockAfter = globalStockBefore + item.quantity;
+
+                        const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore;
+                        const stockAfter = stockBefore + item.quantity;
 
                         // CUMP calculation (Weighted Average Cost)
                         const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0;

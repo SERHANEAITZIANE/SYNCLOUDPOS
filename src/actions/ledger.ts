@@ -21,13 +21,12 @@ export async function getCustomerLedger(customerId: string) {
 
         const tenantId = session.user.tenantId
 
-        // 1. Fetch Sales, payments, returns, and customer details in parallel
-        const [sales, credits, debits, customerOrders, clientReturns, customer] = await Promise.all([
+        // 1. Fetch Sales, invoices, cheques, customer orders, returns, and customer details in parallel
+        const [allSalesOrders, invoices, cheques, customerOrders, clientReturns, customer] = await Promise.all([
             db.salesOrder.findMany({
                 where: {
                     tenantId,
                     customerId,
-                    status: { in: ["VALIDATED", "PAID"] },
                 },
                 select: {
                     id: true,
@@ -35,42 +34,16 @@ export async function getCustomerLedger(customerId: string) {
                     total: true,
                     receiptNumber: true,
                     type: true,
+                    status: true,
                 },
             }),
-            // Fetch Payments RECEIVED (Credits - money given by customer to us)
-            db.treasuryTransaction.findMany({
-                where: {
-                    tenantId,
-                    type: "CREDIT",
-                    OR: [
-                        { source: "MANUAL_IN", referenceId: customerId }, // Standard payment received
-                    ]
-                },
-                select: {
-                    id: true,
-                    date: true,
-                    amount: true,
-                    description: true,
-                    source: true,
-                    referenceId: true
-                }
+            db.invoice.findMany({
+                where: { tenantId, customerId },
+                select: { id: true }
             }),
-            // Fetch Loans/Advances GIVEN (Debits - money we gave to the customer)
-            db.treasuryTransaction.findMany({
-                where: {
-                    tenantId,
-                    type: "DEBIT",
-                    source: "MANUAL_OUT",
-                    referenceId: customerId
-                },
-                select: {
-                    id: true,
-                    date: true,
-                    amount: true,
-                    description: true,
-                    source: true,
-                    referenceId: true
-                }
+            db.cheque.findMany({
+                where: { tenantId, customerId },
+                select: { id: true }
             }),
             db.order.findMany({
                 where: { tenantId, customerId },
@@ -98,29 +71,53 @@ export async function getCustomerLedger(customerId: string) {
             })
         ]);
 
+        const sales = allSalesOrders.filter(so => ["VALIDATED", "PAID"].includes(so.status))
         const customerOrderIds = customerOrders.map(o => o.id)
+        const salesOrderIds = allSalesOrders.map(so => so.id)
+        const invoiceIds = invoices.map(i => i.id)
+        const chequeIds = cheques.map(c => c.id)
 
-        // Payments directly linked to a POS sale
-        const salePayments = await db.treasuryTransaction.findMany({
-            where: {
-                tenantId,
-                type: "CREDIT",
-                source: "SALE",
-                referenceId: { in: customerOrderIds }
-            },
-            select: {
-                id: true,
-                date: true,
-                amount: true,
-                description: true,
-                source: true,
-                referenceId: true
-            }
-        })
+        const referenceIds = [
+            customerId,
+            ...customerOrderIds,
+            ...salesOrderIds,
+            ...invoiceIds,
+            ...chequeIds
+        ]
 
-        const allCredits = [...credits, ...salePayments]
-        // Remove duplicates if any happen to overlap
-        const uniqueCredits = Array.from(new Map(allCredits.map(item => [item.id, item])).values())
+        // Fetch Payments RECEIVED (Credits) and Loans GIVEN (Debits) referencing any of our customer entities
+        const [credits, debits] = await Promise.all([
+            db.treasuryTransaction.findMany({
+                where: {
+                    tenantId,
+                    type: "CREDIT",
+                    referenceId: { in: referenceIds }
+                },
+                select: {
+                    id: true,
+                    date: true,
+                    amount: true,
+                    description: true,
+                    source: true,
+                    referenceId: true
+                }
+            }),
+            db.treasuryTransaction.findMany({
+                where: {
+                    tenantId,
+                    type: "DEBIT",
+                    referenceId: { in: referenceIds }
+                },
+                select: {
+                    id: true,
+                    date: true,
+                    amount: true,
+                    description: true,
+                    source: true,
+                    referenceId: true
+                }
+            })
+        ])
 
         // Map into a unified chronological ledger
         const ledgerLines: Omit<LedgerLine, "balance">[] = []
@@ -156,10 +153,10 @@ export async function getCustomerLedger(customerId: string) {
         }
 
         // Map Payments RECEIVED (Credits - decreases what they owe us)
-        for (const pay of uniqueCredits) {
+        for (const pay of credits) {
             let label = pay.description || "Paiement"
-            if (pay.source === "SALE") label = "Paiement (Vente Directe)"
-            else if (pay.source === "MANUAL_IN") label = "Règlement de dette"
+            if (pay.source === "SALE") label = `Paiement (${pay.description || "Vente"})`
+            else if (pay.source === "MANUAL_IN") label = pay.description || "Règlement de dette"
 
             ledgerLines.push({
                 id: `pay-${pay.id}`,
@@ -238,8 +235,8 @@ export async function getSupplierLedger(supplierId: string) {
 
         const tenantId = session.user.tenantId
 
-        // Step 1: Fetch purchases, supplier details, and returns in parallel
-        const [purchases, supplier, movements] = await Promise.all([
+        // Step 1: Fetch purchases, supplier details, returns, and cheques in parallel
+        const [purchases, supplier, movements, cheques] = await Promise.all([
             db.purchaseOrder.findMany({
                 where: {
                     tenantId,
@@ -270,20 +267,24 @@ export async function getSupplierLedger(supplierId: string) {
                         }
                     }
                 }
+            }),
+            db.cheque.findMany({
+                where: { tenantId, supplierId },
+                select: { id: true }
             })
         ]);
 
         if (!supplier) throw new Error("Fournisseur introuvable")
 
-        // Step 2: Fetch all treasury transactions linked to the supplier or their purchases
+        // Step 2: Fetch all treasury transactions linked to the supplier, purchases, or cheques
         const purchaseIds = purchases.map(p => p.id)
+        const chequeIds = cheques.map(c => c.id)
+        const referenceIds = [supplierId, ...purchaseIds, ...chequeIds]
+
         const treasuryTransactions = await db.treasuryTransaction.findMany({
             where: {
                 tenantId,
-                OR: [
-                    { referenceId: supplierId },
-                    { referenceId: { in: purchaseIds } }
-                ]
+                referenceId: { in: referenceIds }
             },
             select: {
                 id: true,
