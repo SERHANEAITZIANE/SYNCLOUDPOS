@@ -44,7 +44,7 @@ export default function SettingsScreen() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "2.1.0";
+                    const currentVersion = "2.2.0";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
@@ -654,7 +654,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("version")}</Text>
-                    <Text style={styles.infoValue}>v2.1.0</Text>
+                    <Text style={styles.infoValue}>v2.2.0</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("tenant")}</Text>

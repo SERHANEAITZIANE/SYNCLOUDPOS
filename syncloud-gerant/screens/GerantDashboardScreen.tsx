@@ -126,7 +126,7 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.header}>
                     <View style={styles.headerTitleRow}>
                         <Ionicons name="sparkles" size={24} color="#f59e0b" />
-                        <Text style={styles.versionText}>v2.1.0 — SynCloudPOS Gérant</Text>
+                        <Text style={styles.versionText}>v2.2.0 — SynCloudPOS Gérant</Text>
                         <TouchableOpacity
                             style={styles.briefingBtn}
                             onPress={() => (navigation as any)?.navigate?.("MorningBrief")}

@@ -130,7 +130,7 @@ export default function MoreScreen({ navigation }: any) {
                 <Text style={styles.logoutText}>Se déconnecter</Text>
             </TouchableOpacity>
 
-            <Text style={styles.versionText}>SynCloudPOS Gérant v2.1.0</Text>
+            <Text style={styles.versionText}>SynCloudPOS Gérant v2.2.0</Text>
         </ScrollView>
     );
 }

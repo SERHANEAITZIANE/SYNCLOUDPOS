@@ -57,7 +57,7 @@ const AppTheme = {
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const CURRENT_VERSION = "2.1.0";
+const CURRENT_VERSION = "2.2.0";
 
 // ─── Login Screen ───────────────────────────────────────────────────────────
 function LoginScreen() {
