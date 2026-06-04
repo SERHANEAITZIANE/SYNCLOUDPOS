@@ -50,6 +50,9 @@ export default function GerantExpensesScreen() {
     const categories = ["Carburant", "Loyer & Charges", "Fournitures", "Maintenance", "Salaires", "Autre"];
     const sources = ["Caisse Principale (Espèces)", "Compte Banque"];
 
+    const scrollViewRef = React.useRef<ScrollView>(null);
+    const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+
     // Form states
     const [selectedCategory, setSelectedCategory] = useState("Carburant");
     const [selectedSource, setSelectedSource] = useState("Caisse Principale (Espèces)");
@@ -82,6 +85,46 @@ export default function GerantExpensesScreen() {
         setPhotos(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleEditExpense = (expense: Expense) => {
+        setEditingExpenseId(expense.id);
+        setSelectedCategory(expense.category);
+        setSelectedSource(expense.source);
+        setAmount(String(expense.amount));
+        setDescription(expense.description);
+        setPhotos(expense.photos);
+        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingExpenseId(null);
+        setSelectedCategory("Carburant");
+        setSelectedSource("Caisse Principale (Espèces)");
+        setAmount("");
+        setDescription("");
+        setPhotos([]);
+    };
+
+    const handleDeleteExpense = (id: string) => {
+        Alert.alert(
+            "Supprimer la dépense",
+            "Êtes-vous sûr de vouloir supprimer définitivement cette dépense ?",
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: () => {
+                        setExpenses(prev => prev.filter(exp => exp.id !== id));
+                        if (editingExpenseId === id) {
+                            handleCancelEdit();
+                        }
+                        Alert.alert("✓ Supprimé", "La dépense a été supprimée.");
+                    }
+                }
+            ]
+        );
+    };
+
     const handleSaveExpense = () => {
         if (!amount.trim() || isNaN(Number(amount)) || Number(amount) <= 0) {
             Alert.alert("Erreur", "Veuillez entrer un montant valide supérieur à 0.");
@@ -97,30 +140,46 @@ export default function GerantExpensesScreen() {
 
         // Simulate save delay
         setTimeout(() => {
-            const newExpense: Expense = {
-                id: `DEP-${Math.floor(4000 + Math.random() * 1000)}`,
-                category: selectedCategory,
-                amount: Number(amount),
-                description: description.trim(),
-                source: selectedSource,
-                date: new Date().toLocaleDateString("fr-FR"),
-                photos: [...photos]
-            };
-
-            setExpenses(prev => [newExpense, ...prev]);
+            if (editingExpenseId) {
+                setExpenses(prev => prev.map(exp => {
+                    if (exp.id === editingExpenseId) {
+                        return {
+                            ...exp,
+                            category: selectedCategory,
+                            amount: Number(amount),
+                            description: description.trim(),
+                            source: selectedSource,
+                            photos: [...photos]
+                        };
+                    }
+                    return exp;
+                }));
+                setEditingExpenseId(null);
+                Alert.alert("✓ Modifié", "La dépense a été mise à jour !");
+            } else {
+                const newExpense: Expense = {
+                    id: `DEP-${Math.floor(4000 + Math.random() * 1000)}`,
+                    category: selectedCategory,
+                    amount: Number(amount),
+                    description: description.trim(),
+                    source: selectedSource,
+                    date: new Date().toLocaleDateString("fr-FR"),
+                    photos: [...photos]
+                };
+                setExpenses(prev => [newExpense, ...prev]);
+                Alert.alert("✓ Succès", "La dépense a été enregistrée et la caisse a été débitée !");
+            }
             
             // Reset form
             setAmount("");
             setDescription("");
             setPhotos([]);
             setIsSubmitting(false);
-
-            Alert.alert("✓ Succès", "La dépense a été enregistrée et la caisse a été débitée !");
         }, 1000);
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView ref={scrollViewRef} style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Gestion des Dépenses</Text>
@@ -130,8 +189,10 @@ export default function GerantExpensesScreen() {
             {/* Form Card */}
             <View style={styles.formCard}>
                 <View style={styles.formHeader}>
-                    <Ionicons name="add-circle" size={22} color="#3b82f6" />
-                    <Text style={styles.formTitle}>Nouvelle Dépense / Décaissement</Text>
+                    <Ionicons name={editingExpenseId ? "create-outline" : "add-circle"} size={22} color="#3b82f6" />
+                    <Text style={styles.formTitle}>
+                        {editingExpenseId ? "Modifier la Dépense" : "Nouvelle Dépense / Décaissement"}
+                    </Text>
                 </View>
 
                 {/* Category Selection */}
@@ -262,21 +323,34 @@ export default function GerantExpensesScreen() {
                 </View>
 
                 {/* Submit button */}
-                <TouchableOpacity
-                    style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
-                    onPress={handleSaveExpense}
-                    disabled={isSubmitting}
-                    activeOpacity={0.8}
-                >
-                    {isSubmitting ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <>
-                            <Ionicons name="checkmark-done" size={20} color="#fff" />
-                            <Text style={styles.submitBtnText}>Enregistrer la Dépense</Text>
-                        </>
+                <View style={{ flexDirection: "row", gap: 10, marginTop: 6 }}>
+                    {editingExpenseId && (
+                        <TouchableOpacity
+                            style={styles.cancelEditBtn}
+                            onPress={handleCancelEdit}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.cancelEditText}>Annuler</Text>
+                        </TouchableOpacity>
                     )}
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
+                        onPress={handleSaveExpense}
+                        disabled={isSubmitting}
+                        activeOpacity={0.8}
+                    >
+                        {isSubmitting ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <>
+                                <Ionicons name={editingExpenseId ? "save-outline" : "checkmark-done"} size={20} color="#fff" />
+                                <Text style={styles.submitBtnText}>
+                                    {editingExpenseId ? "Modifier" : "Enregistrer la Dépense"}
+                                </Text>
+                            </>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Recent Expenses List */}
@@ -300,8 +374,26 @@ export default function GerantExpensesScreen() {
                                     <Text style={styles.expenseSource}>{exp.source.split(" ")[0]}</Text>
                                 </View>
                                 <Text style={styles.expenseDesc}>{exp.description}</Text>
-                                <View style={styles.expenseCategoryBadge}>
-                                    <Text style={styles.expenseCategoryText}>{exp.category}</Text>
+                                <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                                    <View style={styles.expenseCategoryBadge}>
+                                        <Text style={styles.expenseCategoryText}>{exp.category}</Text>
+                                    </View>
+                                    <TouchableOpacity 
+                                        style={styles.actionIconBtn} 
+                                        onPress={() => handleEditExpense(exp)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Ionicons name="create-outline" size={13} color="#3b82f6" />
+                                        <Text style={styles.actionIconText}>Modifier</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={styles.actionIconBtn} 
+                                        onPress={() => handleDeleteExpense(exp.id)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Ionicons name="trash-outline" size={13} color="#ef4444" />
+                                        <Text style={styles.actionIconTextDelete}>Supprimer</Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
 
@@ -410,8 +502,8 @@ const styles = StyleSheet.create({
     addPhotoText: { color: "#3b82f6", fontSize: 10, fontWeight: "700" },
 
     submitBtn: {
-        flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-        backgroundColor: "#2563eb", borderRadius: 12, height: 50, marginTop: 6,
+        flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+        backgroundColor: "#2563eb", borderRadius: 12, height: 50,
     },
     submitBtnDisabled: { opacity: 0.7 },
     submitBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
@@ -442,4 +534,39 @@ const styles = StyleSheet.create({
     proofBadgeMissing: { backgroundColor: "#f59e0b15" },
     proofText: { color: "#22c55e", fontSize: 9, fontWeight: "700" },
     proofTextMissing: { color: "#f59e0b" },
+    actionIconBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        backgroundColor: "rgba(148,163,184,0.06)",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        marginTop: 6,
+    },
+    actionIconText: {
+        color: "#3b82f6",
+        fontSize: 10,
+        fontWeight: "700",
+    },
+    actionIconTextDelete: {
+        color: "#ef4444",
+        fontSize: 10,
+        fontWeight: "700",
+    },
+    cancelEditBtn: {
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(239, 68, 68, 0.3)",
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        backgroundColor: "rgba(239, 68, 68, 0.08)",
+        height: 50,
+    },
+    cancelEditText: {
+        color: "#ef4444",
+        fontSize: 14,
+        fontWeight: "700",
+    },
 });

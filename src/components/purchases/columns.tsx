@@ -48,6 +48,14 @@ export function usePurchaseColumns(): ColumnDef<PurchaseOrderColumn>[] {
             }
         },
         {
+            accessorKey: "productCount",
+            header: t("fields.productCount"),
+        },
+        {
+            accessorKey: "totalQuantity",
+            header: t("fields.totalQuantity"),
+        },
+        {
             accessorKey: "total",
             header: tCommon("total"),
             cell: ({ row }) => <span className="font-bold">{row.original.total}</span>

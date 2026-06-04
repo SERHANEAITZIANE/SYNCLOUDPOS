@@ -1176,8 +1176,22 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                 </div>
 
                                 {/* Total + Withholding breakdown */}
-                                <div className="flex justify-end">
-                                    <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right space-y-2">
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                    {/* Quantities summary */}
+                                    <div className="bg-muted/30 border border-slate-200 dark:border-slate-800 rounded-xl px-5 py-3.5 flex gap-6 text-sm w-full sm:w-auto">
+                                        <div>
+                                            <span className="text-muted-foreground block text-xs uppercase font-semibold">Produits uniques</span>
+                                            <span className="font-bold text-lg">{fields.length}</span>
+                                        </div>
+                                        <div className="border-l border-slate-200 dark:border-slate-850 pl-6">
+                                            <span className="text-muted-foreground block text-xs uppercase font-semibold">Quantité totale</span>
+                                            <span className="font-bold text-lg">
+                                                {watchItems.reduce((acc, item) => acc + Number(item.quantity || 0), 0)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right space-y-2 w-full sm:w-auto">
                                         <div>
                                             <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Total TTC</p>
                                             <p className="text-3xl font-bold">

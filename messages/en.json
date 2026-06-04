@@ -410,7 +410,9 @@
       "total": "Total",
       "date": "Date",
       "account": "Payment Account",
-      "items": "Items"
+      "items": "Items",
+      "productCount": "Product Count",
+      "totalQuantity": "Total Qty"
     },
     "status": {
       "pending": "Draft",

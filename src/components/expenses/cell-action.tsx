@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash } from "lucide-react"
+import { Edit, Trash } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -43,6 +43,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <>
             <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
             <div className="flex items-center gap-1">
+                {session?.user?.canEdit && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        onClick={() => router.push(`/expenses/${data.id}`)}
+                        title={tCommon("edit")}
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                )}
                 {session?.user?.canDelete && (
                     <Button
                         variant="ghost"

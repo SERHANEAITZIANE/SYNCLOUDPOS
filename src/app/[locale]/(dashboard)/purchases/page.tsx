@@ -8,16 +8,23 @@ import { formatter } from "@/lib/utils"
 export default async function PurchasesPage() {
     const { purchaseOrders } = await getPurchaseOrders()
 
-    const formattedOrders: PurchaseOrderColumn[] = ((purchaseOrders as any) || []).map((item: any) => ({
-        id: item.id,
-        supplier: item.supplier?.name || "",
-        total: formatter.format(Number(item.total)),
-        status: item.status,
-        createdAt: format(new Date(item.createdAt), "dd/MM/yyyy"),
-        imageUrl1: item.imageUrl1,
-        imageUrl2: item.imageUrl2,
-        imageUrl3: item.imageUrl3,
-    }))
+    const formattedOrders: PurchaseOrderColumn[] = ((purchaseOrders as any) || []).map((item: any) => {
+        const productCount = item.items?.length || 0
+        const totalQuantity = (item.items || []).reduce((acc: number, current: any) => acc + Number(current.quantity), 0)
+
+        return {
+            id: item.id,
+            supplier: item.supplier?.name || "",
+            total: formatter.format(Number(item.total)),
+            status: item.status,
+            createdAt: format(new Date(item.createdAt), "dd/MM/yyyy"),
+            productCount,
+            totalQuantity,
+            imageUrl1: item.imageUrl1,
+            imageUrl2: item.imageUrl2,
+            imageUrl3: item.imageUrl3,
+        }
+    })
 
     return (
         <div className="flex-col">

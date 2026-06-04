@@ -27,9 +27,9 @@ interface ScannedPurchase {
 
 export default function GerantPurchasesScreen() {
     const [recentPurchases, setRecentPurchases] = useState<any[]>([
-        { id: "ACH-8849", supplier: "Grossiste El Mountazah", date: "24/05/2026", totalHt: 155462, totalTva: 29538, totalTtc: 185000, shippingFees: 0, paymentMethod: "CREDIT", status: "Reçu", photos: ["https://picsum.photos/id/10/300/300"] },
-        { id: "ACH-8840", SPA: "SPA Ramy Boissons", supplier: "SPA Ramy Boissons", date: "22/05/2026", totalHt: 352941, totalTva: 67059, totalTtc: 420000, shippingFees: 5000, paymentMethod: "CASH", status: "Reçu", photos: ["https://picsum.photos/id/20/300/300", "https://picsum.photos/id/30/300/300"] },
-        { id: "ACH-8799", supplier: "SARL Soummam Lait", date: "18/05/2026", totalHt: 87156, totalTva: 7844, totalTtc: 95000, shippingFees: 0, paymentMethod: "CREDIT", status: "Brouillon", photos: [] },
+        { id: "ACH-8849", supplier: "Grossiste El Mountazah", date: "24/05/2026", totalHt: 155462, totalTva: 29538, totalTtc: 185000, shippingFees: 0, paymentMethod: "CREDIT", status: "Reçu", photos: ["https://picsum.photos/id/10/300/300"], productCount: 3, totalQuantity: 420 },
+        { id: "ACH-8840", SPA: "SPA Ramy Boissons", supplier: "SPA Ramy Boissons", date: "22/05/2026", totalHt: 352941, totalTva: 67059, totalTtc: 420000, shippingFees: 5000, paymentMethod: "CASH", status: "Reçu", photos: ["https://picsum.photos/id/20/300/300", "https://picsum.photos/id/30/300/300"], productCount: 5, totalQuantity: 980 },
+        { id: "ACH-8799", supplier: "SARL Soummam Lait", date: "18/05/2026", totalHt: 87156, totalTva: 7844, totalTtc: 95000, shippingFees: 0, paymentMethod: "CREDIT", status: "Brouillon", photos: [], productCount: 2, totalQuantity: 150 },
     ]);
 
     const [scanning, setScanning] = useState(false);
@@ -313,6 +313,9 @@ export default function GerantPurchasesScreen() {
                 const newId = `ACH-${Math.floor(1000 + Math.random() * 9000)}`;
                 const today = new Date().toLocaleDateString("fr-FR");
                 
+                const productCount = itemsList.length;
+                const totalQuantity = itemsList.reduce((sum, item) => sum + item.quantity, 0);
+
                 setRecentPurchases(prev => [
                     {
                         id: newId,
@@ -324,7 +327,9 @@ export default function GerantPurchasesScreen() {
                         shippingFees: parseFloat(shippingFees) || 0,
                         paymentMethod,
                         status: "Reçu",
-                        photos: [...photos]
+                        photos: [...photos],
+                        productCount,
+                        totalQuantity
                     },
                     ...prev
                 ]);
@@ -537,6 +542,14 @@ export default function GerantPurchasesScreen() {
                     {/* Financial summary blocks */}
                     <View style={styles.summaryContainer}>
                         <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Produits ajoutés (Réf.)</Text>
+                            <Text style={styles.summaryValue}>{itemsList.length}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
+                            <Text style={styles.summaryLabel}>Quantité totale</Text>
+                            <Text style={styles.summaryValue}>{itemsList.reduce((sum, item) => sum + item.quantity, 0)}</Text>
+                        </View>
+                        <View style={styles.summaryRow}>
                             <Text style={styles.summaryLabel}>Total Hors Taxes (HT)</Text>
                             <Text style={styles.summaryValue}>{totalHt.toLocaleString("fr-FR")} DA</Text>
                         </View>
@@ -636,6 +649,8 @@ export default function GerantPurchasesScreen() {
                             
                             {/* Taxes breakdowns details in history */}
                             <View style={styles.historyTaxesRow}>
+                                <Text style={styles.taxesText}>{p.productCount || 0} Réf. ({p.totalQuantity || 0} Qté)</Text>
+                                <Text style={styles.taxesDivider}>|</Text>
                                 <Text style={styles.taxesText}>HT: {p.totalHt.toLocaleString("fr-FR")} DA</Text>
                                 <Text style={styles.taxesDivider}>|</Text>
                                 <Text style={styles.taxesText}>TVA: {p.totalTva.toLocaleString("fr-FR")} DA</Text>

@@ -17,7 +17,7 @@ import { Heading } from "@/components/ui/heading"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createExpense, createExpenseCategory } from "@/actions/expenses"
+import { createExpense, createExpenseCategory, updateExpense } from "@/actions/expenses"
 import { Modal } from "@/components/ui/modal"
 import { Textarea } from "@/components/ui/textarea"
 import { ImageUpload } from "@/components/ui/image-upload"
@@ -82,12 +82,29 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
             setLoading(true)
             // Combine date + time into a Date object
             const dateTime = new Date(`${values.date}T${values.time}`)
-            await createExpense({ ...values, date: dateTime } as any)
-            toast.success("Dépense enregistrée avec succès.")
+            
+            if (initialData) {
+                const res = await updateExpense(initialData.id, { ...values, date: dateTime } as any)
+                if (res?.error) {
+                    toast.error(res.error)
+                    return
+                }
+                toast.success("Dépense mise à jour avec succès.")
+            } else {
+                const res = await createExpense({ ...values, date: dateTime } as any)
+                if (res?.error) {
+                    toast.error(res.error)
+                    return
+                }
+                toast.success("Dépense enregistrée avec succès.")
+            }
             router.push(`/expenses`)
             router.refresh()
-        } catch { toast.error("Une erreur est survenue.") }
-        finally { setLoading(false) }
+        } catch { 
+            toast.error("Une erreur est survenue.") 
+        } finally { 
+            setLoading(false) 
+        }
     }
 
     const onCreateCategory = async () => {
@@ -117,8 +134,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
 
             <div className="flex items-center justify-between">
                 <Heading
-                    title={initialData ? "Détails dépense" : "Nouvelle dépense"}
-                    description={initialData ? "Consulter les détails" : "Enregistrer une nouvelle dépense"}
+                    title={initialData ? "Modifier la dépense" : "Nouvelle dépense"}
+                    description={initialData ? "Modifier les informations de la dépense" : "Enregistrer une nouvelle dépense"}
                 />
             </div>
             <Separator />
@@ -305,7 +322,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
                             </Card>
 
                             <Button id="global-save-button" disabled={loading} className="w-full h-12 text-base font-semibold bg-red-600 hover:bg-red-700" type="submit">
-                                {loading ? "Enregistrement..." : "✓ Enregistrer la dépense"}
+                                {loading ? "Enregistrement..." : initialData ? "✓ Modifier la dépense" : "✓ Enregistrer la dépense"}
                                 <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>
                             </Button>
                         </div>

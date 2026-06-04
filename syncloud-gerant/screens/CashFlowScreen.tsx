@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View, Text, ScrollView, StyleSheet, TouchableOpacity,
-    Dimensions,
+    Dimensions, ActivityIndicator, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiFetch } from "../lib/api";
 
 const { width } = Dimensions.get("window");
 
@@ -57,9 +58,65 @@ const PROB_COLORS: Record<string, string> = {
 
 export default function CashFlowScreen() {
     const [horizon, setHorizon] = useState<Horizon>("7j");
-    const currentBalance = 420000; // Opening cash position
+    const [currentBalance, setCurrentBalance] = useState<number>(420000);
+    const [dbFlows, setDbFlows] = useState<FlowItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const flows = FLOW_DATA[horizon];
+    const loadCashflowData = useCallback(async () => {
+        try {
+            const data = await apiFetch("/gerant/cashflow");
+            if (data) {
+                if (typeof data.currentBalance === "number") {
+                    setCurrentBalance(data.currentBalance);
+                }
+                if (Array.isArray(data.flows)) {
+                    setDbFlows(data.flows);
+                }
+            }
+        } catch (e) {
+            console.error("[CashFlowScreen] Fetch error:", e);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadCashflowData();
+    }, [loadCashflowData]);
+
+    const getFlowsForHorizon = (): FlowItem[] => {
+        if (dbFlows.length === 0) {
+            return FLOW_DATA[horizon];
+        }
+
+        const limitDays = horizon === "7j" ? 7 : horizon === "14j" ? 14 : 30;
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - limitDays);
+
+        const filtered = dbFlows.filter(f => {
+            const fDate = new Date(f.date);
+            return fDate >= cutoffDate;
+        });
+
+        if (filtered.length === 0) {
+            return FLOW_DATA[horizon];
+        }
+
+        return filtered.map(f => {
+            const dateObj = new Date(f.date);
+            const day = String(dateObj.getDate()).padStart(2, "0");
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            return {
+                ...f,
+                date: `${day}/${month}`
+            };
+        });
+    };
+
+    const flows = getFlowsForHorizon();
+
     const totalIn = flows.filter(f => f.type === "in").reduce((s, f) => s + f.amount, 0);
     const totalOut = flows.filter(f => f.type === "out").reduce((s, f) => s + Math.abs(f.amount), 0);
     const netFlow = totalIn - totalOut;
@@ -67,10 +124,9 @@ export default function CashFlowScreen() {
 
     const fmt = (n: number) => Math.abs(n).toLocaleString("fr-FR");
 
-    // Build simplified daily bar data for the 7-day view
     const barData = horizon === "7j"
         ? [
-            { day: "Auj.", net: 185000 - 0 },
+            { day: "Auj.", net: flows.filter(f => f.type === "in").reduce((sum, f) => sum + f.amount, 0) - flows.filter(f => f.type === "out").reduce((sum, f) => sum + Math.abs(f.amount), 0) || 185000 },
             { day: "J+1", net: 180000 - 150000 },
             { day: "J+2", net: 175000 - 85000 },
             { day: "J+3", net: 0 - 0 },
@@ -82,8 +138,30 @@ export default function CashFlowScreen() {
 
     const maxBar = barData.length > 0 ? Math.max(...barData.map(b => Math.abs(b.net))) : 1;
 
+    if (loading) {
+        return (
+            <View style={{ flex: 1, backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="#06b6d4" />
+                <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 10 }}>Chargement des flux de caisse...</Text>
+            </View>
+        );
+    }
+
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => {
+                        setRefreshing(true);
+                        loadCashflowData();
+                    }}
+                    tintColor="#06b6d4"
+                />
+            }
+        >
             {/* Horizon Selector */}
             <View style={styles.horizonBar}>
                 {(["7j", "14j", "30j"] as Horizon[]).map(h => (
