@@ -114,6 +114,7 @@ export const PosClient: FC<PosClientProps> = ({
     isElectronicsStore = false
 }) => {
     const t = useTranslations("PosClient")
+    const tCommon = useTranslations("Common")
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
