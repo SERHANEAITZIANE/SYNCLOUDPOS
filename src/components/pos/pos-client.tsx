@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect, useRef, useMemo, FC, Suspense } from "react"
 import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, Sparkles, Package, Percent, Trash, ChevronLeft, ChevronRight, Info } from "lucide-react"
 import Image from "next/image"
 
