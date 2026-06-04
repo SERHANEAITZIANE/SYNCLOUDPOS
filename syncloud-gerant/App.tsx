@@ -1,22 +1,25 @@
 import React, { useEffect } from "react";
 import {
     View, Text, TextInput, TouchableOpacity,
-    ActivityIndicator, StyleSheet, Image, KeyboardAvoidingView,
+    ActivityIndicator, StyleSheet, KeyboardAvoidingView,
     Platform, Alert, StatusBar, Dimensions, Modal, Linking,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "./lib/store";
 import { useLangStore } from "./lib/i18n";
 
 // ─── Screens ────────────────────────────────────────────────────────────────
-import SettingsScreen from "./screens/SettingsScreen";
 import GerantDashboardScreen from "./screens/GerantDashboardScreen";
+import FinanceScreen from "./screens/FinanceScreen";
+import AiAdvisorScreen from "./screens/AiAdvisorScreen";
+import MoreScreen from "./screens/MoreScreen";
+import SettingsScreen from "./screens/SettingsScreen";
 import GerantPurchasesScreen from "./screens/GerantPurchasesScreen";
 import GerantExpensesScreen from "./screens/GerantExpensesScreen";
-import ReportsScreen from "./screens/ReportsScreen";
 import SalesAnalyticsScreen from "./screens/SalesAnalyticsScreen";
 import ProfitReportScreen from "./screens/ProfitReportScreen";
 import ClientDebtsScreen from "./screens/ClientDebtsScreen";
@@ -30,7 +33,6 @@ import ChequeManagerScreen from "./screens/ChequeManagerScreen";
 import CatalogScreen from "./screens/CatalogScreen";
 import CreateBLScreen from "./screens/CreateBLScreen";
 import AlertsScreen from "./screens/AlertsScreen";
-import AiAdvisorScreen from "./screens/AiAdvisorScreen";
 import MorningBriefScreen from "./screens/MorningBriefScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
@@ -44,16 +46,18 @@ const AppTheme = {
     colors: {
         ...DefaultTheme.colors,
         primary: "#22c55e",
-        background: "#0f172a",
+        background: "#0a0f1e",
         card: "#1e293b",
         text: "#f8fafc",
-        border: "#334155",
+        border: "#1e293b",
         notification: "#ef4444",
     },
 };
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+const CURRENT_VERSION = "2.1.0";
 
 // ─── Login Screen ───────────────────────────────────────────────────────────
 function LoginScreen() {
@@ -86,9 +90,12 @@ function LoginScreen() {
             <View style={styles.loginCard}>
                 {/* Logo */}
                 <View style={styles.logoContainer}>
-                    <View style={styles.logoBadge}>
-                        <Ionicons name="car" size={36} color="#fff" />
-                    </View>
+                    <LinearGradient
+                        colors={["#22c55e", "#10b981"]}
+                        style={styles.logoBadge}
+                    >
+                        <Ionicons name="analytics" size={36} color="#fff" />
+                    </LinearGradient>
                     <Text style={styles.logoTitle}>SynCloud</Text>
                     <Text style={styles.logoSubtitle}>GÉRANT</Text>
                 </View>
@@ -137,81 +144,94 @@ function LoginScreen() {
                     )}
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>v2.0.0 — SynCloudPOS</Text>
+                <Text style={styles.versionText}>v{CURRENT_VERSION} — SynCloudPOS</Text>
             </View>
         </KeyboardAvoidingView>
     );
 }
 
-// ─── Tab Navigator (Gérant App) ──────────────────────────────────────────────
+// ─── Tab Navigator (4 Tabs: Accueil, Finance, AI, Plus) ──────────────────────
 function GerantTabs() {
-    const { t } = useLangStore();
     return (
         <Tab.Navigator
             id="GerantTabs"
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName: any;
-                    if (route.name === "Dashboard") iconName = focused ? "analytics" : "analytics-outline";
-                    else if (route.name === "Alerts") iconName = focused ? "notifications" : "notifications-outline";
+                    if (route.name === "Accueil") iconName = focused ? "home" : "home-outline";
+                    else if (route.name === "Finance") iconName = focused ? "wallet" : "wallet-outline";
                     else if (route.name === "AI") iconName = focused ? "sparkles" : "sparkles-outline";
-                    else if (route.name === "Rapports") iconName = focused ? "bar-chart" : "bar-chart-outline";
-                    else if (route.name === "Paramètres") iconName = focused ? "settings" : "settings-outline";
-                    return <Ionicons name={iconName} size={size} color={color} />;
+                    else if (route.name === "Plus") iconName = focused ? "grid" : "grid-outline";
+                    return (
+                        <View style={focused ? tabStyles.activeWrap : undefined}>
+                            <Ionicons name={iconName} size={focused ? 24 : 22} color={color} />
+                            {focused && <View style={tabStyles.activeDot} />}
+                        </View>
+                    );
                 },
                 tabBarActiveTintColor: "#22c55e",
-                tabBarInactiveTintColor: "#64748b",
+                tabBarInactiveTintColor: "#475569",
                 tabBarStyle: {
-                    backgroundColor: "#1e293b",
-                    borderTopColor: "#334155",
-                    paddingBottom: Platform.OS === "ios" ? 20 : 8,
+                    backgroundColor: "#0f172a",
+                    borderTopWidth: 0,
+                    paddingBottom: Platform.OS === "ios" ? 24 : 10,
                     paddingTop: 8,
-                    height: Platform.OS === "ios" ? 88 : 64,
+                    height: Platform.OS === "ios" ? 88 : 68,
+                    elevation: 20,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: -4 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 12,
                 },
                 tabBarLabelStyle: {
                     fontSize: 10,
-                    fontWeight: "600",
+                    fontWeight: "700",
+                    marginTop: 2,
                 },
                 headerStyle: {
-                    backgroundColor: "#0f172a",
+                    backgroundColor: "#0a0f1e",
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderBottomWidth: 0,
                 },
                 headerTintColor: "#f8fafc",
                 headerTitleStyle: {
-                    fontWeight: "bold",
+                    fontWeight: "800",
+                    fontSize: 18,
                 },
             })}
         >
             <Tab.Screen
-                name="Dashboard"
+                name="Accueil"
                 component={GerantDashboardScreen}
-                options={{ title: "Dashboard" }}
+                options={{ title: "Accueil", headerShown: false }}
             />
             <Tab.Screen
-                name="Alerts"
-                component={AlertsScreen}
-                options={{
-                    title: "Alertes",
-                    tabBarBadgeStyle: { backgroundColor: "#ef4444" },
-                }}
+                name="Finance"
+                component={FinanceScreen}
+                options={{ title: "Finance", headerShown: false }}
             />
             <Tab.Screen
                 name="AI"
                 component={AiAdvisorScreen}
-                options={{ title: "Conseiller IA" }}
+                options={{ title: "IA", headerTitle: "Conseiller IA" }}
             />
             <Tab.Screen
-                name="Rapports"
-                component={ReportsScreen}
-                options={{ title: "Rapports" }}
-            />
-            <Tab.Screen
-                name="Paramètres"
-                component={SettingsScreen}
-                options={{ title: t("settings") }}
+                name="Plus"
+                component={MoreScreen}
+                options={{ title: "Plus", headerShown: false }}
             />
         </Tab.Navigator>
     );
 }
+
+// ─── Stack Screen Config Helper ─────────────────────────────────────────────
+const stackScreenStyle = {
+    headerStyle: { backgroundColor: "#0a0f1e" } as any,
+    headerTintColor: "#f8fafc",
+    headerTitleStyle: { fontWeight: "700" as const, fontSize: 16 },
+    headerShadowVisible: false,
+};
 
 // ─── Root App ────────────────────────────────────────────────────────────────
 export default function App() {
@@ -228,10 +248,9 @@ export default function App() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "2.0.0";
                     const remoteParts = data.version.split(".").map(Number);
-                    const localParts = currentVersion.split(".").map(Number);
-                    
+                    const localParts = CURRENT_VERSION.split(".").map(Number);
+
                     let hasUpdate = false;
                     for (let i = 0; i < 3; i++) {
                         if ((remoteParts[i] || 0) > (localParts[i] || 0)) {
@@ -286,9 +305,9 @@ export default function App() {
     if (isLoading) {
         return (
             <View style={styles.splashContainer}>
-                <View style={styles.logoBadge}>
-                    <Ionicons name="car" size={48} color="#fff" />
-                </View>
+                <LinearGradient colors={["#22c55e", "#10b981"]} style={styles.logoBadge}>
+                    <Ionicons name="analytics" size={48} color="#fff" />
+                </LinearGradient>
                 <ActivityIndicator size="large" color="#22c55e" style={{ marginTop: 24 }} />
             </View>
         );
@@ -296,144 +315,39 @@ export default function App() {
 
     return (
         <NavigationContainer theme={AppTheme}>
-            <Stack.Navigator id="RootStack" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator
+                id="RootStack"
+                screenOptions={{
+                    headerShown: false,
+                    animation: "fade_from_bottom",
+                }}
+            >
                 {!isAuthenticated ? (
                     <Stack.Screen name="Login" component={LoginScreen} />
                 ) : (
                     <>
-                        <Stack.Screen
-                            name="Main"
-                            component={GerantTabs}
-                        />
-                        <Stack.Screen
-                            name="SalesAnalytics"
-                            component={SalesAnalyticsScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Ventes & Revenus",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="ProfitReport"
-                            component={ProfitReportScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Marges & Rentabilité",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="ClientDebts"
-                            component={ClientDebtsScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Créances Clients",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="DailyClose"
-                            component={DailyCloseScreen}
-                            options={{
-                                  headerShown: true,
-                                  title: "Clôture de Caisse",
-                                  headerStyle: { backgroundColor: "#0f172a" },
-                                  headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="SupplierLedger"
-                            component={SupplierLedgerScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Grand Livre Fournisseurs",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="CashFlow"
-                            component={CashFlowScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Flux de Trésorerie",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="DriverMonitor"
-                            component={DriverMonitorScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Performance Livreurs",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="InventoryHealth"
-                            component={InventoryHealthScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Santé du Stock",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="G50Tax"
-                            component={G50TaxScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Déclaration G50 TVA",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="ChequeManager"
-                            component={ChequeManagerScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Gestion des Chèques",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="Catalog"
-                            component={CatalogScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Catalogue & Tarifs",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="CreateBL"
-                            component={CreateBLScreen}
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="MorningBrief"
-                            component={MorningBriefScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Briefing du Jour",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
+                        <Stack.Screen name="Main" component={GerantTabs} />
+                        <Stack.Screen name="SalesAnalytics" component={SalesAnalyticsScreen} options={{ headerShown: true, title: "Ventes & Revenus", ...stackScreenStyle }} />
+                        <Stack.Screen name="ProfitReport" component={ProfitReportScreen} options={{ headerShown: true, title: "Marges & Rentabilité", ...stackScreenStyle }} />
+                        <Stack.Screen name="ClientDebts" component={ClientDebtsScreen} options={{ headerShown: true, title: "Créances Clients", ...stackScreenStyle }} />
+                        <Stack.Screen name="DailyClose" component={DailyCloseScreen} options={{ headerShown: true, title: "Clôture de Caisse", ...stackScreenStyle }} />
+                        <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ headerShown: true, title: "Grand Livre Fournisseurs", ...stackScreenStyle }} />
+                        <Stack.Screen name="CashFlow" component={CashFlowScreen} options={{ headerShown: true, title: "Flux de Trésorerie", ...stackScreenStyle }} />
+                        <Stack.Screen name="DriverMonitor" component={DriverMonitorScreen} options={{ headerShown: true, title: "Performance Livreurs", ...stackScreenStyle }} />
+                        <Stack.Screen name="InventoryHealth" component={InventoryHealthScreen} options={{ headerShown: true, title: "Santé du Stock", ...stackScreenStyle }} />
+                        <Stack.Screen name="G50Tax" component={G50TaxScreen} options={{ headerShown: true, title: "Déclaration G50 TVA", ...stackScreenStyle }} />
+                        <Stack.Screen name="ChequeManager" component={ChequeManagerScreen} options={{ headerShown: true, title: "Gestion des Chèques", ...stackScreenStyle }} />
+                        <Stack.Screen name="Catalog" component={CatalogScreen} options={{ headerShown: true, title: "Catalogue & Tarifs", ...stackScreenStyle }} />
+                        <Stack.Screen name="CreateBL" component={CreateBLScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="MorningBrief" component={MorningBriefScreen} options={{ headerShown: true, title: "Briefing du Jour", ...stackScreenStyle }} />
+                        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: true, title: "Paramètres", ...stackScreenStyle }} />
+                        <Stack.Screen name="Alerts" component={AlertsScreen} options={{ headerShown: true, title: "Alertes", ...stackScreenStyle }} />
+                        <Stack.Screen name="GerantPurchases" component={GerantPurchasesScreen} options={{ headerShown: true, title: "Achats Fournisseurs", ...stackScreenStyle }} />
+                        <Stack.Screen name="GerantExpenses" component={GerantExpensesScreen} options={{ headerShown: true, title: "Dépenses", ...stackScreenStyle }} />
                     </>
                 )}
             </Stack.Navigator>
-            {/* Trilingual Direct APK Update Overlay */}
+            {/* Update Overlay */}
             <Modal
                 visible={showUpdateModal}
                 transparent={true}
@@ -442,14 +356,17 @@ export default function App() {
             >
                 <View style={styles.updateModalOverlay}>
                     <View style={styles.updateModalContent}>
-                        <View style={styles.updateIconContainer}>
-                            <Ionicons name="cloud-download" size={40} color="#fff" />
-                        </View>
+                        <LinearGradient
+                            colors={["#22c55e", "#10b981"]}
+                            style={styles.updateIconContainer}
+                        >
+                            <Ionicons name="cloud-download" size={32} color="#fff" />
+                        </LinearGradient>
                         <Text style={styles.updateModalTitle}>Mise à jour disponible !</Text>
                         <Text style={styles.updateModalTitleAr}>تحديث جديد متوفر !</Text>
-                        
+
                         <Text style={styles.updateVersionText}>
-                             v1.1.2 ➔ v{updateInfo?.version || "1.1.2"}
+                             v{CURRENT_VERSION} ➔ v{updateInfo?.version || CURRENT_VERSION}
                          </Text>
 
                         <View style={styles.releaseNotesBox}>
@@ -460,7 +377,7 @@ export default function App() {
                         </View>
 
                          <View style={{ flexDirection: "row", gap: 8, width: "100%" }}>
-                             <TouchableOpacity 
+                             <TouchableOpacity
                                  style={[styles.updateActionBtn, { flex: 2 }]}
                                  onPress={handleUpdateNow}
                                  activeOpacity={0.8}
@@ -469,7 +386,7 @@ export default function App() {
                                  <Text style={[styles.updateActionText, { fontSize: 12 }]}>{lang === "ar" ? "تحديث الآن" : "Mettre à jour"}</Text>
                              </TouchableOpacity>
 
-                             <TouchableOpacity 
+                             <TouchableOpacity
                                  style={[styles.updateActionBtn, { flex: 1, backgroundColor: "#475569" }]}
                                  onPress={() => setShowUpdateModal(false)}
                                  activeOpacity={0.8}
@@ -484,19 +401,30 @@ export default function App() {
     );
 }
 
+// ─── Tab-specific styles ─────────────────────────────────────────────────────
+const tabStyles = StyleSheet.create({
+    activeWrap: {
+        alignItems: "center",
+    },
+    activeDot: {
+        width: 5, height: 5, borderRadius: 2.5,
+        backgroundColor: "#22c55e", marginTop: 4,
+    },
+});
+
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
     splashContainer: {
         flex: 1,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         justifyContent: "center",
         alignItems: "center",
     },
     loginContainer: {
         flex: 1,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         justifyContent: "center",
         alignItems: "center",
         padding: 24,
@@ -505,34 +433,35 @@ const styles = StyleSheet.create({
         width: "100%",
         maxWidth: 400,
         padding: 32,
-        backgroundColor: "#1e293b",
-        borderRadius: 24,
+        backgroundColor: "rgba(30,41,59,0.9)",
+        borderRadius: 28,
+        borderWidth: 1,
+        borderColor: "rgba(148,163,184,0.08)",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowOffset: { width: 0, height: 12 },
         shadowOpacity: 0.3,
-        shadowRadius: 24,
-        elevation: 12,
+        shadowRadius: 28,
+        elevation: 15,
     },
     logoContainer: {
         alignItems: "center",
         marginBottom: 32,
     },
     logoBadge: {
-        width: 72,
-        height: 72,
-        borderRadius: 20,
-        backgroundColor: "#22c55e",
+        width: 76,
+        height: 76,
+        borderRadius: 22,
         justifyContent: "center",
         alignItems: "center",
         marginBottom: 16,
         shadowColor: "#22c55e",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 14,
+        elevation: 10,
     },
     logoTitle: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: "900",
         color: "#f8fafc",
         letterSpacing: -0.5,
@@ -551,10 +480,10 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: "#334155",
+        borderColor: "rgba(148,163,184,0.1)",
         paddingHorizontal: 14,
     },
     inputIcon: {
@@ -590,14 +519,14 @@ const styles = StyleSheet.create({
     },
     versionText: {
         textAlign: "center",
-        color: "#475569",
+        color: "#334155",
         fontSize: 12,
         marginTop: 20,
     },
     // Update Modal Styles
     updateModalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(15, 23, 42, 0.85)",
+        backgroundColor: "rgba(10, 15, 30, 0.9)",
         justifyContent: "center",
         alignItems: "center",
         padding: 24,
@@ -605,29 +534,28 @@ const styles = StyleSheet.create({
     updateModalContent: {
         width: "100%",
         maxWidth: 340,
-        backgroundColor: "#1e293b",
+        backgroundColor: "rgba(30,41,59,0.95)",
         borderWidth: 1,
-        borderColor: "#334155",
-        borderRadius: 24,
-        padding: 24,
+        borderColor: "rgba(148,163,184,0.1)",
+        borderRadius: 28,
+        padding: 28,
         alignItems: "center",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 20,
-        elevation: 10,
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.35,
+        shadowRadius: 24,
+        elevation: 12,
     },
     updateIconContainer: {
         width: 64,
         height: 64,
-        borderRadius: 18,
-        backgroundColor: "#22c55e",
+        borderRadius: 20,
         justifyContent: "center",
         alignItems: "center",
         marginBottom: 16,
         shadowColor: "#22c55e",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 8,
     },
@@ -656,10 +584,10 @@ const styles = StyleSheet.create({
     },
     releaseNotesBox: {
         width: "100%",
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderWidth: 1,
-        borderColor: "#334155",
-        borderRadius: 14,
+        borderColor: "rgba(148,163,184,0.08)",
+        borderRadius: 16,
         padding: 14,
         marginVertical: 18,
     },
@@ -680,7 +608,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 48,
         backgroundColor: "#22c55e",
-        borderRadius: 12,
+        borderRadius: 14,
         justifyContent: "center",
         alignItems: "center",
         gap: 8,

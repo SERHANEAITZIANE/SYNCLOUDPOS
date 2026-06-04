@@ -43,14 +43,22 @@ export default function AiAdvisorScreen() {
         setSending(true);
 
         try {
+            // Build conversation history for context
+            const history = messages.map(m => ({ role: m.role, text: m.text }));
+
             const response = await apiFetch("/voice-assistant", {
                 method: "POST",
-                body: JSON.stringify({ message: msgText }),
+                body: JSON.stringify({
+                    queryText: msgText,
+                    language: "french",
+                    detailedMode: true,
+                    history,
+                }),
             });
 
             const assistantMsg: Message = {
                 role: "assistant",
-                text: response.response || response.text || "Je n'ai pas pu obtenir de réponse.",
+                text: response.text || response.response || "Je n'ai pas pu obtenir de réponse.",
                 timestamp: new Date(),
             };
             setMessages(prev => [...prev, assistantMsg]);
@@ -63,7 +71,7 @@ export default function AiAdvisorScreen() {
         } finally {
             setSending(false);
         }
-    }, [inputText, sending]);
+    }, [inputText, sending, messages]);
 
     const scrollRef = React.useRef<ScrollView>(null);
 
@@ -139,9 +147,15 @@ export default function AiAdvisorScreen() {
                 ))}
                 {sending && (
                     <View style={[styles.bubble, styles.aiBubble]}>
+                        <View style={styles.aiBadge}>
+                            <Ionicons name="sparkles" size={12} color="#a855f7" />
+                            <Text style={styles.aiBadgeText}>Gemini AI</Text>
+                        </View>
                         <View style={styles.typingDots}>
-                            <ActivityIndicator size="small" color="#a855f7" />
-                            <Text style={styles.typingText}>L'IA réfléchit...</Text>
+                            <View style={[styles.dot, { opacity: 0.4 }]} />
+                            <View style={[styles.dot, { opacity: 0.7 }]} />
+                            <View style={[styles.dot, { opacity: 1.0 }]} />
+                            <Text style={styles.typingText}>  Analyse en cours...</Text>
                         </View>
                     </View>
                 )}
@@ -216,8 +230,9 @@ const styles = StyleSheet.create({
     aiText: { color: "#e2e8f0" },
     timestamp: { color: "#64748b", fontSize: 10, alignSelf: "flex-end", marginTop: 2 },
 
-    typingDots: { flexDirection: "row", alignItems: "center", gap: 8 },
+    typingDots: { flexDirection: "row", alignItems: "center", gap: 4 },
     typingText: { color: "#64748b", fontSize: 13, fontStyle: "italic" },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#a855f7" },
 
     inputBar: {
         flexDirection: "row", alignItems: "flex-end",

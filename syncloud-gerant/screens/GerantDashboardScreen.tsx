@@ -126,7 +126,7 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.header}>
                     <View style={styles.headerTitleRow}>
                         <Ionicons name="sparkles" size={24} color="#f59e0b" />
-                        <Text style={styles.versionText}>v2.0.0 — SynCloudPOS Gérant</Text>
+                        <Text style={styles.versionText}>v2.1.0 — SynCloudPOS Gérant</Text>
                         <TouchableOpacity
                             style={styles.briefingBtn}
                             onPress={() => (navigation as any)?.navigate?.("MorningBrief")}
@@ -313,12 +313,13 @@ export default function GerantDashboardScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e" },
 
     header: { padding: 16, paddingTop: 20 },
     headerTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
     headerTitle: { color: "#f8fafc", fontSize: 24, fontWeight: "900" },
+    versionText: { color: "#475569", fontSize: 12, fontWeight: "600" },
     headerSubtitle: { color: "#64748b", fontSize: 13, marginTop: 4 },
 
     sectionTitle: {
