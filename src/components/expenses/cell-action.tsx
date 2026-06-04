@@ -25,12 +25,19 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const tCommon = useTranslations("Common")
     const { data: session } = useSession()
 
+    const canEdit = session?.user?.canEdit || session?.user?.isSuperadmin || session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER"
+    const canDelete = session?.user?.canDelete || session?.user?.isSuperadmin || session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER"
+
     const onDelete = async () => {
         try {
             setLoading(true)
-            await deleteExpense(data.id)
-            router.refresh()
-            toast.success(t("messages.deleted"))
+            const result = await deleteExpense(data.id)
+            if (result && 'error' in result) {
+                toast.error(result.error as string)
+            } else {
+                toast.success(t("messages.deleted"))
+                router.refresh()
+            }
         } catch {
             toast.error(t("messages.error"))
         } finally {
@@ -43,7 +50,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <>
             <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
             <div className="flex items-center gap-1">
-                {session?.user?.canEdit && (
+                {canEdit && (
                     <Button
                         variant="ghost"
                         size="icon"
@@ -54,7 +61,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <Edit className="h-4 w-4" />
                     </Button>
                 )}
-                {session?.user?.canDelete && (
+                {canDelete && (
                     <Button
                         variant="ghost"
                         size="icon"

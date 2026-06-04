@@ -139,12 +139,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
                 {/* Bottom row: Cart Qty + Price */}
                 <div className="flex justify-between items-end w-full">
-                    <div className="h-4">
+                    <div className="flex items-center gap-1 h-4">
                         {quantityInCart > 0 && (
                             <span className="inline-flex items-center justify-center text-[8px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 min-w-[16px] h-4 px-1 rounded border border-emerald-500/20 animate-in fade-in duration-200">
                                 ×{quantityInCart}
                             </span>
                         )}
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            type="button"
+                            className="h-4 w-4 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowInfo(true);
+                            }}
+                            title={tCommon("view") || "Détails"}
+                        >
+                            <Info size={10} />
+                        </Button>
                     </div>
                     <span className="font-black text-[11px] lg:text-[13px] leading-none text-gray-900 dark:text-white tabular-nums">
                         {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}

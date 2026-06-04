@@ -22,6 +22,11 @@ export function useExpenseColumns(): ColumnDef<ExpenseColumn>[] {
             cell: ({ row }) => <div className="font-medium">{row.getValue("category")}</div>
         },
         {
+            accessorKey: "accountName",
+            header: t("fields.account"),
+            cell: ({ row }) => <div className="font-medium text-slate-600 dark:text-slate-400">{row.getValue("accountName")}</div>
+        },
+        {
             accessorKey: "amount",
             header: tCommon("amount"),
             cell: ({ row }) => <div className="text-red-600 font-bold">-{row.getValue("amount")}</div>

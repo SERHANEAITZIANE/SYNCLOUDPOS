@@ -128,7 +128,7 @@ export async function getExpenses() {
 
         const expenses = await db.expense.findMany({
             where: { tenantId },
-            include: { category: true },
+            include: { category: true, account: true },
             orderBy: { date: "desc" }
         })
 

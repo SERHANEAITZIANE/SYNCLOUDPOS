@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo, FC, Suspense } from "react"
-import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, Sparkles, Package, Percent, Trash } from "lucide-react"
+import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, Sparkles, Package, Percent, Trash, ChevronLeft, ChevronRight, Info } from "lucide-react"
 import Image from "next/image"
 
 import { Input } from "@/components/ui/input"
@@ -121,6 +120,21 @@ export const PosClient: FC<PosClientProps> = ({
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false)
     const [isListening, setIsListening] = useState(false)
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+    
+    // Product details state for list view
+    const [selectedProductForInfo, setSelectedProductForInfo] = useState<any | null>(null)
+    
+    // Category bar scrolling ref and function
+    const categoryScrollRef = useRef<HTMLDivElement>(null)
+    const scrollCategories = (direction: "left" | "right") => {
+        if (categoryScrollRef.current) {
+            const scrollAmount = 240
+            categoryScrollRef.current.scrollBy({
+                left: direction === "left" ? -scrollAmount : scrollAmount,
+                behavior: "smooth"
+            })
+        }
+    }
     
     // Premium POS - Full Fiche Produit Express states
     const [quickProductOpen, setQuickProductOpen] = useState(false)
@@ -771,9 +785,6 @@ export const PosClient: FC<PosClientProps> = ({
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value)
-                                        if (e.target.value.length > 0 && typeof window !== 'undefined' && window.innerWidth >= 1024) {
-                                            setViewMode("list")
-                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && searchQuery.trim() !== '') {
@@ -903,8 +914,24 @@ export const PosClient: FC<PosClientProps> = ({
                         </div>
                     </div>
 
-                        <ScrollArea className="w-full whitespace-nowrap">
-                            <div className="flex gap-1.5 lg:gap-2 pb-2 px-0.5 w-max">
+                    {/* Category Selector Bar with Navigation Buttons */}
+                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar">
+                        {/* Scroll Left Button */}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            type="button"
+                            onClick={() => scrollCategories("left")}
+                            className="absolute left-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+
+                        <div 
+                            ref={categoryScrollRef} 
+                            className="w-full overflow-x-auto scrollbar-none whitespace-nowrap py-1 scroll-smooth"
+                        >
+                            <div className="flex gap-1.5 lg:gap-2 pb-1.5 px-1 w-max">
                                 <Button
                                     variant={selectedCategory === null ? "default" : "outline"}
                                     onClick={() => setSelectedCategory(null)}
@@ -943,8 +970,19 @@ export const PosClient: FC<PosClientProps> = ({
                                     );
                                 })}
                             </div>
-                            <ScrollBar orientation="horizontal" className="h-1" />
-                        </ScrollArea>
+                        </div>
+
+                        {/* Scroll Right Button */}
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            type="button"
+                            onClick={() => scrollCategories("right")}
+                            className="absolute right-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
 
                     {/* Content Area (Grid or List) */}
                     <ScrollArea className="flex-1 px-3 lg:px-6 pb-20 lg:pb-6">
@@ -1024,9 +1062,51 @@ export const PosClient: FC<PosClientProps> = ({
                                                 <div className="font-black text-base lg:text-lg text-gray-900 dark:text-white flex items-center">
                                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}
                                                 </div>
-                                                <Button size="icon" variant="ghost" disabled={outOfStock} className="h-7 w-7 lg:h-8 lg:w-8 rounded-xl bg-gray-50 text-gray-900 group-hover:bg-gray-900 group-hover:text-white transition-all disabled:opacity-50">
-                                                    <ShoppingCart size={14} />
-                                                </Button>
+                                                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        type="button"
+                                                        className="h-7 w-7 lg:h-8 lg:w-8 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-355"
+                                                        onClick={() => {
+                                                            setSelectedProductForInfo(product);
+                                                        }}
+                                                        title={tCommon("view") || "Détails"}
+                                                    >
+                                                        <Info className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        type="button"
+                                                        disabled={outOfStock}
+                                                        className="h-7 w-7 lg:h-8 lg:w-8 rounded-xl bg-gray-50 text-gray-900 hover:bg-gray-900 hover:text-white dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-100 dark:hover:bg-slate-900 transition-all disabled:opacity-50"
+                                                        onClick={() => {
+                                                            if (outOfStock) return;
+                                                            const cType = activeSession?.clientType || 'RETAIL';
+                                                            let currentPrice = product.price;
+                                                            if (cType === 'RESELLER' && product.dealerPrice != null) currentPrice = product.dealerPrice;
+                                                            if (cType === 'WHOLESALE' && product.wholesalePrice != null) currentPrice = product.wholesalePrice;
+                                                            
+                                                            cart.addItem({
+                                                                id: product.id,
+                                                                productId: product.id,
+                                                                name: product.name,
+                                                                price: currentPrice,
+                                                                retailPrice: product.price,
+                                                                wholesalePrice: product.wholesalePrice,
+                                                                dealerPrice: product.dealerPrice,
+                                                                cost: product.cost,
+                                                                tvaRate: product.tvaRate,
+                                                                priceHt: currentPrice / (1 + (product.tvaRate ?? 0) / 100),
+                                                                quantity: 1,
+                                                                image: product.imageUrl
+                                                            });
+                                                        }}
+                                                    >
+                                                        <ShoppingCart size={14} />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     )
@@ -1596,6 +1676,177 @@ export const PosClient: FC<PosClientProps> = ({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Dedicated Info Modal for List View */}
+            {selectedProductForInfo && (
+                <Modal
+                    title=""
+                    description=""
+                    isOpen={!!selectedProductForInfo}
+                    onClose={() => setSelectedProductForInfo(null)}
+                    className="max-w-[360px] p-4 rounded-xl gap-2 border-slate-150 dark:border-slate-800 shadow-2xl bg-white dark:bg-[#131418] overflow-hidden"
+                >
+                    <div className="space-y-4 pt-1" onClick={(e) => e.stopPropagation()}>
+                        {/* Header: Compact Info */}
+                        <div className="flex gap-3">
+                            <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shrink-0">
+                                {selectedProductForInfo.imageUrl ? (
+                                    <Image src={selectedProductForInfo.imageUrl} alt={selectedProductForInfo.name} fill className="object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-[9px] font-bold text-center text-slate-400 dark:text-slate-600 bg-slate-50 dark:bg-slate-900/40 uppercase leading-none">
+                                        No Image
+                                    </div>
+                                )}
+                            </div>
+                            <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                <span className="text-[9px] font-bold tracking-widest text-primary/80 uppercase">
+                                    {selectedProductForInfo.category || "General"}
+                                </span>
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mt-0.5 line-clamp-2">
+                                    {selectedProductForInfo.name}
+                                </h3>
+                            </div>
+                        </div>
+
+                        {/* Stock status indicator */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2 border border-slate-100 dark:border-slate-800/40 flex flex-col justify-between">
+                                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Stock Actuel</span>
+                                <div className="flex items-baseline gap-1 mt-1">
+                                    <span className={cn(
+                                        "text-lg font-black tracking-tight",
+                                        selectedProductForInfo.stock > selectedProductForInfo.minStock ? "text-emerald-600 dark:text-emerald-400" :
+                                        selectedProductForInfo.stock > 0 ? "text-amber-500" : "text-rose-500"
+                                    )}>
+                                        {selectedProductForInfo.stock}
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 dark:text-slate-600 font-semibold">un.</span>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2 border border-slate-100 dark:border-slate-800/40 flex flex-col justify-between">
+                                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Alerte Min</span>
+                                <div className="flex items-baseline gap-1 mt-1">
+                                    <span className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                                        {selectedProductForInfo.minStock}
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 dark:text-slate-600 font-semibold">un.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Prices list */}
+                        <div className="bg-slate-50 dark:bg-slate-900/30 rounded-lg border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+                            <div className="px-2.5 py-1.5 bg-slate-100/50 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800/40 flex justify-between items-center">
+                                <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grille Tarifaire (DZD)</span>
+                                {selectedProductForInfo.cost > 0 && (
+                                    <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500">
+                                        P.A: {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(selectedProductForInfo.cost)}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="p-2 space-y-1.5 text-[11px]">
+                                <div className={cn(
+                                    "flex justify-between items-center py-0.5 px-1.5 rounded",
+                                    clientType === 'RETAIL' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-600 dark:text-slate-400"
+                                )}>
+                                    <span>Détail (Retail)</span>
+                                    <span className="font-mono">{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(selectedProductForInfo.price)}</span>
+                                </div>
+                                {selectedProductForInfo.wholesalePrice && (
+                                    <div className={cn(
+                                        "flex justify-between items-center py-0.5 px-1.5 rounded",
+                                        clientType === 'WHOLESALE' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-600 dark:text-slate-400"
+                                    )}>
+                                        <span>Gros (Wholesale)</span>
+                                        <span className="font-mono">{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(selectedProductForInfo.wholesalePrice)}</span>
+                                    </div>
+                                )}
+                                {selectedProductForInfo.dealerPrice && (
+                                    <div className={cn(
+                                        "flex justify-between items-center py-0.5 px-1.5 rounded",
+                                        clientType === 'RESELLER' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-600 dark:text-slate-400"
+                                    )}>
+                                        <span>Revendeur (Dealer)</span>
+                                        <span className="font-mono">{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(selectedProductForInfo.dealerPrice)}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Barcodes */}
+                        {selectedProductForInfo.barcodes && selectedProductForInfo.barcodes.length > 0 && (
+                            <div className="space-y-1">
+                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Codes-barres liés</span>
+                                <div className="flex flex-wrap gap-1">
+                                    {selectedProductForInfo.barcodes.map((code: string) => (
+                                        <span key={code} className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-900 text-[9px] font-mono rounded text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800">
+                                            {code}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Description */}
+                        {selectedProductForInfo.description && (
+                            <div className="space-y-1 border-t border-slate-100 dark:border-slate-800/60 pt-2">
+                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Description</span>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-3">
+                                    {selectedProductForInfo.description}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="flex-1 h-8 text-[11px] rounded-lg border-slate-200 dark:border-slate-800"
+                                onClick={() => setSelectedProductForInfo(null)}
+                            >
+                                {tCommon("close")}
+                            </Button>
+                            <Button 
+                                variant="default" 
+                                size="sm" 
+                                className="flex-1 h-8 text-[11px] rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold"
+                                disabled={blockNegativeStock && (selectedProductForInfo.stock - (activeSession?.items.find(item => item.productId === selectedProductForInfo.id)?.quantity || 0)) <= 0}
+                                onClick={() => {
+                                    const inCartQty = activeSession?.items.find(item => item.productId === selectedProductForInfo.id)?.quantity || 0;
+                                    const outOfStock = blockNegativeStock && (selectedProductForInfo.stock - inCartQty) <= 0;
+                                    if (outOfStock) {
+                                        toast.error("Cet article est en rupture de stock.");
+                                        return;
+                                    }
+                                    const cType = activeSession?.clientType || 'RETAIL';
+                                    let currentPrice = selectedProductForInfo.price;
+                                    if (cType === 'RESELLER' && selectedProductForInfo.dealerPrice != null) currentPrice = selectedProductForInfo.dealerPrice;
+                                    if (cType === 'WHOLESALE' && selectedProductForInfo.wholesalePrice != null) currentPrice = selectedProductForInfo.wholesalePrice;
+                                    
+                                    cart.addItem({
+                                        id: selectedProductForInfo.id,
+                                        productId: selectedProductForInfo.id,
+                                        name: selectedProductForInfo.name,
+                                        price: currentPrice,
+                                        retailPrice: selectedProductForInfo.price,
+                                        wholesalePrice: selectedProductForInfo.wholesalePrice,
+                                        dealerPrice: selectedProductForInfo.dealerPrice,
+                                        cost: selectedProductForInfo.cost,
+                                        tvaRate: selectedProductForInfo.tvaRate,
+                                        priceHt: currentPrice / (1 + (selectedProductForInfo.tvaRate ?? 0) / 100),
+                                        quantity: 1,
+                                        image: selectedProductForInfo.imageUrl
+                                    });
+                                    setSelectedProductForInfo(null);
+                                }}
+                            >
+                                + Ajouter au Panier
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     )
 }
