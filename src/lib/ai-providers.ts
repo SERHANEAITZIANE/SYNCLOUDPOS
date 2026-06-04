@@ -66,7 +66,7 @@ async function callGemini(params: AIRequestParams): Promise<string> {
 
     const geminiHistory = (params.history || []).map(h => ({
         role: h.role === "assistant" ? "model" : "user",
-        parts: [{ text: h.content }]
+        parts: [{ text: h.content || (h as any).text || "" }]
     }));
 
     const contents = [
@@ -100,7 +100,7 @@ async function callGemini(params: AIRequestParams): Promise<string> {
 async function callOpenAI(params: AIRequestParams): Promise<string> {
     const openAiHistory = (params.history || []).map(h => ({
         role: h.role === "model" ? "assistant" : h.role,
-        content: h.content
+        content: h.content || (h as any).text || ""
     }));
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -134,7 +134,7 @@ async function callOpenAI(params: AIRequestParams): Promise<string> {
 async function callAnthropic(params: AIRequestParams): Promise<string> {
     const anthropicHistory = (params.history || []).map(h => ({
         role: h.role === "model" ? "assistant" : h.role,
-        content: h.content
+        content: h.content || (h as any).text || ""
     }));
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {

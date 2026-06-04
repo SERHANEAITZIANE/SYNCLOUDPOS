@@ -60,61 +60,60 @@ export async function GET(req: NextRequest) {
                         },
                     },
                 },
-                lastLoginAt: true,
             },
             take: 50,
         });
 
         // Also get sales orders grouped by driver/assignee for this day
         const salesByDriver = await db.salesOrder.groupBy({
-            by: ["assignedToId"],
+            by: ["userId"],
             where: {
                 tenantId,
                 storeId: storeId || undefined,
                 createdAt: { gte: from, lte: to },
-                assignedToId: { not: null },
+                userId: { not: null },
             },
             _sum: { total: true, amountPaid: true },
             _count: { id: true },
         });
 
         const driverStatsMap = new Map(
-            salesByDriver.map((s: any) => [s.assignedToId, s])
+            salesByDriver.map((s: any) => [s.userId, s])
         );
 
         // Returns for this day
         const returnsByDriver = await db.salesOrder.groupBy({
-            by: ["assignedToId"],
+            by: ["userId"],
             where: {
                 tenantId,
                 storeId: storeId || undefined,
                 createdAt: { gte: from, lte: to },
                 type: "RETURN",
-                assignedToId: { not: null },
+                userId: { not: null },
             },
             _sum: { total: true },
         });
         const returnsMap = new Map(
-            returnsByDriver.map((r: any) => [r.assignedToId, Number(r._sum.total || 0)])
+            returnsByDriver.map((r: any) => [r.userId, Number(r._sum.total || 0)])
         );
 
         // Unique clients visited
         const clientsByDriver = await db.salesOrder.groupBy({
-            by: ["assignedToId", "customerId"],
+            by: ["userId", "customerId"],
             where: {
                 tenantId,
                 storeId: storeId || undefined,
                 createdAt: { gte: from, lte: to },
-                assignedToId: { not: null },
+                userId: { not: null },
                 customerId: { not: null },
             },
         });
         const clientsVisitedMap = new Map<string, Set<string>>();
         clientsByDriver.forEach((row: any) => {
-            if (!clientsVisitedMap.has(row.assignedToId)) {
-                clientsVisitedMap.set(row.assignedToId, new Set());
+            if (!clientsVisitedMap.has(row.userId)) {
+                clientsVisitedMap.set(row.userId, new Set());
             }
-            clientsVisitedMap.get(row.assignedToId)!.add(row.customerId);
+            clientsVisitedMap.get(row.userId)!.add(row.customerId);
         });
 
         const COMMISSION_RATE = 0.03;

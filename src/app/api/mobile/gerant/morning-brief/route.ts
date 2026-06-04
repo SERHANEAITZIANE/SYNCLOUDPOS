@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
                     select: { name: true, balance: true, phone: true },
                 }),
                 db.storeProduct.findMany({
-                    where: { tenantId, stock: { lte: db.storeProduct.fields.minStock } },
+                    where: { product: { tenantId }, stock: { lte: db.storeProduct.fields.minStock } },
                     take: 5,
                     include: { product: { select: { name: true } } },
                 }),
