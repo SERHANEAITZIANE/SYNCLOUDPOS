@@ -360,6 +360,8 @@ export const PosClient: FC<PosClientProps> = ({
     // Derived cart values for mobile bottom bar
     const activeSessionId = cart.activeSessionId
     const activeSession = cart.sessions.find(s => s.id === activeSessionId)
+    const clientType = activeSession?.clientType || 'RETAIL'
+    const blockNegativeStock = storeData?.blockNegativeStock ?? false
     const items = activeSession?.items || []
     const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0)
     const totalItemsCount = items.reduce((total, item) => total + item.quantity, 0)
