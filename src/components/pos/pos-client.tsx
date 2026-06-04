@@ -18,6 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Modal } from "@/components/ui/modal"
 
 import { PosHeader } from "./pos-header"
 import { CartSidebar } from "./cart-sidebar"
