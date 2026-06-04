@@ -47,9 +47,25 @@ function isRateLimited(ip: string): boolean {
     return entry.count > MAX_LOGIN_ATTEMPTS
 }
 
+function addCorsHeaders(response: NextResponse, origin: string | null) {
+    response.headers.set("Access-Control-Allow-Origin", origin || "*")
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    response.headers.set("Access-Control-Allow-Credentials", "true")
+    response.headers.set("Access-Control-Max-Age", "86400")
+    return response
+}
+
 export default auth(async function middleware(request) {
     const { pathname } = request.nextUrl
     const clean = pathname.replace(/^\/(fr|en|ar)/, "") || "/"
+    const origin = request.headers.get("origin")
+
+    // Handle CORS preflight options
+    if (clean.startsWith("/api/mobile") && request.method === "OPTIONS") {
+        const response = new NextResponse(null, { status: 204 })
+        return addCorsHeaders(response, origin)
+    }
 
     // Static assets, public uploads, _next files, manifest, sw.js - bypass authentication and middleware entirely
     if (
@@ -74,25 +90,33 @@ export default auth(async function middleware(request) {
                            request.headers.get("x-real-ip") || 
                            "unknown"
                 if (isRateLimited(ip)) {
-                    return NextResponse.json(
+                    const res = NextResponse.json(
                         { error: "Trop de tentatives. Veuillez réessayer dans 15 minutes." },
                         { status: 429 }
                     )
+                    if (clean.startsWith("/api/mobile")) addCorsHeaders(res, origin)
+                    return res
                 }
             }
         }
 
         // Public API routes
         if (isPublicPath(pathname)) {
-            return NextResponse.next()
+            const res = NextResponse.next()
+            if (clean.startsWith("/api/mobile")) addCorsHeaders(res, origin)
+            return res
         }
 
         // Protected API routes
         if (!request.auth?.user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+            const res = NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+            if (clean.startsWith("/api/mobile")) addCorsHeaders(res, origin)
+            return res
         }
 
-        return NextResponse.next()
+        const res = NextResponse.next()
+        if (clean.startsWith("/api/mobile")) addCorsHeaders(res, origin)
+        return res
     }
 
     // Rate limit page login/register endpoints
