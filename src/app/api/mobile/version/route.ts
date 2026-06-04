@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     return NextResponse.json({
-        version: "2.1.0",
-        apkUrl: "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.1.0.apk",
+        version: "2.2.0",
+        apkUrl: "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.2.0.apk",
         releaseNotes: {
-            fr: "• Version 2.1.0 — Toutes les données en temps réel\n• G50 TVA : calcul automatique mensuel depuis les ventes et achats réels\n• Chèques : liste live depuis la trésorerie, encaissement en un tap\n• Livreurs : performance journalière en temps réel par BL assigné\n• Clôture de caisse : réconciliation live + archivage serveur",
-            ar: "• نسخة 2.1.0 — جميع البيانات حية\n• G50 الضريبة: حساب تلقائي شهري من المبيعات والمشتريات الحقيقية\n• الشيكات: قائمة حية من الخزينة، تأكيد التحصيل بنقرة واحدة\n• السائقون: أداء يومي حقيقي من وصولات التسليم المعينة\n• إقفال الصندوق: تسوية حية + أرشفة على الخادم"
+            fr: "• Version 2.2.0 — Refonte UX complète \u2018Midnight Aurora\u2019\n• Nouvelle navigation 4 onglets : Accueil, Finance, IA, Plus\n• Écran Finance : accès direct à tous les rapports en 1 tap\n• Écran Plus : toutes les opérations organisées par catégorie\n• Thème Midnight Aurora : glassmorphism, gradients, micro-animations\n• Correctif IA : historique de conversation + mode détaillé\n• Transitions de page fluides (fade from bottom)",
+            ar: "• نسخة 2.2.0 — تجديد كامل لواجهة Midnight Aurora\n• تنقل جديد بـ 4 تبويبات: الرئيسية, المالية, الذكاء, المزيد\n• شاشة مالية: وصول مباشر لجميع التقارير بنقرة واحدة\n• شاشة المزيد: جميع العمليات منظمة حسب الفئة\n• تصحيح الذكاء: تاريخ المحادثة + الوضع التفصيلي"
         },
         minRequired: "1.0.0",
         gerantEndpoints: [
