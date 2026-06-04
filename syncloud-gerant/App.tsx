@@ -32,8 +32,6 @@ import CreateBLScreen from "./screens/CreateBLScreen";
 import AlertsScreen from "./screens/AlertsScreen";
 import AiAdvisorScreen from "./screens/AiAdvisorScreen";
 import MorningBriefScreen from "./screens/MorningBriefScreen";
-import ClientDebtsScreen from "./screens/ClientDebtsScreen";
-import SalesAnalyticsScreen from "./screens/SalesAnalyticsScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
 import { startGPSTracking, stopGPSTracking } from "./lib/gps-tracking";
@@ -230,7 +228,7 @@ export default function App() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "1.2.1";
+                    const currentVersion = "2.0.0";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
@@ -428,26 +426,6 @@ export default function App() {
                             options={{
                                 headerShown: true,
                                 title: "Briefing du Jour",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="ClientDebts"
-                            component={ClientDebtsScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Créances Clients",
-                                headerStyle: { backgroundColor: "#0f172a" },
-                                headerTintColor: "#f8fafc",
-                            }}
-                        />
-                        <Stack.Screen
-                            name="SalesAnalytics"
-                            component={SalesAnalyticsScreen}
-                            options={{
-                                headerShown: true,
-                                title: "Analytique des Ventes",
                                 headerStyle: { backgroundColor: "#0f172a" },
                                 headerTintColor: "#f8fafc",
                             }}
