@@ -21,6 +21,11 @@ const PUBLIC_PATHS = [
     "/manifest.json",
     "/manifest.webmanifest",
     "/sw.js",
+    "/features",
+    "/apps",
+    "/usecases",
+    "/pricing",
+    "/contact",
 ]
 
 function isPublicPath(pathname: string): boolean {
