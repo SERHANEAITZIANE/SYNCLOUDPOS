@@ -95,9 +95,9 @@ export const ProductClient: React.FC<ProductClientProps> = ({
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <Heading title={`${t("title")} (${totalCount})`} description={t("subtitle")} />
-                <div className="flex flex-row flex-wrap gap-2">
+                <div className="flex flex-row flex-wrap gap-2 w-full md:w-auto">
                     <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 rounded-md p-1 mr-2 border border-border/50">
                         <Button
                             variant={viewMode === "grid" ? "default" : "ghost"}
@@ -117,21 +117,21 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                         </Button>
                     </div>
 
-                    <Button variant="outline" className="text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50" onClick={() => setIsPriceListOpen(true)}>
+                    <Button variant="outline" className="text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50 flex-1 sm:flex-none" onClick={() => setIsPriceListOpen(true)}>
                         <FileText className="mr-2 h-4 w-4" /> {t("catalogue")}
                     </Button>
-                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
+                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50 flex-1 sm:flex-none" onClick={() => setImportOpen(true)}>
                         <FileSpreadsheet className="mr-2 h-4 w-4" /> {t("importExcel")}
                     </Button>
-                    <Button variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50" onClick={() => router.push(`/products/stock`)}>
+                    <Button variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50 flex-1 sm:flex-none" onClick={() => router.push(`/products/stock`)}>
                         <ClipboardList className="mr-2 h-4 w-4" /> {t("stockControl") || "Contrôle du Stock"}
                     </Button>
-                    <Button variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700 dark:bg-orange-950/30 dark:border-orange-900/50 dark:hover:bg-orange-900/50" onClick={() => router.push(`/products/inventory`)}>
+                    <Button variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700 dark:bg-orange-950/30 dark:border-orange-900/50 dark:hover:bg-orange-900/50 flex-1 sm:flex-none" onClick={() => router.push(`/products/inventory`)}>
                         {t("outOfStock")}
                     </Button>
-                    <Button id="global-add-new" onClick={() => router.push(`/products/new`)}>
+                    <Button id="global-add-new" onClick={() => router.push(`/products/new`)} className="flex-1 sm:flex-none">
                         <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
-                        <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F3]</span>
+                        <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest hidden sm:inline">[F3]</span>
                     </Button>
                 </div>
             </div>

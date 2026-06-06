@@ -94,10 +94,24 @@ export const createSalesOrder = async (data: {
             })
 
             const isCreditNote = data.type === "CREDIT_NOTE"
+            const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+
+            // Fetch stocks before updates to record stockBefore and stockAfter
+            const productIds = data.items.map(i => i.productId);
+            const productsWithStock = await tx.product.findMany({
+                where: { id: { in: productIds } },
+                include: { storeProducts: { where: { storeId: storeId || "" } } }
+            });
+            const stockMap = new Map(productsWithStock.map(p => {
+                const sp = p.storeProducts[0];
+                return [
+                    p.id,
+                    sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0)
+                ];
+            }));
 
             // Credit Note: RETURN stock (add back)
             if (isCreditNote && STOCK_STATUSES.includes(data.status)) {
-                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 if (storeId) {
                     await Promise.all(
                         data.items.map(item =>
@@ -117,6 +131,34 @@ export const createSalesOrder = async (data: {
                         })
                     )
                 );
+
+                // Track running stock per product to handle duplicates
+                const runningStockMapCN = new Map<string, number>();
+                data.items.forEach(item => {
+                    if (!runningStockMapCN.has(item.productId)) {
+                        runningStockMapCN.set(item.productId, stockMap.get(item.productId) || 0);
+                    }
+                });
+
+                await tx.stockMovement.createMany({
+                    data: data.items.map(item => {
+                        const stockBefore = runningStockMapCN.get(item.productId) || 0;
+                        const stockAfter = stockBefore + item.quantity;
+                        runningStockMapCN.set(item.productId, stockAfter);
+                        return {
+                            productId: item.productId,
+                            type: "RETURN",
+                            quantity: item.quantity,
+                            stockBefore,
+                            stockAfter,
+                            referenceId: order.id,
+                            reason: `Avoir N° ${receiptNumber}`,
+                            userId: session.user.id,
+                            tenantId,
+                            storeId
+                        };
+                    })
+                });
             }
 
             // Deduct stock for BON DE LIVRAISON (ORDER) or INVOICE validated/paid
@@ -126,7 +168,6 @@ export const createSalesOrder = async (data: {
                 STOCK_STATUSES.includes(data.status)
 
             if (shouldDeductStock) {
-                const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 if (storeId) {
                     await Promise.all(
                         data.items.map(item =>
@@ -146,6 +187,34 @@ export const createSalesOrder = async (data: {
                         })
                     )
                 );
+
+                // Track running stock per product to handle duplicates
+                const runningStockMapSale = new Map<string, number>();
+                data.items.forEach(item => {
+                    if (!runningStockMapSale.has(item.productId)) {
+                        runningStockMapSale.set(item.productId, stockMap.get(item.productId) || 0);
+                    }
+                });
+
+                await tx.stockMovement.createMany({
+                    data: data.items.map(item => {
+                        const stockBefore = runningStockMapSale.get(item.productId) || 0;
+                        const stockAfter = stockBefore - item.quantity;
+                        runningStockMapSale.set(item.productId, stockAfter);
+                        return {
+                            productId: item.productId,
+                            type: "SALE",
+                            quantity: -item.quantity,
+                            stockBefore,
+                            stockAfter,
+                            referenceId: order.id,
+                            reason: `Vente N° ${receiptNumber}`,
+                            userId: session.user.id,
+                            tenantId,
+                            storeId
+                        };
+                    })
+                });
             }
 
             // Credit Note: DECREMENT customer balance (we owe them)
@@ -263,7 +332,7 @@ export async function getSalesOrderByReceipt(receiptNumber: string) {
         const tenantId = session.user.tenantId
 
         const salesOrder = await db.salesOrder.findFirst({
-            where: { receiptNumber, tenantId },
+            where: { receiptNumber, tenantId, status: { not: "CANCELLED" } },
             include: {
                 customer: true,
                 items: { include: { product: { include: { barcodes: true } } } }
@@ -287,6 +356,7 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
             where: {
                 tenantId,
                 type,
+                status: { not: "CANCELLED" },
                 OR: [
                     { receiptNumber: { contains: query } },
                     { customer: { name: { contains: query } } }
@@ -390,6 +460,21 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
 
             if (!hadStock && getsStock && (isStockType || isCreditNote)) {
                 const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                
+                // Fetch stocks before updating
+                const productIds = salesOrder.items.map(i => i.productId);
+                const productsWithStock = await tx.product.findMany({
+                    where: { id: { in: productIds } },
+                    include: { storeProducts: { where: { storeId: storeId || "" } } }
+                });
+                const stockMap = new Map(productsWithStock.map(p => {
+                    const sp = p.storeProducts[0];
+                    return [
+                        p.id,
+                        sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0)
+                    ];
+                }));
+
                 if (storeId) {
                     await Promise.all(
                         salesOrder.items.map(item =>
@@ -409,6 +494,35 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                         })
                     )
                 );
+
+                // Track running stock per product to handle duplicates
+                const runningStockMapStatus = new Map<string, number>();
+                salesOrder.items.forEach(item => {
+                    if (!runningStockMapStatus.has(item.productId)) {
+                        runningStockMapStatus.set(item.productId, stockMap.get(item.productId) || 0);
+                    }
+                });
+
+                await tx.stockMovement.createMany({
+                    data: salesOrder.items.map(item => {
+                        const stockBefore = runningStockMapStatus.get(item.productId) || 0;
+                        const change = isCreditNote ? item.quantity : -item.quantity;
+                        const stockAfter = stockBefore + change;
+                        runningStockMapStatus.set(item.productId, stockAfter);
+                        return {
+                            productId: item.productId,
+                            type: isCreditNote ? "RETURN" : "SALE",
+                            quantity: change,
+                            stockBefore,
+                            stockAfter,
+                            referenceId: id,
+                            reason: `${isCreditNote ? "Avoir" : "Vente"} N° ${salesOrder.receiptNumber}`,
+                            userId: session.user.id,
+                            tenantId,
+                            storeId
+                        };
+                    })
+                });
             }
 
             // Restore stock if cancelling
@@ -433,6 +547,96 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                         })
                     )
                 );
+
+                // Also delete related stock movements
+                let linkedOrderIds = [id];
+                if (salesOrder.receiptNumber) {
+                    const timeMin = new Date(salesOrder.createdAt.getTime() - 60000);
+                    const timeMax = new Date(salesOrder.createdAt.getTime() + 60000);
+                    const linkedOrders = await tx.order.findMany({
+                        where: {
+                            tenantId,
+                            total: salesOrder.total,
+                            OR: [
+                                { customerId: salesOrder.customerId },
+                                { customerId: null }
+                            ],
+                            createdAt: { gte: timeMin, lte: timeMax }
+                        },
+                        select: { id: true }
+                    });
+                    linkedOrderIds.push(...linkedOrders.map(o => o.id));
+                }
+
+                await tx.stockMovement.deleteMany({
+                    where: { referenceId: { in: linkedOrderIds } }
+                });
+            }
+
+            // Revert and delete all treasury transactions directly linked to this SalesOrder
+            if (newStatus === "CANCELLED") {
+                const linkedSalesOrderTxs = await tx.treasuryTransaction.findMany({
+                    where: { referenceId: id, source: "SALE", tenantId }
+                });
+
+                for (const t of linkedSalesOrderTxs) {
+                    const amount = Number(t.amount);
+                    if (amount > 0) {
+                        await tx.treasuryAccount.update({
+                            where: { id: t.accountId },
+                            data: { balance: { decrement: amount } }
+                        });
+                    }
+                }
+
+                await tx.treasuryTransaction.deleteMany({
+                    where: { referenceId: id, source: "SALE", tenantId }
+                });
+
+                // Revert associated POS Order, order items, and Treasury Transactions if receiptNumber exists
+                if (salesOrder.receiptNumber) {
+                    let linkedOrder = null;
+                    const linkedTx = await tx.treasuryTransaction.findFirst({
+                        where: { description: { contains: salesOrder.receiptNumber }, source: "SALE", tenantId }
+                    });
+
+                    if (linkedTx && linkedTx.referenceId) {
+                        linkedOrder = await tx.order.findUnique({ where: { id: linkedTx.referenceId } });
+                    } else {
+                        const timeMin = new Date(salesOrder.createdAt.getTime() - 60000);
+                        const timeMax = new Date(salesOrder.createdAt.getTime() + 60000);
+                        linkedOrder = await tx.order.findFirst({
+                            where: {
+                                tenantId,
+                                total: salesOrder.total,
+                                OR: [
+                                    { customerId: salesOrder.customerId },
+                                    { customerId: null }
+                                ],
+                                createdAt: { gte: timeMin, lte: timeMax }
+                            }
+                        });
+                    }
+
+                    if (linkedOrder) {
+                        const oldPaidAmount = Number(linkedOrder.paidAmount);
+
+                        // Revert treasury balance
+                        if (oldPaidAmount > 0 && linkedOrder.accountId) {
+                            await tx.treasuryAccount.update({
+                                where: { id: linkedOrder.accountId },
+                                data: { balance: { decrement: oldPaidAmount } }
+                            });
+                            await tx.treasuryTransaction.deleteMany({
+                                where: { referenceId: linkedOrder.id, source: "SALE", tenantId }
+                            });
+                        }
+
+                        // Delete the POS order items and the order
+                        await tx.orderItem.deleteMany({ where: { orderId: linkedOrder.id } });
+                        await tx.order.delete({ where: { id: linkedOrder.id } });
+                    }
+                }
             }
 
             // Customer balance:
@@ -458,10 +662,15 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
 
             // CANCELLED from VALIDATED → clear balance
             if (newStatus === "CANCELLED" && DEBT_STATUSES.includes(prevStatus)) {
-                await tx.customer.update({
-                    where: { id: salesOrder.customerId },
-                    data: { balance: isCreditNote ? { increment: total } : { decrement: total } }
-                })
+                const decrementAmount = salesOrder.source === "POS"
+                    ? Number(salesOrder.total) - Number(salesOrder.amountPaid)
+                    : Number(salesOrder.total);
+                if (decrementAmount !== 0) {
+                    await tx.customer.update({
+                        where: { id: salesOrder.customerId },
+                        data: { balance: isCreditNote ? { increment: total } : { decrement: decrementAmount } }
+                    });
+                }
             }
         })
 
@@ -491,16 +700,48 @@ export const deleteSalesOrder = async (id: string) => {
 
             if (!order) throw new Error("Not found");
 
+            // Find linked POS order early if receiptNumber exists
+            let linkedOrder = null;
+            if (order.receiptNumber) {
+                const linkedTx = await tx.treasuryTransaction.findFirst({
+                    where: { description: { contains: order.receiptNumber }, source: "SALE" }
+                });
+
+                if (linkedTx && linkedTx.referenceId) {
+                    linkedOrder = await tx.order.findUnique({ where: { id: linkedTx.referenceId } });
+                } else {
+                    const timeMin = new Date(order.createdAt.getTime() - 60000);
+                    const timeMax = new Date(order.createdAt.getTime() + 60000);
+                    linkedOrder = await tx.order.findFirst({
+                        where: { 
+                            tenantId, 
+                            total: order.total,
+                            OR: [
+                                { customerId: order.customerId },
+                                { customerId: null }
+                            ],
+                            createdAt: { gte: timeMin, lte: timeMax } 
+                        }
+                    });
+                }
+            }
+
+            const linkedOrderIds = [id];
+            if (linkedOrder) {
+                linkedOrderIds.push(linkedOrder.id);
+            }
+
             // DGI Compliance: Invoices/BLs with receipt numbers must be VOIDED, not deleted
             // This preserves the numbering sequence required by fiscal authorities
             const hasReceiptNumber = !!order.receiptNumber
             const isNumberedDocument = (order.type === "INVOICE" || order.type === "ORDER" || order.type === "CREDIT_NOTE") && hasReceiptNumber
 
-            // If order was validated or paid, stock was decremented, so we must restore it
+            // If order was validated or paid, stock was decremented (or incremented if Credit Note), so we must restore it
             const STOCK_STATUSES = ["VALIDATED", "PAID"];
             const isStockType = order.type === "ORDER" || order.type === "INVOICE";
+            const isCreditNote = order.type === "CREDIT_NOTE";
             
-            if (STOCK_STATUSES.includes(order.status) && isStockType) {
+            if (STOCK_STATUSES.includes(order.status) && (isStockType || isCreditNote)) {
                 const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
                 
                 await Promise.all(
@@ -508,17 +749,17 @@ export const deleteSalesOrder = async (id: string) => {
                         if (storeId) {
                             await tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
-                                data: { stock: { increment: item.quantity } }
+                                data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
                             });
                         }
                         await tx.product.updateMany({
                             where: { id: item.productId },
-                            data: { stock: { increment: item.quantity } }
+                            data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
                         });
                         
                         // Delete related stock movements
                         await tx.stockMovement.deleteMany({
-                            where: { referenceId: id, productId: item.productId }
+                            where: { referenceId: { in: linkedOrderIds }, productId: item.productId }
                         });
                     })
                 );
@@ -560,25 +801,6 @@ export const deleteSalesOrder = async (id: string) => {
 
             // Revert associated POS Order, order items, and Treasury Transactions if receiptNumber exists
             if (order.receiptNumber) {
-                const linkedTx = await tx.treasuryTransaction.findFirst({
-                    where: { description: { contains: order.receiptNumber }, source: "SALE" }
-                });
-
-                let linkedOrder = null;
-                if (linkedTx && linkedTx.referenceId) {
-                    linkedOrder = await tx.order.findUnique({ where: { id: linkedTx.referenceId } });
-                } else {
-                    const timeMin = new Date(order.createdAt.getTime() - 60000);
-                    const timeMax = new Date(order.createdAt.getTime() + 60000);
-                    linkedOrder = await tx.order.findFirst({
-                        where: { 
-                            tenantId, 
-                            customerId: order.customerId, 
-                            createdAt: { gte: timeMin, lte: timeMax } 
-                        }
-                    });
-                }
-
                 if (linkedOrder) {
                     const oldPaidAmount = Number(linkedOrder.paidAmount);
 

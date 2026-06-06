@@ -17,25 +17,31 @@ const ALERT_ICONS: Record<AlertType, React.ElementType> = {
 
 const SEVERITY_STYLES = {
     critical: {
-        bg: "bg-red-50 dark:bg-red-950/40",
-        border: "border-red-200 dark:border-red-800",
-        icon: "text-red-500",
+        bg: "bg-red-50 dark:bg-red-950/35",
+        border: "border-red-200 dark:border-red-900/50",
+        icon: "text-red-500 dark:text-red-400",
         badge: "bg-red-500",
-        indicator: "bg-red-500",
+        indicator: "bg-red-500 dark:bg-red-600",
+        text: "text-red-950 dark:text-red-100",
+        desc: "text-red-800/80 dark:text-red-300/80",
     },
     warning: {
-        bg: "bg-amber-50 dark:bg-amber-950/40",
-        border: "border-amber-200 dark:border-amber-800",
-        icon: "text-amber-500",
+        bg: "bg-amber-50 dark:bg-amber-950/35",
+        border: "border-amber-200 dark:border-amber-900/50",
+        icon: "text-amber-500 dark:text-amber-400",
         badge: "bg-amber-500",
-        indicator: "bg-amber-500",
+        indicator: "bg-amber-500 dark:bg-amber-600",
+        text: "text-amber-950 dark:text-amber-100",
+        desc: "text-amber-800/80 dark:text-amber-300/80",
     },
     info: {
-        bg: "bg-blue-50 dark:bg-blue-950/40",
-        border: "border-blue-200 dark:border-blue-800",
-        icon: "text-blue-500",
+        bg: "bg-blue-50 dark:bg-blue-950/35",
+        border: "border-blue-200 dark:border-blue-900/50",
+        icon: "text-blue-500 dark:text-blue-400",
         badge: "bg-blue-500",
-        indicator: "bg-blue-500",
+        indicator: "bg-blue-500 dark:bg-blue-600",
+        text: "text-blue-950 dark:text-blue-100",
+        desc: "text-blue-800/80 dark:text-blue-300/80",
     },
 }
 
@@ -107,10 +113,10 @@ export function NotificationBell() {
                 <>
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 z-40"
+                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-all duration-200 animate-in fade-in"
                         onClick={() => setOpen(false)}
                     />
-                    <div className="absolute right-0 top-12 z-50 w-96 max-h-[80vh] overflow-hidden rounded-xl border bg-background shadow-2xl flex flex-col animate-in slide-in-from-top-2 fade-in duration-200">
+                    <div className="fixed md:absolute right-4 md:right-0 top-16 md:top-12 z-50 w-[calc(100vw-2rem)] sm:w-96 max-h-[80vh] overflow-hidden rounded-xl border bg-background/95 backdrop-blur-md shadow-2xl flex flex-col animate-in slide-in-from-top-2 fade-in duration-200">
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 border-b">
                             <div className="flex items-center gap-2">
@@ -181,14 +187,14 @@ export function NotificationBell() {
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-0.5">
                                                         <SeverityIcon className={cn("h-3 w-3 shrink-0", style.icon)} />
-                                                        <p className="text-xs font-semibold truncate">{alert.title}</p>
+                                                        <p className={cn("text-xs font-semibold truncate", style.text)}>{alert.title}</p>
                                                     </div>
-                                                    <p className="text-xs text-muted-foreground leading-snug">{alert.description}</p>
+                                                    <p className={cn("text-xs leading-snug", style.desc)}>{alert.description}</p>
                                                 </div>
 
                                                 {/* Dismiss button */}
                                                 <button
-                                                    className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10"
+                                                    className="shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
                                                     onClick={(e) => handleDismiss(alert.id, e)}
                                                     aria-label="Ignorer"
                                                 >

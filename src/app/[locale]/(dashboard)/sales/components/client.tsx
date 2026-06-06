@@ -83,28 +83,28 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <Heading
                     title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
-                <div className="flex flex-row space-x-2">
-                    <Button variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:hover:bg-emerald-900/50" onClick={() => router.push(`/${locale}/payments`)}>
+                <div className="flex flex-row gap-2">
+                    <Button variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:text-emerald-800 dark:bg-emerald-950/30 dark:border-emerald-900/50 dark:hover:bg-emerald-900/50 flex-1 sm:flex-none" onClick={() => router.push(`/${locale}/payments`)}>
                         Paiements
                     </Button>
-                    <Button onClick={() => router.push(`/${locale}/sales/new`)}>
+                    <Button onClick={() => router.push(`/${locale}/sales/new`)} className="flex-1 sm:flex-none">
                         <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
                     </Button>
                 </div>
             </div>
             <Separator />
 
-            <div className="flex items-center gap-4 py-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 py-4">
                 <Select
                     value={typeFilter}
                     onValueChange={setTypeFilter}
                 >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                         <SelectValue placeholder={t("filters.filterByType")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -114,7 +114,9 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
                         <SelectItem value="INVOICE">{t("filters.invoice")}</SelectItem>
                     </SelectContent>
                 </Select>
-                <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                <div className="w-full sm:w-auto">
+                    <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                </div>
             </div>
 
             <ServerDataTable  exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="search" columns={columns as any} data={data} pageCount={pageCount} currentPage={currentPage} />

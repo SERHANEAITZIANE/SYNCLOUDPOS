@@ -83,7 +83,7 @@ export async function updateChequeStatus(id: string, status: string, accountId?:
                         amount: amount,
                         balanceBefore: account.balance,
                         balanceAfter: isDebit ? Number(account.balance) - amount : Number(account.balance) + amount,
-                        source: "MANUAL_IN", // Treat as manual or could add "CHEQUE"
+                        source: isDebit ? "MANUAL_OUT" : "MANUAL_IN", // Treat as manual or could add "CHEQUE"
                         referenceId: cheque.id,
                         description: `Chèque ${cheque.number} - ${cheque.bank}`
                     }

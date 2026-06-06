@@ -345,6 +345,7 @@ export const PosClient: FC<PosClientProps> = ({
 
     const recognitionRef = useRef<any>(null)
     const cart = usePosStore()
+    const isElectronics = cart.forceElectronicsMode || isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
 
     // Load favorites-only preference from localStorage
     useEffect(() => {
@@ -488,7 +489,7 @@ export const PosClient: FC<PosClientProps> = ({
         // Add all items
         for (const item of order.items) {
             cart.addItem({
-                id: item.productId, // Use productId as the cart item id to merge duplicates easily
+                id: isElectronics ? item.id : item.productId, // Use database item ID in electronics mode to preserve exact rows, otherwise productId to merge duplicates
                 productId: item.productId,
                 name: item.product.name,
                 price: Number(item.unitPrice), // Keep historical order unit price
@@ -498,7 +499,8 @@ export const PosClient: FC<PosClientProps> = ({
                 priceHt: Number(item.priceHt || item.unitPrice),
                 quantity: item.quantity,
                 image: item.product.images?.[0]?.url,
-                serialNumber: item.serialNumber || ""
+                serialNumber: item.serialNumber || "",
+                skipSplit: true
             })
         }
 
@@ -522,7 +524,7 @@ export const PosClient: FC<PosClientProps> = ({
                 // Add all items
                 for (const item of order.items) {
                     cart.addItem({
-                        id: item.productId, // Use productId as the cart item id to merge duplicates easily
+                        id: isElectronics ? item.id : item.productId, // Use database item ID in electronics mode to preserve exact rows, otherwise productId to merge duplicates
                         productId: item.productId,
                         name: item.product.name,
                         price: Number(item.unitPrice),
@@ -530,7 +532,8 @@ export const PosClient: FC<PosClientProps> = ({
                         cost: Number(item.product.cost || 0),
                         quantity: item.quantity,
                         image: item.product.images?.[0]?.url,
-                        serialNumber: item.serialNumber || ""
+                        serialNumber: item.serialNumber || "",
+                        skipSplit: true
                     })
                 }
 

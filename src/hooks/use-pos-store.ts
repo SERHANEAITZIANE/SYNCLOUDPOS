@@ -20,6 +20,7 @@ export interface CartItem {
     discount?: number
     categoryId?: string
     serialNumber?: string
+    skipSplit?: boolean
 }
 
 export interface Session {
@@ -115,7 +116,7 @@ export const usePosStore = create(
                 if (!session) return state
 
                 // In electronics mode, each item is a separate row of quantity 1
-                if (state.forceElectronicsMode) {
+                if (state.forceElectronicsMode && !data.skipSplit) {
                     const qtyToAdd = data.quantity || 1;
                     const additionalItems = Array.from({ length: qtyToAdd }).map(() => ({
                         ...data,

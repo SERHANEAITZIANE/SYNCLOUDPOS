@@ -14,20 +14,33 @@ export async function getFinancialSummary() {
         const tenantId = session.user.tenantId
 
         // 1. Total Sales (Paid)
-        const sales = await db.salesOrder.findMany({
-            where: {
-                tenantId,
-                status: "PAID"
-            },
-            select: { total: true }
-        })
-        const totalSales = sales.reduce((acc, order) => acc + Number(order.total), 0)
-
-        // 2. Total Purchases (Completed)
-        const purchases = await db.purchaseOrder.findMany({
+        // POS Orders
+        const posOrders = await db.order.findMany({
             where: {
                 tenantId,
                 status: "COMPLETED"
+            },
+            select: { paidAmount: true }
+        })
+        const posSalesTotal = posOrders.reduce((acc, order) => acc + Number(order.paidAmount), 0)
+
+        // Sales Orders (BL / Invoice)
+        const salesOrders = await db.salesOrder.findMany({
+            where: {
+                tenantId,
+                status: { in: ["PAID", "VALIDATED", "PARTIAL"] }
+            },
+            select: { amountPaid: true }
+        })
+        const salesOrdersTotal = salesOrders.reduce((acc, order) => acc + Number(order.amountPaid), 0)
+
+        const totalSales = posSalesTotal + salesOrdersTotal
+
+        // 2. Total Purchases (Completed, Facture, Bon de Livraison)
+        const purchases = await db.purchaseOrder.findMany({
+            where: {
+                tenantId,
+                status: { in: ["COMPLETED", "FACTURE", "BON_LIVRAISON"] }
             },
             select: { total: true }
         })
@@ -166,17 +179,32 @@ export async function getTreasuryTransactions(accountId: string) {
 
         const tenantId = session.user.tenantId
 
+        // Get ALL transactions for this account, sorted by date ASC (oldest first)
         const transactions = await db.treasuryTransaction.findMany({
             where: { accountId, tenantId },
-            orderBy: { date: "desc" }
+            orderBy: [{ date: "asc" }, { createdAt: "asc" }]
         })
 
-        return transactions.map(t => ({
-            ...t,
-            amount: Number(t.amount),
-            balanceBefore: Number(t.balanceBefore),
-            balanceAfter: Number(t.balanceAfter)
-        }))
+        // Recalculate running balance from scratch
+        let runningBalance = 0
+        const recalculated = transactions.map(t => {
+            const amount = Number(t.amount)
+            const balanceBefore = runningBalance
+            if (t.type === "CREDIT") {
+                runningBalance += amount
+            } else {
+                runningBalance -= amount
+            }
+            return {
+                ...t,
+                amount,
+                balanceBefore,
+                balanceAfter: runningBalance
+            }
+        })
+
+        // Return in DESC order (newest first) for display
+        return recalculated.reverse()
     } catch (error) {
         console.error("[GET_TREASURY_TRANSACTIONS]", error)
         return []
@@ -198,41 +226,51 @@ export async function getCashbook(accountId: string, year: number, month: number
         })
         if (!account) return { error: "Compte introuvable" }
 
-        // Find opening balance (last transaction before startDate)
-        const lastTxBefore = await db.treasuryTransaction.findFirst({
-            where: { accountId, tenantId, date: { lt: startDate } },
-            orderBy: { date: "desc" }
-        })
-        const openingBalance = lastTxBefore ? Number(lastTxBefore.balanceAfter) : 0
-
-        // Get transactions for the month, ordered ascending
-        const transactions = await db.treasuryTransaction.findMany({
-            where: { 
-                accountId, 
-                tenantId,
-                date: { gte: startDate, lte: endDate }
-            },
-            orderBy: { date: "asc" }
+        // Get ALL transactions up to end of month, sorted chronologically
+        const allTransactions = await db.treasuryTransaction.findMany({
+            where: { accountId, tenantId, date: { lte: endDate } },
+            orderBy: [{ date: "asc" }, { createdAt: "asc" }]
         })
 
-        const entries = transactions.map(t => ({
-            id: t.id,
-            date: t.date.toISOString(),
-            type: t.type,
-            amount: Number(t.amount),
-            balanceBefore: Number(t.balanceBefore),
-            balanceAfter: Number(t.balanceAfter),
-            source: t.source,
-            description: t.description || "-",
-            referenceId: t.referenceId
-        }))
+        // Recalculate running balance from scratch
+        let runningBalance = 0
+        let openingBalance = 0
+        const periodEntries: any[] = []
 
-        const totalIn = entries.filter(e => e.type === "CREDIT").reduce((sum, e) => sum + e.amount, 0)
-        const totalOut = entries.filter(e => e.type === "DEBIT").reduce((sum, e) => sum + e.amount, 0)
-        const closingBalance = entries.length > 0 ? entries[entries.length - 1].balanceAfter : openingBalance
+        for (const t of allTransactions) {
+            const amount = Number(t.amount)
+            const balanceBefore = runningBalance
+            if (t.type === "CREDIT") {
+                runningBalance += amount
+            } else {
+                runningBalance -= amount
+            }
+
+            if (t.date < startDate) {
+                // Before period - just track running balance for opening
+                openingBalance = runningBalance
+            } else {
+                // Within period
+                periodEntries.push({
+                    id: t.id,
+                    date: t.date.toISOString(),
+                    type: t.type,
+                    amount,
+                    balanceBefore,
+                    balanceAfter: runningBalance,
+                    source: t.source,
+                    description: t.description || "-",
+                    referenceId: t.referenceId
+                })
+            }
+        }
+
+        const totalIn = periodEntries.filter(e => e.type === "CREDIT").reduce((sum: number, e: any) => sum + e.amount, 0)
+        const totalOut = periodEntries.filter(e => e.type === "DEBIT").reduce((sum: number, e: any) => sum + e.amount, 0)
+        const closingBalance = periodEntries.length > 0 ? periodEntries[periodEntries.length - 1].balanceAfter : openingBalance
 
         return {
-            entries,
+            entries: periodEntries,
             totals: {
                 openingBalance,
                 totalIn,
@@ -264,16 +302,34 @@ export async function getAllTreasuryTransactions() {
                     }
                 }
             },
-            orderBy: { date: "desc" }
+            orderBy: [{ date: "asc" }, { createdAt: "asc" }]
         })
 
-        return transactions.map(t => ({
-            ...t,
-            amount: Number(t.amount),
-            balanceBefore: Number(t.balanceBefore),
-            balanceAfter: Number(t.balanceAfter),
-            accountName: t.account.name
-        }))
+        // Recalculate running balance per account
+        const balanceByAccount: Record<string, number> = {}
+        const recalculated = transactions.map(t => {
+            const accountId = t.accountId
+            if (!(accountId in balanceByAccount)) {
+                balanceByAccount[accountId] = 0
+            }
+            const amount = Number(t.amount)
+            const balanceBefore = balanceByAccount[accountId]
+            if (t.type === "CREDIT") {
+                balanceByAccount[accountId] += amount
+            } else {
+                balanceByAccount[accountId] -= amount
+            }
+            return {
+                ...t,
+                amount,
+                balanceBefore,
+                balanceAfter: balanceByAccount[accountId],
+                accountName: t.account.name
+            }
+        })
+
+        // Return in DESC order (newest first) for display
+        return recalculated.reverse()
     } catch (error) {
         console.error("[GET_ALL_TREASURY_TRANSACTIONS]", error)
         return []

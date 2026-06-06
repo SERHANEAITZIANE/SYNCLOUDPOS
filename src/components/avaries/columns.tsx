@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { CellAction } from "./cell-action"
 
 export type SpoilageColumn = {
     id: string
@@ -36,5 +37,10 @@ export const columns: ColumnDef<SpoilageColumn>[] = [
     {
         accessorKey: "userName",
         header: "Déclaré par",
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => <CellAction data={row.original} />
     }
 ]
+

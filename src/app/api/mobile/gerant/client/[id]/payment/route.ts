@@ -35,7 +35,7 @@ export async function POST(
         let treasuryId = caisseId;
         if (!treasuryId) {
             const defaultCaisse = await db.treasuryAccount.findFirst({
-                where: { tenantId, type: "CASH", isActive: true },
+                where: { tenantId, type: "CASH" },
                 orderBy: { createdAt: "asc" },
                 select: { id: true },
             });
@@ -56,20 +56,22 @@ export async function POST(
             // Record treasury transaction (money IN = CREDIT)
             let treasuryTx = null;
             if (treasuryId) {
-                await tx.treasuryAccount.update({
+                const updatedAccount = await tx.treasuryAccount.update({
                     where: { id: treasuryId },
                     data: { balance: { increment: paymentAmount } },
                 });
                 treasuryTx = await tx.treasuryTransaction.create({
                     data: {
                         tenantId,
+                        accountId: treasuryId,
                         type: "CREDIT",
                         amount: paymentAmount,
+                        balanceBefore: Number(updatedAccount.balance) - paymentAmount,
+                        balanceAfter: updatedAccount.balance,
                         source: "CUSTOMER_PAYMENT",
                         description: `Encaissement client: ${customer.name}${note ? ` - ${note}` : ""} (mobile gérant)`,
                         referenceId: customerId,
                         date: new Date(),
-                        treasuryAccountId: treasuryId,
                     },
                 });
             }

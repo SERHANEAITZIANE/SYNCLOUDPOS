@@ -11,7 +11,7 @@ import { getStores } from "@/actions/stores";
 export async function DashboardHeader({ user }: { user: any }) {
     const stores = await getStores();
     return (
-        <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
+        <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6 gap-2 md:gap-4">
             <MobileSidebar />
             <div className="w-full flex-1">
                 {/* Search bar could go here */}
@@ -26,7 +26,7 @@ export async function DashboardHeader({ user }: { user: any }) {
                     </div>
                 </form>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                 <HeaderStoreSelector stores={stores} currentStoreId={user.defaultStoreId} />
                 <HeaderMobileConnect />
                 <NotificationBell />

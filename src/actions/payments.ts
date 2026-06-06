@@ -43,7 +43,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
         // For SALE, referenceId points to Order.id (or SalesOrder). 
         // For MANUAL_IN, we just updated it to point to Customer.id
 
-        // Let's fetch the necessary Orders and Customers to resolve the names
+        // Let's fetch the necessary Orders, Customers, and Cheques to resolve the names
         const orderIds = transactions.filter(t => t.source === "SALE" && t.referenceId).map(t => t.referenceId as string)
         const customerIdsFromManual = transactions.filter(t => t.source === "MANUAL_IN" && t.referenceId).map(t => t.referenceId as string)
 
@@ -61,6 +61,11 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
         const customers = await db.customer.findMany({
             where: { id: { in: customerIdsFromManual }, tenantId },
             select: { id: true, name: true }
+        })
+
+        const cheques = await db.cheque.findMany({
+            where: { id: { in: customerIdsFromManual }, tenantId },
+            include: { customer: { select: { id: true, name: true } } }
         })
 
         // Map everything together
@@ -88,7 +93,13 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
                     customerName = customer.name
                     foundCustomerId = customer.id
                 } else {
-                    customerName = "Ancien Impayé (Non lié)"
+                    const cheque = cheques.find(c => c.id === t.referenceId)
+                    if (cheque?.customer) {
+                        customerName = cheque.customer.name
+                        foundCustomerId = cheque.customer.id
+                    } else {
+                        customerName = "Ancien Impayé (Non lié)"
+                    }
                 }
             }
 
@@ -155,6 +166,11 @@ export async function getSupplierPayments() {
             include: { supplier: { select: { id: true, name: true } } }
         })
 
+        const cheques = await db.cheque.findMany({
+            where: { id: { in: supplierIds }, tenantId },
+            include: { supplier: { select: { id: true, name: true } } }
+        })
+
         const mappedPayments = transactions.map(t => {
             let supplierName = "Fournisseur inconnu"
             let foundSupplierId: string | undefined = undefined
@@ -165,6 +181,12 @@ export async function getSupplierPayments() {
                 if (supplier) {
                     supplierName = supplier.name
                     foundSupplierId = supplier.id
+                } else {
+                    const cheque = cheques.find(c => c.id === t.referenceId)
+                    if (cheque?.supplier) {
+                        supplierName = cheque.supplier.name
+                        foundSupplierId = cheque.supplier.id
+                    }
                 }
             } else if (t.source === "PURCHASE") {
                 const po = purchaseOrders.find(p => p.id === t.referenceId)

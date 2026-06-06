@@ -14,9 +14,21 @@ import {
     Package, 
     AlertTriangle, 
     Search,
-    CheckCircle2
+    CheckCircle2,
+    Edit3,
+    Trash2
 } from "lucide-react"
-import { processSupplierReturn, getCustomerSalesOrders, processBulkClientReturn, getSupplierPurchaseOrders, processBulkSupplierReturn } from "@/actions/returns"
+import { 
+    processSupplierReturn, 
+    getCustomerSalesOrders, 
+    processBulkClientReturn, 
+    getSupplierPurchaseOrders, 
+    processBulkSupplierReturn,
+    deleteClientReturn,
+    deleteSupplierReturn,
+    editClientReturn,
+    editSupplierReturn
+} from "@/actions/returns"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 
 interface ProductOption {
@@ -154,6 +166,89 @@ export function ReturnsClient({
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState("")
     const [successMsg, setSuccessMsg] = useState("")
+
+    // Edit Return State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [editingReturn, setEditingReturn] = useState<any>(null)
+    const [editReason, setEditReason] = useState("")
+    const [editNotes, setEditNotes] = useState("")
+    const [editingType, setEditingType] = useState<"client" | "supplier">("client")
+
+    // Delete Return State
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+    const [deletingReturn, setDeletingReturn] = useState<any>(null)
+    const [deletingType, setDeletingType] = useState<"client" | "supplier">("client")
+
+    const openEditModal = (ret: any, type: "client" | "supplier") => {
+        setEditingReturn(ret)
+        setEditingType(type)
+        setEditReason(ret.reason || "")
+        setEditNotes(ret.notes || "")
+        setIsEditModalOpen(true)
+        setErrorMsg("")
+        setSuccessMsg("")
+    }
+
+    const handleEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!editingReturn) return
+        setLoading(true)
+        setErrorMsg("")
+        setSuccessMsg("")
+
+        let res
+        if (editingType === "client") {
+            res = await editClientReturn(editingReturn.id, editReason, editNotes)
+        } else {
+            res = await editSupplierReturn(editingReturn.id, editReason, editNotes)
+        }
+
+        setLoading(false)
+        if (res.error) {
+            setErrorMsg(res.error)
+        } else {
+            setSuccessMsg(res.success || "Retour modifié avec succès")
+            setTimeout(() => {
+                setIsEditModalOpen(false)
+                setEditingReturn(null)
+                router.refresh()
+            }, 1500)
+        }
+    }
+
+    const openDeleteConfirm = (ret: any, type: "client" | "supplier") => {
+        setDeletingReturn(ret)
+        setDeletingType(type)
+        setIsDeleteConfirmOpen(true)
+        setErrorMsg("")
+        setSuccessMsg("")
+    }
+
+    const handleDeleteConfirm = async () => {
+        if (!deletingReturn) return
+        setLoading(true)
+        setErrorMsg("")
+        setSuccessMsg("")
+
+        let res
+        if (deletingType === "client") {
+            res = await deleteClientReturn(deletingReturn.id)
+        } else {
+            res = await deleteSupplierReturn(deletingReturn.id)
+        }
+
+        setLoading(false)
+        if (res.error) {
+            setErrorMsg(res.error)
+        } else {
+            setSuccessMsg(res.success || "Retour supprimé avec succès")
+            setTimeout(() => {
+                setIsDeleteConfirmOpen(false)
+                setDeletingReturn(null)
+                router.refresh()
+            }, 1500)
+        }
+    }
 
     // Reset Client Form
     const resetClientForm = () => {
@@ -372,7 +467,7 @@ export function ReturnsClient({
             {/* Header Banner */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 p-6 rounded-2xl border border-purple-500/10 shadow-lg">
                 <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                    <h1 className="text-xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
                         <ArrowLeftRight className="h-8 w-8 text-purple-400" />
                         Gestion des Retours
                     </h1>
@@ -537,6 +632,7 @@ export function ReturnsClient({
                                             <th className="p-3 text-center">Type</th>
                                             <th className="p-3">Motif</th>
                                             <th className="p-3">Auteur</th>
+                                            <th className="p-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-900">
@@ -565,6 +661,24 @@ export function ReturnsClient({
                                                 </td>
                                                 <td className="p-3 max-w-xs truncate text-slate-400">{r.reason}</td>
                                                 <td className="p-3 text-slate-500">{r.driver?.name}</td>
+                                                <td className="p-3 text-right whitespace-nowrap">
+                                                    <div className="flex justify-end items-center gap-2">
+                                                        <button
+                                                            onClick={() => openEditModal(r, "client")}
+                                                            className="p-1.5 bg-purple-600/10 border border-purple-500/20 text-purple-400 hover:bg-purple-600/25 rounded-lg transition-all"
+                                                            title="Modifier"
+                                                        >
+                                                            <Edit3 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openDeleteConfirm(r, "client")}
+                                                            className="p-1.5 bg-rose-600/10 border border-rose-500/20 text-rose-400 hover:bg-rose-600/25 rounded-lg transition-all"
+                                                            title="Supprimer"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -597,6 +711,7 @@ export function ReturnsClient({
                                             <th className="p-3 text-center">Type</th>
                                             <th className="p-3">Motif</th>
                                             <th className="p-3">Enregistré Par</th>
+                                            <th className="p-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-900">
@@ -625,6 +740,24 @@ export function ReturnsClient({
                                                 </td>
                                                 <td className="p-3 max-w-xs truncate text-slate-400">{r.reason}</td>
                                                 <td className="p-3 text-slate-500">{r.userName}</td>
+                                                <td className="p-3 text-right whitespace-nowrap">
+                                                    <div className="flex justify-end items-center gap-2">
+                                                        <button
+                                                            onClick={() => openEditModal(r, "supplier")}
+                                                            className="p-1.5 bg-pink-600/10 border border-pink-500/20 text-pink-400 hover:bg-pink-600/25 rounded-lg transition-all"
+                                                            title="Modifier"
+                                                        >
+                                                            <Edit3 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => openDeleteConfirm(r, "supplier")}
+                                                            className="p-1.5 bg-rose-600/10 border border-rose-500/20 text-rose-400 hover:bg-rose-600/25 rounded-lg transition-all"
+                                                            title="Supprimer"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -1184,6 +1317,128 @@ export function ReturnsClient({
                                 </button>
                             </div>
                         </form>
+                    </div>
+                                                </div>
+                                            )}
+
+            {/* Modal: Edit Return */}
+            {isEditModalOpen && editingReturn && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-slate-950 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <Edit3 className="h-5 w-5 text-purple-400" />
+                            Modifier le Retour
+                        </h3>
+
+                        <form onSubmit={handleEditSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Motif *</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={editReason}
+                                    onChange={(e) => setEditReason(e.target.value)}
+                                    placeholder="Motif du retour..."
+                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl px-3.5 py-2 text-xs outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Notes Internes</label>
+                                <textarea
+                                    rows={3}
+                                    value={editNotes}
+                                    onChange={(e) => setEditNotes(e.target.value)}
+                                    placeholder="Notes additionnelles..."
+                                    className="w-full bg-slate-900 text-slate-200 border border-slate-800 focus:border-slate-700 rounded-xl px-3.5 py-2 text-xs outline-none resize-none"
+                                />
+                            </div>
+
+                            {errorMsg && (
+                                <div className="p-3 bg-red-950/20 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold flex items-center gap-2">
+                                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                                    {errorMsg}
+                                </div>
+                            )}
+
+                            {successMsg && (
+                                <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                    {successMsg}
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-900">
+                                <button
+                                    type="button"
+                                    onClick={() => { setIsEditModalOpen(false); setEditingReturn(null) }}
+                                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="px-5 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-500/10 transition-all"
+                                >
+                                    {loading ? "Modification..." : "Modifier"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Delete Confirmation */}
+            {isDeleteConfirmOpen && deletingReturn && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-slate-950 border border-rose-500/20 rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-rose-400" />
+                            Confirmer la Suppression
+                        </h3>
+                        <p className="text-slate-400 text-xs mb-4 leading-relaxed">
+                            Êtes-vous sûr de vouloir supprimer ce retour de marchandise ?
+                            Cette action est irréversible et va :
+                        </p>
+                        <ul className="list-disc pl-5 mb-4 space-y-1 text-slate-500 text-xs">
+                            <li>Re-déduire les produits du stock (ou les re-créditer pour les retours fournisseurs).</li>
+                            <li>Restaurer les soldes du client ou fournisseur si c'était un retour à crédit.</li>
+                            <li>Restaurer les soldes de caisse et supprimer la transaction financière si c'était un retour en espèces (cash).</li>
+                        </ul>
+
+                        {errorMsg && (
+                            <div className="p-3 mb-4 bg-red-950/20 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 shrink-0" />
+                                {errorMsg}
+                            </div>
+                        )}
+
+                        {successMsg && (
+                            <div className="p-3 mb-4 bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold flex items-center gap-2">
+                                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                {successMsg}
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-900">
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => { setIsDeleteConfirmOpen(false); setDeletingReturn(null) }}
+                                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={handleDeleteConfirm}
+                                className="px-5 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-500/10 transition-all"
+                            >
+                                {loading ? "Suppression..." : "Supprimer"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

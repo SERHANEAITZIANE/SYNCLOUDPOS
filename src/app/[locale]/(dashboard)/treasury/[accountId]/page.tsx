@@ -21,9 +21,14 @@ const TransactionLogPage = async ({
     const formattedTransactions: TreasuryTransactionColumn[] = transactions.map((item: any) => ({
         id: item.id,
         date: format(item.date, "MMMM do, yyyy HH:mm"),
+        rawDate: item.date,
         type: item.type,
         amount: formatter.format(Number(item.amount)),
+        rawAmount: Number(item.amount),
+        balanceBefore: formatter.format(Number(item.balanceBefore)),
+        rawBalanceBefore: Number(item.balanceBefore),
         balanceAfter: formatter.format(Number(item.balanceAfter)),
+        rawBalanceAfter: Number(item.balanceAfter),
         source: item.source,
         description: item.description || "-",
         referenceId: item.referenceId || null
@@ -32,7 +37,7 @@ const TransactionLogPage = async ({
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-                <TransactionsClient data={formattedTransactions} account={account as any} />
+                <TransactionsClient data={formattedTransactions} account={account as any} locale={locale} />
             </div>
         </div>
     )

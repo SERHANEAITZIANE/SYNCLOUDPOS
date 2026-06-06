@@ -4,6 +4,7 @@ import { Plus, FileSpreadsheet } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
+import { useSearchParams } from "next/navigation"
 
 import { ServerDataTable } from "@/components/ui/server-data-table"
 import { Button } from "@/components/ui/button"
@@ -41,6 +42,20 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
     const t = useTranslations("Suppliers")
     const tCommon = useTranslations("Common")
     const router = useRouter()
+    const searchParams = useSearchParams()
+
+    const aPayerActive = searchParams?.get("aPayer") === "true"
+
+    const toggleAPayer = () => {
+        const params = new URLSearchParams(searchParams?.toString() || "")
+        if (aPayerActive) {
+            params.delete("aPayer")
+        } else {
+            params.set("aPayer", "true")
+        }
+        params.set("page", "1") // reset page
+        router.push(`/suppliers?${params.toString()}`)
+    }
 
     // Modal States
     const [paymentModalOpen, setPaymentModalOpen] = useState(false)
@@ -168,19 +183,29 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <Heading
                     title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
-                <div className="flex flex-row flex-wrap gap-2">
-                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50" onClick={() => setImportOpen(true)}>
+                <div className="flex flex-row flex-wrap gap-2 w-full sm:w-auto">
+                    <Button
+                        variant={aPayerActive ? "default" : "outline"}
+                        className={aPayerActive 
+                            ? "bg-rose-600 hover:bg-rose-700 text-white font-bold flex-1 sm:flex-none" 
+                            : "text-rose-700 border-rose-200 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:border-rose-900/50 font-bold flex-1 sm:flex-none"
+                        }
+                        onClick={toggleAPayer}
+                    >
+                        <HandCoins className="mr-2 h-4 w-4" /> {aPayerActive ? "Tous" : "À Payer"}
+                    </Button>
+                    <Button variant="outline" className="text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-900/50 flex-1 sm:flex-none" onClick={() => setImportOpen(true)}>
                         <FileSpreadsheet className="mr-2 h-4 w-4" /> Import Excel
                     </Button>
-                    <Link href="/suppliers/new">
-                        <Button id="global-add-new">
+                    <Link href="/suppliers/new" className="flex-1 sm:flex-none">
+                        <Button id="global-add-new" className="w-full">
                             <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
-                            <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F3]</span>
+                            <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest hidden sm:inline">[F3]</span>
                         </Button>
                     </Link>
                 </div>

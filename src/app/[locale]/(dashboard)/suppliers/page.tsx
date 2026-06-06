@@ -6,14 +6,15 @@ import { getTreasuryAccounts } from "@/actions/treasury"
 export default async function SuppliersPage({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string, name?: string }>
+    searchParams: Promise<{ page?: string, name?: string, aPayer?: string }>
 }) {
     const params = await searchParams
     const page = Number(params.page) || 1
     const pageSize = 20
     const search = params.name || ""
+    const aPayer = params.aPayer === "true"
 
-    const { suppliers, totalCount } = await getSuppliers(page, pageSize, search) as { suppliers: any[], totalCount: number }
+    const { suppliers, totalCount } = await getSuppliers(page, pageSize, search, aPayer) as { suppliers: any[], totalCount: number }
     const accounts = await getTreasuryAccounts()
     const mappedAccounts = accounts.map(a => ({ id: a.id, name: a.name, type: a.type }))
 

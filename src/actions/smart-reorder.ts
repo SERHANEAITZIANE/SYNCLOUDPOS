@@ -49,7 +49,53 @@ export async function calculateReorderPoint(
             type: "SALE",
             createdAt: { gte: fromDate }
         },
-        select: { quantity: true, createdAt: true }
+        select: { quantity: true, createdAt: true, referenceId: true, reason: true }
+    })
+
+    // Fetch all cancelled sales orders to filter them out
+    const cancelledSalesOrders = await db.salesOrder.findMany({
+        where: { tenantId, status: "CANCELLED" },
+        select: { id: true, receiptNumber: true, createdAt: true, total: true }
+    })
+    const cancelledIds = new Set<string>()
+    const cancelledReceipts: string[] = []
+
+    for (const so of cancelledSalesOrders) {
+        cancelledIds.add(so.id)
+        if (so.receiptNumber) {
+            cancelledReceipts.push(so.receiptNumber)
+            
+            // Find linked POS order IDs by receipt number in treasury transaction
+            const linkedTx = await db.treasuryTransaction.findFirst({
+                where: { description: { contains: so.receiptNumber }, source: "SALE", tenantId },
+                select: { referenceId: true }
+            })
+            if (linkedTx?.referenceId) {
+                cancelledIds.add(linkedTx.referenceId)
+            }
+
+            // Also find linked POS orders by time window and total (fallback/robustness)
+            const timeMin = new Date(so.createdAt.getTime() - 60000)
+            const timeMax = new Date(so.createdAt.getTime() + 60000)
+            const linkedOrders = await db.order.findMany({
+                where: {
+                    tenantId,
+                    total: so.total,
+                    createdAt: { gte: timeMin, lte: timeMax }
+                },
+                select: { id: true }
+            })
+            linkedOrders.forEach(o => cancelledIds.add(o.id))
+        }
+    }
+
+    const filteredMovements = movements.filter(m => {
+        if (m.referenceId && cancelledIds.has(m.referenceId)) return false
+        if (m.reason) {
+            const hasCancelledReceipt = cancelledReceipts.some(r => m.reason?.includes(r))
+            if (hasCancelledReceipt) return false
+        }
+        return true
     })
 
     const product = await db.product.findUnique({
@@ -65,7 +111,7 @@ export async function calculateReorderPoint(
     const currentMinStock = product.storeProducts[0]?.minStock || product.minStock || 0
 
     // Not enough data → low confidence estimation
-    if (movements.length < 5) {
+    if (filteredMovements.length < 5) {
         return {
             productId,
             productName: product.name,
@@ -90,7 +136,7 @@ export async function calculateReorderPoint(
     }
 
     // Aggregate sales per day (movements have negative quantities for sales)
-    movements.forEach(m => {
+    filteredMovements.forEach(m => {
         const day = format(m.createdAt, "yyyy-MM-dd")
         const qty = Math.abs(m.quantity)
         dailySales.set(day, (dailySales.get(day) || 0) + qty)
@@ -121,8 +167,8 @@ export async function calculateReorderPoint(
 
     // Confidence based on data quality
     const confidence: "HIGH" | "MEDIUM" | "LOW" =
-        movements.length > 30 ? "HIGH" :
-            movements.length > 10 ? "MEDIUM" : "LOW"
+        filteredMovements.length > 30 ? "HIGH" :
+            filteredMovements.length > 10 ? "MEDIUM" : "LOW"
 
     return {
         productId,

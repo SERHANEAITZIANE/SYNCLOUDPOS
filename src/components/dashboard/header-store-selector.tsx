@@ -29,9 +29,9 @@ export function HeaderStoreSelector({ stores, currentStoreId }: HeaderStoreSelec
 
     if (stores.length === 1) {
         return (
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-2 rounded-md">
-                <MapPin className="w-4 h-4" />
-                {stores[0].name}
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 px-0 sm:px-3 py-2 rounded-md justify-center w-10 sm:w-auto">
+                <MapPin className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline truncate">{stores[0].name}</span>
             </div>
         )
     }
@@ -46,12 +46,12 @@ export function HeaderStoreSelector({ stores, currentStoreId }: HeaderStoreSelec
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[180px] lg:w-[200px] justify-between" disabled={isPending}>
-                    <div className="flex items-center gap-2 truncate">
+                <Button variant="outline" className="w-10 sm:w-[180px] lg:w-[200px] justify-center sm:justify-between px-0 sm:px-4" disabled={isPending}>
+                    <div className="flex items-center gap-2 truncate justify-center">
                         <MapPin className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{activeStore?.name || "Select Location"}</span>
+                        <span className="hidden sm:inline truncate">{activeStore?.name || "Select Location"}</span>
                     </div>
-                    <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronDown className="hidden sm:inline h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[180px] lg:w-[200px]">

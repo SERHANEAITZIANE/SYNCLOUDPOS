@@ -18,6 +18,7 @@ export default async function PurchasesPage() {
             total: formatter.format(Number(item.total)),
             status: item.status,
             createdAt: format(new Date(item.createdAt), "dd/MM/yyyy"),
+            rawDate: item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date(item.createdAt).toISOString(),
             productCount,
             totalQuantity,
             imageUrl1: item.imageUrl1,

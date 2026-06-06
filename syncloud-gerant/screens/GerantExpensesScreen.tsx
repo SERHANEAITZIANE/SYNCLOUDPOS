@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
     View, Text, StyleSheet, TouchableOpacity, ScrollView,
     ActivityIndicator, TextInput, Alert, Image, Dimensions,
-    FlatList
+    FlatList, Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -105,24 +105,35 @@ export default function GerantExpensesScreen() {
     };
 
     const handleDeleteExpense = (id: string) => {
-        Alert.alert(
-            "Supprimer la dépense",
-            "Êtes-vous sûr de vouloir supprimer définitivement cette dépense ?",
-            [
-                { text: "Annuler", style: "cancel" },
-                {
-                    text: "Supprimer",
-                    style: "destructive",
-                    onPress: () => {
-                        setExpenses(prev => prev.filter(exp => exp.id !== id));
-                        if (editingExpenseId === id) {
-                            handleCancelEdit();
-                        }
-                        Alert.alert("✓ Supprimé", "La dépense a été supprimée.");
-                    }
+        if (Platform.OS === 'web') {
+            const confirmed = window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette dépense ?");
+            if (confirmed) {
+                setExpenses(prev => prev.filter(exp => exp.id !== id));
+                if (editingExpenseId === id) {
+                    handleCancelEdit();
                 }
-            ]
-        );
+                alert("La dépense a été supprimée.");
+            }
+        } else {
+            Alert.alert(
+                "Supprimer la dépense",
+                "Êtes-vous sûr de vouloir supprimer définitivement cette dépense ?",
+                [
+                    { text: "Annuler", style: "cancel" },
+                    {
+                        text: "Supprimer",
+                        style: "destructive",
+                        onPress: () => {
+                            setExpenses(prev => prev.filter(exp => exp.id !== id));
+                            if (editingExpenseId === id) {
+                                handleCancelEdit();
+                            }
+                            Alert.alert("✓ Supprimé", "La dépense a été supprimée.");
+                        }
+                    }
+                ]
+            );
+        }
     };
 
     const handleSaveExpense = () => {

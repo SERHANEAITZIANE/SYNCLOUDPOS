@@ -24,12 +24,11 @@ export async function GET(req: NextRequest) {
             startDate = new Date(now); startDate.setDate(1); startDate.setHours(0, 0, 0, 0);
         }
 
-        // Get all validated orders in the period
         const orders = await db.salesOrder.findMany({
             where: { tenantId, createdAt: { gte: startDate, lte: endDate }, status: { in: ["VALIDATED", "PAID"] } },
             select: {
                 id: true, createdAt: true, total: true, customerId: true,
-                items: { select: { productId: true, quantity: true, total: true, product: { select: { name: true } } } },
+                items: { select: { productId: true, quantity: true, unitPrice: true, product: { select: { name: true } } } },
                 customer: { select: { name: true } },
             },
         });
@@ -61,7 +60,8 @@ export async function GET(req: NextRequest) {
                 if (!productMap[item.productId]) {
                     productMap[item.productId] = { name: item.product.name, revenue: 0, qty: 0 };
                 }
-                productMap[item.productId].revenue += Number(item.total);
+                const itemTotal = Number(item.unitPrice) * item.quantity;
+                productMap[item.productId].revenue += itemTotal;
                 productMap[item.productId].qty += item.quantity;
             }
         }

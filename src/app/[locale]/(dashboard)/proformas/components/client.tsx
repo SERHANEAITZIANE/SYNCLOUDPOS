@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
-import { Plus, Eye, FileText, Truck, BadgeCheck } from "lucide-react"
+import { Plus, Eye, FileText, Truck, BadgeCheck, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { ServerDataTable } from "@/components/ui/server-data-table"
 import { ColumnDef } from "@tanstack/react-table"
 import { formatter } from "@/lib/utils"
+import { deleteProforma } from "@/actions/proformas"
+import { toast } from "react-hot-toast"
 
 interface ProformaRow {
   id: string
@@ -47,6 +49,25 @@ export function ProformaClient({
 }) {
   const locale = useLocale()
   const router = useRouter()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const onDelete = async (id: string) => {
+    if (!confirm("Supprimer ce proforma en brouillon ?")) return
+    setDeletingId(id)
+    try {
+      const result = await deleteProforma(id)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success("Proforma supprimé")
+        router.refresh()
+      }
+    } catch (e) {
+      toast.error("Erreur lors de la suppression")
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const columns: ColumnDef<ProformaRow>[] = [
     {
@@ -134,6 +155,18 @@ export function ProformaClient({
               title="Créer un BL"
             >
               <Truck className="h-4 w-4" />
+            </Button>
+          )}
+          {row.original.status === "DRAFT" && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              disabled={deletingId === row.original.id}
+              onClick={() => onDelete(row.original.id)}
+              title="Supprimer"
+            >
+              <Trash className="h-4 w-4" />
             </Button>
           )}
         </div>

@@ -20,7 +20,7 @@ interface SupplierData {
     notes?: string
 }
 
-export const getSuppliers = async (page: number = 1, pageSize: number = 20, search?: string) => {
+export const getSuppliers = async (page: number = 1, pageSize: number = 20, search?: string, filterOutstanding?: boolean) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized", suppliers: [], totalCount: 0 }
 
@@ -38,6 +38,10 @@ export const getSuppliers = async (page: number = 1, pageSize: number = 20, sear
                 { phone: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
             ]
+        }
+
+        if (filterOutstanding) {
+            whereClause.balance = { gt: 0 }
         }
 
         const [suppliers, totalCount] = await Promise.all([

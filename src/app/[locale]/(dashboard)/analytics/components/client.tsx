@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatter } from "@/lib/utils"
 import {
     TrendingUp, TrendingDown, ShoppingCart, Users,
-    AlertTriangle, Package, ReceiptText, DollarSign, CreditCard
+    AlertTriangle, Package, ReceiptText, DollarSign, CreditCard,
+    Smartphone, Download
 } from "lucide-react"
 import React from "react"
 import { Badge } from "@/components/ui/badge"
@@ -138,7 +139,16 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
     }
 
     const [isMounted, setIsMounted] = React.useState(false)
-    React.useEffect(() => { setIsMounted(true) }, [])
+    const [isMobileDevice, setIsMobileDevice] = React.useState(false)
+
+    React.useEffect(() => {
+        setIsMounted(true)
+        if (typeof window !== "undefined") {
+            const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+            setIsMobileDevice(mobile);
+        }
+    }, [])
+
     if (!isMounted) return null
     if (!data) return <div className="p-8 text-center text-rose-500 font-medium bg-rose-50 rounded-xl">{t("noData")}</div>
 
@@ -159,6 +169,34 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
             </div>
 
             <Separator className="bg-slate-200 dark:bg-slate-800" />
+
+            {isMobileDevice && (
+                <div className="p-4 bg-gradient-to-r from-indigo-900/10 via-purple-900/5 to-indigo-950/15 border border-indigo-500/10 dark:border-indigo-500/20 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-3 text-left w-full md:w-auto">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                            <Smartphone className="w-5 h-5 animate-pulse" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">Application Mobile SynCloud</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-md">
+                                Gagnez en fluidité et en réactivité en téléchargeant nos applications Android officielles.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                        <Button size="sm" asChild variant="outline" className="border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-500 dark:hover:text-emerald-300 text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 py-1 cursor-pointer">
+                            <a href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds" target="_blank" rel="noopener noreferrer">
+                                App Gérant
+                            </a>
+                        </Button>
+                        <Button size="sm" asChild variant="outline" className="border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 py-1 cursor-pointer">
+                            <a href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds" target="_blank" rel="noopener noreferrer">
+                                App Tournée
+                            </a>
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* ── Section: Performances Générales ────────────────────────────────── */}
             <div className="space-y-4">

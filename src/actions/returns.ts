@@ -1,5 +1,6 @@
 "use server"
 
+import crypto from "crypto"
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
@@ -72,6 +73,8 @@ export const processClientReturn = async (params: ClientReturnParams) => {
 
     try {
         const result = await db.$transaction(async (tx) => {
+            const returnId = crypto.randomUUID()
+
             // 1. Fetch product to get unit price and current stock details
             const product = await tx.product.findUnique({
                 where: { id: productId, tenantId },
@@ -118,7 +121,8 @@ export const processClientReturn = async (params: ClientReturnParams) => {
                     reason: `Retour Client: ${reason}`,
                     tenantId,
                     storeId: stockStoreId || undefined,
-                    userId
+                    userId,
+                    referenceId: returnId
                 }
             })
 
@@ -154,7 +158,7 @@ export const processClientReturn = async (params: ClientReturnParams) => {
                         balanceBefore: account.balance,
                         balanceAfter: updatedAccount.balance,
                         source: "MANUAL_OUT",
-                        referenceId: customerId,
+                        referenceId: returnId,
                         description: `Remboursement Retour Client [CASH]: ${reason}`,
                         tenantId
                     }
@@ -164,6 +168,7 @@ export const processClientReturn = async (params: ClientReturnParams) => {
             // 6. Create Return record in ProductReturn table
             const productReturn = await tx.productReturn.create({
                 data: {
+                    id: returnId,
                     tenantId,
                     customerId,
                     driverId: userId,
@@ -246,6 +251,8 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
 
     try {
         const result = await db.$transaction(async (tx) => {
+            const returnId = crypto.randomUUID()
+
             // 1. Fetch supplier info
             const supplier = await tx.supplier.findUnique({
                 where: { id: supplierId, tenantId }
@@ -298,7 +305,8 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
                     reason: `Retour Fournisseur: ${supplier.name} - ${reason}`,
                     tenantId,
                     storeId: stockStoreId || undefined,
-                    userId
+                    userId,
+                    referenceId: returnId
                 }
             })
 
@@ -331,7 +339,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
                         balanceBefore: account.balance,
                         balanceAfter: updatedAccount.balance,
                         source: "MANUAL_IN",
-                        referenceId: supplierId,
+                        referenceId: returnId,
                         description: `Remboursement Retour Fournisseur [CASH]: ${supplier.name} - ${reason}`,
                         tenantId
                     }
@@ -341,6 +349,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             // 7. Create SupplierReturn record
             const supplierReturn = await tx.supplierReturn.create({
                 data: {
+                    id: returnId,
                     tenantId,
                     supplierId,
                     userId,
@@ -467,44 +476,28 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
             const totalRefundCapacity = Math.max(0, amountPaid - (total - returnTotal))
 
             let refundCashAmount = 0
+            let treasuryAccount = null
+            let currentAccountBalance = 0
             if (refundCash && accountId) {
                 refundCashAmount = Math.min(totalRefundCapacity, returnTotal)
                 if (refundCashAmount > 0) {
-                    const account = await tx.treasuryAccount.findUnique({
+                    treasuryAccount = await tx.treasuryAccount.findUnique({
                         where: { id: accountId, tenantId }
                     })
-                    if (!account) throw new Error("Compte de trésorerie introuvable")
-                    if (Number(account.balance) < refundCashAmount) {
+                    if (!treasuryAccount) throw new Error("Compte de trésorerie introuvable")
+                    if (Number(treasuryAccount.balance) < refundCashAmount) {
                         throw new Error("Solde de caisse insuffisant pour effectuer le remboursement")
                     }
-
-                    // Decrement treasury account balance
-                    const updatedAccount = await tx.treasuryAccount.update({
-                        where: { id: accountId },
-                        data: { balance: { decrement: refundCashAmount } }
-                    })
-
-                    // Create Treasury Transaction record
-                    await tx.treasuryTransaction.create({
-                        data: {
-                            accountId,
-                            type: "DEBIT",
-                            amount: refundCashAmount,
-                            balanceBefore: account.balance,
-                            balanceAfter: updatedAccount.balance,
-                            source: "MANUAL_OUT",
-                            referenceId: customerId,
-                            description: `Remboursement Retour Client (BL N°: ${salesOrder.receiptNumber || 'N/A'}): ${reason}`,
-                            tenantId
-                        }
-                    })
+                    currentAccountBalance = Number(treasuryAccount.balance)
                 }
             }
 
             const stockStoreId = storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id
+            let remainingRefundCash = refundCashAmount
 
             // Process each item
             for (const item of validItems) {
+                const returnId = crypto.randomUUID()
                 const product = await tx.product.findUnique({
                     where: { id: item.productId, tenantId },
                     include: { storeProducts: true }
@@ -545,20 +538,51 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
                         reason: `Retour Client sur BL N°: ${salesOrder.receiptNumber || 'N/A'}. Motif: ${reason}`,
                         tenantId,
                         storeId: stockStoreId || undefined,
-                        userId
+                        userId,
+                        referenceId: returnId
                     }
                 })
+
+                const itemTotal = item.quantity * item.unitPrice
+                const itemCashRefund = Math.min(remainingRefundCash, itemTotal)
+                remainingRefundCash -= itemCashRefund
+
+                if (itemCashRefund > 0 && accountId) {
+                    // Decrement treasury account balance
+                    await tx.treasuryAccount.update({
+                        where: { id: accountId },
+                        data: { balance: { decrement: itemCashRefund } }
+                    })
+
+                    // Create Treasury Transaction record
+                    await tx.treasuryTransaction.create({
+                        data: {
+                            accountId,
+                            type: "DEBIT",
+                            amount: itemCashRefund,
+                            balanceBefore: currentAccountBalance,
+                            balanceAfter: currentAccountBalance - itemCashRefund,
+                            source: "MANUAL_OUT",
+                            referenceId: returnId,
+                            description: `Remboursement Retour Client (BL N°: ${salesOrder.receiptNumber || 'N/A'}): ${reason}`,
+                            tenantId
+                        }
+                    })
+
+                    currentAccountBalance -= itemCashRefund
+                }
 
                 // Create ProductReturn record
                 await tx.productReturn.create({
                     data: {
+                        id: returnId,
                         tenantId,
                         customerId,
                         driverId: userId,
                         productId: item.productId,
                         quantity: item.quantity,
                         unitPrice: item.unitPrice,
-                        totalAmount: item.quantity * item.unitPrice,
+                        totalAmount: itemTotal,
                         reason: `${reason} (BL N°: ${salesOrder.receiptNumber || 'N/A'})`,
                         notes: notes || null,
                         status: "COMPLETED",
@@ -722,41 +746,25 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
             const totalRefundCapacity = Math.max(0, amountPaid - (poTotal - returnTotal))
 
             let refundCashAmount = 0
+            let treasuryAccount = null
+            let currentAccountBalance = 0
             if (refundCash && accountId) {
                 refundCashAmount = Math.min(totalRefundCapacity, returnTotal)
                 if (refundCashAmount > 0) {
-                    const account = await tx.treasuryAccount.findUnique({
+                    treasuryAccount = await tx.treasuryAccount.findUnique({
                         where: { id: accountId, tenantId }
                     })
-                    if (!account) throw new Error("Compte de trésorerie introuvable")
-
-                    // Supplier refunds us: credit treasury account (we receive cash)
-                    const updatedAccount = await tx.treasuryAccount.update({
-                        where: { id: accountId },
-                        data: { balance: { increment: refundCashAmount } }
-                    })
-
-                    // Create Treasury Transaction record
-                    await tx.treasuryTransaction.create({
-                        data: {
-                            accountId,
-                            type: "CREDIT",
-                            amount: refundCashAmount,
-                            balanceBefore: account.balance,
-                            balanceAfter: updatedAccount.balance,
-                            source: "MANUAL_IN",
-                            referenceId: supplierId,
-                            description: `Remboursement Retour Fournisseur (Bon N°: ${purchaseOrder.reference || 'N/A'} / ID: ${purchaseOrder.id.slice(-8).toUpperCase()}): ${reason}`,
-                            tenantId
-                        }
-                    })
+                    if (!treasuryAccount) throw new Error("Compte de trésorerie introuvable")
+                    currentAccountBalance = Number(treasuryAccount.balance)
                 }
             }
 
             const stockStoreId = storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id
+            let remainingRefundCash = refundCashAmount
 
             // Process each item
             for (const item of validItems) {
+                const returnId = crypto.randomUUID()
                 const product = await tx.product.findUnique({
                     where: { id: item.productId, tenantId },
                     include: { storeProducts: true }
@@ -797,20 +805,51 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
                         reason: `Retour Fournisseur sur Bon N°: ${purchaseOrder.reference || 'N/A'}. Motif: ${reason}`,
                         tenantId,
                         storeId: stockStoreId || undefined,
-                        userId
+                        userId,
+                        referenceId: returnId
                     }
                 })
+
+                const itemTotal = item.quantity * item.unitCostPrice
+                const itemCashRefund = Math.min(remainingRefundCash, itemTotal)
+                remainingRefundCash -= itemCashRefund
+
+                if (itemCashRefund > 0 && accountId) {
+                    // Supplier refunds us: credit treasury account (we receive cash)
+                    await tx.treasuryAccount.update({
+                        where: { id: accountId },
+                        data: { balance: { increment: itemCashRefund } }
+                    })
+
+                    // Create Treasury Transaction record
+                    await tx.treasuryTransaction.create({
+                        data: {
+                            accountId,
+                            type: "CREDIT",
+                            amount: itemCashRefund,
+                            balanceBefore: currentAccountBalance,
+                            balanceAfter: currentAccountBalance + itemCashRefund,
+                            source: "MANUAL_IN",
+                            referenceId: returnId,
+                            description: `Remboursement Retour Fournisseur (Bon N°: ${purchaseOrder.reference || 'N/A'} / ID: ${purchaseOrder.id.slice(-8).toUpperCase()}): ${reason}`,
+                            tenantId
+                        }
+                    })
+
+                    currentAccountBalance += itemCashRefund
+                }
 
                 // Create SupplierReturn record
                 await tx.supplierReturn.create({
                     data: {
+                        id: returnId,
                         tenantId,
                         supplierId,
                         userId,
                         productId: item.productId,
                         quantity: item.quantity,
                         unitPrice: item.unitCostPrice,
-                        totalAmount: item.quantity * item.unitCostPrice,
+                        totalAmount: itemTotal,
                         reason: `${reason} (Bon N°: ${purchaseOrder.reference || 'N/A'})`,
                         notes: notes || null,
                         status: "COMPLETED",
@@ -843,6 +882,310 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
     } catch (error) {
         console.error("processBulkSupplierReturn error:", error)
         return { error: error instanceof Error ? error.message : "Erreur interne lors du traitement" }
+    }
+}
+
+// ── NEW DELETE & EDIT ACTIONS FOR RETURNS ────────────────────────────────────
+
+export const deleteClientReturn = async (id: string) => {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+
+    try {
+        await db.$transaction(async (tx) => {
+            // 1. Fetch return record
+            const productReturn = await tx.productReturn.findUnique({
+                where: { id, tenantId }
+            })
+            if (!productReturn) throw new Error("Retour client introuvable")
+
+            // 2. Revert stock
+            const stockMovement = await tx.stockMovement.findFirst({
+                where: { referenceId: id, tenantId }
+            })
+            if (stockMovement) {
+                const qtyToAdjust = stockMovement.quantity // positive for client return
+                
+                // Decrement global stock
+                const product = await tx.product.findUnique({
+                    where: { id: productReturn.productId, tenantId }
+                })
+                if (product) {
+                    await tx.product.update({
+                        where: { id: productReturn.productId },
+                        data: { stock: Math.max(0, (product.stock || 0) - qtyToAdjust) }
+                    })
+                }
+
+                // Decrement store stock
+                if (stockMovement.storeId) {
+                    const sp = await tx.storeProduct.findUnique({
+                        where: { storeId_productId: { storeId: stockMovement.storeId, productId: productReturn.productId } }
+                    })
+                    if (sp) {
+                        await tx.storeProduct.update({
+                            where: { storeId_productId: { storeId: stockMovement.storeId, productId: productReturn.productId } },
+                            data: { stock: Math.max(0, (sp.stock || 0) - qtyToAdjust) }
+                        })
+                    }
+                }
+            }
+
+            // 3. Revert financial adjustments (CASH refund / CREDIT)
+            const treasuryTransaction = await tx.treasuryTransaction.findFirst({
+                where: { referenceId: id, tenantId }
+            })
+
+            let cashAmount = 0
+            if (treasuryTransaction) {
+                cashAmount = Number(treasuryTransaction.amount)
+                
+                // Put money back in the treasury account (since DEBIT refunded, we CREDIT it back to the account)
+                await tx.treasuryAccount.update({
+                    where: { id: treasuryTransaction.accountId },
+                    data: { balance: { increment: cashAmount } }
+                })
+
+                // Delete treasury transaction
+                await tx.treasuryTransaction.delete({
+                    where: { id: treasuryTransaction.id }
+                })
+            }
+
+            // The remaining amount is credit (outstanding balance reduction)
+            const creditAmount = productReturn.totalAmount - cashAmount
+            if (creditAmount > 0) {
+                // Increment customer balance (we restore their debt since return is cancelled)
+                await tx.customer.update({
+                    where: { id: productReturn.customerId },
+                    data: { balance: { increment: creditAmount } }
+                })
+            }
+
+            // 4. Delete stock movement
+            await tx.stockMovement.deleteMany({
+                where: { referenceId: id, tenantId }
+            })
+
+            // 5. Delete Return record
+            await tx.productReturn.delete({
+                where: { id }
+            })
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        revalidatePath("/(dashboard)/products")
+        revalidatePath("/(dashboard)/customers")
+        revalidatePath("/(dashboard)/treasury")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
+        return { success: "Retour client supprimé avec succès, stock et finances restaurés." }
+    } catch (error) {
+        console.error("deleteClientReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors de la suppression" }
+    }
+}
+
+export const deleteSupplierReturn = async (id: string) => {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+
+    try {
+        await db.$transaction(async (tx) => {
+            // 1. Fetch return record
+            const supplierReturn = await tx.supplierReturn.findUnique({
+                where: { id, tenantId },
+                include: { supplier: { select: { name: true } } }
+            })
+            if (!supplierReturn) throw new Error("Retour fournisseur introuvable")
+
+            // 2. Revert stock
+            const stockMovement = await tx.stockMovement.findFirst({
+                where: { referenceId: id, tenantId }
+            })
+            if (stockMovement) {
+                const qtyToAdjust = Math.abs(stockMovement.quantity) // negative for supplier return, we add it back
+                
+                // Increment global stock
+                const product = await tx.product.findUnique({
+                    where: { id: supplierReturn.productId, tenantId }
+                })
+                if (product) {
+                    await tx.product.update({
+                        where: { id: supplierReturn.productId },
+                        data: { stock: (product.stock || 0) + qtyToAdjust }
+                    })
+                }
+
+                // Increment store stock
+                if (stockMovement.storeId) {
+                    const sp = await tx.storeProduct.findUnique({
+                        where: { storeId_productId: { storeId: stockMovement.storeId, productId: supplierReturn.productId } }
+                    })
+                    if (sp) {
+                        await tx.storeProduct.update({
+                            where: { storeId_productId: { storeId: stockMovement.storeId, productId: supplierReturn.productId } },
+                            data: { stock: (sp.stock || 0) + qtyToAdjust }
+                        })
+                    }
+                }
+            }
+
+            // 3. Revert financial adjustments (CASH refund / CREDIT)
+            const treasuryTransaction = await tx.treasuryTransaction.findFirst({
+                where: { referenceId: id, tenantId }
+            })
+
+            let cashAmount = 0
+            if (treasuryTransaction) {
+                cashAmount = Number(treasuryTransaction.amount)
+                
+                // Revert treasury account (since CREDIT received refund from supplier, we DEBIT/decrement it from the account)
+                await tx.treasuryAccount.update({
+                    where: { id: treasuryTransaction.accountId },
+                    data: { balance: { decrement: cashAmount } }
+                })
+
+                // Delete treasury transaction
+                await tx.treasuryTransaction.delete({
+                    where: { id: treasuryTransaction.id }
+                })
+            }
+
+            // The remaining amount is credit (dette tierce reduction)
+            const creditAmount = supplierReturn.totalAmount - cashAmount
+            if (creditAmount > 0) {
+                // Increment supplier balance (we restore our debt to them since return is cancelled)
+                await tx.supplier.update({
+                    where: { id: supplierReturn.supplierId },
+                    data: { balance: { increment: creditAmount } }
+                })
+            }
+
+            // 4. Delete stock movement
+            await tx.stockMovement.deleteMany({
+                where: { referenceId: id, tenantId }
+            })
+
+            // 5. Delete Return record
+            await tx.supplierReturn.delete({
+                where: { id }
+            })
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        revalidatePath("/(dashboard)/products")
+        revalidatePath("/(dashboard)/suppliers")
+        revalidatePath("/(dashboard)/treasury")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
+        return { success: "Retour fournisseur supprimé avec succès, stock et finances restaurés." }
+    } catch (error) {
+        console.error("deleteSupplierReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors de la suppression" }
+    }
+}
+
+export const editClientReturn = async (id: string, reason: string, notes?: string) => {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+
+    if (!reason) return { error: "Le motif est obligatoire" }
+
+    try {
+        await db.$transaction(async (tx) => {
+            // 1. Update Return record
+            await tx.productReturn.update({
+                where: { id, tenantId },
+                data: {
+                    reason,
+                    notes: notes || null
+                }
+            })
+
+            // 2. Update Stock Movement reason
+            await tx.stockMovement.updateMany({
+                where: { referenceId: id, tenantId },
+                data: {
+                    reason: `Retour Client: ${reason}`
+                }
+            })
+
+            // 3. Update Treasury Transaction description
+            await tx.treasuryTransaction.updateMany({
+                where: { referenceId: id, tenantId },
+                data: {
+                    description: `Remboursement Retour Client [CASH]: ${reason}`
+                }
+            })
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        return { success: "Retour client mis à jour avec succès." }
+    } catch (error) {
+        console.error("editClientReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors de la modification" }
+    }
+}
+
+export const editSupplierReturn = async (id: string, reason: string, notes?: string) => {
+    await checkSubscription()
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Non autorisé" }
+    const tenantId = session.user.tenantId
+
+    if (!reason) return { error: "Le motif est obligatoire" }
+
+    try {
+        await db.$transaction(async (tx) => {
+            // 1. Fetch to get supplier name
+            const supplierReturn = await tx.supplierReturn.findUnique({
+                where: { id, tenantId },
+                include: { supplier: { select: { name: true } } }
+            })
+            if (!supplierReturn) throw new Error("Retour fournisseur introuvable")
+
+            const supplierName = supplierReturn.supplier?.name || "Fournisseur"
+
+            // 2. Update Return record
+            await tx.supplierReturn.update({
+                where: { id, tenantId },
+                data: {
+                    reason,
+                    notes: notes || null
+                }
+            })
+
+            // 3. Update Stock Movement reason
+            await tx.stockMovement.updateMany({
+                where: { referenceId: id, tenantId },
+                data: {
+                    reason: `Retour Fournisseur: ${supplierName} - ${reason}`
+                }
+            })
+
+            // 4. Update Treasury Transaction description
+            await tx.treasuryTransaction.updateMany({
+                where: { referenceId: id, tenantId },
+                data: {
+                    description: `Remboursement Retour Fournisseur [CASH]: ${supplierName} - ${reason}`
+                }
+            })
+        })
+
+        revalidatePath("/(dashboard)/retours")
+        return { success: "Retour fournisseur mis à jour avec succès." }
+    } catch (error) {
+        console.error("editSupplierReturn error:", error)
+        return { error: error instanceof Error ? error.message : "Erreur interne lors de la modification" }
     }
 }
 

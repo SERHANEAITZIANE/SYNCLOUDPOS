@@ -234,8 +234,7 @@ export const VoiceAssistantWidget: React.FC = () => {
 
     return (
         <>
-            {/* Custom Premium Breathing Glow & Visualizer Animations */}
-            <style jsx global>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 @keyframes orb-glow {
                     0% {
                         box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7), 0 0 0 4px rgba(6, 182, 212, 0.3), 0 0 20px rgba(99, 102, 241, 0.3);
@@ -264,7 +263,7 @@ export const VoiceAssistantWidget: React.FC = () => {
                 .scrollbar-none::-webkit-scrollbar {
                     display: none;
                 }
-            `}</style>
+            ` }} />
 
             {/* Speech & AI Dashboard Overlay Panel */}
             {isOpen && (

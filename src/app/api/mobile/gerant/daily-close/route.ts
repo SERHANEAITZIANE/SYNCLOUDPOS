@@ -74,22 +74,23 @@ export async function GET(req: NextRequest) {
                 _count: { id: true },
             }),
             // Cash payments received from clients today
-            db.customerPayment.aggregate({
+            db.treasuryTransaction.aggregate({
                 where: {
                     tenantId,
-                    paymentMethod: "CASH",
+                    source: { in: ["CUSTOMER_PAYMENT", "MANUAL_IN"] },
                     date: { gte: from, lte: to },
+                    account: { type: "CASH" }
                 },
                 _sum: { amount: true },
             }),
             // Yesterday's closing balance (from cash close records)
-            db.cashClose.findFirst({
+            db.dailyClose.findFirst({
                 where: {
                     tenantId,
                     storeId: storeId || undefined,
                     date: { gte: yesterday, lt: from },
                 },
-                select: { closingBalance: true },
+                select: { netCash: true },
                 orderBy: { date: "desc" },
             }),
         ]);
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
         const totalReturns = Number(returnsAgg._sum.total || 0);
         const totalExpenses = Number(expensesAgg._sum.amount || 0);
         const cashPaymentsReceived = Number(cashPaymentsAgg._sum.amount || 0);
-        const openingBalance = Number(yesterdayClose?.closingBalance || 0);
+        const openingBalance = Number(yesterdayClose?.netCash || 0);
 
         const expectedCash = openingBalance + totalSales + cashPaymentsReceived - totalReturns - totalExpenses;
 
@@ -147,7 +148,7 @@ export async function POST(req: NextRequest) {
         const storeId = dbUser?.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         // Check if already closed today
-        const existingClose = await db.cashClose.findFirst({
+        const existingClose = await db.dailyClose.findFirst({
             where: {
                 tenantId,
                 date: { gte: startOfDay(new Date()), lte: endOfDay(new Date()) },
@@ -158,20 +159,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "La caisse a déjà été clôturée aujourd'hui" }, { status: 400 });
         }
 
-        const close = await db.cashClose.create({
+        const close = await db.dailyClose.create({
             data: {
                 tenantId,
                 storeId: storeId || undefined,
                 date: new Date(),
-                closingBalance: countedCash,
-                expectedBalance: expectedCash,
-                discrepancy: countedCash - expectedCash,
-                notes: notes || null,
-                closedById: user.userId,
+                periodStart: startOfDay(new Date()),
+                periodEnd: endOfDay(new Date()),
+                netCash: countedCash,
+                cashRevenue: countedCash,
+                totalRevenue: expectedCash,
+                notes: `Clôture de caisse mobile. Écart: ${countedCash - expectedCash} DA. (Attendu: ${expectedCash} DA, Compté: ${countedCash} DA)${notes ? ` - Notes: ${notes}` : ""}`,
+                closedByUserId: user.userId,
             },
         });
 
-        return NextResponse.json({ success: true, id: close.id, discrepancy: close.discrepancy });
+        return NextResponse.json({ success: true, id: close.id, discrepancy: countedCash - expectedCash });
     } catch (error) {
         return mobileErrorResponse(error);
     }

@@ -180,24 +180,24 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
 
     return (
         <>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <Heading
                     title={`${t("title")} (${totalCount})`}
                     description={t("subtitle")}
                 />
-                <div className="flex flex-row flex-wrap gap-2">
-                    <Link href="/customers/unpaid">
-                        <Button variant="outline" className="text-red-600 border-red-200 bg-red-50 hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:hover:bg-red-900/50">
+                <div className="flex flex-row flex-wrap gap-2 w-full sm:w-auto">
+                    <Link href="/customers/unpaid" className="flex-1 sm:flex-none">
+                        <Button variant="outline" className="text-red-600 border-red-200 bg-red-50 hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:border-red-900/50 dark:hover:bg-red-900/50 w-full">
                             Impayés
                         </Button>
                     </Link>
-                    <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+                    <Button variant="outline" onClick={() => setImportModalOpen(true)} className="flex-1 sm:flex-none">
                         <Upload className="mr-2 h-4 w-4" /> Importer Excel
                     </Button>
-                    <Link href="/customers/new">
-                        <Button id="global-add-new">
+                    <Link href="/customers/new" className="flex-1 sm:flex-none">
+                        <Button id="global-add-new" className="w-full">
                             <Plus className="mr-2 h-4 w-4" /> {tCommon("addNew")}
-                            <span className="ml-1 text-[10px] opacity-60 font-bold uppercase tracking-widest">[F3]</span>
+                            <span className="ml-1 text-[10px] opacity-60 font-bold uppercase tracking-widest hidden sm:inline">[F3]</span>
                         </Button>
                     </Link>
                 </div>

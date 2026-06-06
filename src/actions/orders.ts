@@ -122,7 +122,15 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         const timeMin = new Date(oldSalesOrder.createdAt.getTime() - 60000);
                         const timeMax = new Date(oldSalesOrder.createdAt.getTime() + 60000);
                         oldOrder = await tx.order.findFirst({
-                            where: { tenantId, customerId: oldSalesOrder.customerId, createdAt: { gte: timeMin, lte: timeMax } }
+                            where: {
+                                tenantId,
+                                total: oldSalesOrder.total,
+                                OR: [
+                                    { customerId: oldSalesOrder.customerId },
+                                    { customerId: null }
+                                ],
+                                createdAt: { gte: timeMin, lte: timeMax }
+                            }
                         });
                     }
 
@@ -206,8 +214,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             })
 
             // 1.5 Create or Update the SalesOrder (Bon de livraison)
+            let salesOrderId = "";
             if (originalOrderId) {
-                await tx.salesOrder.update({
+                const updatedSalesOrder = await tx.salesOrder.update({
                     where: { id: originalOrderId },
                     data: {
                         customerId: finalCustomerId,
@@ -224,8 +233,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         }
                     }
                 })
+                salesOrderId = updatedSalesOrder.id;
             } else {
-                await tx.salesOrder.create({
+                const createdSalesOrder = await tx.salesOrder.create({
                     data: {
                         tenantId,
                         storeId: storeIdToUse,
@@ -246,6 +256,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         }
                     }
                 })
+                salesOrderId = createdSalesOrder.id;
             }
 
             // 2. Decrement stock for each item — BATCHED & RACE-SAFE
@@ -299,17 +310,27 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             );
 
             // Step 4: Batch create stock movements (single query instead of N)
+            // Track running stock per product to handle duplicate products in same order
+            const runningStockMap = new Map<string, number>();
+            items.forEach((item: any) => {
+                if (!runningStockMap.has(item.productId)) {
+                    const existing = stockMap.get(item.productId);
+                    runningStockMap.set(item.productId, existing?.stock || 0);
+                }
+            });
+
             await tx.stockMovement.createMany({
                 data: items.map((item: any) => {
-                    const existing = stockMap.get(item.productId);
-                    const stockBefore = existing?.stock || 0;
+                    const stockBefore = runningStockMap.get(item.productId) || 0;
+                    const stockAfter = stockBefore - item.quantity;
+                    runningStockMap.set(item.productId, stockAfter);
                     return {
                         productId: item.productId,
                         type: "SALE",
                         quantity: -item.quantity,
                         stockBefore,
-                        stockAfter: stockBefore - item.quantity,
-                        referenceId: newOrder.id,
+                        stockAfter,
+                        referenceId: salesOrderId,
                         reason: `Vente N° ${receiptNumber}`,
                         userId,
                         tenantId
@@ -472,6 +493,7 @@ export const getProductCustomerSellHistory = async (productId: string, customerI
             where: {
                 tenantId,
                 customerId,
+                status: { not: "CANCELLED" },
                 items: {
                     some: { productId }
                 }
