@@ -1,0 +1,46 @@
+# Ignore all node_modules recursively
+node_modules/
+**/node_modules/
+
+# Ignore Expo and Next.js outputs
+.next/
+**/.next/
+.expo/
+**/.expo/
+dist/
+**/dist/
+web-build/
+**/web-build/
+
+# Ignore Next.js source code and files not needed for Expo build
+/src/
+/public/
+/prisma/
+/scripts/
+/backups/
+/documentation/
+
+# Ignore files in the root that are large or temporary
+*.zip
+*.tar.gz
+*.apk
+*.log
+*.txt
+*.csv
+*.pem
+*.key
+*.db
+*.sqlite
+*.sqlite3
+
+# Ignore the other app
+syncloud-tournee/
+
+# Ignore local native folders of the target app to force server-side prebuild
+syncloud-gerant/android/
+syncloud-gerant/ios/
+
+# Ignore agents
+.agents/
+graphify-out/
+scratch/

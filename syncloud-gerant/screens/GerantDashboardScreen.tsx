@@ -8,6 +8,7 @@ import { apiFetch } from "../lib/api";
 import { useLangStore } from "../lib/i18n";
 import { isOnline } from "../lib/offline-sync";
 import VoiceAssistantWidget from "../components/VoiceAssistantWidget";
+import Constants from "expo-constants";
 
 interface GerantDashboardData {
     revenue: number;
@@ -126,7 +127,7 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 <View style={styles.header}>
                     <View style={styles.headerTitleRow}>
                         <Ionicons name="sparkles" size={24} color="#f59e0b" />
-                        <Text style={styles.versionText}>v2.2.0 — SynCloudPOS Gérant</Text>
+                        <Text style={styles.versionText}>v{Constants.expoConfig?.version || "2.2.1"} — SynCloudPOS Gérant</Text>
                         <TouchableOpacity
                             style={styles.briefingBtn}
                             onPress={() => (navigation as any)?.navigate?.("MorningBrief")}

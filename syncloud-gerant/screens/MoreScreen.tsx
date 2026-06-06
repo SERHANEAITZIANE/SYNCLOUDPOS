@@ -6,6 +6,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "../lib/store";
+import Constants from "expo-constants";
 
 interface MenuItem {
     icon: string;
@@ -130,7 +131,7 @@ export default function MoreScreen({ navigation }: any) {
                 <Text style={styles.logoutText}>Se déconnecter</Text>
             </TouchableOpacity>
 
-            <Text style={styles.versionText}>SynCloudPOS Gérant v2.2.0</Text>
+            <Text style={styles.versionText}>SynCloudPOS Gérant v{Constants.expoConfig?.version || "2.2.1"}</Text>
         </ScrollView>
     );
 }

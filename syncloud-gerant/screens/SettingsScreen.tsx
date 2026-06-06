@@ -8,6 +8,7 @@ import { useAuthStore } from "../lib/store";
 import { useLangStore } from "../lib/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiFetch } from "../lib/api";
+import Constants from "expo-constants";
 
 type AIProvider = "GEMINI" | "OPENAI" | "ANTHROPIC";
 
@@ -44,7 +45,7 @@ export default function SettingsScreen() {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.version) {
-                    const currentVersion = "2.2.0";
+                    const currentVersion = Constants.expoConfig?.version || "2.2.1";
                     const remoteParts = data.version.split(".").map(Number);
                     const localParts = currentVersion.split(".").map(Number);
                     
@@ -654,7 +655,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("version")}</Text>
-                    <Text style={styles.infoValue}>v2.2.0</Text>
+                    <Text style={styles.infoValue}>v{Constants.expoConfig?.version || "2.2.1"}</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>{t("tenant")}</Text>
