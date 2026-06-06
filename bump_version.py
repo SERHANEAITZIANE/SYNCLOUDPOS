@@ -41,6 +41,7 @@ FILES = {
     "version_route": os.path.join(ROOT_DIR, "src", "app", "api", "mobile", "version", "route.ts"),
     "landing_page": os.path.join(ROOT_DIR, "src", "app", "[locale]", "landing-client.tsx"),
     "deploy_script": os.path.join(ROOT_DIR, "deploy_everything.py"),
+    "gerant_app_tsx": os.path.join(GERANT_DIR, "App.tsx"),
 }
 
 APK_DIR = os.path.join(ROOT_DIR, "public", "downloads")
@@ -150,6 +151,19 @@ def update_text_file(filepath: str, old_version: str, new_version: str):
     print(f"  [OK] {os.path.relpath(filepath, ROOT_DIR)}: {old_version} -> {new_version}")
 
 
+def update_app_tsx(filepath: str, old_version: str, new_version: str):
+    """Update version inside App.tsx static declaration."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    content = content.replace(f'const CURRENT_VERSION = "{old_version}";', f'const CURRENT_VERSION = "{new_version}";')
+    
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+    
+    print(f"  [OK] {os.path.relpath(filepath, ROOT_DIR)}: {old_version} -> {new_version}")
+
+
 def rename_apk(old_version: str, new_version: str):
     """Rename the APK file in public/downloads/ if it exists."""
     old_apk = os.path.join(APK_DIR, f"syncloudpos-gerant-v{old_version}.apk")
@@ -206,7 +220,13 @@ def main():
     else:
         print(f"  [!] {FILES['deploy_script']} not found - skipping")
     
-    # 6. Rename APK
+    # 6. App.tsx
+    if os.path.exists(FILES["gerant_app_tsx"]):
+        update_app_tsx(FILES["gerant_app_tsx"], current, new)
+    else:
+        print(f"  [!] {FILES['gerant_app_tsx']} not found - skipping")
+
+    # 7. Rename APK
     rename_apk(current, new)
     
     print(f"\n{'='*50}")
