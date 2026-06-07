@@ -16,3 +16,5 @@ export async function generateMetadata() {
     description: 'Explorez plus de 120 fonctionnalités intelligentes de SyncloudPOS pour les commerces algériens: caisse POS, stock, clients, finances, et IA.',
   };
 }
+// Trigger rebuild for CSS changes
+

@@ -843,74 +843,94 @@
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--lp-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .lp-feat-cat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .lp-feat-cat-title {
-  font-size: 1.4rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 850;
   margin-bottom: 4px;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .lp-feat-cat-desc {
-  font-size: 0.9rem;
-  color: var(--lp-text-muted);
+  font-size: 0.92rem;
+  color: var(--lp-text-dim);
 }
 
 .lp-feat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .lp-feat-item {
   display: flex;
-  gap: 12px;
-  padding: 16px;
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-border);
-  border-radius: var(--lp-radius-sm);
-  transition: var(--lp-transition);
+  gap: 16px;
+  padding: 20px;
+  background: rgba(30, 41, 59, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .lp-feat-item:hover {
-  background: var(--lp-surface-hover);
-  border-color: var(--lp-border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--lp-shadow);
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(99, 102, 241, 0.08);
 }
 
 .lp-fi-icon {
-  font-size: 1.3rem;
-  width: 36px;
-  height: 36px;
+  font-size: 1.35rem;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.lp-feat-item:hover .lp-fi-icon {
+  transform: rotate(8deg) scale(1.1);
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
 }
 
 .lp-fi-title {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 4px;
+  color: #fff;
 }
 
 .lp-fi-desc {
-  font-size: 0.8rem;
-  color: var(--lp-text-muted);
-  line-height: 1.5;
+  font-size: 0.82rem;
+  color: var(--lp-text-dim);
+  line-height: 1.6;
 }
 
 /* ═══════════════ USE CASES ═══════════════ */
@@ -1895,11 +1915,9 @@
 }
 
 /* ═══════════════ FEATURES EXPLORER WIDGET ═══════════════ */
+/* Now applied to section element, no extra margin needed */
 .lp-features-explorer {
-  margin-top: 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+  /* Marker class for features page section - styling handled by children */
 }
 
 .lp-search-container {
@@ -1912,19 +1930,20 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(20, 20, 50, 0.4);
-  border: 1px solid var(--lp-border);
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50px;
   padding: 2px 24px;
-  transition: var(--lp-transition);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .lp-search-input-wrap:focus-within {
-  border-color: var(--lp-primary-light);
-  box-shadow: 0 0 20px var(--lp-primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  background: rgba(20, 20, 50, 0.6);
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.25), 0 4px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.6);
 }
 
 .lp-search-icon {
@@ -2011,29 +2030,33 @@
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid var(--lp-border);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--lp-text-muted);
-  transition: var(--lp-transition);
+  transition: all 0.3s ease;
   white-space: nowrap;
   user-select: none;
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0; /* Critical fix for mobile squish */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .lp-chip:hover {
-  border-color: var(--lp-border-hover);
+  border-color: rgba(255, 255, 255, 0.15);
   color: var(--lp-text);
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .lp-chip.active {
   background: var(--lp-primary);
   color: white;
-  border-color: var(--lp-primary);
-  box-shadow: 0 4px 15px var(--lp-primary-glow);
+  border-color: transparent;
+  box-shadow: 0 4px 20px var(--lp-primary-glow);
 }
 
 .lp-results-info {
@@ -2415,4 +2438,247 @@
   }
 }
 
+/* ═══════════════ FEATURES EXPLORER – MOBILE REDESIGN ═══════════════ */
+
+/* Ensure explorer is always visible (not hidden by lp-reveal) */
+.lp-features-explorer {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+@media (max-width: 768px) {
+  /* ── Features Explorer Container ── */
+  .lp-features-explorer {
+    margin-top: 24px;
+    gap: 20px;
+  }
+
+  /* ── Search Bar – Mobile ── */
+  .lp-search-container {
+    max-width: 100%;
+    padding: 0 4px;
+  }
+
+  .lp-search-input-wrap {
+    padding: 2px 16px;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), 0 0 40px rgba(99, 102, 241, 0.05);
+  }
+
+  .lp-search-input {
+    height: 48px;
+    font-size: 0.9rem;
+  }
+
+  .lp-search-icon {
+    font-size: 1rem;
+    margin-right: 8px;
+  }
+
+  /* ── Category Chips – Mobile Horizontal Scroll ── */
+  .lp-categories-scroll {
+    margin: 0 -16px;
+    padding: 8px 16px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lp-categories-chips {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0 4px;
+  }
+
+  .lp-chip {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .lp-chip.active {
+    box-shadow: 0 4px 16px var(--lp-primary-glow), 0 0 24px rgba(99, 102, 241, 0.15);
+  }
+
+  /* ── Results Info – Mobile ── */
+  .lp-results-info {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+  }
+
+  .lp-results-count {
+    font-size: 0.82rem;
+  }
+
+  /* ── Feature Category – Mobile Redesign ── */
+  .lp-feat-category {
+    margin-bottom: 32px;
+    background: rgba(15, 23, 42, 0.25);
+    border-radius: 20px;
+    padding: 20px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .lp-feat-cat-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  }
+
+  .lp-feat-cat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    font-size: 1.6rem;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .lp-feat-cat-title {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .lp-feat-cat-desc {
+    font-size: 0.85rem;
+    text-align: center;
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ── Feature Grid – Vertical Stack on Mobile ── */
+  .lp-feat-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── Feature Item Cards – Mobile Premium ── */
+  .lp-feat-item {
+    padding: 16px;
+    gap: 12px;
+    border-radius: 14px;
+    background: rgba(30, 41, 59, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .lp-feat-item:active {
+    transform: scale(0.98);
+    background: rgba(30, 41, 59, 0.65);
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+
+  .lp-fi-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .lp-fi-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .lp-fi-desc {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.8;
+  }
+
+  /* ── No Results – Mobile ── */
+  .lp-no-results {
+    padding: 40px 24px;
+    margin: 24px 8px;
+    border-radius: 20px;
+  }
+
+  .lp-no-results-icon {
+    font-size: 2.5rem;
+  }
+
+  .lp-no-results h4 {
+    font-size: 1.1rem;
+  }
+
+  .lp-no-results p {
+    font-size: 0.85rem;
+  }
+
+  /* ── Section Header on Features Page – Mobile ── */
+  .lp-section-header {
+    margin-bottom: 24px;
+  }
+
+  .lp-section-header .lp-s-title {
+    font-size: 1.6rem;
+    line-height: 1.3;
+  }
+
+  .lp-section-header .lp-s-desc {
+    font-size: 0.9rem;
+  }
+}
+
+/* ── Extra small screens (iPhone SE, small phones) ── */
+@media (max-width: 380px) {
+  .lp-feat-item {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+
+  .lp-fi-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .lp-fi-title {
+    font-size: 0.82rem;
+  }
+
+  .lp-fi-desc {
+    font-size: 0.75rem;
+  }
+
+  .lp-chip {
+    padding: 7px 12px;
+    font-size: 0.75rem;
+  }
+
+  .lp-feat-cat-title {
+    font-size: 1.1rem;
+  }
+
+  .lp-search-input {
+    height: 44px;
+    font-size: 0.85rem;
+  }
+}
 

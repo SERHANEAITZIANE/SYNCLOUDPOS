@@ -193,6 +193,7 @@ export const processClientReturn = async (params: ClientReturnParams) => {
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour client enregistré avec succès et stock réapprovisionné.", id: result.id }
     } catch (error) {
@@ -373,6 +374,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour fournisseur enregistré avec succès et stock déduit.", id: result.id }
     } catch (error) {
@@ -610,6 +612,7 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour client enregistré avec succès et stock réapprovisionné." }
     } catch (error) {
@@ -877,6 +880,7 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour fournisseur enregistré avec succès et stock mis à jour." }
     } catch (error) {
@@ -934,9 +938,34 @@ export const deleteClientReturn = async (id: string) => {
             }
 
             // 3. Revert financial adjustments (CASH refund / CREDIT)
-            const treasuryTransaction = await tx.treasuryTransaction.findFirst({
+            let treasuryTransaction = await tx.treasuryTransaction.findFirst({
                 where: { referenceId: id, tenantId }
             })
+
+            // Fallback for older returns where referenceId was incorrectly set to customerId
+            if (!treasuryTransaction && productReturn.returnType === "CASH") {
+                const salesOrder = productReturn.salesOrderId ? await tx.salesOrder.findUnique({
+                    where: { id: productReturn.salesOrderId }
+                }) : null;
+
+                const possibleTxs = await tx.treasuryTransaction.findMany({
+                    where: {
+                        referenceId: productReturn.customerId,
+                        tenantId,
+                        type: "DEBIT",
+                        source: "MANUAL_OUT",
+                        amount: productReturn.totalAmount
+                    }
+                });
+
+                // Match by description containing "Retour Client" and the salesOrder receiptNumber (if present)
+                treasuryTransaction = possibleTxs.find(t => {
+                    const desc = t.description || "";
+                    const matchesBL = salesOrder?.receiptNumber ? desc.includes(salesOrder.receiptNumber) : true;
+                    const matchesKeyword = desc.includes("Retour Client") || desc.includes("Remboursement");
+                    return matchesBL && matchesKeyword;
+                }) || null;
+            }
 
             let cashAmount = 0
             if (treasuryTransaction) {
@@ -981,6 +1010,7 @@ export const deleteClientReturn = async (id: string) => {
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour client supprimé avec succès, stock et finances restaurés." }
     } catch (error) {
@@ -1084,6 +1114,7 @@ export const deleteSupplierReturn = async (id: string) => {
         revalidatePath("/(dashboard)/treasury")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
 
         return { success: "Retour fournisseur supprimé avec succès, stock et finances restaurés." }
     } catch (error) {
@@ -1129,6 +1160,7 @@ export const editClientReturn = async (id: string, reason: string, notes?: strin
         })
 
         revalidatePath("/(dashboard)/retours")
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
         return { success: "Retour client mis à jour avec succès." }
     } catch (error) {
         console.error("editClientReturn error:", error)
@@ -1182,6 +1214,7 @@ export const editSupplierReturn = async (id: string, reason: string, notes?: str
         })
 
         revalidatePath("/(dashboard)/retours")
+        await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
         return { success: "Retour fournisseur mis à jour avec succès." }
     } catch (error) {
         console.error("editSupplierReturn error:", error)

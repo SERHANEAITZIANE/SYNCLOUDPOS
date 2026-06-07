@@ -1051,20 +1051,27 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
 
   // Intersection Observer for reveal animations
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible');
-            observer.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
-    );
-    document.querySelectorAll('.lp-reveal, .lp-slide-up').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [lang]);
+    let observer: IntersectionObserver;
+    // Use rAF to ensure DOM is settled after potential hydration recovery
+    const rafId = requestAnimationFrame(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      );
+      document.querySelectorAll('.lp-reveal, .lp-slide-up').forEach((el) => observer.observe(el));
+    });
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer?.disconnect();
+    };
+  }, [lang, pageType]);
 
   // Update dir for language
   useEffect(() => {
@@ -1091,7 +1098,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
   };
 
   return (
-    <div className="landing-page">
+    <div className="landing-page" suppressHydrationWarning>
       {/* ═══ NAVBAR ═══ */}
       <nav className={`lp-nav ${scrolled ? 'scrolled' : ''}`} id="landing-nav">
         <div className="lp-nav-inner">
@@ -1313,7 +1320,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
 
       {/* ═══ FEATURES ═══ */}
       {(pageType === 'home' || pageType === 'features') && (
-        <section id="features" className="lp-section">
+        <section id="features" className={`lp-section ${pageType === 'features' ? 'lp-features-explorer' : ''}`}>
         <div className="lp-container">
           <div className="lp-section-header lp-reveal">
             <div className="lp-pill lp-pill-purple">{t('sec_feat_tag')}</div>
@@ -1321,10 +1328,10 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
             <p className="lp-s-desc">{t('sec_feat_desc')}</p>
           </div>
 
-          {pageType === 'features' ? (
-            <div className="lp-features-explorer lp-reveal">
+          {pageType === 'features' && (
+            <>
             {/* Search Bar */}
-            <div className="lp-search-container">
+            <div className="lp-search-container" style={{ marginTop: '32px' }}>
               <div className="lp-search-input-wrap">
                 <span className="lp-search-icon">🔍</span>
                 <input
@@ -1353,7 +1360,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
             </div>
 
             {/* Category Pills */}
-            <div className="lp-categories-scroll">
+            <div className="lp-categories-scroll" style={{ marginTop: '20px' }}>
               <div className="lp-categories-chips">
                 <button
                   className={`lp-chip ${activeCategory === 'all' ? 'active' : ''}`}
@@ -1380,7 +1387,7 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
 
             {/* Total count indicator */}
             {searchQuery.trim() !== '' && (
-              <div className="lp-results-info">
+              <div className="lp-results-info" style={{ marginTop: '16px' }}>
                 <div className="lp-results-count">
                   {lang === 'ar' ? 'نتائج البحث عن' : lang === 'en' ? 'Search results for' : 'Résultats de recherche pour'} : <strong style={{ color: 'var(--lp-primary-light)' }}>"{searchQuery}"</strong>
                 </div>
@@ -1389,11 +1396,15 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                 </div>
               </div>
             )}
+            </>
+          )}
 
-            {/* Features Listing */}
+          {/* Features Listing */}
+          {pageType === 'features' ? (
+            <div className="lp-features-list" style={{ marginTop: '32px' }}>
             {filteredFeatures.length > 0 ? (
               filteredFeatures.map((cat, ci) => (
-                <div key={ci} className="lp-feat-category" style={{ animation: 'lp-fade-in 0.4s ease' }}>
+                <div key={ci} className="lp-feat-category lp-reveal" style={{ animation: 'lp-fade-in 0.4s ease' }}>
                   <div className="lp-feat-cat-header">
                     <div className="lp-feat-cat-icon" style={{ background: cat.gradient }}>{cat.icon}</div>
                     <div>
@@ -1435,9 +1446,9 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                 >
                   {lang === 'ar' ? 'إعادة ضبط البحث' : lang === 'en' ? 'Reset search' : 'Réinitialiser la recherche'}
                 </button>
+              </div>
+            )}
             </div>
-          )}
-          </div>
           ) : (
             <div className="lp-features-summary" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '40px' }}>
               {FEATURES.slice(0, 4).map((cat) => (

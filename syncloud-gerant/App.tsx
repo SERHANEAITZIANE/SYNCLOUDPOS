@@ -3,6 +3,7 @@ import {
     View, Text, TextInput, TouchableOpacity,
     ActivityIndicator, StyleSheet, KeyboardAvoidingView,
     Platform, Alert, StatusBar, Dimensions, Modal, Linking,
+    useWindowDimensions,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -233,6 +234,43 @@ const stackScreenStyle = {
     headerShadowVisible: false,
 };
 
+function AppNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
+    return (
+        <Stack.Navigator
+            id="RootStack"
+            screenOptions={{
+                headerShown: false,
+                animation: "fade_from_bottom",
+            }}
+        >
+            {!isAuthenticated ? (
+                <Stack.Screen name="Login" component={LoginScreen} />
+            ) : (
+                <>
+                    <Stack.Screen name="Main" component={GerantTabs} />
+                    <Stack.Screen name="SalesAnalytics" component={SalesAnalyticsScreen} options={{ headerShown: true, title: "Ventes & Revenus", ...stackScreenStyle }} />
+                    <Stack.Screen name="ProfitReport" component={ProfitReportScreen} options={{ headerShown: true, title: "Marges & Rentabilité", ...stackScreenStyle }} />
+                    <Stack.Screen name="ClientDebts" component={ClientDebtsScreen} options={{ headerShown: true, title: "Créances Clients", ...stackScreenStyle }} />
+                    <Stack.Screen name="DailyClose" component={DailyCloseScreen} options={{ headerShown: true, title: "Clôture de Caisse", ...stackScreenStyle }} />
+                    <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ headerShown: true, title: "Grand Livre Fournisseurs", ...stackScreenStyle }} />
+                    <Stack.Screen name="CashFlow" component={CashFlowScreen} options={{ headerShown: true, title: "Flux de Trésorerie", ...stackScreenStyle }} />
+                    <Stack.Screen name="DriverMonitor" component={DriverMonitorScreen} options={{ headerShown: true, title: "Performance Livreurs", ...stackScreenStyle }} />
+                    <Stack.Screen name="InventoryHealth" component={InventoryHealthScreen} options={{ headerShown: true, title: "Santé du Stock", ...stackScreenStyle }} />
+                    <Stack.Screen name="G50Tax" component={G50TaxScreen} options={{ headerShown: true, title: "Déclaration G50 TVA", ...stackScreenStyle }} />
+                    <Stack.Screen name="ChequeManager" component={ChequeManagerScreen} options={{ headerShown: true, title: "Gestion des Chèques", ...stackScreenStyle }} />
+                    <Stack.Screen name="Catalog" component={CatalogScreen} options={{ headerShown: true, title: "Catalogue & Tarifs", ...stackScreenStyle }} />
+                    <Stack.Screen name="CreateBL" component={CreateBLScreen} options={{ headerShown: false }} />
+                    <Stack.Screen name="MorningBrief" component={MorningBriefScreen} options={{ headerShown: true, title: "Briefing du Jour", ...stackScreenStyle }} />
+                    <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: true, title: "Paramètres", ...stackScreenStyle }} />
+                    <Stack.Screen name="Alerts" component={AlertsScreen} options={{ headerShown: true, title: "Alertes", ...stackScreenStyle }} />
+                    <Stack.Screen name="GerantPurchases" component={GerantPurchasesScreen} options={{ headerShown: true, title: "Achats Fournisseurs", ...stackScreenStyle }} />
+                    <Stack.Screen name="GerantExpenses" component={GerantExpensesScreen} options={{ headerShown: true, title: "Dépenses", ...stackScreenStyle }} />
+                </>
+            )}
+        </Stack.Navigator>
+    );
+}
+
 // ─── Root App ────────────────────────────────────────────────────────────────
 export default function App() {
     const { isLoading, isAuthenticated, loadSession, user } = useAuthStore();
@@ -313,40 +351,18 @@ export default function App() {
         );
     }
 
-    return (
-        <NavigationContainer theme={AppTheme}>
-            <Stack.Navigator
-                id="RootStack"
-                screenOptions={{
-                    headerShown: false,
-                    animation: "fade_from_bottom",
-                }}
-            >
-                {!isAuthenticated ? (
-                    <Stack.Screen name="Login" component={LoginScreen} />
-                ) : (
-                    <>
-                        <Stack.Screen name="Main" component={GerantTabs} />
-                        <Stack.Screen name="SalesAnalytics" component={SalesAnalyticsScreen} options={{ headerShown: true, title: "Ventes & Revenus", ...stackScreenStyle }} />
-                        <Stack.Screen name="ProfitReport" component={ProfitReportScreen} options={{ headerShown: true, title: "Marges & Rentabilité", ...stackScreenStyle }} />
-                        <Stack.Screen name="ClientDebts" component={ClientDebtsScreen} options={{ headerShown: true, title: "Créances Clients", ...stackScreenStyle }} />
-                        <Stack.Screen name="DailyClose" component={DailyCloseScreen} options={{ headerShown: true, title: "Clôture de Caisse", ...stackScreenStyle }} />
-                        <Stack.Screen name="SupplierLedger" component={SupplierLedgerScreen} options={{ headerShown: true, title: "Grand Livre Fournisseurs", ...stackScreenStyle }} />
-                        <Stack.Screen name="CashFlow" component={CashFlowScreen} options={{ headerShown: true, title: "Flux de Trésorerie", ...stackScreenStyle }} />
-                        <Stack.Screen name="DriverMonitor" component={DriverMonitorScreen} options={{ headerShown: true, title: "Performance Livreurs", ...stackScreenStyle }} />
-                        <Stack.Screen name="InventoryHealth" component={InventoryHealthScreen} options={{ headerShown: true, title: "Santé du Stock", ...stackScreenStyle }} />
-                        <Stack.Screen name="G50Tax" component={G50TaxScreen} options={{ headerShown: true, title: "Déclaration G50 TVA", ...stackScreenStyle }} />
-                        <Stack.Screen name="ChequeManager" component={ChequeManagerScreen} options={{ headerShown: true, title: "Gestion des Chèques", ...stackScreenStyle }} />
-                        <Stack.Screen name="Catalog" component={CatalogScreen} options={{ headerShown: true, title: "Catalogue & Tarifs", ...stackScreenStyle }} />
-                        <Stack.Screen name="CreateBL" component={CreateBLScreen} options={{ headerShown: false }} />
-                        <Stack.Screen name="MorningBrief" component={MorningBriefScreen} options={{ headerShown: true, title: "Briefing du Jour", ...stackScreenStyle }} />
-                        <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: true, title: "Paramètres", ...stackScreenStyle }} />
-                        <Stack.Screen name="Alerts" component={AlertsScreen} options={{ headerShown: true, title: "Alertes", ...stackScreenStyle }} />
-                        <Stack.Screen name="GerantPurchases" component={GerantPurchasesScreen} options={{ headerShown: true, title: "Achats Fournisseurs", ...stackScreenStyle }} />
-                        <Stack.Screen name="GerantExpenses" component={GerantExpensesScreen} options={{ headerShown: true, title: "Dépenses", ...stackScreenStyle }} />
-                    </>
-                )}
-            </Stack.Navigator>
+    const { width, height } = useWindowDimensions();
+    const isWeb = Platform.OS === "web";
+    const isDesktop = isWeb && width >= 768;
+
+    const handleDownloadApk = () => {
+        const url = updateInfo?.apkUrl || "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk";
+        Linking.openURL(url);
+    };
+
+    const navigatorContent = (
+        <>
+            <AppNavigator isAuthenticated={isAuthenticated} />
             {/* Update Overlay */}
             <Modal
                 visible={showUpdateModal}
@@ -379,7 +395,7 @@ export default function App() {
                          <View style={{ flexDirection: "row", gap: 8, width: "100%" }}>
                              <TouchableOpacity
                                  style={[styles.updateActionBtn, { flex: 2 }]}
-                                 onPress={handleUpdateNow}
+                                 onPress={handleDownloadApk}
                                  activeOpacity={0.8}
                              >
                                  <Ionicons name="download-outline" size={18} color="#fff" />
@@ -397,6 +413,128 @@ export default function App() {
                     </View>
                 </View>
             </Modal>
+        </>
+    );
+
+    if (isDesktop) {
+        return (
+            <NavigationContainer theme={AppTheme}>
+                <View style={styles.desktopContainer}>
+                    {/* Glowing Balls for High Aesthetics */}
+                    <View style={[styles.glowBall, { top: -150, left: -150, backgroundColor: "#22c55e10" }]} />
+                    <View style={[styles.glowBall, { bottom: -250, right: -150, backgroundColor: "#3b82f610" }]} />
+
+                    {/* Left Brand Panel */}
+                    <View style={styles.desktopLeftPanel}>
+                        <View style={styles.desktopBrandRow}>
+                            <LinearGradient colors={["#22c55e", "#10b981"]} style={styles.desktopLogoBadge}>
+                                <Ionicons name="analytics" size={32} color="#fff" />
+                            </LinearGradient>
+                            <View>
+                                <Text style={styles.desktopTitle}>SynCloud</Text>
+                                <Text style={styles.desktopSubtitle}>GÉRANT</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.desktopCard}>
+                            <Text style={styles.desktopCardTitle}>Console de Gestion Web</Text>
+                            <Text style={styles.desktopCardText}>
+                                Accédez à l'intégralité du tableau de bord de votre commerce, suivez vos créances clients, validez vos clôtures de caisse et briefez l'IA depuis votre ordinateur.
+                            </Text>
+                        </View>
+
+                        <View style={styles.desktopCard}>
+                            <Text style={styles.desktopCardTitle}>Mesures Système en Direct</Text>
+                            
+                            <View style={styles.metricsRow}>
+                                <View style={styles.metricItem}>
+                                    <Text style={styles.metricVal}>99.9%</Text>
+                                    <Text style={styles.metricLbl}>Uptime VPS</Text>
+                                </View>
+                                <View style={styles.metricItem}>
+                                    <Text style={styles.metricVal}>14 ms</Text>
+                                    <Text style={styles.metricLbl}>Latence API</Text>
+                                </View>
+                                <View style={styles.metricItem}>
+                                    <Text style={styles.metricVal}>v2.3.0</Text>
+                                    <Text style={styles.metricLbl}>Version Actuelle</Text>
+                                </View>
+                            </View>
+
+                            {/* Modern progress / bar graphic */}
+                            <View style={styles.sysUsageBar}>
+                                <Text style={styles.sysUsageText}>Charge CPU Serveur</Text>
+                                <View style={styles.sysBarTrack}>
+                                    <View style={[styles.sysBarFill, { width: "12%" }]} />
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.desktopCard}>
+                            <Text style={styles.desktopCardTitle}>Téléchargement Mobile</Text>
+                            <Text style={styles.desktopVersionBadge}>Version {CURRENT_VERSION} stable</Text>
+                            <Text style={styles.desktopCardText}>
+                                Pour les livraisons et les ventes physiques sur le terrain, utilisez notre application Android native.
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.desktopDownloadBtn}
+                                onPress={handleDownloadApk}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="logo-android" size={18} color="#fff" />
+                                <Text style={styles.downloadBtnText}>Télécharger l'APK Gérant</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.desktopCard}>
+                            <Text style={styles.desktopCardTitle}>Statut Système</Text>
+                            <View style={styles.statusRow}>
+                                <View style={styles.statusIndicator} />
+                                <Text style={styles.statusText}>
+                                    Serveur Actif | chirpedbeo.online
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Right Mockup Phone Panel */}
+                    <View style={styles.mockupContainer}>
+                        <View style={styles.phoneMockup}>
+                            {/* Physical side buttons on phone */}
+                            <View style={[styles.phoneButton, { left: -6, top: 120, height: 50 }]} />
+                            <View style={[styles.phoneButton, { left: -6, top: 180, height: 40 }]} />
+                            <View style={[styles.phoneButton, { left: -6, top: 230, height: 40 }]} />
+                            <View style={[styles.phoneButton, { right: -6, top: 160, height: 60 }]} />
+
+                            <View style={styles.phoneSpeaker} />
+                            <View style={styles.phoneCamera} />
+                            
+                            <View style={styles.phoneInner}>
+                                {/* Mock Status Bar */}
+                                <View style={styles.mockStatusBar}>
+                                    <Text style={styles.mockStatusTime}>09:41</Text>
+                                    <View style={styles.mockStatusIcons}>
+                                        <Ionicons name="wifi" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
+                                        <Ionicons name="cellular" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
+                                        <Ionicons name="battery-full" size={16} color="#22c55e" />
+                                    </View>
+                                </View>
+
+                                {navigatorContent}
+
+                                {/* Screen Glare reflection overlay */}
+                                <View style={styles.phoneGlare} pointerEvents="none" />
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </NavigationContainer>
+        );
+    }
+
+    return (
+        <NavigationContainer theme={AppTheme}>
+            {navigatorContent}
         </NavigationContainer>
     );
 }
@@ -622,5 +760,350 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 13.5,
         fontWeight: "800",
+    },
+    // Desktop Responsive Mockup Styles
+    desktopContainer: {
+        flex: 1,
+        flexDirection: "row",
+        backgroundColor: "#030712",
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+    },
+    glowBall: {
+        position: "absolute",
+        width: 600,
+        height: 600,
+        borderRadius: 300,
+        opacity: 0.15,
+        ...Platform.select({
+            web: {
+                filter: "blur(120px)",
+                pointerEvents: "none",
+            } as any
+        })
+    },
+    desktopLeftPanel: {
+        flex: 1,
+        padding: 60,
+        justifyContent: "center",
+        maxWidth: 600,
+        zIndex: 10,
+    },
+    desktopBrandRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+        marginBottom: 40,
+    },
+    desktopLogoBadge: {
+        width: 64,
+        height: 64,
+        borderRadius: 18,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#22c55e",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 14,
+    },
+    desktopTitle: {
+        fontSize: 36,
+        fontWeight: "900",
+        color: "#f8fafc",
+        letterSpacing: -1,
+    },
+    desktopSubtitle: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#22c55e",
+        letterSpacing: 4,
+        marginTop: 2,
+    },
+    desktopContainer: {
+        flex: 1,
+        flexDirection: "row",
+        backgroundColor: "#030712",
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+        ...Platform.select({
+            web: {
+                backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px)",
+                backgroundSize: "32px 32px",
+            } as any
+        })
+    },
+    glowBall: {
+        position: "absolute",
+        width: 600,
+        height: 600,
+        borderRadius: 300,
+        opacity: 0.12,
+        ...Platform.select({
+            web: {
+                filter: "blur(130px)",
+                pointerEvents: "none",
+            } as any
+        })
+    },
+    desktopLeftPanel: {
+        flex: 1,
+        padding: 50,
+        justifyContent: "center",
+        maxWidth: 550,
+        zIndex: 10,
+    },
+    desktopBrandRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+        marginBottom: 30,
+    },
+    desktopLogoBadge: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#22c55e",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+    },
+    desktopTitle: {
+        fontSize: 32,
+        fontWeight: "900",
+        color: "#f8fafc",
+        letterSpacing: -1,
+    },
+    desktopSubtitle: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#22c55e",
+        letterSpacing: 4,
+        marginTop: 1,
+    },
+    desktopCard: {
+        backgroundColor: "rgba(15, 23, 42, 0.55)",
+        borderWidth: 1,
+        borderColor: "rgba(148, 163, 184, 0.08)",
+        borderRadius: 20,
+        padding: 22,
+        marginBottom: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.2,
+        shadowRadius: 16,
+        ...Platform.select({
+            web: {
+                backdropFilter: "blur(24px)",
+            } as any
+        })
+    },
+    desktopCardTitle: {
+        fontSize: 14,
+        fontWeight: "800",
+        color: "#f8fafc",
+        marginBottom: 6,
+        letterSpacing: 0.3,
+    },
+    desktopCardText: {
+        fontSize: 12.5,
+        color: "#94a3b8",
+        lineHeight: 19,
+        fontWeight: "500",
+    },
+    metricsRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 12,
+        marginBottom: 16,
+        gap: 12,
+    },
+    metricItem: {
+        flex: 1,
+        backgroundColor: "rgba(10, 15, 30, 0.45)",
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(148, 163, 184, 0.05)",
+    },
+    metricVal: {
+        color: "#22c55e",
+        fontSize: 14,
+        fontWeight: "900",
+    },
+    metricLbl: {
+        color: "#64748b",
+        fontSize: 9,
+        fontWeight: "700",
+        marginTop: 2,
+    },
+    sysUsageBar: {
+        marginTop: 4,
+    },
+    sysUsageText: {
+        color: "#94a3b8",
+        fontSize: 10,
+        fontWeight: "700",
+        marginBottom: 6,
+    },
+    sysBarTrack: {
+        height: 4,
+        backgroundColor: "#1e293b",
+        borderRadius: 2,
+        overflow: "hidden",
+    },
+    sysBarFill: {
+        height: "100%",
+        backgroundColor: "#22c55e",
+        borderRadius: 2,
+    },
+    desktopVersionBadge: {
+        alignSelf: "flex-start",
+        backgroundColor: "#22c55e15",
+        color: "#22c55e",
+        fontSize: 10,
+        fontWeight: "700",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        marginBottom: 12,
+        textTransform: "uppercase",
+    },
+    desktopDownloadBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        height: 48,
+        backgroundColor: "#22c55e",
+        borderRadius: 14,
+        marginTop: 16,
+        shadowColor: "#22c55e",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    downloadBtnText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "700",
+    },
+    statusRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        marginTop: 4,
+    },
+    statusIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: "#22c55e",
+    },
+    statusText: {
+        color: "#e2e8f0",
+        fontSize: 13,
+        fontWeight: "600",
+    },
+    mockupContainer: {
+        flex: 1.2,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(10, 15, 30, 0.3)",
+        borderLeftWidth: 1,
+        borderLeftColor: "rgba(148, 163, 184, 0.05)",
+        padding: 40,
+        zIndex: 10,
+    },
+    phoneMockup: {
+        width: 420,
+        height: 860,
+        borderRadius: 48,
+        backgroundColor: "#000",
+        padding: 12,
+        borderWidth: 4,
+        borderColor: "#334155",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 24 },
+        shadowOpacity: 0.5,
+        shadowRadius: 40,
+        position: "relative",
+    },
+    phoneButton: {
+        position: "absolute",
+        width: 4,
+        backgroundColor: "#334155",
+        borderRadius: 2,
+        zIndex: 50,
+    },
+    phoneSpeaker: {
+        position: "absolute",
+        top: 24,
+        left: "50%",
+        transform: [{ translateX: -40 }],
+        width: 80,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: "#1e293b",
+        zIndex: 100,
+    },
+    phoneCamera: {
+        position: "absolute",
+        top: 20,
+        left: "50%",
+        transform: [{ translateX: 50 }],
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: "#1e293b",
+        zIndex: 100,
+    },
+    phoneInner: {
+        flex: 1,
+        borderRadius: 38,
+        overflow: "hidden",
+        backgroundColor: "#0a0f1e",
+        position: "relative",
+    },
+    phoneGlare: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "100%",
+        ...Platform.select({
+            web: {
+                background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 40%)",
+            } as any
+        }),
+        zIndex: 99,
+        borderRadius: 38,
+    },
+    mockStatusBar: {
+        height: 40,
+        backgroundColor: "#0a0f1e",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 24,
+        paddingTop: 12,
+        zIndex: 98,
+    },
+    mockStatusTime: {
+        color: "#f8fafc",
+        fontSize: 12,
+        fontWeight: "700",
+    },
+    mockStatusIcons: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
     },
 });
