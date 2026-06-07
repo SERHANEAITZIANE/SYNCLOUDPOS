@@ -770,65 +770,6 @@ const styles = StyleSheet.create({
         height: "100%",
         position: "relative",
         overflow: "hidden",
-    },
-    glowBall: {
-        position: "absolute",
-        width: 600,
-        height: 600,
-        borderRadius: 300,
-        opacity: 0.15,
-        ...Platform.select({
-            web: {
-                filter: "blur(120px)",
-                pointerEvents: "none",
-            } as any
-        })
-    },
-    desktopLeftPanel: {
-        flex: 1,
-        padding: 60,
-        justifyContent: "center",
-        maxWidth: 600,
-        zIndex: 10,
-    },
-    desktopBrandRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 16,
-        marginBottom: 40,
-    },
-    desktopLogoBadge: {
-        width: 64,
-        height: 64,
-        borderRadius: 18,
-        justifyContent: "center",
-        alignItems: "center",
-        shadowColor: "#22c55e",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-    },
-    desktopTitle: {
-        fontSize: 36,
-        fontWeight: "900",
-        color: "#f8fafc",
-        letterSpacing: -1,
-    },
-    desktopSubtitle: {
-        fontSize: 14,
-        fontWeight: "700",
-        color: "#22c55e",
-        letterSpacing: 4,
-        marginTop: 2,
-    },
-    desktopContainer: {
-        flex: 1,
-        flexDirection: "row",
-        backgroundColor: "#030712",
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
         ...Platform.select({
             web: {
                 backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px)",

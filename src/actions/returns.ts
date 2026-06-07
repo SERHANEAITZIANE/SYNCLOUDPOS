@@ -943,7 +943,7 @@ export const deleteClientReturn = async (id: string) => {
             })
 
             // Fallback for older returns where referenceId was incorrectly set to customerId
-            if (!treasuryTransaction && productReturn.returnType === "CASH") {
+            if (!treasuryTransaction && (productReturn.returnType === "CASH" || !productReturn.returnType)) {
                 const salesOrder = productReturn.salesOrderId ? await tx.salesOrder.findUnique({
                     where: { id: productReturn.salesOrderId }
                 }) : null;
@@ -1067,9 +1067,34 @@ export const deleteSupplierReturn = async (id: string) => {
             }
 
             // 3. Revert financial adjustments (CASH refund / CREDIT)
-            const treasuryTransaction = await tx.treasuryTransaction.findFirst({
+            let treasuryTransaction = await tx.treasuryTransaction.findFirst({
                 where: { referenceId: id, tenantId }
             })
+
+            // Fallback for older returns where referenceId was incorrectly set to supplierId
+            if (!treasuryTransaction && (supplierReturn.returnType === "CASH" || !supplierReturn.returnType)) {
+                const purchaseOrder = supplierReturn.purchaseOrderId ? await tx.purchaseOrder.findUnique({
+                    where: { id: supplierReturn.purchaseOrderId }
+                }) : null;
+
+                const possibleTxs = await tx.treasuryTransaction.findMany({
+                    where: {
+                        referenceId: supplierReturn.supplierId,
+                        tenantId,
+                        type: "CREDIT",
+                        source: "MANUAL_IN",
+                        amount: supplierReturn.totalAmount
+                    }
+                });
+
+                // Match by description containing "Retour Fournisseur" or "Remboursement" and the purchaseOrder reference (if present)
+                treasuryTransaction = possibleTxs.find(t => {
+                    const desc = t.description || "";
+                    const matchesPO = purchaseOrder?.reference ? desc.includes(purchaseOrder.reference) : true;
+                    const matchesKeyword = desc.includes("Retour Fournisseur") || desc.includes("Remboursement");
+                    return matchesPO && matchesKeyword;
+                }) || null;
+            }
 
             let cashAmount = 0
             if (treasuryTransaction) {
