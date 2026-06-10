@@ -9,4 +9,9 @@ export type SalesOrderColumn = {
     receiptNumber: string
     createdAt: string
     originalDate: string
+    amountPaid?: string
+    unpaid?: string
+    productCount?: number
+    totalQuantity?: number
+    itemsSummary?: string
 }

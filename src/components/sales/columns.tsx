@@ -33,6 +33,26 @@ export function useSalesColumns(): ColumnDef<SalesOrderColumn>[] {
             header: t("fields.customer"),
         },
         {
+            accessorKey: "itemsSummary",
+            header: "Articles",
+            cell: ({ row }) => {
+                const summary = row.original.itemsSummary || ""
+                const count = row.original.productCount || 0
+                const qty = row.original.totalQuantity || 0
+                if (count === 0) return <span className="text-xs text-muted-foreground italic">Aucun article</span>
+                return (
+                    <div className="flex flex-col max-w-[220px] min-w-[150px]">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-0.5">
+                            {count} {count > 1 ? "articles" : "article"} ({qty} {qty > 1 ? "unités" : "unité"})
+                        </span>
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-355 truncate" title={summary}>
+                            {summary}
+                        </span>
+                    </div>
+                )
+            }
+        },
+        {
             accessorKey: "type",
             header: tCommon("type"),
             cell: ({ row }) => {
@@ -71,6 +91,32 @@ export function useSalesColumns(): ColumnDef<SalesOrderColumn>[] {
             accessorKey: "total",
             header: t("fields.total"),
             cell: ({ row }) => <span className="font-bold">{row.original.total}</span>
+        },
+        {
+            accessorKey: "amountPaid",
+            header: "Payé",
+            cell: ({ row }) => {
+                return (
+                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-450">
+                        {row.original.amountPaid}
+                    </span>
+                )
+            }
+        },
+        {
+            accessorKey: "unpaid",
+            header: "Crédit (Reste)",
+            cell: ({ row }) => {
+                const unpaidVal = row.original.unpaid || ""
+                const cleanVal = unpaidVal.replace(/[^0-9.-]+/g, "")
+                const numericVal = parseFloat(cleanVal) || 0
+                const hasUnpaid = numericVal > 0.01
+                return (
+                    <span className={cn("text-xs font-bold", hasUnpaid ? "text-amber-600 dark:text-amber-500" : "text-slate-400 dark:text-slate-500")}>
+                        {unpaidVal}
+                    </span>
+                )
+            }
         },
         {
             accessorKey: "createdAt",

@@ -678,3 +678,25 @@ export const updateProductPrices = async (
     }
 }
 
+export async function suggestProductNames(query: string) {
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+    if (!tenantId || !query || query.trim().length === 0) return []
+    try {
+        const products = await db.product.findMany({
+            where: {
+                tenantId,
+                name: { contains: query, mode: "insensitive" }
+            },
+            select: { name: true },
+            take: 8,
+            distinct: ["name"],
+            orderBy: { name: "asc" }
+        })
+        return products.map(p => p.name)
+    } catch (error) {
+        console.error("suggestProductNames error:", error)
+        return []
+    }
+}
+

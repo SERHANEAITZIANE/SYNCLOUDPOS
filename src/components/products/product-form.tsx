@@ -38,7 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ProductSchema } from "@/schemas"
-import { createProduct, deleteProduct, updateProduct } from "@/actions/products"
+import { createProduct, deleteProduct, updateProduct, suggestProductNames } from "@/actions/products"
 import { generateNextBarcode } from "@/actions/barcode"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { PrintBarcodeModal } from "./print-barcode-modal"
@@ -58,6 +58,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [suggestions, setSuggestions] = useState<string[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1)
     const t = useTranslations("Products")
     const tCommon = useTranslations("Common")
 
@@ -234,7 +237,85 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                                             <FormItem>
                                                 <FormLabel>{t("fields.name")}</FormLabel>
                                                 <FormControl>
-                                                    <Input autoFocus={!initialData} disabled={loading} placeholder={t("form.namePlaceholder")} {...field} />
+                                                    <div className="relative">
+                                                        <Input
+                                                            autoFocus={!initialData}
+                                                            disabled={loading}
+                                                            placeholder={t("form.namePlaceholder")}
+                                                            {...field}
+                                                            onChange={async (e) => {
+                                                                const val = e.target.value
+                                                                field.onChange(val)
+                                                                if (val.trim()) {
+                                                                    const res = await suggestProductNames(val)
+                                                                    setSuggestions(res)
+                                                                    setShowSuggestions(res.length > 0)
+                                                                } else {
+                                                                    setSuggestions([])
+                                                                    setShowSuggestions(false)
+                                                                }
+                                                                setFocusedSuggestionIndex(-1)
+                                                            }}
+                                                            onFocus={async () => {
+                                                                const val = field.value || ""
+                                                                if (val.trim()) {
+                                                                    const res = await suggestProductNames(val)
+                                                                    setSuggestions(res)
+                                                                    setShowSuggestions(res.length > 0)
+                                                                }
+                                                            }}
+                                                            onBlur={() => {
+                                                                // Small timeout so click events can fire
+                                                                setTimeout(() => setShowSuggestions(false), 200)
+                                                            }}
+                                                            onKeyDown={(e) => {
+                                                                if (!showSuggestions || suggestions.length === 0) return
+
+                                                                if (e.key === "ArrowDown") {
+                                                                    e.preventDefault()
+                                                                    setFocusedSuggestionIndex(prev => 
+                                                                        prev < suggestions.length - 1 ? prev + 1 : 0
+                                                                    )
+                                                                } else if (e.key === "ArrowUp") {
+                                                                    e.preventDefault()
+                                                                    setFocusedSuggestionIndex(prev => 
+                                                                        prev > 0 ? prev - 1 : suggestions.length - 1
+                                                                    )
+                                                                } else if (e.key === "Enter") {
+                                                                    if (focusedSuggestionIndex >= 0 && focusedSuggestionIndex < suggestions.length) {
+                                                                        e.preventDefault()
+                                                                        field.onChange(suggestions[focusedSuggestionIndex])
+                                                                        setShowSuggestions(false)
+                                                                    }
+                                                                } else if (e.key === "Escape") {
+                                                                    setShowSuggestions(false)
+                                                                }
+                                                            }}
+                                                            autoComplete="off"
+                                                        />
+                                                        {showSuggestions && suggestions.length > 0 && (
+                                                            <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-border/85 rounded-lg shadow-xl divide-y divide-border/50 animate-in fade-in slide-in-from-top-1 duration-100">
+                                                                {suggestions.map((name, idx) => (
+                                                                    <div
+                                                                        key={name}
+                                                                        onMouseDown={(e) => e.preventDefault()}
+                                                                        onClick={() => {
+                                                                            field.onChange(name)
+                                                                            setShowSuggestions(false)
+                                                                        }}
+                                                                        className={cn(
+                                                                            "px-4 py-2.5 text-sm cursor-pointer select-none transition-colors text-left font-medium",
+                                                                            idx === focusedSuggestionIndex 
+                                                                                ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold"
+                                                                                : "text-slate-700 dark:text-slate-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                                                        )}
+                                                                    >
+                                                                        {name}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

@@ -18,7 +18,16 @@ const SalesPage = async ({
     const from = params.from || undefined
     const to = params.to || undefined
 
-    const { salesOrders, totalCount } = await getSalesOrders(page, pageSize, search, type, from, to) as { salesOrders: any[], totalCount: number }
+    const { salesOrders, totalCount, summary } = await getSalesOrders(page, pageSize, search, type, from, to) as {
+        salesOrders: any[]
+        totalCount: number
+        summary?: {
+            totalSalesAmount: number
+            totalPaidAmount: number
+            totalUnpaidAmount: number
+            totalItemsSold: number
+        }
+    }
 
     const formattedSalesOrders: SalesOrderColumn[] = salesOrders.map((item: any) => ({
         id: item.id,
@@ -28,12 +37,29 @@ const SalesPage = async ({
         type: item.type,
         status: item.status,
         total: formatter.format(Number(item.total)),
+        amountPaid: formatter.format(Number(item.amountPaid || 0)),
+        unpaid: formatter.format(Math.max(0, Number(item.total) - Number(item.amountPaid || 0))),
         receiptNumber: item.receiptNumber || "",
         createdAt: format(new Date(item.createdAt), "MMMM do, yyyy"),
         originalDate: new Date(item.createdAt).toISOString(),
+        productCount: item.items?.length || 0,
+        totalQuantity: (item.items || []).reduce((sum: number, i: any) => sum + (i.quantity || 0), 0),
+        itemsSummary: (item.items || []).map((i: any) => `${i.product?.name || "Produit"} (x${i.quantity})`).join(", "),
     }))
 
     const pageCount = Math.ceil(totalCount / pageSize)
+
+    const formattedSummary = summary ? {
+        totalSalesAmount: formatter.format(summary.totalSalesAmount),
+        totalPaidAmount: formatter.format(summary.totalPaidAmount),
+        totalUnpaidAmount: formatter.format(summary.totalUnpaidAmount),
+        totalItemsSold: summary.totalItemsSold,
+    } : {
+        totalSalesAmount: formatter.format(0),
+        totalPaidAmount: formatter.format(0),
+        totalUnpaidAmount: formatter.format(0),
+        totalItemsSold: 0,
+    }
 
     return (
         <div className="flex-col">
@@ -43,6 +69,7 @@ const SalesPage = async ({
                     totalCount={totalCount}
                     pageCount={pageCount}
                     currentPage={page}
+                    summary={formattedSummary}
                 />
             </div>
         </div>

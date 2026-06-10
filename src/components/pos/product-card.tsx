@@ -149,7 +149,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 )}
 
                 {/* Centered Product Image */}
-                <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-[#22252e]">
+                <div className="relative w-full aspect-square overflow-hidden bg-slate-100 dark:bg-[#22252e]">
                     {data.imageUrl ? (
                         <Image 
                             src={data.imageUrl} 

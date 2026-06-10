@@ -28,7 +28,7 @@ import {
     deletePurchaseOrder,
     createSupplierPayment
 } from "@/actions/purchase-orders"
-import { createProduct, updateProductPrices } from "@/actions/products"
+import { createProduct, updateProductPrices, suggestProductNames } from "@/actions/products"
 import { createCategory } from "@/actions/categories"
 import { createBrand } from "@/actions/brands"
 import { createSupplier } from "@/actions/suppliers"
@@ -164,6 +164,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const [quickProductRowIndex, setQuickProductRowIndex] = useState<number | null>(null)
     const [quickTab, setQuickTab] = useState<"general" | "pricing" | "barcodes" | "stock">("general")
     const [quickName, setQuickName] = useState("")
+    const [quickSuggestions, setQuickSuggestions] = useState<string[]>([])
+    const [showQuickSuggestions, setShowQuickSuggestions] = useState(false)
+    const [focusedQuickSuggestionIndex, setFocusedQuickSuggestionIndex] = useState(-1)
     const [quickDescription, setQuickDescription] = useState("")
     const [quickCategoryId, setQuickCategoryId] = useState("")
     const [quickBrandId, setQuickBrandId] = useState("")
@@ -1585,13 +1588,83 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                 <div className="space-y-4 animate-in fade-in duration-300">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nom du Produit *</label>
-                                        <Input
-                                            disabled={loading}
-                                            placeholder="Ex: Coca Cola 33cl ou iPhone 14 Pro Max"
-                                            value={quickName}
-                                            onChange={e => setQuickName(e.target.value)}
-                                            className="text-sm font-semibold border-slate-200 dark:border-slate-800"
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                disabled={loading}
+                                                placeholder="Ex: Coca Cola 33cl ou iPhone 14 Pro Max"
+                                                value={quickName}
+                                                onChange={async (e) => {
+                                                    const val = e.target.value
+                                                    setQuickName(val)
+                                                    if (val.trim()) {
+                                                        const res = await suggestProductNames(val)
+                                                        setQuickSuggestions(res)
+                                                        setShowQuickSuggestions(res.length > 0)
+                                                    } else {
+                                                        setQuickSuggestions([])
+                                                        setShowQuickSuggestions(false)
+                                                    }
+                                                    setFocusedQuickSuggestionIndex(-1)
+                                                }}
+                                                onFocus={async () => {
+                                                    if (quickName.trim()) {
+                                                        const res = await suggestProductNames(quickName)
+                                                        setQuickSuggestions(res)
+                                                        setShowQuickSuggestions(res.length > 0)
+                                                    }
+                                                }}
+                                                onBlur={() => {
+                                                    setTimeout(() => setShowQuickSuggestions(false), 200)
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (!showQuickSuggestions || quickSuggestions.length === 0) return
+
+                                                    if (e.key === "ArrowDown") {
+                                                        e.preventDefault()
+                                                        setFocusedQuickSuggestionIndex(prev => 
+                                                            prev < quickSuggestions.length - 1 ? prev + 1 : 0
+                                                        )
+                                                    } else if (e.key === "ArrowUp") {
+                                                        e.preventDefault()
+                                                        setFocusedQuickSuggestionIndex(prev => 
+                                                            prev > 0 ? prev - 1 : quickSuggestions.length - 1
+                                                        )
+                                                    } else if (e.key === "Enter") {
+                                                        if (focusedQuickSuggestionIndex >= 0 && focusedQuickSuggestionIndex < quickSuggestions.length) {
+                                                            e.preventDefault()
+                                                            setQuickName(quickSuggestions[focusedQuickSuggestionIndex])
+                                                            setShowQuickSuggestions(false)
+                                                        }
+                                                    } else if (e.key === "Escape") {
+                                                        setShowQuickSuggestions(false)
+                                                    }
+                                                }}
+                                                className="text-sm font-semibold border-slate-200 dark:border-slate-800"
+                                                autoComplete="off"
+                                            />
+                                            {showQuickSuggestions && quickSuggestions.length > 0 && (
+                                                <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-border/85 rounded-lg shadow-xl divide-y divide-border/50 animate-in fade-in slide-in-from-top-1 duration-100">
+                                                    {quickSuggestions.map((name, idx) => (
+                                                        <div
+                                                            key={name}
+                                                            onMouseDown={(e) => e.preventDefault()}
+                                                            onClick={() => {
+                                                                setQuickName(name)
+                                                                setShowQuickSuggestions(false)
+                                                            }}
+                                                            className={cn(
+                                                                "px-4 py-2.5 text-sm cursor-pointer select-none transition-colors text-left font-medium",
+                                                                idx === focusedQuickSuggestionIndex 
+                                                                    ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold"
+                                                                    : "text-slate-700 dark:text-slate-355 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                                            )}
+                                                        >
+                                                            {name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">

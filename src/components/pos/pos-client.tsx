@@ -32,7 +32,7 @@ import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { toast } from "react-hot-toast"
 import { getSalesOrderByReceipt } from "@/actions/sales-orders"
-import { createProduct } from "@/actions/products"
+import { createProduct, suggestProductNames } from "@/actions/products"
 import { createCategory } from "@/actions/categories"
 import { createBrand } from "@/actions/brands"
 import { generateNextBarcode } from "@/actions/barcode"
@@ -153,6 +153,9 @@ export const PosClient: FC<PosClientProps> = ({
     const [quickProductOpen, setQuickProductOpen] = useState(false)
     const [quickTab, setQuickTab] = useState<"general" | "pricing" | "barcodes" | "stock">("general")
     const [quickName, setQuickName] = useState("")
+    const [quickSuggestions, setQuickSuggestions] = useState<string[]>([])
+    const [showQuickSuggestions, setShowQuickSuggestions] = useState(false)
+    const [focusedQuickSuggestionIndex, setFocusedQuickSuggestionIndex] = useState(-1)
     const [quickDescription, setQuickDescription] = useState("")
     const [quickCategoryId, setQuickCategoryId] = useState(categories[0]?.id || "")
     const [quickBrandId, setQuickBrandId] = useState(brands[0]?.id || "")
@@ -438,6 +441,21 @@ export const PosClient: FC<PosClientProps> = ({
                 setQuickTab("general");
                 setQuickProductOpen(true);
                 return;
+            } else if (e.key === "F6") {
+                e.preventDefault();
+                // Cycle through categories: null -> cat[0] -> cat[1] -> ... -> null
+                const allCatIds = [null, ...categories.map(c => c.id)];
+                const currentIdx = allCatIds.indexOf(selectedCategory);
+                const nextIdx = (currentIdx + 1) % allCatIds.length;
+                setSelectedCategory(allCatIds[nextIdx]);
+                const nextName = allCatIds[nextIdx] === null ? 'Toutes' : categories.find(c => c.id === allCatIds[nextIdx])?.name || '';
+                toast.success(`Catégorie: ${nextName}`, { id: 'cat-switch' });
+                return;
+            } else if (e.key === "F5") {
+                e.preventDefault();
+                setSelectedCategory(null);
+                toast.success('Catégorie: Toutes', { id: 'cat-switch' });
+                return;
             } else if (e.key === "F9" || e.key === " ") {
                 e.preventDefault();
                 const checkoutButton = document.getElementById("checkout-button");
@@ -450,6 +468,12 @@ export const PosClient: FC<PosClientProps> = ({
                 if (searchInput) {
                     searchInput.focus();
                 }
+            } else if (e.key === "PageDown") {
+                e.preventDefault();
+                setPage(p => p + 1);
+            } else if (e.key === "PageUp") {
+                e.preventDefault();
+                setPage(p => Math.max(1, p - 1));
             } else if (e.key === "?" || e.key.toLowerCase() === "h") {
                 e.preventDefault();
                 setIsShortcutsOpen(prev => !prev);
@@ -457,7 +481,7 @@ export const PosClient: FC<PosClientProps> = ({
         };
         window.addEventListener("keydown", handleGlobalKeyDown);
         return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-    }, [isSearchOrderOpen, quickProductOpen, isShortcutsOpen, searchQuery, cart, categories, brands]);
+    }, [isSearchOrderOpen, quickProductOpen, isShortcutsOpen, searchQuery, cart, categories, brands, selectedCategory, localProducts.length, pageSize]);
 
     const handleLoadOrder = (order: any) => {
         setIsSearchOrderOpen(false)
@@ -1038,8 +1062,8 @@ export const PosClient: FC<PosClientProps> = ({
                         </div>
                     </div>
 
-                    {/* Category Selector Bar with Navigation Buttons */}
-                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar">
+                    {/* Category Selector Bar with Navigation Buttons - Always visible (F6 to cycle) */}
+                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar bg-[#f8f9fa]/80 dark:bg-[#0f1115]/80 py-1.5 border-b border-gray-200/40 dark:border-slate-800/40">
                         {/* Scroll Left Button */}
                         <Button
                             variant="outline"
@@ -1106,10 +1130,14 @@ export const PosClient: FC<PosClientProps> = ({
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
+                        {/* F6 shortcut hint */}
+                        <span className="hidden lg:flex items-center gap-1 ml-1 shrink-0">
+                            <kbd className="px-1.5 py-0.5 text-[8px] font-black bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-400 dark:text-slate-500 font-mono">F6</kbd>
+                        </span>
                     </div>
 
                     {/* Content Area (Grid or List) */}
-                    <ScrollArea className="flex-1 px-3 lg:px-6 pb-20 lg:pb-6">
+                    <ScrollArea className="flex-1 px-3 lg:px-6 pt-2 pb-20 lg:pb-6">
                         {viewMode === "grid" ? (
                             <div className={cn(
                                 "grid gap-2.5 lg:gap-3 pb-8 pos-products-grid",
@@ -1418,12 +1446,82 @@ export const PosClient: FC<PosClientProps> = ({
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nom du Produit *</label>
-                                    <Input
-                                        placeholder="Ex: Coca Cola 33cl ou iPhone 14 Pro Max"
-                                        value={quickName}
-                                        onChange={e => setQuickName(e.target.value)}
-                                        className="text-sm font-semibold border-slate-200 dark:border-slate-800"
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            placeholder="Ex: Coca Cola 33cl ou iPhone 14 Pro Max"
+                                            value={quickName}
+                                            onChange={async (e) => {
+                                                const val = e.target.value
+                                                setQuickName(val)
+                                                if (val.trim()) {
+                                                    const res = await suggestProductNames(val)
+                                                    setQuickSuggestions(res)
+                                                    setShowQuickSuggestions(res.length > 0)
+                                                } else {
+                                                    setQuickSuggestions([])
+                                                    setShowQuickSuggestions(false)
+                                                }
+                                                setFocusedQuickSuggestionIndex(-1)
+                                            }}
+                                            onFocus={async () => {
+                                                if (quickName.trim()) {
+                                                    const res = await suggestProductNames(quickName)
+                                                    setQuickSuggestions(res)
+                                                    setShowQuickSuggestions(res.length > 0)
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                setTimeout(() => setShowQuickSuggestions(false), 200)
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (!showQuickSuggestions || quickSuggestions.length === 0) return
+
+                                                if (e.key === "ArrowDown") {
+                                                    e.preventDefault()
+                                                    setFocusedQuickSuggestionIndex(prev => 
+                                                        prev < quickSuggestions.length - 1 ? prev + 1 : 0
+                                                    )
+                                                } else if (e.key === "ArrowUp") {
+                                                    e.preventDefault()
+                                                    setFocusedQuickSuggestionIndex(prev => 
+                                                        prev > 0 ? prev - 1 : quickSuggestions.length - 1
+                                                    )
+                                                } else if (e.key === "Enter") {
+                                                    if (focusedQuickSuggestionIndex >= 0 && focusedQuickSuggestionIndex < quickSuggestions.length) {
+                                                        e.preventDefault()
+                                                        setQuickName(quickSuggestions[focusedQuickSuggestionIndex])
+                                                        setShowQuickSuggestions(false)
+                                                    }
+                                                } else if (e.key === "Escape") {
+                                                    setShowQuickSuggestions(false)
+                                                }
+                                            }}
+                                            className="text-sm font-semibold border-slate-200 dark:border-slate-800"
+                                            autoComplete="off"
+                                        />
+                                        {showQuickSuggestions && quickSuggestions.length > 0 && (
+                                            <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-60 overflow-y-auto bg-white dark:bg-zinc-900 border border-border/85 rounded-lg shadow-xl divide-y divide-border/50 animate-in fade-in slide-in-from-top-1 duration-100">
+                                                {quickSuggestions.map((name, idx) => (
+                                                    <div
+                                                        key={name}
+                                                        onMouseDown={(e) => e.preventDefault()}
+                                                        onClick={() => {
+                                                            setQuickName(name)
+                                                            setShowQuickSuggestions(false)
+                                                        }}
+                                                        className={cn(
+                                                            "px-4 py-2.5 text-sm cursor-pointer select-none transition-colors text-left font-medium",
+                                                            idx === focusedQuickSuggestionIndex 
+                                                                ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold"
+                                                                : "text-slate-700 dark:text-slate-350 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                                        )}
+                                                    >
+                                                        {name}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
@@ -1855,12 +1953,24 @@ export const PosClient: FC<PosClientProps> = ({
                             <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-emerald-400 font-mono shadow-[0_2px_0_rgba(16,185,129,0.2)]">F2</kbd>
                         </div>
                         <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                            <span className="text-xs text-gray-300 font-bold">Changer de Catégorie</span>
+                            <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-amber-400 font-mono shadow-[0_2px_0_rgba(245,158,11,0.2)]">F6</kbd>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
                             <span className="text-xs text-gray-300 font-bold">Rechercher un produit</span>
                             <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-emerald-400 font-mono shadow-[0_2px_0_rgba(16,185,129,0.2)]">F4 ou F</kbd>
                         </div>
                         <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                            <span className="text-xs text-gray-300 font-bold">Toutes les catégories (reset)</span>
+                            <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-amber-400 font-mono shadow-[0_2px_0_rgba(245,158,11,0.2)]">F5</kbd>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
                             <span className="text-xs text-gray-300 font-bold">Encaisser la vente (Paiement)</span>
                             <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-emerald-400 font-mono shadow-[0_2px_0_rgba(16,185,129,0.2)]">F9 ou Espace</kbd>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+                            <span className="text-xs text-gray-300 font-bold">Page suivante / précédente</span>
+                            <kbd className="px-2.5 py-1 text-[10px] font-black bg-gray-800 border border-gray-700 rounded-md text-sky-400 font-mono shadow-[0_2px_0_rgba(56,189,248,0.2)]">PgUp / PgDn</kbd>
                         </div>
                         <div className="flex items-center justify-between pb-1">
                             <span className="text-xs text-gray-300 font-bold">Fermer les modals / Effacer la recherche</span>

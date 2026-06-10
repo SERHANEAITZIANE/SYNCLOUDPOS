@@ -288,7 +288,7 @@ export async function getSalesOrders(
             }
         }
 
-        const [salesOrders, totalCount] = await Promise.all([
+        const [salesOrders, totalCount, stats, itemsStats] = await Promise.all([
             db.salesOrder.findMany({
                 where,
                 include: { customer: true, items: { include: { product: true } } },
@@ -296,12 +296,38 @@ export async function getSalesOrders(
                 skip: (page - 1) * pageSize,
                 take: pageSize
             }),
-            db.salesOrder.count({ where })
+            db.salesOrder.count({ where }),
+            db.salesOrder.aggregate({
+                where,
+                _sum: {
+                    total: true,
+                    amountPaid: true,
+                }
+            }),
+            db.salesOrderItem.aggregate({
+                where: {
+                    salesOrder: where
+                },
+                _sum: {
+                    quantity: true
+                }
+            })
         ])
+
+        const totalSalesAmount = Number(stats._sum.total) || 0
+        const totalPaidAmount = Number(stats._sum.amountPaid) || 0
+        const totalUnpaidAmount = Math.max(0, totalSalesAmount - totalPaidAmount)
+        const totalItemsSold = Number(itemsStats._sum.quantity) || 0
 
         return {
             salesOrders: JSON.parse(JSON.stringify(salesOrders)),
-            totalCount
+            totalCount,
+            summary: {
+                totalSalesAmount,
+                totalPaidAmount,
+                totalUnpaidAmount,
+                totalItemsSold
+            }
         }
     } catch (error) {
         console.error("[GET_SALES_ORDERS]", error)
