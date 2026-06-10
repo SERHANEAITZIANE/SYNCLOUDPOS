@@ -1,0 +1,28 @@
+# EAS Build ignore file
+# Exclude dev artifacts that bloat the build archive
+
+# Build outputs (expo export creates this)
+dist/
+
+# Expo cache
+.expo/
+
+# Local error/log files
+*.txt
+*.log
+*.json
+!app.json
+!package.json
+!tsconfig.json
+!eas.json
+!package-lock.json
+
+# Node modules (EAS installs fresh)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/

@@ -131,21 +131,43 @@ const formatNumber = (n: number) =>
     new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 
 // ─── Company Header Block (shared between templates) ────────────────────────
-const CompanyHeaderBlock = ({ store }: { store?: PrintableStore | null }) => (
-    <div className="print-company-info">
-        {store?.logo ? (
-            <img src={store.logo} alt="Logo" className="print-logo" />
-        ) : (
-            <div className="print-logo-placeholder">
-                {store?.name?.substring(0, 2).toUpperCase() || "SC"}
+const CompanyHeaderBlock = ({ store }: { store?: PrintableStore | null }) => {
+    let showLogo = true;
+    if (typeof window !== "undefined") {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs");
+            if (stored) {
+                const prefs = JSON.parse(stored);
+                if (prefs.showLogoOnBL !== undefined) {
+                    showLogo = prefs.showLogoOnBL;
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    return (
+        <div className="flex flex-col gap-2">
+            {showLogo && store?.logo && (
+                <div className="mb-2">
+                    <img src={store.logo} alt="Logo" className="print-logo" style={{ maxHeight: "60px", maxWidth: "120mm", objectFit: "contain" }} />
+                </div>
+            )}
+            <div className="flex items-center gap-14">
+                {(!showLogo || !store?.logo) && (
+                    <div className="print-logo-placeholder">
+                        {store?.name?.substring(0, 2).toUpperCase() || "SC"}
+                    </div>
+                )}
+                <div>
+                    <div className="print-company-name">{store?.name || "VOTRE SOCIÉTÉ"}</div>
+                    {store?.activity && <div className="print-company-activity">{store.activity}</div>}
+                </div>
             </div>
-        )}
-        <div>
-            <div className="print-company-name">{store?.name || "VOTRE SOCIÉTÉ"}</div>
-            {store?.activity && <div className="print-company-activity">{store.activity}</div>}
         </div>
-    </div>
-)
+    );
+};
 
 // ─── Company Fiscal Details (right side) ─────────────────────────────────────
 const CompanyFiscalBlock = ({ store }: { store?: PrintableStore | null }) => (

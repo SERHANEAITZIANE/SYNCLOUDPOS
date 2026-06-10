@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Component, useEffect } from "react";
 import {
     View, Text, TextInput, TouchableOpacity,
     ActivityIndicator, StyleSheet, KeyboardAvoidingView,
@@ -12,6 +12,81 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuthStore } from "./lib/store";
 import { useLangStore } from "./lib/i18n";
+import { useNotificationStore } from "./lib/notificationStore";
+
+const CURRENT_VERSION = "3.0.0";
+
+// ─── Global Error Logger ───────────────────────────────────────────────────
+if (typeof global !== "undefined" && (global as any).ErrorUtils) {
+    const defaultHandler = (global as any).ErrorUtils.getGlobalHandler();
+    (global as any).ErrorUtils.setGlobalHandler(async (error: any, isFatal?: boolean) => {
+        try {
+            await fetch("https://chirpedbeo.online/api/mobile/log-error", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    error: {
+                        message: error?.message || "Unknown error",
+                        stack: error?.stack || "No stack",
+                    },
+                    isFatal: isFatal ?? true,
+                    app: "gerant",
+                    version: CURRENT_VERSION,
+                }),
+            });
+        } catch (e) {
+            console.warn("[GlobalError] Failed to report crash to server:", e);
+        }
+        if (defaultHandler) {
+            defaultHandler(error, isFatal);
+        }
+    });
+}
+
+// ─── Error Boundary ─────────────────────────────────────────────────────────
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error: Error | null;
+}
+
+class ErrorBoundary extends Component<{ children: React.ReactNode }, ErrorBoundaryState> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+        console.error("[ErrorBoundary] Crash caught:", error, info);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <View style={{ flex: 1, backgroundColor: "#0a0f1e", justifyContent: "center", alignItems: "center", padding: 32 }}>
+                    <Ionicons name="warning" size={64} color="#ef4444" />
+                    <Text style={{ color: "#f8fafc", fontSize: 20, fontWeight: "800", marginTop: 16, textAlign: "center" }}>
+                        Erreur Application (Gérant)
+                    </Text>
+                    <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 8, textAlign: "center", lineHeight: 20 }}>
+                        {this.state.error?.message || "Une erreur inattendue est survenue"}
+                    </Text>
+                    <TouchableOpacity
+                        style={{ marginTop: 24, backgroundColor: "#22c55e", paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14 }}
+                        onPress={() => this.setState({ hasError: false, error: null })}
+                    >
+                        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Réessayer</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 
 // ─── Screens ────────────────────────────────────────────────────────────────
 import GerantDashboardScreen from "./screens/GerantDashboardScreen";
@@ -35,9 +110,15 @@ import CatalogScreen from "./screens/CatalogScreen";
 import CreateBLScreen from "./screens/CreateBLScreen";
 import AlertsScreen from "./screens/AlertsScreen";
 import MorningBriefScreen from "./screens/MorningBriefScreen";
+import ComparativeReportScreen from "./screens/ComparativeReportScreen";
+import ProductDashboardScreen from "./screens/ProductDashboardScreen";
+import ClientAnalyticsScreen from "./screens/ClientAnalyticsScreen";
+import NotificationCenterScreen from "./screens/NotificationCenterScreen";
+import GoalsScreen from "./screens/GoalsScreen";
+import ActivityHistoryScreen from "./screens/ActivityHistoryScreen";
+import WeeklySummaryScreen from "./screens/WeeklySummaryScreen";
 
 // ─── Services ───────────────────────────────────────────────────────────────
-import { startGPSTracking, stopGPSTracking } from "./lib/gps-tracking";
 import { fullSync } from "./lib/offline-sync";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -58,12 +139,10 @@ const AppTheme = {
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const CURRENT_VERSION = "2.3.0";
-
 // ─── Login Screen ───────────────────────────────────────────────────────────
 function LoginScreen() {
-    const [email, setEmail] = React.useState("");
-    const [password, setPassword] = React.useState("");
+    const [email, setEmail] = React.useState("xm@live.fr");
+    const [password, setPassword] = React.useState("Babez@16");
     const [loading, setLoading] = React.useState(false);
     const login = useAuthStore((s) => s.login);
 
@@ -153,6 +232,7 @@ function LoginScreen() {
 
 // ─── Tab Navigator (4 Tabs: Accueil, Finance, AI, Plus) ──────────────────────
 function GerantTabs() {
+    const unreadCount = useNotificationStore((s) => s.unreadCount);
     return (
         <Tab.Navigator
             id="GerantTabs"
@@ -173,12 +253,13 @@ function GerantTabs() {
                 tabBarActiveTintColor: "#22c55e",
                 tabBarInactiveTintColor: "#475569",
                 tabBarStyle: {
-                    backgroundColor: "#0f172a",
-                    borderTopWidth: 0,
+                    backgroundColor: "rgba(10, 15, 30, 0.95)",
+                    borderTopWidth: 1,
+                    borderTopColor: "rgba(148, 163, 184, 0.08)",
                     paddingBottom: Platform.OS === "ios" ? 24 : 10,
                     paddingTop: 8,
                     height: Platform.OS === "ios" ? 88 : 68,
-                    elevation: 20,
+                    elevation: 0,
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: -4 },
                     shadowOpacity: 0.15,
@@ -205,7 +286,12 @@ function GerantTabs() {
             <Tab.Screen
                 name="Accueil"
                 component={GerantDashboardScreen}
-                options={{ title: "Accueil", headerShown: false }}
+                options={{ 
+                    title: "Accueil", 
+                    headerShown: false,
+                    tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                    tabBarBadgeStyle: { backgroundColor: "#ef4444", color: "#fff", fontSize: 10, height: 16, minWidth: 16, borderRadius: 8, lineHeight: 14 }
+                }}
             />
             <Tab.Screen
                 name="Finance"
@@ -262,9 +348,16 @@ function AppNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
                     <Stack.Screen name="CreateBL" component={CreateBLScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="MorningBrief" component={MorningBriefScreen} options={{ headerShown: true, title: "Briefing du Jour", ...stackScreenStyle }} />
                     <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: true, title: "Paramètres", ...stackScreenStyle }} />
-                    <Stack.Screen name="Alerts" component={AlertsScreen} options={{ headerShown: true, title: "Alertes", ...stackScreenStyle }} />
+                    <Stack.Screen name="Alerts" component={NotificationCenterScreen} options={{ headerShown: true, title: "Centre de Notifications", ...stackScreenStyle }} />
                     <Stack.Screen name="GerantPurchases" component={GerantPurchasesScreen} options={{ headerShown: true, title: "Achats Fournisseurs", ...stackScreenStyle }} />
                     <Stack.Screen name="GerantExpenses" component={GerantExpensesScreen} options={{ headerShown: true, title: "Dépenses", ...stackScreenStyle }} />
+                    <Stack.Screen name="ComparativeReport" component={ComparativeReportScreen} options={{ headerShown: true, title: "Comparatif Périodes", ...stackScreenStyle }} />
+                    <Stack.Screen name="ProductDashboard" component={ProductDashboardScreen} options={{ headerShown: true, title: "Tableau Produits", ...stackScreenStyle }} />
+                    <Stack.Screen name="ClientAnalytics" component={ClientAnalyticsScreen} options={{ headerShown: true, title: "Analyse Clients", ...stackScreenStyle }} />
+                    <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ headerShown: true, title: "Centre de Notifications", ...stackScreenStyle }} />
+                    <Stack.Screen name="Goals" component={GoalsScreen} options={{ headerShown: true, title: "Objectifs & KPIs", ...stackScreenStyle }} />
+                    <Stack.Screen name="ActivityHistory" component={ActivityHistoryScreen} options={{ headerShown: true, title: "Historique d'Activité", ...stackScreenStyle }} />
+                    <Stack.Screen name="WeeklySummary" component={WeeklySummaryScreen} options={{ headerShown: true, title: "Résumé Hebdomadaire", ...stackScreenStyle }} />
                 </>
             )}
         </Stack.Navigator>
@@ -272,7 +365,8 @@ function AppNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
 }
 
 // ─── Root App ────────────────────────────────────────────────────────────────
-export default function App() {
+function MainApp() {
+    const { width, height } = useWindowDimensions();
     const { isLoading, isAuthenticated, loadSession, user } = useAuthStore();
     const { loadLang, lang } = useLangStore();
 
@@ -312,25 +406,23 @@ export default function App() {
 
     useEffect(() => {
         loadLang();
-        loadSession();
+        loadSession().then(() => {
+            if (useAuthStore.getState().isAuthenticated) {
+                useNotificationStore.getState().fetchUnreadCount().catch(() => {});
+            }
+        });
         checkUpdates();
     }, []);
 
-    // Start GPS tracking + offline sync when authenticated
+    // Start offline sync when authenticated
     useEffect(() => {
         if (isAuthenticated) {
             (async () => {
-                const gpsEnabled = await AsyncStorage.getItem("setting_gpsTracking");
-                if (gpsEnabled !== "false") {
-                    startGPSTracking();
-                }
                 // Cache data for offline use
                 fullSync().catch(() => {});
+                // Fetch initial notifications
+                useNotificationStore.getState().fetchUnreadCount().catch(() => {});
             })();
-
-            return () => {
-                stopGPSTracking();
-            };
         }
     }, [isAuthenticated]);
 
@@ -351,7 +443,6 @@ export default function App() {
         );
     }
 
-    const { width, height } = useWindowDimensions();
     const isWeb = Platform.OS === "web";
     const isDesktop = isWeb && width >= 768;
 
@@ -419,125 +510,138 @@ export default function App() {
     if (isDesktop) {
         return (
             <NavigationContainer theme={AppTheme}>
-                <View style={styles.desktopContainer}>
-                    {/* Glowing Balls for High Aesthetics */}
-                    <View style={[styles.glowBall, { top: -150, left: -150, backgroundColor: "#22c55e10" }]} />
-                    <View style={[styles.glowBall, { bottom: -250, right: -150, backgroundColor: "#3b82f610" }]} />
+                <ErrorBoundary>
+                    <View style={styles.desktopContainer}>
+                        {/* Glowing Balls for High Aesthetics */}
+                        <View style={[styles.glowBall, { top: -150, left: -150, backgroundColor: "#22c55e10" }]} />
+                        <View style={[styles.glowBall, { bottom: -250, right: -150, backgroundColor: "#3b82f610" }]} />
 
-                    {/* Left Brand Panel */}
-                    <View style={styles.desktopLeftPanel}>
-                        <View style={styles.desktopBrandRow}>
-                            <LinearGradient colors={["#22c55e", "#10b981"]} style={styles.desktopLogoBadge}>
-                                <Ionicons name="analytics" size={32} color="#fff" />
-                            </LinearGradient>
-                            <View>
-                                <Text style={styles.desktopTitle}>SynCloud</Text>
-                                <Text style={styles.desktopSubtitle}>GÉRANT</Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.desktopCard}>
-                            <Text style={styles.desktopCardTitle}>Console de Gestion Web</Text>
-                            <Text style={styles.desktopCardText}>
-                                Accédez à l'intégralité du tableau de bord de votre commerce, suivez vos créances clients, validez vos clôtures de caisse et briefez l'IA depuis votre ordinateur.
-                            </Text>
-                        </View>
-
-                        <View style={styles.desktopCard}>
-                            <Text style={styles.desktopCardTitle}>Mesures Système en Direct</Text>
-                            
-                            <View style={styles.metricsRow}>
-                                <View style={styles.metricItem}>
-                                    <Text style={styles.metricVal}>99.9%</Text>
-                                    <Text style={styles.metricLbl}>Uptime VPS</Text>
-                                </View>
-                                <View style={styles.metricItem}>
-                                    <Text style={styles.metricVal}>14 ms</Text>
-                                    <Text style={styles.metricLbl}>Latence API</Text>
-                                </View>
-                                <View style={styles.metricItem}>
-                                    <Text style={styles.metricVal}>v2.3.0</Text>
-                                    <Text style={styles.metricLbl}>Version Actuelle</Text>
+                        {/* Left Brand Panel */}
+                        <View style={styles.desktopLeftPanel}>
+                            <View style={styles.desktopBrandRow}>
+                                <LinearGradient colors={["#22c55e", "#10b981"]} style={styles.desktopLogoBadge}>
+                                    <Ionicons name="analytics" size={32} color="#fff" />
+                                </LinearGradient>
+                                <View>
+                                    <Text style={styles.desktopTitle}>SynCloud</Text>
+                                    <Text style={styles.desktopSubtitle}>GÉRANT</Text>
                                 </View>
                             </View>
 
-                            {/* Modern progress / bar graphic */}
-                            <View style={styles.sysUsageBar}>
-                                <Text style={styles.sysUsageText}>Charge CPU Serveur</Text>
-                                <View style={styles.sysBarTrack}>
-                                    <View style={[styles.sysBarFill, { width: "12%" }]} />
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={styles.desktopCard}>
-                            <Text style={styles.desktopCardTitle}>Téléchargement Mobile</Text>
-                            <Text style={styles.desktopVersionBadge}>Version {CURRENT_VERSION} stable</Text>
-                            <Text style={styles.desktopCardText}>
-                                Pour les livraisons et les ventes physiques sur le terrain, utilisez notre application Android native.
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.desktopDownloadBtn}
-                                onPress={handleDownloadApk}
-                                activeOpacity={0.8}
-                            >
-                                <Ionicons name="logo-android" size={18} color="#fff" />
-                                <Text style={styles.downloadBtnText}>Télécharger l'APK Gérant</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.desktopCard}>
-                            <Text style={styles.desktopCardTitle}>Statut Système</Text>
-                            <View style={styles.statusRow}>
-                                <View style={styles.statusIndicator} />
-                                <Text style={styles.statusText}>
-                                    Serveur Actif | chirpedbeo.online
+                            <View style={styles.desktopCard}>
+                                <Text style={styles.desktopCardTitle}>Console de Gestion Web</Text>
+                                <Text style={styles.desktopCardText}>
+                                    Accédez à l'intégralité du tableau de bord de votre commerce, suivez vos créances clients, validez vos clôtures de caisse et briefez l'IA depuis votre ordinateur.
                                 </Text>
                             </View>
-                        </View>
-                    </View>
 
-                    {/* Right Mockup Phone Panel */}
-                    <View style={styles.mockupContainer}>
-                        <View style={styles.phoneMockup}>
-                            {/* Physical side buttons on phone */}
-                            <View style={[styles.phoneButton, { left: -6, top: 120, height: 50 }]} />
-                            <View style={[styles.phoneButton, { left: -6, top: 180, height: 40 }]} />
-                            <View style={[styles.phoneButton, { left: -6, top: 230, height: 40 }]} />
-                            <View style={[styles.phoneButton, { right: -6, top: 160, height: 60 }]} />
-
-                            <View style={styles.phoneSpeaker} />
-                            <View style={styles.phoneCamera} />
-                            
-                            <View style={styles.phoneInner}>
-                                {/* Mock Status Bar */}
-                                <View style={styles.mockStatusBar}>
-                                    <Text style={styles.mockStatusTime}>09:41</Text>
-                                    <View style={styles.mockStatusIcons}>
-                                        <Ionicons name="wifi" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
-                                        <Ionicons name="cellular" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
-                                        <Ionicons name="battery-full" size={16} color="#22c55e" />
+                            <View style={styles.desktopCard}>
+                                <Text style={styles.desktopCardTitle}>Mesures Système en Direct</Text>
+                                
+                                <View style={styles.metricsRow}>
+                                    <View style={styles.metricItem}>
+                                        <Text style={styles.metricVal}>99.9%</Text>
+                                        <Text style={styles.metricLbl}>Uptime VPS</Text>
+                                    </View>
+                                    <View style={styles.metricItem}>
+                                        <Text style={styles.metricVal}>14 ms</Text>
+                                        <Text style={styles.metricLbl}>Latence API</Text>
+                                    </View>
+                                    <View style={styles.metricItem}>
+                                        <Text style={styles.metricVal}>v{CURRENT_VERSION}</Text>
+                                        <Text style={styles.metricLbl}>Version Actuelle</Text>
                                     </View>
                                 </View>
 
-                                {navigatorContent}
+                                {/* Modern progress / bar graphic */}
+                                <View style={styles.sysUsageBar}>
+                                    <Text style={styles.sysUsageText}>Charge CPU Serveur</Text>
+                                    <View style={styles.sysBarTrack}>
+                                        <View style={[styles.sysBarFill, { width: "12%" }]} />
+                                    </View>
+                                </View>
+                            </View>
 
-                                {/* Screen Glare reflection overlay */}
-                                <View style={styles.phoneGlare} pointerEvents="none" />
+                            <View style={styles.desktopCard}>
+                                <Text style={styles.desktopCardTitle}>Téléchargement Mobile</Text>
+                                <Text style={styles.desktopVersionBadge}>Version {CURRENT_VERSION} stable</Text>
+                                <Text style={styles.desktopCardText}>
+                                    Pour les livraisons et les ventes physiques sur le terrain, utilisez notre application Android native.
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.desktopDownloadBtn}
+                                    onPress={handleDownloadApk}
+                                    activeOpacity={0.8}
+                                >
+                                    <Ionicons name="logo-android" size={18} color="#fff" />
+                                    <Text style={styles.downloadBtnText}>Télécharger l'APK Gérant</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.desktopCard}>
+                                <Text style={styles.desktopCardTitle}>Statut Système</Text>
+                                <View style={styles.statusRow}>
+                                    <View style={styles.statusIndicator} />
+                                    <Text style={styles.statusText}>
+                                        Serveur Actif | chirpedbeo.online
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Right Mockup Phone Panel */}
+                        <View style={styles.mockupContainer}>
+                            <View style={phoneMockupStyle}>
+                                {/* Physical side buttons on phone */}
+                                <View style={[styles.phoneButton, { left: -6, top: 120, height: 50 }]} />
+                                <View style={[styles.phoneButton, { left: -6, top: 180, height: 40 }]} />
+                                <View style={[styles.phoneButton, { left: -6, top: 230, height: 40 }]} />
+                                <View style={[styles.phoneButton, { right: -6, top: 160, height: 60 }]} />
+
+                                <View style={styles.phoneSpeaker} />
+                                <View style={styles.phoneCamera} />
+                                
+                                <View style={styles.phoneInner}>
+                                    {/* Mock Status Bar */}
+                                    <View style={styles.mockStatusBar}>
+                                        <Text style={styles.mockStatusTime}>09:41</Text>
+                                        <View style={styles.mockStatusIcons}>
+                                            <Ionicons name="wifi" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
+                                            <Ionicons name="cellular" size={12} color="#f8fafc" style={{ opacity: 0.9 }} />
+                                            <Ionicons name="battery-full" size={16} color="#22c55e" />
+                                        </View>
+                                    </View>
+
+                                    {navigatorContent}
+
+                                    {/* Screen Glare reflection overlay */}
+                                    <View style={styles.phoneGlare} pointerEvents="none" />
+                                </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </ErrorBoundary>
             </NavigationContainer>
         );
     }
 
     return (
         <NavigationContainer theme={AppTheme}>
-            {navigatorContent}
+            <ErrorBoundary>
+                {navigatorContent}
+            </ErrorBoundary>
         </NavigationContainer>
     );
 }
+
+export default function App() {
+    return (
+        <ErrorBoundary>
+            <MainApp />
+        </ErrorBoundary>
+    );
+}
+
 
 // ─── Tab-specific styles ─────────────────────────────────────────────────────
 const tabStyles = StyleSheet.create({
@@ -1048,3 +1152,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
 });
+
+// ─── Styles Helper ──────────────────────────────────────────────────────────
+const phoneMockupStyle = styles.phoneMockup;
+

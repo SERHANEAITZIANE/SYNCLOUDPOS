@@ -84,9 +84,9 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
     const totalLabels = labels.reduce((sum, l) => sum + l.quantity, 0);
 
     const labelDimensions = {
-        small: { w: "40mm", h: "20mm", cols: 5, fontSize: "6.5px", priceFontSize: "17px", barcodeH: 38, barcodeW: 1.2, barcodeWidthCss: "36mm" },
-        medium: { w: "52mm", h: "30mm", cols: 4, fontSize: "8px", priceFontSize: "22px", barcodeH: 55, barcodeW: 1.5, barcodeWidthCss: "46mm" },
-        large: { w: "70mm", h: "37mm", cols: 3, fontSize: "9.5px", priceFontSize: "26px", barcodeH: 70, barcodeW: 1.8, barcodeWidthCss: "64mm" },
+        small: { w: "40mm", h: "20mm", cols: 5, fontSize: "9px", priceFontSize: "17px", barcodeH: 38, barcodeW: 1.2, barcodeWidthCss: "36mm" },
+        medium: { w: "52mm", h: "30mm", cols: 4, fontSize: "11px", priceFontSize: "22px", barcodeH: 55, barcodeW: 1.5, barcodeWidthCss: "46mm" },
+        large: { w: "70mm", h: "37mm", cols: 3, fontSize: "13px", priceFontSize: "26px", barcodeH: 70, barcodeW: 1.8, barcodeWidthCss: "64mm" },
     };
 
     const dim = labelDimensions[labelSize];

@@ -57,6 +57,15 @@ set MACHINE_ID=%MACHINE_ID%
 :: Create empty license file if not exists
 if not exist "license.key" echo.>license.key
 
+:: Detect local Windows printers and output to .local-printers.json
+echo  Detecting local Windows printers...
+powershell -Command "Get-Printer | Select-Object -ExpandProperty Name | ConvertTo-Json" > .local-printers.json 2>nul
+if %errorlevel% neq 0 (
+    echo  [WARNING] Failed to detect printers automatically.
+) else (
+    echo  [OK] Local printers detected and written to .local-printers.json
+)
+
 :: ── LAN Mode Setup ────────────────────────────────────────
 echo.
 echo [LAN] Do you want other devices on the network to access this app?

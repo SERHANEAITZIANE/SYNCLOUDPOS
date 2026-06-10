@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import { logAudit } from "./audit-log"
 import cacheMonitor from "@/lib/cache-monitor"
+import { SalesOrderType, SalesOrderStatus, PaymentMethod } from "@prisma/client"
 
 // Helper: generate receipt number
 export async function generateReceiptNumber(type: string, tenantId: string) {
@@ -55,6 +56,7 @@ export const createSalesOrder = async (data: {
     total: number
     receiptNumber?: string
     relatedSalesOrderId?: string
+    createdAt?: Date
 }) => {
     await checkSubscription();
     try {
@@ -71,15 +73,16 @@ export const createSalesOrder = async (data: {
                     tenantId,
                     userId: session.user.id,
                     customerId: data.customerId,
-                    type: data.type,
-                    status: data.status,
-                    paymentMethod: data.paymentMethod,
+                    type: data.type as SalesOrderType,
+                    status: data.status as SalesOrderStatus,
+                    paymentMethod: data.paymentMethod as PaymentMethod,
                     subtotal: data.subtotal,
                     tvaAmount: data.tvaAmount,
                     stampTax: data.stampTax,
                     total: data.total,
                     receiptNumber,
                     relatedSalesOrderId: data.relatedSalesOrderId || undefined,
+                    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
@@ -155,7 +158,8 @@ export const createSalesOrder = async (data: {
                             reason: `Avoir N° ${receiptNumber}`,
                             userId: session.user.id,
                             tenantId,
-                            storeId
+                            storeId,
+                            createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                         };
                     })
                 });
@@ -211,7 +215,8 @@ export const createSalesOrder = async (data: {
                             reason: `Vente N° ${receiptNumber}`,
                             userId: session.user.id,
                             tenantId,
-                            storeId
+                            storeId,
+                            createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                         };
                     })
                 });
@@ -263,7 +268,7 @@ export async function getSalesOrders(
         const where: any = { tenantId }
 
         if (type && type !== "ALL") {
-            where.type = type
+            where.type = type as SalesOrderType
         }
 
         if (search) {
@@ -355,7 +360,7 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
         const salesOrders = await db.salesOrder.findMany({
             where: {
                 tenantId,
-                type,
+                type: type as SalesOrderType,
                 status: { not: "CANCELLED" },
                 OR: [
                     { receiptNumber: { contains: query } },
@@ -387,6 +392,7 @@ export const updateSalesOrder = async (id: string, data: {
     stampTax: number
     items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; serialNumber?: string }[]
     total: number
+    createdAt?: Date
 }) => {
     await checkSubscription();
     try {
@@ -396,32 +402,84 @@ export const updateSalesOrder = async (id: string, data: {
 
         const existing = await db.salesOrder.findUnique({ where: { id, tenantId }, include: { items: true } })
         if (!existing) return { error: "Bon introuvable" }
-        if (!["DRAFT"].includes(existing.status)) return { error: "Seuls les brouillons peuvent être modifiés" }
+
+        const newDate = data.createdAt ? new Date(data.createdAt) : undefined
+
+        if (existing.status !== "DRAFT") {
+            // ONLY modify the date!
+            if (!newDate) {
+                return { error: "Seuls les brouillons peuvent être modifiés" }
+            }
+            await db.$transaction(async (tx) => {
+                await tx.salesOrder.update({
+                    where: { id },
+                    data: { createdAt: newDate }
+                })
+                await tx.treasuryTransaction.updateMany({
+                    where: { referenceId: id, source: "SALE", tenantId },
+                    data: {
+                        date: newDate,
+                        createdAt: newDate
+                    }
+                })
+                await tx.stockMovement.updateMany({
+                    where: { referenceId: id },
+                    data: {
+                        createdAt: newDate
+                    }
+                })
+            })
+            revalidatePath("/(dashboard)/sales")
+            return { success: "Date mise à jour avec succès" }
+        }
 
         await db.$transaction(async (tx) => {
             await tx.salesOrderItem.deleteMany({ where: { salesOrderId: id } })
+            
+            const updateData: any = {
+                customerId: data.customerId,
+                type: data.type,
+                paymentMethod: data.paymentMethod,
+                subtotal: data.subtotal,
+                tvaAmount: data.tvaAmount,
+                stampTax: data.stampTax,
+                total: data.total,
+                items: {
+                    create: data.items.map(item => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        tvaRate: item.tvaRate,
+                        priceHt: item.priceHt,
+                        serialNumber: item.serialNumber || null
+                    }))
+                }
+            }
+            
+            if (newDate) {
+                updateData.createdAt = newDate
+            }
+
             await tx.salesOrder.update({
                 where: { id },
-                data: {
-                    customerId: data.customerId,
-                    type: data.type,
-                    paymentMethod: data.paymentMethod,
-                    subtotal: data.subtotal,
-                    tvaAmount: data.tvaAmount,
-                    stampTax: data.stampTax,
-                    total: data.total,
-                    items: {
-                        create: data.items.map(item => ({
-                            productId: item.productId,
-                            quantity: item.quantity,
-                            unitPrice: item.unitPrice,
-                            tvaRate: item.tvaRate,
-                            priceHt: item.priceHt,
-                            serialNumber: item.serialNumber || null
-                        }))
-                    }
-                }
+                data: updateData
             })
+
+            if (newDate) {
+                await tx.treasuryTransaction.updateMany({
+                    where: { referenceId: id, source: "SALE", tenantId },
+                    data: {
+                        date: newDate,
+                        createdAt: newDate
+                    }
+                })
+                await tx.stockMovement.updateMany({
+                    where: { referenceId: id },
+                    data: {
+                        createdAt: newDate
+                    }
+                })
+            }
         })
 
         revalidatePath("/(dashboard)/sales")
@@ -449,7 +507,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
         const total = Number(salesOrder.total)
 
         await db.$transaction(async (tx) => {
-            await tx.salesOrder.update({ where: { id }, data: { status: newStatus } })
+            await tx.salesOrder.update({ where: { id }, data: { status: newStatus as SalesOrderStatus } })
 
             // Stock: deduct when going to VALIDATED/PAID (and not already deducted)
             const hadStock = STOCK_STATUSES.includes(prevStatus)
@@ -692,6 +750,8 @@ export const deleteSalesOrder = async (id: string) => {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
+        let deletedOrderInfo: any = null;
+
         await db.$transaction(async (tx) => {
             const order = await tx.salesOrder.findUnique({
                 where: { id, tenantId },
@@ -699,6 +759,7 @@ export const deleteSalesOrder = async (id: string) => {
             });
 
             if (!order) throw new Error("Not found");
+            deletedOrderInfo = order;
 
             // Find linked POS order early if receiptNumber exists
             let linkedOrder = null;
@@ -836,7 +897,13 @@ export const deleteSalesOrder = async (id: string) => {
         revalidatePath("/(dashboard)/sales")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        logAudit({ action: "DELETE", entity: "SALES_ORDER", entityId: id, description: `Document annulé/supprimé` }).catch(() => null)
+        logAudit({ 
+            action: "DELETE", 
+            entity: "SALES_ORDER", 
+            entityId: id, 
+            description: `Document ${deletedOrderInfo?.type || ""} ${deletedOrderInfo?.receiptNumber || ""} annulé/supprimé`,
+            before: deletedOrderInfo
+        }).catch(() => null)
         return { success: "Document annulé et stock restauré" }
     } catch { return { error: "Erreur lors de la suppression" } }
 }

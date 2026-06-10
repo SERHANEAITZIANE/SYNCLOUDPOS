@@ -1081,7 +1081,7 @@ export function ReturnsClient({
                                     <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Bon d'Achat / Commande *</label>
                                     <SearchableSelect
                                         options={supplierPurchaseOrders.map(po => ({
-                                            label: `${po.reference || `Bon #${po.id.substring(0,8)}`} (${new Date(po.createdAt).toLocaleDateString()} — Total: ${Number(po.total).toLocaleString()} DA — Payé: ${Number(po.amountPaid).toLocaleString()} DA)`,
+                                            label: `${po.purchaseNumber || po.reference || `Bon #${po.id.substring(0,8)}`} (${new Date(po.createdAt).toLocaleDateString()} — Total: ${Number(po.total).toLocaleString()} DA — Payé: ${Number(po.amountPaid).toLocaleString()} DA)`,
                                             value: po.id
                                         }))}
                                         disabled={!supplierId}

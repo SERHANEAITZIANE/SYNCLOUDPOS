@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileText, Clock } from "lucide-react"
 import { useReactToPrint } from "react-to-print"
 import { useTranslations } from "next-intl"
+import { toast } from "react-hot-toast"
 
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,7 @@ import { Label } from "@/components/ui/label"
 interface PaymentModalProps {
     isOpen: boolean
     onClose: () => void
-    onConfirm: (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number) => Promise<{ success: boolean; data?: any } | void>
+    onConfirm: (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number, vendorId?: string) => Promise<{ success: boolean; data?: any } | void>
     loading: boolean
     total: number
     items?: { 
@@ -39,6 +40,8 @@ interface PaymentModalProps {
     storePhone?: string
     posTimbreEnabled?: boolean
     storeData?: any
+    sellers?: { id: string; name: string | null; role: string }[]
+    currentUserId?: string
 }
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -55,11 +58,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     storeAddress,
     storePhone,
     posTimbreEnabled = false,
-    storeData
+    storeData,
+    sellers = [],
+    currentUserId
 }) => {
     const t = useTranslations("PaymentModal")
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
+    const [selectedVendorId, setSelectedVendorId] = useState<string>(currentUserId || "")
+
+    useEffect(() => {
+        if (isOpen && currentUserId) {
+            setSelectedVendorId(currentUserId)
+        }
+    }, [isOpen, currentUserId])
 
     // Read localStorage POS defaults on first open, fallback to CAISSE SECONDAIRE
     useEffect(() => {
@@ -117,6 +129,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const finalTotalTTC = (method === "CASH" && posCashRoundingEnabled) ? getRoundedAmount(unroundedTotalTTC) : unroundedTotalTTC
     const roundingDifference = finalTotalTTC - unroundedTotalTTC
 
+    const [printerReceipt, setPrinterReceipt] = useState("default")
+    const [printerA4, setPrinterA4] = useState("default")
+
+    useEffect(() => {
+        if (isOpen) {
+            try {
+                const stored = localStorage.getItem("pos_printing_prefs")
+                if (stored) {
+                    const prefs = JSON.parse(stored)
+                    if (prefs.printerReceipt) setPrinterReceipt(prefs.printerReceipt)
+                    if (prefs.printerA4) setPrinterA4(prefs.printerA4)
+                }
+            } catch (err) {
+                console.error("Failed to load local printing prefs:", err)
+            }
+        }
+    }, [isOpen])
+
     const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
     const [success, setSuccess] = useState(false)
     const [orderData, setOrderData] = useState<any>(null)
@@ -133,22 +163,65 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const handlePrintReceipt = useReactToPrint({
         contentRef: receiptRef,
+        documentTitle: printerReceipt !== "default" ? printerReceipt : "Ticket de Caisse",
     })
 
     const handlePrintBL = useReactToPrint({
         contentRef: blRef,
+        documentTitle: printerA4 !== "default" ? printerA4 : "Bon de Livraison",
     })
 
     const handlePrintWarranty = useReactToPrint({
         contentRef: warrantyRef,
+        documentTitle: printerA4 !== "default" ? printerA4 : "Bon de Garantie",
     })
 
+    const onPrintReceipt = () => {
+        if (!handlePrintReceipt) return
+        const originalTitle = document.title
+        if (printerReceipt !== "default") {
+            document.title = printerReceipt
+        }
+        handlePrintReceipt()
+        setTimeout(() => {
+            document.title = originalTitle
+        }, 1000)
+    }
+
+    const onPrintBL = () => {
+        if (!handlePrintBL) return
+        const originalTitle = document.title
+        if (printerA4 !== "default") {
+            document.title = printerA4
+        }
+        handlePrintBL()
+        setTimeout(() => {
+            document.title = originalTitle
+        }, 1000)
+    }
+
+    const onPrintWarranty = () => {
+        if (!handlePrintWarranty) return
+        const originalTitle = document.title
+        if (printerA4 !== "default") {
+            document.title = printerA4
+        }
+        handlePrintWarranty()
+        setTimeout(() => {
+            document.title = originalTitle
+        }, 1000)
+    }
+
     const handleConfirm = async () => {
+        if (storeData?.posVendorRequired && !selectedVendorId) {
+            toast.error("Veuillez sélectionner un vendeur pour continuer.")
+            return
+        }
         const finalAccountId = accountId === "none" ? undefined : accountId
         const actualPaidAmount = method === "CASH"
             ? (finalTotalTTC < 0 ? Math.max(tenderedAmount, finalTotalTTC) : Math.min(tenderedAmount, finalTotalTTC))
             : finalTotalTTC
-        const result = await onConfirm(method, actualPaidAmount, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC)
+        const result = await onConfirm(method, actualPaidAmount, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC, selectedVendorId)
         if (result && result.success) {
             setFinalItems(items)
             setFinalTotal(finalTotalTTC)
@@ -241,7 +314,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             // Allow React to mount the <Receipt /> component inside the success view
             timeoutId = setTimeout(() => {
                 if (receiptRef.current && handlePrintReceipt) {
-                    handlePrintReceipt()
+                    onPrintReceipt()
                 } else {
                     console.log("Print failed: Component ref is null")
                 }
@@ -251,7 +324,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         return () => {
             if (timeoutId) clearTimeout(timeoutId)
         }
-    }, [success, handlePrintReceipt, hasAutoPrinted])
+    }, [success, handlePrintReceipt, hasAutoPrinted, printerReceipt])
 
     // Success View
     if (success) {
@@ -295,16 +368,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
                     <div className="flex w-full flex-col gap-3 mt-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => handlePrintReceipt && handlePrintReceipt()}>
+                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => onPrintReceipt()}>
                                 <Printer size={20} />
                                 {t("printTicket", { fallback: "Imprimer Ticket (80mm)" })}
                             </Button>
-                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/20" onClick={() => handlePrintBL && handlePrintBL()}>
+                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/20" onClick={() => onPrintBL()}>
                                 <FileText size={20} className="text-emerald-600" />
                                 {storeData?.posBlFormat === "A5" ? "Imprimer BL (A5)" : "Imprimer BL (A4)"}
                             </Button>
                             {storeData?.warrantyEnabled && (
-                                <Button variant="outline" size="lg" className="col-span-1 sm:col-span-2 h-16 rounded-xl text-base font-bold gap-3 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/20" onClick={() => handlePrintWarranty && handlePrintWarranty()}>
+                                <Button variant="outline" size="lg" className="col-span-1 sm:col-span-2 h-16 rounded-xl text-base font-bold gap-3 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/20" onClick={() => onPrintWarranty()}>
                                     <FileText size={20} className="text-blue-600" />
                                     Imprimer Garantie ({storeData?.posBlFormat === "A5" ? "A5" : "A4"})
                                 </Button>
@@ -333,6 +406,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             paidAmount={orderData?.paidAmount}
                             previousBalance={orderData?.previousBalance}
                             newBalance={orderData?.newBalance}
+                            logo={storeData?.logo}
                         />
                         <div ref={blRef}>
                             <BonLivraisonPrintTemplate
@@ -454,8 +528,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 </div>
                             )}
                         </div>
-
-                        {/* Payment Method â€” 2 rows on mobile, 1 row on bigger */}
+                        {/* Payment Method — 2 rows on mobile, 1 row on bigger */}
                         <div className="grid grid-cols-5 gap-2">
                             {([
                                 { key: "CASH", label: t("cash"), Icon: Banknote },
@@ -468,17 +541,45 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                     key={key}
                                     onClick={() => { setMethod(key); if (key !== "CASH") setTenderedStr(finalTotalTTC.toString()) }}
                                     className={cn(
-                                        "flex flex-col items-center justify-center py-3 sm:py-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer gap-1.5",
+                                        "flex flex-col items-center justify-center py-2 sm:py-2.5 rounded-xl border transition-all duration-200 cursor-pointer gap-1",
                                         method === key
                                             ? "bg-gray-900 dark:bg-white border-gray-900 dark:border-white text-white dark:text-black"
                                             : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-300 text-gray-500"
                                     )}
                                 >
-                                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.5} />
-                                    <span className="font-bold text-[9px] sm:text-[10px] text-center leading-tight">{label}</span>
+                                    <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" strokeWidth={1.5} />
+                                    <span className="font-bold text-[8px] sm:text-[9px] text-center leading-tight">{label}</span>
                                 </button>
                             ))}
                         </div>
+
+                        {/* Vendor Selector - Displayed when there are salespeople available in system */}
+                        {sellers.length > 0 && (
+                            <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest">
+                                    Vendeur / Commercial {storeData?.posVendorRequired && <span className="text-red-500">*</span>}
+                                </Label>
+                                <Select
+                                    value={selectedVendorId}
+                                    onValueChange={(val) => setSelectedVendorId(val)}
+                                    disabled={loading}
+                                >
+                                    <SelectTrigger className="rounded-xl bg-white dark:bg-gray-900 border-gray-150 dark:border-gray-800 h-9 text-xs text-gray-950 dark:text-slate-100">
+                                        <SelectValue placeholder="Sélectionner le vendeur..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {!storeData?.posVendorRequired && (
+                                            <SelectItem value="none">Aucun (Par défaut)</SelectItem>
+                                        )}
+                                        {sellers.map((seller) => (
+                                            <SelectItem key={seller.id} value={seller.id}>
+                                                {seller.name || "Inconnu"} ({seller.role === "ADMIN" ? "Admin" : seller.role === "CASHIER" ? "Caissier" : "Vendeur"})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
                         {/* Deposit Account */}
                         <div className="space-y-2">
@@ -498,7 +599,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             />
                         </div>
 
-                        {/* Quick Cash â€” only for CASH */}
+                        {/* Quick Cash — only for CASH */}
                         {method === "CASH" && (
                             <div className="space-y-2">
                                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t("quickCash")}</p>
@@ -507,7 +608,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                         <Button
                                             key={amount}
                                             variant="outline"
-                                            className="h-12 sm:h-14 rounded-xl font-bold text-base sm:text-lg hover:border-gray-400 hover:text-gray-900 transition-colors border-gray-100 bg-white shadow-sm"
+                                            className="h-9 sm:h-10 rounded-xl font-bold text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-950 dark:hover:text-white transition-colors border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
                                             onClick={() => setQuickCash(amount)}
                                         >
                                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)}
@@ -555,28 +656,28 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 <Button
                                     key={num}
                                     variant="outline"
-                                    className="h-12 sm:h-16 rounded-xl text-lg sm:text-2xl font-black shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 transition-all text-gray-900 dark:text-white"
+                                    className="h-10 sm:h-12 rounded-xl text-md sm:text-lg font-bold shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850/60 transition-all text-gray-900 dark:text-white"
                                     onClick={() => handleNumpad(num)}
                                 >
                                     {num}
                                 </Button>
                             ))}
-                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-xl font-black text-red-500 hover:bg-red-50 border-gray-100 shadow-sm bg-white transition-all" onClick={() => handleNumpad("C")}>C</Button>
-                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-xl font-black shadow-sm bg-white border-gray-100 hover:bg-gray-50 transition-all text-gray-900" onClick={() => handleNumpad("0")}>0</Button>
-                            <Button variant="outline" className="h-12 sm:h-16 rounded-xl text-lg font-black bg-white border-gray-100 hover:bg-gray-50 shadow-sm transition-all text-gray-900" onClick={() => handleNumpad("00")}>00</Button>
+                            <Button variant="outline" className="h-10 sm:h-12 rounded-xl text-lg font-bold text-red-500 bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all shadow-sm" onClick={() => handleNumpad("C")}>C</Button>
+                            <Button variant="outline" className="h-10 sm:h-12 rounded-xl text-lg font-bold shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850/60 transition-all text-gray-900 dark:text-white" onClick={() => handleNumpad("0")}>0</Button>
+                            <Button variant="outline" className="h-10 sm:h-12 rounded-xl text-md font-bold shadow-sm bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-850/60 transition-all text-gray-900 dark:text-white" onClick={() => handleNumpad("00")}>00</Button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Sticky Footer Actions */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 rounded-b-2xl shrink-0 mt-auto">
-                <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-12 sm:h-14 px-6 rounded-xl font-bold" onClick={handleClose}>
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 px-4 sm:px-6 py-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 rounded-b-2xl shrink-0 mt-auto">
+                <Button disabled={loading} variant="ghost" className="w-full sm:w-auto h-10 sm:h-11 px-5 rounded-xl font-bold text-xs sm:text-sm" onClick={handleClose}>
                     {t("cancel")} <span className="text-[9px] opacity-40 ml-1 hidden sm:inline">Esc</span>
                 </Button>
                 <Button
                     disabled={loading || (method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer)}
-                    className="w-full sm:w-auto h-12 sm:h-14 px-8 rounded-xl font-black text-base sm:text-lg bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-black shadow-xl transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-xl font-black text-xs sm:text-sm bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl transition-all disabled:opacity-50"
                     onClick={handleConfirm}
                 >
                     {loading ? t("processing") : t("completeOrder")}

@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
+import { PaymentMethod } from "@prisma/client"
 
 // ────────────────────────────────────────────────────────────────────────────
 // Helper: generate proforma number (PF-2026/0001)
@@ -264,7 +265,7 @@ export async function createBLFromProforma(data: {
           type: "ORDER",
           status: "VALIDATED",
           receiptNumber,
-          paymentMethod: data.paymentMethod ?? "TERM",
+          paymentMethod: (data.paymentMethod as PaymentMethod) ?? PaymentMethod.TERM,
           paymentStatus: "PENDING",
           subtotal,
           tvaAmount,

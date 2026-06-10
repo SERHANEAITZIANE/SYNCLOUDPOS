@@ -11,18 +11,20 @@ export const metadata = {
 export default async function ProfitReportPage({
     searchParams
 }: {
-    searchParams: Promise<{ from?: string; to?: string }>
+    searchParams: Promise<{ from?: string; to?: string; clientType?: string }>
 }) {
     const session = await auth()
     if (session?.user?.role !== "ADMIN" && session?.user?.role !== "ACCOUNTANT" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
     }
 
-    const { from, to } = await searchParams
+    const { from, to, clientType } = await searchParams
 
-    const data = await getProfitReport(
-        from && to ? { from: new Date(from), to: new Date(to) } : undefined
-    )
+    const data = await getProfitReport({
+        from: from ? new Date(from) : undefined,
+        to: to ? new Date(to) : undefined,
+        clientType: clientType || undefined
+    })
 
     return (
         <div className="flex-col">

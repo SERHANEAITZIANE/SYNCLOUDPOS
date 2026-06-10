@@ -921,7 +921,12 @@
     "reseller": "بائع",
     "wholesale": "جملة",
     "noResults": "لا توجد نتائج.",
-    "page": "صفحة"
+    "page": "صفحة",
+    "show": "عرض",
+    "all": "الكل",
+    "rowsPerPage": "صفوف في الصفحة",
+    "of": "من",
+    "results": "نتائج"
   },
   "PosPage": {
     "unauthorized": "غير مصرح",
@@ -995,6 +1000,7 @@
     "loadOrder": "تحميل طلب",
     "allCategories": "الكل",
     "showingTop50": "عرض أفضل 50 نتيجة. استخدم البحث للعثور على المزيد.",
+    "showingProducts": "عرض {start} إلى {end} من أصل {total} منتج",
     "noProductsFound": "لم يتم العثور على منتجات",
     "tryRefiningSearch": "حاول تحسين بحثك",
     "viewCart": "عرض السلة",

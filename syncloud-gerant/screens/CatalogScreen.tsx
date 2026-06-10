@@ -428,7 +428,7 @@ export default function CatalogScreen({ navigation }: any) {
             const isRupture = item.stock <= 0;
             const { price: activePrice, fallback } = getActivePrice(item);
             return `
-                <tr style="background-color: ${idx % 2 === 0 ? "#1e293b" : "#0f172a"}; border-bottom: 1px solid #334155;">
+                <tr style="background-color: ${idx % 2 === 0 ? "#1e293b" : "#0a0f1e"}; border-bottom: 1px solid #334155;">
                     <td style="padding: 12px; color: #94a3b8; font-weight: bold; text-align: center;">${idx + 1}</td>
                     <td style="padding: 12px; color: #f8fafc; font-weight: bold; text-align: left;">
                         ${item.name}
@@ -453,7 +453,7 @@ export default function CatalogScreen({ navigation }: any) {
                 <style>
                     body {
                         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                        background-color: #0f172a;
+                        background-color: #0a0f1e;
                         color: #f8fafc;
                         margin: 0;
                         padding: 30px;

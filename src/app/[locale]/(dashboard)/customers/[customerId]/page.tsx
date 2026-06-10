@@ -29,9 +29,11 @@ export default async function CustomerPage({
 
     let formattedCustomer = null
     if (customer) {
+        const safeCustomer = JSON.parse(JSON.stringify(customer))
         formattedCustomer = {
-            ...customer,
-            balance: customer.balance ? Number(customer.balance) : 0
+            ...safeCustomer,
+            balance: safeCustomer.balance ? Number(safeCustomer.balance) : 0,
+            initialBalance: safeCustomer.initialBalance ? Number(safeCustomer.initialBalance) : 0
         }
     }
 

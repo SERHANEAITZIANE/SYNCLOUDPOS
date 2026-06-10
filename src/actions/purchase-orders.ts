@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
+import { PurchaseOrderStatus } from "@prisma/client"
 
 interface PurchaseOrderItemData {
     productId: string
@@ -30,6 +31,7 @@ interface PurchaseOrderData {
     paymentMethod?: string
     paymentAccountId?: string
     paymentNotes?: string
+    createdAt?: Date
 }
 
 export const getPurchaseOrders = async () => {
@@ -78,6 +80,35 @@ export const getPurchaseOrder = async (id: string) => {
     } catch { return { error: "Failed to fetch purchase order" } }
 }
 
+export async function generatePurchaseNumber(tx: any, tenantId: string, date?: Date) {
+    const prefix = "BR"
+    const actualDate = date ? new Date(date) : new Date()
+    const year = actualDate.getFullYear()
+    
+    const dd = String(actualDate.getDate()).padStart(2, "0")
+    const mm = String(actualDate.getMonth() + 1).padStart(2, "0")
+    const yy = String(year).slice(-2)
+    const dateStr = `${dd}${mm}${yy}`
+
+    const counter = await tx.sequenceCounter.upsert({
+        where: {
+            tenantId_prefix_year: { tenantId, prefix, year }
+        },
+        update: {
+            lastValue: { increment: 1 }
+        },
+        create: {
+            tenantId,
+            prefix,
+            year,
+            lastValue: 1
+        }
+    })
+
+    const sequenceStr = String(counter.lastValue).padStart(5, "0")
+    return `${prefix}-${dateStr}-${sequenceStr}`
+}
+
 export const createPurchaseOrder = async (data: PurchaseOrderData) => {
     await checkSubscription();
     const session = await auth()
@@ -91,6 +122,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
             const withholdingRate = supplier?.withholdingRate ?? 0
             const withholdingAmount = withholdingRate > 0 ? data.total * (withholdingRate / 100) : 0
 
+            const purchaseNumber = await generatePurchaseNumber(tx, tenantId, data.createdAt)
+
             const purchaseOrder = await tx.purchaseOrder.create({
                 data: {
                     tenantId,
@@ -100,10 +133,12 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     total: data.total,
                     withholdingAmount,
                     reference: data.reference,
-                    status: data.status,
+                    purchaseNumber,
+                    status: data.status as PurchaseOrderStatus,
                     imageUrl1: data.imageUrl1 || undefined,
                     imageUrl2: data.imageUrl2 || undefined,
                     imageUrl3: data.imageUrl3 || undefined,
+                    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
@@ -163,8 +198,9 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                                 stockBefore,
                                 stockAfter,
                                 referenceId: purchaseOrder.id,
-                                reason: `Achat Fournisseur N° ${purchaseOrder.id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
-                                tenantId
+                                reason: `Achat Fournisseur N° ${purchaseOrder.purchaseNumber || purchaseOrder.id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
+                                tenantId,
+                                createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                             }
                         });
                     })
@@ -200,9 +236,11 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                             source: "PURCHASE",
                             referenceId: purchaseOrder.id,
                             description: withholdingAmount > 0 
-                                ? `Paiement fournisseur (net: ${netPayment.toLocaleString()} DA, retenue: ${Number(withholdingAmount).toLocaleString()} DA)`
-                                : `Bon de commande - Paiement`,
-                            tenantId
+                                ? `Paiement fournisseur #${purchaseOrder.purchaseNumber || purchaseOrder.id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${Number(withholdingAmount).toLocaleString()} DA)`
+                                : `Bon de commande #${purchaseOrder.purchaseNumber || purchaseOrder.id.slice(-6)} - Paiement`,
+                            tenantId,
+                            date: data.createdAt ? new Date(data.createdAt) : undefined,
+                            createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                         }
                     })
                 }
@@ -236,7 +274,9 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                         balanceAfter: updatedAccount.balance,
                         source: "PURCHASE",
                         referenceId: purchaseOrder.id,
-                        description: `Règlement Initial [${payMethod}] Bon #${purchaseOrder.id.slice(-8).toUpperCase()}${data.paymentNotes ? ` - ${data.paymentNotes}` : ""}`
+                        description: `Règlement Initial [${payMethod}] Bon #${purchaseOrder.purchaseNumber || purchaseOrder.id.slice(-8).toUpperCase()}${data.paymentNotes ? ` - ${data.paymentNotes}` : ""}`,
+                        date: data.createdAt ? new Date(data.createdAt) : undefined,
+                        createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                     }
                 });
 
@@ -310,6 +350,11 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
             // Delete existing old items
             await tx.purchaseOrderItem.deleteMany({ where: { purchaseOrderId: id } })
 
+            let purchaseNumber = existing.purchaseNumber
+            if (!purchaseNumber) {
+                purchaseNumber = await generatePurchaseNumber(tx, tenantId, data.createdAt || existing.createdAt)
+            }
+
             // Update order details
             await tx.purchaseOrder.update({
                 where: { id },
@@ -317,11 +362,13 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     supplierId: data.supplierId,
                     total: data.total,
                     reference: data.reference,
-                    status: data.status,
+                    purchaseNumber,
+                    status: data.status as PurchaseOrderStatus,
                     accountId: (data.accountId && data.accountId !== "none") ? data.accountId : undefined,
                     imageUrl1: data.imageUrl1 || undefined,
                     imageUrl2: data.imageUrl2 || undefined,
                     imageUrl3: data.imageUrl3 || undefined,
+                    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
@@ -333,6 +380,21 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     }
                 }
             })
+
+            if (data.createdAt) {
+                const newDate = new Date(data.createdAt)
+                await tx.stockMovement.updateMany({
+                    where: { referenceId: id, tenantId },
+                    data: { createdAt: newDate }
+                })
+                await tx.treasuryTransaction.updateMany({
+                    where: { referenceId: id, source: "PURCHASE", tenantId },
+                    data: {
+                        date: newDate,
+                        createdAt: newDate
+                    }
+                })
+            }
 
             if (isStockStatus) {
                 // Apply new stock additions and recalculate CUMP/PMP
@@ -378,7 +440,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                                 stockAfter,
                                 referenceId: id,
                                 reason: `Modification Achat (Corrigé) N° ${id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
-                                tenantId
+                                tenantId,
+                                createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                             }
                         })
                     }
@@ -532,8 +595,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
             }
 
             // ─── Supplier Balance Adjustments ───
-            const oldNet = (existing.status === "FACTURE" || existing.status === "BON_LIVRAISON") ? (Number(existing.total) - oldPaymentAmount) : (-oldPaymentAmount);
-            const newNet = (data.status === "FACTURE" || data.status === "BON_LIVRAISON") ? (data.total - newPaymentAmount) : (-newPaymentAmount);
+            const oldNet = (existing.status === "FACTURE" || existing.status === "BON_LIVRAISON") ? (Number(existing.total) - oldPaymentAmount) : 0;
+            const newNet = (data.status === "FACTURE" || data.status === "BON_LIVRAISON") ? (data.total - newPaymentAmount) : 0;
 
             if (existing.supplierId === data.supplierId) {
                 if (newNet !== oldNet) {
@@ -585,7 +648,18 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
         const total = Number(order.total)
 
         await db.$transaction(async (tx) => {
-            await tx.purchaseOrder.update({ where: { id }, data: { status: newStatus } })
+            let purchaseNumber = order.purchaseNumber
+            if (!purchaseNumber) {
+                purchaseNumber = await generatePurchaseNumber(tx, tenantId, order.createdAt)
+            }
+
+            await tx.purchaseOrder.update({
+                where: { id },
+                data: {
+                    status: newStatus as PurchaseOrderStatus,
+                    purchaseNumber
+                }
+            })
 
             // Stock update: only if going TO a status that receives stock (and not already having done so)
             const stockStatuses = ["BON_LIVRAISON", "FACTURE", "COMPLETED"]
@@ -638,7 +712,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 stockBefore,
                                 stockAfter,
                                 referenceId: order.id,
-                                reason: `Modification statut Achat N° ${order.id.slice(-6)}: ${newStatus} (CUMP: ${newCump.toFixed(2)})`,
+                                reason: `Achat Fournisseur N° ${purchaseNumber || order.id.slice(-6)}: ${newStatus} (CUMP: ${newCump.toFixed(2)})`,
                                 tenantId
                             }
                         });
@@ -677,7 +751,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 stockBefore,
                                 stockAfter,
                                 referenceId: order.id,
-                                reason: `Annulation Achat N° ${order.id.slice(-6)}`,
+                                reason: `Annulation Achat N° ${purchaseNumber || order.id.slice(-6)}`,
                                 tenantId
                             }
                         });
@@ -743,8 +817,8 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                                 source: "PURCHASE",
                                 referenceId: id,
                                 description: withholdingAmt > 0
-                                    ? `Paiement solde final #${id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${withholdingAmt.toLocaleString()} DA)`
-                                    : `Paiement solde final - Bon #${id.slice(-6)}`,
+                                    ? `Paiement solde final #${purchaseNumber || id.slice(-6)} (net: ${netPayment.toLocaleString()} DA, retenue: ${withholdingAmt.toLocaleString()} DA)`
+                                    : `Paiement solde final - Bon #${purchaseNumber || id.slice(-6)}`,
                                 tenantId
                             }
                         })
@@ -752,7 +826,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                         if (prevStatus === "FACTURE" || prevStatus === "BON_LIVRAISON") {
                             await (tx as any).supplier.update({
                                 where: { id: order.supplierId },
-                                data: { balance: { decrement: netPayment } }
+                                data: { balance: { decrement: total - alreadyPaid } }
                             })
                         }
                     }
@@ -817,16 +891,12 @@ export const deletePurchaseOrder = async (id: string) => {
                 where: { referenceId: id, source: "PURCHASE", tenantId }
             });
 
+            const alreadyPaid = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+
             for (const t of transactions) {
                 // Refund the treasury account balance
                 await tx.treasuryAccount.update({
                     where: { id: t.accountId },
-                    data: { balance: { increment: t.amount } }
-                });
-
-                // Always increment the supplier balance to cancel that payment decrement.
-                await tx.supplier.update({
-                    where: { id: order.supplierId },
                     data: { balance: { increment: t.amount } }
                 });
             }
@@ -836,12 +906,15 @@ export const deletePurchaseOrder = async (id: string) => {
                 where: { referenceId: id, source: "PURCHASE", tenantId }
             });
 
-            // 3. Restore supplier balance if the order had incremented it (FACTURE, BON_LIVRAISON, or COMPLETED status)
-            if (["FACTURE", "BON_LIVRAISON", "COMPLETED"].includes(order.status)) {
-                await tx.supplier.update({
-                    where: { id: order.supplierId },
-                    data: { balance: { decrement: order.total } }
-                });
+            // 3. Restore supplier balance if the order had incremented it (FACTURE or BON_LIVRAISON status)
+            if (["FACTURE", "BON_LIVRAISON"].includes(order.status)) {
+                const outstandingDebt = Number(order.total) - alreadyPaid;
+                if (outstandingDebt !== 0) {
+                    await tx.supplier.update({
+                        where: { id: order.supplierId },
+                        data: { balance: { decrement: outstandingDebt } }
+                    });
+                }
             }
 
             // 4. Finally delete the order itself (cascade deletes items)

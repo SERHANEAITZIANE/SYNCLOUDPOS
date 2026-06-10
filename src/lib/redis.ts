@@ -169,7 +169,7 @@ export async function rateLimit(identifier: string, limit: number = 5, windowMs:
         // Use a transaction/pipeline to increment and set expiry
         const multi = redis.multi();
         multi.incr(key);
-        multi.pTtl(key);
+        multi.pTTL(key);
         
         const [count, ttl] = await multi.exec() as unknown as [number, number];
 

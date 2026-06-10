@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
-import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info, Star } from "lucide-react"
+import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info, Star, RefreshCcw } from "lucide-react"
 import Bcode from "react-barcode"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
@@ -208,6 +208,25 @@ export const PrintingSettingsForm = ({
     const [posBlColumns, setPosBlColumns] = useState(initialPosBlColumns || "standard")
     const [prefs, setPrefs] = useState<PrintingPrefs>(defaults)
     const [localPrinters, setLocalPrinters] = useState<string[]>([])
+    const [refreshingPrinters, setRefreshingPrinters] = useState(false)
+
+    const refreshPrinters = async () => {
+        setRefreshingPrinters(true)
+        try {
+            const printers = await getLocalPrinters()
+            if (printers && printers.length > 0) {
+                setLocalPrinters(printers)
+                toast.success(`${printers.length} imprimante(s) détectée(s)`)
+            } else {
+                toast.error("Aucune imprimante détectée")
+            }
+        } catch (err) {
+            console.error("Failed to load local printers:", err)
+            toast.error("Erreur de détection des imprimantes")
+        } finally {
+            setRefreshingPrinters(false)
+        }
+    }
 
     useEffect(() => {
         try {
@@ -220,7 +239,7 @@ export const PrintingSettingsForm = ({
                 setLocalPrinters(printers)
             }
         }).catch(err => console.error("Failed to load local printers:", err))
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const getOptions = (currentValue: string) => {
         const base = [
@@ -273,6 +292,22 @@ export const PrintingSettingsForm = ({
                 <div className="flex items-center gap-2 mb-4">
                     <Printer className="w-5 h-5 text-blue-500" />
                     <h3 className="text-base font-semibold">{t("printers")}</h3>
+                    {localPrinters.length > 0 && (
+                        <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-bold">
+                            {localPrinters.length} détectée(s)
+                        </span>
+                    )}
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={refreshPrinters}
+                        disabled={refreshingPrinters}
+                        className="ml-auto h-8 gap-1.5 text-xs"
+                    >
+                        <RefreshCcw className={cn("w-3.5 h-3.5", refreshingPrinters && "animate-spin")} />
+                        {refreshingPrinters ? "Détection..." : "Rafraîchir"}
+                    </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 bg-muted/40 p-5 rounded-xl border">
                     <PrinterSelect

@@ -69,7 +69,7 @@ export async function getCustomerLedger(customerId: string) {
             }),
             db.customer.findUnique({
                 where: { id: customerId, tenantId },
-                select: { balance: true, createdAt: true }
+                select: { balance: true, initialBalance: true, createdAt: true }
             })
         ]);
 
@@ -126,19 +126,21 @@ export async function getCustomerLedger(customerId: string) {
 
         // Map Sales (Debits - increases what they owe us)
         for (const sale of sales) {
+            const isCreditNote = sale.type === "CREDIT_NOTE"
             let label = "Vente"
             if (sale.type === "INVOICE") label = "Facture"
+            else if (sale.type === "CREDIT_NOTE") label = "Avoir"
             else if (sale.type === "QUOTE") continue; // Quotes aren't debts
 
             ledgerLines.push({
                 id: `sale-${sale.id}`,
                 date: sale.createdAt.toISOString(),
-                type: "SALE",
-                debit: Number(sale.total),
-                credit: 0,
+                type: isCreditNote ? "PAYMENT" : "SALE",
+                debit: isCreditNote ? 0 : Number(sale.total),
+                credit: isCreditNote ? Number(sale.total) : 0,
                 observation: `${label} N°: ${sale.receiptNumber || '-'}`,
                 reference: sale.id,
-                category: "SALE"
+                category: isCreditNote ? "RETURN" : "SALE"
             })
         }
 
@@ -182,17 +184,15 @@ export async function getCustomerLedger(customerId: string) {
                 date: ret.createdAt.toISOString(),
                 type: "PAYMENT",
                 debit: 0,
-                credit: Number(ret.totalAmount),
+                credit: isCash ? 0 : Number(ret.totalAmount),
                 observation: `Retour Client ${isCash ? "Remboursé (Cash)" : "Crédité (Solde)"}: ${ret.product?.name || "Produit"} (N° ${ret.id.substring(0, 8)})`,
                 reference: ret.id,
                 category: "RETURN"
             })
         }
 
-        // Calculate Initial Balance (Current Balance - Debits + Credits)
-        const totalDebits = ledgerLines.reduce((sum, line) => sum + line.debit, 0)
-        const totalCredits = ledgerLines.reduce((sum, line) => sum + line.credit, 0)
-        const initialBalance = Number(customer?.balance || 0) - totalDebits + totalCredits
+        // Calculate Initial Balance (Use stored initial balance)
+        const initialBalance = Number(customer?.initialBalance || 0)
 
         // Push Initial Balance line (make date 1s before earliest txn so it sorts first)
         const earliestTxTime = ledgerLines.length > 0
@@ -381,7 +381,7 @@ export async function getSupplierLedger(supplierId: string) {
                 date: ret.createdAt.toISOString(),
                 type: "PAYMENT",
                 debit: 0,
-                credit: Number(ret.totalAmount),
+                credit: isCash ? 0 : Number(ret.totalAmount),
                 observation: `Retour Fournisseur ${isCash ? "Remboursé (Cash)" : "Crédité (Solde)"}: ${ret.product?.name || "Produit"} (Qté: ${ret.quantity})`,
                 reference: ret.id,
                 category: "RETURN"

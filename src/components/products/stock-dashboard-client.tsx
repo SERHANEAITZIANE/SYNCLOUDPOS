@@ -868,7 +868,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
 
                     {selectedProduct && (
                         <div className="flex-1 overflow-hidden flex flex-col">
-                            <ScrollArea className="flex-1 p-6">
+                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                                 <div className="space-y-6">
                                     {/* Section 1: Main Title */}
                                     <div>
@@ -971,7 +971,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                             <p className="text-sm text-muted-foreground text-center py-6">Aucun mouvement enregistré pour ce produit.</p>
                                         ) : (
                                             <div className="relative pl-6 border-l-2 border-border/80 space-y-5">
-                                                {drawerMovements.slice(0, 10).map((m: any, idx: number) => {
+                                                {drawerMovements.map((m: any, idx: number) => {
                                                     const isPositive = m.quantity > 0
                                                     return (
                                                         <div key={m.id} className="relative">
@@ -1003,7 +1003,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                         )}
                                     </div>
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     )}
                 </SheetContent>

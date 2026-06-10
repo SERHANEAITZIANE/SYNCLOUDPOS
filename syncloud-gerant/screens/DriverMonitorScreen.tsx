@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 const { width } = Dimensions.get("window");
 
@@ -72,12 +73,7 @@ export default function DriverMonitorScreen() {
         s === "active" ? "car" : s === "done" ? "checkmark-circle" : "alert-circle";
 
     if (loading) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#ec4899" />
-                <Text style={styles.loadingText}>Chargement des livreurs...</Text>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     return (
@@ -121,7 +117,7 @@ export default function DriverMonitorScreen() {
                 <View style={styles.emptyState}>
                     <Ionicons name="car-outline" size={56} color="#334155" />
                     <Text style={styles.emptyText}>Aucun livreur actif aujourd'hui</Text>
-                    <Text style={styles.emptySubText}>Les livreurs assignés aux bons de livraison apparaîtront ici</Text>
+                    <Text style={styles.emptySubText}>Makan hta chauffeur hna</Text>
                 </View>
             ) : (
                 <>
@@ -269,8 +265,8 @@ export default function DriverMonitorScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a", gap: 12 },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e", gap: 12 },
     loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
     emptyState: { alignItems: "center", padding: 48, gap: 12 },
     emptyText: { color: "#64748b", fontSize: 16, fontWeight: "700" },
@@ -305,7 +301,7 @@ const styles = StyleSheet.create({
     driverRevenue: { color: "#f8fafc", fontSize: 15, fontWeight: "900" },
     driverLastPing: { color: "#475569", fontSize: 9, fontWeight: "600", marginTop: 2 },
 
-    driverQuickStats: { flexDirection: "row", justifyContent: "space-around", backgroundColor: "#0f172a", borderRadius: 12, paddingVertical: 10 },
+    driverQuickStats: { flexDirection: "row", justifyContent: "space-around", backgroundColor: "#0a0f1e", borderRadius: 12, paddingVertical: 10 },
     quickStat: { alignItems: "center" },
     quickStatVal: { color: "#f8fafc", fontSize: 14, fontWeight: "900" },
     quickStatLabel: { color: "#64748b", fontSize: 9, fontWeight: "600", marginTop: 2 },
@@ -322,7 +318,7 @@ const styles = StyleSheet.create({
     milestoneBarTrack: { height: 6, backgroundColor: "#334155", borderRadius: 3, overflow: "hidden" },
     milestoneBarFill: { height: "100%", borderRadius: 3 },
 
-    expandedDetails: { backgroundColor: "#0f172a", borderRadius: 12, padding: 12, gap: 0 },
+    expandedDetails: { backgroundColor: "#0a0f1e", borderRadius: 12, padding: 12, gap: 0 },
     expandedRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#33415540" },
     expandedLabel: { color: "#94a3b8", fontSize: 13, fontWeight: "600" },
     expandedValue: { color: "#f8fafc", fontSize: 13, fontWeight: "800" },

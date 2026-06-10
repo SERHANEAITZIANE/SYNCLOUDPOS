@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -80,12 +81,7 @@ export default function G50TaxScreen() {
     };
 
     if (loading) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#f97316" />
-                <Text style={styles.loadingText}>Calcul de la TVA en cours...</Text>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     const totalCollected = months.reduce((s, m) => s + m.tvaCollected, 0);
@@ -134,7 +130,7 @@ export default function G50TaxScreen() {
                 <View style={styles.emptyState}>
                     <Ionicons name="receipt-outline" size={48} color="#334155" />
                     <Text style={styles.emptyText}>Aucune donnée TVA disponible</Text>
-                    <Text style={styles.emptySubText}>Les ventes et achats enregistrés apparaîtront ici</Text>
+                    <Text style={styles.emptySubText}>Makan hta déclaration G50 hna</Text>
                 </View>
             ) : (
                 <>
@@ -239,8 +235,8 @@ export default function G50TaxScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a", gap: 12 },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e", gap: 12 },
     loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
 
     emptyState: { alignItems: "center", padding: 48, gap: 12 },
@@ -265,7 +261,7 @@ const styles = StyleSheet.create({
 
     monthScroll: { paddingHorizontal: 16, marginBottom: 16 },
     monthChip: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#1e293b", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, marginRight: 8, borderWidth: 1, borderColor: "#334155" },
-    monthChipActive: { backgroundColor: "#0f172a" },
+    monthChipActive: { backgroundColor: "#0a0f1e" },
     monthChipText: { color: "#94a3b8", fontSize: 13, fontWeight: "700" },
 
     detailCard: { backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 20, padding: 20, gap: 16 },
@@ -275,7 +271,7 @@ const styles = StyleSheet.create({
     statusBadge: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
     statusText: { fontSize: 11, fontWeight: "800" },
 
-    computeSection: { backgroundColor: "#0f172a", borderRadius: 14, padding: 14, gap: 8 },
+    computeSection: { backgroundColor: "#0a0f1e", borderRadius: 14, padding: 14, gap: 8 },
     computeTitle: { color: "#64748b", fontSize: 10, fontWeight: "800", letterSpacing: 1, marginBottom: 4 },
     computeRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     computeTotal: { borderTopWidth: 1, borderTopColor: "#334155", marginTop: 4, paddingTop: 8 },

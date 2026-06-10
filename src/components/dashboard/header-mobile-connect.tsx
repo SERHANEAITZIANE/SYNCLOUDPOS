@@ -37,8 +37,9 @@ export function HeaderMobileConnect() {
         if (isLocal) {
             return "exp://192.168.0.132:8081";
         }
-        const slug = tab === "gerant" ? "syncloud-gerant" : "syncloud-tournee";
-        return `https://expo.dev/accounts/aitee/projects/${slug}/builds`;
+        return tab === "gerant"
+            ? "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.2.apk"
+            : "https://chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk";
     };
 
     return (

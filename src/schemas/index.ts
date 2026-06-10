@@ -82,10 +82,12 @@ export const OrderSchema = z.object({
     paidAmount: z.coerce.number().optional(),
     customerId: z.string().optional().nullable(),
     accountId: z.string().optional().nullable(),
+    userId: z.string().optional().nullable(),
     status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]).default("COMPLETED"),
     originalOrderId: z.string().optional().nullable(),
     discountAmount: z.coerce.number().optional().default(0),
-    loyaltyPointsUsed: z.coerce.number().optional().default(0)
+    loyaltyPointsUsed: z.coerce.number().optional().default(0),
+    idempotencyKey: z.string().optional().nullable()
 })
 
 export const CustomerSchema = z.object({
@@ -104,6 +106,7 @@ export const CustomerSchema = z.object({
     notes: z.string().optional(),
     clientType: z.enum(["RETAIL", "RESELLER", "WHOLESALE"]).default("RETAIL"),
     balance: z.coerce.number().default(0).optional(),
+    initialBalance: z.coerce.number().default(0).optional(),
 })
 
 export const SupplierSchema = z.object({

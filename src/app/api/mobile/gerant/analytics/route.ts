@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { requireMobileAuth, mobileErrorResponse } from "@/lib/mobile-auth";
+import { startOfDay, endOfDay, subDays } from "date-fns";
 
 export async function GET(req: NextRequest) {
     try {
@@ -10,22 +11,41 @@ export async function GET(req: NextRequest) {
         }
         const tenantId = user.tenantId;
         const { searchParams } = new URL(req.url);
-        const period = searchParams.get("period") || "today"; // today | week | month
+        const fromParam = searchParams.get("from");
+        const toParam = searchParams.get("to");
+        const clientType = searchParams.get("clientType"); // RETAIL, WHOLESALE, RESELLER, or null
 
-        const now = new Date();
         let startDate: Date;
-        let endDate = now;
+        let endDate: Date;
 
-        if (period === "today") {
-            startDate = new Date(now); startDate.setHours(0, 0, 0, 0);
-        } else if (period === "week") {
-            startDate = new Date(now); startDate.setDate(now.getDate() - 6); startDate.setHours(0, 0, 0, 0);
+        if (fromParam && toParam) {
+            startDate = startOfDay(new Date(fromParam));
+            endDate = endOfDay(new Date(toParam));
         } else {
-            startDate = new Date(now); startDate.setDate(1); startDate.setHours(0, 0, 0, 0);
+            const period = searchParams.get("period") || "today"; // today | week | month
+            const now = new Date();
+            endDate = now;
+            if (period === "today") {
+                startDate = new Date(now); startDate.setHours(0, 0, 0, 0);
+            } else if (period === "week") {
+                startDate = new Date(now); startDate.setDate(now.getDate() - 6); startDate.setHours(0, 0, 0, 0);
+            } else {
+                startDate = new Date(now); startDate.setDate(1); startDate.setHours(0, 0, 0, 0);
+            }
+        }
+
+        const salesOrderFilter: any = {
+            tenantId,
+            createdAt: { gte: startDate, lte: endDate },
+            status: { in: ["VALIDATED", "PAID"] }
+        };
+
+        if (clientType) {
+            salesOrderFilter.customer = { clientType };
         }
 
         const orders = await db.salesOrder.findMany({
-            where: { tenantId, createdAt: { gte: startDate, lte: endDate }, status: { in: ["VALIDATED", "PAID"] } },
+            where: salesOrderFilter,
             select: {
                 id: true, createdAt: true, total: true, customerId: true,
                 items: { select: { productId: true, quantity: true, unitPrice: true, product: { select: { name: true } } } },
@@ -36,17 +56,21 @@ export async function GET(req: NextRequest) {
         const totalRevenue = orders.reduce((s, o) => s + Number(o.total), 0);
         const totalOrders = orders.length;
 
-        // Hourly breakdown (for today)
+        // Hourly breakdown (for single-day queries)
         const hourlyMap: Record<number, number> = {};
         for (let h = 7; h <= 20; h++) hourlyMap[h] = 0;
-        if (period === "today") {
+        
+        const isSingleDay = startDate.toDateString() === endDate.toDateString() || 
+                           (endDate.getTime() - startDate.getTime() <= 1000 * 60 * 60 * 24);
+
+        if (isSingleDay) {
             for (const o of orders) {
                 const h = o.createdAt.getHours();
                 if (h >= 7 && h <= 20) hourlyMap[h] = (hourlyMap[h] || 0) + Number(o.total);
             }
         }
 
-        // Daily breakdown (for week/month)
+        // Daily breakdown (for multi-day queries)
         const dailyMap: Record<string, number> = {};
         for (const o of orders) {
             const dateKey = o.createdAt.toISOString().split("T")[0];
@@ -84,7 +108,7 @@ export async function GET(req: NextRequest) {
             .slice(0, 8);
 
         // Build trend data
-        const trend = period === "today"
+        const trend = isSingleDay
             ? Object.entries(hourlyMap).map(([h, v]) => ({ label: `${h}h`, value: Math.round(v) }))
             : Object.entries(dailyMap).sort().map(([d, v]) => ({
                 label: new Date(d).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" }),
@@ -93,10 +117,21 @@ export async function GET(req: NextRequest) {
 
         // Previous period comparison
         const prevStart = new Date(startDate);
-        const periodDays = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) || 1;
+        const periodMs = endDate.getTime() - startDate.getTime();
+        const periodDays = Math.max(1, Math.round(periodMs / (1000 * 60 * 60 * 24)));
         prevStart.setDate(prevStart.getDate() - periodDays);
+
+        const prevSalesOrderFilter: any = {
+            tenantId,
+            createdAt: { gte: prevStart, lt: startDate },
+            status: { in: ["VALIDATED", "PAID"] }
+        };
+        if (clientType) {
+            prevSalesOrderFilter.customer = { clientType };
+        }
+
         const prevOrders = await db.salesOrder.aggregate({
-            where: { tenantId, createdAt: { gte: prevStart, lt: startDate }, status: { in: ["VALIDATED", "PAID"] } },
+            where: prevSalesOrderFilter,
             _sum: { total: true },
         });
         const prevRevenue = Number(prevOrders._sum.total || 0);
@@ -105,7 +140,7 @@ export async function GET(req: NextRequest) {
             : 0;
 
         return NextResponse.json({
-            period,
+            period: fromParam && toParam ? "custom" : "standard",
             totalRevenue: Math.round(totalRevenue),
             totalOrders,
             avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0,

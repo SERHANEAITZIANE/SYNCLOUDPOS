@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo, FC, Suspense } from "react"
+import { useState, useEffect, useRef, useMemo, FC, Suspense, ReactNode } from "react"
 import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, Sparkles, Package, Percent, Trash, ChevronLeft, ChevronRight, Info } from "lucide-react"
 import Image from "next/image"
 
@@ -23,6 +23,7 @@ import { Modal } from "@/components/ui/modal"
 import { PosHeader } from "./pos-header"
 import { CartSidebar } from "./cart-sidebar"
 import { ProductCard } from "./product-card"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import dynamic from "next/dynamic"
 const SalesOrderSearchDialog = dynamic(() => import("./sales-order-search-dialog").then(m => m.SalesOrderSearchDialog), { ssr: false })
 import { useBarcodeScanner } from "@/hooks/use-barcode-scanner"
@@ -71,6 +72,8 @@ interface PosClientProps {
     posTimbreEnabled?: boolean
     storeData?: any
     isElectronicsStore?: boolean
+    sellers?: { id: string; name: string | null; role: string }[]
+    currentUserId?: string
 }
 
 const getCategoryIcon = (name: string) => {
@@ -112,7 +115,9 @@ export const PosClient: FC<PosClientProps> = ({
     accounts = [],
     posTimbreEnabled = false,
     storeData,
-    isElectronicsStore = false
+    isElectronicsStore = false,
+    sellers = [],
+    currentUserId
 }) => {
     const t = useTranslations("PosClient")
     const tCommon = useTranslations("Common")
@@ -121,11 +126,16 @@ export const PosClient: FC<PosClientProps> = ({
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const [isSearchOrderOpen, setIsSearchOrderOpen] = useState(false)
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false)
-    const [isListening, setIsListening] = useState(false)
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+    const [page, setPage] = useState(1)
+    const pageSize = 60
     
     // Product details state for list view
     const [selectedProductForInfo, setSelectedProductForInfo] = useState<any | null>(null)
+
+    // Keyboard navigation and image preview states
+    const [focusedProductIndex, setFocusedProductIndex] = useState<number>(-1)
+    const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
     
     // Category bar scrolling ref and function
     const categoryScrollRef = useRef<HTMLDivElement>(null)
@@ -262,6 +272,8 @@ export const PosClient: FC<PosClientProps> = ({
         setLocalProducts(products)
     }, [products])
 
+
+
     const handleCreateQuickProduct = async () => {
         if (!quickName.trim() || !quickCategoryId || !quickBrandId) {
             toast.error("Veuillez remplir les champs obligatoires (*)")
@@ -343,7 +355,6 @@ export const PosClient: FC<PosClientProps> = ({
         }
     }
 
-    const recognitionRef = useRef<any>(null)
     const cart = usePosStore()
     const isElectronics = cart.forceElectronicsMode || isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
 
@@ -357,6 +368,11 @@ export const PosClient: FC<PosClientProps> = ({
             }
         } catch { }
     }, [])
+
+    // Reset page on search or filter changes
+    useEffect(() => {
+        setPage(1)
+    }, [searchQuery, selectedCategory, showFavoritesOnly])
 
     // Derived cart values for mobile bottom bar
     const activeSessionId = cart.activeSessionId
@@ -376,38 +392,6 @@ export const PosClient: FC<PosClientProps> = ({
             }
         }
     }, [activeSessionId, activeSession?.customerId, customers, cart])
-
-    // Voice search with Web Speech API
-    const startVoiceSearch = () => {
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-        if (!SpeechRecognition) {
-            toast.error("Voice search not supported in this browser")
-            return
-        }
-
-        if (isListening) {
-            recognitionRef.current?.stop()
-            setIsListening(false)
-            return
-        }
-
-        const recognition = new SpeechRecognition()
-        recognitionRef.current = recognition
-        recognition.lang = "ar-DZ" // Algerian Arabic — also picks up French & Darija
-        recognition.interimResults = true
-        recognition.continuous = false
-
-        recognition.onstart = () => setIsListening(true)
-        recognition.onresult = (event: any) => {
-            const transcript = Array.from(event.results)
-                .map((r: any) => r[0].transcript)
-                .join("")
-            setSearchQuery(transcript)
-        }
-        recognition.onend = () => setIsListening(false)
-        recognition.onerror = () => setIsListening(false)
-        recognition.start()
-    }
 
     // Global POS Shortcuts
     useEffect(() => {
@@ -478,7 +462,8 @@ export const PosClient: FC<PosClientProps> = ({
     const handleLoadOrder = (order: any) => {
         setIsSearchOrderOpen(false)
         cart.createSession()
-        cart.updateSessionName(cart.activeSessionId, `Extracted ${order.receiptNumber}`)
+        const newSessionId = usePosStore.getState().activeSessionId
+        cart.updateSessionName(newSessionId, `Extracted ${order.receiptNumber}`)
         cart.setOriginalOrder(order.id, order.receiptNumber)
 
         // Set Customer if exists
@@ -513,7 +498,8 @@ export const PosClient: FC<PosClientProps> = ({
             const order = await getSalesOrderByReceipt(code)
             if (order) {
                 cart.createSession()
-                cart.updateSessionName(cart.activeSessionId, `Extracted ${code}`)
+                const newSessionId = usePosStore.getState().activeSessionId
+                cart.updateSessionName(newSessionId, `Extracted ${code}`)
                 cart.setOriginalOrder(order.id, order.receiptNumber)
 
                 // Set Customer if exists
@@ -687,8 +673,150 @@ export const PosClient: FC<PosClientProps> = ({
         });
     }, [localProducts, searchQuery, selectedCategory, showFavoritesOnly]);
 
-    // Show all matching products (no cap) when searching, otherwise cap at 60 for performance
-    const renderedProducts = searchQuery ? filteredProducts : filteredProducts.slice(0, 60)
+    const totalFiltered = filteredProducts.length
+    const totalPages = Math.ceil(totalFiltered / pageSize)
+    const currentPage = Math.max(1, Math.min(page, totalPages || 1))
+    const renderedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+    const [sidebarWidth, setSidebarWidth] = useState<'narrow' | 'standard' | 'wide'>('standard');
+
+    // Keyboard navigation functionality
+    const getColumnsCount = () => {
+        const gridEl = document.querySelector(".pos-products-grid");
+        if (gridEl) {
+            const computedStyle = window.getComputedStyle(gridEl);
+            const gridTemplateColumns = computedStyle.getPropertyValue("grid-template-columns");
+            const cols = gridTemplateColumns.split(" ").filter(Boolean);
+            return cols.length;
+        }
+        return 4;
+    };
+
+    // Reset focused index when query/category changes
+    useEffect(() => {
+        setFocusedProductIndex(-1);
+    }, [searchQuery, selectedCategory]);
+
+    // Scroll list item into view when focused in list view
+    useEffect(() => {
+        if (viewMode === "list" && focusedProductIndex !== -1 && itemRefs.current[focusedProductIndex]) {
+            itemRefs.current[focusedProductIndex]?.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+        }
+    }, [focusedProductIndex, viewMode]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Check if any modal/dialog is open
+            if (quickProductOpen || isSearchOrderOpen || selectedProductForInfo || isShortcutsOpen) {
+                return;
+            }
+
+            const openModals = document.querySelectorAll('[role="dialog"], [role="menu"]');
+            if (openModals.length > 0) {
+                return;
+            }
+
+            // Check if user is typing in a text input (excluding the search input)
+            const activeEl = document.activeElement;
+            const isSearchInput = activeEl && activeEl.classList.contains("pos-search-input");
+            const isOtherInputFocused = activeEl && !isSearchInput && (
+                activeEl.tagName === "INPUT" || 
+                activeEl.tagName === "TEXTAREA" || 
+                activeEl.getAttribute("contenteditable") === "true"
+            );
+
+            if (isOtherInputFocused) {
+                return;
+            }
+
+            const itemsCount = renderedProducts.length;
+            if (itemsCount === 0) return;
+
+            const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId);
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                if (viewMode === "grid") {
+                    const cols = getColumnsCount();
+                    setFocusedProductIndex(prev => {
+                        if (prev === -1) return 0;
+                        const next = prev + cols;
+                        return next < itemsCount ? next : prev;
+                    });
+                } else {
+                    setFocusedProductIndex(prev => (prev === -1 ? 0 : Math.min(itemsCount - 1, prev + 1)));
+                }
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (viewMode === "grid") {
+                    const cols = getColumnsCount();
+                    setFocusedProductIndex(prev => {
+                        if (prev === -1) return 0;
+                        const next = prev - cols;
+                        return next >= 0 ? next : prev;
+                    });
+                } else {
+                    setFocusedProductIndex(prev => (prev === -1 ? 0 : Math.max(0, prev - 1)));
+                }
+            } else if (e.key === "ArrowRight") {
+                if (viewMode === "grid") {
+                    e.preventDefault();
+                    setFocusedProductIndex(prev => (prev === -1 ? 0 : Math.min(itemsCount - 1, prev + 1)));
+                }
+            } else if (e.key === "ArrowLeft") {
+                if (viewMode === "grid") {
+                    e.preventDefault();
+                    setFocusedProductIndex(prev => (prev === -1 ? 0 : Math.max(0, prev - 1)));
+                }
+            } else if (e.key === "Enter") {
+                if (focusedProductIndex !== -1 && focusedProductIndex < itemsCount) {
+                    const targetProduct = renderedProducts[focusedProductIndex];
+                    const quantityInCart = activeSession?.items.find(item => item.productId === targetProduct.id)?.quantity || 0;
+                    const outOfStock = (storeData?.blockNegativeStock) && (targetProduct.stock - quantityInCart) <= 0;
+
+                    if (outOfStock) {
+                        toast.error("Cet article est en rupture de stock.");
+                        return;
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const cType = activeSession?.clientType || 'RETAIL';
+                    let currentPrice = targetProduct.price;
+                    if (cType === 'RESELLER' && targetProduct.dealerPrice != null) currentPrice = targetProduct.dealerPrice;
+                    if (cType === 'WHOLESALE' && targetProduct.wholesalePrice != null) currentPrice = targetProduct.wholesalePrice;
+
+                    cart.addItem({
+                        id: targetProduct.id,
+                        productId: targetProduct.id,
+                        name: targetProduct.name,
+                        price: currentPrice,
+                        retailPrice: targetProduct.price,
+                        wholesalePrice: targetProduct.wholesalePrice,
+                        dealerPrice: targetProduct.dealerPrice,
+                        cost: targetProduct.cost,
+                        tvaRate: targetProduct.tvaRate,
+                        priceHt: currentPrice / (1 + (targetProduct.tvaRate ?? 0) / 100),
+                        quantity: 1,
+                        image: targetProduct.imageUrl
+                    });
+
+                    toast.success(`${targetProduct.name} ajouté au panier !`, { id: 'added-to-cart' });
+                }
+            } else if (e.key === "Escape") {
+                setFocusedProductIndex(-1);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [focusedProductIndex, renderedProducts, viewMode, quickProductOpen, isSearchOrderOpen, selectedProductForInfo, isShortcutsOpen, cart.activeSessionId, storeData]);
 
     return (
         <div className="flex h-[100dvh] flex-col bg-[#f8f9fa] dark:bg-[#0f1115] overflow-hidden">
@@ -773,7 +901,7 @@ export const PosClient: FC<PosClientProps> = ({
                         <div className="flex-1 w-full h-[calc(100%-2rem)] flex flex-col pt-2">
                             {/* Draggable indicator line */}
                             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto my-2 flex-shrink-0" />
-                            <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} />
+                            <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} sellers={sellers} currentUserId={currentUserId} />
                         </div>
                     </SheetContent>
                 </Sheet>
@@ -789,7 +917,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors duration-200" />
                                 <Input
                                     placeholder={t("searchPlaceholder")}
-                                    className="pl-10 pr-10 h-11 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all rounded-xl text-xs lg:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 font-bold"
+                                    className="pl-10 pr-4 h-11 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all rounded-xl text-xs lg:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 font-bold pos-search-input"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value)
@@ -800,18 +928,6 @@ export const PosClient: FC<PosClientProps> = ({
                                         }
                                     }}
                                 />
-                                <button
-                                    onClick={startVoiceSearch}
-                                    title={isListening ? "Stop listening" : "Voice search (Arabic/French/Darija)"}
-                                    className={cn(
-                                        "absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full flex items-center justify-center transition-all",
-                                        isListening
-                                            ? "bg-red-500 text-white shadow-lg shadow-red-500/40 animate-pulse"
-                                            : "text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    )}
-                                >
-                                    {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-                                </button>
                             </div>
 
                             {/* Buttons and Action items */}
@@ -995,14 +1111,26 @@ export const PosClient: FC<PosClientProps> = ({
                     {/* Content Area (Grid or List) */}
                     <ScrollArea className="flex-1 px-3 lg:px-6 pb-20 lg:pb-6">
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7 gap-1.5 lg:gap-2 pb-8">
-                                {renderedProducts.map((product) => (
-                                    <ProductCard key={product.id} data={product} blockNegativeStock={storeData?.blockNegativeStock ?? false} />
+                            <div className={cn(
+                                "grid gap-2.5 lg:gap-3 pb-8 pos-products-grid",
+                                sidebarWidth === 'wide' 
+                                    ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
+                                    : sidebarWidth === 'narrow'
+                                    ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                    : "grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                            )}>
+                                {renderedProducts.map((product, index) => (
+                                    <ProductCard 
+                                        key={product.id} 
+                                        data={product} 
+                                        blockNegativeStock={storeData?.blockNegativeStock ?? false} 
+                                        isFocused={focusedProductIndex === index}
+                                    />
                                 ))}
                             </div>
                         ) : (
                             <div className="flex flex-col gap-2 pb-8 max-w-4xl mx-auto">
-                                {renderedProducts.map((product) => {
+                                {renderedProducts.map((product, index) => {
                                     const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId);
                                     const quantityInCart = activeSession?.items.find(item => item.productId === product.id)?.quantity || 0;
                                     const outOfStock = (storeData?.blockNegativeStock) && (product.stock - quantityInCart) <= 0;
@@ -1010,6 +1138,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     return (
                                         <div
                                             key={product.id}
+                                            ref={el => { itemRefs.current[index] = el; }}
                                             onClick={() => {
                                                 if (outOfStock) {
                                                     toast.error("Cet article est en rupture de stock.");
@@ -1037,7 +1166,10 @@ export const PosClient: FC<PosClientProps> = ({
                                             }}
                                             className={cn(
                                                 "flex items-center gap-3 lg:gap-4 bg-white dark:bg-[#1e293b] border-2 border-gray-100 dark:border-gray-800 p-2 lg:p-3 rounded-[16px] lg:rounded-[20px] hover:border-gray-300 dark:hover:border-gray-600 shadow-sm cursor-pointer transition-all group relative overflow-hidden",
-                                                outOfStock ? "opacity-50 cursor-not-allowed select-none bg-gray-50/20 dark:bg-slate-900/20" : ""
+                                                outOfStock ? "opacity-50 cursor-not-allowed select-none bg-gray-50/20 dark:bg-slate-900/20" : "",
+                                                focusedProductIndex === index
+                                                    ? "ring-2 ring-indigo-600 dark:ring-indigo-400 scale-[1.01] z-10 border-transparent shadow-[0_0_12px_rgba(99,102,241,0.4)]"
+                                                    : ""
                                             )}
                                         >
                                             {outOfStock && (
@@ -1045,15 +1177,15 @@ export const PosClient: FC<PosClientProps> = ({
                                                     Épuisé
                                                 </div>
                                             )}
-                                            {cart.showImages && (
-                                                <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative border border-gray-200/50 dark:border-gray-700/50">
-                                                    {product.imageUrl ? (
-                                                        <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
-                                                    ) : (
-                                                        <div className="flex h-full w-full items-center justify-center text-[8px] text-center font-medium text-gray-400">{t("noImg")}</div>
-                                                    )}
-                                                </div>
-                                            )}
+                                            <div 
+                                                className="h-12 w-12 lg:h-14 lg:w-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative border border-gray-200/50 dark:border-gray-700/50"
+                                            >
+                                                {product.imageUrl ? (
+                                                    <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center text-[8px] text-center font-medium text-gray-400">{t("noImg")}</div>
+                                                )}
+                                            </div>
                                             <div className="flex-1 overflow-hidden">
                                                 <p className="text-[9px] lg:text-[10px] font-bold text-primary/80 uppercase tracking-widest truncate">{product.category}</p>
                                                 <h4 className="font-bold text-gray-900 dark:text-gray-100 text-xs lg:text-sm truncate group-hover:text-primary transition-colors">{product.name}</h4>
@@ -1121,9 +1253,63 @@ export const PosClient: FC<PosClientProps> = ({
                                 })}
                             </div>
                         )}
-                        {filteredProducts.length > 60 && !searchQuery && (
-                            <div className="py-8 text-center text-xs lg:text-sm font-medium text-gray-400">
-                                {t("showingTop50")} — utilisez la recherche ou filtrez par catégorie pour voir plus
+                        {totalFiltered > 0 && (
+                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200/50 dark:border-slate-800/50 pt-4 pb-8 select-none">
+                                <p className="text-xs text-gray-500 dark:text-slate-400 font-bold">
+                                    {t("showingProducts", {
+                                        start: totalFiltered === 0 ? 0 : (currentPage - 1) * pageSize + 1,
+                                        end: Math.min(currentPage * pageSize, totalFiltered),
+                                        total: totalFiltered
+                                    })}
+                                </p>
+                                {totalPages > 1 && (
+                                    <nav className="relative z-0 inline-flex rounded-xl shadow-xs -space-x-px bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 p-0.5" aria-label="Pagination">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="h-8 w-8 rounded-lg text-gray-500 hover:text-gray-950 dark:hover:text-white disabled:opacity-40"
+                                        >
+                                            <ChevronLeft size={16} />
+                                        </Button>
+                                        
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                            .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                                            .map((p, index, array) => {
+                                                const showEllipsis = index > 0 && p - array[index - 1] > 1;
+                                                return (
+                                                    <div key={p} className="flex items-center">
+                                                        {showEllipsis && (
+                                                            <span className="px-2 text-xs text-gray-400">...</span>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setPage(p)}
+                                                            className={cn(
+                                                                "h-8 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                                                                currentPage === p
+                                                                    ? "bg-indigo-600 text-white shadow-xs"
+                                                                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white"
+                                                            )}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="h-8 w-8 rounded-lg text-gray-500 hover:text-gray-950 dark:hover:text-white disabled:opacity-40"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </Button>
+                                    </nav>
+                                )}
                             </div>
                         )}
                         {filteredProducts.length === 0 && (
@@ -1163,11 +1349,15 @@ export const PosClient: FC<PosClientProps> = ({
                 </div>
 
                 {/* Cart Sidebar - Hidden on mobile, Right on Desktop */}
-                <div className="hidden lg:flex w-[440px] h-full shrink-0 z-20 transition-all bg-white dark:bg-[#18181b] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[-4px_0_24px_rgba(0,0,0,0.3)] border-l border-gray-200 dark:border-gray-800 flex-col">
-                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} />
+                <div 
+                    className="hidden lg:flex h-full shrink-0 z-20 transition-all duration-200 bg-white dark:bg-[#18181b] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[-4px_0_24px_rgba(0,0,0,0.3)] border-l border-gray-200 dark:border-gray-800 flex-col"
+                    style={{ width: sidebarWidth === 'narrow' ? '30%' : sidebarWidth === 'wide' ? '50%' : '40%' }}
+                >
+                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} sidebarWidth={sidebarWidth} setSidebarWidth={setSidebarWidth} sellers={sellers} currentUserId={currentUserId} />
                 </div>
 
             </div>
+
 
             <Suspense fallback={null}>
                 <SalesOrderSearchDialog

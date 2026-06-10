@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { ClientType } from "@prisma/client"
 
 interface CustomerData {
     name: string
@@ -18,8 +19,9 @@ interface CustomerData {
     rib?: string
     barcode?: string
     notes?: string
-    clientType?: string
+    clientType?: ClientType
     balance?: number
+    initialBalance?: number
 }
 
 export const getCustomers = async (page: number = 1, pageSize: number = 20, search?: string) => {
@@ -65,9 +67,25 @@ export const createCustomer = async (data: CustomerData) => {
     const tenantId = session.user.tenantId
 
     try {
+        const initialBal = data.initialBalance ?? data.balance ?? 0
         const customer = await db.customer.create({
             data: {
-                ...data,
+                name: data.name,
+                phone: data.phone || null,
+                email: data.email || null,
+                address: data.address || null,
+                city: data.city || null,
+                taxId: data.taxId || null,
+                nif: data.nif || null,
+                nis: data.nis || null,
+                artImposition: data.artImposition || null,
+                rc: data.rc || null,
+                rib: data.rib || null,
+                barcode: data.barcode || null,
+                notes: data.notes || null,
+                clientType: data.clientType || ClientType.RETAIL,
+                balance: initialBal,
+                initialBalance: initialBal,
                 tenantId
             }
         })
@@ -87,15 +105,49 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
-        const { balance, ...rest } = data
+        const existingCustomer = await db.customer.findUnique({
+            where: { id, tenantId }
+        })
+        if (!existingCustomer) return { error: "Customer not found" }
+
+        // Sanitize: convert empty strings to null/undefined for optional fields
+        // This prevents unique constraint violations (e.g. barcode @unique with "")
+        const sanitize = (val: string | undefined | null): string | null => {
+            if (val === undefined || val === null || val === "") return null
+            return val
+        }
+
+        const newInitialBalance = data.initialBalance ?? 0
+        const oldInitialBalance = existingCustomer.initialBalance ? Number(existingCustomer.initialBalance) : 0
+        const delta = newInitialBalance - oldInitialBalance
+        const newBalance = Number(existingCustomer.balance) + delta
+
         const customer = await db.customer.update({
             where: { id, tenantId },
-            data: rest
+            data: {
+                name: data.name,
+                phone: sanitize(data.phone),
+                email: sanitize(data.email),
+                address: sanitize(data.address),
+                city: sanitize(data.city),
+                taxId: sanitize(data.taxId),
+                nif: sanitize(data.nif),
+                nis: sanitize(data.nis),
+                artImposition: sanitize(data.artImposition),
+                rc: sanitize(data.rc),
+                rib: sanitize(data.rib),
+                barcode: sanitize(data.barcode) || null,
+                notes: sanitize(data.notes),
+                clientType: data.clientType || ClientType.RETAIL,
+                balance: newBalance,
+                initialBalance: newInitialBalance
+            }
         })
         revalidatePath("/(dashboard)/customers")
         return { success: "Customer updated", id: customer.id }
-    } catch (_error) {
-        return { error: "Failed to update customer" }
+    } catch (error: any) {
+        console.error("updateCustomer error:", error)
+        return { error: `Failed to update customer: ${error?.message || String(error)}` }
     }
 }
 
@@ -154,11 +206,11 @@ export const importCustomers = async (rows: Record<string, string>[]) => {
     }
 
     // Helper to determine client type
-    const resolveClientType = (val: string): string => {
+    const resolveClientType = (val: string): ClientType => {
         const v = val.toLowerCase().trim()
-        if (["reseller", "revendeur", "grossiste-revendeur"].includes(v)) return "RESELLER"
-        if (["wholesale", "grossiste", "gros"].includes(v)) return "WHOLESALE"
-        return "RETAIL"
+        if (["reseller", "revendeur", "grossiste-revendeur"].includes(v)) return ClientType.RESELLER
+        if (["wholesale", "grossiste", "gros"].includes(v)) return ClientType.WHOLESALE
+        return ClientType.RETAIL
     }
 
     const validRows = rows.filter(r => {
@@ -198,6 +250,7 @@ export const importCustomers = async (rows: Record<string, string>[]) => {
             notes: notes || undefined,
             clientType: resolveClientType(clientTypeRaw),
             balance: parseNumeric(balanceRaw),
+            initialBalance: parseNumeric(balanceRaw),
             barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
             tenantId
         }
@@ -377,6 +430,11 @@ export const getCustomerLoans = async (customerId?: string) => {
                 source: "MANUAL_OUT",
                 referenceId: { in: customerIds }
             },
+            include: {
+                account: {
+                    select: { id: true, name: true }
+                }
+            },
             orderBy: { date: "desc" }
         })
 
@@ -389,7 +447,9 @@ export const getCustomerLoans = async (customerId?: string) => {
                 source: t.source,
                 description: t.description || "",
                 customerName: customer?.name || "Inconnu",
-                customerId: t.referenceId as string
+                customerId: t.referenceId as string,
+                accountId: t.accountId,
+                accountName: t.account?.name || "Inconnu"
             }
         })
 

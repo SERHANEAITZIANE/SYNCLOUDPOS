@@ -77,7 +77,7 @@ export default function AiAdvisorScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={{ flex: 1, backgroundColor: "#0f172a" }}
+            style={{ flex: 1, backgroundColor: "#0a0f1e" }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
         >
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1, borderTopColor: "#334155",
     },
     input: {
-        flex: 1, backgroundColor: "#0f172a",
+        flex: 1, backgroundColor: "#0a0f1e",
         borderWidth: 1, borderColor: "#334155",
         borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10,
         color: "#f8fafc", fontSize: 14, maxHeight: 100,

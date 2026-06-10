@@ -691,7 +691,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
 
     profileCard: {
         alignItems: "center", padding: 24,
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
     optionsRow: { flexDirection: "row", gap: 8, marginTop: 12 },
     optionBtn: {
         flex: 1, alignItems: "center", gap: 4, padding: 12, borderRadius: 10,
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
         flexDirection: "row", justifyContent: "center",
     },
     optionBtnWide: { flex: 1 },
@@ -749,7 +749,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     modelPill: {
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderWidth: 1,
         borderColor: "#334155",
         paddingHorizontal: 10,
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
 
     // API Key Input styling
     keyInput: {
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         color: "#f8fafc",
         borderWidth: 1,
         borderColor: "#334155",

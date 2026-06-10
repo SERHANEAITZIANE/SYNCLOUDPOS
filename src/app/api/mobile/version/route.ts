@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     return NextResponse.json({
-        version: "2.3.0",
-        apkUrl: "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk",
+        version: "3.0.0",
+        apkUrl: "https://chirpedbeo.online/downloads/syncloudpos-gerant-v3.0.0.apk",
         releaseNotes: {
-            fr: "• Version 2.3.0 — Refonte UX complète \u2018Midnight Aurora\u2019\n• Nouvelle navigation 4 onglets : Accueil, Finance, IA, Plus\n• Écran Finance : accès direct à tous les rapports en 1 tap\n• Écran Plus : toutes les opérations organisées par catégorie\n• Thème Midnight Aurora : glassmorphism, gradients, micro-animations\n• Correctif IA : historique de conversation + mode détaillé\n• Transitions de page fluides (fade from bottom)",
-            ar: "• نسخة 2.3.0 — تجديد كامل لواجهة Midnight Aurora\n• تنقل جديد بـ 4 تبويبات: الرئيسية, المالية, الذكاء, المزيد\n• شاشة مالية: وصول مباشر لجميع التقارير بنقرة واحدة\n• شاشة المزيد: جميع العمليات منظمة حسب الفئة\n• تصحيح الذكاء: تاريخ المحادثة + الوضع التفصيلي"
+            fr: "• Version 3.0.0 — Refonte majeure de l'interface (Design System v3), tableau de bord premium dynamique, nouveaux rapports analytiques avec filtres, centre de notifications intelligent, suivi des objectifs et résumés hebdomadaires.",
+            ar: "• نسخة 3.0.0 — تحديث شامل للواجهة وتصميم جديد، لوحة تحكم ذكية، تقارير تحليلية متقدمة مع فلاتر جديدة، مركز إشعارات متكامل، ومتابعة الأهداف والملخصات الأسبوعية."
         },
         minRequired: "1.0.0",
         gerantEndpoints: [

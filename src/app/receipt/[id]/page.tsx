@@ -21,12 +21,12 @@ export default async function ReceiptPage({ params }: Props) {
     // Try POS order first, then Sales Order
     const order = await db.order.findUnique({
         where: { id },
-        include: { customer: true, tenant: { select: { name: true, phone: true, address: true, email: true } } }
+        include: { customer: true, tenant: { select: { name: true, phone: true, address: true, email: true, logo: true } } }
     }).catch(() => null)
 
     const salesOrder = !order ? await db.salesOrder.findUnique({
         where: { id },
-        include: { customer: true, tenant: { select: { name: true, phone: true, address: true, email: true } } }
+        include: { customer: true, tenant: { select: { name: true, phone: true, address: true, email: true, logo: true } } }
     }).catch(() => null) : null
 
     const doc = order || salesOrder
@@ -48,20 +48,35 @@ export default async function ReceiptPage({ params }: Props) {
             <body className="min-h-screen bg-gray-50 font-sans">
                 <div className="max-w-md mx-auto py-10 px-4">
                     {/* Header */}
-                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-6">
-                        <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-8 text-white">
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-6 relative">
+                        {tenant.logo && (
+                            <div 
+                                className="absolute inset-0 opacity-[0.03] pointer-events-none bg-center bg-no-repeat bg-contain" 
+                                style={{ backgroundImage: `url(${tenant.logo})`, margin: '4rem 2rem 2rem 2rem' }}
+                            />
+                        )}
+                        <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-6 py-8 text-white relative z-10">
                             <div className="flex items-center justify-between">
-                                <div>
-                                    <h1 className="text-2xl font-bold">{tenant.name}</h1>
-                                    <p className="text-indigo-100 text-sm mt-0.5">{tenant.phone}</p>
+                                <div className="flex items-center gap-3">
+                                    {tenant.logo && (
+                                        <img 
+                                            src={tenant.logo} 
+                                            alt="Logo" 
+                                            className="w-12 h-12 object-contain rounded-xl bg-white p-1.5 shadow-sm border border-indigo-100/30" 
+                                        />
+                                    )}
+                                    <div>
+                                        <h1 className="text-xl font-bold leading-tight">{tenant.name}</h1>
+                                        <p className="text-indigo-100 text-xs mt-0.5">{tenant.phone}</p>
+                                    </div>
                                 </div>
-                                <div className={`px-3 py-1.5 rounded-full text-sm font-bold ${isPaid ? "bg-emerald-400 text-white" : "bg-amber-400 text-amber-900"}`}>
+                                <div className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 ${isPaid ? "bg-emerald-400 text-white" : "bg-amber-400 text-amber-900"}`}>
                                     {isPaid ? "✓ Payé" : "⏳ Solde dû"}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="px-6 py-6 space-y-4">
+                        <div className="px-6 py-6 space-y-4 relative z-10">
                             {/* Customer */}
                             {customer && (
                                 <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">

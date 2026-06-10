@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { requireMobileAuth, mobileErrorResponse } from "@/lib/mobile-auth";
+import { ChequeStatus } from "@prisma/client";
 
 // GET /api/mobile/gerant/cheques — Cheque list from native Cheque model
 export async function GET(req: NextRequest) {
@@ -104,7 +105,7 @@ export async function PATCH(req: NextRequest) {
 
         const updated = await db.cheque.update({
             where: { id },
-            data: { status: statusMap[status] || "PENDING" },
+            data: { status: (statusMap[status] || "PENDING") as ChequeStatus },
         });
 
         return NextResponse.json({ success: true, id: updated.id });

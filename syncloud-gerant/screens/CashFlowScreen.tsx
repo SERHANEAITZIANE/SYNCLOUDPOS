@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 const { width } = Dimensions.get("window");
 
@@ -139,12 +140,7 @@ export default function CashFlowScreen() {
     const maxBar = barData.length > 0 ? Math.max(...barData.map(b => Math.abs(b.net))) : 1;
 
     if (loading) {
-        return (
-            <View style={{ flex: 1, backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color="#06b6d4" />
-                <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 10 }}>Chargement des flux de caisse...</Text>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     return (
@@ -267,43 +263,51 @@ export default function CashFlowScreen() {
 
             {/* Flow Items */}
             <Text style={styles.sectionTitle}>DÉTAIL DES FLUX</Text>
-            <View style={styles.flowList}>
-                {flows.map((item, i) => (
-                    <View key={i} style={[styles.flowItem, i < flows.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#33415540" }]}>
-                        <View style={[styles.flowItemIcon, {
-                            backgroundColor: item.type === "in" ? "#22c55e15" : "#ef444415",
-                        }]}>
-                            <Ionicons
-                                name={item.type === "in" ? "arrow-down" : "arrow-up"}
-                                size={16}
-                                color={item.type === "in" ? "#22c55e" : "#ef4444"}
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={styles.flowItemLabel}>{item.label}</Text>
-                            <View style={styles.flowItemMeta}>
-                                <Text style={styles.flowItemDate}>{item.date}</Text>
-                                <View style={[styles.probBadge, { backgroundColor: `${PROB_COLORS[item.probability]}20` }]}>
-                                    <View style={[styles.probBadgeDot, { backgroundColor: PROB_COLORS[item.probability] }]} />
-                                    <Text style={[styles.probBadgeText, { color: PROB_COLORS[item.probability] }]}>
-                                        {item.probability}
-                                    </Text>
-                                </View>
-                                <Text style={styles.flowItemCat}>{item.category}</Text>
+            {flows.length === 0 ? (
+                <View style={styles.emptyState}>
+                    <Ionicons name="swap-vertical" size={48} color="#334155" />
+                    <Text style={styles.emptyText}>Aucun flux trouvé</Text>
+                    <Text style={styles.emptySubText}>Makan hta transaction f la caisse hna</Text>
+                </View>
+            ) : (
+                <View style={styles.flowList}>
+                    {flows.map((item, i) => (
+                        <View key={i} style={[styles.flowItem, i < flows.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#33415540" }]}>
+                            <View style={[styles.flowItemIcon, {
+                                backgroundColor: item.type === "in" ? "#22c55e15" : "#ef444415",
+                            }]}>
+                                <Ionicons
+                                    name={item.type === "in" ? "arrow-down" : "arrow-up"}
+                                    size={16}
+                                    color={item.type === "in" ? "#22c55e" : "#ef4444"}
+                                />
                             </View>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.flowItemLabel}>{item.label}</Text>
+                                <View style={styles.flowItemMeta}>
+                                    <Text style={styles.flowItemDate}>{item.date}</Text>
+                                    <View style={[styles.probBadge, { backgroundColor: `${PROB_COLORS[item.probability]}20` }]}>
+                                        <View style={[styles.probBadgeDot, { backgroundColor: PROB_COLORS[item.probability] }]} />
+                                        <Text style={[styles.probBadgeText, { color: PROB_COLORS[item.probability] }]}>
+                                            {item.probability}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.flowItemCat}>{item.category}</Text>
+                                </View>
+                            </View>
+                            <Text style={[styles.flowItemAmount, { color: item.type === "in" ? "#22c55e" : "#ef4444" }]}>
+                                {item.type === "in" ? "+" : "-"}{fmt(item.amount)} DA
+                            </Text>
                         </View>
-                        <Text style={[styles.flowItemAmount, { color: item.type === "in" ? "#22c55e" : "#ef4444" }]}>
-                            {item.type === "in" ? "+" : "-"}{fmt(item.amount)} DA
-                        </Text>
-                    </View>
-                ))}
-            </View>
+                    ))}
+                </View>
+            )}
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
 
     horizonBar: {
         flexDirection: "row", gap: 8, paddingHorizontal: 16,
@@ -383,4 +387,7 @@ const styles = StyleSheet.create({
     probBadgeDot: { width: 5, height: 5, borderRadius: 3 },
     probBadgeText: { fontSize: 9, fontWeight: "700" },
     flowItemAmount: { fontSize: 13, fontWeight: "800" },
+    emptyState: { alignItems: "center", padding: 48, gap: 12 },
+    emptyText: { color: "#64748b", fontSize: 16, fontWeight: "700" },
+    emptySubText: { color: "#475569", fontSize: 12, textAlign: "center" },
 });

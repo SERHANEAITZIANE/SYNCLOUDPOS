@@ -140,8 +140,8 @@ async function callGeminiTranscription(audioFile: Blob, language: string, apiKey
         ? audioFile.type
         : "audio/m4a";
 
-    // Use gemini-2.0-flash for outstanding multimodal audio transcription in 2026
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
+    // Use gemini-2.5-flash for outstanding multimodal audio transcription in 2026
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
 
     const response = await fetch(url, {
         method: "POST",

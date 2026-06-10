@@ -367,7 +367,7 @@ export default function CreateBLScreen({ navigation }: any) {
             <head>
                 <meta charset="UTF-8">
                 <style>
-                    body { font-family: Arial, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 24px; }
+                    body { font-family: Arial, sans-serif; background-color: #0a0f1e; color: #f8fafc; padding: 24px; }
                     .header { display: flex; justify-content: space-between; border-bottom: 2px solid #22c55e; padding-bottom: 16px; margin-bottom: 24px; }
                     .title { font-size: 24px; color: #22c55e; font-weight: bold; }
                     .meta { text-align: right; font-size: 12px; color: #94a3b8; }
@@ -864,14 +864,14 @@ export default function CreateBLScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
     
     // Header
     header: {
         flexDirection: "row", justifyContent: "space-between", alignItems: "center",
         paddingHorizontal: 16, paddingTop: 50, paddingBottom: 16,
         borderBottomWidth: 1, borderBottomColor: "#334155",
-        backgroundColor: "#0f172a"
+        backgroundColor: "#0a0f1e"
     },
     backBtn: { width: 40, height: 40, justifyContent: "center", alignItems: "center" },
     headerTitle: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
@@ -889,7 +889,7 @@ const styles = StyleSheet.create({
     addProductShortcut: { width: 30, height: 30, justifyContent: "center", alignItems: "center" },
 
     // Client select UI
-    selectedClientContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "#0f172a50", padding: 12, borderRadius: 12 },
+    selectedClientContainer: { flexDirection: "row", alignItems: "center", backgroundColor: "#0a0f1e50", padding: 12, borderRadius: 12 },
     clientNameText: { color: "#f8fafc", fontSize: 14, fontWeight: "700" },
     clientPhoneText: { color: "#64748b", fontSize: 12, marginTop: 2 },
     changeClientBtn: { backgroundColor: "#334155", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
@@ -907,23 +907,23 @@ const styles = StyleSheet.create({
     addProductShortcutBtnText: { color: "#22c55e", fontSize: 12, fontWeight: "800" },
 
     basketItemsList: { gap: 10 },
-    basketItemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0f172a30", padding: 12, borderRadius: 12, borderWidth: 1, borderColor: "#33415580" },
+    basketItemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0a0f1e30", padding: 12, borderRadius: 12, borderWidth: 1, borderColor: "#33415580" },
     basketItemName: { color: "#f8fafc", fontSize: 13, fontWeight: "700" },
     basketItemTva: { color: "#64748b", fontSize: 11, marginTop: 2 },
     basketItemActions: { flexDirection: "row", alignItems: "center", gap: 6 },
-    priceInputMini: { backgroundColor: "#0f172a", borderRadius: 8, borderWidth: 1, borderColor: "#334155", width: 70, height: 32, paddingHorizontal: 8, color: "#fff", fontSize: 12, fontWeight: "700", textAlign: "right" },
+    priceInputMini: { backgroundColor: "#0a0f1e", borderRadius: 8, borderWidth: 1, borderColor: "#334155", width: 70, height: 32, paddingHorizontal: 8, color: "#fff", fontSize: 12, fontWeight: "700", textAlign: "right" },
     currencySuffixMini: { color: "#64748b", fontSize: 10, fontWeight: "700" },
     
-    qtyRowMini: { flexDirection: "row", alignItems: "center", backgroundColor: "#0f172a", borderRadius: 8, borderWidth: 1, borderColor: "#334155", padding: 2, gap: 6 },
+    qtyRowMini: { flexDirection: "row", alignItems: "center", backgroundColor: "#0a0f1e", borderRadius: 8, borderWidth: 1, borderColor: "#334155", padding: 2, gap: 6 },
     qtyBtnMini: { width: 24, height: 24, borderRadius: 6, backgroundColor: "#334155", justifyContent: "center", alignItems: "center" },
     qtyTextMini: { color: "#f8fafc", fontSize: 12, fontWeight: "800", minWidth: 20, textAlign: "center" },
 
     // Forms
     inputGroup: { marginBottom: 14 },
     label: { color: "#94a3b8", fontSize: 12, fontWeight: "700", marginBottom: 6 },
-    input: { backgroundColor: "#0f172a", borderRadius: 12, borderWidth: 1, borderColor: "#334155", height: 44, color: "#fff", paddingHorizontal: 12, fontSize: 13 },
+    input: { backgroundColor: "#0a0f1e", borderRadius: 12, borderWidth: 1, borderColor: "#334155", height: 44, color: "#fff", paddingHorizontal: 12, fontSize: 13 },
     
-    toggleGroup: { flexDirection: "row", backgroundColor: "#0f172a", borderRadius: 10, padding: 3, borderWidth: 1, borderColor: "#334155" },
+    toggleGroup: { flexDirection: "row", backgroundColor: "#0a0f1e", borderRadius: 10, padding: 3, borderWidth: 1, borderColor: "#334155" },
     toggleBtn: { flex: 1, paddingVertical: 10, alignItems: "center", borderRadius: 8 },
     toggleBtnActive: { backgroundColor: "#22c55e" },
     toggleText: { color: "#64748b", fontSize: 12, fontWeight: "700" },
@@ -939,7 +939,7 @@ const styles = StyleSheet.create({
     grandTotalValue: { color: "#22c55e", fontSize: 18, fontWeight: "900" },
 
     // Sticky Footer
-    stickyFooter: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, paddingBottom: Platform.OS === "ios" ? 34 : 16, backgroundColor: "#0f172a", borderTopWidth: 1, borderTopColor: "#334155", zIndex: 100 },
+    stickyFooter: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 16, paddingBottom: Platform.OS === "ios" ? 34 : 16, backgroundColor: "#0a0f1e", borderTopWidth: 1, borderTopColor: "#334155", zIndex: 100 },
     createBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: "#22c55e", height: 50, borderRadius: 14 },
     createBtnDisabled: { backgroundColor: "#334155" },
     createBtnText: { color: "#fff", fontSize: 14, fontWeight: "800" },
@@ -949,7 +949,7 @@ const styles = StyleSheet.create({
     sheetContent: { backgroundColor: "#1e293b", borderTopLeftRadius: 24, borderTopRightRadius: 24, height: "70%", padding: 16 },
     sheetHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
     sheetTitle: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
-    sheetSearch: { backgroundColor: "#0f172a", borderRadius: 12, borderWidth: 1, borderColor: "#334155", height: 44, color: "#fff", paddingHorizontal: 12, fontSize: 13, marginBottom: 14 },
+    sheetSearch: { backgroundColor: "#0a0f1e", borderRadius: 12, borderWidth: 1, borderColor: "#334155", height: 44, color: "#fff", paddingHorizontal: 12, fontSize: 13, marginBottom: 14 },
     sheetItemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderBottomWidth: 1, borderBottomColor: "#33415540", paddingVertical: 12 },
     sheetItemName: { color: "#f8fafc", fontSize: 14, fontWeight: "700" },
     sheetItemSub: { color: "#64748b", fontSize: 11, marginTop: 2 },
@@ -961,7 +961,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         overflow: "hidden",
         marginRight: 10,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderWidth: 1,
         borderColor: "#33415580",
     },
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 12,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderWidth: 1,
         borderColor: "#334155",
         justifyContent: "center",
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         overflow: "hidden",
         marginRight: 12,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         borderWidth: 1,
         borderColor: "#33415580",
     },
@@ -1079,7 +1079,7 @@ const styles = StyleSheet.create({
     zoomImageWrapper: {
         width: "100%",
         height: 260,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
         justifyContent: "center",
         alignItems: "center",
         borderBottomWidth: 1,
@@ -1116,7 +1116,7 @@ const styles = StyleSheet.create({
         color: "#94a3b8",
         fontSize: 12,
         lineHeight: 16,
-        backgroundColor: "#0f172a40",
+        backgroundColor: "#0a0f1e40",
         padding: 10,
         borderRadius: 10,
         borderWidth: 1,

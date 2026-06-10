@@ -27,6 +27,7 @@ interface ReceiptProps {
     paidAmount?: number
     previousBalance?: number
     newBalance?: number
+    logo?: string
 }
 
 export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
@@ -42,7 +43,8 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
     customerName,
     paidAmount,
     previousBalance,
-    newBalance
+    newBalance,
+    logo
 }, ref) => {
     const t = useTranslations("Receipt")
 
@@ -57,6 +59,11 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
         <div ref={ref} className="w-[80mm] p-4 bg-white text-black font-sans text-base font-bold leading-tight print:shadow-none shadow-lg print:m-0 mx-auto">
             {/* Header */}
             <div className="text-center mb-6 space-y-1">
+                {logo && (
+                    <div className="flex justify-center mb-2">
+                        <img src={logo} alt="Logo" className="max-h-[60px] max-w-[60mm] object-contain" />
+                    </div>
+                )}
                 <h1 className="font-black text-2xl tracking-tighter uppercase">{storeName}</h1>
                 <p className="text-sm text-black font-bold">{storeAddress}</p>
                 <p className="text-sm text-black font-bold">Tel: {storePhone}</p>

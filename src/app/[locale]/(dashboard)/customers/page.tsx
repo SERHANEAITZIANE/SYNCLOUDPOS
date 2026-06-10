@@ -6,11 +6,11 @@ import { getTreasuryAccounts } from "@/actions/treasury"
 export default async function CustomersPage({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string, name?: string }>
+    searchParams: Promise<{ page?: string, name?: string, limit?: string }>
 }) {
     const params = await searchParams
     const page = Number(params.page) || 1
-    const pageSize = 20
+    const pageSize = Number(params.limit) || 20
     const search = params.name || ""
 
     const { customers, totalCount } = await getCustomers(page, pageSize, search) as { customers: any[], totalCount: number }

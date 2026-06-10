@@ -69,6 +69,7 @@ services:
     volumes:
       - uploads_data:/app/public/uploads
       - ./license.key:/app/license.key
+      - ./.local-printers.json:/app/.local-printers.json
     depends_on:
       db:
         condition: service_healthy

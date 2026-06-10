@@ -135,37 +135,123 @@ export async function updateLoyaltySettings(data: {
 
 export async function getLocalPrinters(): Promise<string[]> {
     try {
-        const { exec } = await import("child_process")
-        const { promisify } = await import("util")
-        const execAsync = promisify(exec)
+        const fs = await import("fs/promises")
+        const path = await import("path")
 
-        let stdout = ""
+        const printersList = new Set<string>()
+
+        // 1. If running on Windows, query the actual OS printers first
         if (process.platform === "win32") {
+            const { exec } = await import("child_process")
+            const { promisify } = await import("util")
+            const execAsync = promisify(exec)
+
+            // Try HKLM registry
             try {
-                const res = await execAsync('powershell -Command "Get-Printer | Select-Object -ExpandProperty Name"')
-                stdout = res.stdout
-            } catch (err) {
-                const res = await execAsync('wmic printer get name')
-                stdout = res.stdout
+                const res = await execAsync('reg query "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Print\\Printers"')
+                res.stdout.split(/\r?\n/).forEach(line => {
+                    const trimmed = line.trim()
+                    if (trimmed.startsWith("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Print\\Printers\\")) {
+                        const name = trimmed.replace("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Print\\Printers\\", "").trim()
+                        if (name) printersList.add(name)
+                    }
+                })
+            } catch (hklmErr) {
+                console.error("Registry HKLM printer query failed:", hklmErr)
             }
-        } else if (process.platform === "darwin") {
-            const res = await execAsync('lpstat -a | cut -d" " -f1')
-            stdout = res.stdout
-        } else {
-            const res = await execAsync('lpstat -p | cut -d" " -f2')
-            stdout = res.stdout
+
+            // Try HKCU registry
+            try {
+                const res = await execAsync('reg query "HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Devices"')
+                res.stdout.split(/\r?\n/).forEach(line => {
+                    const trimmed = line.trim()
+                    if (trimmed && !trimmed.startsWith("HKEY_")) {
+                        const idx = trimmed.indexOf("REG_SZ")
+                        if (idx !== -1) {
+                            const name = trimmed.substring(0, idx).trim()
+                            if (name) printersList.add(name)
+                        }
+                    }
+                })
+            } catch (regErr) {
+                console.error("Registry HKCU printer query failed:", regErr)
+            }
+
+            // Try PowerShell
+            try {
+                const res = await execAsync('powershell -ExecutionPolicy Bypass -Command "Get-Printer | Select-Object -ExpandProperty Name"')
+                res.stdout.split(/\r?\n/).forEach(line => {
+                    const trimmed = line.trim()
+                    if (trimmed && trimmed !== "Name" && !trimmed.includes("------")) {
+                        printersList.add(trimmed)
+                    }
+                })
+            } catch (psErr) {
+                console.error("Powershell printer query failed:", psErr)
+            }
+
+            // Try WMIC
+            try {
+                const res = await execAsync('wmic printer get name')
+                res.stdout.split(/\r?\n/).forEach(line => {
+                    const trimmed = line.trim()
+                    if (trimmed && trimmed !== "Name" && !trimmed.includes("------")) {
+                        printersList.add(trimmed)
+                    }
+                })
+            } catch (wmicErr) {
+                // ignore
+            }
         }
 
-        const lines = stdout
-            .split(/\r?\n/)
-            .map(line => line.trim())
-            .filter(line => line && line !== "Name" && !line.includes("------"))
+        // 2. If Windows queries yielded results, return them
+        if (printersList.size > 0) {
+            return Array.from(printersList)
+        }
 
-        return Array.from(new Set(lines))
+        // 3. Fallback: try reading from local JSON file (useful inside Docker/VPS)
+        try {
+            const filePath = path.join(process.cwd(), ".local-printers.json")
+            const fileExists = await fs.access(filePath).then(() => true).catch(() => false)
+            if (fileExists) {
+                const data = await fs.readFile(filePath, "utf-8")
+                const printers = JSON.parse(data)
+                if (Array.isArray(printers) && printers.length > 0) {
+                    return printers
+                }
+            }
+        } catch (jsonErr) {
+            console.error("Failed to read .local-printers.json:", jsonErr)
+        }
+
+        // 4. Non-Windows POSIX fallback (macOS/Linux via CUPS lpstat)
+        if (process.platform !== "win32") {
+            const { exec } = await import("child_process")
+            const { promisify } = await import("util")
+            const execAsync = promisify(exec)
+            
+            let stdout = ""
+            try {
+                if (process.platform === "darwin") {
+                    const res = await execAsync('lpstat -a | cut -d" " -f1')
+                    stdout = res.stdout
+                } else {
+                    const res = await execAsync('lpstat -p | cut -d" " -f2')
+                    stdout = res.stdout
+                }
+                const lines = stdout
+                    .split(/\r?\n/)
+                    .map(line => line.trim())
+                    .filter(line => line && line !== "Name" && !line.includes("------"))
+                return Array.from(new Set(lines))
+            } catch (cupsErr) {
+                console.error("CUPS lpstat query failed:", cupsErr)
+            }
+        }
+
+        return []
     } catch (error) {
         console.error("[GET_LOCAL_PRINTERS_ERROR]", error)
         return []
     }
 }
-
-

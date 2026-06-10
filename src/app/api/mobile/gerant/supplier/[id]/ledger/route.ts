@@ -122,11 +122,12 @@ export async function GET(
 
         // Supplier returns (credits - decreases what we owe)
         for (const ret of supplierReturns) {
+            const isCash = ret.returnType === "CASH";
             rawLines.push({
                 date: ret.createdAt.toISOString(),
                 type: "CREDIT",
                 debit: 0,
-                credit: Number(ret.totalAmount),
+                credit: isCash ? 0 : Number(ret.totalAmount),
                 observation: `Retour: ${ret.product?.name || "Produit"} (Qté: ${ret.quantity})`,
                 category: "RETURN",
             });

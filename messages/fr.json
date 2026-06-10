@@ -921,7 +921,12 @@
     "reseller": "Revendeur",
     "wholesale": "Grossiste",
     "noResults": "Aucun résultat.",
-    "page": "Page"
+    "page": "Page",
+    "show": "Afficher",
+    "all": "Tout",
+    "rowsPerPage": "Lignes par page",
+    "of": "sur",
+    "results": "résultats"
   },
   "PosPage": {
     "unauthorized": "Non autorisé",
@@ -995,6 +1000,7 @@
     "loadOrder": "Charger Commande",
     "allCategories": "Tous",
     "showingTop50": "Affichage des 50 meilleurs résultats. Utilisez la recherche pour en trouver plus.",
+    "showingProducts": "Affichage de {start} à {end} sur {total} produits",
     "noProductsFound": "Aucun produit trouvé",
     "tryRefiningSearch": "Essayez d'affiner votre recherche",
     "viewCart": "Voir Panier",

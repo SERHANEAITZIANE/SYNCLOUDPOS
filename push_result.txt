@@ -6,26 +6,31 @@ STDOUT: Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
 Datasource "db": PostgreSQL database "syncloudpos", schema "public" at "localhost:5433"
 
-🚀  Your database is now in sync with your Prisma schema. Done in 2.78s
+🚀  Your database is now in sync with your Prisma schema. Done in 619ms
 
 Running generate... (Use --skip-generate to skip the generators)
 [2K[1A[2K[GRunning generate... - Prisma Client
-[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 9.41s
+[2K[1A[2K[G✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 3.29s
 
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.16.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.16.0
+npm notice To update run: npm install -g npm@11.16.0
+npm notice
 
 
 Running: prisma generate...
 STDOUT: Environment variables loaded from .env
 Prisma schema loaded from prisma/schema.prisma
 
-✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 4.79s
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 2.06s
 
 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 
-Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+Tip: Curious about the SQL queries Prisma ORM generates? Optimize helps you enhance your visibility: https://pris.ly/tip-2-optimize
 
 ┌─────────────────────────────────────────────────────────┐
-│  Update available 5.22.0 -> 7.6.0                       │
+│  Update available 5.22.0 -> 7.8.0                       │
 │                                                         │
 │  This is a major update - please follow the guide at    │
 │  https://pris.ly/d/major-version-upgrade                │
@@ -52,13 +57,13 @@ STDOUT: Use --update-env to update environment variables
 ┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453585   │ 4s     │ 133  │ online    │ 0%       │ 59.8mb   │ root     │ disabled │
-│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453567   │ 4s     │ 133  │ online    │ 0%       │ 59.5mb   │ root     │ disabled │
-│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453655   │ 3s     │ 133  │ online    │ 0%       │ 59.9mb   │ root     │ disabled │
-│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453683   │ 3s     │ 133  │ online    │ 0%       │ 58.9mb   │ root     │ disabled │
-│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453759   │ 2s     │ 133  │ online    │ 0%       │ 56.1mb   │ root     │ disabled │
-│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 453852   │ 0s     │ 133  │ online    │ 0%       │ 38.5mb   │ root     │ disabled │
-│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 453475   │ 0      │ 0    │ stopped   │ 0%       │ 0b       │ root     │ disabled │
+│ 2  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79365    │ 1s     │ 2408 │ online    │ 0%       │ 61.8mb   │ root     │ disabled │
+│ 3  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79350    │ 2s     │ 3296 │ online    │ 0%       │ 61.6mb   │ root     │ disabled │
+│ 4  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79488    │ 1s     │ 3254 │ online    │ 0%       │ 62.5mb   │ root     │ disabled │
+│ 5  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79577    │ 1s     │ 3328 │ online    │ 0%       │ 54.5mb   │ root     │ disabled │
+│ 6  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79710    │ 0s     │ 241… │ online    │ 0%       │ 47.4mb   │ root     │ disabled │
+│ 7  │ syncloudpos              │ default     │ 0.1.0   │ cluster │ 79782    │ 0s     │ 242… │ online    │ 0%       │ 38.6mb   │ root     │ disabled │
+│ 1  │ syncloudpos-db-backup    │ default     │ 0.1.0   │ fork    │ 79250    │ 2s     │ 0    │ online    │ 0%       │ 55.9mb   │ root     │ disabled │
 └────┴──────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 
 

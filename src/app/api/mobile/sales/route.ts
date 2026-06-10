@@ -118,7 +118,6 @@ export async function POST(req: NextRequest) {
                         unitPrice: item.unitPrice,
                         priceHt: item.priceHt,
                         tvaRate: item.tvaRate,
-                        total: item.total,
                     })),
                 },
             },

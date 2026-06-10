@@ -23,6 +23,7 @@ export function AlgerianSettingsForm() {
         stampTaxEnabled: true,
         posTimbreEnabled: false,
         posCashRounding: true,
+        posVendorRequired: false,
         yalidineApiId: "",
         yalidineApiToken: "",
         dhdApiToken: "",
@@ -44,6 +45,7 @@ export function AlgerianSettingsForm() {
                 stampTaxEnabled: data.stampTaxEnabled ?? true,
                 posTimbreEnabled: data.posTimbreEnabled ?? false,
                 posCashRounding: (data as any).posCashRounding ?? true,
+                posVendorRequired: (data as any).posVendorRequired ?? false,
                 yalidineApiId: data.yalidineApiId ?? "",
                 yalidineApiToken: data.yalidineApiToken ?? "",
                 dhdApiToken: data.dhdApiToken ?? "",
@@ -237,6 +239,18 @@ export function AlgerianSettingsForm() {
                     <Switch
                         checked={settings.posCashRounding}
                         onCheckedChange={v => setSettings(s => ({ ...s, posCashRounding: v }))}
+                    />
+                </div>
+
+                {/* Sélection du vendeur au POS */}
+                <div className="flex items-center justify-between border-t border-amber-200 dark:border-amber-700 pt-4">
+                    <div>
+                        <p className="font-medium text-sm">Sélection du vendeur obligatoire au POS</p>
+                        <p className="text-xs text-muted-foreground">Demande obligatoirement la sélection d'un vendeur/caissier lors de la validation d'une vente au POS pour le calcul des commissions</p>
+                    </div>
+                    <Switch
+                        checked={settings.posVendorRequired}
+                        onCheckedChange={v => setSettings(s => ({ ...s, posVendorRequired: v }))}
                     />
                 </div>
 

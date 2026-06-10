@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
                 where,
                 select: {
                     id: true, name: true, phone: true, email: true,
-                    address: true, city: true, balance: true,
+                    address: true, city: true, balance: true, initialBalance: true,
                     nif: true, rc: true, nis: true, rib: true,
                     artImposition: true, clientType: true,
                     barcode: true, loyaltyPoints: true,
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         ]);
 
         return NextResponse.json({
-            clients: clients.map(c => ({ ...c, balance: Number(c.balance) })),
+            clients: clients.map(c => ({ ...c, balance: Number(c.balance), initialBalance: Number(c.initialBalance) })),
             total,
             page,
             totalPages: Math.ceil(total / limit),
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        return NextResponse.json({ ...client, balance: Number(client.balance) }, { status: 201 });
+        return NextResponse.json({ ...client, balance: Number(client.balance), initialBalance: Number(client.initialBalance) }, { status: 201 });
     } catch (error) {
         return mobileErrorResponse(error);
     }

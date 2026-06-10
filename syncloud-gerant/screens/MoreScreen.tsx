@@ -31,8 +31,10 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
         items: [
             { icon: "cube-outline", label: "Santé du Stock", subtitle: "Lents, rapides, sur-stockés", color: "#06b6d4", nav: "InventoryHealth" },
             { icon: "car-outline", label: "Performance Livreurs", subtitle: "KPIs des chauffeurs", color: "#ec4899", nav: "DriverMonitor" },
-            { icon: "notifications-outline", label: "Alertes", subtitle: "Stock, créances, promos", color: "#ef4444", nav: "Alerts" },
+            { icon: "notifications-outline", label: "Notifications", subtitle: "Historique des alertes", color: "#ef4444", nav: "NotificationCenter" },
             { icon: "sunny-outline", label: "Briefing du Jour", subtitle: "Résumé IA matinal", color: "#f59e0b", nav: "MorningBrief" },
+            { icon: "trending-up-outline", label: "Objectifs & KPIs", subtitle: "Suivi des targets mensuels", color: "#3b82f6", nav: "Goals" },
+            { icon: "time-outline", label: "Historique d'Activité", subtitle: "Timeline des événements", color: "#a855f7", nav: "ActivityHistory" },
         ],
     },
     {

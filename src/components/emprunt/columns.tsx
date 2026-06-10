@@ -13,9 +13,11 @@ export type LoanColumn = {
     description: string
     customerName: string
     customerId?: string
+    accountId?: string
+    accountName?: string
 }
 
-export const useLoanColumns = () => {
+export const useLoanColumns = (treasuryAccounts: { id: string; name: string }[]) => {
     const columns: ColumnDef<LoanColumn>[] = [
         {
             accessorKey: "date",
@@ -38,6 +40,13 @@ export const useLoanColumns = () => {
             )
         },
         {
+            accessorKey: "accountName",
+            header: "Compte / Caisse",
+            cell: ({ row }) => (
+                <div className="text-sm font-medium text-muted-foreground">{row.original.accountName || "-"}</div>
+            )
+        },
+        {
             accessorKey: "amount",
             header: "Montant",
             cell: ({ row }) => (
@@ -56,7 +65,7 @@ export const useLoanColumns = () => {
         },
         {
             id: "actions",
-            cell: ({ row }) => <CellAction data={row.original} />
+            cell: ({ row }) => <CellAction data={row.original} treasuryAccounts={treasuryAccounts} />
         }
     ]
     return columns

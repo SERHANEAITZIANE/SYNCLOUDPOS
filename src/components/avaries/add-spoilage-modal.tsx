@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { SearchableSelect } from "@/components/ui/searchable-select"
-import { createSpoilage } from "@/actions/spoilage"
+import { createSpoilage, updateSpoilage } from "@/actions/spoilage"
 
 const formSchema = z.object({
     productId: z.string().min(1, "Produit requis"),
@@ -32,15 +32,19 @@ interface AddSpoilageModalProps {
     isOpen: boolean
     onClose: () => void
     products: { id: string, name: string, quantity: number }[]
+    initialData?: { id: string, productId: string, productName: string, quantity: number, reason: string, date: Date, userName: string } | null
 }
 
 export const AddSpoilageModal: React.FC<AddSpoilageModalProps> = ({
     isOpen,
     onClose,
-    products
+    products,
+    initialData
 }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const isEdit = !!initialData
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema) as any,
@@ -48,24 +52,58 @@ export const AddSpoilageModal: React.FC<AddSpoilageModalProps> = ({
             productId: "",
             quantity: 1,
             reason: "",
-            date: new Date().toISOString().split('T')[0], // Defaults to today, YYYY-MM-DD
+            date: new Date().toISOString().split('T')[0],
         },
     })
+
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                form.reset({
+                    productId: initialData.productId,
+                    quantity: initialData.quantity,
+                    reason: initialData.reason || "",
+                    date: new Date(initialData.date).toISOString().split('T')[0]
+                })
+            } else {
+                form.reset({
+                    productId: "",
+                    quantity: 1,
+                    reason: "",
+                    date: new Date().toISOString().split('T')[0]
+                })
+            }
+        }
+    }, [initialData, isOpen, form])
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             setLoading(true)
             const selectedProduct = products.find(p => p.id === values.productId)
 
-            if (selectedProduct && selectedProduct.quantity < values.quantity) {
-                toast.error(`Stock insuffisant. Quantité disponible: ${selectedProduct.quantity}`)
-                return
+            if (selectedProduct) {
+                const currentStock = selectedProduct.quantity
+                const previousQty = initialData?.productId === values.productId ? initialData.quantity : 0
+                const requiredStockChange = values.quantity - previousQty
+
+                if (currentStock < requiredStockChange) {
+                    toast.error(`Stock insuffisant. Quantité disponible: ${currentStock}`)
+                    return
+                }
             }
 
-            const response = await createSpoilage({
-                ...values,
-                date: new Date(values.date)
-            })
+            let response;
+            if (isEdit && initialData) {
+                response = await updateSpoilage(initialData.id, {
+                    ...values,
+                    date: new Date(values.date)
+                })
+            } else {
+                response = await createSpoilage({
+                    ...values,
+                    date: new Date(values.date)
+                })
+            }
 
             if (response.error) {
                 toast.error(response.error)
@@ -84,8 +122,8 @@ export const AddSpoilageModal: React.FC<AddSpoilageModalProps> = ({
 
     return (
         <Modal
-            title="Déclarer une Avarie"
-            description="Ajouter un produit défectueux ou périmé pour le retirer du stock."
+            title={isEdit ? "Modifier l'Avarie" : "Déclarer une Avarie"}
+            description={isEdit ? "Modifier les détails de la perte de stock." : "Ajouter un produit défectueux ou périmé pour le retirer du stock."}
             isOpen={isOpen}
             onClose={onClose}
         >

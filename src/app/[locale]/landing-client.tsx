@@ -1548,28 +1548,28 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                     : 'Lien de téléchargement direct APK (Sans Expo) :'}
                 </div>
                 <a
-                  href="https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk"
+                  href="https://chirpedbeo.online/downloads/syncloudpos-gerant-v3.0.0.apk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-link"
                 >
-                  chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk
+                  chirpedbeo.online/downloads/syncloudpos-gerant-v3.0.0.apk
                 </a>
                 
                 <a
-                  href="https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk"
+                  href="https://chirpedbeo.online/downloads/syncloudpos-gerant-v3.0.0.apk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-btn"
                   style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
                 >
-                  📥 {lang === 'ar' ? 'تحميل APK المباشر (تحديث v2.3.0)' : lang === 'en' ? 'Download Direct APK (v2.3.0)' : "Télécharger l'APK Direct (Mise à jour v2.3.0)"}
+                  📥 {lang === 'ar' ? 'تحميل APK المباشر (تحديث v3.0.0)' : lang === 'en' ? 'Download Direct APK (v3.0.0)' : "Télécharger l'APK Direct (Mise à jour v3.0.0)"}
                 </a>
 
                 <div className="lp-qr-container">
                   <div className="lp-qr-box">
                     <QRCodeSVG
-                      value="https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.0.apk"
+                      value="https://chirpedbeo.online/downloads/syncloudpos-gerant-v3.0.0.apk"
                       size={80}
                       level="H"
                       includeMargin={false}
@@ -1649,28 +1649,28 @@ export default function LandingClient({ locale, pageType = 'home' }: { locale: s
                     : 'Lien de téléchargement direct APK (Sans Expo) :'}
                 </div>
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
+                  href="https://chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-link"
                 >
-                  expo.dev/aitee/syncloud-tournee/builds/c5445edf
+                  chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk
                 </a>
                 
                 <a
-                  href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
+                  href="https://chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-download-btn"
                   style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}
                 >
-                  📥 {lang === 'ar' ? 'تحميل APK المباشر' : lang === 'en' ? 'Download Direct APK' : "Télécharger l'APK Direct"}
+                  📥 {lang === 'ar' ? 'تحميل APK المباشر (تحديث v1.0.0)' : lang === 'en' ? 'Download Direct APK (v1.0.0)' : "Télécharger l'APK Direct (Mise à jour v1.0.0)"}
                 </a>
 
                 <div className="lp-qr-container">
                   <div className="lp-qr-box">
                     <QRCodeSVG
-                      value="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds/c5445edf-4ed3-4c52-9b73-134714a681bb"
+                      value="https://chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk"
                       size={80}
                       level="H"
                       includeMargin={false}

@@ -32,6 +32,7 @@ const formSchema = z.object({
     status: z.enum(["DRAFT", "VALIDATED", "PAID", "CANCELLED"]),
     paymentMethod: z.enum(["CASH", "CARD", "TRANSFER", "CHECK", "TERM"]),
     receiptNumber: z.string().optional(),
+    createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
         quantity: z.number().min(1),
@@ -111,9 +112,24 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [sendDialogOpen, setSendDialogOpen] = useState(false)
+    const [printerA4, setPrinterA4] = useState("default")
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs")
+            if (stored) {
+                const prefs = JSON.parse(stored)
+                if (prefs.printerA4) setPrinterA4(prefs.printerA4)
+            }
+        } catch (err) {
+            console.error("Failed to load local printing prefs:", err)
+        }
+    }, [])
+
     const warrantyRef = useRef<HTMLDivElement>(null)
     const handlePrintWarranty = useReactToPrint({
         contentRef: warrantyRef,
+        documentTitle: printerA4 !== "default" ? printerA4 : "Bon de Garantie",
     })
     const [relatedSalesOrderId, setRelatedSalesOrderId] = useState<string | null>(initialData?.relatedSalesOrderId || null)
     const [invoiceSearch, setInvoiceSearch] = useState("")
@@ -134,6 +150,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             status: initialData.status,
             paymentMethod: initialData.paymentMethod || "CASH",
             receiptNumber: initialData.receiptNumber || "",
+            createdAt: initialData.createdAt ? new Date(initialData.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             items: initialData.items.map((item: any) => ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
@@ -146,6 +163,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             status: "DRAFT",
             paymentMethod: "CASH",
             receiptNumber: "",
+            createdAt: new Date().toISOString().split('T')[0],
             items: [{ productId: "", quantity: 1, unitPrice: 0, serialNumber: "" }]
         }
     })
@@ -228,6 +246,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             setLoading(true)
             const submissionData = {
                 ...values,
+                createdAt: values.createdAt ? new Date(values.createdAt) : undefined,
                 subtotal: subtotalHT,
                 tvaAmount: totalTVA,
                 stampTax: stampTax,
@@ -376,7 +395,14 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     </div>
                     {isEditMode && (
                         <div className="flex items-center gap-2 flex-wrap">
-                            <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                                const originalTitle = document.title
+                                if (printerA4 !== "default") {
+                                    document.title = printerA4
+                                }
+                                window.print()
+                                document.title = originalTitle
+                            }}>
                                 <Printer className="h-4 w-4 mr-1.5" /> Imprimer
                             </Button>
                             {storeData?.warrantyEnabled && (
@@ -429,7 +455,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                             <FormField control={form.control} name="receiptNumber" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>N° Référence</FormLabel>
@@ -503,6 +529,15 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                             <SelectItem value="TERM">À Terme</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={form.control} name="createdAt" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Date de transaction</FormLabel>
+                                    <FormControl>
+                                        <Input disabled={loading} type="date" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -724,7 +759,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                             </div>
                         </div>
 
-                        {canEdit && (
+                        {(canEdit || isEditMode) && (
                             <Button id="global-save-button" disabled={loading} className="w-full md:w-auto min-w-40" type="submit">
                                 {loading ? "Enregistrement..." : isEditMode ? "✓ Enregistrer les modifications" : "✓ Créer le bon"}
                                 <span className="ml-2 text-[10px] opacity-70 font-bold uppercase tracking-widest">[F8]</span>

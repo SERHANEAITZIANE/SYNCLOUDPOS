@@ -1,13 +1,23 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { format } from "date-fns"
 import { TrendingUp, TrendingDown, DollarSign, Percent, Package, Tag, Layers } from "lucide-react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { DateRange } from "react-day-picker"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
 import { Badge } from "@/components/ui/badge"
+import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface ProfitProduct {
     id: string
@@ -52,6 +62,53 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data }) 
     const [viewMode, setViewMode] = useState<ViewMode>("products")
     const { totals } = data
 
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+
+    const fromStr = searchParams.get("from")
+    const toStr = searchParams.get("to")
+    const clientTypeFilter = searchParams.get("clientType") || "ALL"
+
+    const dateRange = useMemo(() => {
+        const defaultFrom = new Date()
+        defaultFrom.setDate(1) // First day of current month
+        defaultFrom.setHours(0, 0, 0, 0)
+
+        const defaultTo = new Date()
+        defaultTo.setHours(23, 59, 59, 999)
+
+        return {
+            from: fromStr ? new Date(fromStr) : defaultFrom,
+            to: toStr ? new Date(toStr) : defaultTo
+        }
+    }, [fromStr, toStr])
+
+    const setClientTypeFilter = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value && value !== "ALL") {
+            params.set("clientType", value)
+        } else {
+            params.delete("clientType")
+        }
+        router.push(pathname + "?" + params.toString())
+    }
+
+    const setDateRange = (range: DateRange | undefined) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (range?.from) {
+            params.set("from", range.from.toISOString())
+        } else {
+            params.delete("from")
+        }
+        if (range?.to) {
+            params.set("to", range.to.toISOString())
+        } else {
+            params.delete("to")
+        }
+        router.push(pathname + "?" + params.toString())
+    }
+
     const kpis = [
         { label: "Chiffre d'Affaires", value: fmt(totals.totalRevenue), icon: DollarSign, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
         { label: "Coût des Marchandises", value: fmt(totals.totalCost), icon: Package, color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/30" },
@@ -80,6 +137,27 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data }) 
                 description="Analyse des marges bénéficiaires par produit, catégorie et marque"
             />
             <Separator />
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 py-1">
+                <Select
+                    value={clientTypeFilter}
+                    onValueChange={setClientTypeFilter}
+                >
+                    <SelectTrigger className="w-full sm:w-[220px]">
+                        <SelectValue placeholder="Type de Client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ALL">Tous les clients</SelectItem>
+                        <SelectItem value="RETAIL">Client de détail (Détail)</SelectItem>
+                        <SelectItem value="WHOLESALE">Grossiste (Gros)</SelectItem>
+                        <SelectItem value="RESELLER">Revendeur (Rev)</SelectItem>
+                    </SelectContent>
+                </Select>
+                <div className="w-full sm:w-auto">
+                    <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                </div>
+            </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

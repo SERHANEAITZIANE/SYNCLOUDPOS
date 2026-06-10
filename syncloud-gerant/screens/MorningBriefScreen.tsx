@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 interface BriefData {
     greeting: string;
@@ -50,18 +51,23 @@ export default function MorningBriefScreen({ navigation }: any) {
     const dayLabel = now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
     if (loading) {
-        return (
-            <View style={styles.center}>
-                <View style={styles.loadingCard}>
-                    <ActivityIndicator size="large" color="#f59e0b" />
-                    <Text style={styles.loadingTitle}>Gemini analyse votre journée...</Text>
-                    <Text style={styles.loadingSubtitle}>Consultation des données en temps réel</Text>
-                </View>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     const d = brief?.data;
+
+    if (!brief || !d) {
+        return (
+            <View style={styles.center}>
+                <Ionicons name="sparkles-outline" size={48} color="#f59e0b" />
+                <Text style={styles.emptyText}>Aucun brief disponible</Text>
+                <Text style={styles.emptySubText}>Makan hta brief lyoum</Text>
+                <TouchableOpacity style={styles.retryBtn} onPress={fetchBrief}>
+                    <Text style={styles.retryText}>Générer le brief</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <ScrollView
@@ -232,8 +238,8 @@ export default function MorningBriefScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e" },
     loadingCard: { backgroundColor: "#1e293b", borderRadius: 24, padding: 32, alignItems: "center", gap: 16, margin: 32 },
     loadingTitle: { color: "#f8fafc", fontSize: 16, fontWeight: "800", textAlign: "center" },
     loadingSubtitle: { color: "#64748b", fontSize: 13, textAlign: "center" },
@@ -288,4 +294,8 @@ const styles = StyleSheet.create({
     shortcutLabel: { color: "#94a3b8", fontSize: 11, fontWeight: "700", textAlign: "center" },
 
     lastUpdated: { color: "#334155", fontSize: 11, textAlign: "center", marginTop: 24, fontStyle: "italic" },
+    emptyText: { color: "#f8fafc", fontSize: 16, fontWeight: "800", marginTop: 12 },
+    emptySubText: { color: "#64748b", fontSize: 13, marginTop: 4, marginBottom: 16, textAlign: "center" },
+    retryBtn: { backgroundColor: "#f59e0b", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
+    retryText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 });

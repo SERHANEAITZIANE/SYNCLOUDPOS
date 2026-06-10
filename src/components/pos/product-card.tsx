@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Image from "next/image"
 import { ShoppingCart, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { usePosStore, CartItem } from "@/hooks/use-pos-store"
 import { useSwipe } from "@/hooks/use-swipe"
 
@@ -28,16 +29,19 @@ interface ProductCardProps {
         barcodes: string[]
     }
     blockNegativeStock?: boolean
+    isFocused?: boolean
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
     data,
-    blockNegativeStock = false
+    blockNegativeStock = false,
+    isFocused = false
 }) => {
     const cart = usePosStore()
     const t = useTranslations("ProductCard")
     const tCommon = useTranslations("Common")
     const [showInfo, setShowInfo] = useState(false)
+    const [showImagePreview, setShowImagePreview] = useState(false)
 
     const activeSession = cart.sessions.find(s => s.id === cart.activeSessionId);
     const clientType = activeSession?.clientType || 'RETAIL';
@@ -89,6 +93,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         threshold: 50,
         preventDefaultTouchmoveEvent: true
     });
+
+    useEffect(() => {
+        if (isFocused && ref.current) {
+            ref.current.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+        }
+    }, [isFocused, ref]);
     const outOfStock = blockNegativeStock && (data.stock - quantityInCart) <= 0;
     const isLowStock = (data.stock - quantityInCart) > 0 && (data.stock - quantityInCart) <= data.minStock;
 
@@ -97,12 +110,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <Card
                 ref={ref}
                 className={cn(
-                    "group cursor-pointer overflow-hidden rounded-lg border bg-white dark:bg-[#131418] transition-all duration-200 ease-out flex flex-col p-1.5 lg:p-2 h-[68px] lg:h-[78px] justify-between relative select-none active:scale-[0.97]",
+                    "group cursor-pointer overflow-hidden rounded-xl border !bg-white dark:!bg-[#1c1e26] transition-all duration-200 ease-out flex flex-col p-0 gap-0 relative select-none active:scale-[0.97] hover:shadow-lg dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]",
                     quantityInCart > 0
-                        ? "border-emerald-500/50 dark:border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-500/[0.03] shadow-[0_2px_12px_rgba(16,185,129,0.1)]"
-                        : "border-slate-100 dark:border-slate-900/60 shadow-[0_1px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_4px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_4px_16px_rgba(0,0,0,0.25)] hover:border-slate-200 dark:hover:border-slate-800",
+                        ? "border-emerald-500/60 dark:border-emerald-500/40 shadow-[0_2px_16px_rgba(16,185,129,0.12)]"
+                        : "border-slate-200/70 dark:border-[#2a2d36] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:border-slate-300 dark:hover:border-slate-600",
                     outOfStock ? "opacity-40 cursor-not-allowed select-none" : "",
-                    isLowStock && quantityInCart === 0 ? "border-amber-200 dark:border-amber-800/60" : ""
+                    isLowStock && quantityInCart === 0 ? "border-amber-300/60 dark:border-amber-700/40" : "",
+                    isFocused ? "ring-2 ring-indigo-500 dark:ring-indigo-400 scale-[1.02] z-10 border-transparent shadow-[0_0_20px_rgba(99,102,241,0.35)]" : ""
                 )}
                 onClick={outOfStock ? undefined : onAddToCart}
                 onContextMenu={(e) => {
@@ -113,55 +127,88 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 {/* Out of Stock Overlay */}
                 {outOfStock && (
                     <div className="absolute inset-0 bg-[#0f1115]/40 dark:bg-[#0f1115]/70 backdrop-blur-[0.5px] flex items-center justify-center z-10 select-none">
-                        <span className="bg-red-600 text-white text-[8px] font-black uppercase tracking-wider py-0.5 px-2 rounded shadow-lg transform -rotate-2">
+                        <span className="bg-red-600 text-white text-[9px] font-black uppercase tracking-wider py-1 px-3 rounded-md shadow-lg transform -rotate-3">
                             ÉPUISÉ
                         </span>
                     </div>
                 )}
 
-                {/* Top row: Name + Stock */}
-                <div className="flex items-start justify-between gap-1 w-full min-w-0">
-                    <h3 className="font-semibold text-gray-800 dark:text-slate-200 text-[9px] lg:text-[10px] line-clamp-2 leading-[1.3] group-hover:text-primary transition-colors duration-150 flex-1 min-w-0" title={data.name}>
-                        {data.name}
-                    </h3>
-                    <div className={cn(
-                        "shrink-0 text-[7px] lg:text-[8px] font-bold px-1 py-px rounded tabular-nums",
-                        (data.stock - quantityInCart) > 0
-                            ? isLowStock
-                                ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
-                                : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                            : "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"
-                    )}>
-                        {isLowStock && <span className="inline-block h-1 w-1 rounded-full bg-amber-500 animate-pulse mr-0.5 align-middle" />}
-                        {data.stock - quantityInCart}
+                {/* Cart Quantity Badge - top right corner */}
+                {quantityInCart > 0 && (
+                    <div className="absolute top-1.5 right-1.5 z-20 flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-black shadow-md animate-in zoom-in-75 duration-150 border-2 border-white dark:border-[#1c1e26]">
+                        {quantityInCart}
                     </div>
+                )}
+
+                {/* Low stock indicator - top left corner */}
+                {isLowStock && quantityInCart === 0 && (
+                    <div className="absolute top-1.5 left-1.5 z-20 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-[8px] font-bold border border-amber-200 dark:border-amber-800/50">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        Stock bas
+                    </div>
+                )}
+
+                {/* Centered Product Image */}
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-[#22252e]">
+                    {data.imageUrl ? (
+                        <Image 
+                            src={data.imageUrl} 
+                            alt={data.name} 
+                            fill 
+                            className="object-cover transition-transform duration-300 group-hover:scale-105" 
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 dark:text-slate-600">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                <circle cx="9" cy="9" r="2"/>
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                            </svg>
+                        </div>
+                    )}
                 </div>
 
-                {/* Bottom row: Cart Qty + Price */}
-                <div className="flex justify-between items-end w-full">
-                    <div className="flex items-center gap-1 h-4">
-                        {quantityInCart > 0 && (
-                            <span className="inline-flex items-center justify-center text-[8px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 min-w-[16px] h-4 px-1 rounded border border-emerald-500/20 animate-in fade-in duration-200">
-                                ×{quantityInCart}
+                {/* Product Info - Below Image */}
+                <div className="flex flex-col gap-0.5 p-2 flex-1 min-h-0">
+                    {/* Product Name */}
+                    <h3 
+                        className="font-bold text-gray-800 dark:text-slate-200 text-[10px] lg:text-[11px] leading-tight line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-150" 
+                        title={data.name}
+                    >
+                        {data.name}
+                    </h3>
+
+                    {/* Price + Stock Row */}
+                    <div className="flex items-end justify-between mt-auto pt-1">
+                        <span className="font-black text-[11px] lg:text-[13px] leading-none text-gray-900 dark:text-white tabular-nums">
+                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            <span className={cn(
+                                "text-[8px] font-bold px-1 py-px rounded tabular-nums",
+                                (data.stock - quantityInCart) > 0
+                                    ? isLowStock
+                                        ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
+                                        : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                    : "bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+                            )}>
+                                {data.stock - quantityInCart}
                             </span>
-                        )}
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            type="button"
-                            className="h-4 w-4 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowInfo(true);
-                            }}
-                            title={tCommon("view") || "Détails"}
-                        >
-                            <Info size={10} />
-                        </Button>
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                type="button"
+                                className="h-5 w-5 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowInfo(true);
+                                }}
+                                title={tCommon("view") || "Détails"}
+                            >
+                                <Info size={11} />
+                            </Button>
+                        </div>
                     </div>
-                    <span className="font-black text-[11px] lg:text-[13px] leading-none text-gray-900 dark:text-white tabular-nums">
-                        {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
-                    </span>
                 </div>
             </Card>
 
@@ -175,7 +222,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <div className="space-y-4 pt-1" onClick={(e) => e.stopPropagation()}>
                     {/* Header: Compact Info */}
                     <div className="flex gap-3">
-                        <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shrink-0">
+                        <div 
+                            className={cn(
+                                "relative h-16 w-16 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shrink-0",
+                                data.imageUrl ? "cursor-zoom-in hover:opacity-90 transition-opacity" : ""
+                            )}
+                            onClick={data.imageUrl ? (e) => {
+                                e.stopPropagation();
+                                setShowImagePreview(true);
+                            } : undefined}
+                        >
                             {data.imageUrl ? (
                                 <Image src={data.imageUrl} alt={data.name} fill className="object-cover" />
                             ) : (
@@ -311,6 +367,42 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     </div>
                 </div>
             </Modal>
+
+
+            {/* Beautiful Lightbox Image Preview Dialog */}
+            {data.imageUrl && (
+                <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
+                    <DialogContent className="max-w-[440px] p-0 overflow-hidden border-none bg-black/95 backdrop-blur-md shadow-2xl rounded-2xl z-[300] flex flex-col items-center justify-center gap-0 focus:outline-none">
+                        <div className="relative w-full aspect-square flex items-center justify-center bg-zinc-950/20 p-2">
+                            <Image 
+                                src={data.imageUrl} 
+                                alt={data.name} 
+                                fill 
+                                sizes="(max-width: 440px) 100vw, 440px"
+                                className="object-contain p-2 animate-in zoom-in-95 duration-200" 
+                                priority
+                            />
+                        </div>
+                        {/* Footer overlay */}
+                        <div className="w-full bg-[#131418]/90 border-t border-slate-800/40 px-5 py-4 flex flex-col gap-1 select-text">
+                            <span className="text-[10px] font-black tracking-widest text-emerald-500 uppercase">
+                                {data.category || "General"}
+                            </span>
+                            <h3 className="text-sm font-black text-white leading-tight">
+                                {data.name}
+                            </h3>
+                            <div className="flex justify-between items-center mt-3">
+                                <span className="text-[11px] font-bold text-slate-400">
+                                    Stock: <span className="text-white font-black">{data.stock}</span> un.
+                                </span>
+                                <span className="text-sm font-black text-white tabular-nums">
+                                    {new Intl.NumberFormat("fr-FR", { style: "currency", currency: "DZD", minimumFractionDigits: 2 }).format(displayPrice)}
+                                </span>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
         </>
     )
 }

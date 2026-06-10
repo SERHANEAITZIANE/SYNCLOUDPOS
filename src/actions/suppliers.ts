@@ -71,7 +71,19 @@ export const createSupplier = async (data: SupplierData) => {
     try {
         const supplier = await db.supplier.create({
             data: {
-                ...data,
+                name: data.name,
+                contactPerson: data.contactPerson || null,
+                phone: data.phone || null,
+                email: data.email || null,
+                address: data.address || null,
+                taxId: data.taxId || null,
+                nif: data.nif || null,
+                nis: data.nis || null,
+                artImposition: data.artImposition || null,
+                rc: data.rc || null,
+                rib: data.rib || null,
+                balance: data.balance || 0,
+                notes: data.notes || null,
                 tenantId
             }
         })
@@ -91,10 +103,22 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
-        const { balance, ...rest } = data
         const supplier = await db.supplier.update({
             where: { id, tenantId },
-            data: rest
+            data: {
+                name: data.name,
+                contactPerson: data.contactPerson || null,
+                phone: data.phone || null,
+                email: data.email || null,
+                address: data.address || null,
+                taxId: data.taxId || null,
+                nif: data.nif || null,
+                nis: data.nis || null,
+                artImposition: data.artImposition || null,
+                rc: data.rc || null,
+                rib: data.rib || null,
+                notes: data.notes || null,
+            }
         })
         revalidatePath("/(dashboard)/suppliers")
         return { success: "Supplier updated", id: supplier.id }
@@ -347,6 +371,11 @@ export const getSupplierLoans = async (supplierId?: string) => {
                 source: "MANUAL_IN",
                 referenceId: { in: supplierIds }
             },
+            include: {
+                account: {
+                    select: { id: true, name: true }
+                }
+            },
             orderBy: { date: "desc" }
         })
 
@@ -359,7 +388,9 @@ export const getSupplierLoans = async (supplierId?: string) => {
                 source: t.source,
                 description: t.description || "",
                 supplierName: supplier?.name || "Inconnu",
-                supplierId: t.referenceId as string
+                supplierId: t.referenceId as string,
+                accountId: t.accountId,
+                accountName: t.account?.name || "Inconnu"
             }
         })
 

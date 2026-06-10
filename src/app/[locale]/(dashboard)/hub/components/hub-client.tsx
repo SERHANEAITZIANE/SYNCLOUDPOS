@@ -96,7 +96,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
     const [showQrModal, setShowQrModal] = useState(false);
     const [activeTab, setActiveTab] = useState<"gerant" | "tournee">("gerant");
-    const [viewMode, setViewMode] = useState<"grid" | "custom">("grid"); // Default to grid
+    const [viewMode, setViewMode] = useState<"grid" | "custom">("custom");
     
     // Configurable Hub states
     const [customButtons, setCustomButtons] = useState<string[]>([]);
@@ -115,17 +115,31 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
             } else {
                 setCustomButtons(["/pos", "/dashboard", "/products", "/sales", "/treasury?action=manual-credit", "/treasury?action=manual-debit"]);
             }
+
+            // Load saved custom buttons from LocalStorage
+            const savedViewMode = localStorage.getItem("syncloudpos_hub_view_mode");
+            // Always default to custom (Mon Hub Perso) on fresh load/entry
+            setViewMode("custom");
         }
     }, []);
+
+    const changeViewMode = (mode: "grid" | "custom") => {
+        setViewMode(mode);
+        if (typeof window !== "undefined") {
+            localStorage.setItem("syncloudpos_hub_view_mode", mode);
+        }
+    };
 
     const toggleCustomButton = (href: string) => {
         setCustomButtons(prev => {
             const next = prev.includes(href) ? prev.filter(h => h !== href) : [...prev, href];
             if (typeof window !== "undefined") {
                 localStorage.setItem("syncloudpos_custom_hub_links", JSON.stringify(next));
+                localStorage.setItem("syncloudpos_hub_view_mode", "custom");
             }
             return next;
         });
+        setViewMode("custom");
     };
 
     const isLocal = typeof window !== "undefined" && (
@@ -138,8 +152,9 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
         if (isLocal) {
             return "exp://192.168.0.132:8081";
         }
-        const slug = tab === "gerant" ? "syncloud-gerant" : "syncloud-tournee";
-        return `https://expo.dev/accounts/aitee/projects/${slug}/builds`;
+        return tab === "gerant"
+            ? "https://chirpedbeo.online/downloads/syncloudpos-gerant-v2.3.2.apk"
+            : "https://chirpedbeo.online/downloads/syncloudpos-tournee-v1.0.0.apk";
     };
 
     // ═══════════════ Quick Actions ═══════════════
@@ -509,7 +524,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             <div className="relative flex p-1 rounded-2xl bg-slate-950/80 border border-white/[0.04] w-full lg:w-auto overflow-hidden">
                                 {/* Slide indicators will glow according to active views */}
                                 <button
-                                    onClick={() => setViewMode("grid")}
+                                    onClick={() => changeViewMode("grid")}
                                     className={`relative z-10 flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all duration-300 cursor-pointer ${
                                         viewMode === "grid"
                                             ? "text-cyan-400 shadow-md"
@@ -526,7 +541,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                     GRILLE DE CONTRÔLE
                                 </button>
                                 <button
-                                    onClick={() => setViewMode("custom")}
+                                    onClick={() => changeViewMode("custom")}
                                     className={`relative z-10 flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all duration-300 cursor-pointer ${
                                         viewMode === "custom"
                                             ? "text-emerald-400 shadow-md"

@@ -183,8 +183,8 @@ export default function AlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a", gap: 12 },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e", gap: 12 },
     loadingText: { color: "#64748b", fontSize: 14 },
 
     header: { padding: 16, paddingTop: 20 },

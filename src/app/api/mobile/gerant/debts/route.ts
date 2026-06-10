@@ -16,14 +16,21 @@ export async function GET(req: NextRequest) {
         const segment = searchParams.get("segment"); // all, overdue, critical
         const sort = searchParams.get("sort") || "debt"; // debt, name, recent
         const limit = parseInt(searchParams.get("limit") || "50");
+        const clientType = searchParams.get("clientType"); // RETAIL, WHOLESALE, RESELLER, or null
 
-        // ── Get all clients with debt (negative balance = client owes us) ───
+        // ── Get all clients with debt ───
+        const customerFilter: any = {
+            tenantId,
+            balance: { lt: 0 },
+            isArchived: false,
+        };
+
+        if (clientType) {
+            customerFilter.clientType = clientType;
+        }
+
         const debtors = await db.customer.findMany({
-            where: {
-                tenantId,
-                balance: { lt: 0 },
-                isArchived: false,
-            },
+            where: customerFilter,
             select: {
                 id: true,
                 name: true,
@@ -43,30 +50,6 @@ export async function GET(req: NextRequest) {
                 },
             },
         });
-
-        // ── Get last payment per client from treasury transactions ──
-        const clientIds = debtors.map(d => d.id);
-
-        // Find payment transactions (INFLOW type with PAYMENT source) for these clients
-        const paymentTransactions = clientIds.length > 0
-            ? await db.treasuryTransaction.findMany({
-                where: {
-                    tenantId,
-                    source: "PAYMENT",
-                    type: "INFLOW",
-                    description: {
-                        contains: "", // We'll match by description later
-                    },
-                },
-                select: {
-                    referenceId: true,
-                    createdAt: true,
-                    description: true,
-                },
-                orderBy: { createdAt: "desc" },
-                take: 500, // Get recent payments
-            })
-            : [];
 
         const now = new Date();
 
@@ -157,6 +140,25 @@ export async function GET(req: NextRequest) {
                 returned: results.length,
                 segment: segment || "all",
                 sort,
+            },
+            debtors: results.map(r => ({
+                id: r.id,
+                name: r.name,
+                phone: r.phone || "",
+                balance: Math.round(r.debt),
+                agingBucket: r.aging,
+                lastSaleDate: r.lastPurchaseDate,
+                daysOverdue: r.daysSinceLastPurchase || 0,
+            })),
+            aging: {
+                bucket0_30: Math.round(agingSummary["0-30"].total),
+                bucket30_60: Math.round(agingSummary["30-60"].total),
+                bucket60_90: Math.round(agingSummary["60-90"].total),
+                bucket90plus: Math.round(agingSummary["90+"].total),
+            },
+            totals: {
+                clientsOweUs: Math.round(totalDebt),
+                clientDebtorCount: enrichedDebtors.length,
             },
         });
     } catch (error) {

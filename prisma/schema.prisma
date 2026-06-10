@@ -58,6 +58,7 @@ model Tenant {
   stampTaxEnabled      Boolean               @default(true)
   posTimbreEnabled     Boolean               @default(false)
   posCashRounding      Boolean               @default(true)
+  posVendorRequired    Boolean               @default(false)
   aiModel              String?               @default("gemini-1.5-flash")
   smtpHost             String?
   smtpPort             String?
@@ -225,7 +226,7 @@ model User {
   isSuperadmin    Boolean              @default(false)
   canEdit         Boolean              @default(false)
   canDelete       Boolean              @default(false)
-  role            String               @default("CASHIER")
+  role            UserRole             @default(CASHIER)
   tenantId        String
   defaultStoreId  String?
   createdAt       DateTime             @default(now())
@@ -254,7 +255,7 @@ model TenantUser {
   id        String   @id @default(uuid())
   userId    String
   tenantId  String
-  role      String   @default("ADMIN")
+  role      TenantUserRole   @default(ADMIN)
   createdAt DateTime @default(now())
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -375,8 +376,9 @@ model Customer {
   barcode           String?            @unique
   loyaltyPoints     Int                @default(0)
   balance           Decimal            @default(0)
+  initialBalance    Decimal            @default(0)
   tenantId          String
-  clientType        String             @default("RETAIL")
+  clientType        ClientType             @default(RETAIL)
   isArchived        Boolean            @default(false)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -428,8 +430,8 @@ model Order {
   stampTax      Decimal          @default(0)
   total         Decimal
   paidAmount    Decimal          @default(0)
-  status        String           @default("COMPLETED")
-  paymentMethod String           @default("CASH")
+  status        OrderStatus      @default(COMPLETED)
+  paymentMethod PaymentMethod    @default(CASH)
   userId        String
   customerId    String?
   tenantId      String
@@ -437,6 +439,7 @@ model Order {
   accountId     String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
+  idempotencyKey String?         @unique
   account       TreasuryAccount? @relation(fields: [accountId], references: [id])
   customer      Customer?        @relation(fields: [customerId], references: [id])
   store         Store?           @relation(fields: [storeId], references: [id])
@@ -462,8 +465,8 @@ model OrderItem {
   priceHt      Decimal @default(0)
   tvaRate      Decimal @default(0)
   serialNumber String?
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 }
 
 model PurchaseOrder {
@@ -473,11 +476,12 @@ model PurchaseOrder {
   storeId           String?
   total             Decimal
   withholdingAmount Decimal             @default(0)
-  status            String              @default("PENDING")
+  status            PurchaseOrderStatus              @default(PENDING)
   accountId         String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   reference         String?
+  purchaseNumber    String?
   imageUrl1         String?
   imageUrl2         String?
   imageUrl3         String?
@@ -502,7 +506,7 @@ model PurchaseOrderItem {
   costPrice       Decimal
   tvaRate         Decimal       @default(0)
   serialNumber    String?
-  product         Product       @relation(fields: [productId], references: [id])
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
 }
 
@@ -511,17 +515,18 @@ model SalesOrder {
   tenantId            String
   storeId             String?
   customerId          String
-  type                String            @default("ORDER")
-  status              String            @default("DRAFT")
+  type                SalesOrderType    @default(ORDER)
+  status              SalesOrderStatus  @default(DRAFT)
   receiptNumber       String?
-  paymentMethod       String            @default("CASH")
-  paymentStatus       String            @default("PENDING")
+  paymentMethod       PaymentMethod     @default(CASH)
+  paymentStatus       PaymentStatus     @default(PENDING)
   amountPaid          Decimal           @default(0)
   subtotal            Decimal           @default(0)
   tvaAmount           Decimal           @default(0)
   stampTax            Decimal           @default(0)
   total               Decimal
   notes               String?
+  idempotencyKey      String?           @unique
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   recurringInvoiceId  String?
@@ -537,7 +542,7 @@ model SalesOrder {
   user                User?             @relation("UserSalesOrders", fields: [userId], references: [id])
   items               SalesOrderItem[]
   deliveryShipments   DeliveryShipment[]
-  source              String            @default("POS") // POS, MOBILE, ECOMMERCE
+  source              OrderSource       @default(POS) // POS, MOBILE, ECOMMERCE
   productReturns      ProductReturn[]
 
   @@index([tenantId])
@@ -561,14 +566,14 @@ model SalesOrderItem {
   tvaRate      Decimal    @default(0)
   priceHt      Decimal    @default(0)
   serialNumber String?
-  product      Product    @relation(fields: [productId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
 }
 
 model ExpenseCategory {
   id        String    @id @default(uuid())
   name      String
-  type      String    @default("VARIABLE")
+  type      ExpenseCategoryType    @default(VARIABLE)
   tenantId  String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -599,7 +604,7 @@ model Expense {
 model TreasuryAccount {
   id           String                @id @default(uuid())
   name         String
-  type         String
+  type         TreasuryAccountType
   balance      Decimal               @default(0)
   rib          String?
   tenantId     String
@@ -616,11 +621,11 @@ model TreasuryAccount {
 model TreasuryTransaction {
   id            String          @id @default(uuid())
   accountId     String
-  type          String
+  type          TreasuryTransactionType
   amount        Decimal
   balanceBefore Decimal
   balanceAfter  Decimal
-  source        String
+  source        TreasuryTransactionSource
   referenceId   String?
   description   String?
   imageUrl      String?
@@ -678,7 +683,7 @@ model DailyClose {
 model StockMovement {
   id          String   @id @default(uuid())
   productId   String
-  type        String
+  type        StockMovementType
   quantity    Int
   stockBefore Int
   stockAfter  Int
@@ -689,7 +694,7 @@ model StockMovement {
   storeId     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   store       Store?   @relation(fields: [storeId], references: [id])
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user        User?    @relation(fields: [userId], references: [id])
@@ -929,7 +934,7 @@ model ProductReturn {
   updatedAt   DateTime @updatedAt
   customer    Customer @relation(fields: [customerId], references: [id])
   driver      User     @relation(fields: [driverId], references: [id])
-  product     Product  @relation(fields: [productId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   salesOrderId String?
   salesOrder   SalesOrder? @relation(fields: [salesOrderId], references: [id])
@@ -959,7 +964,7 @@ model SupplierReturn {
   purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
   supplier        Supplier       @relation(fields: [supplierId], references: [id])
   user            User           @relation(fields: [userId], references: [id])
-  product         Product        @relation(fields: [productId], references: [id])
+  product         Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
   tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
@@ -1072,8 +1077,8 @@ model InvoiceItem {
   tvaRate      Decimal    @default(0)
   priceHt      Decimal    @default(0)
   invoice      Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  product      Product    @relation(fields: [productId], references: [id])
-  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Restrict)
 
   @@index([invoiceId])
   @@index([salesOrderId])
@@ -1124,7 +1129,7 @@ model TransferItem {
   transferId String
   productId  String
   quantity   Int
-  product    Product  @relation(fields: [productId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   transfer   Transfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
 
   @@index([transferId])
@@ -1137,8 +1142,8 @@ model Cheque {
   bank       String // Bank name
   amount     Decimal
   dueDate    DateTime
-  status     String           @default("PENDING") // PENDING, CLEARED, BOUNCED, CANCELLED
-  type       String // ISSUED, RECEIVED
+  status     ChequeStatus     @default(PENDING) // PENDING, CLEARED, BOUNCED, CANCELLED
+  type       ChequeType // ISSUED, RECEIVED
   customerId String?
   customer   Customer?        @relation(fields: [customerId], references: [id])
   supplierId String?
@@ -1170,3 +1175,140 @@ model SellerCommissionPayment {
   @@index([tenantId])
   @@index([userId])
 }
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  CASHIER
+  ACCOUNTANT
+  STOCK_MANAGER
+  DRIVER
+  VENDEUR
+  SUPERADMIN
+  DELIVERY
+}
+
+enum TenantUserRole {
+  ADMIN
+  USER
+  MANAGER
+  SUPERADMIN
+}
+
+enum ClientType {
+  RETAIL
+  RESELLER
+  WHOLESALE
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  CHECK
+  TERM
+}
+
+enum PurchaseOrderStatus {
+  PENDING
+  BON_LIVRAISON
+  FACTURE
+  COMPLETED
+  CANCELLED
+  BON_COMMANDE
+  PAID
+  DELIVERED
+}
+
+enum SalesOrderType {
+  INVOICE
+  ORDER
+  QUOTE
+  CREDIT_NOTE
+  BON_LIVRAISON
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  CANCELLED
+  VALIDATED
+  PAID
+  PARTIAL
+  PENDING
+  DELIVERED
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  PARTIAL
+}
+
+enum OrderSource {
+  POS
+  MOBILE
+  ECOMMERCE
+}
+
+enum ExpenseCategoryType {
+  VARIABLE
+  FIXED
+}
+
+enum TreasuryAccountType {
+  BANK
+  CASH
+  CAISSE
+}
+
+enum TreasuryTransactionType {
+  CREDIT
+  DEBIT
+  INFLOW
+  OUTFLOW
+}
+
+enum TreasuryTransactionSource {
+  MANUAL_OUT
+  MANUAL_IN
+  SALE
+  PURCHASE
+  EXPENSE
+  TRANSFER
+  INITIAL_BALANCE
+  CUSTOMER_PAYMENT
+  SUPPLIER_PAYMENT
+  PAYMENT
+}
+
+enum StockMovementType {
+  RETURN
+  SPOILAGE
+  SALE
+  PURCHASE
+  SUPPLIER_RETURN
+  MANUAL_ADJUSTMENT
+  TRANSFER
+  STOCK_IN
+  TRANSFER_OUT
+  TRANSFER_IN
+}
+
+enum ChequeStatus {
+  PENDING
+  CLEARED
+  BOUNCED
+  CANCELLED
+}
+
+enum ChequeType {
+  ISSUED
+  RECEIVED
+}
+

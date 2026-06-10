@@ -62,7 +62,8 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             rib: initialData.rib || "",
             notes: initialData.notes || "",
             clientType: initialData.clientType || "RETAIL",
-            balance: initialData.balance ?? 0,
+            balance: initialData.balance ? Number(initialData.balance) : 0,
+            initialBalance: initialData.initialBalance ? Number(initialData.initialBalance) : 0,
         } : {
             name: "",
             phone: "",
@@ -78,6 +79,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             notes: "",
             clientType: "RETAIL",
             balance: 0,
+            initialBalance: 0,
             barcode: Math.floor(100000000000 + Math.random() * 900000000000).toString()
         }
     })
@@ -89,7 +91,11 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
             if (initialData) {
                 result = await updateCustomer(initialData.id, values)
             } else {
-                result = await createCustomer(values)
+                const submittedValues = {
+                    ...values,
+                    balance: values.initialBalance
+                }
+                result = await createCustomer(submittedValues)
             }
 
             if (result.error) {
@@ -219,23 +225,22 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
                         </div>
                     </div>
 
-                    {/* Solde Initial */}
+                    {/* Solde Initial / Actuel */}
                     <div>
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                            {initialData ? "Solde Actuel" : "Solde Initial"}
+                            Informations de Solde
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <FormField
                                 control={form.control}
-                                name="balance"
+                                name="initialBalance"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>{initialData ? "Solde Actuel (DA)" : "Solde Initial (DA)"}</FormLabel>
+                                        <FormLabel>Solde Initial (DA)</FormLabel>
                                         <FormControl>
                                             <Input 
-                                                disabled={loading || !!initialData} 
+                                                disabled={loading} 
                                                 type="number" 
-                                                min={initialData ? undefined : 0} 
                                                 step={0.01} 
                                                 placeholder="0.00" 
                                                 {...field} 
@@ -243,15 +248,13 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({
                                             />
                                         </FormControl>
                                         <p className="text-xs text-muted-foreground">
-                                            {initialData 
-                                                ? "Le solde actuel de ce client (calculé et non modifiable)" 
-                                                : "Le montant que ce client vous doit initialement"
-                                            }
+                                            Le montant que ce client vous doit initialement (modifiable)
                                         </p>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+
                         </div>
                     </div>
 

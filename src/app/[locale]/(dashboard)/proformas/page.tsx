@@ -5,19 +5,20 @@ import { format } from "date-fns"
 export default async function ProformasPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string }>
+  searchParams: Promise<{ page?: string; status?: string; limit?: string }>
 }) {
   const params = await searchParams
   const page = Number(params.page) || 1
+  const limit = Number(params.limit) || 20
   const result = await getProformas({
     page,
-    limit: 20,
+    limit,
     status: params.status,
   })
 
   const proformas = (result as any).data ?? []
   const total = (result as any).total ?? 0
-  const pageCount = Math.ceil(total / 20)
+  const pageCount = Math.ceil(total / limit)
 
   const formatted = proformas.map((p: any) => ({
     id: p.id,

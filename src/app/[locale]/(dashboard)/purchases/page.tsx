@@ -21,6 +21,7 @@ export default async function PurchasesPage() {
             rawDate: item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date(item.createdAt).toISOString(),
             productCount,
             totalQuantity,
+            purchaseNumber: item.purchaseNumber,
             imageUrl1: item.imageUrl1,
             imageUrl2: item.imageUrl2,
             imageUrl3: item.imageUrl3,

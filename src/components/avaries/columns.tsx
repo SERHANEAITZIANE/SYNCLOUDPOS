@@ -7,6 +7,7 @@ import { CellAction } from "./cell-action"
 
 export type SpoilageColumn = {
     id: string
+    productId: string
     productName: string
     quantity: number
     reason: string
@@ -27,7 +28,7 @@ export const columns: ColumnDef<SpoilageColumn>[] = [
         accessorKey: "date",
         header: "Date",
         cell: ({ row }) => {
-            return format(new Date(row.original.date), 'dd/MM/yyyy HH:mm', { locale: fr })
+            return format(new Date(row.original.date), 'dd/MM/yyyy' + ' HH:mm', { locale: fr })
         }
     },
     {
@@ -40,7 +41,7 @@ export const columns: ColumnDef<SpoilageColumn>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => <CellAction data={row.original} />
+        cell: ({ row, table }) => <CellAction data={row.original} products={(table.options.meta as any)?.products} />
     }
 ]
 

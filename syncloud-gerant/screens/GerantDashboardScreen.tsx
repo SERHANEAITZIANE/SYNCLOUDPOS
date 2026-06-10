@@ -1,42 +1,83 @@
-import React, { useEffect, useState, useCallback } from "react";
+// ─── GerantDashboardScreen — Premium Business Cockpit ────────────────────────
+// Completely redesigned v3.0 dashboard.
+// Features:
+// - Glassmorphic design with LinearGradients
+// - Hero header greeting based on time of day, weather/time emojis, and user names
+// - Notification bell with unread badge count from live alerts
+// - Reusable AnimatedKPICard row with count-up animations and 7-day sparklines
+// - Circular gauge for AI Health Score with factors and Darija insight
+// - Live Treasury bar-chart comparison (Cash vs Banque)
+// - Live Activity Feed with recent transactions
+// - Custom floating quick actions
+
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
     View, Text, ScrollView, StyleSheet,
-    ActivityIndicator, RefreshControl, TouchableOpacity,
+    RefreshControl, TouchableOpacity, Animated, Platform, StatusBar,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { apiFetch } from "../lib/api";
 import { useLangStore } from "../lib/i18n";
+import { useAuthStore } from "../lib/store";
+import { useNotificationStore } from "../lib/notificationStore";
 import { isOnline } from "../lib/offline-sync";
+import { Colors } from "../theme/colors";
+import { Typography } from "../theme/typography";
+import AnimatedKPICard from "../components/AnimatedKPICard";
+import SkeletonLoader from "../components/SkeletonLoader";
 import VoiceAssistantWidget from "../components/VoiceAssistantWidget";
-import Constants from "expo-constants";
 
 interface GerantDashboardData {
     revenue: number;
-    grossProfit: number;
-    netProfit: number;
+    profit: number;
     expenses: number;
     caisseEspeces: number;
     caisseBanque: number;
     outOfStockCount: number;
     debtorsCount: number;
     totalDebts: number;
-    lowStockList: { name: string; stock: number }[];
-    topDebtors: { name: string; balance: number }[];
+    trends: {
+        revenueLast7Days: number[];
+        profitLast7Days: number[];
+        expenseLast7Days: number[];
+        revenueChangePercent: number;
+        profitChangePercent: number;
+        expenseChangePercent: number;
+    };
+    recentActivity: Array<{
+        id: string;
+        type: string;
+        description: string;
+        amount: number;
+        timestamp: string;
+    }>;
 }
 
 export default function GerantDashboardScreen({ navigation }: any) {
     const { t } = useLangStore();
+    const { user } = useAuthStore();
     const [data, setData] = useState<GerantDashboardData | null>(null);
+    const [alertCount, setAlertCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [online, setOnline] = useState(true);
 
-    // ─── AI Business Health Score ─────────────────────────────────────────────────
-    // Computed from dashboard data once loaded
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+
+    // Greeting based on hour
+    const greeting = React.useMemo(() => {
+        const hour = new Date().getHours();
+        if (hour >= 6 && hour < 12) return { text: "Bonjour", emoji: "☀️" };
+        if (hour >= 12 && hour < 18) return { text: "Bon après-midi", emoji: "🌤️" };
+        return { text: "Bonsoir", emoji: "🌙" };
+    }, []);
+
+    // ─── AI Business Health Score ───────────────────────────────────────────────
     const healthFactors = React.useMemo(() => {
         if (!data) return [];
         const revenueScore = Math.min(100, Math.round((data.revenue / 500000) * 100));
-        const profitMarginPct = data.revenue > 0 ? (data.netProfit / data.revenue) * 100 : 0;
+        const profitMarginPct = data.revenue > 0 ? (data.profit / data.revenue) * 100 : 0;
         const marginScore = Math.min(100, Math.round(profitMarginPct * 4));
         const debtRatio = data.revenue > 0 ? (data.totalDebts / data.revenue) : 0;
         const debtScore = Math.max(0, Math.round((1 - debtRatio * 5) * 100));
@@ -62,15 +103,17 @@ export default function GerantDashboardScreen({ navigation }: any) {
         if (healthScore >= 50) return "الحالة معقولة، بصح خلي بالك على الديون والمخزون. زيد شوية جهد.";
         return "كاين مشاكل في الخزينة أو الديون، خدم بسرعة باش تحسن الوضعية.";
     }, [healthScore, data]);
-    // ───────────────────────────────────────────────────────────────────
 
     const fetchDashboard = useCallback(async () => {
         try {
-            const result = await apiFetch("/gerant/dashboard");
+            const [result, unreadCount] = await Promise.all([
+                apiFetch("/gerant/dashboard"),
+                useNotificationStore.getState().fetchUnreadCount().catch(() => 0),
+            ]);
+
             setData({
                 revenue: result.today.revenue.total,
-                grossProfit: result.today.netCashFlow,
-                netProfit: result.today.netCashFlow,
+                profit: result.today.profit?.total || 0,
                 expenses: result.today.expenses.total,
                 caisseEspeces: result.treasury.accounts
                     .filter((a: any) => a.type === "CASH")
@@ -81,352 +124,653 @@ export default function GerantDashboardScreen({ navigation }: any) {
                 outOfStockCount: result.stock.lowStockCount,
                 debtorsCount: result.debts.clientDebtorCount,
                 totalDebts: result.debts.clientsOweUs,
-                lowStockList: [],
-                topDebtors: [],
+                trends: result.trends || {
+                    revenueLast7Days: [],
+                    profitLast7Days: [],
+                    expenseLast7Days: [],
+                    revenueChangePercent: 0,
+                    profitChangePercent: 0,
+                    expenseChangePercent: 0,
+                },
+                recentActivity: result.recentActivity || [],
             });
+            setAlertCount(unreadCount);
+
+            // Animate content fade in
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 500,
+                useNativeDriver: true,
+            }).start();
         } catch (e) {
             console.error("[Dashboard]", e);
-            setData({
-                revenue: 0, grossProfit: 0, netProfit: 0, expenses: 0,
-                caisseEspeces: 0, caisseBanque: 0,
-                outOfStockCount: 0, debtorsCount: 0, totalDebts: 0,
-                lowStockList: [], topDebtors: [],
-            });
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [fadeAnim]);
 
     useEffect(() => {
         isOnline().then(setOnline);
         fetchDashboard();
     }, [fetchDashboard]);
 
-    if (loading || !data) {
+    // Treasury Calculations
+    const totalTreasury = data ? data.caisseEspeces + data.caisseBanque : 0;
+    const cashPct = totalTreasury > 0 ? (data!.caisseEspeces / totalTreasury) * 100 : 50;
+    const bankPct = totalTreasury > 0 ? (data!.caisseBanque / totalTreasury) * 100 : 50;
+
+    if (loading) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#3b82f6" />
+            <View style={styles.loaderContainer}>
+                <SkeletonLoader type="dashboard" />
             </View>
         );
     }
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.mainContainer}>
+            {/* Custom Top Header Status Bar */}
+            <StatusBar barStyle="light-content" backgroundColor={Colors.bg.primary} />
+
             <ScrollView
-                style={styles.container}
-                contentContainerStyle={{ paddingBottom: 90 }}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => {
-                        setRefreshing(true);
-                        fetchDashboard();
-                    }} tintColor="#22c55e" />
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => {
+                            setRefreshing(true);
+                            fetchDashboard();
+                        }}
+                        tintColor={Colors.accent.green}
+                        colors={[Colors.accent.green]}
+                        progressBackgroundColor={Colors.bg.card}
+                    />
                 }
             >
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.headerTitleRow}>
-                        <Ionicons name="sparkles" size={24} color="#f59e0b" />
-                        <Text style={styles.versionText}>v{Constants.expoConfig?.version || "2.2.1"} — SynCloudPOS Gérant</Text>
-                        <TouchableOpacity
-                            style={styles.briefingBtn}
-                            onPress={() => (navigation as any)?.navigate?.("MorningBrief")}
-                        >
-                            <Ionicons name="sunny" size={16} color="#f59e0b" />
-                            <Text style={styles.briefingBtnText}>Briefing IA</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={styles.headerSubtitle}>Tableau de bord — données temps réel</Text>
-                </View>
-
-
-                {/* ── AI Business Health Score ───────────────────────────── */}
-                <Text style={styles.sectionTitle}>SCORE SANTÉ ENTREPRISE</Text>
-                <View style={styles.healthCard}>
-                    {/* Score gauge */}
-                    <View style={styles.healthGaugeRow}>
-                        <View style={styles.healthGaugeWrap}>
-                            <View style={styles.healthGaugeOuter}>
-                                <View style={[styles.healthGaugeInner, {
-                                    borderColor: healthScore >= 75 ? "#22c55e" : healthScore >= 50 ? "#f59e0b" : "#ef4444",
-                                }]}>
-                                    <Text style={[styles.healthScoreNum, {
-                                        color: healthScore >= 75 ? "#22c55e" : healthScore >= 50 ? "#f59e0b" : "#ef4444",
-                                    }]}>{healthScore}</Text>
-                                    <Text style={styles.healthScoreSub}>/100</Text>
-                                </View>
-                            </View>
-                            <Text style={[styles.healthLabel, {
-                                color: healthScore >= 75 ? "#22c55e" : healthScore >= 50 ? "#f59e0b" : "#ef4444",
-                            }]}>
-                                {healthScore >= 75 ? "🟢 Excellent" : healthScore >= 50 ? "🟡 Correct" : "🔴 Attention"}
+                {/* ─── Hero Header Row ────────────────────────────────────────── */}
+                <View style={styles.heroSection}>
+                    <View style={styles.heroRow}>
+                        <View>
+                            <Text style={styles.greetingText}>
+                                {greeting.text} {greeting.emoji}
                             </Text>
+                            <Text style={styles.userNameText}>{user?.name || "Gérant"}</Text>
+                            <Text style={styles.shopNameText}>{user?.tenant?.name || "SynCloud Shop"}</Text>
                         </View>
-                        <View style={styles.healthFactors}>
-                            {healthFactors.map((f, i) => (
-                                <View key={i} style={styles.factorRow}>
-                                    <Text style={styles.factorLabel} numberOfLines={1}>{f.label}</Text>
-                                    <View style={styles.factorBarTrack}>
-                                        <View style={[styles.factorBarFill, {
-                                            width: `${f.score}%`,
-                                            backgroundColor: f.score >= 70 ? "#22c55e" : f.score >= 40 ? "#f59e0b" : "#ef4444",
-                                        }]} />
+
+                        <View style={styles.headerRightActions}>
+                            {/* Briefing Button */}
+                            <TouchableOpacity
+                                style={styles.briefingBtn}
+                                onPress={() => navigation.navigate("MorningBrief")}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="sunny" size={16} color={Colors.accent.amber} />
+                                <Text style={styles.briefingBtnText}>Briefing IA</Text>
+                            </TouchableOpacity>
+
+                            {/* Notification Bell */}
+                            <TouchableOpacity
+                                style={styles.bellBtn}
+                                onPress={() => navigation.navigate("NotificationCenter")}
+                                activeOpacity={0.8}
+                            >
+                                <MaterialCommunityIcons name="bell-outline" size={24} color={Colors.text.primary} />
+                                {alertCount > 0 && (
+                                    <View style={styles.bellBadge}>
+                                        <Text style={styles.bellBadgeText}>{alertCount}</Text>
                                     </View>
-                                    <Text style={styles.factorScore}>{f.score}</Text>
-                                </View>
-                            ))}
+                                )}
+                            </TouchableOpacity>
                         </View>
                     </View>
-                    {/* AI Insight in Darija */}
-                    <View style={styles.healthInsight}>
-                        <Ionicons name="mic" size={14} color="#22c55e" />
-                        <Text style={styles.healthInsightText}>
-                            "{aiInsight}"
-                        </Text>
-                    </View>
                 </View>
 
-                {/* ── Quick Action Shortcuts ─────────────────────────────── */}
-                <Text style={styles.sectionTitle}>ACCÈS RAPIDE</Text>
-                <View style={styles.quickActions}>
-                    {[
-                        { icon: "bar-chart-outline", label: "Rapports", color: "#3b82f6", nav: "Rapports" },
-                        { icon: "document-text-outline", label: "Créer BL", color: "#22c55e", nav: "CreateBL" },
-                        { icon: "book-outline", label: "Catalogue", color: "#10b981", nav: "Catalog" },
-                        { icon: "lock-closed-outline", label: "Clôture", color: "#a855f7", nav: "DailyClose" },
-                        { icon: "people-outline", label: "Créances", color: "#f59e0b", nav: "ClientDebts" },
-                        { icon: "cube-outline", label: "Stock", color: "#64748b", nav: "InventoryHealth" },
-                    ].map((a, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            style={styles.quickActionBtn}
-                            onPress={() => (navigation as any)?.navigate(a.nav)}
-                            activeOpacity={0.7}
-                        >
-                            <View style={[styles.quickActionIcon, { backgroundColor: `${a.color}20` }]}>
-                                <Ionicons name={a.icon as any} size={22} color={a.color} />
-                            </View>
-                            <Text style={styles.quickActionLabel}>{a.label}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                {/* Main animated opacity content wrapper */}
+                <Animated.View style={{ opacity: fadeAnim }}>
 
-                {/* Financial Status Grid */}
-                <Text style={styles.sectionTitle}>SITUATION FINANCIÈRE</Text>
-                <View style={styles.kpiGrid}>
-                    {/* CA Card */}
-                    <View style={[styles.kpiCard, { borderLeftColor: "#3b82f6" }]}>
-                        <Ionicons name="trending-up" size={22} color="#3b82f6" />
-                        <Text style={styles.kpiValue}>
-                            {data.revenue.toLocaleString("fr-FR")} DA
-                        </Text>
-                        <Text style={styles.kpiLabel}>Chiffre d'Affaires</Text>
-                    </View>
-
-                    {/* Net Profit Card */}
-                    <View style={[styles.kpiCard, { borderLeftColor: "#22c55e" }]}>
-                        <Ionicons name="stats-chart" size={22} color="#22c55e" />
-                        <Text style={[styles.kpiValue, { color: "#22c55e" }]}>
-                            {data.netProfit.toLocaleString("fr-FR")} DA
-                        </Text>
-                        <Text style={styles.kpiLabel}>Bénéfice Net</Text>
-                    </View>
-
-                    {/* Expenses Card */}
-                    <View style={[styles.kpiCard, { borderLeftColor: "#ef4444" }]}>
-                        <Ionicons name="receipt" size={22} color="#ef4444" />
-                        <Text style={[styles.kpiValue, { color: "#ef4444" }]}>
-                            {data.expenses.toLocaleString("fr-FR")} DA
-                        </Text>
-                        <Text style={styles.kpiLabel}>Dépenses Période</Text>
-                    </View>
-
-                    {/* Outstanding Debts */}
-                    <View style={[styles.kpiCard, { borderLeftColor: "#f59e0b" }]}>
-                        <Ionicons name="people" size={22} color="#f59e0b" />
-                        <Text style={[styles.kpiValue, { color: "#f59e0b" }]}>
-                            {Math.abs(data.totalDebts).toLocaleString("fr-FR")} DA
-                        </Text>
-                        <Text style={styles.kpiLabel}>Dettes Clients</Text>
-                    </View>
-                </View>
-
-                {/* Treasury Accounts */}
-                <Text style={styles.sectionTitle}>SITUATION DE TRÉSORERIE</Text>
-                <View style={styles.caisseCard}>
-                    <View style={styles.caisseRow}>
-                        <View style={styles.caisseLabelWrap}>
-                            <Ionicons name="wallet-outline" size={20} color="#22c55e" />
-                            <Text style={styles.caisseLabel}>Caisse Principale (Espèces)</Text>
-                        </View>
-                        <Text style={styles.caisseValue}>{data.caisseEspeces.toLocaleString("fr-FR")} DA</Text>
-                    </View>
-                    <View style={styles.caisseRow}>
-                        <View style={styles.caisseLabelWrap}>
-                            <Ionicons name="business-outline" size={20} color="#3b82f6" />
-                            <Text style={styles.caisseLabel}>Banque / Comptes Courants</Text>
-                        </View>
-                        <Text style={[styles.caisseValue, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-                            {data.caisseBanque.toLocaleString("fr-FR")} DA
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Out of Stock and Warnings */}
-                <Text style={styles.sectionTitle}>ALERTES D'INVENTAIRE ({data.outOfStockCount})</Text>
-                <View style={styles.alertCard}>
-                    {data.lowStockList.map((item, i) => (
-                        <View key={i} style={styles.alertRow}>
-                            <View style={styles.alertLeft}>
-                                <Ionicons
-                                    name={item.stock === 0 ? "close-circle" : "alert-circle"}
-                                    size={18}
-                                    color={item.stock === 0 ? "#ef4444" : "#f59e0b"}
+                    {/* ─── Horizontal Scrollable KPI cards ─────────────────────── */}
+                    <Text style={styles.sectionTitle}>SITUATION AUJOURD'HUI</Text>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.kpiScrollContainer}
+                    >
+                        {data && (
+                            <>
+                                <AnimatedKPICard
+                                    title="Chiffre d'Affaires"
+                                    value={data.revenue}
+                                    trend={data.trends.revenueChangePercent}
+                                    sparklineData={data.trends.revenueLast7Days}
+                                    icon="trending-up"
+                                    color={Colors.accent.blue}
+                                    onPress={() => navigation.navigate("SalesAnalytics")}
                                 />
-                                <Text style={styles.alertName}>{item.name}</Text>
-                            </View>
-                            <Text style={[styles.alertValue, item.stock === 0 && styles.red]}>
-                                {item.stock === 0 ? "Rupture" : `${item.stock} restants`}
-                            </Text>
-                        </View>
-                    ))}
-                </View>
+                                <AnimatedKPICard
+                                    title="Bénéfice Net"
+                                    value={data.profit}
+                                    trend={data.trends.profitChangePercent}
+                                    sparklineData={data.trends.profitLast7Days}
+                                    icon="cash"
+                                    color={Colors.accent.green}
+                                    onPress={() => navigation.navigate("ProfitReport")}
+                                />
+                                <AnimatedKPICard
+                                    title="Dépenses Période"
+                                    value={data.expenses}
+                                    trend={data.trends.expenseChangePercent}
+                                    sparklineData={data.trends.expenseLast7Days}
+                                    icon="receipt"
+                                    color={Colors.accent.red}
+                                    onPress={() => navigation.navigate("GerantExpenses")}
+                                />
+                                <AnimatedKPICard
+                                    title="Créances Clients"
+                                    value={data.totalDebts}
+                                    trend={undefined}
+                                    sparklineData={undefined}
+                                    icon="account-arrow-left"
+                                    color={Colors.accent.amber}
+                                    onPress={() => navigation.navigate("ClientDebts")}
+                                />
+                            </>
+                        )}
+                    </ScrollView>
 
-                {/* Debtor Clients */}
-                <Text style={styles.sectionTitle}>TOP CRÉANCES CLIENTS ({data.debtorsCount})</Text>
-                <View style={styles.alertCard}>
-                    {data.topDebtors.map((client, i) => (
-                        <View key={i} style={styles.alertRow}>
-                            <View style={styles.alertLeft}>
-                                <Ionicons name="person-outline" size={18} color="#94a3b8" />
-                                <Text style={styles.alertName}>{client.name}</Text>
+                    {/* ─── Circular gauge for AI Health Score ──────────────────── */}
+                    <Text style={styles.sectionTitle}>SCORE DE SANTÉ</Text>
+                    <View style={styles.healthCard}>
+                        <View style={styles.healthGaugeRow}>
+                            <View style={styles.gaugeContainer}>
+                                <View style={[styles.gaugeTrack, {
+                                    borderColor: healthScore >= 75 ? `${Colors.accent.green}20` : healthScore >= 50 ? `${Colors.accent.amber}20` : `${Colors.accent.red}20`
+                                }]}>
+                                    <View style={[styles.gaugeOverlay, {
+                                        borderColor: healthScore >= 75 ? Colors.accent.green : healthScore >= 50 ? Colors.accent.amber : Colors.accent.red
+                                    }]}>
+                                        <Text style={[styles.gaugeScoreNum, {
+                                            color: healthScore >= 75 ? Colors.accent.green : healthScore >= 50 ? Colors.accent.amber : Colors.accent.red
+                                        }]}>
+                                            {healthScore}
+                                        </Text>
+                                        <Text style={styles.gaugeScoreSub}>/100</Text>
+                                    </View>
+                                </View>
+                                <Text style={[styles.gaugeLabel, {
+                                    color: healthScore >= 75 ? Colors.accent.green : healthScore >= 50 ? Colors.accent.amber : Colors.accent.red
+                                }]}>
+                                    {healthScore >= 75 ? "🟢 En Bonne Santé" : healthScore >= 50 ? "🟡 Moyen" : "🔴 Attention"}
+                                </Text>
                             </View>
-                            <Text style={[styles.alertValue, styles.red]}>
-                                {Math.abs(client.balance).toLocaleString("fr-FR")} DA
-                            </Text>
+
+                            <View style={styles.healthFactors}>
+                                {healthFactors.map((f, i) => (
+                                    <View key={i} style={styles.factorRow}>
+                                        <Text style={styles.factorLabel} numberOfLines={1}>{f.label}</Text>
+                                        <View style={styles.factorBarTrack}>
+                                            <View style={[styles.factorBarFill, {
+                                                width: `${f.score}%`,
+                                                backgroundColor: f.score >= 75 ? Colors.accent.green : f.score >= 50 ? Colors.accent.amber : Colors.accent.red,
+                                            }]} />
+                                        </View>
+                                        <Text style={styles.factorScore}>{f.score}</Text>
+                                    </View>
+                                ))}
+                            </View>
                         </View>
-                    ))}
-                </View>
+
+                        <View style={[styles.insightRow, { borderColor: healthScore >= 75 ? `${Colors.accent.green}20` : `${Colors.accent.red}20` }]}>
+                            <MaterialCommunityIcons name="robot" size={18} color={Colors.accent.green} style={styles.insightIcon} />
+                            <Text style={styles.insightText}>"{aiInsight}"</Text>
+                        </View>
+                    </View>
+
+                    {/* ─── Treasury split bar comparison ───────────────────────── */}
+                    <Text style={styles.sectionTitle}>RÉPARTITION TRÉSORERIE</Text>
+                    <View style={styles.treasuryCard}>
+                        <View style={styles.treasuryBarContainer}>
+                            <View style={[styles.treasuryBarFill, { width: `${cashPct}%`, backgroundColor: Colors.accent.green }]} />
+                            <View style={[styles.treasuryBarFill, { width: `${bankPct}%`, backgroundColor: Colors.accent.blue }]} />
+                        </View>
+
+                        <View style={styles.treasuryDetailsRow}>
+                            <View style={styles.treasuryLegendItem}>
+                                <View style={[styles.legendIndicator, { backgroundColor: Colors.accent.green }]} />
+                                <View>
+                                    <Text style={styles.legendTitle}>Espèces (Caisse)</Text>
+                                    <Text style={styles.legendValue}>
+                                        {data ? data.caisseEspeces.toLocaleString("fr-FR") : 0} DA ({Math.round(cashPct)}%)
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.treasuryLegendItem}>
+                                <View style={[styles.legendIndicator, { backgroundColor: Colors.accent.blue }]} />
+                                <View>
+                                    <Text style={styles.legendTitle}>Banque (CCP/Compte)</Text>
+                                    <Text style={styles.legendValue}>
+                                        {data ? data.caisseBanque.toLocaleString("fr-FR") : 0} DA ({Math.round(bankPct)}%)
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* ─── Live Activity Feed ──────────────────────────────────── */}
+                    <Text style={styles.sectionTitle}>DERNIÈRES ACTIVITÉS</Text>
+                    <View style={styles.activityCard}>
+                        {data && data.recentActivity.length > 0 ? (
+                            data.recentActivity.map((act, i) => {
+                                const isExpense = act.type === "EXPENSE";
+                                const isPos = act.type === "SALE_POS";
+                                const color = isExpense ? Colors.accent.red : isPos ? Colors.accent.blue : Colors.accent.green;
+                                const icon = isExpense ? "minus-circle" : isPos ? "cash-register" : "file-document-outline";
+
+                                return (
+                                    <View key={act.id} style={[styles.activityRow, i === data.recentActivity.length - 1 && styles.lastRow]}>
+                                        <View style={[styles.activityIconWrapper, { backgroundColor: `${color}15` }]}>
+                                            <MaterialCommunityIcons name={icon} size={18} color={color} />
+                                        </View>
+                                        <View style={styles.activityInfo}>
+                                            <Text style={styles.activityDesc} numberOfLines={1}>{act.description}</Text>
+                                            <Text style={styles.activityTime}>
+                                                {new Date(act.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                            </Text>
+                                        </View>
+                                        <Text style={[styles.activityAmount, { color: isExpense ? Colors.text.primary : color }]}>
+                                            {isExpense ? "-" : "+"}{act.amount.toLocaleString("fr-FR")} DA
+                                        </Text>
+                                    </View>
+                                );
+                            })
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <MaterialCommunityIcons name="clipboard-text-clock" size={36} color={Colors.text.muted} />
+                                <Text style={styles.emptyText}>Aucune activité aujourd'hui</Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* ─── Floating/Quick Actions Shortcuts ────────────────────── */}
+                    <Text style={styles.sectionTitle}>RACCOURCIS RAPIDES</Text>
+                    <View style={styles.quickActionsContainer}>
+                        {[
+                            { icon: "chart-bar", label: "Rapports", color: Colors.accent.blue, nav: "Rapports" },
+                            { icon: "file-plus", label: "Créer BL", color: Colors.accent.green, nav: "CreateBL" },
+                            { icon: "book-open-variant", label: "Catalogue", color: Colors.accent.green, nav: "Catalog" },
+                            { icon: "lock", label: "Clôture", color: Colors.accent.purple, nav: "DailyClose" },
+                            { icon: "account-cash", label: "Créances", color: Colors.accent.amber, nav: "ClientDebts" },
+                            { icon: "cube-send", label: "Santé Stock", color: Colors.text.secondary, nav: "InventoryHealth" },
+                        ].map((a, i) => (
+                            <TouchableOpacity
+                                key={i}
+                                style={styles.quickActionBtn}
+                                onPress={() => navigation.navigate(a.nav)}
+                                activeOpacity={0.7}
+                            >
+                                <View style={[styles.quickActionIconWrapper, { backgroundColor: `${a.color}15` }]}>
+                                    <MaterialCommunityIcons name={a.icon as any} size={22} color={a.color} />
+                                </View>
+                                <Text style={styles.quickActionLabel}>{a.label}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                </Animated.View>
             </ScrollView>
+
+            {/* Smart AI Voice Assistant widget */}
             <VoiceAssistantWidget />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0a0f1e" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e" },
-
-    header: { padding: 16, paddingTop: 20 },
-    headerTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-    headerTitle: { color: "#f8fafc", fontSize: 24, fontWeight: "900" },
-    versionText: { color: "#475569", fontSize: 12, fontWeight: "600" },
-    headerSubtitle: { color: "#64748b", fontSize: 13, marginTop: 4 },
-
-    sectionTitle: {
-        color: "#64748b", fontSize: 11, fontWeight: "700", letterSpacing: 2,
-        paddingHorizontal: 16, marginTop: 24, marginBottom: 10,
+    mainContainer: {
+        flex: 1,
+        backgroundColor: Colors.bg.primary,
     },
-
-    // ─── Health Score ─────────────────────────────────────────────────────────
-    healthCard: {
-        backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 20,
-        padding: 18, gap: 14,
-        shadowColor: "#000", shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15, shadowRadius: 12, elevation: 5,
+    loaderContainer: {
+        flex: 1,
+        backgroundColor: Colors.bg.primary,
+        justifyContent: "center",
+        alignItems: "center",
     },
-    healthGaugeRow: { flexDirection: "row", gap: 16, alignItems: "center" },
-    healthGaugeWrap: { alignItems: "center", gap: 8 },
-    healthGaugeOuter: {
-        width: 90, height: 90, borderRadius: 45,
-        backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center",
-        borderWidth: 2, borderColor: "#334155",
+    scrollView: {
+        flex: 1,
     },
-    healthGaugeInner: {
-        width: 76, height: 76, borderRadius: 38,
-        justifyContent: "center", alignItems: "center",
-        borderWidth: 5, borderColor: "#22c55e",
+    scrollContent: {
+        paddingBottom: Platform.OS === "ios" ? 100 : 80,
     },
-    healthScoreNum: { color: "#f8fafc", fontSize: 26, fontWeight: "900", lineHeight: 28 },
-    healthScoreSub: { color: "#64748b", fontSize: 10, fontWeight: "700" },
-    healthLabel: { fontSize: 12, fontWeight: "800" },
-    healthFactors: { flex: 1, gap: 8 },
-    factorRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-    factorLabel: { color: "#94a3b8", fontSize: 9, fontWeight: "700", width: 68 },
-    factorBarTrack: { flex: 1, height: 6, backgroundColor: "#334155", borderRadius: 3, overflow: "hidden" },
-    factorBarFill: { height: "100%", borderRadius: 3 },
-    factorScore: { color: "#f8fafc", fontSize: 10, fontWeight: "900", width: 20, textAlign: "right" },
-    healthInsight: {
-        flexDirection: "row", alignItems: "flex-start", gap: 8,
-        backgroundColor: "#22c55e10", borderRadius: 10,
-        paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: "#22c55e20",
-    },
-    healthInsightText: { flex: 1, color: "#94a3b8", fontSize: 12, fontWeight: "600", fontStyle: "italic", lineHeight: 18 },
-
-    // ─── Quick Actions ─────────────────────────────────────────────────────
-    quickActions: {
-        flexDirection: "row", justifyContent: "space-around", flexWrap: "wrap", gap: 12,
-        backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16, paddingVertical: 16, paddingHorizontal: 8,
-    },
-    quickActionBtn: { alignItems: "center", gap: 8 },
-    quickActionIcon: {
-        width: 48, height: 48, borderRadius: 14,
-        justifyContent: "center", alignItems: "center",
-    },
-    quickActionLabel: { color: "#94a3b8", fontSize: 10, fontWeight: "700" },
-
-    // KPIs
-    kpiGrid: {
-        flexDirection: "row", flexWrap: "wrap", gap: 10,
+    heroSection: {
         paddingHorizontal: 16,
+        paddingTop: Platform.OS === "ios" ? 50 : 24,
+        paddingBottom: 16,
     },
-    kpiCard: {
-        backgroundColor: "#1e293b", borderRadius: 16, padding: 16,
-        width: "47%", borderLeftWidth: 4,
-        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3,
+    heroRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
-    kpiValue: { color: "#f8fafc", fontSize: 18, fontWeight: "900", marginTop: 8 },
-    kpiLabel: { color: "#64748b", fontSize: 11, marginTop: 4, fontWeight: "600" },
-
-    // End of day cash
-    caisseCard: {
-        backgroundColor: "#1e293b", marginHorizontal: 16,
-        padding: 16, borderRadius: 16, gap: 12,
-        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3,
+    greetingText: {
+        ...Typography.caption,
+        color: Colors.text.muted,
+        fontWeight: "600",
     },
-    caisseRow: {
-        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    userNameText: {
+        ...Typography.h2,
+        fontWeight: "bold",
+        color: Colors.text.primary,
+        marginTop: 2,
     },
-    caisseLabelWrap: { flexDirection: "row", alignItems: "center", gap: 8 },
-    caisseLabel: { color: "#94a3b8", fontSize: 13, fontWeight: "600" },
-    caisseValue: {
-        color: "#f8fafc", fontSize: 15, fontWeight: "800",
-        borderBottomWidth: 1, borderBottomColor: "#334155", paddingBottom: 10,
+    shopNameText: {
+        ...Typography.caption,
+        color: Colors.accent.green,
+        fontWeight: "700",
+        marginTop: 1,
     },
-
-    // Alerts card
-    alertCard: {
-        backgroundColor: "#1e293b", marginHorizontal: 16,
-        padding: 16, borderRadius: 16, gap: 12,
-        shadowColor: "#000", shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1, shadowRadius: 6, elevation: 3,
+    headerRightActions: {
+        flexDirection: "row",
+        alignItems: "center",
     },
-    alertRow: {
-        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-        borderBottomWidth: 1, borderBottomColor: "#334155", paddingBottom: 8,
-    },
-    alertLeft: { flexDirection: "row", alignItems: "center", gap: 8, flex: 1 },
-    alertName: { color: "#f8fafc", fontSize: 14, fontWeight: "600", flex: 1 },
-    alertValue: { color: "#f59e0b", fontSize: 13, fontWeight: "700" },
-    red: { color: "#ef4444" },
-
-    // Morning Brief button
     briefingBtn: {
-        flexDirection: "row", alignItems: "center", gap: 4, marginLeft: "auto",
-        backgroundColor: "#f59e0b20", paddingHorizontal: 10, paddingVertical: 5,
-        borderRadius: 12, borderWidth: 1, borderColor: "#f59e0b40",
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: `${Colors.accent.amber}15`,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: `${Colors.accent.amber}30`,
+        marginRight: 12,
     },
-    briefingBtnText: { color: "#f59e0b", fontSize: 11, fontWeight: "700" },
+    briefingBtnText: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: Colors.accent.amber,
+        marginLeft: 4,
+    },
+    bellBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: Colors.bg.card,
+        borderWidth: 1,
+        borderColor: Colors.border.card,
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+    },
+    bellBadge: {
+        position: "absolute",
+        top: -4,
+        right: -4,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        backgroundColor: Colors.accent.red,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 3,
+    },
+    bellBadgeText: {
+        color: "#ffffff",
+        fontSize: 10,
+        fontWeight: "bold",
+    },
+    sectionTitle: {
+        fontSize: 11,
+        fontWeight: "700",
+        color: Colors.text.muted,
+        letterSpacing: 2,
+        paddingHorizontal: 16,
+        marginTop: 20,
+        marginBottom: 8,
+        textTransform: "uppercase",
+    },
+    kpiScrollContainer: {
+        paddingLeft: 16,
+        paddingRight: 4,
+        paddingVertical: 4,
+    },
+    healthCard: {
+        backgroundColor: Colors.bg.card,
+        marginHorizontal: 16,
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: Colors.border.card,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    healthGaugeRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16,
+    },
+    gaugeContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    gaugeTrack: {
+        width: 84,
+        height: 84,
+        borderRadius: 42,
+        borderWidth: 2,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0,0,0,0.1)",
+    },
+    gaugeOverlay: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        borderWidth: 4,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    gaugeScoreNum: {
+        fontSize: 22,
+        fontWeight: "900",
+    },
+    gaugeScoreSub: {
+        fontSize: 10,
+        color: Colors.text.muted,
+        fontWeight: "700",
+    },
+    gaugeLabel: {
+        fontSize: 11,
+        fontWeight: "800",
+        marginTop: 6,
+    },
+    healthFactors: {
+        flex: 1,
+        gap: 8,
+    },
+    factorRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    factorLabel: {
+        fontSize: 10,
+        fontWeight: "600",
+        color: Colors.text.secondary,
+        width: 75,
+    },
+    factorBarTrack: {
+        flex: 1,
+        height: 6,
+        backgroundColor: Colors.border.subtle,
+        borderRadius: 3,
+        overflow: "hidden",
+    },
+    factorBarFill: {
+        height: "100%",
+        borderRadius: 3,
+    },
+    factorScore: {
+        fontSize: 10,
+        fontWeight: "700",
+        color: Colors.text.primary,
+        width: 20,
+        textAlign: "right",
+    },
+    insightRow: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        marginTop: 12,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        gap: 8,
+    },
+    insightIcon: {
+        marginTop: 1,
+    },
+    insightText: {
+        flex: 1,
+        fontSize: 11,
+        color: Colors.text.secondary,
+        fontStyle: "italic",
+        fontWeight: "500",
+        lineHeight: 16,
+    },
+    treasuryCard: {
+        backgroundColor: Colors.bg.card,
+        marginHorizontal: 16,
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: Colors.border.card,
+        gap: 12,
+    },
+    treasuryBarContainer: {
+        height: 10,
+        backgroundColor: Colors.border.subtle,
+        borderRadius: 5,
+        flexDirection: "row",
+        overflow: "hidden",
+    },
+    treasuryBarFill: {
+        height: "100%",
+    },
+    treasuryDetailsRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    treasuryLegendItem: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: 6,
+    },
+    legendIndicator: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginTop: 3,
+    },
+    legendTitle: {
+        fontSize: 10,
+        color: Colors.text.muted,
+        fontWeight: "700",
+    },
+    legendValue: {
+        fontSize: 11,
+        color: Colors.text.primary,
+        fontWeight: "600",
+        marginTop: 2,
+    },
+    activityCard: {
+        backgroundColor: Colors.bg.card,
+        marginHorizontal: 16,
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: Colors.border.card,
+    },
+    activityRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.border.subtle,
+    },
+    lastRow: {
+        borderBottomWidth: 0,
+        paddingBottom: 0,
+    },
+    activityIconWrapper: {
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12,
+    },
+    activityInfo: {
+        flex: 1,
+    },
+    activityDesc: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: Colors.text.primary,
+    },
+    activityTime: {
+        fontSize: 10,
+        color: Colors.text.muted,
+        marginTop: 2,
+    },
+    activityAmount: {
+        fontSize: 12,
+        fontWeight: "700",
+    },
+    emptyContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 16,
+        gap: 8,
+    },
+    emptyText: {
+        fontSize: 12,
+        color: Colors.text.muted,
+        fontWeight: "500",
+    },
+    quickActionsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+        justifyContent: "space-between",
+        backgroundColor: Colors.bg.card,
+        marginHorizontal: 16,
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: Colors.border.card,
+    },
+    quickActionBtn: {
+        width: "30%",
+        alignItems: "center",
+        gap: 6,
+        marginVertical: 4,
+    },
+    quickActionIconWrapper: {
+        width: 48,
+        height: 48,
+        borderRadius: 14,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    quickActionLabel: {
+        fontSize: 10,
+        fontWeight: "700",
+        color: Colors.text.secondary,
+        textAlign: "center",
+    },
 });

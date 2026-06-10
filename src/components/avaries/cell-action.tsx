@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash } from "lucide-react"
+import { Trash, Edit } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
@@ -9,15 +9,18 @@ import { Button } from "@/components/ui/button"
 import { AlertModal } from "@/components/modals/alert-modal"
 import { deleteSpoilage } from "@/actions/spoilage"
 import { SpoilageColumn } from "./columns"
+import { AddSpoilageModal } from "./add-spoilage-modal"
 
 interface CellActionProps {
     data: SpoilageColumn
+    products: { id: string, name: string, quantity: number }[]
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+export const CellAction: React.FC<CellActionProps> = ({ data, products = [] }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
+    const [isEditOpen, setIsEditOpen] = useState(false)
 
     const onDelete = async () => {
         try {
@@ -40,7 +43,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     return (
         <>
             <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
+            <AddSpoilageModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} products={products} initialData={data} />
             <div className="flex items-center gap-1 justify-end">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
+                    onClick={() => setIsEditOpen(true)}
+                    title="Modifier"
+                >
+                    <Edit className="h-4 w-4" />
+                </Button>
                 <Button
                     variant="ghost"
                     size="icon"

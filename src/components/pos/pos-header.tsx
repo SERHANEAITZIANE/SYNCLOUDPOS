@@ -12,7 +12,7 @@ export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string })
     return (
         <div className="flex items-center justify-between px-6 py-3 bg-[#131418] text-white shadow-sm h-14">
             <div className="flex items-center gap-4 shrink-0">
-                <Link href="/dashboard">
+                <Link href="/hub">
                     <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 rounded-full h-8 w-8">
                         <Home className="h-4 w-4" />
                     </Button>

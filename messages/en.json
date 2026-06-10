@@ -921,7 +921,12 @@
     "reseller": "Reseller",
     "wholesale": "Wholesale",
     "noResults": "No results.",
-    "page": "Page"
+    "page": "Page",
+    "show": "Show",
+    "all": "All",
+    "rowsPerPage": "Rows per page",
+    "of": "of",
+    "results": "results"
   },
   "PosPage": {
     "unauthorized": "Unauthorized",
@@ -995,6 +1000,7 @@
     "loadOrder": "Load Order",
     "allCategories": "All",
     "showingTop50": "Showing top 50 matches. Use search to find more.",
+    "showingProducts": "Showing {start} to {end} of {total} products",
     "noProductsFound": "No products found",
     "tryRefiningSearch": "Try refining your search",
     "viewCart": "View Cart",

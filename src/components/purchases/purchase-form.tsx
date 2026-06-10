@@ -49,6 +49,7 @@ const formSchema = z.object({
     imageUrl1: z.string().optional(),
     imageUrl2: z.string().optional(),
     imageUrl3: z.string().optional(),
+    createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
         quantity: z.number().min(1),
@@ -536,7 +537,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         }
     }, [isEditMode, payments])
 
-    const title = isEditMode ? `Bon #${initialData?.id?.slice(-8).toUpperCase()}` : "Nouveau bon d'achat"
+    const title = isEditMode
+        ? (initialData?.purchaseNumber || `Bon #${initialData?.id?.slice(-8).toUpperCase()}`)
+        : "Nouveau bon d'achat"
     const currentStatus = initialData?.status || "PENDING"
     const statusConf = STATUS_CONFIG[currentStatus as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.PENDING
 
@@ -550,6 +553,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             imageUrl1: initialData.imageUrl1 || "",
             imageUrl2: initialData.imageUrl2 || "",
             imageUrl3: initialData.imageUrl3 || "",
+            createdAt: initialData.createdAt ? new Date(initialData.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             items: initialData.items.map((item: any) => ({
                 productId: item.productId,
                 quantity: Number(item.quantity),
@@ -567,6 +571,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             imageUrl2: "",
             imageUrl3: "",
             reference: "",
+            createdAt: new Date().toISOString().split('T')[0],
             items: [{ productId: "", quantity: 1, costPrice: 0, tvaRate: 0, serialNumber: "" }]
         }
     })
@@ -579,6 +584,13 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
     const total = watchItems.reduce((acc, item) => acc + (item.quantity * item.costPrice), 0)
 
+    const combineDateWithCurrentTime = (dateStr: string) => {
+        const d = new Date(dateStr)
+        const now = new Date()
+        d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+        return d
+    }
+
     const onSubmit = async (values: FormValues) => {
         try {
             setLoading(true)
@@ -586,6 +598,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 const payload = {
                     ...values,
                     total,
+                    createdAt: values.createdAt ? combineDateWithCurrentTime(values.createdAt) : undefined,
                     paymentAmount: payImmediately ? initialPayAmount : 0,
                     paymentMethod: payImmediately ? initialPayMethod : "CASH",
                     paymentAccountId: payImmediately ? initialPayAccountId : undefined,
@@ -600,6 +613,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 const payload = {
                     ...values,
                     total,
+                    createdAt: values.createdAt ? combineDateWithCurrentTime(values.createdAt) : undefined,
                     paymentAmount: payImmediately ? initialPayAmount : 0,
                     paymentMethod: payImmediately ? initialPayMethod : "CASH",
                     paymentAccountId: payImmediately ? initialPayAccountId : undefined,
@@ -706,7 +720,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h1 className="text-2xl font-bold">{statusConf.label}</h1>
-                        <p className="text-gray-500">Réf: #{initialData?.id?.slice(-8).toUpperCase()}</p>
+                        <p className="text-gray-500">Réf: {initialData?.purchaseNumber || `#${initialData?.id?.slice(-8).toUpperCase()}`}</p>
                         <p className="text-gray-500">Date: {format(new Date(), "dd/MM/yyyy HH:mm")}</p>
                     </div>
                     <div className="text-right">
@@ -846,7 +860,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         {/* Top fields */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                             <FormField control={form.control} name="supplierId" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Fournisseur</FormLabel>
@@ -912,6 +926,16 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     <FormLabel>Réf. Fournisseur (Facture/BL)</FormLabel>
                                     <FormControl>
                                         <Input disabled={loading || !canEdit} placeholder="Ex: FAC-2024-001" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <FormField control={form.control} name="createdAt" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Date de transaction</FormLabel>
+                                    <FormControl>
+                                        <Input disabled={loading} type="date" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

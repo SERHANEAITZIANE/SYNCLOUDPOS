@@ -49,6 +49,55 @@ const ENTITY_LABELS: Record<string, string> = {
     TREASURY: "Trésorerie",
 };
 
+const FIELD_TRANSLATIONS: Record<string, string> = {
+    name: "Nom",
+    price: "Prix public",
+    cost: "Coût (Prix d'achat)",
+    stock: "Stock",
+    wholesalePrice: "Prix de gros",
+    dealerPrice: "Prix revendeur",
+    status: "Statut",
+    paymentMethod: "Mode de paiement",
+    paymentStatus: "Statut de paiement",
+    total: "Total",
+    subtotal: "Sous-total",
+    amountPaid: "Montant payé",
+    tvaAmount: "Montant TVA",
+    stampTax: "Timbre fiscal",
+    type: "Type",
+    receiptNumber: "N° de pièce",
+    clientType: "Type de client",
+    description: "Description",
+    notes: "Notes",
+    phone: "Téléphone",
+    email: "Email",
+    address: "Adresse",
+    city: "Ville",
+    barcode: "Code-barres",
+    qtySold: "Quantité vendue",
+    revenue: "Chiffre d'affaires",
+};
+
+const formatValue = (key: string, val: any) => {
+    if (val === null || val === undefined) return "—";
+    if (typeof val === "boolean") return val ? "Oui" : "Non";
+    
+    const priceKeys = ["price", "cost", "wholesalePrice", "dealerPrice", "total", "subtotal", "amountPaid", "tvaAmount", "stampTax", "revenue"];
+    if (priceKeys.includes(key) && !isNaN(Number(val))) {
+        return Number(val).toLocaleString("fr-DZ") + " DA";
+    }
+    return String(val);
+};
+
+function parseJSON(str: string | null): any {
+    if (!str) return null;
+    try {
+        return JSON.parse(str);
+    } catch {
+        return null;
+    }
+}
+
 export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
     const [search, setSearch] = useState("");
     const [filterEntity, setFilterEntity] = useState<string | null>(null);
@@ -205,33 +254,166 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                                 </div>
 
                                 {/* Expanded details */}
-                                {isExpanded && (log.before || log.after) && (
-                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {log.before && (
-                                                <div>
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1.5">Avant</p>
-                                                    <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                        {JSON.stringify(JSON.parse(log.before), null, 2)}
-                                                    </pre>
+                                {isExpanded && (log.before || log.after) && (() => {
+                                    const beforeObj = parseJSON(log.before);
+                                    const afterObj = parseJSON(log.after);
+                                    const isDelete = log.action === "DELETE";
+                                    const isUpdate = log.action === "UPDATE";
+                                    const isCreate = log.action === "CREATE";
+
+                                    const hasStructured = (log.before ? beforeObj !== null : true) && (log.after ? afterObj !== null : true);
+
+                                    if (!hasStructured) {
+                                        return (
+                                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {log.before && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1.5">Avant</p>
+                                                            <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
+                                                                {log.before}
+                                                            </pre>
+                                                        </div>
+                                                    )}
+                                                    {log.after && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1.5">Après</p>
+                                                            <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
+                                                                {log.after}
+                                                            </pre>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {log.ipAddress && (
+                                                    <p className="text-[10px] text-muted-foreground mt-3 font-mono">
+                                                        IP: {log.ipAddress}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+
+                                    // Structured View
+                                    let changedFields: { key: string; beforeVal: any; afterVal: any }[] = [];
+                                    if (isUpdate && beforeObj && afterObj) {
+                                        const allKeys = Array.from(new Set([...Object.keys(beforeObj), ...Object.keys(afterObj)]));
+                                        allKeys.forEach((key) => {
+                                            if (key.endsWith("Id") || key === "id" || key === "updatedAt" || key === "createdAt") return;
+                                            const beforeVal = beforeObj[key];
+                                            const afterVal = afterObj[key];
+                                            if (typeof beforeVal === "object" || typeof afterVal === "object") return;
+                                            const beforeStr = beforeVal !== undefined && beforeVal !== null ? String(beforeVal) : "";
+                                            const afterStr = afterVal !== undefined && afterVal !== null ? String(afterVal) : "";
+                                            if (beforeStr !== afterStr) {
+                                                changedFields.push({ key, beforeVal, afterVal });
+                                            }
+                                        });
+                                    }
+
+                                    return (
+                                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
+                                            {/* DELETE View */}
+                                            {isDelete && beforeObj && (
+                                                <div className="bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4">
+                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-red-600 dark:text-red-400 mb-3">
+                                                        Élément Supprimé
+                                                    </p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                        {Object.entries(beforeObj).map(([key, val]) => {
+                                                            if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
+                                                            return (
+                                                                <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-red-100/50 dark:border-red-900/20">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
+                                                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             )}
-                                            {log.after && (
-                                                <div>
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1.5">Après</p>
-                                                    <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                        {JSON.stringify(JSON.parse(log.after), null, 2)}
-                                                    </pre>
+
+                                            {/* UPDATE View */}
+                                            {isUpdate && (
+                                                <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4">
+                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
+                                                        Valeurs Modifiées (De ➔ À)
+                                                    </p>
+                                                    <div className="space-y-2">
+                                                        {changedFields.map(({ key, beforeVal, afterVal }) => (
+                                                            <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#151525] p-3 rounded-lg border border-blue-100/50 dark:border-blue-900/20">
+                                                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider shrink-0 w-40">
+                                                                    {FIELD_TRANSLATIONS[key] || key}
+                                                                </span>
+                                                                <div className="flex items-center gap-3 flex-1 justify-start sm:justify-end">
+                                                                    <span className="text-xs font-medium text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/30 px-2 py-1 rounded">
+                                                                        {formatValue(key, beforeVal)}
+                                                                    </span>
+                                                                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                                                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
+                                                                        {formatValue(key, afterVal)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        {changedFields.length === 0 && (
+                                                            <div className="text-xs text-muted-foreground py-2 text-center">
+                                                                Aucune propriété modifiée ou pas d&apos;historique précédent.
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                            )}
+
+                                            {/* CREATE View */}
+                                            {isCreate && afterObj && (
+                                                <div className="bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-4">
+                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3">
+                                                        Nouveau Contenu
+                                                    </p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                        {Object.entries(afterObj).map(([key, val]) => {
+                                                            if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
+                                                            return (
+                                                                <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
+                                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
+                                                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Fallback for other actions like LOGIN, PRINT etc. */}
+                                            {!isDelete && !isUpdate && !isCreate && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {log.before && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1.5">Avant</p>
+                                                            <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
+                                                                {JSON.stringify(beforeObj, null, 2)}
+                                                            </pre>
+                                                        </div>
+                                                    )}
+                                                    {log.after && (
+                                                        <div>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1.5">Après</p>
+                                                            <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
+                                                                {JSON.stringify(afterObj, null, 2)}
+                                                            </pre>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {log.ipAddress && (
+                                                <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                                                    IP: {log.ipAddress}
+                                                </p>
                                             )}
                                         </div>
-                                        {log.ipAddress && (
-                                            <p className="text-[10px] text-muted-foreground mt-3 font-mono">
-                                                IP: {log.ipAddress}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
+                                    );
+                                })()}
                             </div>
                         );
                     })}

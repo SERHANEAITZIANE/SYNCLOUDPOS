@@ -5,15 +5,16 @@ import { format } from "date-fns"
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string }>
+  searchParams: Promise<{ page?: string; status?: string; limit?: string }>
 }) {
   const params = await searchParams
   const page = Number(params.page) || 1
-  const result = await getInvoices({ page, limit: 20, status: params.status })
+  const limit = Number(params.limit) || 20
+  const result = await getInvoices({ page, limit, status: params.status })
 
   const invoices = (result as any).data ?? []
   const total = (result as any).total ?? 0
-  const pageCount = Math.ceil(total / 20)
+  const pageCount = Math.ceil(total / limit)
 
   const formatted = invoices.map((inv: any) => ({
     id: inv.id,

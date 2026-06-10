@@ -1,5 +1,6 @@
 "use server"
 
+import { SalesOrderType } from "@prisma/client"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 
@@ -64,17 +65,20 @@ export async function getSalesJournal(
         select: { name: true, nif: true, rc: true, address: true }
     })
 
-    const typeFilter = type && type !== "ALL"
-        ? { type }
-        : { type: { in: ["INVOICE", "ORDER", "CREDIT_NOTE"] } }
+    const whereClause: any = {
+        tenantId,
+        status: { not: "CANCELLED" },
+        createdAt: { gte: startDate, lt: endDate }
+    }
+
+    if (type && type !== "ALL") {
+        whereClause.type = type as SalesOrderType
+    } else {
+        whereClause.type = { in: ["INVOICE", "ORDER", "CREDIT_NOTE"] as SalesOrderType[] }
+    }
 
     const salesOrders = await db.salesOrder.findMany({
-        where: {
-            tenantId,
-            ...typeFilter,
-            status: { not: "CANCELLED" },
-            createdAt: { gte: startDate, lt: endDate }
-        },
+        where: whereClause,
         include: {
             customer: { select: { name: true, nif: true } },
             items: {

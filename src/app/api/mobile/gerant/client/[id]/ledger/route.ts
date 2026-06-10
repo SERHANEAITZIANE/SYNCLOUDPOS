@@ -97,16 +97,18 @@ export async function GET(
 
         // Sales (debits)
         for (const sale of sales) {
+            const isCreditNote = sale.type === "CREDIT_NOTE";
             let label = "Vente";
             if (sale.type === "INVOICE") label = "Facture";
+            else if (sale.type === "CREDIT_NOTE") label = "Avoir";
             else if (sale.type === "QUOTE") continue;
             rawLines.push({
                 date: sale.createdAt.toISOString(),
-                type: "DEBIT",
-                debit: Number(sale.total),
-                credit: 0,
+                type: isCreditNote ? "CREDIT" : "DEBIT",
+                debit: isCreditNote ? 0 : Number(sale.total),
+                credit: isCreditNote ? Number(sale.total) : 0,
                 observation: `${label} N°: ${sale.receiptNumber || "-"}`,
-                category: "SALE",
+                category: isCreditNote ? "RETURN" : "SALE",
             });
         }
 
@@ -136,12 +138,13 @@ export async function GET(
 
         // Client returns (credits)
         for (const ret of clientReturns) {
+            const isCash = ret.returnType === "CASH";
             rawLines.push({
                 date: ret.createdAt.toISOString(),
                 type: "CREDIT",
                 debit: 0,
-                credit: Number(ret.totalAmount),
-                observation: `Retour: ${ret.product?.name || "Produit"} (${ret.returnType === "CASH" ? "Remboursé" : "Crédité"})`,
+                credit: isCash ? 0 : Number(ret.totalAmount),
+                observation: `Retour: ${ret.product?.name || "Produit"} (${isCash ? "Remboursé" : "Crédité"})`,
                 category: "RETURN",
             });
         }

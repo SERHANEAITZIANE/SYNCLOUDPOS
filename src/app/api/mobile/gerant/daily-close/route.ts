@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
                 where: {
                     tenantId,
                     storeId: storeId || undefined,
-                    type: "RETURN",
+                    type: "CREDIT_NOTE",
                     createdAt: { gte: from, lte: to },
                 },
                 _sum: { total: true },

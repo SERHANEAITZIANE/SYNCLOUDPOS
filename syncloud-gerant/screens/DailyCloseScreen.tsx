@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 interface CashCloseData {
     date: string;
@@ -100,12 +101,7 @@ export default function DailyCloseScreen() {
     };
 
     if (loading) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#a855f7" />
-                <Text style={styles.loadingText}>Chargement des données de caisse...</Text>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     if (!data) {
@@ -173,19 +169,27 @@ export default function DailyCloseScreen() {
             {/* Day Summary */}
             <Text style={styles.sectionTitle}>RÉSUMÉ DE LA JOURNÉE</Text>
             <View style={styles.summaryCard}>
-                {data.transactions.map((tx, i) => (
-                    <View key={i} style={styles.txRow}>
-                        <Ionicons
-                            name={tx.type === "in" ? "arrow-down-circle" : "arrow-up-circle"}
-                            size={18}
-                            color={tx.type === "in" ? "#22c55e" : "#ef4444"}
-                        />
-                        <Text style={styles.txLabel}>{tx.label}</Text>
-                        <Text style={[styles.txAmount, { color: tx.type === "in" ? "#22c55e" : "#ef4444" }]}>
-                            {tx.amount >= 0 ? "+" : ""}{fmt(tx.amount)} DA
-                        </Text>
+                {data.transactions.length === 0 ? (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="receipt-outline" size={48} color="#334155" />
+                        <Text style={styles.emptyText}>Aucune transaction aujourd'hui</Text>
+                        <Text style={styles.emptySubText}>Makan hta transaction lyoum</Text>
                     </View>
-                ))}
+                ) : (
+                    data.transactions.map((tx, i) => (
+                        <View key={i} style={styles.txRow}>
+                            <Ionicons
+                                name={tx.type === "in" ? "arrow-down-circle" : "arrow-up-circle"}
+                                size={18}
+                                color={tx.type === "in" ? "#22c55e" : "#ef4444"}
+                            />
+                            <Text style={styles.txLabel}>{tx.label}</Text>
+                            <Text style={[styles.txAmount, { color: tx.type === "in" ? "#22c55e" : "#ef4444" }]}>
+                                {tx.amount >= 0 ? "+" : ""}{fmt(tx.amount)} DA
+                            </Text>
+                        </View>
+                    ))
+                )}
 
                 <View style={styles.txDivider} />
 
@@ -301,8 +305,8 @@ export default function DailyCloseScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a", gap: 12 },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e", gap: 12 },
     loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
     retryBtn: { backgroundColor: "#a855f7", paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10 },
     retryText: { color: "#fff", fontSize: 14, fontWeight: "700" },
@@ -317,7 +321,7 @@ const styles = StyleSheet.create({
     txLabel: { flex: 1, color: "#f8fafc", fontSize: 13, fontWeight: "600" },
     txAmount: { fontSize: 13, fontWeight: "800" },
     txDivider: { height: 1, backgroundColor: "#334155", marginVertical: 4 },
-    expectedRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0f172a", borderRadius: 10, padding: 12, marginTop: 4 },
+    expectedRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0a0f1e", borderRadius: 10, padding: 12, marginTop: 4 },
     expectedLabel: { color: "#a855f7", fontSize: 11, fontWeight: "800", letterSpacing: 1 },
     expectedValue: { color: "#f8fafc", fontSize: 18, fontWeight: "900" },
 
@@ -325,14 +329,14 @@ const styles = StyleSheet.create({
     countHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
     countTitle: { color: "#f8fafc", fontSize: 15, fontWeight: "800" },
     denomRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-    denomBadge: { width: 80, backgroundColor: "#0f172a", borderRadius: 8, paddingVertical: 6, paddingHorizontal: 8, borderWidth: 1, borderColor: "#334155" },
+    denomBadge: { width: 80, backgroundColor: "#0a0f1e", borderRadius: 8, paddingVertical: 6, paddingHorizontal: 8, borderWidth: 1, borderColor: "#334155" },
     denomText: { color: "#f8fafc", fontSize: 12, fontWeight: "700", textAlign: "center" },
     denomX: { color: "#64748b", fontSize: 14, fontWeight: "700" },
-    denomInput: { width: 52, height: 36, backgroundColor: "#0f172a", borderRadius: 8, color: "#f8fafc", textAlign: "center", fontSize: 14, fontWeight: "700", borderWidth: 1, borderColor: "#334155" },
+    denomInput: { width: 52, height: 36, backgroundColor: "#0a0f1e", borderRadius: 8, color: "#f8fafc", textAlign: "center", fontSize: 14, fontWeight: "700", borderWidth: 1, borderColor: "#334155" },
     denomEqual: { color: "#64748b", fontSize: 14 },
     denomSubtotal: { flex: 1, color: "#94a3b8", fontSize: 12, fontWeight: "700", textAlign: "right" },
 
-    countTotal: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0f172a", borderRadius: 10, padding: 12, marginTop: 8, borderWidth: 1, borderColor: "#a855f740" },
+    countTotal: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0a0f1e", borderRadius: 10, padding: 12, marginTop: 8, borderWidth: 1, borderColor: "#a855f740" },
     countTotalLabel: { color: "#a855f7", fontSize: 12, fontWeight: "800", letterSpacing: 1 },
     countTotalValue: { color: "#f8fafc", fontSize: 20, fontWeight: "900" },
 
@@ -342,21 +346,24 @@ const styles = StyleSheet.create({
 
     notesCard: { backgroundColor: "#1e293b", marginHorizontal: 16, marginTop: 16, borderRadius: 16, padding: 16 },
     notesLabel: { color: "#94a3b8", fontSize: 12, fontWeight: "600", marginBottom: 8 },
-    notesInput: { backgroundColor: "#0f172a", borderRadius: 10, minHeight: 60, color: "#f8fafc", padding: 12, borderWidth: 1, borderColor: "#334155", fontSize: 13, textAlignVertical: "top" },
+    notesInput: { backgroundColor: "#0a0f1e", borderRadius: 10, minHeight: 60, color: "#f8fafc", padding: 12, borderWidth: 1, borderColor: "#334155", fontSize: 13, textAlignVertical: "top" },
 
     closeBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginHorizontal: 16, marginTop: 20, height: 52, backgroundColor: "#a855f7", borderRadius: 14, shadowColor: "#a855f7", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6 },
     closeBtnDisabled: { opacity: 0.7 },
     closeBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
 
-    closedContainer: { flex: 1, backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center", padding: 24 },
+    closedContainer: { flex: 1, backgroundColor: "#0a0f1e", justifyContent: "center", alignItems: "center", padding: 24 },
     closedCard: { backgroundColor: "#1e293b", borderRadius: 24, padding: 32, alignItems: "center", width: "100%", shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 24, elevation: 10 },
     closedIconWrap: { marginBottom: 16 },
     closedTitle: { color: "#f8fafc", fontSize: 24, fontWeight: "900" },
     closedDate: { color: "#64748b", fontSize: 13, marginTop: 4, textTransform: "capitalize" },
-    closedSummary: { width: "100%", backgroundColor: "#0f172a", borderRadius: 14, padding: 16, marginTop: 20, gap: 10 },
+    closedSummary: { width: "100%", backgroundColor: "#0a0f1e", borderRadius: 14, padding: 16, marginTop: 20, gap: 10 },
     closedRow: { flexDirection: "row", justifyContent: "space-between", paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: "#334155" },
     closedLabel: { color: "#94a3b8", fontSize: 13, fontWeight: "600" },
     closedValue: { color: "#f8fafc", fontSize: 14, fontWeight: "800" },
     closedStamp: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 16, backgroundColor: "#22c55e15", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: "#22c55e30" },
     closedStampText: { color: "#22c55e", fontSize: 12, fontWeight: "700" },
+    emptyState: { alignItems: "center", padding: 24, gap: 12 },
+    emptyText: { color: "#64748b", fontSize: 15, fontWeight: "700" },
+    emptySubText: { color: "#475569", fontSize: 11, textAlign: "center" },
 });

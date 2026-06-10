@@ -265,6 +265,11 @@ export const deleteProduct = async (id: string) => {
     }
 
     try {
+        const productToDelete = await db.product.findUnique({
+            where: { id, tenantId },
+            select: { name: true, price: true, cost: true, stock: true }
+        });
+
         await db.product.delete({
             where: {
                 id,
@@ -275,7 +280,13 @@ export const deleteProduct = async (id: string) => {
         revalidatePath("/[locale]/(dashboard)/products", "page")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        logAudit({ action: "DELETE", entity: "PRODUCT", entityId: id, description: `Produit supprimé (ID: ${id})` }).catch(() => null)
+        logAudit({ 
+            action: "DELETE", 
+            entity: "PRODUCT", 
+            entityId: id, 
+            description: `Produit supprimé : ${productToDelete?.name || id}`,
+            before: productToDelete
+        }).catch(() => null)
         return { success: "Product deleted!" }
     } catch {
         return { error: "Failed to delete product!" }
@@ -403,7 +414,28 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
         revalidatePath("/[locale]/(dashboard)/products", "page")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        logAudit({ action: "UPDATE", entity: "PRODUCT", entityId: id, description: `Produit mis à jour: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
+        logAudit({ 
+            action: "UPDATE", 
+            entity: "PRODUCT", 
+            entityId: id, 
+            description: `Produit mis à jour: ${name} (${price} DA)`, 
+            before: { 
+                name: previousProduct?.name, 
+                price: previousProduct?.price ? Number(previousProduct.price) : undefined,
+                cost: previousProduct?.cost ? Number(previousProduct.cost) : undefined,
+                stock: previousProduct?.stock,
+                wholesalePrice: previousProduct?.wholesalePrice ? Number(previousProduct.wholesalePrice) : undefined,
+                dealerPrice: previousProduct?.dealerPrice ? Number(previousProduct.dealerPrice) : undefined,
+            }, 
+            after: { 
+                name, 
+                price,
+                cost,
+                stock,
+                wholesalePrice,
+                dealerPrice
+            } 
+        }).catch(() => null)
         return { success: "Product updated!" }
     } catch (error) {
         console.error("PRISMA ERROR in updateProduct:", error)

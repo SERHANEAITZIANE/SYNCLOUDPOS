@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { invalidateCache } from "@/lib/redis"
+import { ChequeStatus } from "@prisma/client"
 
 export async function getCheques() {
     const session = await auth()
@@ -36,7 +37,15 @@ export async function createCheque(data: any) {
     try {
         const cheque = await db.cheque.create({
             data: {
-                ...data,
+                number: data.number,
+                bank: data.bank,
+                amount: data.amount,
+                dueDate: new Date(data.dueDate),
+                status: data.status || "PENDING",
+                type: data.type,
+                customerId: data.customerId || null,
+                supplierId: data.supplierId || null,
+                accountId: data.accountId || null,
                 tenantId
             }
         });
@@ -48,7 +57,7 @@ export async function createCheque(data: any) {
     }
 }
 
-export async function updateChequeStatus(id: string, status: string, accountId?: string) {
+export async function updateChequeStatus(id: string, status: ChequeStatus, accountId?: string) {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

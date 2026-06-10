@@ -5,6 +5,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import { subDays } from "date-fns";
+import DateRangeFilter, { DateRange } from "../components/DateRangeFilter";
+import ClientTypeFilter, { ClientType } from "../components/ClientTypeFilter";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 type Period = "today" | "week" | "month";
 
@@ -20,17 +24,25 @@ interface AnalyticsData {
 }
 
 export default function SalesAnalyticsScreen() {
-    const [period, setPeriod] = useState<Period>("today");
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
+    const [dateRange, setDateRange] = useState<DateRange>({
+        from: subDays(new Date(), 29),
+        to: new Date(),
+        key: "30days",
+    });
+    const [clientType, setClientType] = useState<ClientType>("");
+
     const fmt = (n: number) => n.toLocaleString("fr-FR");
 
-    const fetchAnalytics = useCallback(async (p: Period) => {
-        setLoading(true);
+    const fetchAnalytics = useCallback(async () => {
         try {
-            const result: AnalyticsData = await apiFetch(`/gerant/analytics?period=${p}`);
+            const fromStr = dateRange.from.toISOString().split("T")[0];
+            const toStr = dateRange.to.toISOString().split("T")[0];
+            const path = `/gerant/analytics?from=${fromStr}&to=${toStr}${clientType ? `&clientType=${clientType}` : ""}`;
+            const result: AnalyticsData = await apiFetch(path);
             setData(result);
         } catch (e) {
             console.error("[SalesAnalytics]", e);
@@ -38,15 +50,15 @@ export default function SalesAnalyticsScreen() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [dateRange, clientType]);
 
-    useEffect(() => { fetchAnalytics(period); }, []);
+    useEffect(() => {
+        setLoading(true);
+        fetchAnalytics();
+    }, [dateRange, clientType, fetchAnalytics]);
 
-    const switchPeriod = (p: Period) => {
-        setPeriod(p);
-        fetchAnalytics(p);
-    };
-
+    const isSingleDay = dateRange.from.toDateString() === dateRange.to.toDateString() ||
+                        (dateRange.to.getTime() - dateRange.from.getTime() <= 1000 * 60 * 60 * 24);
     const maxTrend = data ? Math.max(...data.trend.map(d => d.value), 1) : 1;
     const maxProduct = data ? Math.max(...data.topProducts.map(p => p.revenue), 1) : 1;
     const maxClient = data ? Math.max(...data.topClients.map(c => c.revenue), 1) : 1;
@@ -56,28 +68,17 @@ export default function SalesAnalyticsScreen() {
             style={styles.container}
             contentContainerStyle={{ paddingBottom: 40 }}
             refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchAnalytics(period); }} tintColor="#22c55e" />
+                <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchAnalytics(); }} tintColor="#22c55e" />
             }
         >
-            {/* Period Selector */}
-            <View style={styles.periodBar}>
-                {(["today", "week", "month"] as Period[]).map(p => (
-                    <TouchableOpacity
-                        key={p}
-                        style={[styles.periodBtn, period === p && styles.periodBtnActive]}
-                        onPress={() => switchPeriod(p)}
-                    >
-                        <Text style={[styles.periodText, period === p && styles.periodTextActive]}>
-                            {p === "today" ? "Aujourd'hui" : p === "week" ? "Semaine" : "Mois"}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+            <View style={{ paddingTop: 16 }}>
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                <ClientTypeFilter value={clientType} onChange={setClientType} />
             </View>
 
-            {loading ? (
-                <View style={styles.loadingWrap}>
-                    <ActivityIndicator size="large" color="#22c55e" />
-                    <Text style={{ color: "#64748b", marginTop: 12 }}>Chargement des données réelles...</Text>
+            {loading && !refreshing ? (
+                <View style={{ flex: 1 }}>
+                    <SkeletonLoader type="list" rows={5} />
                 </View>
             ) : data ? (
                 <>
@@ -106,7 +107,7 @@ export default function SalesAnalyticsScreen() {
 
                     {/* Trend Chart */}
                     <Text style={styles.sectionTitle}>
-                        {period === "today" ? "VENTES PAR HEURE" : period === "week" ? "VENTES PAR JOUR" : "VENTES PAR SEMAINE"}
+                        {isSingleDay ? "VENTES PAR HEURE" : "VENTES PAR PÉRIODE"}
                     </Text>
                     <View style={styles.chartCard}>
                         {data.trend.length === 0 ? (
@@ -194,7 +195,7 @@ export default function SalesAnalyticsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
     loadingWrap: { paddingVertical: 80, alignItems: "center" },
     emptyText: { color: "#64748b", fontSize: 13, textAlign: "center", paddingVertical: 8 },
     divider: { borderBottomWidth: 1, borderBottomColor: "#33415540" },
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
 
     listCard: { backgroundColor: "#1e293b", marginHorizontal: 16, borderRadius: 16, padding: 16, gap: 0 },
     listRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 },
-    listRank: { width: 28, height: 28, borderRadius: 8, backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center" },
+    listRank: { width: 28, height: 28, borderRadius: 8, backgroundColor: "#0a0f1e", justifyContent: "center", alignItems: "center" },
     listRankText: { color: "#64748b", fontSize: 12, fontWeight: "800" },
     listName: { color: "#f8fafc", fontSize: 13, fontWeight: "600" },
     listBarTrack: { height: 4, backgroundColor: "#334155", borderRadius: 2, marginTop: 6, overflow: "hidden" },

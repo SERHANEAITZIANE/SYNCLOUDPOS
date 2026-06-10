@@ -11,12 +11,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { deletePayment, updatePayment } from "@/actions/payments"
 import { LoanColumn } from "./columns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface CellActionProps {
     data: LoanColumn
+    treasuryAccounts: { id: string; name: string }[]
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
@@ -27,6 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [editAmount, setEditAmount] = useState(String(data.amount))
     const [editDescription, setEditDescription] = useState(data.description)
     const [editDate, setEditDate] = useState(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
+    const [editAccountId, setEditAccountId] = useState(data.accountId || "")
 
     const onDelete = async () => {
         try {
@@ -59,6 +62,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 amount,
                 description: editDescription,
                 date: editDate || undefined,
+                accountId: editAccountId || undefined
             })
             if (result && 'error' in result) {
                 toast.error(result.error as string)
@@ -108,7 +112,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <div className="flex flex-col gap-2 mb-4">
                             <h3 className="text-lg font-semibold">Modifier l'emprunt</h3>
                             <p className="text-sm text-muted-foreground">
-                                Modifiez le montant, l'observation ou la date.
+                                Modifiez le montant, le compte, l'observation ou la date.
                             </p>
                         </div>
                         <div className="grid gap-4 py-2">
@@ -121,6 +125,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                                     value={editAmount}
                                     onChange={(e) => setEditAmount(e.target.value)}
                                 />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor={`edit-account-${data.id}`}>Caisse / Banque</Label>
+                                <Select value={editAccountId} onValueChange={setEditAccountId}>
+                                    <SelectTrigger id={`edit-account-${data.id}`}>
+                                        <SelectValue placeholder="Sélectionner un compte" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {treasuryAccounts.map(account => (
+                                            <SelectItem key={account.id} value={account.id}>
+                                                {account.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor={`edit-desc-${data.id}`}>Observation</Label>

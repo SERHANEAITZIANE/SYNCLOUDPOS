@@ -10,6 +10,7 @@ export default async function AvariesPage() {
     // Format data for the table
     const formattedSpoilages = spoilages.map((item) => ({
         id: item.id,
+        productId: item.productId,
         productName: item.product.name,
         quantity: item.quantity,
         reason: item.reason,

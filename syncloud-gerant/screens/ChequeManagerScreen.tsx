@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 type ChequeStatus = "en_attente" | "encaissé" | "rejeté" | "annulé";
 type ChequeType = "reçu" | "émis";
@@ -94,12 +95,7 @@ export default function ChequeManagerScreen() {
         .filter(c => statusFilter === "tous" || c.status === statusFilter);
 
     if (loading) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#6366f1" />
-                <Text style={styles.loadingText}>Chargement des chèques...</Text>
-            </View>
-        );
+        return <SkeletonLoader type="list" rows={5} />;
     }
 
     return (
@@ -176,7 +172,7 @@ export default function ChequeManagerScreen() {
                 <View style={styles.emptyState}>
                     <Ionicons name="document-text-outline" size={48} color="#334155" />
                     <Text style={styles.emptyText}>Aucun chèque trouvé</Text>
-                    <Text style={styles.emptySubText}>Les chèques enregistrés dans la trésorerie apparaîtront ici</Text>
+                    <Text style={styles.emptySubText}>Makan hta chek hna</Text>
                 </View>
             ) : (
                 filtered.map((cheque) => {
@@ -250,8 +246,8 @@ export default function ChequeManagerScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a", gap: 12 },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e", gap: 12 },
     loadingText: { color: "#64748b", fontSize: 14, fontWeight: "600" },
 
     summaryRow: { flexDirection: "row", gap: 10, padding: 16 },

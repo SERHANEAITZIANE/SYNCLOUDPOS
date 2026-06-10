@@ -118,6 +118,51 @@ const reportCards: ReportCard[] = [
         screen: "ChequeManager",
         badge: "🏦",
     },
+    {
+        id: "comparative",
+        title: "Comparatif Périodes",
+        subtitle: "Comparaison side-by-side de deux périodes",
+        icon: "calendar",
+        color: "#8b5cf6",
+        screen: "ComparativeReport",
+        badge: "📅",
+    },
+    {
+        id: "product-dashboard",
+        title: "Tableau Produits",
+        subtitle: "Stock, ventes, marges & vélocité par produit",
+        icon: "analytics",
+        color: "#06b6d4",
+        screen: "ProductDashboard",
+        badge: "📊",
+    },
+    {
+        id: "client-analytics",
+        title: "Analyse Clients",
+        subtitle: "Segmentation fidélité, récence & dettes",
+        icon: "people",
+        color: "#ec4899",
+        screen: "ClientAnalytics",
+        badge: "👥",
+    },
+    {
+        id: "weekly-summary",
+        title: "Résumé Hebdomadaire",
+        subtitle: "Synthèse IA hebdomadaire & export PDF",
+        icon: "calendar",
+        color: "#10b981",
+        screen: "WeeklySummary",
+        badge: "📊",
+    },
+    {
+        id: "goals",
+        title: "Objectifs & KPIs",
+        subtitle: "Suivi des targets mensuels & budget",
+        icon: "trending-up",
+        color: "#3b82f6",
+        screen: "Goals",
+        badge: "🎯",
+    },
 ];
 
 
@@ -142,7 +187,7 @@ export default function ReportsScreen({ navigation }: any) {
             {/* Quick Stats Bar */}
             <View style={styles.quickBar}>
                 <View style={styles.quickItem}>
-                    <Text style={styles.quickValue}>10</Text>
+                    <Text style={styles.quickValue}>16</Text>
                     <Text style={styles.quickLabel}>Rapports</Text>
                 </View>
                 <View style={styles.quickDivider} />
@@ -203,7 +248,7 @@ export default function ReportsScreen({ navigation }: any) {
 const cardWidth = (width - 48 - 12) / 2;
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
 
     header: { padding: 16, paddingTop: 20 },
     headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },

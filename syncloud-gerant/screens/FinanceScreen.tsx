@@ -82,12 +82,12 @@ export default function FinanceScreen({ navigation }: any) {
     return (
         <ScrollView
             style={styles.container}
-            contentContainerStyle={{ paddingBottom: 30 }}
+            contentContainerStyle={{ paddingBottom: 60 }}
             showsVerticalScrollIndicator={false}
         >
             {/* Hero header */}
             <LinearGradient
-                colors={["#0f172a", "#1a1f3a"]}
+                colors={["#0a0f1e", "#1a1f3a"]}
                 style={styles.hero}
             >
                 <View style={styles.heroRow}>

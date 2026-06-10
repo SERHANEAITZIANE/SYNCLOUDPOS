@@ -3,24 +3,49 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { startOfDay, endOfDay } from "date-fns"
+import { ClientType } from "@prisma/client"
 
-export async function getProfitReport(dateRange?: { from: Date; to: Date }) {
+export async function getProfitReport(options?: { from?: Date; to?: Date; clientType?: string }) {
     const session = await auth()
     if (!session?.user?.id) throw new Error("Unauthorized")
 
     const tenantId = session.user.tenantId
-    const toDate = dateRange?.to || endOfDay(new Date())
-    const fromDate = dateRange?.from || startOfDay(new Date(new Date().setDate(1))) // Default: start of current month
+    const toDate = options?.to || endOfDay(new Date())
+    const fromDate = options?.from || startOfDay(new Date(new Date().setDate(1))) // Default: start of current month
+    const clientType = options?.clientType
+
+    const orderWhere: any = {
+        tenantId,
+        status: "COMPLETED",
+        createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+    }
+
+    if (clientType && clientType !== "ALL") {
+        if (clientType === "RETAIL") {
+            orderWhere.OR = [
+                { customerId: null },
+                { customer: { clientType: ClientType.RETAIL } }
+            ]
+        } else {
+            orderWhere.customer = { clientType: clientType as ClientType }
+        }
+    }
+
+    const salesOrderWhere: any = {
+        tenantId,
+        status: "PAID",
+        createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+    }
+
+    if (clientType && clientType !== "ALL") {
+        salesOrderWhere.customer = { clientType: clientType as ClientType }
+    }
 
     // Get all POS order items with product cost info
     const [posItems, salesItems] = await Promise.all([
         db.orderItem.findMany({
             where: {
-                order: {
-                    tenantId,
-                    status: "COMPLETED",
-                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
-                }
+                order: orderWhere
             },
             include: {
                 product: {
@@ -34,11 +59,7 @@ export async function getProfitReport(dateRange?: { from: Date; to: Date }) {
         }),
         db.salesOrderItem.findMany({
             where: {
-                salesOrder: {
-                    tenantId,
-                    status: "PAID",
-                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
-                }
+                salesOrder: salesOrderWhere
             },
             include: {
                 product: {

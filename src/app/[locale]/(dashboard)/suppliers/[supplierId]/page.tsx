@@ -26,9 +26,10 @@ export default async function SupplierPage({
 
     let formattedSupplier = null
     if (supplier) {
+        const safeSupplier = JSON.parse(JSON.stringify(supplier))
         formattedSupplier = {
-            ...supplier,
-            balance: supplier.balance ? Number(supplier.balance) : 0
+            ...safeSupplier,
+            balance: safeSupplier.balance ? Number(safeSupplier.balance) : 0
         }
     }
 

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
+import { StockMovementType } from "@prisma/client"
 
 interface SpoilageData {
     date: Date
@@ -227,4 +228,115 @@ export async function deleteSpoilage(id: string) {
         return { error: "Erreur lors de la suppression de l'avarie" }
     }
 }
+
+export async function updateSpoilage(id: string, data: SpoilageData) {
+    await checkSubscription();
+    try {
+        const tenantId = await getActiveTenantId()
+        const session = await auth()
+
+        if (!tenantId || !session?.user?.id) {
+            return { error: "Non autorisé" }
+        }
+
+        const store = await db.store.findFirst({ where: { tenantId } })
+        if (!store) return { error: "Boutique introuvable" }
+
+        // Find existing spoilage
+        const existing = await db.spoilage.findFirst({
+            where: { id, tenantId }
+        })
+        if (!existing) return { error: "Avarie introuvable" }
+
+        // Check stock availability
+        if (existing.productId === data.productId) {
+            const diff = data.quantity - existing.quantity
+            if (diff > 0) {
+                const storeProduct = await db.storeProduct.findUnique({
+                    where: { storeId_productId: { storeId: store.id, productId: data.productId } }
+                })
+                if (!storeProduct || Number(storeProduct.stock) < diff) {
+                    return { error: "Stock insuffisant pour augmenter la quantité avariée" }
+                }
+            }
+        } else {
+            const storeProduct = await db.storeProduct.findUnique({
+                where: { storeId_productId: { storeId: store.id, productId: data.productId } }
+            })
+            if (!storeProduct || Number(storeProduct.stock) < data.quantity) {
+                return { error: "Stock insuffisant pour déclarer cette avarie" }
+            }
+        }
+
+        await db.$transaction(async (tx) => {
+            // Revert or adjust stock
+            if (existing.productId === data.productId) {
+                const diff = data.quantity - existing.quantity
+                if (diff !== 0) {
+                    await tx.storeProduct.update({
+                        where: { storeId_productId: { storeId: store.id, productId: data.productId } },
+                        data: { stock: { decrement: diff } }
+                    })
+                    await tx.product.update({
+                        where: { id: data.productId },
+                        data: { stock: { decrement: diff } }
+                    })
+                }
+            } else {
+                // Restore stock of old product
+                await tx.storeProduct.update({
+                    where: { storeId_productId: { storeId: store.id, productId: existing.productId } },
+                    data: { stock: { increment: existing.quantity } }
+                })
+                await tx.product.update({
+                    where: { id: existing.productId },
+                    data: { stock: { increment: existing.quantity } }
+                })
+
+                // Deduct stock of new product
+                await tx.storeProduct.update({
+                    where: { storeId_productId: { storeId: store.id, productId: data.productId } },
+                    data: { stock: { decrement: data.quantity } }
+                })
+                await tx.product.update({
+                    where: { id: data.productId },
+                    data: { stock: { decrement: data.quantity } }
+                })
+            }
+
+            // Update associated StockMovement
+            await tx.stockMovement.updateMany({
+                where: { referenceId: id, type: "SPOILAGE" },
+                data: {
+                    productId: data.productId,
+                    quantity: -data.quantity,
+                    reason: data.reason || "Déclaration avarie (Modifié)",
+                    createdAt: data.date
+                }
+            })
+
+            // Update the Spoilage record itself
+            await tx.spoilage.update({
+                where: { id },
+                data: {
+                    date: data.date,
+                    reason: data.reason,
+                    quantity: data.quantity,
+                    productId: data.productId
+                }
+            })
+        })
+
+        revalidatePath("/avaries")
+        revalidatePath("/products")
+        await cacheMonitor.invalidateCache(`products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+
+        return { success: "Avarie modifiée avec succès" }
+    } catch (error) {
+        console.error("[UPDATE_SPOILAGE]", error)
+        return { error: "Erreur lors de la modification de l'avarie" }
+    }
+}
+
 

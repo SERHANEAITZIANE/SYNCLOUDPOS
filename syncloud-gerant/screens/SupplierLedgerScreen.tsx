@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View, Text, ScrollView, StyleSheet, TouchableOpacity,
-    Alert, TextInput, ActivityIndicator, Dimensions,
+    Alert, TextInput, ActivityIndicator, Dimensions, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 const { width } = Dimensions.get("window");
 
@@ -42,48 +44,90 @@ const RECENT_PAYMENTS: Payment[] = [
 ];
 
 export default function SupplierLedgerScreen() {
-    const [suppliers, setSuppliers] = useState(SUPPLIERS);
-    const [payments, setPayments] = useState(RECENT_PAYMENTS);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [payments, setPayments] = useState<Payment[]>([]);
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
     const [paymentAmount, setPaymentAmount] = useState("");
     const [paymentMethod, setPaymentMethod] = useState<"especes" | "cheque" | "virement">("especes");
     const [paymentRef, setPaymentRef] = useState("");
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<"suppliers" | "payments">("suppliers");
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     const fmt = (n: number) => Math.abs(n).toLocaleString("fr-FR");
     const totalOwed = suppliers.reduce((s, sup) => s + Math.abs(sup.balance), 0);
 
-    const handlePay = () => {
+    const loadData = useCallback(async () => {
+        try {
+            const data = await apiFetch("/gerant/suppliers");
+            if (data) {
+                if (data.suppliers) {
+                    const mapped = data.suppliers.map((s: any) => ({
+                        id: s.id,
+                        name: s.name,
+                        phone: s.phone || "",
+                        balance: -Math.abs(s.balance), // map to negative for owed amount
+                        lastOrderDate: s.lastPurchaseDate || "—",
+                        lastPaymentDate: "—",
+                        totalPurchases: 0,
+                    }));
+                    setSuppliers(mapped);
+                }
+                if (data.payments) {
+                    setPayments(data.payments);
+                }
+            }
+        } catch (e) {
+            console.error("[SupplierLedgerScreen] Error loading:", e);
+            setSuppliers(SUPPLIERS);
+            setPayments(RECENT_PAYMENTS);
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handlePay = async () => {
         if (!selectedSupplier) return;
         if (!paymentAmount || isNaN(Number(paymentAmount)) || Number(paymentAmount) <= 0) {
             Alert.alert("Erreur", "Montant invalide.");
             return;
         }
         setSaving(true);
-        setTimeout(() => {
-            const amount = Number(paymentAmount);
-            const newPayment: Payment = {
-                id: `PAY-${Math.floor(Math.random() * 9000 + 1000)}`,
-                supplierId: selectedSupplier.id,
-                supplierName: selectedSupplier.name,
-                amount,
-                method: paymentMethod,
-                date: new Date().toLocaleDateString("fr-FR"),
-                reference: paymentRef || `REF-${Date.now()}`,
-            };
-            setPayments(prev => [newPayment, ...prev]);
-            setSuppliers(prev => prev.map(s =>
-                s.id === selectedSupplier.id
-                    ? { ...s, balance: s.balance + amount, lastPaymentDate: new Date().toLocaleDateString("fr-FR") }
-                    : s
-            ));
+        try {
+            let methodMapping = "CASH";
+            if (paymentMethod === "cheque") methodMapping = "CHECK";
+            else if (paymentMethod === "virement") methodMapping = "TRANSFER";
+
+            const res = await apiFetch("/gerant/payment-supplier", {
+                method: "POST",
+                body: JSON.stringify({
+                    supplierId: selectedSupplier.id,
+                    amount: Number(paymentAmount),
+                    paymentMethod: methodMapping,
+                    notes: paymentRef || undefined,
+                }),
+            });
+
+            if (res && res.success) {
+                Alert.alert("✓ Paiement Enregistré", `${fmt(Number(paymentAmount))} DA versés à ${selectedSupplier.name}`);
+                setSelectedSupplier(null);
+                setPaymentAmount("");
+                setPaymentRef("");
+                loadData();
+            } else {
+                throw new Error("Erreur inconnue");
+            }
+        } catch (e: any) {
+            Alert.alert("Erreur", e.message || "Erreur lors de l'enregistrement du paiement.");
+        } finally {
             setSaving(false);
-            setSelectedSupplier(null);
-            setPaymentAmount("");
-            setPaymentRef("");
-            Alert.alert("✓ Paiement Enregistré", `${fmt(amount)} DA versés à ${selectedSupplier.name}`);
-        }, 1200);
+        }
     };
 
     const methodIcon = (m: string) =>
@@ -91,9 +135,18 @@ export default function SupplierLedgerScreen() {
     const methodColor = (m: string) =>
         m === "especes" ? "#22c55e" : m === "cheque" ? "#f59e0b" : "#3b82f6";
 
+    if (loading) {
+        return <SkeletonLoader type="list" rows={5} />;
+    }
+
     return (
-        <View style={{ flex: 1, backgroundColor: "#0f172a" }}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <View style={{ flex: 1, backgroundColor: "#0a0f1e" }}>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadData(); }} tintColor="#3b82f6" />
+                }
+            >
                 {/* Summary */}
                 <View style={styles.summaryCard}>
                     <View style={styles.summaryLeft}>
@@ -130,96 +183,104 @@ export default function SupplierLedgerScreen() {
                 {activeTab === "suppliers" && (
                     <>
                         <Text style={styles.sectionTitle}>SOLDES FOURNISSEURS</Text>
-                        {suppliers.map(sup => (
-                            <TouchableOpacity
-                                key={sup.id}
-                                style={[styles.supplierCard, selectedSupplier?.id === sup.id && styles.supplierCardSelected]}
-                                onPress={() => setSelectedSupplier(selectedSupplier?.id === sup.id ? null : sup)}
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.supplierHeader}>
-                                    <View style={styles.supplierAvatar}>
-                                        <Ionicons name="business-outline" size={20} color="#3b82f6" />
-                                    </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.supplierName}>{sup.name}</Text>
-                                        <Text style={styles.supplierMeta}>
-                                            Dernier achat: {sup.lastOrderDate} · Payé: {sup.lastPaymentDate}
-                                        </Text>
-                                    </View>
-                                    <View style={{ alignItems: "flex-end" }}>
-                                        <Text style={styles.supplierBalance}>-{fmt(sup.balance)} DA</Text>
-                                        <Ionicons
-                                            name={selectedSupplier?.id === sup.id ? "chevron-up" : "chevron-down"}
-                                            size={16}
-                                            color="#475569"
-                                            style={{ marginTop: 4 }}
-                                        />
-                                    </View>
-                                </View>
-
-                                {/* Payment panel (expanded) */}
-                                {selectedSupplier?.id === sup.id && (
-                                    <View style={styles.payPanel}>
-                                        <View style={styles.payPanelDivider} />
-
-                                        <Text style={styles.payLabel}>Méthode de paiement</Text>
-                                        <View style={styles.methodRow}>
-                                            {(["especes", "cheque", "virement"] as const).map(m => (
-                                                <TouchableOpacity
-                                                    key={m}
-                                                    style={[styles.methodBtn, paymentMethod === m && { backgroundColor: `${methodColor(m)}25`, borderColor: methodColor(m) }]}
-                                                    onPress={() => setPaymentMethod(m)}
-                                                >
-                                                    <Ionicons name={methodIcon(m) as any} size={16} color={paymentMethod === m ? methodColor(m) : "#64748b"} />
-                                                    <Text style={[styles.methodText, paymentMethod === m && { color: methodColor(m) }]}>
-                                                        {m === "especes" ? "Espèces" : m === "cheque" ? "Chèque" : "Virement"}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            ))}
+                        {suppliers.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <Ionicons name="storefront-outline" size={48} color="#334155" />
+                                <Text style={styles.emptyText}>Aucun fournisseur trouvé</Text>
+                                <Text style={styles.emptySubText}>Makan hta fournisseur hna</Text>
+                            </View>
+                        ) : (
+                            suppliers.map(sup => (
+                                <TouchableOpacity
+                                    key={sup.id}
+                                    style={[styles.supplierCard, selectedSupplier?.id === sup.id && styles.supplierCardSelected]}
+                                    onPress={() => setSelectedSupplier(selectedSupplier?.id === sup.id ? null : sup)}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.supplierHeader}>
+                                        <View style={styles.supplierAvatar}>
+                                            <Ionicons name="business-outline" size={20} color="#3b82f6" />
                                         </View>
-
-                                        <View style={styles.payInputRow}>
-                                            <View style={[styles.payInputGroup, { flex: 1.5 }]}>
-                                                <Text style={styles.payLabel}>Montant (DA)</Text>
-                                                <TextInput
-                                                    style={styles.payInput}
-                                                    keyboardType="numeric"
-                                                    value={paymentAmount}
-                                                    onChangeText={setPaymentAmount}
-                                                    placeholder={`Max: ${fmt(sup.balance)} DA`}
-                                                    placeholderTextColor="#475569"
-                                                />
-                                            </View>
-                                            <View style={[styles.payInputGroup, { flex: 1 }]}>
-                                                <Text style={styles.payLabel}>Référence</Text>
-                                                <TextInput
-                                                    style={styles.payInput}
-                                                    value={paymentRef}
-                                                    onChangeText={setPaymentRef}
-                                                    placeholder="N° CHQ..."
-                                                    placeholderTextColor="#475569"
-                                                />
-                                            </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.supplierName}>{sup.name}</Text>
+                                            <Text style={styles.supplierMeta}>
+                                                Dernier achat: {sup.lastOrderDate} · Payé: {sup.lastPaymentDate}
+                                            </Text>
                                         </View>
-
-                                        <TouchableOpacity
-                                            style={[styles.payBtn, saving && { opacity: 0.6 }]}
-                                            onPress={handlePay}
-                                            disabled={saving}
-                                        >
-                                            {saving
-                                                ? <ActivityIndicator color="#fff" />
-                                                : <>
-                                                    <Ionicons name="checkmark-done" size={18} color="#fff" />
-                                                    <Text style={styles.payBtnText}>Enregistrer le Paiement</Text>
-                                                </>
-                                            }
-                                        </TouchableOpacity>
+                                        <View style={{ alignItems: "flex-end" }}>
+                                            <Text style={styles.supplierBalance}>-{fmt(sup.balance)} DA</Text>
+                                            <Ionicons
+                                                name={selectedSupplier?.id === sup.id ? "chevron-up" : "chevron-down"}
+                                                size={16}
+                                                color="#475569"
+                                                style={{ marginTop: 4 }}
+                                            />
+                                        </View>
                                     </View>
-                                )}
-                            </TouchableOpacity>
-                        ))}
+
+                                    {/* Payment panel (expanded) */}
+                                    {selectedSupplier?.id === sup.id && (
+                                        <View style={styles.payPanel}>
+                                            <View style={styles.payPanelDivider} />
+
+                                            <Text style={styles.payLabel}>Méthode de paiement</Text>
+                                            <View style={styles.methodRow}>
+                                                {(["especes", "cheque", "virement"] as const).map(m => (
+                                                    <TouchableOpacity
+                                                        key={m}
+                                                        style={[styles.methodBtn, paymentMethod === m && { backgroundColor: `${methodColor(m)}25`, borderColor: methodColor(m) }]}
+                                                        onPress={() => setPaymentMethod(m)}
+                                                    >
+                                                        <Ionicons name={methodIcon(m) as any} size={16} color={paymentMethod === m ? methodColor(m) : "#64748b"} />
+                                                        <Text style={[styles.methodText, paymentMethod === m && { color: methodColor(m) }]}>
+                                                            {m === "especes" ? "Espèces" : m === "cheque" ? "Chèque" : "Virement"}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+
+                                            <View style={styles.payInputRow}>
+                                                <View style={[styles.payInputGroup, { flex: 1.5 }]}>
+                                                    <Text style={styles.payLabel}>Montant (DA)</Text>
+                                                    <TextInput
+                                                        style={styles.payInput}
+                                                        keyboardType="numeric"
+                                                        value={paymentAmount}
+                                                        onChangeText={setPaymentAmount}
+                                                        placeholder={`Max: ${fmt(sup.balance)} DA`}
+                                                        placeholderTextColor="#475569"
+                                                    />
+                                                </View>
+                                                <View style={[styles.payInputGroup, { flex: 1 }]}>
+                                                    <Text style={styles.payLabel}>Référence</Text>
+                                                    <TextInput
+                                                        style={styles.payInput}
+                                                        value={paymentRef}
+                                                        onChangeText={setPaymentRef}
+                                                        placeholder="N° CHQ..."
+                                                        placeholderTextColor="#475569"
+                                                    />
+                                                </View>
+                                            </View>
+
+                                            <TouchableOpacity
+                                                style={[styles.payBtn, saving && { opacity: 0.6 }]}
+                                                onPress={handlePay}
+                                                disabled={saving}
+                                            >
+                                                {saving
+                                                    ? <ActivityIndicator color="#fff" />
+                                                    : <>
+                                                        <Ionicons name="checkmark-done" size={18} color="#fff" />
+                                                        <Text style={styles.payBtnText}>Enregistrer le Paiement</Text>
+                                                    </>
+                                                }
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            ))
+                        )}
                     </>
                 )}
 
@@ -227,20 +288,28 @@ export default function SupplierLedgerScreen() {
                 {activeTab === "payments" && (
                     <>
                         <Text style={styles.sectionTitle}>HISTORIQUE DES PAIEMENTS</Text>
-                        <View style={styles.payHistCard}>
-                            {payments.map((p, i) => (
-                                <View key={p.id} style={[styles.payHistRow, i < payments.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#33415540" }]}>
-                                    <View style={[styles.payHistIcon, { backgroundColor: `${methodColor(p.method)}20` }]}>
-                                        <Ionicons name={methodIcon(p.method) as any} size={18} color={methodColor(p.method)} />
+                        {payments.length === 0 ? (
+                            <View style={styles.emptyState}>
+                                <Ionicons name="receipt-outline" size={48} color="#334155" />
+                                <Text style={styles.emptyText}>Aucun paiement enregistré</Text>
+                                <Text style={styles.emptySubText}>Makan hta khlass hna</Text>
+                            </View>
+                        ) : (
+                            <View style={styles.payHistCard}>
+                                {payments.map((p, i) => (
+                                    <View key={p.id} style={[styles.payHistRow, i < payments.length - 1 && { borderBottomWidth: 1, borderBottomColor: "#33415540" }]}>
+                                        <View style={[styles.payHistIcon, { backgroundColor: `${methodColor(p.method)}20` }]}>
+                                            <Ionicons name={methodIcon(p.method) as any} size={18} color={methodColor(p.method)} />
+                                        </View>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.payHistName}>{p.supplierName}</Text>
+                                            <Text style={styles.payHistRef}>{p.reference} · {p.date}</Text>
+                                        </View>
+                                        <Text style={styles.payHistAmount}>-{fmt(p.amount)} DA</Text>
                                     </View>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.payHistName}>{p.supplierName}</Text>
-                                        <Text style={styles.payHistRef}>{p.reference} · {p.date}</Text>
-                                    </View>
-                                    <Text style={styles.payHistAmount}>-{fmt(p.amount)} DA</Text>
-                                </View>
-                            ))}
-                        </View>
+                                ))}
+                            </View>
+                        )}
                     </>
                 )}
             </ScrollView>
@@ -301,13 +370,13 @@ const styles = StyleSheet.create({
     methodBtn: {
         flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
         gap: 4, paddingVertical: 8, borderRadius: 10,
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
     },
     methodText: { color: "#64748b", fontSize: 11, fontWeight: "700" },
     payInputRow: { flexDirection: "row", gap: 10 },
     payInputGroup: { gap: 6 },
     payInput: {
-        backgroundColor: "#0f172a", borderRadius: 10, height: 44, color: "#f8fafc",
+        backgroundColor: "#0a0f1e", borderRadius: 10, height: 44, color: "#f8fafc",
         paddingHorizontal: 12, borderWidth: 1, borderColor: "#334155", fontSize: 13,
     },
     payBtn: {
@@ -324,4 +393,7 @@ const styles = StyleSheet.create({
     payHistName: { color: "#f8fafc", fontSize: 13, fontWeight: "700" },
     payHistRef: { color: "#64748b", fontSize: 10, fontWeight: "600", marginTop: 2 },
     payHistAmount: { color: "#ef4444", fontSize: 14, fontWeight: "800" },
+    emptyState: { alignItems: "center", padding: 48, gap: 12 },
+    emptyText: { color: "#64748b", fontSize: 16, fontWeight: "700" },
+    emptySubText: { color: "#475569", fontSize: 12, textAlign: "center" },
 });

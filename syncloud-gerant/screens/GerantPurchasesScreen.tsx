@@ -694,7 +694,7 @@ export default function GerantPurchasesScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
     header: { padding: 16, paddingTop: 20 },
     headerTitle: { color: "#f8fafc", fontSize: 24, fontWeight: "900" },
     headerSubtitle: { color: "#64748b", fontSize: 13, marginTop: 4 },
@@ -738,13 +738,13 @@ const styles = StyleSheet.create({
     
     inputGroup: { gap: 6 },
     label: { color: "#94a3b8", fontSize: 12, fontWeight: "600" },
-    input: { backgroundColor: "#0f172a", borderRadius: 10, height: 44, color: "#f8fafc", paddingHorizontal: 12, borderWidth: 1, borderColor: "#334155" },
+    input: { backgroundColor: "#0a0f1e", borderRadius: 10, height: 44, color: "#f8fafc", paddingHorizontal: 12, borderWidth: 1, borderColor: "#334155" },
     
     rowInputs: { flexDirection: "row", gap: 10 },
     feesInputWrapper: { position: "relative" },
     feesSuffix: { position: "absolute", right: 12, top: 12, color: "#64748b", fontWeight: "700", fontSize: 13 },
     
-    toggleGroup: { flexDirection: "row", backgroundColor: "#0f172a", borderRadius: 10, height: 44, padding: 3, borderWidth: 1, borderColor: "#334155" },
+    toggleGroup: { flexDirection: "row", backgroundColor: "#0a0f1e", borderRadius: 10, height: 44, padding: 3, borderWidth: 1, borderColor: "#334155" },
     toggleBtn: { flex: 1, justifyContent: "center", alignItems: "center", borderRadius: 8 },
     toggleBtnActive: { backgroundColor: "#22c55e" },
     toggleText: { color: "#64748b", fontSize: 12, fontWeight: "700" },
@@ -755,24 +755,24 @@ const styles = StyleSheet.create({
     
     // Rich Item Card
     itemCard: {
-        backgroundColor: "#0f172a50", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e50", borderWidth: 1, borderColor: "#334155",
         borderRadius: 14, padding: 12, gap: 10
     },
     itemTitleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     itemNameText: { color: "#f8fafc", fontSize: 13, fontWeight: "700", flex: 1, paddingRight: 6 },
-    stockBadge: { color: "#64748b", fontSize: 10, fontWeight: "700", backgroundColor: "#0f172a", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+    stockBadge: { color: "#64748b", fontSize: 10, fontWeight: "700", backgroundColor: "#0a0f1e", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
     
     itemInputsRow: { flexDirection: "row", gap: 8, alignItems: "flex-end" },
     subLabel: { color: "#64748b", fontSize: 9, fontWeight: "600", marginBottom: 4 },
-    itemInputCompact: { backgroundColor: "#0f172a", color: "#f8fafc", borderWidth: 1, borderColor: "#334155", borderRadius: 8, height: 36, paddingHorizontal: 8, fontSize: 12, fontWeight: "700" },
+    itemInputCompact: { backgroundColor: "#0a0f1e", color: "#f8fafc", borderWidth: 1, borderColor: "#334155", borderRadius: 8, height: 36, paddingHorizontal: 8, fontSize: 12, fontWeight: "700" },
     
-    tvaPillsRow: { flexDirection: "row", gap: 4, height: 36, backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155", borderRadius: 8, padding: 2 },
+    tvaPillsRow: { flexDirection: "row", gap: 4, height: 36, backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155", borderRadius: 8, padding: 2 },
     tvaPill: { flex: 1, justifyContent: "center", alignItems: "center", borderRadius: 6 },
     tvaPillActive: { backgroundColor: "#22c55e" },
     tvaPillText: { color: "#64748b", fontSize: 9, fontWeight: "800" },
     tvaPillTextActive: { color: "#fff" },
 
-    calculationsGrid: { flexDirection: "row", backgroundColor: "#0f172a40", padding: 8, borderRadius: 10, marginTop: 4 },
+    calculationsGrid: { flexDirection: "row", backgroundColor: "#0a0f1e40", padding: 8, borderRadius: 10, marginTop: 4 },
     calcCell: { flex: 1, alignItems: "center" },
     calcLabel: { color: "#64748b", fontSize: 9, fontWeight: "500" },
     calcValue: { color: "#f8fafc", fontSize: 11, fontWeight: "700", marginTop: 2 },
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     marginTextRed: { color: "#ef4444" },
 
     // Financial Summary
-    summaryContainer: { backgroundColor: "#0f172a", borderRadius: 14, borderWidth: 1, borderColor: "#334155", padding: 12, gap: 8 },
+    summaryContainer: { backgroundColor: "#0a0f1e", borderRadius: 14, borderWidth: 1, borderColor: "#334155", padding: 12, gap: 8 },
     summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
     summaryLabel: { color: "#94a3b8", fontSize: 12, fontWeight: "600" },
     summaryValue: { color: "#f8fafc", fontSize: 13, fontWeight: "700" },
@@ -813,7 +813,7 @@ const styles = StyleSheet.create({
     addPhotoBtn: {
         width: 60, height: 60, borderRadius: 12, borderWidth: 1.5, borderColor: "#334155",
         borderStyle: "dashed", justifyContent: "center", alignItems: "center", gap: 2,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
     },
     addPhotoText: { color: "#22c55e", fontSize: 9, fontWeight: "700" },
 

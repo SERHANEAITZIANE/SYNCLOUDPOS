@@ -31,6 +31,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 { username: { equals: lowerIdentifier, mode: 'insensitive' } },
                                 { phone: identifier }
                             ]
+                        },
+                        include: {
+                            tenant: true
                         }
                     })
 
@@ -161,26 +164,76 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return session
         },
-        async jwt({ token }) {
-            if (!token.sub) return token;
+        async jwt({ token, user, trigger, session }) {
+            // 1. Initial sign-in: user object is available
+            if (user) {
+                const dbUser = user as any;
+                let tenant = dbUser.tenant;
 
-            const existingUser = await db.user.findUnique({
-                where: { id: token.sub },
-                include: { tenant: true }
-            });
+                // Fallback: If tenant is not included (e.g. from Google OAuth sign-in)
+                if (!tenant && dbUser.tenantId) {
+                    const foundUser = await db.user.findUnique({
+                        where: { id: dbUser.id },
+                        include: { tenant: true }
+                    });
+                    if (foundUser) {
+                        dbUser.role = foundUser.role;
+                        dbUser.isSuperadmin = foundUser.isSuperadmin;
+                        dbUser.canEdit = foundUser.canEdit;
+                        dbUser.canDelete = foundUser.canDelete;
+                        dbUser.defaultStoreId = foundUser.defaultStoreId;
+                        dbUser.username = foundUser.username;
+                        tenant = foundUser.tenant;
+                    }
+                }
 
-            if (!existingUser) return token;
+                token.tenantId = dbUser.tenantId;
+                token.isSuperadmin = dbUser.isSuperadmin;
+                token.role = dbUser.role;
+                token.canEdit = dbUser.role === "ADMIN" ? true : dbUser.canEdit;
+                token.canDelete = dbUser.role === "ADMIN" ? true : dbUser.canDelete;
+                token.subscriptionEndsAt = tenant?.subscriptionEndsAt;
+                token.isBlocked = tenant?.isBlocked;
+                token.defaultStoreId = dbUser.defaultStoreId;
+                token.username = dbUser.username;
+            }
 
-            token.tenantId = existingUser.tenantId;
-            token.isSuperadmin = existingUser.isSuperadmin;
-            token.role = existingUser.role;
-            token.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
-            token.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
-            token.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
-            token.isBlocked = existingUser.tenant?.isBlocked;
-            token.defaultStoreId = existingUser.defaultStoreId;
-            token.username = existingUser.username;
-            return token
+            // 2. Dynamic updates
+            if (trigger === "update" && session) {
+                if (session.defaultStoreId !== undefined) {
+                    token.defaultStoreId = session.defaultStoreId;
+                }
+                if (session.isBlocked !== undefined) {
+                    token.isBlocked = session.isBlocked;
+                }
+                if (session.subscriptionEndsAt !== undefined) {
+                    token.subscriptionEndsAt = session.subscriptionEndsAt;
+                }
+                if (session.username !== undefined) {
+                    token.username = session.username;
+                }
+            }
+
+            // 3. Fallback for legacy tokens if they lack tenantId
+            if (!token.tenantId && token.sub) {
+                const foundUser = await db.user.findUnique({
+                    where: { id: token.sub },
+                    include: { tenant: true }
+                });
+                if (foundUser) {
+                    token.tenantId = foundUser.tenantId;
+                    token.isSuperadmin = foundUser.isSuperadmin;
+                    token.role = foundUser.role;
+                    token.canEdit = foundUser.role === "ADMIN" ? true : foundUser.canEdit;
+                    token.canDelete = foundUser.role === "ADMIN" ? true : foundUser.canDelete;
+                    token.subscriptionEndsAt = foundUser.tenant?.subscriptionEndsAt;
+                    token.isBlocked = foundUser.tenant?.isBlocked;
+                    token.defaultStoreId = foundUser.defaultStoreId;
+                    token.username = foundUser.username;
+                }
+            }
+
+            return token;
         }
     },
 })

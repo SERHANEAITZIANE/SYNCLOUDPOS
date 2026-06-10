@@ -437,7 +437,7 @@ export default function GerantExpensesScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
     header: { padding: 16, paddingTop: 20 },
     headerTitle: { color: "#f8fafc", fontSize: 24, fontWeight: "900" },
     headerSubtitle: { color: "#64748b", fontSize: 13, marginTop: 4 },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     // Category Selector
     categoryWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     categoryBadge: {
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
         paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
     },
     categoryBadgeActive: {
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     sourceWrap: { flexDirection: "row", gap: 10 },
     sourceBtn: {
         flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
         paddingVertical: 10, borderRadius: 12,
     },
     sourceBtnActive: {
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
 
     rowInputs: { flexDirection: "row", gap: 12 },
     input: {
-        backgroundColor: "#0f172a", borderRadius: 12, height: 48,
+        backgroundColor: "#0a0f1e", borderRadius: 12, height: 48,
         color: "#f8fafc", paddingHorizontal: 14, borderWidth: 1, borderColor: "#334155",
         fontSize: 14,
     },
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
     addPhotoBtn: {
         width: 72, height: 72, borderRadius: 12, borderWidth: 1.5, borderColor: "#334155",
         borderStyle: "dashed", justifyContent: "center", alignItems: "center", gap: 4,
-        backgroundColor: "#0f172a",
+        backgroundColor: "#0a0f1e",
     },
     addPhotoText: { color: "#3b82f6", fontSize: 10, fontWeight: "700" },
 
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     expenseMetaRow: { flexDirection: "row", gap: 8, alignItems: "center" },
     expenseId: { color: "#3b82f6", fontWeight: "700", fontSize: 11 },
     expenseDate: { color: "#64748b", fontSize: 11 },
-    expenseSource: { color: "#94a3b8", fontSize: 10, fontWeight: "600", backgroundColor: "#0f172a", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+    expenseSource: { color: "#94a3b8", fontSize: 10, fontWeight: "600", backgroundColor: "#0a0f1e", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
     expenseDesc: { color: "#f8fafc", fontSize: 13, fontWeight: "600", marginTop: 6 },
     expenseCategoryBadge: {
         backgroundColor: "#3b82f615", alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, marginTop: 6,

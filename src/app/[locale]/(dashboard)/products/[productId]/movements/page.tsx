@@ -18,7 +18,7 @@ export default async function StockMovementsPage({
     const [product, result] = await Promise.all([
         db.product.findFirst({
             where: { id: productId, tenantId },
-            select: { id: true, name: true, stock: true }
+            select: { id: true, name: true, stock: true, price: true, cost: true }
         }),
         getStockMovements(productId)
     ])
@@ -32,6 +32,8 @@ export default async function StockMovementsPage({
                     productName={product.name}
                     productId={product.id}
                     currentStock={product.stock}
+                    price={Number(product.price)}
+                    cost={product.cost ? Number(product.cost) : 0}
                     movements={("movements" in result ? result.movements : []) as any[]}
                 />
             </div>

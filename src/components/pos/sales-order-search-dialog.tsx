@@ -111,12 +111,12 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                                     )}
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h4 className={cn(
-                                                "font-bold uppercase",
-                                                isCancelled ? "text-red-600 dark:text-red-400 line-through" : "text-gray-900 dark:text-white"
+                                            <span className={cn(
+                                                "text-[10px] font-bold uppercase bg-slate-200 dark:bg-slate-850 text-slate-700 dark:text-slate-350 px-1.5 py-0.5 rounded",
+                                                isCancelled ? "text-red-650 dark:text-red-400 line-through" : ""
                                             )}>
                                                 {order.receiptNumber}
-                                            </h4>
+                                            </span>
                                             <span className={cn(
                                                 "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
                                                 order.status === "CANCELLED" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400" :
@@ -127,15 +127,29 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
                                                 {order.status}
                                             </span>
                                         </div>
-                                        <div className={cn("text-sm", isCancelled ? "text-red-400 dark:text-red-500" : "text-gray-500")}>
-                                            <span className={cn("font-medium", isCancelled ? "text-red-500 dark:text-red-400" : "text-gray-700 dark:text-gray-300")}>
+                                        <div className={cn("text-xs mt-1", isCancelled ? "text-red-400 dark:text-red-500" : "text-gray-500")}>
+                                            <span className={cn("font-semibold", isCancelled ? "text-red-500 dark:text-red-400" : "text-gray-700 dark:text-gray-300")}>
                                                 {order.customer?.name || t("noCustomer")}
                                             </span>
                                             {" • "}
                                             {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
-                                            {" • "}
-                                            {order.items.length} {t("items")}
                                         </div>
+
+                                        {/* Products list show before select */}
+                                        {order.items && order.items.length > 0 && (
+                                            <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-450 bg-white/50 dark:bg-black/20 p-2 rounded-xl border border-white/[0.03] space-y-0.5 max-w-[280px] sm:max-w-md">
+                                                {order.items.slice(0, 4).map((item: any, idx: number) => (
+                                                    <div key={item.id || idx} className="truncate">
+                                                        • <span className="font-semibold text-slate-700 dark:text-slate-300">{item.product?.name}</span> (x{item.quantity})
+                                                    </div>
+                                                ))}
+                                                {order.items.length > 4 && (
+                                                    <div className="text-[10px] text-slate-400 dark:text-slate-550 font-bold pl-2">
+                                                        + {order.items.length - 4} autre(s)...
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="text-right">
                                         <div className={cn(

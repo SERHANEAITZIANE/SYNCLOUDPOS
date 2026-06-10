@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View, Text, ScrollView, StyleSheet, TouchableOpacity,
-    ActivityIndicator, Dimensions,
+    ActivityIndicator, Dimensions, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { apiFetch } from "../lib/api";
+import { subDays } from "date-fns";
+import DateRangeFilter, { DateRange } from "../components/DateRangeFilter";
+import ClientTypeFilter, { ClientType } from "../components/ClientTypeFilter";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 const { width } = Dimensions.get("window");
 
@@ -26,44 +31,76 @@ interface CategoryProfit {
     marginPct: number;
 }
 
-const PRODUCTS: ProfitItem[] = [
-    { name: "Café Prestige 250g", revenue: 445000, cost: 267000, marginDA: 178000, marginPct: 40.0, qtySold: 3423 },
-    { name: "Biscuits Bimo Choco", revenue: 218000, cost: 130800, marginDA: 87200, marginPct: 40.0, qtySold: 5450 },
-    { name: "Coca-Cola Canette 33cl", revenue: 842000, cost: 589400, marginDA: 252600, marginPct: 30.0, qtySold: 14033 },
-    { name: "Jus Ramy Orange 1L", revenue: 532000, cost: 399000, marginDA: 133000, marginPct: 25.0, qtySold: 5911 },
-    { name: "Eau Lalla Khedidja 1.5L", revenue: 680000, cost: 578000, marginDA: 102000, marginPct: 15.0, qtySold: 22667 },
-    { name: "Lait Soummam 1L", revenue: 384000, cost: 345600, marginDA: 38400, marginPct: 10.0, qtySold: 9600 },
-    { name: "Savon Vénus 125g", revenue: 156000, cost: 148200, marginDA: 7800, marginPct: 5.0, qtySold: 2600 },
-    { name: "Huile Fleurial 1L", revenue: 420000, cost: 407400, marginDA: 12600, marginPct: 3.0, qtySold: 3500 },
-];
 
-const CATEGORIES: CategoryProfit[] = [
-    { name: "Boissons", revenue: 2054000, cost: 1566400, marginDA: 487600, marginPct: 23.7 },
-    { name: "Café & Thé", revenue: 580000, cost: 348000, marginDA: 232000, marginPct: 40.0 },
-    { name: "Biscuits & Snacks", revenue: 585000, cost: 380250, marginDA: 204750, marginPct: 35.0 },
-    { name: "Produits Laitiers", revenue: 1170000, cost: 1053000, marginDA: 117000, marginPct: 10.0 },
-    { name: "Hygiène", revenue: 533000, cost: 506350, marginDA: 26650, marginPct: 5.0 },
-];
 
 export default function ProfitReportScreen() {
     const [tab, setTab] = useState<"products" | "categories">("products");
     const [sortKey, setSortKey] = useState<SortKey>("margin_da");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const [dateRange, setDateRange] = useState<DateRange>({
+        from: subDays(new Date(), 29),
+        to: new Date(),
+        key: "30days",
+    });
+    const [clientType, setClientType] = useState<ClientType>("");
+
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [totalCost, setTotalCost] = useState(0);
+    const [totalMarginDA, setTotalMarginDA] = useState(0);
+    const [totalMarginPct, setTotalMarginPct] = useState(0);
+    const [productsList, setProductsList] = useState<ProfitItem[]>([]);
+    const [categoriesList, setCategoriesList] = useState<CategoryProfit[]>([]);
 
     const fmt = (n: number) => n.toLocaleString("fr-FR");
 
-    const totalRevenue = PRODUCTS.reduce((a, p) => a + p.revenue, 0);
-    const totalCost = PRODUCTS.reduce((a, p) => a + p.cost, 0);
-    const totalMarginDA = totalRevenue - totalCost;
-    const totalMarginPct = totalRevenue > 0 ? ((totalMarginDA / totalRevenue) * 100) : 0;
+    const fetchProfitData = useCallback(async () => {
+        try {
+            const fromStr = dateRange.from.toISOString().split("T")[0];
+            const toStr = dateRange.to.toISOString().split("T")[0];
+            const path = `/gerant/profit?from=${fromStr}&to=${toStr}${clientType ? `&clientType=${clientType}` : ""}`;
+            const data = await apiFetch(path);
+            if (data) {
+                setTotalRevenue(data.totalRevenue || 0);
+                setTotalCost(data.totalCost || 0);
+                setTotalMarginDA(data.totalMarginDA || 0);
+                setTotalMarginPct(data.totalMarginPct || 0);
+                setProductsList(data.products || []);
+                setCategoriesList(data.categories || []);
+            } else {
+                useFallbackData();
+            }
+        } catch (e) {
+            console.error("[ProfitReportScreen] Error fetching margins:", e);
+            useFallbackData();
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
 
-    const sortedProducts = [...PRODUCTS].sort((a, b) => {
+    const useFallbackData = () => {
+        setTotalRevenue(0);
+        setTotalCost(0);
+        setTotalMarginDA(0);
+        setTotalMarginPct(0);
+        setProductsList([]);
+        setCategoriesList([]);
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        fetchProfitData();
+    }, [dateRange, clientType, fetchProfitData]);
+
+    const sortedProducts = [...productsList].sort((a, b) => {
         if (sortKey === "margin_pct") return b.marginPct - a.marginPct;
         if (sortKey === "margin_da") return b.marginDA - a.marginDA;
         return b.revenue - a.revenue;
     });
 
-    const sortedCategories = [...CATEGORIES].sort((a, b) => b.marginDA - a.marginDA);
+    const sortedCategories = [...categoriesList].sort((a, b) => b.marginDA - a.marginDA);
 
     const getMarginColor = (pct: number) => {
         if (pct >= 25) return "#22c55e";
@@ -71,8 +108,30 @@ export default function ProfitReportScreen() {
         return "#ef4444";
     };
 
+    if (loading && !refreshing) {
+        return (
+            <View style={{ flex: 1, backgroundColor: "#0a0f1e" }}>
+                <View style={{ paddingTop: 16 }}>
+                    <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                    <ClientTypeFilter value={clientType} onChange={setClientType} />
+                </View>
+                <SkeletonLoader type="list" rows={6} />
+            </View>
+        );
+    }
+
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchProfitData(); }} tintColor="#22c55e" />
+            }
+        >
+            <View style={{ paddingTop: 16 }}>
+                <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                <ClientTypeFilter value={clientType} onChange={setClientType} />
+            </View>
             {/* Summary KPIs */}
             <View style={styles.summaryCard}>
                 <View style={styles.summaryHeader}>
@@ -155,84 +214,98 @@ export default function ProfitReportScreen() {
             {/* Product List */}
             {tab === "products" && (
                 <View style={styles.listCard}>
-                    {sortedProducts.map((prod, i) => (
-                        <View key={i} style={[styles.prodRow, i < sortedProducts.length - 1 && styles.prodRowBorder]}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.prodName} numberOfLines={1}>{prod.name}</Text>
-                                <View style={styles.prodMeta}>
-                                    <Text style={styles.prodMetaText}>CA: {fmt(prod.revenue)} DA</Text>
-                                    <Text style={styles.prodMetaDot}>·</Text>
-                                    <Text style={styles.prodMetaText}>{fmt(prod.qtySold)} vendus</Text>
-                                </View>
-                                {/* Margin bar */}
-                                <View style={styles.marginBarTrack}>
-                                    <View style={[
-                                        styles.marginBarFill,
-                                        {
-                                            width: `${prod.marginPct}%`,
-                                            backgroundColor: getMarginColor(prod.marginPct),
-                                        }
-                                    ]} />
-                                </View>
-                            </View>
-                            <View style={styles.prodRight}>
-                                <Text style={[styles.prodMarginDA, { color: getMarginColor(prod.marginPct) }]}>
-                                    +{fmt(prod.marginDA)} DA
-                                </Text>
-                                <View style={[styles.prodPctBadge, { backgroundColor: `${getMarginColor(prod.marginPct)}20` }]}>
-                                    <Text style={[styles.prodPctText, { color: getMarginColor(prod.marginPct) }]}>
-                                        {prod.marginPct.toFixed(1)}%
-                                    </Text>
-                                </View>
-                            </View>
+                    {sortedProducts.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="receipt-outline" size={48} color="#475569" />
+                            <Text style={styles.emptyText}>Aucune donnée de vente pour les produits</Text>
                         </View>
-                    ))}
+                    ) : (
+                        sortedProducts.map((prod, i) => (
+                            <View key={i} style={[styles.prodRow, i < sortedProducts.length - 1 && styles.prodRowBorder]}>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.prodName} numberOfLines={1}>{prod.name}</Text>
+                                    <View style={styles.prodMeta}>
+                                        <Text style={styles.prodMetaText}>CA: {fmt(prod.revenue)} DA</Text>
+                                        <Text style={styles.prodMetaDot}>·</Text>
+                                        <Text style={styles.prodMetaText}>{fmt(prod.qtySold)} vendus</Text>
+                                    </View>
+                                    {/* Margin bar */}
+                                    <View style={styles.marginBarTrack}>
+                                        <View style={[
+                                            styles.marginBarFill,
+                                            {
+                                                width: `${prod.marginPct}%`,
+                                                backgroundColor: getMarginColor(prod.marginPct),
+                                            }
+                                        ]} />
+                                    </View>
+                                </View>
+                                <View style={styles.prodRight}>
+                                    <Text style={[styles.prodMarginDA, { color: getMarginColor(prod.marginPct) }]}>
+                                        +{fmt(prod.marginDA)} DA
+                                    </Text>
+                                    <View style={[styles.prodPctBadge, { backgroundColor: `${getMarginColor(prod.marginPct)}20` }]}>
+                                        <Text style={[styles.prodPctText, { color: getMarginColor(prod.marginPct) }]}>
+                                            {prod.marginPct.toFixed(1)}%
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        ))
+                    )}
                 </View>
             )}
 
             {/* Category List */}
             {tab === "categories" && (
                 <View style={styles.listCard}>
-                    {sortedCategories.map((cat, i) => (
-                        <View key={i} style={[styles.prodRow, i < sortedCategories.length - 1 && styles.prodRowBorder]}>
-                            <View style={[styles.catIcon, {
-                                backgroundColor: `${getMarginColor(cat.marginPct)}15`,
-                            }]}>
-                                <Ionicons
-                                    name="folder-open-outline"
-                                    size={18}
-                                    color={getMarginColor(cat.marginPct)}
-                                />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.prodName}>{cat.name}</Text>
-                                <View style={styles.prodMeta}>
-                                    <Text style={styles.prodMetaText}>CA: {fmt(cat.revenue)} DA</Text>
-                                    <Text style={styles.prodMetaDot}>·</Text>
-                                    <Text style={styles.prodMetaText}>Coût: {fmt(cat.cost)} DA</Text>
-                                </View>
-                                <View style={styles.marginBarTrack}>
-                                    <View style={[
-                                        styles.marginBarFill,
-                                        {
-                                            width: `${cat.marginPct}%`,
-                                            backgroundColor: getMarginColor(cat.marginPct),
-                                        }
-                                    ]} />
-                                </View>
-                            </View>
-                            <View style={styles.prodRight}>
-                                <Text style={[styles.prodMarginDA, { color: getMarginColor(cat.marginPct) }]}>
-                                    +{fmt(cat.marginDA)} DA
-                                </Text>
-                                <View style={[styles.prodPctBadge, { backgroundColor: `${getMarginColor(cat.marginPct)}20` }]}>
-                                    <Text style={[styles.prodPctText, { color: getMarginColor(cat.marginPct) }]}>
-                                        {cat.marginPct.toFixed(1)}%
-                                    </Text>
-                                </View>
-                            </View>
+                    {sortedCategories.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="folder-open-outline" size={48} color="#475569" />
+                            <Text style={styles.emptyText}>Aucune donnée de vente pour les catégories</Text>
                         </View>
-                    ))}
+                    ) : (
+                        sortedCategories.map((cat, i) => (
+                            <View key={i} style={[styles.prodRow, i < sortedCategories.length - 1 && styles.prodRowBorder]}>
+                                <View style={[styles.catIcon, {
+                                    backgroundColor: `${getMarginColor(cat.marginPct)}15`,
+                                }]}>
+                                    <Ionicons
+                                        name="folder-open-outline"
+                                        size={18}
+                                        color={getMarginColor(cat.marginPct)}
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.prodName}>{cat.name}</Text>
+                                    <View style={styles.prodMeta}>
+                                        <Text style={styles.prodMetaText}>CA: {fmt(cat.revenue)} DA</Text>
+                                        <Text style={styles.prodMetaDot}>·</Text>
+                                        <Text style={styles.prodMetaText}>Coût: {fmt(cat.cost)} DA</Text>
+                                    </View>
+                                    <View style={styles.marginBarTrack}>
+                                        <View style={[
+                                            styles.marginBarFill,
+                                            {
+                                                width: `${cat.marginPct}%`,
+                                                backgroundColor: getMarginColor(cat.marginPct),
+                                            }
+                                        ]} />
+                                    </View>
+                                </View>
+                                <View style={styles.prodRight}>
+                                    <Text style={[styles.prodMarginDA, { color: getMarginColor(cat.marginPct) }]}>
+                                        +{fmt(cat.marginDA)} DA
+                                    </Text>
+                                    <View style={[styles.prodPctBadge, { backgroundColor: `${getMarginColor(cat.marginPct)}20` }]}>
+                                        <Text style={[styles.prodPctText, { color: getMarginColor(cat.marginPct) }]}>
+                                            {cat.marginPct.toFixed(1)}%
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        ))
+                    )}
                 </View>
             )}
 
@@ -256,7 +329,7 @@ export default function ProfitReportScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
 
     // Summary card
     summaryCard: {
@@ -269,7 +342,7 @@ const styles = StyleSheet.create({
     summaryTitle: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
     summaryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
     summaryItem: {
-        width: "47%", backgroundColor: "#0f172a", borderRadius: 12,
+        width: "47%", backgroundColor: "#0a0f1e", borderRadius: 12,
         padding: 12, borderWidth: 1, borderColor: "#334155",
     },
     summaryLabel: { color: "#64748b", fontSize: 11, fontWeight: "600" },
@@ -348,4 +421,17 @@ const styles = StyleSheet.create({
     legendItem: { flexDirection: "row", alignItems: "center", gap: 4 },
     legendDot: { width: 8, height: 8, borderRadius: 4 },
     legendText: { color: "#64748b", fontSize: 10, fontWeight: "600" },
+
+    emptyContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 40,
+        gap: 12,
+    },
+    emptyText: {
+        color: "#64748b",
+        fontSize: 13,
+        fontWeight: "600",
+        textAlign: "center",
+    },
 });

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Component, useEffect } from "react";
 import {
     View, Text, TextInput, TouchableOpacity,
     ActivityIndicator, StyleSheet, Image, KeyboardAvoidingView,
@@ -10,6 +10,50 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "./lib/store";
 import { useLangStore } from "./lib/i18n";
+
+// ─── Error Boundary ─────────────────────────────────────────────────────────
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error: Error | null;
+}
+
+class ErrorBoundary extends Component<{ children: React.ReactNode }, ErrorBoundaryState> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+        console.error("[ErrorBoundary] Crash caught:", error, info);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <View style={{ flex: 1, backgroundColor: "#0f172a", justifyContent: "center", alignItems: "center", padding: 32 }}>
+                    <Ionicons name="warning" size={64} color="#ef4444" />
+                    <Text style={{ color: "#f8fafc", fontSize: 20, fontWeight: "800", marginTop: 16, textAlign: "center" }}>
+                        Erreur Application
+                    </Text>
+                    <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 8, textAlign: "center", lineHeight: 20 }}>
+                        {this.state.error?.message || "Une erreur inattendue est survenue"}
+                    </Text>
+                    <TouchableOpacity
+                        style={{ marginTop: 24, backgroundColor: "#2563eb", paddingHorizontal: 24, paddingVertical: 14, borderRadius: 14 }}
+                        onPress={() => this.setState({ hasError: false, error: null })}
+                    >
+                        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "700" }}>Réessayer</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 // ─── Screens ────────────────────────────────────────────────────────────────
 import TourneeScreen from "./screens/TourneeScreen";
@@ -199,8 +243,8 @@ export default function App() {
     const { loadLang } = useLangStore();
 
     useEffect(() => {
-        loadLang();
-        loadSession();
+        try { loadLang(); } catch (e) { console.error('[App] loadLang failed:', e); }
+        try { loadSession(); } catch (e) { console.error('[App] loadSession failed:', e); }
     }, []);
 
     // Start GPS tracking + offline sync when authenticated
@@ -233,6 +277,7 @@ export default function App() {
     }
 
     return (
+        <ErrorBoundary>
         <NavigationContainer theme={AppTheme}>
             <Stack.Navigator id="RootStack" screenOptions={{ headerShown: false }}>
                 {!isAuthenticated ? (
@@ -297,6 +342,7 @@ export default function App() {
                 )}
             </Stack.Navigator>
         </NavigationContainer>
+        </ErrorBoundary>
     );
 }
 

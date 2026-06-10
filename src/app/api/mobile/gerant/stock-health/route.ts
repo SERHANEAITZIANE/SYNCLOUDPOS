@@ -132,6 +132,13 @@ export async function GET(req: NextRequest) {
         fastMovers.sort((a, b) => b.velocity - a.velocity); // Fastest sellers
 
         return NextResponse.json({
+            totalStockValue: Math.round(totalStockValue),
+            totalRetailValue: Math.round(totalRetailValue),
+            potentialProfit: Math.round(totalRetailValue - totalStockValue),
+            zeroStockCount: zeroStock.length,
+            lowStockCount: lowStock.length,
+            overStockCount: overstocked.length,
+            slowMoverCount: slowMovers.length,
             summary: {
                 totalProducts: allProducts.length,
                 totalStockValue: Math.round(totalStockValue),
@@ -144,6 +151,7 @@ export async function GET(req: NextRequest) {
             },
             zeroStock: zeroStock.slice(0, 15),
             lowStock: lowStock.slice(0, 15),
+            overStock: overstocked.slice(0, 15),
             overstocked: overstocked.slice(0, 15),
             slowMovers: slowMovers.slice(0, 15),
             fastMovers: fastMovers.slice(0, 10),

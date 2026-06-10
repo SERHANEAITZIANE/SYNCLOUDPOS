@@ -24,6 +24,15 @@ export function usePurchaseColumns(): ColumnDef<PurchaseOrderColumn>[] {
 
     return [
         {
+            accessorKey: "purchaseNumber",
+            header: "N° Bon",
+            cell: ({ row }) => (
+                <span className="font-mono font-semibold text-xs text-primary">
+                    {row.original.purchaseNumber || `Bon #${row.original.id.slice(-8).toUpperCase()}`}
+                </span>
+            )
+        },
+        {
             accessorKey: "supplier",
             header: t("fields.supplier"),
         },

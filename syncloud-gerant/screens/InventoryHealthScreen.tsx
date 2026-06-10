@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 type InventoryTab = "overview" | "reorder" | "dead";
 
@@ -50,14 +51,18 @@ export default function InventoryHealthScreen() {
     useEffect(() => { fetchStock(); }, [fetchStock]);
 
     if (loading) {
+        return <SkeletonLoader type="list" rows={5} />;
+    }
+
+    if (!data) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#22c55e" />
+                <Ionicons name="cube-outline" size={48} color="#22c55e" />
+                <Text style={styles.emptyText}>Aucune donnée de stock</Text>
+                <Text style={styles.emptySubText}>Makan hta data ta3 stock hna</Text>
             </View>
         );
     }
-
-    if (!data) return null;
 
     const reorderList = [...data.zeroStock, ...data.lowStock];
     const deadList = data.slowMovers;
@@ -125,47 +130,61 @@ export default function InventoryHealthScreen() {
                 <>
                     <Text style={styles.sectionTitle}>PRODUITS EN RUPTURE</Text>
                     <View style={styles.productList}>
-                        {data.zeroStock.length === 0
-                            ? <Text style={styles.emptyText}>✅ Aucune rupture</Text>
-                            : data.zeroStock.map((p, i) => (
-                                <View key={i} style={[styles.productRow, i < data.zeroStock.length - 1 && styles.divider]}>
-                                    <View style={[styles.healthDot, { backgroundColor: "#ef4444" }]} />
-                                    <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                                    <Text style={[styles.productStock, { color: "#ef4444" }]}>RUPTURE</Text>
-                                </View>
-                            ))
-                        }
+                        {data.zeroStock.length === 0 ? (
+                            <View style={styles.listEmptyState}>
+                                <Ionicons name="checkmark-circle-outline" size={30} color="#22c55e" />
+                                <Text style={styles.listEmptyText}>Aucune rupture de stock</Text>
+                                <Text style={styles.listEmptySubText}>Makan hta rupture hna</Text>
+                            </View>
+                        ) : data.zeroStock.map((p, i) => (
+                            <View key={i} style={[styles.productRow, i < data.zeroStock.length - 1 && styles.divider]}>
+                                <View style={[styles.healthDot, { backgroundColor: "#ef4444" }]} />
+                                <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
+                                <Text style={[styles.productStock, { color: "#ef4444" }]}>RUPTURE</Text>
+                            </View>
+                        ))}
                     </View>
 
                     <Text style={styles.sectionTitle}>STOCK BAS ({data.lowStockCount})</Text>
                     <View style={styles.productList}>
-                        {data.lowStock.length === 0
-                            ? <Text style={styles.emptyText}>✅ Stock suffisant</Text>
-                            : data.lowStock.map((p, i) => (
-                                <View key={i} style={[styles.productRow, i < data.lowStock.length - 1 && styles.divider]}>
-                                    <View style={[styles.healthDot, { backgroundColor: "#f59e0b" }]} />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                                        <Text style={styles.productSub}>Seuil: {p.minStock} unités</Text>
-                                    </View>
-                                    <Text style={[styles.productStock, { color: "#f59e0b" }]}>{p.stock} u.</Text>
+                        {data.lowStock.length === 0 ? (
+                            <View style={styles.listEmptyState}>
+                                <Ionicons name="checkmark-circle-outline" size={30} color="#22c55e" />
+                                <Text style={styles.listEmptyText}>Stock suffisant</Text>
+                                <Text style={styles.listEmptySubText}>Kolchi stock labas bih lyoum</Text>
+                            </View>
+                        ) : data.lowStock.map((p, i) => (
+                            <View key={i} style={[styles.productRow, i < data.lowStock.length - 1 && styles.divider]}>
+                                <View style={[styles.healthDot, { backgroundColor: "#f59e0b" }]} />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
+                                    <Text style={styles.productSub}>Seuil: {p.minStock} unités</Text>
                                 </View>
-                            ))
-                        }
+                                <Text style={[styles.productStock, { color: "#f59e0b" }]}>{p.stock} u.</Text>
+                            </View>
+                        ))}
                     </View>
 
                     <Text style={styles.sectionTitle}>PRODUITS RAPIDES 🚀 ({data.fastMovers.length})</Text>
                     <View style={styles.productList}>
-                        {data.fastMovers.slice(0, 8).map((p, i) => (
-                            <View key={i} style={[styles.productRow, i < 7 && styles.divider]}>
-                                <View style={[styles.healthDot, { backgroundColor: "#22c55e" }]} />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
-                                    <Text style={styles.productSub}>~{Math.round(p.avgDailySales)} ventes/j</Text>
-                                </View>
-                                <Text style={[styles.productStock, { color: "#22c55e" }]}>{p.stock} u.</Text>
+                        {data.fastMovers.length === 0 ? (
+                            <View style={styles.listEmptyState}>
+                                <Ionicons name="trending-up" size={30} color="#3b82f6" />
+                                <Text style={styles.listEmptyText}>Aucun mouvement rapide</Text>
+                                <Text style={styles.listEmptySubText}>Makan hta produit sria3 hna</Text>
                             </View>
-                        ))}
+                        ) : (
+                            data.fastMovers.slice(0, 8).map((p, i) => (
+                                <View key={i} style={[styles.productRow, i < 7 && styles.divider]}>
+                                    <View style={[styles.healthDot, { backgroundColor: "#22c55e" }]} />
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.productName} numberOfLines={1}>{p.name}</Text>
+                                        <Text style={styles.productSub}>~{Math.round(p.avgDailySales)} ventes/j</Text>
+                                    </View>
+                                    <Text style={[styles.productStock, { color: "#22c55e" }]}>{p.stock} u.</Text>
+                                </View>
+                            ))
+                        )}
                     </View>
                 </>
             )}
@@ -180,9 +199,14 @@ export default function InventoryHealthScreen() {
                         </Text>
                     </View>
                     <View style={styles.productList}>
-                        {reorderList.length === 0
-                            ? <Text style={styles.emptyText}>✅ Aucun réapprovisionnement nécessaire</Text>
-                            : reorderList.map((p, i) => {
+                        {reorderList.length === 0 ? (
+                            <View style={styles.listEmptyState}>
+                                <Ionicons name="checkmark-circle-outline" size={30} color="#22c55e" />
+                                <Text style={styles.listEmptyText}>Aucune commande nécessaire</Text>
+                                <Text style={styles.listEmptySubText}>Stock kamel labas bih</Text>
+                            </View>
+                        ) : (
+                            reorderList.map((p, i) => {
                                 const isZero = p.stock === 0;
                                 const color = isZero ? "#ef4444" : "#f59e0b";
                                 const suggested = Math.max(p.minStock * 2, 10);
@@ -203,7 +227,7 @@ export default function InventoryHealthScreen() {
                                     </View>
                                 );
                             })
-                        }
+                        )}
                     </View>
                 </>
             )}
@@ -218,9 +242,14 @@ export default function InventoryHealthScreen() {
                         </Text>
                     </View>
                     <View style={styles.productList}>
-                        {deadList.length === 0
-                            ? <Text style={styles.emptyText}>✅ Tous les produits bougent normalement</Text>
-                            : deadList.map((p, i) => (
+                        {deadList.length === 0 ? (
+                            <View style={styles.listEmptyState}>
+                                <Ionicons name="checkmark-circle-outline" size={30} color="#94a3b8" />
+                                <Text style={styles.listEmptyText}>Mouvements normaux</Text>
+                                <Text style={styles.listEmptySubText}>Ga3 les produits rahom yemchiw mlih</Text>
+                            </View>
+                        ) : (
+                            deadList.map((p, i) => (
                                 <View key={i} style={[styles.productRow, i < deadList.length - 1 && styles.divider]}>
                                     <View style={[styles.healthDot, { backgroundColor: "#94a3b8" }]} />
                                     <View style={{ flex: 1 }}>
@@ -232,7 +261,7 @@ export default function InventoryHealthScreen() {
                                     <Text style={styles.productStock}>{p.stock} u.</Text>
                                 </View>
                             ))
-                        }
+                        )}
                     </View>
                 </>
             )}
@@ -241,8 +270,8 @@ export default function InventoryHealthScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e" },
     emptyText: { color: "#22c55e", fontSize: 13, fontWeight: "600", textAlign: "center", paddingVertical: 12 },
 
     kpiRow: { flexDirection: "row", gap: 10, padding: 16 },
@@ -281,4 +310,8 @@ const styles = StyleSheet.create({
     reorderRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 },
     reorderBadge: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center" },
     reorderSuggested: { color: "#22c55e", fontSize: 10, fontWeight: "700", marginTop: 2 },
+    emptySubText: { color: "#475569", fontSize: 12, textAlign: "center", paddingHorizontal: 16 },
+    listEmptyState: { alignItems: "center", paddingVertical: 16, gap: 6 },
+    listEmptyText: { color: "#94a3b8", fontSize: 13, fontWeight: "700" },
+    listEmptySubText: { color: "#475569", fontSize: 11, textAlign: "center" },
 });

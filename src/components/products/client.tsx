@@ -149,25 +149,22 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                                 className="max-w-sm w-full"
                             />
                         </div>
-                    </div>
 
-                    <ProductGridView data={data} />
-
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-zinc-100 dark:border-zinc-800/40 mt-4">
-                        {/* Page size selector on the left */}
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
+                        {/* Row count selector */}
+                        <div className="flex items-center gap-1.5 no-print">
+                            <span className="text-xs text-muted-foreground font-medium mr-1">
+                                {tDataTable("show")} :
+                            </span>
                             {[20, 50, 100, 200].map((size) => {
                                 const active = currentLimit === size
                                 return (
-                                    <Button
+                                    <button
                                         key={size}
-                                        variant={active ? "default" : "outline"}
                                         className={cn(
-                                            "h-7 w-10 text-xs font-semibold p-0",
+                                            "h-7 min-w-[2.5rem] text-xs font-semibold px-2.5 rounded-md border transition-all duration-150",
                                             active
-                                                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-blue-600"
-                                                : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850"
+                                                ? "bg-primary text-primary-foreground shadow-sm border-primary"
+                                                : "bg-background border-input hover:bg-accent hover:text-accent-foreground"
                                         )}
                                         onClick={() => {
                                             const params = new URLSearchParams(searchParams?.toString() || "")
@@ -177,11 +174,18 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                                         }}
                                     >
                                         {size}
-                                    </Button>
+                                    </button>
                                 )
                             })}
                         </div>
-                        {/* Pagination on the right */}
+                    </div>
+
+                    <ProductGridView data={data} />
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-zinc-100 dark:border-zinc-800/40 mt-4 no-print">
+                        <p className="text-sm text-muted-foreground tabular-nums">
+                            {tDataTable("page")} <span className="font-semibold text-foreground">{currentPage}</span> / <span className="font-semibold text-foreground">{pageCount}</span>
+                        </p>
                         <div className="flex items-center space-x-2">
                             <Button
                                 variant="outline"
@@ -194,7 +198,6 @@ export const ProductClient: React.FC<ProductClientProps> = ({
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
-                            <div className="text-sm font-medium">{tDataTable("page")} {currentPage} / {pageCount}</div>
                             <Button
                                 variant="outline"
                                 size="sm"

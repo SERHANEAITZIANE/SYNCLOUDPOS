@@ -6,6 +6,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../lib/api";
+import ClientTypeFilter, { ClientType } from "../components/ClientTypeFilter";
+import SkeletonLoader from "../components/SkeletonLoader";
 
 type AgingBucket = "0-30" | "30-60" | "60-90" | "90+";
 
@@ -37,6 +39,7 @@ export default function ClientDebtsScreen({ navigation }: any) {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [filter, setFilter] = useState<AgingBucket | "all">("all");
+    const [clientType, setClientType] = useState<ClientType>("");
 
     // Quick payment modal
     const [payModal, setPayModal] = useState(false);
@@ -48,7 +51,8 @@ export default function ClientDebtsScreen({ navigation }: any) {
 
     const fetchDebts = useCallback(async () => {
         try {
-            const result: DebtsData = await apiFetch("/gerant/debts");
+            const path = `/gerant/debts?clientType=${clientType}`;
+            const result: DebtsData = await apiFetch(path);
             setData(result);
         } catch (e: any) {
             console.error("[ClientDebts]", e);
@@ -56,9 +60,12 @@ export default function ClientDebtsScreen({ navigation }: any) {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [clientType]);
 
-    useEffect(() => { fetchDebts(); }, [fetchDebts]);
+    useEffect(() => {
+        setLoading(true);
+        fetchDebts();
+    }, [clientType, fetchDebts]);
 
     const handleWhatsApp = (client: ClientDebt) => {
         const msg = encodeURIComponent(
@@ -96,10 +103,13 @@ export default function ClientDebtsScreen({ navigation }: any) {
         }
     };
 
-    if (loading) {
+    if (loading && !refreshing) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#f59e0b" />
+            <View style={{ flex: 1, backgroundColor: "#0a0f1e" }}>
+                <View style={{ paddingTop: 16 }}>
+                    <ClientTypeFilter value={clientType} onChange={setClientType} />
+                </View>
+                <SkeletonLoader type="list" rows={6} />
             </View>
         );
     }
@@ -126,6 +136,9 @@ export default function ClientDebtsScreen({ navigation }: any) {
                     <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDebts(); }} tintColor="#f59e0b" />
                 }
             >
+                <View style={{ paddingTop: 16 }}>
+                    <ClientTypeFilter value={clientType} onChange={setClientType} />
+                </View>
                 {/* Total */}
                 <View style={styles.totalCard}>
                     <View style={styles.totalHeader}>
@@ -292,8 +305,8 @@ export default function ClientDebtsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#0f172a" },
-    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0f172a" },
+    container: { flex: 1, backgroundColor: "#0a0f1e" },
+    center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0a0f1e" },
 
     totalCard: {
         backgroundColor: "#1e293b", margin: 16, borderRadius: 20, padding: 20, alignItems: "center",
@@ -312,7 +325,7 @@ const styles = StyleSheet.create({
     agingLeft: { flexDirection: "row", alignItems: "center", gap: 6, width: 100 },
     agingDot: { width: 8, height: 8, borderRadius: 4 },
     agingLabel: { color: "#f8fafc", fontSize: 12, fontWeight: "600" },
-    agingCountBadge: { backgroundColor: "#0f172a", paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 },
+    agingCountBadge: { backgroundColor: "#0a0f1e", paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 },
     agingCountText: { color: "#94a3b8", fontSize: 9, fontWeight: "700" },
     agingBarTrack: { flex: 1, height: 8, backgroundColor: "#334155", borderRadius: 4, overflow: "hidden" },
     agingBarFill: { height: "100%", borderRadius: 4 },
@@ -336,13 +349,13 @@ const styles = StyleSheet.create({
     clientAmount: { fontSize: 16, fontWeight: "900" },
     agingTag: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 4 },
     agingTagText: { fontSize: 10, fontWeight: "800" },
-    clientMeta: { backgroundColor: "#0f172a", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+    clientMeta: { backgroundColor: "#0a0f1e", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
     clientMetaText: { color: "#94a3b8", fontSize: 11, fontWeight: "600" },
 
     clientActions: { flexDirection: "row", gap: 8 },
     actionBtn: {
         flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
-        gap: 4, paddingVertical: 8, borderRadius: 10, backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        gap: 4, paddingVertical: 8, borderRadius: 10, backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
     },
     actionBtnPay: { backgroundColor: "#22c55e", borderColor: "#22c55e" },
     actionText: { fontSize: 11, fontWeight: "700" },
@@ -355,12 +368,12 @@ const styles = StyleSheet.create({
     },
     modalHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
     modalTitle: { flex: 1, color: "#f8fafc", fontSize: 18, fontWeight: "900" },
-    modalClient: { backgroundColor: "#0f172a", borderRadius: 14, padding: 16, gap: 4 },
+    modalClient: { backgroundColor: "#0a0f1e", borderRadius: 14, padding: 16, gap: 4 },
     modalClientName: { color: "#f8fafc", fontSize: 16, fontWeight: "800" },
     modalClientDebt: { color: "#f59e0b", fontSize: 14, fontWeight: "700" },
     modalLabel: { color: "#64748b", fontSize: 12, fontWeight: "700" },
     modalInput: {
-        backgroundColor: "#0f172a", borderWidth: 1, borderColor: "#334155",
+        backgroundColor: "#0a0f1e", borderWidth: 1, borderColor: "#334155",
         borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14,
         color: "#f8fafc", fontSize: 22, fontWeight: "900",
     },

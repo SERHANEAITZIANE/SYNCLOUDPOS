@@ -7,6 +7,7 @@ import { Check, X, AlertCircle } from "lucide-react"
 import { updateChequeStatus } from "@/actions/cheques"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
+import { ChequeStatus } from "@prisma/client"
 
 interface ChequeCellActionProps {
     data: ChequeColumn
@@ -16,7 +17,7 @@ export const ChequeCellAction: React.FC<ChequeCellActionProps> = ({ data }) => {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    const onUpdateStatus = async (status: string) => {
+    const onUpdateStatus = async (status: ChequeStatus) => {
         try {
             setLoading(true)
             // Ideally we'd open a modal to select the account if CLEARED

@@ -87,13 +87,22 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
 
     useEffect(() => {
         if (isPrinting && printRef.current) {
+            const originalTitle = document.title
+            if (printerBarcode !== "default") {
+                document.title = printerBarcode
+            }
             const timer = setTimeout(() => {
                 handlePrint(() => printRef.current!)
                 setIsPrinting(false)
+                setTimeout(() => {
+                    document.title = originalTitle
+                }, 1000)
             }, 150)
-            return () => clearTimeout(timer)
+            return () => {
+                clearTimeout(timer)
+            }
         }
-    }, [isPrinting, handlePrint])
+    }, [isPrinting, handlePrint, printerBarcode])
 
     const validBarcodes = (barcodes || []).filter(b => b && b.value && b.value.trim() !== "");
     const hasBarcodes = validBarcodes.length > 0;

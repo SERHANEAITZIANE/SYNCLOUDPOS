@@ -238,6 +238,52 @@ export function ServerDataTable<TData, TValue>({
                 </div>
             </div>
 
+            {/* Row count selector — above the table */}
+            <div className="flex items-center gap-1.5 pb-3 no-print">
+                <span className="text-xs text-muted-foreground font-medium mr-1">
+                    {tDataTable("show")} :
+                </span>
+                {[20, 50, 100, 200].map((size) => {
+                    const limit = Number(getSafeSearchParam("limit")) || 20
+                    const active = limit === size
+                    return (
+                        <button
+                            key={size}
+                            className={cn(
+                                "h-7 min-w-[2.5rem] text-xs font-semibold px-2.5 rounded-md border transition-all duration-150",
+                                active
+                                    ? "bg-primary text-primary-foreground shadow-sm border-primary"
+                                    : "bg-background border-input hover:bg-accent hover:text-accent-foreground"
+                            )}
+                            onClick={() => {
+                                const params = new URLSearchParams(getSafeSearchParamsString())
+                                params.set("limit", String(size))
+                                params.set("page", "1")
+                                router.push(pathname + "?" + params.toString())
+                            }}
+                        >
+                            {size}
+                        </button>
+                    )
+                })}
+                <button
+                    className={cn(
+                        "h-7 min-w-[2.5rem] text-xs font-semibold px-2.5 rounded-md border transition-all duration-150",
+                        (Number(getSafeSearchParam("limit")) || 20) >= 9999
+                            ? "bg-primary text-primary-foreground shadow-sm border-primary"
+                            : "bg-background border-input hover:bg-accent hover:text-accent-foreground"
+                    )}
+                    onClick={() => {
+                        const params = new URLSearchParams(getSafeSearchParamsString())
+                        params.set("limit", "9999")
+                        params.set("page", "1")
+                        router.push(pathname + "?" + params.toString())
+                    }}
+                >
+                    {tDataTable("all")}
+                </button>
+            </div>
+
             {/* Table */}
             <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-sm bg-white dark:bg-zinc-950 print:border-none print:shadow-none print:m-0 print:p-0" ref={printRef}>
                 {/* Print Header - Only visible when printing */}
@@ -255,100 +301,71 @@ export function ServerDataTable<TData, TValue>({
                     </div>
                 </div>
 
-                <div className="overflow-x-auto print:overflow-visible print:max-h-none">
-                    <Table className="print:w-full print:border-collapse print:text-black">
-                        <TableHeader className="print:bg-gray-100 print:text-black print:border-b-2 print:border-gray-800">
-                            {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id} className="border-b border-zinc-200/80 dark:border-zinc-800/60 bg-zinc-50/80 dark:bg-zinc-900/40 hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40 print:border-b print:border-gray-300">
-                                    {headerGroup.headers.map((header) => {
-                                        return (
-                                            <TableHead key={header.id} className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 h-11 px-4 first:pl-4 print:text-black print:font-bold">
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </TableHead>
-                                        )
-                                    })}
-                                </TableRow>
-                            ))}
-                        </TableHeader>
-                        <TableBody>
-                            {table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row, index) => (
-                                    <TableRow
-                                        key={row.id}
-                                        data-state={row.getIsSelected() && "selected"}
-                                        className={`
-                                            transition-colors duration-150
-                                            hover:bg-blue-50/50 dark:hover:bg-blue-950/20
-                                            ${index % 2 === 0 ? 'bg-white dark:bg-zinc-950' : 'bg-zinc-50/50 dark:bg-zinc-900/20'}
-                                            border-b border-zinc-100 dark:border-zinc-800/40
-                                        `}
-                                    >
-                                        {row.getVisibleCells().map((cell) => (
-                                            <TableCell key={cell.id} className="px-4 py-3 text-sm">
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
+                <Table className="print:w-full print:border-collapse print:text-black" containerClassName="max-h-[70vh] print:max-h-none print:overflow-visible">
+                    <TableHeader className="bg-zinc-50/80 dark:bg-zinc-900/40 sticky top-0 z-10 backdrop-blur-sm print:bg-gray-100 print:text-black print:border-b-2 print:border-gray-800">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id} className="border-b border-zinc-200/80 dark:border-zinc-800/60 bg-zinc-50/80 dark:bg-zinc-900/40 hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40 print:border-b print:border-gray-300">
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <TableHead key={header.id} className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 h-11 px-4 first:pl-4 print:text-black print:font-bold">
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
                                                 )}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={columns.length}
-                                        className="h-32 text-center"
-                                    >
-                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                            <Search className="h-8 w-8 mb-2 opacity-40" />
-                                            <p className="text-sm font-medium">{tDataTable("noResults")}</p>
-                                        </div>
-                                    </TableCell>
+                                        </TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row, index) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                    className={`
+                                        transition-colors duration-150
+                                        hover:bg-blue-50/50 dark:hover:bg-blue-950/20
+                                        ${index % 2 === 0 ? 'bg-white dark:bg-zinc-950' : 'bg-zinc-50/50 dark:bg-zinc-900/20'}
+                                        border-b border-zinc-100 dark:border-zinc-800/40
+                                    `}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id} className="px-4 py-3 text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-32 text-center"
+                                >
+                                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                        <Search className="h-8 w-8 mb-2 opacity-40" />
+                                        <p className="text-sm font-medium">{tDataTable("noResults")}</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             {/* Pagination */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-zinc-100 dark:border-zinc-800/40 mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 no-print">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <p className="text-sm text-muted-foreground tabular-nums">
                         {tDataTable("page")} <span className="font-semibold text-foreground">{currentPage}</span> / <span className="font-semibold text-foreground">{pageCount}</span>
                     </p>
-                    <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
-                        {[20, 50, 100, 200].map((size) => {
-                            const limit = Number(getSafeSearchParam("limit")) || 20
-                            const active = limit === size
-                            return (
-                                <Button
-                                    key={size}
-                                    variant={active ? "default" : "outline"}
-                                    className={cn(
-                                        "h-7 w-10 text-xs font-semibold p-0",
-                                        active
-                                            ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm border-blue-600"
-                                            : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850"
-                                    )}
-                                    onClick={() => {
-                                        const params = new URLSearchParams(getSafeSearchParamsString())
-                                        params.set("limit", String(size))
-                                        params.set("page", "1")
-                                        router.push(pathname + "?" + params.toString())
-                                    }}
-                                >
-                                    {size}
-                                </Button>
-                            )
-                        })}
-                    </div>
                 </div>
 
                 <div className="flex items-center gap-1">

@@ -88,13 +88,13 @@ export async function GET(req: NextRequest) {
                 tenantId,
                 storeId: storeId || undefined,
                 createdAt: { gte: from, lte: to },
-                type: "RETURN",
+                type: "CREDIT_NOTE",
                 userId: { not: null },
             },
             _sum: { total: true },
         });
-        const returnsMap = new Map(
-            returnsByDriver.map((r: any) => [r.userId, Number(r._sum.total || 0)])
+        const returnsMap = new Map<string, number>(
+            returnsByDriver.map((r: any) => [r.userId as string, Number(r._sum.total || 0)])
         );
 
         // Unique clients visited
@@ -105,7 +105,6 @@ export async function GET(req: NextRequest) {
                 storeId: storeId || undefined,
                 createdAt: { gte: from, lte: to },
                 userId: { not: null },
-                customerId: { not: null },
             },
         });
         const clientsVisitedMap = new Map<string, Set<string>>();

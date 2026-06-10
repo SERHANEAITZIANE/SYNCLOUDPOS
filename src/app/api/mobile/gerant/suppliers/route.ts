@@ -102,6 +102,47 @@ export async function GET(req: NextRequest) {
         const totalWeOwe = weOwe.reduce((sum, s) => sum + s.balance, 0);
         const totalTheyOwe = theyOwe.reduce((sum, s) => sum + Math.abs(s.balance), 0);
 
+        // Find recent supplier payments
+        const recentPayments = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                type: "OUTFLOW",
+                source: { in: ["PURCHASE", "PAYMENT", "SUPPLIER_PAYMENT"] },
+            },
+            select: {
+                id: true,
+                amount: true,
+                date: true,
+                description: true,
+                referenceId: true,
+                account: { select: { type: true } },
+            },
+            orderBy: { date: "desc" },
+            take: 30,
+        });
+
+        const allSuppliers = await db.supplier.findMany({
+            where: { tenantId },
+            select: { id: true, name: true },
+        });
+        const nameMap = new Map(allSuppliers.map(s => [s.id, s.name]));
+
+        const mappedPayments = recentPayments.map(p => {
+            const supplierName = p.referenceId ? (nameMap.get(p.referenceId) || "Fournisseur") : "Fournisseur";
+            let method: "especes" | "cheque" | "virement" = "especes";
+            if (p.account?.type === "BANK") method = "virement";
+            
+            return {
+                id: p.id,
+                supplierId: p.referenceId || "",
+                supplierName,
+                amount: Math.round(Number(p.amount)),
+                method,
+                date: p.date.toLocaleDateString("fr-FR"),
+                reference: p.description || "Paiement",
+            };
+        });
+
         return NextResponse.json({
             summary: {
                 totalWeOwe: Math.round(totalWeOwe),
@@ -111,6 +152,7 @@ export async function GET(req: NextRequest) {
                 netPosition: Math.round(totalWeOwe - totalTheyOwe),
             },
             suppliers: results,
+            payments: mappedPayments,
             meta: {
                 total: enriched.length,
                 returned: results.length,

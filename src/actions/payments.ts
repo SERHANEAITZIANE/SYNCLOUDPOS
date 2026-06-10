@@ -223,6 +223,7 @@ export async function updatePayment(id: string, data: {
     amount: number
     description?: string
     date?: string
+    accountId?: string
 }) {
     try {
         const session = await auth()
@@ -237,29 +238,77 @@ export async function updatePayment(id: string, data: {
             if (!existing) throw new Error("Paiement introuvable")
 
             const oldAmount = Number(existing.amount)
-            const diff = data.amount - oldAmount
+            const newAmount = data.amount
+            const diff = newAmount - oldAmount
+            const hasAccountChanged = data.accountId && data.accountId !== existing.accountId
+
+            if (hasAccountChanged) {
+                // 1. Revert old amount from old account
+                await tx.treasuryAccount.update({
+                    where: { id: existing.accountId },
+                    data: {
+                        balance: existing.type === "CREDIT"
+                            ? { decrement: oldAmount }
+                            : { increment: oldAmount }
+                    }
+                })
+
+                // 2. Apply new amount to new account
+                // Verify new account has enough funds if DEBIT
+                const newAccount = await tx.treasuryAccount.findUnique({
+                    where: { id: data.accountId, tenantId }
+                })
+                if (!newAccount) throw new Error("Nouveau compte introuvable")
+
+                if (existing.type === "DEBIT" && Number(newAccount.balance) < newAmount) {
+                    throw new Error("Fonds insuffisants dans le nouveau compte de trésorerie")
+                }
+
+                await tx.treasuryAccount.update({
+                    where: { id: data.accountId },
+                    data: {
+                        balance: existing.type === "CREDIT"
+                            ? { increment: newAmount }
+                            : { decrement: newAmount }
+                    }
+                })
+            } else {
+                if (diff !== 0) {
+                    // Check if existing account has enough funds if DEBIT and diff > 0
+                    if (existing.type === "DEBIT" && diff > 0) {
+                        const account = await tx.treasuryAccount.findUnique({
+                            where: { id: existing.accountId, tenantId }
+                        })
+                        if (!account) throw new Error("Compte de trésorerie introuvable")
+                        if (Number(account.balance) < diff) {
+                            throw new Error("Fonds insuffisants dans le compte de trésorerie")
+                        }
+                    }
+
+                    // Adjust treasury account balance
+                    await tx.treasuryAccount.update({
+                        where: { id: existing.accountId },
+                        data: {
+                            balance: existing.type === "CREDIT"
+                                ? { increment: diff }
+                                : { decrement: diff }
+                        }
+                    })
+                }
+            }
 
             // Update the transaction itself
             await tx.treasuryTransaction.update({
                 where: { id },
                 data: {
                     amount: data.amount,
+                    accountId: data.accountId || undefined,
                     description: data.description,
                     date: data.date ? new Date(data.date) : undefined,
                 }
             })
 
             if (diff !== 0) {
-                // Adjust treasury account balance
-                await tx.treasuryAccount.update({
-                    where: { id: existing.accountId },
-                    data: {
-                        balance: existing.type === "CREDIT"
-                            ? { increment: diff }
-                            : { decrement: diff }
-                    }
-                })
-
                 // Adjust customer/supplier balance if this is a MANUAL transaction
                 if (existing.referenceId) {
                     const isCustomer = await tx.customer.findUnique({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
@@ -290,6 +339,8 @@ export async function updatePayment(id: string, data: {
 
         revalidatePath("/(dashboard)/payments")
         revalidatePath("/(dashboard)/treasury")
+        revalidatePath("/(dashboard)/emprunt")
+        revalidatePath("/(dashboard)/emprunt-fournisseur")
         return result
     } catch (error) {
         console.error("[UPDATE_PAYMENT]", error)
@@ -357,6 +408,8 @@ export async function deletePayment(id: string) {
         revalidatePath("/(dashboard)/treasury")
         revalidatePath("/(dashboard)/customers")
         revalidatePath("/(dashboard)/suppliers")
+        revalidatePath("/(dashboard)/emprunt")
+        revalidatePath("/(dashboard)/emprunt-fournisseur")
         return result
     } catch (error) {
         console.error("[DELETE_PAYMENT]", error)

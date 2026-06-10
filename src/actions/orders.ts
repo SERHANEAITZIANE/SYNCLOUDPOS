@@ -27,11 +27,39 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId, discountAmount, loyaltyPointsUsed } = validatedFields.data
+    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId, discountAmount, loyaltyPointsUsed, userId: selectedUserId, idempotencyKey } = validatedFields.data
 
     try {
         // Check subscription INSIDE try/catch so errors are returned properly
         await checkSubscription();
+
+        if (idempotencyKey) {
+            const existingOrder = await db.order.findUnique({
+                where: { idempotencyKey }
+            });
+            if (existingOrder) {
+                const existingSalesOrder = await db.salesOrder.findUnique({
+                    where: { idempotencyKey }
+                });
+                let previousBalance = 0;
+                let newBalance = 0;
+                if (existingOrder.customerId) {
+                    const customer = await db.customer.findUnique({
+                        where: { id: existingOrder.customerId }
+                    });
+                    newBalance = Number(customer?.balance || 0);
+                    const debt = Number(existingOrder.total) - Number(existingOrder.paidAmount);
+                    previousBalance = newBalance - debt;
+                }
+                return {
+                    success: "Commande créée avec succès!",
+                    orderId: existingOrder.id,
+                    receiptNumber: existingSalesOrder?.receiptNumber || `POS-${existingOrder.id.slice(-6).toUpperCase()}`,
+                    previousBalance,
+                    newBalance
+                }
+            }
+        }
 
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
         const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
@@ -57,9 +85,11 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 finalCustomerId = diversCustomer.id;
             }
 
+            let oldSalesOrder: any = null;
+
             // --- EDIT MODE LOGIC ---
             if (originalOrderId) {
-                const oldSalesOrder = await tx.salesOrder.findUnique({
+                oldSalesOrder = await tx.salesOrder.findUnique({
                     where: { id: originalOrderId },
                     include: { items: true }
                 });
@@ -99,7 +129,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                                     referenceId: oldSalesOrder.id,
                                     reason: `Edition/Annulation Vente N° ${receiptNumber}`,
                                     userId,
-                                    tenantId
+                                    tenantId,
+                                    createdAt: oldSalesOrder.createdAt
                                 }
                             });
                         })
@@ -109,6 +140,34 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     await tx.salesOrderItem.deleteMany({
                         where: { salesOrderId: originalOrderId }
                     });
+
+                    // Revert old customer balance and loyalty points using oldSalesOrder directly
+                    const oldPaidAmount = Number(oldSalesOrder.amountPaid || 0);
+                    const oldTotal = Number(oldSalesOrder.total || 0);
+                    const oldDebt = oldTotal - oldPaidAmount;
+
+                    if (oldSalesOrder.customerId) {
+                        if (oldDebt !== 0) {
+                            await tx.customer.update({
+                                where: { id: oldSalesOrder.customerId },
+                                data: { balance: { decrement: oldDebt } }
+                            });
+                        }
+
+                        // Revert loyalty points
+                        const oldTenant = await tx.tenant.findUnique({ where: { id: tenantId } });
+                        if (oldTenant) {
+                            const oldPointsEarned = Math.floor(oldTotal * oldTenant.loyaltyPointsPerDa);
+                            await tx.customer.update({
+                                where: { id: oldSalesOrder.customerId },
+                                data: {
+                                    loyaltyPoints: {
+                                        decrement: oldPointsEarned
+                                    }
+                                }
+                            });
+                        }
+                    }
 
                     // 3. Find and Revert Old Order
                     let oldOrder = null;
@@ -132,45 +191,31 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                                 createdAt: { gte: timeMin, lte: timeMax }
                             }
                         });
+
+                        // Fallback: if not found by exact date window (e.g. due to date mismatch or build differences),
+                        // search for the most recent POS order for this customer with the same total
+                        if (!oldOrder) {
+                            oldOrder = await tx.order.findFirst({
+                                where: {
+                                    tenantId,
+                                    total: oldSalesOrder.total,
+                                    customerId: oldSalesOrder.customerId || undefined
+                                },
+                                orderBy: {
+                                    createdAt: "desc"
+                                }
+                            });
+                        }
                     }
 
                     if (oldOrder) {
-                        const oldPaidAmount = Number(oldOrder.paidAmount);
-                        const oldTotal = Number(oldOrder.total);
-                        const oldDebt = oldTotal - oldPaidAmount;
-
-                        // Revert customer balance
-                        if (oldOrder.customerId) {
-                            if (oldDebt !== 0) {
-                                await tx.customer.update({
-                                    where: { id: oldOrder.customerId },
-                                    data: { balance: { decrement: oldDebt } }
-                                });
-                            }
-
-                            // Edit Mode: Revert Loyalty Points
-                            // Fetch old tenant settings to know what ratio was applied
-                            const oldTenant = await tx.tenant.findUnique({ where: { id: tenantId } });
-                            if (oldTenant) {
-                                const oldPointsEarned = Math.floor(oldTotal * oldTenant.loyaltyPointsPerDa);
-                                // For old orders we don't know exactly how many points were used unless we query it, 
-                                // but the easiest approach is just reverting the earned points to prevent abuse
-                                await tx.customer.update({
-                                    where: { id: oldOrder.customerId },
-                                    data: {
-                                        loyaltyPoints: {
-                                            decrement: oldPointsEarned
-                                        }
-                                    }
-                                });
-                            }
-                        }
+                        const oldOrderPaidAmount = Number(oldOrder.paidAmount);
 
                         // Revert treasury
-                        if (oldPaidAmount > 0 && oldOrder.accountId) {
+                        if (oldOrderPaidAmount > 0 && oldOrder.accountId) {
                             await tx.treasuryAccount.update({
                                 where: { id: oldOrder.accountId },
-                                data: { balance: { decrement: oldPaidAmount } }
+                                data: { balance: { decrement: oldOrderPaidAmount } }
                             });
                             await tx.treasuryTransaction.deleteMany({
                                 where: { referenceId: oldOrder.id, source: "SALE" }
@@ -185,12 +230,11 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             }
             // --- END EDIT MODE LOGIC ---
 
-            // 1. Create the order
             const newOrder = await tx.order.create({
                 data: {
                     tenantId,
                     storeId: storeIdToUse,
-                    userId,
+                    userId: selectedUserId || userId,
                     customerId: customerId || undefined,
                     accountId: accountId || undefined,
                     total,
@@ -200,6 +244,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     paymentMethod,
                     paidAmount: paidAmount ?? total, // If not provided, assume paid in full
                     status,
+                    idempotencyKey: idempotencyKey || null,
+                    createdAt: oldSalesOrder ? oldSalesOrder.createdAt : undefined, // Keep original timestamp
                     items: {
                         create: items.map((item) => ({
                             productId: item.productId,
@@ -220,7 +266,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     where: { id: originalOrderId },
                     data: {
                         customerId: finalCustomerId,
-                        userId,
+                        userId: selectedUserId || userId,
                         amountPaid: paidAmount ?? total,
                         total,
                         items: {
@@ -240,12 +286,13 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         tenantId,
                         storeId: storeIdToUse,
                         customerId: finalCustomerId,
-                        userId,
+                        userId: selectedUserId || userId,
                         amountPaid: paidAmount ?? total,
                         type: "ORDER", // Bon de Livraison
                         status: "VALIDATED",
                         total,
                         receiptNumber,
+                        idempotencyKey: idempotencyKey || null,
                         items: {
                             create: items.map(item => ({
                                 productId: item.productId,
@@ -333,7 +380,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                         referenceId: salesOrderId,
                         reason: `Vente N° ${receiptNumber}`,
                         userId,
-                        tenantId
+                        tenantId,
+                        createdAt: oldSalesOrder ? oldSalesOrder.createdAt : undefined
                     };
                 })
             });
@@ -400,7 +448,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             source: "SALE",
                             referenceId: newOrder.id,
                             description: `Paiement Vente N° ${receiptNumber}`,
-                            tenantId
+                            tenantId,
+                            date: oldSalesOrder ? oldSalesOrder.createdAt : undefined,
+                            createdAt: oldSalesOrder ? oldSalesOrder.createdAt : undefined
                         }
                     })
                 }
