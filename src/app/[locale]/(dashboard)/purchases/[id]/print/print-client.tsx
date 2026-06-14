@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { printWithDefaultPrinter } from "@/lib/print-helper";
 import { useRouter } from "@/i18n/routing";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -51,6 +52,7 @@ interface PurchaseOrderPrintClientProps {
         logo?: string | null;
         activity?: string | null;
         headerText?: string | null;
+        tvaEnabled?: boolean | null;
     } | null;
 }
 
@@ -60,29 +62,54 @@ const formatNumber = (n: number) =>
 export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClientProps) {
     const printRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const [printerA4, setPrinterA4] = useState("default");
 
-    const subtotalHT = po.items.reduce((sum, item) => sum + item.quantity * item.costPrice / (1 + item.tvaRate / 100), 0);
-    const totalTVA = po.items.reduce((sum, item) => {
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs");
+            if (stored) {
+                const prefs = JSON.parse(stored);
+                if (prefs.printerA4) setPrinterA4(prefs.printerA4);
+            }
+        } catch { /* noop */ }
+    }, []);
+
+    const tvaEnabled = tenant?.tvaEnabled ?? false;
+
+    const subtotalHT = po.items.reduce((sum, item) => sum + item.quantity * item.costPrice / (1 + (tvaEnabled ? item.tvaRate : 0) / 100), 0);
+    const totalTVA = tvaEnabled ? po.items.reduce((sum, item) => {
         const ht = item.quantity * item.costPrice / (1 + item.tvaRate / 100);
         return sum + ht * (item.tvaRate / 100);
-    }, 0);
+    }, 0) : 0;
     const totalTTC = Number(po.total);
     const withholdingAmount = Number(po.withholdingAmount);
     const netToPay = totalTTC - withholdingAmount;
 
     // TVA breakdown by rate
     const tvaBreakdown: Record<number, { base: number, amount: number }> = {};
-    po.items.forEach(item => {
-        const rate = Number(item.tvaRate);
-        const ht = item.quantity * item.costPrice / (1 + rate / 100);
-        const tva = ht * (rate / 100);
-        if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 };
-        tvaBreakdown[rate].base += ht;
-        tvaBreakdown[rate].amount += tva;
-    });
+    if (tvaEnabled) {
+        po.items.forEach(item => {
+            const rate = Number(item.tvaRate);
+            const ht = item.quantity * item.costPrice / (1 + rate / 100);
+            const tva = ht * (rate / 100);
+            if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 };
+            tvaBreakdown[rate].base += ht;
+            tvaBreakdown[rate].amount += tva;
+        });
+    }
 
     const handlePrint = () => {
-        window.print();
+        const originalTitle = document.title;
+        if (printerA4 !== "default") {
+            document.title = printerA4;
+        }
+        printWithDefaultPrinter(printerA4, () => {
+            window.print();
+        }).finally(() => {
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        });
     };
 
     const statusLabel: Record<string, string> = {
@@ -187,9 +214,9 @@ export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClien
                                 <th className="print-th-num">#</th>
                                 <th className="print-th-designation">Désignation</th>
                                 <th className="print-th-center">Qté</th>
-                                <th className="print-th-right">P.U TTC (DA)</th>
-                                <th className="print-th-center">TVA %</th>
-                                <th className="print-th-right">Total TTC (DA)</th>
+                                <th className="print-th-right">{tvaEnabled ? "P.U TTC (DA)" : "P.U (DA)"}</th>
+                                {tvaEnabled && <th className="print-th-center">TVA %</th>}
+                                <th className="print-th-right">{tvaEnabled ? "Total TTC (DA)" : "Total (DA)"}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -204,7 +231,7 @@ export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClien
                                     <td className="print-td-right">
                                         {formatNumber(Number(item.costPrice))}
                                     </td>
-                                    <td className="print-td-center">{Number(item.tvaRate)}%</td>
+                                    {tvaEnabled && <td className="print-td-center">{Number(item.tvaRate)}%</td>}
                                     <td className="print-td-right print-td-bold">
                                         {formatNumber(item.quantity * Number(item.costPrice))}
                                     </td>
@@ -216,7 +243,7 @@ export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClien
                                     <td className="print-td-designation">&nbsp;</td>
                                     <td className="print-td-center">&nbsp;</td>
                                     <td className="print-td-right">&nbsp;</td>
-                                    <td className="print-td-center">&nbsp;</td>
+                                    {tvaEnabled && <td className="print-td-center">&nbsp;</td>}
                                     <td className="print-td-right">&nbsp;</td>
                                 </tr>
                             ))}
@@ -227,38 +254,48 @@ export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClien
                 {/* TVA Breakdown + Totals */}
                 <div className="print-footer-section">
                     <div className="print-tva-breakdown">
-                        <div className="print-tva-title">Récapitulatif TVA</div>
-                        <table className="print-tva-table">
-                            <thead>
-                                <tr>
-                                    <th>Taux</th>
-                                    <th>Base HT</th>
-                                    <th>Montant TVA</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.entries(tvaBreakdown).map(([rate, data]) => (
-                                    <tr key={rate}>
-                                        <td>{rate}%</td>
-                                        <td>{formatNumber(data.base)}</td>
-                                        <td>{formatNumber(data.amount)}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        {tvaEnabled ? (
+                            <>
+                                <div className="print-tva-title">Récapitulatif TVA</div>
+                                <table className="print-tva-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Taux</th>
+                                            <th>Base HT</th>
+                                            <th>Montant TVA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(tvaBreakdown).map(([rate, data]) => (
+                                            <tr key={rate}>
+                                                <td>{rate}%</td>
+                                                <td>{formatNumber(data.base)}</td>
+                                                <td>{formatNumber(data.amount)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </>
+                        ) : (
+                            <div className="print-tva-title" style={{ visibility: "hidden" }} />
+                        )}
                     </div>
 
                     <div className="print-totals-box">
-                        <div className="print-total-row">
-                            <span>Total HT</span>
-                            <span>{formatNumber(subtotalHT)}</span>
-                        </div>
-                        <div className="print-total-row">
-                            <span>TVA</span>
-                            <span>{formatNumber(totalTVA)}</span>
-                        </div>
-                        <div className="print-total-row" style={{ borderTop: "1px solid #e5e7eb", paddingTop: "8px" }}>
-                            <span>Total TTC</span>
+                        {tvaEnabled && (
+                            <div className="print-total-row">
+                                <span>Total HT</span>
+                                <span>{formatNumber(subtotalHT)}</span>
+                            </div>
+                        )}
+                        {tvaEnabled && (
+                            <div className="print-total-row">
+                                <span>TVA</span>
+                                <span>{formatNumber(totalTVA)}</span>
+                            </div>
+                        )}
+                        <div className="print-total-row" style={tvaEnabled ? { borderTop: "1px solid #e5e7eb", paddingTop: "8px" } : { paddingTop: "8px" }}>
+                            <span>{tvaEnabled ? "Total TTC" : "Total"}</span>
                             <span style={{ fontWeight: 700 }}>{formatNumber(totalTTC)}</span>
                         </div>
                         {withholdingAmount > 0 && (
@@ -275,7 +312,7 @@ export function PurchaseOrderPrintClient({ po, tenant }: PurchaseOrderPrintClien
                         )}
                         {withholdingAmount <= 0 && (
                             <div className="print-total-row print-total-final" style={{ background: "linear-gradient(135deg, #4c1d95, #5b21b6)" }}>
-                                <span>TOTAL TTC</span>
+                                <span>{tvaEnabled ? "TOTAL TTC" : "TOTAL"}</span>
                                 <span>{formatNumber(totalTTC)} DA</span>
                             </div>
                         )}

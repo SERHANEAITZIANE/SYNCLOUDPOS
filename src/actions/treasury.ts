@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import { requirePermission } from "@/lib/rbac"
+import { logAudit } from "./audit-log"
 
 export async function getFinancialSummary() {
     try {
@@ -115,6 +116,13 @@ export async function createTreasuryAccount(values: z.infer<typeof TreasuryAccou
         }
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        logAudit({
+            action: "CREATE",
+            entity: "TREASURY",
+            entityId: account.id,
+            description: `Compte de trésorerie créé : ${name} (${type}, Solde: ${balance} DA)`,
+            after: { name, type, balance, rib }
+        }).catch(() => null)
         return {
             success: "Account created!",
             account: {
@@ -349,6 +357,11 @@ export async function updateTreasuryAccount(id: string, values: z.infer<typeof T
 
         const { name, type, rib } = validatedFields.data
 
+        const existingAccount = await db.treasuryAccount.findUnique({
+            where: { id, tenantId }
+        })
+        if (!existingAccount) return { error: "Compte introuvable" }
+
         const account = await db.treasuryAccount.update({
             where: { id, tenantId },
             data: {
@@ -359,6 +372,14 @@ export async function updateTreasuryAccount(id: string, values: z.infer<typeof T
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        logAudit({
+            action: "UPDATE",
+            entity: "TREASURY",
+            entityId: id,
+            description: `Compte de trésorerie mis à jour : ${name}`,
+            before: { name: existingAccount.name, type: existingAccount.type, rib: existingAccount.rib },
+            after: { name, type, rib }
+        }).catch(() => null)
         return {
             success: "Compte mis à jour !",
             account: {
@@ -380,11 +401,22 @@ export async function deleteTreasuryAccount(id: string) {
 
         const tenantId = session.user.tenantId
 
+        const existingAccount = await db.treasuryAccount.findUnique({
+            where: { id, tenantId }
+        })
+
         await db.treasuryAccount.delete({
             where: { id, tenantId }
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        logAudit({
+            action: "DELETE",
+            entity: "TREASURY",
+            entityId: id,
+            description: `Compte de trésorerie supprimé : ${existingAccount?.name || id}`,
+            before: existingAccount ? { name: existingAccount.name, type: existingAccount.type, balance: Number(existingAccount.balance) } : undefined
+        }).catch(() => null)
         return { success: "Account deleted!" }
     } catch (error) {
         console.error("[DELETE_TREASURY_ACCOUNT]", error)
@@ -455,6 +487,12 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        logAudit({
+            action: "TRANSFER",
+            entity: "TREASURY",
+            description: `Transfert de fonds : ${amount} DA transférés (Compte source ID: ${fromAccountId} → Compte destination ID: ${toAccountId})`,
+            after: { fromAccountId, toAccountId, amount, description }
+        }).catch(() => null)
         return { success: "Transfer completed successfully!" }
     } catch (error: any) {
         console.error("[TRANSFER_FUNDS]", error)
@@ -502,6 +540,12 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        logAudit({
+            action: type === "CREDIT" ? "CREATE" : "VOID",
+            entity: "TREASURY",
+            description: `Opération manuelle sur compte ID ${accountId} : ${type === "CREDIT" ? "Entrée" : "Sortie"} de ${amount} DA (${description})`,
+            after: { accountId, type, amount, description }
+        }).catch(() => null)
         return { success: "Transaction completed!" }
     } catch (error: any) {
         console.error("[MANUAL_TRANSACTION]", error)

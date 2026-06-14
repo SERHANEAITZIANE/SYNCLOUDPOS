@@ -51,6 +51,7 @@ export interface PrintableStore {
     headerText?: string
     posBlFormat?: string | null
     posBlColumns?: string | null
+    tvaEnabled?: boolean
 }
 
 export interface PrintTemplateProps {
@@ -255,18 +256,22 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
         subtotalHT, totalTVA, stampTax, totalTTC, paymentMethod, documentId
     } = props
 
+    const tvaEnabled = store?.tvaEnabled ?? false
+
     // Group TVA by rate
     const tvaBreakdown: Record<number, { base: number, amount: number }> = {}
-    items.forEach(item => {
-        const rate = Number(item.tvaRate ?? 0)
-        const discountAmount = item.discountAmount || 0
-        const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
-        const ht = item.quantity * (netUnitPriceTTC / (1 + rate / 100))
-        const tva = ht * (rate / 100)
-        if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 }
-        tvaBreakdown[rate].base += ht
-        tvaBreakdown[rate].amount += tva
-    })
+    if (tvaEnabled) {
+        items.forEach(item => {
+            const rate = Number(item.tvaRate ?? 0)
+            const discountAmount = item.discountAmount || 0
+            const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
+            const ht = item.quantity * (netUnitPriceTTC / (1 + rate / 100))
+            const tva = ht * (rate / 100)
+            if (!tvaBreakdown[rate]) tvaBreakdown[rate] = { base: 0, amount: 0 }
+            tvaBreakdown[rate].base += ht
+            tvaBreakdown[rate].amount += tva
+        })
+    }
 
     const colModel = store?.posBlColumns || "standard"
     
@@ -332,19 +337,19 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             <th className={firstColStyle}>{firstColHeader}</th>
                             <th className="print-th-designation">Désignation</th>
                             <th className="print-th-center">Qté</th>
-                            <th className="print-th-right">P.U HT (DA)</th>
-                            <th className="print-th-center">TVA %</th>
-                            <th className="print-th-right">Montant HT (DA)</th>
+                            <th className="print-th-right">{tvaEnabled ? "P.U HT (DA)" : "P.U (DA)"}</th>
+                            {tvaEnabled && <th className="print-th-center">TVA %</th>}
+                            <th className="print-th-right">{tvaEnabled ? "Montant HT (DA)" : "Montant (DA)"}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map((item, i) => {
-                            const rate = Number(item.tvaRate ?? 0)
-                            const originalHT = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const rate = tvaEnabled ? Number(item.tvaRate ?? 0) : 0
+                            const originalHT = tvaEnabled ? (item.priceHt || item.unitPrice / (1 + rate / 100)) : item.unitPrice
                             const discountAmount = item.discountAmount || 0
                             
                             const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
-                            const netHT = netUnitPriceTTC / (1 + rate / 100)
+                            const netHT = tvaEnabled ? (netUnitPriceTTC / (1 + rate / 100)) : netUnitPriceTTC
                             const lineHT = item.quantity * netHT
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
@@ -377,7 +382,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                                             formatNumber(originalHT)
                                         )}
                                     </td>
-                                    <td className="print-td-center">{rate}%</td>
+                                    {tvaEnabled && <td className="print-td-center">{rate}%</td>}
                                     <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
                                 </tr>
                             )
@@ -389,7 +394,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                                 <td className="print-td-designation">&nbsp;</td>
                                 <td className="print-td-center">&nbsp;</td>
                                 <td className="print-td-right">&nbsp;</td>
-                                <td className="print-td-center">&nbsp;</td>
+                                {tvaEnabled && <td className="print-td-center">&nbsp;</td>}
                                 <td className="print-td-right">&nbsp;</td>
                             </tr>
                         ))}
@@ -400,69 +405,106 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
             {/* ── TVA Breakdown + Totals ── */}
             <div className="print-footer-section">
                 {/* TVA Breakdown */}
-                <div className="print-tva-breakdown">
-                    <div className="print-tva-title">Récapitulatif TVA</div>
-                    <table className="print-tva-table">
-                        <thead>
-                            <tr>
-                                <th>Taux</th>
-                                <th>Base HT</th>
-                                <th>Montant TVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(tvaBreakdown).map(([rate, data]) => (
-                                <tr key={rate}>
-                                    <td>{rate}%</td>
-                                    <td>{formatNumber(data.base)}</td>
-                                    <td>{formatNumber(data.amount)}</td>
+                {tvaEnabled ? (
+                    <div className="print-tva-breakdown">
+                        <div className="print-tva-title">Récapitulatif TVA</div>
+                        <table className="print-tva-table">
+                            <thead>
+                                <tr>
+                                    <th>Taux</th>
+                                    <th>Base HT</th>
+                                    <th>Montant TVA</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {Object.entries(tvaBreakdown).map(([rate, data]) => (
+                                    <tr key={rate}>
+                                        <td>{rate}%</td>
+                                        <td>{formatNumber(data.base)}</td>
+                                        <td>{formatNumber(data.amount)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
 
-                    {/* Amount in words */}
-                    <div className="print-amount-words">
-                        <div className="print-amount-words-label">Arrêtée la présente facture à la somme de :</div>
-                        <div className="print-amount-words-text">{numberToFrenchWords(totalTTC)}</div>
-                    </div>
-                    {paymentMethod && (
-                        <div className="print-payment-mode">
-                            Mode de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
+                        {/* Amount in words */}
+                        <div className="print-amount-words">
+                            <div className="print-amount-words-label">Arrêtée la présente facture à la somme de :</div>
+                            <div className="print-amount-words-text">{numberToFrenchWords(totalTTC)}</div>
                         </div>
-                    )}
-                    <BaridiMobPaymentBlock
-                        bankAccount={store?.bankAccount}
-                        storeName={store?.name}
-                        amount={totalTTC}
-                        receiptNumber={receiptNumber || `FA-${documentId?.slice(-6) || "000000"}`}
-                    />
-                </div>
+                        {paymentMethod && (
+                            <div className="print-payment-mode">
+                                Mode de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
+                            </div>
+                        )}
+                        <BaridiMobPaymentBlock
+                            bankAccount={store?.bankAccount}
+                            storeName={store?.name}
+                            amount={totalTTC}
+                            receiptNumber={receiptNumber || `FA-${documentId?.slice(-6) || "000000"}`}
+                        />
+                    </div>
+                ) : (
+                    <div className="print-tva-breakdown">
+                        {/* Amount in words */}
+                        <div className="print-amount-words">
+                            <div className="print-amount-words-label">Arrêtée la présente facture à la somme de :</div>
+                            <div className="print-amount-words-text">{numberToFrenchWords(totalTTC)}</div>
+                        </div>
+                        {paymentMethod && (
+                            <div className="print-payment-mode">
+                                Mode de règlement : <strong>{paymentMethod === "CASH" ? "Espèces" : paymentMethod === "CHECK" ? "Chèque" : paymentMethod === "TRANSFER" ? "Virement" : paymentMethod === "CARD" ? "Carte bancaire" : paymentMethod === "TERM" ? "À terme" : paymentMethod}</strong>
+                            </div>
+                        )}
+                        <BaridiMobPaymentBlock
+                            bankAccount={store?.bankAccount}
+                            storeName={store?.name}
+                            amount={totalTTC}
+                            receiptNumber={receiptNumber || `FA-${documentId?.slice(-6) || "000000"}`}
+                        />
+                    </div>
+                )}
 
                 {/* Totals column */}
                 <div className="print-totals-box">
-                    <div className="print-total-row">
-                        <span>Total HT</span>
-                        <span>{formatNumber(subtotalHT)}</span>
-                    </div>
-                    <div className="print-total-row">
-                        <span>TVA</span>
-                        <span>{formatNumber(totalTVA)}</span>
-                    </div>
+                    {tvaEnabled && (
+                        <div className="print-total-row">
+                            <span>Total HT</span>
+                            <span>{formatNumber(subtotalHT)}</span>
+                        </div>
+                    )}
+                    {tvaEnabled && (
+                        <div className="print-total-row">
+                            <span>TVA</span>
+                            <span>{formatNumber(totalTVA)}</span>
+                        </div>
+                    )}
+                    {!tvaEnabled && stampTax > 0 && (
+                        <div className="print-total-row">
+                            <span>Total</span>
+                            <span>{formatNumber(subtotalHT)}</span>
+                        </div>
+                    )}
                     {stampTax > 0 && (
                         <div className="print-total-row">
                             <span>Droit de Timbre</span>
                             <span>{formatNumber(stampTax)}</span>
                         </div>
                     )}
-                    {Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
+                    {tvaEnabled && Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
                         <div className="print-total-row">
                             <span>Arrondi de Caisse</span>
                             <span>{formatNumber(totalTTC - (subtotalHT + totalTVA + stampTax))}</span>
                         </div>
                     )}
+                    {!tvaEnabled && Math.abs(totalTTC - (subtotalHT + stampTax)) > 0.01 && (
+                        <div className="print-total-row">
+                            <span>Arrondi de Caisse</span>
+                            <span>{formatNumber(totalTTC - (subtotalHT + stampTax))}</span>
+                        </div>
+                    )}
                     <div className="print-total-row print-total-final">
-                        <span>NET À PAYER</span>
+                        <span>{tvaEnabled ? "NET À PAYER" : "TOTAL"}</span>
                         <span>{formatNumber(totalTTC)} DA</span>
                     </div>
                 </div>
@@ -506,6 +548,7 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
         previousBalance = 0, paymentAmount = 0, newBalance = 0, documentId
     } = props
 
+    const tvaEnabled = store?.tvaEnabled ?? false
     const colModel = store?.posBlColumns || "standard"
     
     // First column header label
@@ -646,22 +689,22 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
                         <span>{formatNumber(previousBalance)}</span>
                     </div>
                     <div className="print-total-row">
-                        <span>Total TTC</span>
+                        <span>{tvaEnabled ? "Total TTC" : "Total"}</span>
                         <span>{formatNumber(totalTTC)}</span>
                     </div>
-                    {totalTVA > 0 && (
+                    {tvaEnabled && totalTVA > 0 && (
                         <div className="print-total-row print-total-row-muted">
                             <span>dont TVA</span>
                             <span>{formatNumber(totalTVA)}</span>
                         </div>
                     )}
-                    {stampTax > 0 && (
+                    {tvaEnabled && stampTax > 0 && (
                         <div className="print-total-row print-total-row-muted">
                             <span>dont Timbre</span>
                             <span>{formatNumber(stampTax)}</span>
                         </div>
                     )}
-                    {Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
+                    {tvaEnabled && Math.abs(totalTTC - (subtotalHT + totalTVA + stampTax)) > 0.01 && (
                         <div className="print-total-row print-total-row-muted">
                             <span>dont Arrondi</span>
                             <span>{formatNumber(totalTTC - (subtotalHT + totalTVA + stampTax))}</span>
@@ -716,6 +759,8 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
         items, customer, store, receiptNumber, date = new Date(),
         subtotalHT, totalTVA, stampTax, totalTTC, paymentMethod, documentId
     } = props
+
+    const tvaEnabled = store?.tvaEnabled ?? false
 
     // Calculate validity (30 days from date)
     const validityDate = new Date(date)
@@ -791,19 +836,19 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                             <th className={firstColStyle}>{firstColHeader}</th>
                             <th className="print-th-designation">Désignation</th>
                             <th className="print-th-center">Qté</th>
-                            <th className="print-th-right">P.U HT (DA)</th>
-                            <th className="print-th-center">TVA %</th>
-                            <th className="print-th-right">Montant HT (DA)</th>
+                            <th className="print-th-right">{tvaEnabled ? "P.U HT (DA)" : "P.U (DA)"}</th>
+                            {tvaEnabled && <th className="print-th-center">TVA %</th>}
+                            <th className="print-th-right">{tvaEnabled ? "Montant HT (DA)" : "Montant (DA)"}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map((item, i) => {
-                            const rate = Number(item.tvaRate ?? 0)
-                            const originalHT = item.priceHt || item.unitPrice / (1 + rate / 100)
+                            const rate = tvaEnabled ? Number(item.tvaRate ?? 0) : 0
+                            const originalHT = tvaEnabled ? (item.priceHt || item.unitPrice / (1 + rate / 100)) : item.unitPrice
                             const discountAmount = item.discountAmount || 0
                             
                             const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
-                            const netHT = netUnitPriceTTC / (1 + rate / 100)
+                            const netHT = tvaEnabled ? (netUnitPriceTTC / (1 + rate / 100)) : netUnitPriceTTC
                             const lineHT = item.quantity * netHT
                             return (
                                 <tr key={i} className={i % 2 === 0 ? "print-row-even" : ""}>
@@ -836,18 +881,19 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                                             formatNumber(originalHT)
                                         )}
                                     </td>
-                                    <td className="print-td-center">{rate}%</td>
+                                    {tvaEnabled && <td className="print-td-center">{rate}%</td>}
                                     <td className="print-td-right print-td-bold">{formatNumber(lineHT)}</td>
                                 </tr>
                             )
                         })}
+                        {/* Empty rows pad to fill space */}
                         {items.length < 8 && Array.from({ length: 8 - items.length }).map((_, i) => (
                             <tr key={`empty-${i}`} className="print-row-empty">
                                 <td className={firstColTdStyle}>&nbsp;</td>
                                 <td className="print-td-designation">&nbsp;</td>
                                 <td className="print-td-center">&nbsp;</td>
                                 <td className="print-td-right">&nbsp;</td>
-                                <td className="print-td-center">&nbsp;</td>
+                                {tvaEnabled && <td className="print-td-center">&nbsp;</td>}
                                 <td className="print-td-right">&nbsp;</td>
                             </tr>
                         ))}
@@ -880,14 +926,24 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                 </div>
 
                 <div className="print-totals-box print-totals-box-proforma">
-                    <div className="print-total-row">
-                        <span>Total HT</span>
-                        <span>{formatNumber(subtotalHT)}</span>
-                    </div>
-                    <div className="print-total-row">
-                        <span>TVA</span>
-                        <span>{formatNumber(totalTVA)}</span>
-                    </div>
+                    {tvaEnabled && (
+                        <div className="print-total-row">
+                            <span>Total HT</span>
+                            <span>{formatNumber(subtotalHT)}</span>
+                        </div>
+                    )}
+                    {tvaEnabled && (
+                        <div className="print-total-row">
+                            <span>TVA</span>
+                            <span>{formatNumber(totalTVA)}</span>
+                        </div>
+                    )}
+                    {!tvaEnabled && stampTax > 0 && (
+                        <div className="print-total-row">
+                            <span>Total</span>
+                            <span>{formatNumber(subtotalHT)}</span>
+                        </div>
+                    )}
                     {stampTax > 0 && (
                         <div className="print-total-row">
                             <span>Droit de Timbre</span>
@@ -895,7 +951,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                         </div>
                     )}
                     <div className="print-total-row print-total-final print-total-final-amber">
-                        <span>TOTAL TTC</span>
+                        <span>{tvaEnabled ? "TOTAL TTC" : "TOTAL"}</span>
                         <span>{formatNumber(totalTTC)} DA</span>
                     </div>
                 </div>

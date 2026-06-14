@@ -588,31 +588,37 @@ export const getAllProductsForCatalogue = async () => {
     }
 
     try {
-        const products = await db.product.findMany({
-            where: {
-                tenantId,
-                isArchived: false,
-            },
-            include: {
-                category: true,
-                brand: true,
-                images: true,
-                storeProducts: true
-            },
-            orderBy: [
-                { categoryId: 'asc' },
-                { name: 'asc' }
-            ]
-        })
+        return cacheMonitor.withCache(
+            `products:${tenantId}:catalogue`,
+            async () => {
+                const products = await db.product.findMany({
+                    where: {
+                        tenantId,
+                        isArchived: false,
+                    },
+                    include: {
+                        category: true,
+                        brand: true,
+                        images: true,
+                        storeProducts: true
+                    },
+                    orderBy: [
+                        { categoryId: 'asc' },
+                        { name: 'asc' }
+                    ]
+                })
 
-        return products.map(product => ({
-            ...product,
-            price: Number(product.price),
-            cost: Number(product.cost),
-            wholesalePrice: product.wholesalePrice ? Number(product.wholesalePrice) : null,
-            dealerPrice: product.dealerPrice ? Number(product.dealerPrice) : null,
-            tvaRate: product.tvaRate ? Number(product.tvaRate) : null,
-        }))
+                return products.map(product => ({
+                    ...product,
+                    price: Number(product.price),
+                    cost: Number(product.cost),
+                    wholesalePrice: product.wholesalePrice ? Number(product.wholesalePrice) : null,
+                    dealerPrice: product.dealerPrice ? Number(product.dealerPrice) : null,
+                    tvaRate: product.tvaRate ? Number(product.tvaRate) : null,
+                }))
+            },
+            300 // 5 minutes cache
+        )
     } catch (error) {
         console.error("getAllProductsForCatalogue error:", error)
         return []

@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/routing"
 import { useState, useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
-import { DataTable } from "@/components/ui/data-table"
+import { ServerDataTable } from "@/components/ui/server-data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 import { usePurchaseColumns } from "@/components/purchases/columns"
@@ -19,6 +19,9 @@ import { DateRange } from "react-day-picker"
 
 interface PurchasesClientProps {
     data: PurchaseOrderColumn[]
+    totalCount: number
+    pageCount: number
+    currentPage: number
 }
 
 const LOCALES = {
@@ -42,7 +45,7 @@ const LOCALES = {
     }
 }
 
-export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data }) => {
+export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCount, pageCount, currentPage }) => {
     const t = useTranslations("Purchases")
     const tCommon = useTranslations("Common")
     const appLocale = useLocale()
@@ -147,7 +150,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data }) => {
                 </div>
             </div>
 
-            <DataTable exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="supplier" columns={columns} data={filteredData} />
+            <ServerDataTable exportTitle={t("title")} exportDescription={t("subtitle")} searchKey="search" columns={columns} data={filteredData} pageCount={pageCount} currentPage={currentPage} />
         </>
     )
 }

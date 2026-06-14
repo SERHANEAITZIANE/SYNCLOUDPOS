@@ -71,7 +71,6 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
                 { label: t("hub"), icon: Home, href: "/hub", color: "text-blue-400", visible: !isCASHIER },
                 { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isCASHIER },
                 { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: isAdmin || isCASHIER || isMANAGER },
-                { label: t("aiIntelligence") || "Intelligence IA", icon: Sparkles, href: "/ai", color: "text-violet-400", visible: isAdmin },
             ]
         },
         {

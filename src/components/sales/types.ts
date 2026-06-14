@@ -14,4 +14,5 @@ export type SalesOrderColumn = {
     productCount?: number
     totalQuantity?: number
     itemsSummary?: string
+    paymentMethod: string
 }

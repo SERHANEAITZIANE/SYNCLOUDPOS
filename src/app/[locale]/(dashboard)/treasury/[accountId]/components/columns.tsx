@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import { TreasuryTransactionColumn } from "./types"
 import { Badge } from "@/components/ui/badge"
 
+import { Link } from "@/i18n/routing"
+import { Eye } from "lucide-react"
+
 export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
     {
         accessorKey: "date",
@@ -40,11 +43,61 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
     },
     {
         accessorKey: "referenceId",
-        header: "Ref ID",
+        header: "Opération",
         cell: ({ row }) => {
-            const refId = row.getValue("referenceId") as string
+            const refId = row.original.referenceId
+            const source = row.original.source
             if (!refId) return <span className="text-muted-foreground">-</span>
-            return <span className="text-xs text-muted-foreground">{refId}</span>
+
+            let href = ""
+            let label = "Détail"
+
+            if (source === "SALE") {
+                href = `/sales/${refId}`
+                label = "Vente"
+            } else if (source === "PURCHASE") {
+                href = `/purchases/${refId}`
+                label = "Achat"
+            } else if (source === "EXPENSE") {
+                href = `/expenses/${refId}`
+                label = "Dépense"
+            } else if (source === "TRANSFER") {
+                href = `/transfers`
+                label = "Transfert"
+            } else if (source === "LOAN") {
+                const desc = (row.original.description || "").toLowerCase()
+                if (desc.includes("fournisseur") || desc.includes("supplier")) {
+                    href = `/emprunt-fournisseur`
+                } else {
+                    href = `/emprunt`
+                }
+                label = "Emprunt"
+            } else if (source === "RETURN") {
+                href = `/retours`
+                label = "Retour"
+            } else if (source === "PAYMENT" || source === "MANUAL_IN" || source === "MANUAL_OUT") {
+                const txId = row.original.id
+                const desc = (row.original.description || "").toLowerCase()
+                if (desc.includes("fournisseur") || desc.includes("supplier")) {
+                    href = `/payments/suppliers?paymentId=${txId}`
+                } else {
+                    href = `/payments?paymentId=${txId}`
+                }
+                label = "Paiement"
+            }
+
+            if (!href) return <span className="text-xs text-muted-foreground">Autre</span>
+
+            return (
+                <Link
+                    href={href}
+                    target="_blank"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold hover:underline flex items-center gap-1 text-xs"
+                >
+                    <Eye className="h-3 w-3" />
+                    <span>{label}</span>
+                </Link>
+            )
         }
     }
 ]

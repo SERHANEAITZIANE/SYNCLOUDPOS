@@ -52,9 +52,18 @@ interface ProductFormProps {
     categories: Category[]
     brands: Brand[]
     tvaEnabled?: boolean
+    tenantName?: string
+    tenantPhone?: string
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categories, brands, tvaEnabled = false }) => {
+export const ProductForm: React.FC<ProductFormProps> = ({ 
+    initialData, 
+    categories, 
+    brands, 
+    tvaEnabled = false,
+    tenantName = "",
+    tenantPhone = ""
+}) => {
     const router = useRouter()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -202,6 +211,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ initialData, categorie
                         productName={form.watch("name") || ""}
                         price={Number(form.watch("price") || 0)}
                         barcodes={(form.watch("barcodes") || []).map(b => ({ value: b.value, label: b.label || "" }))}
+                        tenantName={tenantName}
+                        tenantPhone={tenantPhone}
                     />
                     {initialData && (
                         <Button disabled={loading} variant="destructive" size="icon" onClick={() => setOpen(true)}>

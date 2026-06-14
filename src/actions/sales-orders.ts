@@ -258,7 +258,8 @@ export async function getSalesOrders(
     search?: string,
     type?: string,
     from?: string,
-    to?: string
+    to?: string,
+    status?: string
 ) {
     try {
         const session = await auth()
@@ -269,6 +270,10 @@ export async function getSalesOrders(
 
         if (type && type !== "ALL") {
             where.type = type as SalesOrderType
+        }
+
+        if (status && status !== "ALL") {
+            where.status = status as SalesOrderStatus
         }
 
         if (search) {
@@ -389,8 +394,8 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
                 type: type as SalesOrderType,
                 status: { not: "CANCELLED" },
                 OR: [
-                    { receiptNumber: { contains: query } },
-                    { customer: { name: { contains: query } } }
+                    { receiptNumber: { contains: query, mode: "insensitive" } },
+                    { customer: { name: { contains: query, mode: "insensitive" } } }
                 ]
             },
             include: {
@@ -398,7 +403,7 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
                 items: { include: { product: { include: { barcodes: true } } } }
             },
             orderBy: { createdAt: "desc" },
-            take: 20
+            take: 100
         })
 
         return JSON.parse(JSON.stringify(salesOrders))

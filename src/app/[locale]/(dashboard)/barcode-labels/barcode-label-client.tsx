@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useMemo, useEffect } from "react";
-import { Printer, Search, Plus, Minus, Tag, X, CheckCircle2 } from "lucide-react";
+import { Printer, Search, Plus, Minus, Tag, X, CheckCircle2, LayoutGrid } from "lucide-react";
+import { printWithDefaultPrinter } from "@/lib/print-helper";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import Barcode from "react-barcode";
+import { BarcodeLabel, type BarcodeLabelModel } from "@/components/products/barcode-label";
 
 interface Product {
     id: string;
@@ -23,13 +24,26 @@ interface LabelItem {
     quantity: number;
 }
 
-export function BarcodeLabelClient({ products }: { products: Product[] }) {
+const modelDimensions: Record<BarcodeLabelModel, { w: string; h: string; labelSize: "4x2" | "4.5x3.5" }> = {
+    simple_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" },
+    side_store_45x35: { w: "45mm", h: "35mm", labelSize: "4.5x3.5" },
+    store_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" },
+};
+
+export function BarcodeLabelClient({ 
+    products,
+    tenantName = "",
+    tenantPhone = ""
+}: { 
+    products: Product[];
+    tenantName?: string;
+    tenantPhone?: string;
+}) {
     const [search, setSearch] = useState("");
     const [labels, setLabels] = useState<LabelItem[]>([]);
-    const [labelSize, setLabelSize] = useState<"small" | "medium" | "large">("small");
-    const [showPrice, setShowPrice] = useState(true);
     const printRef = useRef<HTMLDivElement>(null);
     const [printerBarcode, setPrinterBarcode] = useState("default");
+    const [barcodeModel, setBarcodeModel] = useState<BarcodeLabelModel>("simple_40x20");
 
     useEffect(() => {
         try {
@@ -37,6 +51,9 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
             if (stored) {
                 const prefs = JSON.parse(stored);
                 if (prefs.printerBarcode) setPrinterBarcode(prefs.printerBarcode);
+                if (prefs.barcodeModel && ["simple_40x20", "side_store_45x35", "store_40x20"].includes(prefs.barcodeModel)) {
+                    setBarcodeModel(prefs.barcodeModel);
+                }
             }
         } catch { /* noop */ }
     }, []);
@@ -83,96 +100,79 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
 
     const totalLabels = labels.reduce((sum, l) => sum + l.quantity, 0);
 
-    const labelDimensions = {
-        small: { w: "40mm", h: "20mm", cols: 5, fontSize: "9px", priceFontSize: "17px", barcodeH: 38, barcodeW: 1.2, barcodeWidthCss: "36mm" },
-        medium: { w: "52mm", h: "30mm", cols: 4, fontSize: "11px", priceFontSize: "22px", barcodeH: 55, barcodeW: 1.5, barcodeWidthCss: "46mm" },
-        large: { w: "70mm", h: "37mm", cols: 3, fontSize: "13px", priceFontSize: "26px", barcodeH: 70, barcodeW: 1.8, barcodeWidthCss: "64mm" },
-    };
-
-    const dim = labelDimensions[labelSize];
+    const dim = modelDimensions[barcodeModel];
 
     const handlePrint = () => {
         if (!printRef.current) return;
-        const printWindow = window.open("", "_blank");
-        if (!printWindow) return;
+        
+        printWithDefaultPrinter(printerBarcode, () => {
+            const printWindow = window.open("", "_blank");
+            if (!printWindow) return;
 
-        const printTitle = printerBarcode !== "default" ? printerBarcode : "Étiquettes Code-barres - SYNCLOUDPOS";
+            const printTitle = printerBarcode !== "default" ? printerBarcode : "Étiquettes Code-barres - SYNCLOUDPOS";
 
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>${printTitle}</title>
-                <meta name="printer" content="${printerBarcode}" />
-                <meta name="printer-name" content="${printerBarcode}" />
-                <meta name="selected-printer" content="${printerBarcode}" />
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    @page { 
-                        size: ${dim.w} ${dim.h}; 
-                        margin: 0; 
-                    }
-                    body { 
-                        font-family: Arial, Helvetica, sans-serif; 
-                        margin: 0;
-                        padding: 0;
-                        background: white;
-                    }
-                    .label-grid {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                    }
-                    .label {
-                        width: ${dim.w};
-                        height: ${dim.h};
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 1mm;
-                        page-break-inside: avoid;
-                        page-break-after: always;
-                        break-after: page;
-                        overflow: hidden;
-                        box-sizing: border-box;
-                        border: none;
-                    }
-                    .label:last-child {
-                        page-break-after: avoid;
-                        break-after: avoid;
-                    }
-                    .label-name {
-                        font-size: ${dim.fontSize};
-                        font-weight: bold;
-                        text-align: center;
-                        white-space: nowrap;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        max-width: 100%;
-                        line-height: 1.2;
-                    }
-                    .label-barcode { display: flex; justify-content: center; margin: 0.5mm 0 0 0; }
-                    .label-barcode svg { width: ${dim.barcodeWidthCss}; height: ${dim.barcodeH}px; }
-                    .label-price {
-                        font-size: ${dim.priceFontSize};
-                        font-weight: 900;
-                        letter-spacing: -0.5px;
-                        margin-top: -0.5mm;
-                    }
-                </style>
-            </head>
-            <body data-printer="${printerBarcode}" data-printer-name="${printerBarcode}" data-selected-printer="${printerBarcode}">
-                <script>
-                    window.printerName = "${printerBarcode}";
-                    window.selectedPrinter = "${printerBarcode}";
-                </script>
-                ${printRef.current.innerHTML}
-                <script>window.onload = () => { window.print(); window.close(); }<\/script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
+            const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+                .map(style => style.outerHTML)
+                .join('\n');
+
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${printTitle}</title>
+                    <meta name="printer" content="${printerBarcode}" />
+                    <meta name="printer-name" content="${printerBarcode}" />
+                    <meta name="selected-printer" content="${printerBarcode}" />
+                    ${styles}
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        @page { 
+                            size: ${dim.w} ${dim.h}; 
+                            margin: 0; 
+                        }
+                        body { 
+                            font-family: Arial, Helvetica, sans-serif; 
+                            margin: 0;
+                            padding: 0;
+                            background: white;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .label-grid {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                        }
+                        .barcode-print-item {
+                            page-break-after: always !important;
+                            break-after: page !important;
+                            page-break-inside: avoid !important;
+                            break-inside: avoid !important;
+                            width: ${dim.w} !important;
+                            height: ${dim.h} !important;
+                            box-sizing: border-box !important;
+                            overflow: hidden !important;
+                        }
+                        .barcode-print-item:last-child {
+                            page-break-after: avoid !important;
+                            break-after: avoid !important;
+                        }
+                    </style>
+                </head>
+                <body data-printer="${printerBarcode}" data-printer-name="${printerBarcode}" data-selected-printer="${printerBarcode}">
+                    <script>
+                        window.printerName = "${printerBarcode}";
+                        window.selectedPrinter = "${printerBarcode}";
+                    </script>
+                    <div class="label-grid">
+                        ${printRef.current!.innerHTML}
+                    </div>
+                    <script>window.onload = () => { window.print(); window.close(); }<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        });
     };
 
     // Generate expanded labels array for preview
@@ -286,34 +286,66 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
                 {/* Right: Label Queue + Settings */}
                 <div className="space-y-4">
                     {/* Settings */}
-                    <div className="bg-white dark:bg-[#1a1a2e] rounded-xl border border-gray-100 dark:border-gray-800 p-4 space-y-3">
-                        <h3 className="font-bold text-sm text-gray-900 dark:text-white">Paramètres</h3>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground font-medium w-16 shrink-0">Taille</span>
-                            <div className="flex gap-1">
-                                {(["small", "medium", "large"] as const).map((size) => (
-                                    <Button
-                                        key={size}
-                                        variant={labelSize === size ? "default" : "outline"}
-                                        size="sm"
-                                        className="rounded-lg text-xs"
-                                        onClick={() => setLabelSize(size)}
+                    <div className="bg-white dark:bg-[#1a1a2e] rounded-xl border border-gray-100 dark:border-gray-800 p-5 space-y-5">
+                        <h3 className="font-bold text-sm text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800/80 pb-2">Modèle d'impression</h3>
+                        
+                        {/* Model Selection */}
+                        <div className="space-y-2.5">
+                            <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                                <LayoutGrid className="h-3.5 w-3.5" /> Modèle visuel
+                            </span>
+                            <div className="grid grid-cols-1 gap-2.5">
+                                {([
+                                    { id: "simple_40x20", name: "Simple (40×20 mm)", desc: "Nom + Code-barres + Prix" },
+                                    { id: "side_store_45x35", name: "Bandeau Gauche (45×35 mm)", desc: "Infos magasin + Nom multiline + Grand Code-barres" },
+                                    { id: "store_40x20", name: "Bandeau Magasin (40×20 mm)", desc: "Magasin + Nom + Code-barres + Prix" }
+                                ] as const).map((m) => (
+                                    <button
+                                        key={m.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setBarcodeModel(m.id);
+                                            try {
+                                                const existing = JSON.parse(localStorage.getItem("pos_printing_prefs") || "{}");
+                                                localStorage.setItem("pos_printing_prefs", JSON.stringify({ ...existing, barcodeModel: m.id }));
+                                            } catch {}
+                                        }}
+                                        className={cn(
+                                            "p-3 rounded-xl border flex flex-col items-start text-left transition-all duration-200 gap-0.5 relative overflow-hidden group",
+                                            barcodeModel === m.id
+                                                ? "border-pink-500 bg-pink-500/5 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400 ring-1 ring-pink-500"
+                                                : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-white dark:bg-[#121220]"
+                                        )}
                                     >
-                                        {size === "small" ? "40×20mm" : size === "medium" ? "52×30mm" : "70×37mm"}
-                                    </Button>
+                                        <span className="font-bold text-xs">{m.name}</span>
+                                        <span className="text-[9px] text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400">
+                                            {m.desc}
+                                        </span>
+                                        {barcodeModel === m.id && (
+                                            <div className="absolute top-2 right-3">
+                                                <div className="h-2 w-2 rounded-full bg-pink-500" />
+                                            </div>
+                                        )}
+                                    </button>
                                 ))}
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground font-medium w-16 shrink-0">Prix</span>
-                            <Button
-                                variant={showPrice ? "default" : "outline"}
-                                size="sm"
-                                className="rounded-lg text-xs"
-                                onClick={() => setShowPrice(!showPrice)}
-                            >
-                                {showPrice ? "Avec prix" : "Sans prix"}
-                            </Button>
+                    </div>
+
+                    {/* Live Preview Card */}
+                    <div className="bg-white dark:bg-[#1a1a2e] rounded-xl border border-gray-100 dark:border-gray-800 p-4 space-y-3">
+                        <h3 className="font-bold text-sm text-gray-900 dark:text-white font-black tracking-tight">Aperçu en temps réel</h3>
+                        <div className="w-full bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 border-2 border-dashed border-gray-200 dark:border-gray-800/80 flex items-center justify-center min-h-[140px] select-none">
+                            <div className="shadow-lg bg-white rounded-md overflow-hidden border border-gray-100 text-black">
+                                <BarcodeLabel
+                                    productName={labels.length > 0 ? labels[0].product.name : "EXEMPLE PRODUIT LAPTOP"}
+                                    price={labels.length > 0 ? labels[0].product.price : 65000}
+                                    barcodeValue={labels.length > 0 ? labels[0].barcode : "7770911000019"}
+                                    model={barcodeModel}
+                                    tenantName={tenantName}
+                                    tenantPhone={tenantPhone}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -383,28 +415,17 @@ export function BarcodeLabelClient({ products }: { products: Product[] }) {
             {/* Hidden print area with actual barcodes */}
             <div className="hidden">
                 <div ref={printRef}>
-                    <div className="label-grid">
-                        {expandedLabels.map((label) => (
-                            <div key={label.key} className="label">
-                                <div className="label-name">{label.product.name}</div>
-                                <div className="label-barcode">
-                                    <Barcode
-                                        value={label.barcode}
-                                        height={dim.barcodeH}
-                                        width={dim.barcodeW}
-                                        fontSize={10}
-                                        margin={2}
-                                        displayValue={false}
-                                    />
-                                </div>
-                                {showPrice && (
-                                    <div className="label-price">
-                                        {new Intl.NumberFormat("fr-FR").format(label.product.price)} DA
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                    {expandedLabels.map((label) => (
+                        <BarcodeLabel
+                            key={label.key}
+                            productName={label.product.name}
+                            price={label.product.price}
+                            barcodeValue={label.barcode}
+                            model={barcodeModel}
+                            tenantName={tenantName}
+                            tenantPhone={tenantPhone}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

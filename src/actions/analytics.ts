@@ -91,17 +91,13 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                     take: 8
                 }),
                 // 11-13. Revenue over time charts — GROUP BY at DB level instead of fetching all rows
-                db.order.groupBy({
-                    by: ['createdAt'],
+                db.order.findMany({
                     where: { tenantId, storeId: storeIdToUse, status: "COMPLETED", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-                    _sum: { total: true },
-                    _count: { id: true }
+                    select: { createdAt: true, total: true }
                 }),
-                db.salesOrder.groupBy({
-                    by: ['createdAt'],
+                db.salesOrder.findMany({
                     where: { tenantId, storeId: storeIdToUse, status: "PAID", createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) } },
-                    _sum: { total: true },
-                    _count: { id: true }
+                    select: { createdAt: true, total: true }
                 }),
                 db.expense.groupBy({
                     by: ['date'],
@@ -212,7 +208,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 const dateStr = format(o.createdAt, "MMM dd");
                 if (revenueMap.has(dateStr)) {
                     const cur = revenueMap.get(dateStr)!;
-                    cur.revenue += Number(o._sum.total || 0);
+                    cur.revenue += Number(o.total || 0);
                 }
             });
 
@@ -220,7 +216,7 @@ export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
                 const dateStr = format(o.createdAt, "MMM dd");
                 if (revenueMap.has(dateStr)) {
                     const cur = revenueMap.get(dateStr)!;
-                    cur.revenue += Number(o._sum.total || 0);
+                    cur.revenue += Number(o.total || 0);
                 }
             });
 
@@ -300,47 +296,50 @@ export async function getSalesData(tenantId: string, days: number = 60): Promise
     try {
         const toDate = new Date();
         const fromDate = subDays(toDate, days);
+        const cacheKey = `sales-data:${tenantId}:${days}`;
 
-        const [posOrders, salesOrders] = await Promise.all([
-            db.order.findMany({
-                where: {
-                    tenantId,
-                    status: "COMPLETED",
-                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
-                },
-                select: { createdAt: true, total: true }
-            }),
-            db.salesOrder.findMany({
-                where: {
-                    tenantId,
-                    status: "PAID",
-                    createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
-                },
-                select: { createdAt: true, total: true }
-            })
-        ]);
+        return withCache(cacheKey, async () => {
+            const [posOrders, salesOrders] = await Promise.all([
+                db.order.findMany({
+                    where: {
+                        tenantId,
+                        status: "COMPLETED",
+                        createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+                    },
+                    select: { createdAt: true, total: true }
+                }),
+                db.salesOrder.findMany({
+                    where: {
+                        tenantId,
+                        status: "PAID",
+                        createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+                    },
+                    select: { createdAt: true, total: true }
+                })
+            ]);
 
-        const salesMap = new Map<string, number>();
+            const salesMap = new Map<string, number>();
 
-        const intervalDays = eachDayOfInterval({ start: fromDate, end: toDate });
-        intervalDays.forEach(day => {
-            salesMap.set(format(day, "yyyy-MM-dd"), 0);
-        });
+            const intervalDays = eachDayOfInterval({ start: fromDate, end: toDate });
+            intervalDays.forEach(day => {
+                salesMap.set(format(day, "yyyy-MM-dd"), 0);
+            });
 
-        posOrders.forEach(o => {
-            const dateStr = format(o.createdAt, "yyyy-MM-dd");
-            salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(o.total));
-        });
+            posOrders.forEach(o => {
+                const dateStr = format(o.createdAt, "yyyy-MM-dd");
+                salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(o.total));
+            });
 
-        salesOrders.forEach(so => {
-            const dateStr = format(so.createdAt, "yyyy-MM-dd");
-            salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(so.total));
-        });
+            salesOrders.forEach(so => {
+                const dateStr = format(so.createdAt, "yyyy-MM-dd");
+                salesMap.set(dateStr, (salesMap.get(dateStr) || 0) + Number(so.total));
+            });
 
-        return Array.from(salesMap.entries()).map(([date, sales]) => ({
-            date,
-            sales
-        }));
+            return Array.from(salesMap.entries()).map(([date, sales]) => ({
+                date,
+                sales
+            }));
+        }, 300); // 5 minute cache
     } catch (error) {
         console.error("[GET_SALES_DATA]", error);
         return [];

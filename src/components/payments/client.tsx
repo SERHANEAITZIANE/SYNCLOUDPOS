@@ -31,7 +31,7 @@ interface PaymentsClientProps {
 }
 
 export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers, accounts }) => {
-    const columns = usePaymentColumns()
+    const columns = usePaymentColumns(accounts)
     const router = useRouter()
 
     // Filter states
@@ -39,6 +39,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
     const [selectedCustomer, setSelectedCustomer] = React.useState<string>("ALL")
     const [selectedAccount, setSelectedAccount] = React.useState<string>("ALL")
+    const [paymentId, setPaymentId] = React.useState<string | null>(null)
 
     // Create dialog state
     const [createOpen, setCreateOpen] = React.useState(false)
@@ -51,39 +52,63 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
         date: new Date().toISOString().slice(0, 10),
     })
 
+    React.useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search)
+            setPaymentId(params.get("paymentId"))
+
+            const custId = params.get("customerId")
+            if (custId) {
+                setSelectedCustomer(custId)
+            }
+
+            const accId = params.get("accountId")
+            if (accId) {
+                const acc = accounts.find(a => a.id === accId)
+                if (acc) {
+                    setSelectedAccount(acc.name)
+                }
+            }
+        }
+    }, [accounts])
+
     // Apply filters
     React.useEffect(() => {
         let result = data
 
-        // 1. Filter by Customer
-        if (selectedCustomer !== "ALL") {
-            result = result.filter(item => item.customerId === selectedCustomer)
-        }
+        if (paymentId) {
+            result = result.filter(item => item.id === paymentId)
+        } else {
+            // 1. Filter by Customer
+            if (selectedCustomer !== "ALL") {
+                result = result.filter(item => item.customerId === selectedCustomer)
+            }
 
-        // 2. Filter by Account (Modalité de paiement)
-        if (selectedAccount !== "ALL") {
-            result = result.filter(item => item.accountName === selectedAccount)
-        }
+            // 2. Filter by Account (Modalité de paiement)
+            if (selectedAccount !== "ALL") {
+                result = result.filter(item => item.accountName === selectedAccount)
+            }
 
-        // 3. Filter by Date range
-        if (dateRange?.from) {
-            result = result.filter(item => {
-                const itemDate = new Date(item.date)
-                itemDate.setHours(0, 0, 0, 0)
-                const fromDate = new Date(dateRange.from!)
-                fromDate.setHours(0, 0, 0, 0)
+            // 3. Filter by Date range
+            if (dateRange?.from) {
+                result = result.filter(item => {
+                    const itemDate = new Date(item.date)
+                    itemDate.setHours(0, 0, 0, 0)
+                    const fromDate = new Date(dateRange.from!)
+                    fromDate.setHours(0, 0, 0, 0)
 
-                if (dateRange.to) {
-                    const toDate = new Date(dateRange.to)
-                    toDate.setHours(23, 59, 59, 999)
-                    return itemDate >= fromDate && itemDate <= toDate
-                }
-                return itemDate.getTime() === fromDate.getTime()
-            })
+                    if (dateRange.to) {
+                        const toDate = new Date(dateRange.to)
+                        toDate.setHours(23, 59, 59, 999)
+                        return itemDate >= fromDate && itemDate <= toDate
+                    }
+                    return itemDate.getTime() === fromDate.getTime()
+                })
+            }
         }
 
         setFilteredData(result)
-    }, [data, dateRange, selectedCustomer, selectedAccount])
+    }, [data, dateRange, selectedCustomer, selectedAccount, paymentId])
 
     // Calculate total
     const totalAmount = filteredData.reduce((acc, curr) => acc + curr.amount, 0)
@@ -155,6 +180,23 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                 </div>
             </div>
             <Separator />
+
+            {paymentId && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-center justify-between mt-4 dark:bg-blue-950/20 dark:border-blue-900/50 dark:text-blue-300">
+                    <span className="text-sm font-medium">Affichage d'une seule opération (Paiement).</span>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-bold hover:bg-blue-100/50 dark:hover:bg-blue-900/30" 
+                        onClick={() => {
+                            window.history.replaceState({}, '', window.location.pathname)
+                            setPaymentId(null)
+                        }}
+                    >
+                        Voir toutes les opérations
+                    </Button>
+                </div>
+            )}
 
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row items-center gap-4 py-4">

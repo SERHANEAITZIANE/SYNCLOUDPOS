@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ShoppingCart, Info } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-import { cn } from "@/lib/utils"
+import { cn, scrollIntoViewSafe } from "@/lib/utils"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
@@ -30,12 +30,14 @@ interface ProductCardProps {
     }
     blockNegativeStock?: boolean
     isFocused?: boolean
+    posUiSize?: "sm" | "md" | "lg"
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
     data,
     blockNegativeStock = false,
-    isFocused = false
+    isFocused = false,
+    posUiSize = "md"
 }) => {
     const cart = usePosStore()
     const t = useTranslations("ProductCard")
@@ -96,10 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     useEffect(() => {
         if (isFocused && ref.current) {
-            ref.current.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest"
-            });
+            scrollIntoViewSafe(ref.current);
         }
     }, [isFocused, ref]);
     const outOfStock = blockNegativeStock && (data.stock - quantityInCart) <= 0;
@@ -156,6 +155,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                             alt={data.name} 
                             fill 
                             className="object-cover transition-transform duration-300 group-hover:scale-105" 
+                            unoptimized={data.imageUrl.startsWith("/uploads/")}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                         />
                     ) : (
                         <div className="flex h-full w-full items-center justify-center">
@@ -169,23 +170,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </div>
 
                 {/* Product Info - Below Image */}
-                <div className="flex flex-col gap-0.5 p-2 flex-1 min-h-0">
+                <div className={cn(
+                    "flex flex-col flex-1 min-h-0",
+                    posUiSize === "sm" ? "p-1.5 gap-0" : posUiSize === "lg" ? "p-3 gap-1" : "p-2 gap-0.5"
+                )}>
                     {/* Product Name */}
                     <h3 
-                        className="font-bold text-gray-800 dark:text-slate-200 text-[10px] lg:text-[11px] leading-tight line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-150" 
+                        className={cn(
+                            "font-bold text-gray-800 dark:text-slate-200 leading-tight line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-150",
+                            posUiSize === "sm" ? "text-[8.5px] lg:text-[9.5px]" : posUiSize === "lg" ? "text-[12px] lg:text-[13px]" : "text-[10px] lg:text-[11px]"
+                        )} 
                         title={data.name}
                     >
                         {data.name}
                     </h3>
 
                     {/* Price + Stock Row */}
-                    <div className="flex items-end justify-between mt-auto pt-1">
-                        <span className="font-black text-[11px] lg:text-[13px] leading-none text-gray-900 dark:text-white tabular-nums">
+                    <div className={cn("flex items-end justify-between mt-auto", posUiSize === "sm" ? "pt-0.5" : "pt-1")}>
+                        <span className={cn(
+                            "font-black leading-none text-gray-900 dark:text-white tabular-nums",
+                            posUiSize === "sm" ? "text-[10px] lg:text-[11px]" : posUiSize === "lg" ? "text-[13px] lg:text-[15px]" : "text-[11px] lg:text-[13px]"
+                        )}>
                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
                         </span>
                         <div className="flex items-center gap-1">
                             <span className={cn(
-                                "text-[8px] font-bold px-1 py-px rounded tabular-nums",
+                                "font-bold px-1 py-px rounded tabular-nums",
+                                posUiSize === "sm" ? "text-[7px]" : posUiSize === "lg" ? "text-[9px]" : "text-[8px]",
                                 (data.stock - quantityInCart) > 0
                                     ? isLowStock
                                         ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
@@ -194,19 +205,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                             )}>
                                 {data.stock - quantityInCart}
                             </span>
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                type="button"
-                                className="h-5 w-5 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowInfo(true);
-                                }}
-                                title={tCommon("view") || "Détails"}
-                            >
-                                <Info size={11} />
-                            </Button>
+                            {posUiSize !== "sm" && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    type="button"
+                                    className="h-5 w-5 p-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowInfo(true);
+                                    }}
+                                    title={tCommon("view") || "Détails"}
+                                >
+                                    <Info size={11} />
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -233,7 +246,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                             } : undefined}
                         >
                             {data.imageUrl ? (
-                                <Image src={data.imageUrl} alt={data.name} fill className="object-cover" />
+                                <Image src={data.imageUrl} alt={data.name} fill className="object-cover" unoptimized={data.imageUrl.startsWith("/uploads/")} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center text-[9px] font-bold text-center text-slate-400 dark:text-slate-600 bg-slate-50 dark:bg-slate-900/40 uppercase leading-none">
                                     No Image
@@ -381,6 +394,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                                 sizes="(max-width: 440px) 100vw, 440px"
                                 className="object-contain p-2 animate-in zoom-in-95 duration-200" 
                                 priority
+                                unoptimized={data.imageUrl.startsWith("/uploads/")}
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                             />
                         </div>
                         {/* Footer overlay */}

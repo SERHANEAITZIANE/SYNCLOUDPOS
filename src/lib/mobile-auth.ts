@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "syncloud-mobile-secret";
+const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
 export interface MobileUser {
     userId: string;
@@ -16,6 +16,10 @@ export interface MobileUser {
  * Returns the decoded user payload or null if invalid.
  */
 export function verifyMobileAuth(req: NextRequest): MobileUser | null {
+    if (!JWT_SECRET) {
+        console.error("[MOBILE_AUTH] ERROR: Neither AUTH_SECRET nor NEXTAUTH_SECRET is configured. Access denied.");
+        return null;
+    }
     const authHeader = req.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) return null;
 

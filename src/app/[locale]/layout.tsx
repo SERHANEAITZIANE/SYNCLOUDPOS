@@ -5,7 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/session-provider";
-import { VoiceAssistantWidget } from "@/components/ui/voice-assistant-widget";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,7 +59,6 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              <VoiceAssistantWidget />
             </ThemeProvider>
           </AuthSessionProvider>
         </NextIntlClientProvider>

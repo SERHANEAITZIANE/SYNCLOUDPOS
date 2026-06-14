@@ -3,11 +3,15 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Shield, Search, Filter, User, Clock, FileText, ArrowRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Shield, Clock, User, ArrowRight, Eye, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 
 interface AuditLog {
@@ -32,6 +36,8 @@ const ACTION_BADGES: Record<string, { label: string; color: string }> = {
     VOID: { label: "Annulation", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
     LOGIN: { label: "Connexion", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400" },
     EXPORT: { label: "Export", color: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" },
+    IMPORT: { label: "Import", color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400" },
+    TRANSFER: { label: "Transfert", color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" },
     PRINT: { label: "Impression", color: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
     SETTINGS_CHANGE: { label: "Paramètres", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
 };
@@ -43,10 +49,15 @@ const ENTITY_LABELS: Record<string, string> = {
     SUPPLIER: "Fournisseur",
     SETTINGS: "Paramètres",
     USER: "Utilisateur",
-    SALES_ORDER: "Bon de vente",
-    PURCHASE_ORDER: "Achat",
+    SALES_ORDER: "Bon de livraison",
+    PURCHASE_ORDER: "Achat / Commande",
     EXPENSE: "Dépense",
-    TREASURY: "Trésorerie",
+    EXPENSE_CATEGORY: "Catégorie Dépense",
+    TREASURY: "Trésorerie / Caisse",
+    PAYMENT: "Paiement / Règlement",
+    LOAN: "Emprunt / Avance",
+    RETURN: "Retour Produit",
+    TRANSFER: "Transfert de fonds",
 };
 
 const FIELD_TRANSLATIONS: Record<string, string> = {
@@ -76,13 +87,26 @@ const FIELD_TRANSLATIONS: Record<string, string> = {
     barcode: "Code-barres",
     qtySold: "Quantité vendue",
     revenue: "Chiffre d'affaires",
+    taxId: "Identifiant fiscal",
+    nif: "NIF",
+    nis: "NIS",
+    artImposition: "Article d'imposition",
+    rc: "Registre de commerce (RC)",
+    rib: "RIB / Compte bancaire",
+    initialBalance: "Solde initial",
+    balance: "Solde actuel",
+    contactPerson: "Contact principal",
+    categoryId: "Catégorie (ID)",
+    accountId: "Compte financier (ID)",
+    date: "Date",
+    tvaRate: "Taux TVA (%)",
 };
 
 const formatValue = (key: string, val: any) => {
     if (val === null || val === undefined) return "—";
     if (typeof val === "boolean") return val ? "Oui" : "Non";
     
-    const priceKeys = ["price", "cost", "wholesalePrice", "dealerPrice", "total", "subtotal", "amountPaid", "tvaAmount", "stampTax", "revenue"];
+    const priceKeys = ["price", "cost", "wholesalePrice", "dealerPrice", "total", "subtotal", "amountPaid", "tvaAmount", "stampTax", "revenue", "balance", "initialBalance", "amount"];
     if (priceKeys.includes(key) && !isNaN(Number(val))) {
         return Number(val).toLocaleString("fr-DZ") + " DA";
     }
@@ -99,28 +123,163 @@ function parseJSON(str: string | null): any {
 }
 
 export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
-    const [search, setSearch] = useState("");
-    const [filterEntity, setFilterEntity] = useState<string | null>(null);
-    const [filterAction, setFilterAction] = useState<string | null>(null);
-    const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    const entities = useMemo(() => {
-        const set = new Set(logs.map((l) => l.entity));
-        return Array.from(set).sort();
+    // Filter states
+    const [selectedUser, setSelectedUser] = useState<string>("ALL");
+    const [selectedAction, setSelectedAction] = useState<string>("ALL");
+    const [selectedEntity, setSelectedEntity] = useState<string>("ALL");
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+    const uniqueUsers = useMemo(() => {
+        const set = new Set(logs.map((l) => l.userName).filter(Boolean));
+        return Array.from(set).sort() as string[];
     }, [logs]);
 
-    const filtered = useMemo(() => {
+    const uniqueActions = useMemo(() => {
+        const set = new Set(logs.map((l) => l.action).filter(Boolean));
+        return Array.from(set).sort() as string[];
+    }, [logs]);
+
+    const uniqueEntities = useMemo(() => {
+        const set = new Set(logs.map((l) => l.entity).filter(Boolean));
+        return Array.from(set).sort() as string[];
+    }, [logs]);
+
+    const filteredLogs = useMemo(() => {
         return logs.filter((log) => {
-            const matchesSearch =
-                !search ||
-                log.description?.toLowerCase().includes(search.toLowerCase()) ||
-                log.userName?.toLowerCase().includes(search.toLowerCase()) ||
-                log.entity.toLowerCase().includes(search.toLowerCase());
-            const matchesEntity = !filterEntity || log.entity === filterEntity;
-            const matchesAction = !filterAction || log.action === filterAction;
-            return matchesSearch && matchesEntity && matchesAction;
+            if (selectedUser !== "ALL" && log.userName !== selectedUser) {
+                return false;
+            }
+            if (selectedAction !== "ALL" && log.action !== selectedAction) {
+                return false;
+            }
+            if (selectedEntity !== "ALL" && log.entity !== selectedEntity) {
+                return false;
+            }
+            if (dateRange?.from) {
+                const logDate = new Date(log.createdAt);
+                const start = new Date(dateRange.from);
+                start.setHours(0, 0, 0, 0);
+                if (logDate < start) return false;
+
+                if (dateRange.to) {
+                    const end = new Date(dateRange.to);
+                    end.setHours(23, 59, 59, 999);
+                    if (logDate > end) return false;
+                }
+            }
+            return true;
         });
-    }, [logs, search, filterEntity, filterAction]);
+    }, [logs, selectedUser, selectedAction, selectedEntity, dateRange]);
+
+    const resetFilters = () => {
+        setSelectedUser("ALL");
+        setSelectedAction("ALL");
+        setSelectedEntity("ALL");
+        setDateRange(undefined);
+    };
+
+    const hasActiveFilters = selectedUser !== "ALL" || selectedAction !== "ALL" || selectedEntity !== "ALL" || dateRange !== undefined;
+
+    const columns: ColumnDef<AuditLog>[] = useMemo(() => [
+        {
+            accessorKey: "createdAt",
+            header: "Date Heure",
+            cell: ({ row }) => {
+                return (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono font-bold">
+                        <Clock className="h-3.5 w-3.5 opacity-70" />
+                        {format(new Date(row.original.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: fr })}
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: "userName",
+            header: "Utilisateur",
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        <User className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="font-semibold text-sm">
+                        {row.original.userName || "Système"}
+                    </span>
+                </div>
+            )
+        },
+        {
+            accessorKey: "action",
+            header: "Action",
+            cell: ({ row }) => {
+                const action = row.original.action;
+                const badge = ACTION_BADGES[action] || {
+                    label: action,
+                    color: "bg-gray-100 text-gray-700 dark:bg-gray-850 dark:text-gray-300"
+                };
+                return (
+                    <Badge className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider", badge.color)}>
+                        {badge.label}
+                    </Badge>
+                );
+            }
+        },
+        {
+            accessorKey: "entity",
+            header: "Module",
+            cell: ({ row }) => {
+                const entity = row.original.entity;
+                return (
+                    <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider bg-slate-50 dark:bg-slate-900">
+                        {ENTITY_LABELS[entity] || entity}
+                    </Badge>
+                );
+            }
+        },
+        {
+            accessorKey: "description",
+            header: "Description",
+            cell: ({ row }) => (
+                <div className="text-sm font-medium max-w-[350px] truncate" title={row.original.description || ""}>
+                    {row.original.description || "—"}
+                </div>
+            )
+        },
+        {
+            accessorKey: "ipAddress",
+            header: "Adresse IP",
+            cell: ({ row }) => (
+                <span className="font-mono text-xs text-muted-foreground">
+                    {row.original.ipAddress || "—"}
+                </span>
+            )
+        },
+        {
+            id: "actions",
+            header: "Détails",
+            cell: ({ row }) => {
+                const hasDetails = row.original.before || row.original.after;
+                if (!hasDetails) return null;
+                return (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-blue-600 hover:text-blue-800 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1.5"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedLog(row.original);
+                            setIsDialogOpen(true);
+                        }}
+                    >
+                        <Eye className="h-4 w-4" />
+                        Voir
+                    </Button>
+                );
+            }
+        }
+    ], []);
 
     return (
         <div className="space-y-6">
@@ -139,286 +298,285 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                         </p>
                     </div>
                 </div>
-                <Badge variant="outline" className="w-fit text-sm font-semibold px-4 py-1.5 rounded-full">
-                    {filtered.length} entrée{filtered.length !== 1 ? "s" : ""}
-                </Badge>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Rechercher par description, utilisateur..."
-                        className="pl-10 h-11 rounded-xl"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                    <Button
-                        variant={filterEntity === null ? "default" : "outline"}
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setFilterEntity(null)}
-                    >
-                        Tout
-                    </Button>
-                    {entities.map((entity) => (
-                        <Button
-                            key={entity}
-                            variant={filterEntity === entity ? "default" : "outline"}
-                            size="sm"
-                            className="rounded-full text-xs"
-                            onClick={() => setFilterEntity(filterEntity === entity ? null : entity)}
-                        >
-                            {ENTITY_LABELS[entity] || entity}
+            {/* Filter controls */}
+            <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl p-4 space-y-4">
+                <div className="flex items-center justify-between border-b pb-2 border-slate-200/50 dark:border-slate-850">
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-200">Filtres du journal</span>
+                    {hasActiveFilters && (
+                        <Button variant="ghost" size="sm" onClick={resetFilters} className="text-red-500 hover:text-red-700 h-8 flex items-center gap-1">
+                            <X className="h-4 w-4" />
+                            Réinitialiser
                         </Button>
-                    ))}
+                    )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* User Select */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground">Utilisateur</label>
+                        <Select value={selectedUser} onValueChange={setSelectedUser}>
+                            <SelectTrigger className="bg-white dark:bg-slate-950">
+                                <SelectValue placeholder="Tous les utilisateurs" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tous les utilisateurs</SelectItem>
+                                {uniqueUsers.map((user) => (
+                                    <SelectItem key={user} value={user}>
+                                        {user}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Action Select */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground">Action / Opération</label>
+                        <Select value={selectedAction} onValueChange={setSelectedAction}>
+                            <SelectTrigger className="bg-white dark:bg-slate-950">
+                                <SelectValue placeholder="Toutes les actions" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Toutes les actions</SelectItem>
+                                {uniqueActions.map((act) => (
+                                    <SelectItem key={act} value={act}>
+                                        {ACTION_BADGES[act]?.label || act}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Entity Select */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground">Module / Entité</label>
+                        <Select value={selectedEntity} onValueChange={setSelectedEntity}>
+                            <SelectTrigger className="bg-white dark:bg-slate-950">
+                                <SelectValue placeholder="Tous les modules" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tous les modules</SelectItem>
+                                {uniqueEntities.map((ent) => (
+                                    <SelectItem key={ent} value={ent}>
+                                        {ENTITY_LABELS[ent] || ent}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Date picker */}
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground">Période</label>
+                        <DatePickerWithRange
+                            date={dateRange}
+                            setDate={setDateRange}
+                            className="w-full bg-white dark:bg-slate-950"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Action filter chips */}
-            <div className="flex gap-2 flex-wrap">
-                {Object.entries(ACTION_BADGES).map(([key, { label, color }]) => (
-                    <button
-                        key={key}
-                        onClick={() => setFilterAction(filterAction === key ? null : key)}
-                        className={cn(
-                            "text-xs font-bold px-3 py-1.5 rounded-full transition-all border-2",
-                            filterAction === key
-                                ? "border-violet-500 ring-2 ring-violet-500/20"
-                                : "border-transparent",
-                            color
-                        )}
-                    >
-                        {label}
-                    </button>
-                ))}
-            </div>
+            {/* Well-structured DataTable */}
+            <DataTable
+                columns={columns}
+                data={filteredLogs}
+                searchKey="description"
+                exportTitle="Journal d'Audit"
+                exportDescription="Historique de traçabilité des actions critiques."
+            />
 
-            {/* Log Entries */}
-            <ScrollArea className="h-[calc(100vh-320px)]">
-                <div className="space-y-2 pr-4">
-                    {filtered.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-                            <FileText className="h-12 w-12 mb-4 opacity-30" />
-                            <p className="text-lg font-medium">Aucune entrée trouvée</p>
-                            <p className="text-sm opacity-70 mt-1">
-                                Essayez de modifier vos filtres
-                            </p>
-                        </div>
-                    )}
-                    {filtered.map((log) => {
-                        const badge = ACTION_BADGES[log.action] || {
-                            label: log.action,
-                            color: "bg-gray-100 text-gray-700",
-                        };
-                        const isExpanded = expandedId === log.id;
+            {/* Detailed Changes Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+                            <Shield className="h-5 w-5 text-violet-500" />
+                            Détails de l&apos;Action d&apos;Audit
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        return (
-                            <div
-                                key={log.id}
-                                className={cn(
-                                    "bg-white dark:bg-[#1a1a2e] border border-gray-100 dark:border-gray-800 rounded-xl p-4 transition-all hover:shadow-sm cursor-pointer",
-                                    isExpanded && "ring-2 ring-violet-500/20"
-                                )}
-                                onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                                        <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 shrink-0 mt-0.5">
-                                            <User className="h-4 w-4 text-gray-500" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                                                <span className="font-bold text-sm text-gray-900 dark:text-white">
-                                                    {log.userName || "Système"}
-                                                </span>
-                                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider", badge.color)}>
-                                                    {badge.label}
-                                                </span>
-                                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-50 dark:bg-gray-800 text-gray-500 uppercase tracking-wider">
-                                                    {ENTITY_LABELS[log.entity] || log.entity}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                                                {log.description || "—"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
-                                        <Clock className="h-3 w-3" />
-                                        {format(new Date(log.createdAt), "dd MMM yyyy HH:mm", { locale: fr })}
-                                    </div>
+                    {selectedLog && (
+                        <div className="space-y-4 pt-2">
+                            {/* Meta Info */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 dark:bg-slate-900 p-3 rounded-lg border text-sm">
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Date Heure</p>
+                                    <p className="font-semibold">{format(new Date(selectedLog.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: fr })}</p>
                                 </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Utilisateur</p>
+                                    <p className="font-semibold">{selectedLog.userName || "Système"}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Module</p>
+                                    <p className="font-semibold">{ENTITY_LABELS[selectedLog.entity] || selectedLog.entity}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Adresse IP</p>
+                                    <p className="font-semibold font-mono">{selectedLog.ipAddress || "—"}</p>
+                                </div>
+                            </div>
 
-                                {/* Expanded details */}
-                                {isExpanded && (log.before || log.after) && (() => {
-                                    const beforeObj = parseJSON(log.before);
-                                    const afterObj = parseJSON(log.after);
-                                    const isDelete = log.action === "DELETE";
-                                    const isUpdate = log.action === "UPDATE";
-                                    const isCreate = log.action === "CREATE";
+                            {/* Description */}
+                            <div className="p-3 bg-violet-50/50 dark:bg-violet-950/10 border border-violet-100 dark:border-violet-900/30 rounded-lg">
+                                <p className="text-[10px] font-bold text-violet-700 dark:text-violet-400 uppercase tracking-wider mb-1">Description</p>
+                                <p className="text-sm font-medium">{selectedLog.description || "—"}</p>
+                            </div>
 
-                                    const hasStructured = (log.before ? beforeObj !== null : true) && (log.after ? afterObj !== null : true);
+                            {/* Changes */}
+                            {(() => {
+                                const beforeObj = parseJSON(selectedLog.before);
+                                const afterObj = parseJSON(selectedLog.after);
+                                const isDelete = selectedLog.action === "DELETE";
+                                const isUpdate = selectedLog.action === "UPDATE";
+                                const isCreate = selectedLog.action === "CREATE";
 
-                                    if (!hasStructured) {
-                                        return (
-                                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {log.before && (
-                                                        <div>
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1.5">Avant</p>
-                                                            <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                                {log.before}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                    {log.after && (
-                                                        <div>
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1.5">Après</p>
-                                                            <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                                {log.after}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {log.ipAddress && (
-                                                    <p className="text-[10px] text-muted-foreground mt-3 font-mono">
-                                                        IP: {log.ipAddress}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        );
-                                    }
+                                const hasStructured = (selectedLog.before ? beforeObj !== null : true) && (selectedLog.after ? afterObj !== null : true);
 
-                                    // Structured View
-                                    let changedFields: { key: string; beforeVal: any; afterVal: any }[] = [];
-                                    if (isUpdate && beforeObj && afterObj) {
-                                        const allKeys = Array.from(new Set([...Object.keys(beforeObj), ...Object.keys(afterObj)]));
-                                        allKeys.forEach((key) => {
-                                            if (key.endsWith("Id") || key === "id" || key === "updatedAt" || key === "createdAt") return;
-                                            const beforeVal = beforeObj[key];
-                                            const afterVal = afterObj[key];
-                                            if (typeof beforeVal === "object" || typeof afterVal === "object") return;
-                                            const beforeStr = beforeVal !== undefined && beforeVal !== null ? String(beforeVal) : "";
-                                            const afterStr = afterVal !== undefined && afterVal !== null ? String(afterVal) : "";
-                                            if (beforeStr !== afterStr) {
-                                                changedFields.push({ key, beforeVal, afterVal });
-                                            }
-                                        });
-                                    }
-
+                                if (!hasStructured) {
                                     return (
-                                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/50 space-y-4">
-                                            {/* DELETE View */}
-                                            {isDelete && beforeObj && (
-                                                <div className="bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4">
-                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-red-600 dark:text-red-400 mb-3">
-                                                        Élément Supprimé
-                                                    </p>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                                        {Object.entries(beforeObj).map(([key, val]) => {
-                                                            if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
-                                                            return (
-                                                                <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-red-100/50 dark:border-red-900/20">
-                                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
-                                                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {selectedLog.before && (
+                                                <div>
+                                                    <p className="text-xs font-bold text-red-500 mb-1.5">Avant</p>
+                                                    <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-60 font-mono">
+                                                        {selectedLog.before}
+                                                    </pre>
                                                 </div>
                                             )}
-
-                                            {/* UPDATE View */}
-                                            {isUpdate && (
-                                                <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4">
-                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
-                                                        Valeurs Modifiées (De ➔ À)
-                                                    </p>
-                                                    <div className="space-y-2">
-                                                        {changedFields.map(({ key, beforeVal, afterVal }) => (
-                                                            <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#151525] p-3 rounded-lg border border-blue-100/50 dark:border-blue-900/20">
-                                                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider shrink-0 w-40">
-                                                                    {FIELD_TRANSLATIONS[key] || key}
-                                                                </span>
-                                                                <div className="flex items-center gap-3 flex-1 justify-start sm:justify-end">
-                                                                    <span className="text-xs font-medium text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/30 px-2 py-1 rounded">
-                                                                        {formatValue(key, beforeVal)}
-                                                                    </span>
-                                                                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                                                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
-                                                                        {formatValue(key, afterVal)}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                        {changedFields.length === 0 && (
-                                                            <div className="text-xs text-muted-foreground py-2 text-center">
-                                                                Aucune propriété modifiée ou pas d&apos;historique précédent.
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                            {selectedLog.after && (
+                                                <div>
+                                                    <p className="text-xs font-bold text-emerald-500 mb-1.5">Après</p>
+                                                    <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-60 font-mono">
+                                                        {selectedLog.after}
+                                                    </pre>
                                                 </div>
-                                            )}
-
-                                            {/* CREATE View */}
-                                            {isCreate && afterObj && (
-                                                <div className="bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-4">
-                                                    <p className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3">
-                                                        Nouveau Contenu
-                                                    </p>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                                        {Object.entries(afterObj).map(([key, val]) => {
-                                                            if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
-                                                            return (
-                                                                <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
-                                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
-                                                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Fallback for other actions like LOGIN, PRINT etc. */}
-                                            {!isDelete && !isUpdate && !isCreate && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {log.before && (
-                                                        <div>
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1.5">Avant</p>
-                                                            <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                                {JSON.stringify(beforeObj, null, 2)}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                    {log.after && (
-                                                        <div>
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1.5">Après</p>
-                                                            <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-40 font-mono">
-                                                                {JSON.stringify(afterObj, null, 2)}
-                                                            </pre>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {log.ipAddress && (
-                                                <p className="text-[10px] text-muted-foreground mt-1 font-mono">
-                                                    IP: {log.ipAddress}
-                                                </p>
                                             )}
                                         </div>
                                     );
-                                })()}
-                            </div>
-                        );
-                    })}
-                </div>
-            </ScrollArea>
+                                }
+
+                                // Structured View
+                                let changedFields: { key: string; beforeVal: any; afterVal: any }[] = [];
+                                if (isUpdate && beforeObj && afterObj) {
+                                    const allKeys = Array.from(new Set([...Object.keys(beforeObj), ...Object.keys(afterObj)]));
+                                    allKeys.forEach((key) => {
+                                        if (key.endsWith("Id") || key === "id" || key === "updatedAt" || key === "createdAt") return;
+                                        const beforeVal = beforeObj[key];
+                                        const afterVal = afterObj[key];
+                                        if (typeof beforeVal === "object" || typeof afterVal === "object") return;
+                                        const beforeStr = beforeVal !== undefined && beforeVal !== null ? String(beforeVal) : "";
+                                        const afterStr = afterVal !== undefined && afterVal !== null ? String(afterVal) : "";
+                                        if (beforeStr !== afterStr) {
+                                            changedFields.push({ key, beforeVal, afterVal });
+                                        }
+                                    });
+                                }
+
+                                return (
+                                    <div className="space-y-4">
+                                        {/* DELETE View */}
+                                        {isDelete && beforeObj && (
+                                            <div className="bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4">
+                                                <p className="text-xs font-extrabold uppercase tracking-widest text-red-600 dark:text-red-400 mb-3">
+                                                    Élément Supprimé
+                                                </p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                    {Object.entries(beforeObj).map(([key, val]) => {
+                                                        if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
+                                                        return (
+                                                            <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-red-100/50 dark:border-red-900/20">
+                                                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
+                                                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* UPDATE View */}
+                                        {isUpdate && (
+                                            <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4">
+                                                <p className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
+                                                    Valeurs Modifiées (De ➔ À)
+                                                </p>
+                                                <div className="space-y-2">
+                                                    {changedFields.map(({ key, beforeVal, afterVal }) => (
+                                                        <div key={key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#151525] p-3 rounded-lg border border-blue-100/50 dark:border-blue-900/20">
+                                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider shrink-0 w-40">
+                                                                {FIELD_TRANSLATIONS[key] || key}
+                                                            </span>
+                                                            <div className="flex items-center gap-3 flex-1 justify-start sm:justify-end">
+                                                                <span className="text-xs font-medium text-red-600 dark:text-red-400 line-through bg-red-50 dark:bg-red-950/30 px-2 py-1 rounded">
+                                                                    {formatValue(key, beforeVal)}
+                                                                </span>
+                                                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                                                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded">
+                                                                    {formatValue(key, afterVal)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {changedFields.length === 0 && (
+                                                        <div className="text-xs text-muted-foreground py-2 text-center">
+                                                            Aucune propriété modifiée ou pas d&apos;historique précédent.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* CREATE View */}
+                                        {isCreate && afterObj && (
+                                            <div className="bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-4">
+                                                <p className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-3">
+                                                    Nouveau Contenu
+                                                </p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                    {Object.entries(afterObj).map(([key, val]) => {
+                                                        if (key.endsWith("Id") || key === "id" || typeof val === "object") return null;
+                                                        return (
+                                                            <div key={key} className="flex flex-col gap-0.5 bg-white dark:bg-[#151525] p-2.5 rounded-lg border border-emerald-100/50 dark:border-emerald-900/20">
+                                                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{FIELD_TRANSLATIONS[key] || key}</span>
+                                                                <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatValue(key, val)}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Fallback for other actions */}
+                                        {!isDelete && !isUpdate && !isCreate && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {selectedLog.before && (
+                                                    <div>
+                                                        <p className="text-xs font-bold text-red-500 mb-1.5">Avant</p>
+                                                        <pre className="text-xs bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-3 rounded-lg overflow-auto max-h-60 font-mono">
+                                                            {JSON.stringify(beforeObj, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                )}
+                                                {selectedLog.after && (
+                                                    <div>
+                                                        <p className="text-xs font-bold text-emerald-500 mb-1.5">Après</p>
+                                                        <pre className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-lg overflow-auto max-h-60 font-mono">
+                                                            {JSON.stringify(afterObj, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

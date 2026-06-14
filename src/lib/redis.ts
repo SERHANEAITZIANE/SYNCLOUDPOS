@@ -61,7 +61,9 @@ export async function withCache<T>(
         try {
             // This is a fire-and-forget call to maintain loose coupling
             // In a real implementation, this might be an event or a separate tracking mechanism
-            console.log(`Cache event: Set key=${key} ttl=${ttl}`); // Debug only
+            if (process.env.NODE_ENV !== "production") {
+                console.log(`Cache event: Set key=${key} ttl=${ttl}`);
+            }
         } catch (e) {
             // Ignore monitoring errors
         }

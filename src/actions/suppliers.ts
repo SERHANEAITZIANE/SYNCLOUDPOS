@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { logAudit } from "./audit-log"
 
 interface SupplierData {
     name: string
@@ -88,6 +89,13 @@ export const createSupplier = async (data: SupplierData) => {
             }
         })
         revalidatePath("/(dashboard)/suppliers")
+        logAudit({
+            action: "CREATE",
+            entity: "SUPPLIER",
+            entityId: supplier.id,
+            description: `Fournisseur créé : ${data.name} (Solde: ${data.balance || 0} DA)`,
+            after: { name: data.name, phone: data.phone, balance: data.balance || 0 }
+        }).catch(() => null)
         return { success: "Supplier created", id: supplier.id }
     } catch (error) {
         console.error("createSupplier error:", error)
@@ -103,6 +111,11 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
+        const existingSupplier = await db.supplier.findFirst({
+            where: { id, tenantId }
+        })
+        if (!existingSupplier) return { error: "Supplier not found" }
+
         const supplier = await db.supplier.update({
             where: { id, tenantId },
             data: {
@@ -121,6 +134,14 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
             }
         })
         revalidatePath("/(dashboard)/suppliers")
+        logAudit({
+            action: "UPDATE",
+            entity: "SUPPLIER",
+            entityId: id,
+            description: `Fournisseur mis à jour : ${data.name}`,
+            before: { name: existingSupplier.name, phone: existingSupplier.phone, balance: Number(existingSupplier.balance) },
+            after: { name: data.name, phone: data.phone, balance: Number(supplier.balance) }
+        }).catch(() => null)
         return { success: "Supplier updated", id: supplier.id }
     } catch (_error) {
         return { error: "Failed to update supplier" }
@@ -135,10 +156,21 @@ export const deleteSupplier = async (id: string) => {
     if (!tenantId) return { error: "Tenant ID missing from session" }
 
     try {
+        const existingSupplier = await db.supplier.findFirst({
+            where: { id, tenantId }
+        })
+
         await db.supplier.delete({
             where: { id, tenantId }
         })
         revalidatePath("/(dashboard)/suppliers")
+        logAudit({
+            action: "DELETE",
+            entity: "SUPPLIER",
+            entityId: id,
+            description: `Fournisseur supprimé : ${existingSupplier?.name || id}`,
+            before: { name: existingSupplier?.name, phone: existingSupplier?.phone, balance: existingSupplier?.balance ? Number(existingSupplier.balance) : 0 }
+        }).catch(() => null)
         return { success: "Supplier deleted" }
     } catch (_error) {
         return { error: "Failed to delete supplier" }
@@ -209,6 +241,12 @@ export const importSuppliers = async (rows: SupplierData[]) => {
     }
 
     revalidatePath("/(dashboard)/suppliers")
+    logAudit({
+        action: "IMPORT",
+        entity: "SUPPLIER",
+        description: `Importation de ${created} fournisseurs (${errors} lignes invalides)`,
+        after: { count: created, errors }
+    }).catch(() => null)
     return { success: `${created} fournisseurs importés`, errors }
 }
 
@@ -252,7 +290,7 @@ export const registerSupplierPayment = async (data: {
                     amount: data.amount,
                     balanceBefore: Number(account.balance), // Before this txn
                     balanceAfter: Number(account.balance) - data.amount, // After
-                    source: "MANUAL_OUT",
+                    source: "SUPPLIER_PAYMENT",
                     referenceId: data.supplierId, // Link to supplier for history
                     description: `Paiement Fournisseur: ${data.notes || "Règlement"}`,
                     imageUrl: data.imageUrl || undefined,
@@ -274,6 +312,12 @@ export const registerSupplierPayment = async (data: {
         })
 
         revalidatePath("/(dashboard)/suppliers")
+        logAudit({
+            action: "CREATE",
+            entity: "PAYMENT",
+            description: `Règlement fournisseur : ${data.amount} DA payé (Compte ID: ${data.accountId})`,
+            after: { supplierId: data.supplierId, amount: data.amount, accountId: data.accountId, notes: data.notes }
+        }).catch(() => null)
         return transactionResult
 
     } catch (error) {
@@ -337,6 +381,12 @@ export const registerSupplierLoan = async (data: { supplierId: string; amount: n
 
         revalidatePath("/(dashboard)/suppliers")
         revalidatePath("/(dashboard)/emprunt-fournisseur")
+        logAudit({
+            action: "CREATE",
+            entity: "LOAN",
+            description: `Emprunt fournisseur : ${data.amount} DA reçu (Compte ID: ${data.accountId})`,
+            after: { supplierId: data.supplierId, amount: data.amount, accountId: data.accountId, notes: data.notes }
+        }).catch(() => null)
         return { success: "Emprunt fournisseur enregistré avec succès" }
     } catch (error) {
         console.error("registerSupplierLoan error:", error)

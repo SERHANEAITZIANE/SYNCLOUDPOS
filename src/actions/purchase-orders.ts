@@ -34,22 +34,43 @@ interface PurchaseOrderData {
     createdAt?: Date
 }
 
-export const getPurchaseOrders = async () => {
+export const getPurchaseOrders = async (page: number = 1, pageSize: number = 20, search?: string) => {
     const session = await auth()
-    if (!session?.user?.id) return { error: "Unauthorized" }
+    if (!session?.user?.id) return { error: "Unauthorized", purchaseOrders: [], totalCount: 0 }
     const tenantId = session.user.tenantId
 
     try {
-        const purchaseOrders = await db.purchaseOrder.findMany({
-            where: { tenantId },
-            include: {
-                supplier: true,
-                items: { include: { product: true } }
-            },
-            orderBy: { createdAt: "desc" }
-        })
-        return { purchaseOrders: JSON.parse(JSON.stringify(purchaseOrders)) }
-    } catch { return { error: "Failed to fetch purchase orders" } }
+        const whereClause: any = { tenantId }
+
+        if (search) {
+            whereClause.OR = [
+                { purchaseNumber: { contains: search, mode: 'insensitive' } },
+                { supplier: { name: { contains: search, mode: 'insensitive' } } }
+            ]
+        }
+
+        const safePage = Math.max(1, isNaN(page) ? 1 : page)
+        const safePageSize = Math.max(1, isNaN(pageSize) ? 20 : pageSize)
+
+        const [purchaseOrders, totalCount] = await Promise.all([
+            db.purchaseOrder.findMany({
+                where: whereClause,
+                include: {
+                    supplier: true,
+                    items: { include: { product: true } },
+                    account: true
+                },
+                orderBy: { createdAt: "desc" },
+                skip: (safePage - 1) * safePageSize,
+                take: safePageSize
+            }),
+            db.purchaseOrder.count({ where: whereClause })
+        ])
+        return { purchaseOrders: JSON.parse(JSON.stringify(purchaseOrders)), totalCount }
+    } catch (error) {
+        console.error("getPurchaseOrders error:", error)
+        return { error: "Failed to fetch purchase orders", purchaseOrders: [], totalCount: 0 }
+    }
 }
 
 export const getPurchaseOrder = async (id: string) => {

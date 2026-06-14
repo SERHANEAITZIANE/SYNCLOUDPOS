@@ -55,7 +55,7 @@ export const CustomersReportClient: React.FC<CustomerReportProps> = ({ data }) =
             id: "actions",
             cell: ({ row }) => (
                 <Button asChild variant="ghost" size="sm">
-                    <Link href={`/dashboard/customers/${row.original.id}/ledger`}>
+                    <Link href={`/payments?customerId=${row.original.id}`}>
                         Voir Détails <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
                 </Button>

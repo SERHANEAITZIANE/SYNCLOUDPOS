@@ -36,6 +36,8 @@ export default async function TreasuryReportPage() {
         type: tx.type,
         amount: Number(tx.amount),
         description: tx.description || "-",
+        source: tx.source,
+        referenceId: tx.referenceId,
     }));
 
     return (

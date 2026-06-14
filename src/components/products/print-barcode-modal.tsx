@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useReactToPrint } from "react-to-print"
 import { Printer, Sparkles, Tag, Plus, Minus, LayoutGrid } from "lucide-react"
+import { printWithDefaultPrinter } from "@/lib/print-helper"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -23,13 +24,21 @@ interface PrintBarcodeModalProps {
     price: number
     barcodes: { value: string; label?: string | null }[]
     children?: React.ReactNode
+    tenantName?: string
+    tenantPhone?: string
 }
 
-export const PrintBarcodeModal = ({ productName, price, barcodes, children }: PrintBarcodeModalProps) => {
-    const [size, setSize] = useState<"4x2" | "4.5x3.5" | "5x3">("4x2")
+export const PrintBarcodeModal = ({ 
+    productName, 
+    price, 
+    barcodes, 
+    children,
+    tenantName = "",
+    tenantPhone = ""
+}: PrintBarcodeModalProps) => {
     const [copies, setCopies] = useState(1)
     const [selectedBarcodeIndex, setSelectedBarcodeIndex] = useState(0)
-    const [barcodeModel, setBarcodeModel] = useState<BarcodeLabelModel>("classic")
+    const [barcodeModel, setBarcodeModel] = useState<BarcodeLabelModel>("simple_40x20")
     const [isPrinting, setIsPrinting] = useState(false)
     const [printerBarcode, setPrinterBarcode] = useState("default")
 
@@ -38,7 +47,9 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
             const stored = localStorage.getItem("pos_printing_prefs")
             if (stored) {
                 const prefs = JSON.parse(stored)
-                if (prefs.barcodeModel) setBarcodeModel(prefs.barcodeModel)
+                if (prefs.barcodeModel && ["simple_40x20", "side_store_45x35", "store_40x20"].includes(prefs.barcodeModel)) {
+                    setBarcodeModel(prefs.barcodeModel)
+                }
                 if (prefs.printerBarcode) setPrinterBarcode(prefs.printerBarcode)
             }
         } catch { /* noop */ }
@@ -46,17 +57,23 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
 
     const printRef = useRef<HTMLDivElement>(null)
 
+    const dim = {
+        simple_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" as const },
+        side_store_45x35: { w: "45mm", h: "35mm", labelSize: "4.5x3.5" as const },
+        store_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" as const },
+    }[barcodeModel] || { w: "40mm", h: "20mm", labelSize: "4x2" as const };
+
     const handlePrint = useReactToPrint({
         documentTitle: printerBarcode !== "default" ? printerBarcode : (productName || "Barcode Label"),
         pageStyle: `
             @page {
-                size: ${size === "4x2" ? "40mm 20mm" : size === "4.5x3.5" ? "45mm 35mm" : "50mm 30mm"};
+                size: ${dim.w} ${dim.h};
                 margin: 0;
             }
             @media print {
                 html, body {
-                    width: ${size === "4x2" ? "40mm" : size === "4.5x3.5" ? "45mm" : "50mm"};
-                    height: ${size === "4x2" ? "20mm" : size === "4.5x3.5" ? "35mm" : "30mm"};
+                    width: ${dim.w};
+                    height: ${dim.h};
                     margin: 0 !important;
                     padding: 0 !important;
                     overflow: hidden !important;
@@ -91,16 +108,15 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
             if (printerBarcode !== "default") {
                 document.title = printerBarcode
             }
-            const timer = setTimeout(() => {
+            
+            printWithDefaultPrinter(printerBarcode, () => {
                 handlePrint(() => printRef.current!)
+            }).finally(() => {
                 setIsPrinting(false)
                 setTimeout(() => {
                     document.title = originalTitle
                 }, 1000)
-            }, 150)
-            return () => {
-                clearTimeout(timer)
-            }
+            })
         }
     }, [isPrinting, handlePrint, printerBarcode])
 
@@ -134,7 +150,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                     </DialogTitle>
                                 </div>
                                 <DialogDescription className="text-xs text-gray-500 dark:text-gray-400">
-                                    Personnalisez la taille et le style des étiquettes de <span className="font-semibold text-gray-700 dark:text-gray-200">{productName}</span>.
+                                    Personnalisez le style d'étiquette de <span className="font-semibold text-gray-700 dark:text-gray-200">{productName}</span>.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -166,53 +182,16 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                         </div>
                                     )}
 
-                                    {/* 2. Label Dimension Selector */}
-                                    <div className="space-y-2.5">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                            Dimension de l'étiquette
-                                        </Label>
-                                        <div className="grid grid-cols-3 gap-2.5">
-                                            {(["4x2", "4.5x3.5", "5x3"] as const).map((s) => (
-                                                <button
-                                                    key={s}
-                                                    type="button"
-                                                    onClick={() => setSize(s)}
-                                                    className={cn(
-                                                        "p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all duration-200 gap-1.5 relative overflow-hidden group",
-                                                        size === s
-                                                            ? "border-pink-500 bg-pink-500/5 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400 ring-1 ring-pink-500"
-                                                            : "border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 bg-white dark:bg-[#121220]"
-                                                    )}
-                                                >
-                                                    <span className="font-bold text-xs">
-                                                        {s === "4x2" ? "40×20 mm" : s === "4.5x3.5" ? "45×35 mm" : "50×30 mm"}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400">
-                                                        {s === "4x2" ? "Compact" : s === "4.5x3.5" ? "Standard" : "Large"}
-                                                    </span>
-                                                    {size === s && (
-                                                        <div className="absolute top-1 right-1">
-                                                            <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
-                                                        </div>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 3. Style Selection */}
+                                    {/* 2. Style Selection */}
                                     <div className="space-y-2.5">
                                         <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
                                             <LayoutGrid className="h-3.5 w-3.5" /> Modèle visuel
                                         </Label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                        <div className="grid grid-cols-1 gap-2.5">
                                             {([
-                                                { id: "classic", name: "Classique", desc: "Minimal simple" },
-                                                { id: "modern", name: "Sombre", desc: "Fond noir" },
-                                                { id: "elegant", name: "Élégant", desc: "Cadre fin" },
-                                                { id: "retro", name: "Rétro", desc: "Teinte vintage" },
-                                                { id: "minimal", name: "Minimaliste", desc: "Épuré" },
-                                                { id: "bold", name: "Gras", desc: "Bandeau contrast" }
+                                                { id: "simple_40x20", name: "Simple (40×20 mm)", desc: "Nom + Code-barres + Prix" },
+                                                { id: "side_store_45x35", name: "Bandeau Gauche (45×35 mm)", desc: "Infos magasin + Nom multiline + Grand Code-barres" },
+                                                { id: "store_40x20", name: "Bandeau Magasin (40×20 mm)", desc: "Magasin + Nom + Code-barres + Prix" }
                                             ] as const).map((m) => (
                                                 <button
                                                     key={m.id}
@@ -220,7 +199,8 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                                     onClick={() => {
                                                         setBarcodeModel(m.id);
                                                         try {
-                                                            localStorage.setItem("pos_printing_prefs", JSON.stringify({ barcodeModel: m.id }));
+                                                            const existing = JSON.parse(localStorage.getItem("pos_printing_prefs") || "{}");
+                                                            localStorage.setItem("pos_printing_prefs", JSON.stringify({ ...existing, barcodeModel: m.id }));
                                                         } catch {}
                                                     }}
                                                     className={cn(
@@ -235,8 +215,8 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                                         {m.desc}
                                                     </span>
                                                     {barcodeModel === m.id && (
-                                                        <div className="absolute top-1 right-1">
-                                                            <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                                                        <div className="absolute top-2 right-3">
+                                                            <div className="h-2 w-2 rounded-full bg-pink-500" />
                                                         </div>
                                                     )}
                                                 </button>
@@ -244,7 +224,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                         </div>
                                     </div>
 
-                                    {/* 4. Quantity Stepper */}
+                                    {/* 3. Quantity Stepper */}
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between p-3.5 bg-white dark:bg-[#121220] rounded-xl border border-gray-200 dark:border-gray-800">
                                             <div className="flex flex-col">
@@ -255,7 +235,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                                 <button
                                                     type="button"
                                                     onClick={() => setCopies(prev => Math.max(1, prev - 1))}
-                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors font-bold text-base"
+                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-305 transition-colors font-bold text-base"
                                                 >
                                                     <Minus className="h-3.5 w-3.5" />
                                                 </button>
@@ -270,7 +250,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                                 <button
                                                     type="button"
                                                     onClick={() => setCopies(prev => Math.min(500, prev + 1))}
-                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-750 text-gray-600 dark:text-gray-300 transition-colors font-bold text-base"
+                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-355 transition-colors font-bold text-base"
                                                 >
                                                     <Plus className="h-3.5 w-3.5" />
                                                 </button>
@@ -297,8 +277,10 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                             productName={productName}
                                             price={price}
                                             barcodeValue={activeBarcode}
-                                            size={size}
+                                            size={dim.labelSize}
                                             model={barcodeModel}
+                                            tenantName={tenantName}
+                                            tenantPhone={tenantPhone}
                                         />
                                     </div>
                                 ) : (
@@ -310,7 +292,7 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
 
                             <div className="mt-6 text-center max-w-[280px]">
                                 <p className="text-xs text-gray-700 dark:text-gray-300 font-semibold">
-                                    Format d'impression : {size === "4x2" ? "40 x 20 mm" : size === "4.5x3.5" ? "45 x 35 mm" : "50 x 30 mm"}
+                                    Format d'impression : {dim.w.replace("mm", "")} x {dim.h}
                                 </p>
                                 <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 leading-relaxed">
                                     L'affichage est optimisé pour votre rouleau d'imprimante thermique sans marges ni débordements.
@@ -342,8 +324,10 @@ export const PrintBarcodeModal = ({ productName, price, barcodes, children }: Pr
                                 productName={productName}
                                 price={price}
                                 barcodeValue={activeBarcode}
-                                size={size}
+                                size={dim.labelSize}
                                 model={barcodeModel}
+                                tenantName={tenantName}
+                                tenantPhone={tenantPhone}
                             />
                         ))}
                     </div>

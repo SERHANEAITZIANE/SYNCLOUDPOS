@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Wallet, CreditCard, Receipt } from "lucide-react"
+import { Wallet, CreditCard, Receipt, LayoutGrid } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 const STORAGE_KEY = "pos_defaults_prefs"
@@ -20,6 +20,7 @@ export interface PosDefaultPrefs {
     showTvaOnReceipt: boolean
     showHtPricesOnReceipt: boolean
     showFavoritesOnly: boolean
+    posUiSize?: "sm" | "md" | "lg"
 }
 
 const defaults: PosDefaultPrefs = {
@@ -28,6 +29,7 @@ const defaults: PosDefaultPrefs = {
     showTvaOnReceipt: false,
     showHtPricesOnReceipt: false,
     showFavoritesOnly: false,
+    posUiSize: "md",
 }
 
 interface Account {
@@ -188,6 +190,8 @@ export const PosDefaultsForm = ({ accounts }: PosDefaultsFormProps) => {
                     </div>
                 </div>
             </div>
+
+
 
             <p className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2">
                 {t.rich("warning", { strong: (chunks) => <strong>{chunks}</strong> })}

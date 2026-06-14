@@ -18,7 +18,7 @@ export type PaymentColumn = {
     customerId?: string
 }
 
-export const usePaymentColumns = () => {
+export const usePaymentColumns = (accounts: { id: string; name: string; type: string }[]) => {
     const columns: ColumnDef<PaymentColumn>[] = [
         {
             accessorKey: "date",
@@ -63,12 +63,25 @@ export const usePaymentColumns = () => {
         },
         {
             accessorKey: "accountName",
-            header: "Modalité",
+            header: "Banque / Caisse",
             cell: ({ row }) => (
                 <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900/30 dark:text-purple-300">
                     {row.original.accountName}
                 </span>
             )
+        },
+        {
+            id: "paymentMode",
+            header: "Mode de règlement",
+            cell: ({ row }) => {
+                const account = accounts.find(a => a.id === row.original.accountId || a.name === row.original.accountName)
+                const type = account ? (account.type === "BANK" ? "Banque" : "Caisse") : "-"
+                return (
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${type === "Banque" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"}`}>
+                        {type}
+                    </span>
+                )
+            }
         },
         {
             accessorKey: "source",
@@ -94,7 +107,7 @@ export const usePaymentColumns = () => {
         {
             id: "actions",
             header: "",
-            cell: ({ row }) => <CellAction data={row.original} />
+            cell: ({ row }) => <CellAction data={row.original} accounts={accounts} />
         }
     ]
 

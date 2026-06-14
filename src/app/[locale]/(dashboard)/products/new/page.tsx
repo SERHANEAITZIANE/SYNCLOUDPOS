@@ -20,6 +20,8 @@ export default async function NewProductPage() {
                     brands={brands}
                     initialData={null}
                     tvaEnabled={tvaEnabled}
+                    tenantName={tenant?.name || ""}
+                    tenantPhone={tenant?.phone || ""}
                 />
             </div>
         </div>

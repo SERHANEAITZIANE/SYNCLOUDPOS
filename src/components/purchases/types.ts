@@ -11,5 +11,8 @@ export type PurchaseOrderColumn = {
     imageUrl1?: string | null
     imageUrl2?: string | null
     imageUrl3?: string | null
+    accountId?: string | null
+    accountName?: string | null
+    accountType?: string | null
 }
 

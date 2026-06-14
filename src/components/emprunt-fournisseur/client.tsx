@@ -21,7 +21,7 @@ import { SupplierLoanModal } from "./loan-modal"
 interface EmpruntFournisseurClientProps {
     data: SupplierLoanColumn[]
     suppliers: { id: string; name: string }[]
-    treasuryAccounts: { id: string; name: string; balance: number }[]
+    treasuryAccounts: { id: string; name: string; type: string; balance: number }[]
 }
 
 export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> = ({ data, suppliers, treasuryAccounts }) => {

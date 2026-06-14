@@ -4,13 +4,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "syncloud-mobile-secret";
+const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 const ACCESS_TOKEN_EXPIRY = "24h";
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
 
 // POST /api/mobile/auth — Login for mobile app
 export async function POST(req: NextRequest) {
     try {
+        if (!JWT_SECRET) {
+            console.error("[MOBILE_AUTH] ERROR: Neither AUTH_SECRET nor NEXTAUTH_SECRET is configured. Mobile login disabled.");
+            return NextResponse.json({ error: "Configuration du serveur invalide" }, { status: 500 });
+        }
+
         const { email, password, deviceName } = await req.json();
 
         if (!email || !password) {

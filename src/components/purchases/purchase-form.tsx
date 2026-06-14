@@ -96,6 +96,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const isElectronics = storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
+    const tvaEnabled = storeData?.tvaEnabled ?? false;
     const [ocrItems, setOcrItems] = useState<{ name: string, price: number, quantity: number }[]>([])
     const [supplierModalOpen, setSupplierModalOpen] = useState(false)
     const [newSupplierName, setNewSupplierName] = useState("")
@@ -1032,9 +1033,13 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             <div className="hidden md:grid grid-cols-12 gap-3 px-5 py-3.5 bg-slate-50 dark:bg-slate-900/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider items-center border-b border-slate-100 dark:border-slate-800">
                                                 <div className="col-span-4">Produit</div>
                                                 <div className="col-span-2 text-center">Quantité</div>
-                                                <div className="col-span-2">Prix U. HT (DA)</div>
-                                                <div className="col-span-2 text-center">TVA</div>
-                                                <div className="col-span-1 text-right">Total HT</div>
+                                                <div className={cn("text-left", storeData?.tvaEnabled ? "col-span-2" : "col-span-4")}>
+                                                    {storeData?.tvaEnabled ? "Prix U. HT (DA)" : "Prix U. (DA)"}
+                                                </div>
+                                                {storeData?.tvaEnabled && <div className="col-span-2 text-center">TVA</div>}
+                                                <div className="col-span-1 text-right">
+                                                    {storeData?.tvaEnabled ? "Total HT" : "Total"}
+                                                </div>
                                                 <div className="col-span-1"></div>
                                             </div>
                                             {fields.map((field, index) => {
@@ -1056,7 +1061,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                     value={f.value}
                                                                                     onChange={f.onChange}
                                                                                     disabled={loading || !canEdit}
-                                                                                    placeholder="Rechercher produit..."
+                                                                                    placeholder="Rechercher par nom, code, code-barre..."
                                                                                     priceField="cost"
                                                                                     onPriceSelect={price => form.setValue(`items.${index}.costPrice`, price)}
                                                                                 />
@@ -1066,11 +1071,11 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                     type="button"
                                                                                     variant="outline"
                                                                                     size="icon"
-                                                                                    className="h-9 w-9 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:text-emerald-300 dark:hover:bg-emerald-950/20 shrink-0 border border-slate-200 dark:border-slate-800 rounded-xl"
+                                                                                    className="h-9 w-9 shrink-0 border-dashed border-slate-300 hover:border-slate-400 bg-slate-50 hover:bg-slate-100 rounded-xl"
                                                                                     onClick={() => handleOpenQuickProductModal(index)}
-                                                                                    title="Ajouter un produit inline"
+                                                                                    title="Créer rapidement un nouveau produit"
                                                                                 >
-                                                                                    <Plus className="h-4 w-4" />
+                                                                                    <Plus className="h-4 w-4 text-slate-500" />
                                                                                 </Button>
                                                                             )}
                                                                         </div>
@@ -1086,7 +1091,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                 <span className="absolute left-2.5 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">S/N</span>
                                                                                 <Input
                                                                                     type="text"
-                                                                                    placeholder="N° de Série (Optionnel)..."
+                                                                                    placeholder="Numéros de série (S/N séparés par virgule)..."
                                                                                     className="pl-8 text-xs font-mono h-7 border-slate-150 focus-visible:ring-indigo-500 bg-slate-50/50 dark:bg-slate-900/50 rounded-lg"
                                                                                     disabled={loading || !canEdit}
                                                                                     {...f}
@@ -1108,7 +1113,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                             type="number" 
                                                                             min={1} 
                                                                             disabled={loading || !canEdit} 
-                                                                            className="text-center font-bold h-9 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
+                                                                            className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
                                                                             {...f} 
                                                                             onChange={e => f.onChange(e.target.valueAsNumber || 1)} 
                                                                         />
@@ -1118,7 +1123,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                         </div>
 
                                                         {/* Unit Price with absolute Sparkle button */}
-                                                        <div className="col-span-4 md:col-span-2">
+                                                        <div className={cn("col-span-4", storeData?.tvaEnabled ? "md:col-span-2" : "md:col-span-4")}>
                                                             <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
                                                                 <FormItem className="m-0 space-y-0">
                                                                     <FormControl>
@@ -1149,29 +1154,30 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                         </div>
 
                                                         {/* TVA */}
-                                                        <div className="col-span-4 md:col-span-2">
-                                                            <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => {
-                                                                const tvaEnabled = storeData?.tvaEnabled ?? false;
-                                                                const isDisabled = loading || !canEdit || !tvaEnabled;
-                                                                const val = tvaEnabled ? (f.value?.toString() ?? "0") : "0";
-                                                                return (
-                                                                    <FormItem className="m-0 space-y-0">
-                                                                        <Select disabled={isDisabled} onValueChange={(v) => f.onChange(Number(v))} value={val}>
-                                                                            <FormControl>
-                                                                                <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
-                                                                                    <SelectValue placeholder="TVA..." />
-                                                                                </SelectTrigger>
-                                                                            </FormControl>
-                                                                            <SelectContent>
-                                                                                <SelectItem value="19">19%</SelectItem>
-                                                                                <SelectItem value="9">9%</SelectItem>
-                                                                                <SelectItem value="0">0%</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </FormItem>
-                                                                );
-                                                            }} />
-                                                        </div>
+                                                        {storeData?.tvaEnabled && (
+                                                            <div className="col-span-4 md:col-span-2">
+                                                                <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => {
+                                                                    const isDisabled = loading || !canEdit;
+                                                                    const val = f.value?.toString() ?? "0";
+                                                                    return (
+                                                                        <FormItem className="m-0 space-y-0">
+                                                                            <Select disabled={isDisabled} onValueChange={(v) => f.onChange(Number(v))} value={val}>
+                                                                                <FormControl>
+                                                                                    <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
+                                                                                        <SelectValue placeholder="TVA..." />
+                                                                                    </SelectTrigger>
+                                                                                </FormControl>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="19">19%</SelectItem>
+                                                                                    <SelectItem value="9">9%</SelectItem>
+                                                                                    <SelectItem value="0">0%</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </FormItem>
+                                                                    );
+                                                                }} />
+                                                            </div>
+                                                        )}
 
                                                         {/* Total Line (HT) */}
                                                         <div className="col-span-8 md:col-span-1 text-right">
@@ -1220,7 +1226,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
                                     <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 text-right space-y-2 w-full sm:w-auto">
                                         <div>
-                                            <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">Total TTC</p>
+                                            <p className="text-xs text-muted-foreground uppercase font-semibold mb-1">{tvaEnabled ? "Total TTC" : "Total"}</p>
                                             <p className="text-3xl font-bold">
                                                 {total.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
                                             </p>
@@ -1794,10 +1800,10 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             {/* PRICING TAB */}
                             {quickTab === "pricing" && (
                                 <div className="space-y-4 animate-in fade-in duration-300">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className={cn("grid gap-4", tvaEnabled ? "grid-cols-2" : "grid-cols-1")}>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
-                                                <ShoppingCart className="h-3.5 w-3.5" /> Coût d'achat HT (DA) *
+                                                <ShoppingCart className="h-3.5 w-3.5" /> {tvaEnabled ? "Coût d'achat HT (DA) *" : "Coût d'achat (DA) *"}
                                             </label>
                                             <div className="relative">
                                                 <Input
@@ -1812,17 +1818,19 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             </div>
                                         </div>
 
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Taux de TVA (%)</label>
-                                            <Select value={String(quickTva)} onValueChange={v => setQuickTva(Number(v))} disabled={loading}>
-                                                <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold"><SelectValue placeholder="TVA..." /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="19">19% (Taux normal)</SelectItem>
-                                                    <SelectItem value="9">9% (Taux réduit)</SelectItem>
-                                                    <SelectItem value="0">0% (Exonéré)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                        {tvaEnabled && (
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Taux de TVA (%)</label>
+                                                <Select value={String(quickTva)} onValueChange={v => setQuickTva(Number(v))} disabled={loading}>
+                                                    <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold"><SelectValue placeholder="TVA..." /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="19">19% (Taux normal)</SelectItem>
+                                                        <SelectItem value="9">9% (Taux réduit)</SelectItem>
+                                                        <SelectItem value="0">0% (Exonéré)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <Separator />
@@ -1830,7 +1838,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     <div className="grid grid-cols-3 gap-3">
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                                <Store className="h-3.5 w-3.5" /> Vente Public TTC
+                                                <Store className="h-3.5 w-3.5" /> {tvaEnabled ? "Vente Public TTC" : "Vente Public"}
                                             </label>
                                             <div className="relative">
                                                 <Input
@@ -1864,7 +1872,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                                                <UsersIcon className="h-3.5 w-3.5" /> Revendeur TTC
+                                                <UsersIcon className="h-3.5 w-3.5" /> {tvaEnabled ? "Revendeur TTC" : "Revendeur"}
                                             </label>
                                             <div className="relative">
                                                 <Input

@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo, FC, Suspense, ReactNode } from "react"
-import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, Sparkles, Package, Percent, Trash, ChevronLeft, ChevronRight, Info } from "lucide-react"
+import { Search, ShoppingCart, ImageIcon, ChevronUp, Mic, MicOff, Star, X, PlusCircle, Plus, Keyboard, Tag, HelpCircle, DollarSign, Store, Users as UsersIcon, Barcode, Wand2, Archive, CheckCircle, LayoutGrid, Package, Percent, Trash, ChevronLeft, ChevronRight, Info } from "lucide-react"
 import Image from "next/image"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { useSwipe } from "@/hooks/use-swipe"
-import { cn, formatter } from "@/lib/utils"
+import { cn, formatter, scrollIntoViewSafe } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
@@ -79,7 +79,7 @@ interface PosClientProps {
 const getCategoryIcon = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes("all") || lower.includes("tous")) {
-        return <Sparkles className="h-3.5 w-3.5 text-indigo-400 shrink-0 transition-transform group-hover:rotate-12" />
+        return <LayoutGrid className="h-3.5 w-3.5 text-indigo-400 shrink-0 transition-transform group-hover:rotate-12" />
     }
     if (lower.includes("electr") || lower.includes("phone") || lower.includes("pc") || lower.includes("laptop")) {
         return <Store className="h-3.5 w-3.5 text-sky-400 shrink-0 transition-transform group-hover:scale-110" />
@@ -127,6 +127,7 @@ export const PosClient: FC<PosClientProps> = ({
     const [isSearchOrderOpen, setIsSearchOrderOpen] = useState(false)
     const [isMobileCartOpen, setIsMobileCartOpen] = useState(false)
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+    const [posUiSize, setPosUiSize] = useState<"sm" | "md" | "lg">("md")
     const [page, setPage] = useState(1)
     const pageSize = 60
     
@@ -163,7 +164,7 @@ export const PosClient: FC<PosClientProps> = ({
     const [quickPrice, setQuickPrice] = useState(0)
     const [quickWholesalePrice, setQuickWholesalePrice] = useState(0)
     const [quickDealerPrice, setQuickDealerPrice] = useState(0)
-    const [quickTva, setQuickTva] = useState(storeData?.tvaEnabled ? 19 : 0)
+    const [quickTva, setQuickTva] = useState(0)
     const [quickBarcodes, setQuickBarcodes] = useState<{ value: string; label: string }[]>([])
     const [quickImages, setQuickImages] = useState<{ url: string }[]>([])
     const [quickStock, setQuickStock] = useState(0)
@@ -274,6 +275,15 @@ export const PosClient: FC<PosClientProps> = ({
     useEffect(() => {
         setLocalProducts(products)
     }, [products])
+
+    // Lock body scrolling when POS is mounted to prevent layout shift and keep categories sticky
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+        return () => {
+            document.body.style.overflow = originalOverflow
+        }
+    }, [])
 
 
 
@@ -429,7 +439,7 @@ export const PosClient: FC<PosClientProps> = ({
                 setQuickPrice(0);
                 setQuickWholesalePrice(0);
                 setQuickDealerPrice(0);
-                setQuickTva(19);
+                setQuickTva(0);
                 setQuickBarcodes([]);
                 setQuickImages([]);
                 setQuickStock(0);
@@ -704,6 +714,53 @@ export const PosClient: FC<PosClientProps> = ({
 
     const [sidebarWidth, setSidebarWidth] = useState<'narrow' | 'standard' | 'wide'>('standard');
 
+    // Scroll categories horizontally with mouse wheel
+    const handleCategoryWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        if (categoryScrollRef.current) {
+            categoryScrollRef.current.scrollLeft += e.deltaY;
+        }
+    }
+
+    const lastScrollPageChange = useRef<number>(0);
+
+    const handleProductsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        const viewport = e.currentTarget.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+        if (!viewport) return;
+
+        const now = Date.now();
+        if (now - lastScrollPageChange.current < 800) return; // 800ms cooldown
+
+        const isScrollDown = e.deltaY > 0;
+        const isScrollUp = e.deltaY < 0;
+        const canScroll = viewport.scrollHeight > viewport.clientHeight;
+
+        if (isScrollDown) {
+            // Check if user is at the bottom of the scroll container
+            const isAtBottom = canScroll && Math.abs(viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop) < 15;
+            if (isAtBottom && currentPage < totalPages) {
+                lastScrollPageChange.current = now;
+                setPage(p => p + 1);
+                toast.success(`Page ${currentPage + 1} / ${totalPages}`, { id: 'pos-page-change', duration: 1000 });
+                // Reset scroll position to top for the next page
+                setTimeout(() => {
+                    if (viewport) viewport.scrollTop = 0;
+                }, 50);
+            }
+        } else if (isScrollUp) {
+            // Check if user is at the top of the scroll container
+            const isAtTop = canScroll && viewport.scrollTop <= 2;
+            if (isAtTop && currentPage > 1) {
+                lastScrollPageChange.current = now;
+                setPage(p => p - 1);
+                toast.success(`Page ${currentPage - 1} / ${totalPages}`, { id: 'pos-page-change', duration: 1000 });
+                // Reset scroll position to bottom for the previous page
+                setTimeout(() => {
+                    if (viewport) viewport.scrollTop = viewport.scrollHeight - viewport.clientHeight - 15;
+                }, 50);
+            }
+        }
+    };
+
     // Keyboard navigation functionality
     const getColumnsCount = () => {
         const gridEl = document.querySelector(".pos-products-grid");
@@ -724,10 +781,7 @@ export const PosClient: FC<PosClientProps> = ({
     // Scroll list item into view when focused in list view
     useEffect(() => {
         if (viewMode === "list" && focusedProductIndex !== -1 && itemRefs.current[focusedProductIndex]) {
-            itemRefs.current[focusedProductIndex]?.scrollIntoView({
-                behavior: "smooth",
-                block: "nearest"
-            });
+            scrollIntoViewSafe(itemRefs.current[focusedProductIndex]);
         }
     }, [focusedProductIndex, viewMode]);
 
@@ -967,7 +1021,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         setQuickPrice(0);
                                         setQuickWholesalePrice(0);
                                         setQuickDealerPrice(0);
-                                        setQuickTva(19);
+                                        setQuickTva(0);
                                         setQuickBarcodes([]);
                                         setQuickImages([]);
                                         setQuickStock(0);
@@ -1062,21 +1116,22 @@ export const PosClient: FC<PosClientProps> = ({
                         </div>
                     </div>
 
-                    {/* Category Selector Bar with Navigation Buttons - Always visible (F6 to cycle) */}
-                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar bg-[#f8f9fa]/80 dark:bg-[#0f1115]/80 py-1.5 border-b border-gray-200/40 dark:border-slate-800/40">
+                    {/* Category Selector Bar with Navigation Buttons - Always visible, sticky (F6 to cycle) */}
+                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar bg-[#f8f9fa] dark:bg-[#0f1115] py-1.5 border-b border-gray-200/60 dark:border-slate-800/60 sticky top-0 z-30 backdrop-blur-md">
                         {/* Scroll Left Button */}
                         <Button
                             variant="outline"
                             size="icon"
                             type="button"
                             onClick={() => scrollCategories("left")}
-                            className="absolute left-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
+                            className="absolute left-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-80 [@media(hover:hover)]:opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
 
                         <div 
                             ref={categoryScrollRef} 
+                            onWheel={handleCategoryWheel}
                             className="w-full overflow-x-auto scrollbar-none whitespace-nowrap py-1 scroll-smooth"
                         >
                             <div className="flex gap-1.5 lg:gap-2 pb-1.5 px-1 w-max">
@@ -1126,7 +1181,7 @@ export const PosClient: FC<PosClientProps> = ({
                             size="icon"
                             type="button"
                             onClick={() => scrollCategories("right")}
-                            className="absolute right-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
+                            className="absolute right-4 z-20 h-7 w-7 rounded-full bg-white/95 dark:bg-[#1e293b]/95 border border-gray-200 dark:border-slate-800 shadow-md opacity-80 [@media(hover:hover)]:opacity-0 group-hover/cat-bar:opacity-100 transition-all duration-200 flex items-center justify-center hover:scale-105"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -1137,15 +1192,32 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                     {/* Content Area (Grid or List) */}
-                    <ScrollArea className="flex-1 px-3 lg:px-6 pt-2 pb-20 lg:pb-6">
+                    <ScrollArea 
+                        className="flex-1 min-h-0 px-3 lg:px-6 pt-2 pb-20 lg:pb-6"
+                        onWheel={handleProductsWheel}
+                    >
                         {viewMode === "grid" ? (
                             <div className={cn(
                                 "grid gap-2.5 lg:gap-3 pb-8 pos-products-grid",
-                                sidebarWidth === 'wide' 
-                                    ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
-                                    : sidebarWidth === 'narrow'
-                                    ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
-                                    : "grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                posUiSize === "sm" ? (
+                                    sidebarWidth === 'wide'
+                                        ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                        : sidebarWidth === 'narrow'
+                                        ? "grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 min-[1800px]:grid-cols-10"
+                                        : "grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                ) : posUiSize === "lg" ? (
+                                    sidebarWidth === 'wide'
+                                        ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1800px]:grid-cols-6"
+                                        : sidebarWidth === 'narrow'
+                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
+                                ) : (
+                                    sidebarWidth === 'wide' 
+                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
+                                        : sidebarWidth === 'narrow'
+                                        ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                        : "grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                )
                             )}>
                                 {renderedProducts.map((product, index) => (
                                     <ProductCard 
@@ -1153,6 +1225,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         data={product} 
                                         blockNegativeStock={storeData?.blockNegativeStock ?? false} 
                                         isFocused={focusedProductIndex === index}
+                                        posUiSize={posUiSize}
                                     />
                                 ))}
                             </div>
@@ -1193,7 +1266,12 @@ export const PosClient: FC<PosClientProps> = ({
                                                 })
                                             }}
                                             className={cn(
-                                                "flex items-center gap-3 lg:gap-4 bg-white dark:bg-[#1e293b] border-2 border-gray-100 dark:border-gray-800 p-2 lg:p-3 rounded-[16px] lg:rounded-[20px] hover:border-gray-300 dark:hover:border-gray-600 shadow-sm cursor-pointer transition-all group relative overflow-hidden",
+                                                "flex items-center bg-white dark:bg-[#1e293b] border-2 border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm cursor-pointer transition-all group relative overflow-hidden",
+                                                posUiSize === "sm"
+                                                    ? "p-1.5 lg:p-2 gap-2 lg:gap-2.5 rounded-[12px] lg:rounded-[14px]"
+                                                    : posUiSize === "lg"
+                                                    ? "p-3.5 lg:p-4 gap-4 lg:gap-5 rounded-[20px] lg:rounded-[24px]"
+                                                    : "p-2 lg:p-3 gap-3 lg:gap-4 rounded-[16px] lg:rounded-[20px]",
                                                 outOfStock ? "opacity-50 cursor-not-allowed select-none bg-gray-50/20 dark:bg-slate-900/20" : "",
                                                 focusedProductIndex === index
                                                     ? "ring-2 ring-indigo-600 dark:ring-indigo-400 scale-[1.01] z-10 border-transparent shadow-[0_0_12px_rgba(99,102,241,0.4)]"
@@ -1206,23 +1284,58 @@ export const PosClient: FC<PosClientProps> = ({
                                                 </div>
                                             )}
                                             <div 
-                                                className="h-12 w-12 lg:h-14 lg:w-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative border border-gray-200/50 dark:border-gray-700/50"
+                                                className={cn(
+                                                    "overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative border border-gray-200/50 dark:border-gray-700/50",
+                                                    posUiSize === "sm"
+                                                        ? "h-9 w-9 rounded-lg"
+                                                        : posUiSize === "lg"
+                                                        ? "h-16 w-16 rounded-2xl"
+                                                        : "h-12 w-12 lg:h-14 lg:w-14 rounded-xl"
+                                                )}
                                             >
                                                 {product.imageUrl ? (
-                                                    <Image src={product.imageUrl} alt={product.name} fill className="object-cover" />
+                                                    <Image 
+                                                        src={product.imageUrl} 
+                                                        alt={product.name} 
+                                                        fill 
+                                                        className="object-cover" 
+                                                        unoptimized={product.imageUrl.startsWith("/uploads/")}
+                                                        onError={(e) => {
+                                                            const target = e.currentTarget as HTMLImageElement;
+                                                            target.style.display = "none";
+                                                            if (target.parentElement) {
+                                                                target.parentElement.innerHTML = `<div class="flex h-full w-full items-center justify-center text-[8px] text-center font-medium text-gray-400">${t("noImg")}</div>`;
+                                                            }
+                                                        }}
+                                                    />
                                                 ) : (
                                                     <div className="flex h-full w-full items-center justify-center text-[8px] text-center font-medium text-gray-400">{t("noImg")}</div>
                                                 )}
                                             </div>
                                             <div className="flex-1 overflow-hidden">
-                                                <p className="text-[9px] lg:text-[10px] font-bold text-primary/80 uppercase tracking-widest truncate">{product.category}</p>
-                                                <h4 className="font-bold text-gray-900 dark:text-gray-100 text-xs lg:text-sm truncate group-hover:text-primary transition-colors">{product.name}</h4>
+                                                <p className={cn(
+                                                    "font-bold text-primary/80 uppercase tracking-widest truncate",
+                                                    posUiSize === "sm" ? "text-[7.5px]" : posUiSize === "lg" ? "text-[10px] lg:text-[11px]" : "text-[9px] lg:text-[10px]"
+                                                )}>{product.category}</p>
+                                                <h4 className={cn(
+                                                    "font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary transition-colors",
+                                                    posUiSize === "sm" ? "text-xs" : posUiSize === "lg" ? "text-sm lg:text-base" : "text-xs lg:text-sm"
+                                                )}>{product.name}</h4>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="text-[10px] lg:text-xs text-gray-500 font-mono">{product.barcodes[0] || 'No Barcode'}</p>
+                                                    <p className={cn(
+                                                        "text-gray-500 font-mono",
+                                                        posUiSize === "sm" ? "text-[8px] lg:text-[9px]" : posUiSize === "lg" ? "text-xs lg:text-sm" : "text-[10px] lg:text-xs"
+                                                    )}>{product.barcodes[0] || 'No Barcode'}</p>
                                                     {product.stock <= 5 ? (
-                                                        <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-red-100 text-red-700 font-bold uppercase hidden xs:inline">{t("lowStock", { stock: product.stock })}</span>
+                                                        <span className={cn(
+                                                            "px-1.5 py-0.5 rounded-sm bg-red-100 text-red-700 font-bold uppercase hidden xs:inline",
+                                                            posUiSize === "sm" ? "text-[8px]" : "text-[9px]"
+                                                        )}>{t("lowStock", { stock: product.stock })}</span>
                                                     ) : (
-                                                        <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium uppercase hidden xs:inline">{t("stock", { stock: product.stock })}</span>
+                                                        <span className={cn(
+                                                            "px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium uppercase hidden xs:inline",
+                                                            posUiSize === "sm" ? "text-[8px]" : "text-[9px]"
+                                                        )}>{t("stock", { stock: product.stock })}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -1650,10 +1763,10 @@ export const PosClient: FC<PosClientProps> = ({
                         {/* PRICING TAB */}
                         {quickTab === "pricing" && (
                             <div className="space-y-4 animate-in fade-in duration-300">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className={cn("grid gap-4", storeData?.tvaEnabled ? "grid-cols-2" : "grid-cols-1")}>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
-                                            <ShoppingCart className="h-3.5 w-3.5" /> Coût d'achat HT (DA) *
+                                            <ShoppingCart className="h-3.5 w-3.5" /> {storeData?.tvaEnabled ? "Coût d'achat HT (DA) *" : "Coût d'achat (DA) *"}
                                         </label>
                                         <div className="relative">
                                             <Input
@@ -1667,17 +1780,19 @@ export const PosClient: FC<PosClientProps> = ({
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Taux de TVA (%)</label>
-                                        <Select value={String(quickTva)} onValueChange={v => setQuickTva(Number(v))}>
-                                            <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold"><SelectValue placeholder="TVA..." /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="19">19% (Taux normal)</SelectItem>
-                                                <SelectItem value="9">9% (Taux réduit)</SelectItem>
-                                                <SelectItem value="0">0% (Exonéré)</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                    {storeData?.tvaEnabled && (
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-indigo-700 dark:text-indigo-400">Taux de TVA (%)</label>
+                                            <Select value={String(quickTva)} onValueChange={v => setQuickTva(Number(v))}>
+                                                <SelectTrigger className="border-slate-200 dark:border-slate-800 font-semibold"><SelectValue placeholder="TVA..." /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="19">19% (Taux normal)</SelectItem>
+                                                    <SelectItem value="9">9% (Taux réduit)</SelectItem>
+                                                    <SelectItem value="0">0% (Exonéré)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <Separator />
@@ -1685,7 +1800,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 <div className="grid grid-cols-3 gap-3">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                            <Store className="h-3.5 w-3.5" /> Vente Public TTC
+                                            <Store className="h-3.5 w-3.5" /> {storeData?.tvaEnabled ? "Vente Public TTC" : "Vente Public"}
                                         </label>
                                         <div className="relative">
                                             <Input
@@ -1717,7 +1832,7 @@ export const PosClient: FC<PosClientProps> = ({
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                                            <UsersIcon className="h-3.5 w-3.5" /> Revendeur TTC
+                                            <UsersIcon className="h-3.5 w-3.5" /> {storeData?.tvaEnabled ? "Revendeur TTC" : "Revendeur"}
                                         </label>
                                         <div className="relative">
                                             <Input

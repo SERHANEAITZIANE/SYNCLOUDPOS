@@ -8,17 +8,18 @@ import { formatter } from "@/lib/utils"
 const SalesPage = async ({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string, search?: string, type?: string, from?: string, to?: string, limit?: string }>
+    searchParams: Promise<{ page?: string, search?: string, type?: string, status?: string, from?: string, to?: string, limit?: string }>
 }) => {
     const params = await searchParams
     const page = Number(params.page) || 1
     const pageSize = Number(params.limit) || 20
     const search = params.search || ""
     const type = params.type || "ALL"
+    const status = params.status || "ALL"
     const from = params.from || undefined
     const to = params.to || undefined
 
-    const { salesOrders, totalCount, summary } = await getSalesOrders(page, pageSize, search, type, from, to) as {
+    const { salesOrders, totalCount, summary } = await getSalesOrders(page, pageSize, search, type, from, to, status) as {
         salesOrders: any[]
         totalCount: number
         summary?: {
@@ -45,6 +46,7 @@ const SalesPage = async ({
         productCount: item.items?.length || 0,
         totalQuantity: (item.items || []).reduce((sum: number, i: any) => sum + (i.quantity || 0), 0),
         itemsSummary: (item.items || []).map((i: any) => `${i.product?.name || "Produit"} (x${i.quantity})`).join(", "),
+        paymentMethod: item.paymentMethod,
     }))
 
     const pageCount = Math.ceil(totalCount / pageSize)

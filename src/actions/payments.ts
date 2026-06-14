@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { logAudit } from "./audit-log"
 
 // ─── Customer Payments ──────────────────────────────────────────────────────
 
@@ -230,12 +231,14 @@ export async function updatePayment(id: string, data: {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
+        let oldPaymentCopy: any = null
         const result = await db.$transaction(async (tx) => {
             // Get the existing transaction
             const existing = await tx.treasuryTransaction.findFirst({
                 where: { id, tenantId }
             })
             if (!existing) throw new Error("Paiement introuvable")
+            oldPaymentCopy = existing
 
             const oldAmount = Number(existing.amount)
             const newAmount = data.amount
@@ -341,6 +344,14 @@ export async function updatePayment(id: string, data: {
         revalidatePath("/(dashboard)/treasury")
         revalidatePath("/(dashboard)/emprunt")
         revalidatePath("/(dashboard)/emprunt-fournisseur")
+        logAudit({
+            action: "UPDATE",
+            entity: "PAYMENT",
+            entityId: id,
+            description: `Paiement mis à jour : ${data.description || id} (Montant: ${data.amount} DA)`,
+            before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId } : undefined,
+            after: { amount: data.amount, description: data.description, accountId: data.accountId }
+        }).catch(() => null)
         return result
     } catch (error) {
         console.error("[UPDATE_PAYMENT]", error)
@@ -356,11 +367,13 @@ export async function deletePayment(id: string) {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
+        let oldPaymentCopy: any = null
         const result = await db.$transaction(async (tx) => {
             const existing = await tx.treasuryTransaction.findFirst({
                 where: { id, tenantId }
             })
             if (!existing) throw new Error("Paiement introuvable")
+            oldPaymentCopy = existing
 
             const amount = Number(existing.amount)
 
@@ -410,6 +423,13 @@ export async function deletePayment(id: string) {
         revalidatePath("/(dashboard)/suppliers")
         revalidatePath("/(dashboard)/emprunt")
         revalidatePath("/(dashboard)/emprunt-fournisseur")
+        logAudit({
+            action: "DELETE",
+            entity: "PAYMENT",
+            entityId: id,
+            description: `Paiement supprimé : ${oldPaymentCopy?.description || id} (Montant: ${oldPaymentCopy?.amount ? Number(oldPaymentCopy.amount) : 0} DA)`,
+            before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId } : undefined
+        }).catch(() => null)
         return result
     } catch (error) {
         console.error("[DELETE_PAYMENT]", error)

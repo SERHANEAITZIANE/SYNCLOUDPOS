@@ -11,6 +11,7 @@ const nextConfig: import('next').NextConfig = {
     // Performance optimizations
     compress: true,
     poweredByHeader: false,
+    devIndicators: false,
 
     // Tree-shake heavy barrel-export packages
     experimental: {

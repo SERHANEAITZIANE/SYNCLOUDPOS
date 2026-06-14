@@ -133,6 +133,14 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                                        unoptimized={(imageUrl as string).startsWith("/uploads/")}
+                                        onError={(e) => {
+                                            const target = e.currentTarget as HTMLImageElement;
+                                            target.style.display = "none";
+                                            if (target.parentElement) {
+                                                target.parentElement.innerHTML = '<div class="flex flex-col items-center justify-center h-full text-zinc-300 dark:text-zinc-700"><span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Image introuvable</span></div>';
+                                            }
+                                        }}
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center text-zinc-300 dark:text-zinc-700">

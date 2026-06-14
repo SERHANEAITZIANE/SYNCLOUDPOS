@@ -82,11 +82,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             }
                         })
 
+                        const randomPassword = "OAUTH_NO_PASSWORD_" + Math.random().toString(36).substring(2) + Date.now()
+                        const hashedPassword = await bcrypt.hash(randomPassword, 10)
+
                         const newUser = await db.user.create({
                             data: {
                                 name,
                                 email: user.email,
-                                password: "", // No password for OAuth users
+                                password: hashedPassword, // Secure random hashed password for OAuth users
                                 tenantId: tenant.id,
                                 role: "ADMIN",
                                 defaultStoreId: defaultStore.id,

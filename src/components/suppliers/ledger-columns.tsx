@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { LedgerLine } from "@/actions/ledger"
 
+import { Link } from "@/i18n/routing"
+import { Eye } from "lucide-react"
+
 export const useSupplierLedgerColumns = (): ColumnDef<LedgerLine>[] => {
 
     const formatCurrency = (amount: number) => {
@@ -53,6 +56,43 @@ export const useSupplierLedgerColumns = (): ColumnDef<LedgerLine>[] => {
             accessorKey: "observation",
             header: "Observations",
             cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.observation}</span>
+        },
+        {
+            id: "actions",
+            header: "Détails",
+            cell: ({ row }) => {
+                const line = row.original
+                let href = ""
+                let label = "Détail"
+
+                if (line.id.startsWith("purchase-")) {
+                    href = `/purchases/${line.reference}`
+                    label = "Achat"
+                } else if (line.id.startsWith("pay-")) {
+                    const payId = line.id.replace("pay-", "")
+                    href = `/payments/suppliers?paymentId=${payId}`
+                    label = "Paiement"
+                } else if (line.id.startsWith("return-")) {
+                    href = `/retours`
+                    label = "Retour"
+                } else if (line.id.startsWith("advance-")) {
+                    href = `/emprunt-fournisseur`
+                    label = "Emprunt"
+                }
+
+                if (!href || line.category === "INITIAL") return null
+
+                return (
+                    <Link
+                        href={href}
+                        target="_blank"
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-semibold hover:underline flex items-center gap-1 no-print text-xs"
+                    >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>{label}</span>
+                    </Link>
+                )
+            }
         }
     ]
 }

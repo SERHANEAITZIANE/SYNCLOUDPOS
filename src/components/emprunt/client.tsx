@@ -22,7 +22,7 @@ import { LoanModal } from "./loan-modal"
 interface EmpruntClientProps {
     data: LoanColumn[]
     customers: { id: string; name: string }[]
-    treasuryAccounts: { id: string; name: string; balance: number }[]
+    treasuryAccounts: { id: string; name: string; type: string; balance: number }[]
 }
 
 export const EmpruntClient: React.FC<EmpruntClientProps> = ({ data, customers, treasuryAccounts }) => {

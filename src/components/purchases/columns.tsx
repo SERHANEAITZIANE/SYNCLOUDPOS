@@ -65,6 +65,36 @@ export function usePurchaseColumns(): ColumnDef<PurchaseOrderColumn>[] {
             header: t("fields.totalQuantity"),
         },
         {
+            accessorKey: "accountName",
+            header: "Banque / Caisse",
+            cell: ({ row }) => {
+                const name = row.original.accountName
+                if (!name) return <span className="text-muted-foreground text-xs italic">-</span>
+                return (
+                    <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900/30 dark:text-purple-300">
+                        {name}
+                    </span>
+                )
+            }
+        },
+        {
+            id: "paymentMode",
+            header: "Mode de règlement",
+            cell: ({ row }) => {
+                const type = row.original.accountType
+                if (!type) return <span className="text-muted-foreground text-xs italic">-</span>
+                const label = type === "BANK" ? "Banque" : "Caisse"
+                return (
+                    <span className={cn(
+                        "text-xs px-2 py-1 rounded-full font-medium",
+                        type === "BANK" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                    )}>
+                        {label}
+                    </span>
+                )
+            }
+        },
+        {
             accessorKey: "total",
             header: tCommon("total"),
             cell: ({ row }) => <span className="font-bold">{row.original.total}</span>

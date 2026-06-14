@@ -3,11 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "syncloud-mobile-secret";
+const JWT_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
 // POST /api/mobile/auth/refresh — Refresh access token
 export async function POST(req: NextRequest) {
     try {
+        if (!JWT_SECRET) {
+            console.error("[MOBILE_AUTH_REFRESH] ERROR: Neither AUTH_SECRET nor NEXTAUTH_SECRET is configured. Mobile token refresh disabled.");
+            return NextResponse.json({ error: "Configuration du serveur invalide" }, { status: 500 });
+        }
+
         const { refreshToken } = await req.json();
 
         if (!refreshToken) {

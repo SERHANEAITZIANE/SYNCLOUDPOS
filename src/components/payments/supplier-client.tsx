@@ -32,7 +32,7 @@ interface SupplierPaymentsClientProps {
 }
 
 export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ data, suppliers, accounts }) => {
-    const columns = useSupplierPaymentColumns()
+    const columns = useSupplierPaymentColumns(accounts)
     const router = useRouter()
 
     // Filter states
@@ -40,6 +40,27 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
     const [dateRange, setDateRange] = React.useState<DateRange | undefined>()
     const [selectedSupplier, setSelectedSupplier] = React.useState<string>("ALL")
     const [selectedAccount, setSelectedAccount] = React.useState<string>("ALL")
+    const [paymentId, setPaymentId] = React.useState<string | null>(null)
+
+    React.useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search)
+            setPaymentId(params.get("paymentId"))
+
+            const suppId = params.get("supplierId")
+            if (suppId) {
+                setSelectedSupplier(suppId)
+            }
+
+            const accId = params.get("accountId")
+            if (accId) {
+                const acc = accounts.find(a => a.id === accId)
+                if (acc) {
+                    setSelectedAccount(acc.name)
+                }
+            }
+        }
+    }, [accounts])
 
     // Create dialog state
     const [createOpen, setCreateOpen] = React.useState(false)
@@ -57,32 +78,36 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
     React.useEffect(() => {
         let result = data
 
-        if (selectedSupplier !== "ALL") {
-            result = result.filter(item => item.supplierId === selectedSupplier)
-        }
+        if (paymentId) {
+            result = result.filter(item => item.id === paymentId)
+        } else {
+            if (selectedSupplier !== "ALL") {
+                result = result.filter(item => item.supplierId === selectedSupplier)
+            }
 
-        if (selectedAccount !== "ALL") {
-            result = result.filter(item => item.accountName === selectedAccount)
-        }
+            if (selectedAccount !== "ALL") {
+                result = result.filter(item => item.accountName === selectedAccount)
+            }
 
-        if (dateRange?.from) {
-            result = result.filter(item => {
-                const itemDate = new Date(item.date)
-                itemDate.setHours(0, 0, 0, 0)
-                const fromDate = new Date(dateRange.from!)
-                fromDate.setHours(0, 0, 0, 0)
+            if (dateRange?.from) {
+                result = result.filter(item => {
+                    const itemDate = new Date(item.date)
+                    itemDate.setHours(0, 0, 0, 0)
+                    const fromDate = new Date(dateRange.from!)
+                    fromDate.setHours(0, 0, 0, 0)
 
-                if (dateRange.to) {
-                    const toDate = new Date(dateRange.to)
-                    toDate.setHours(23, 59, 59, 999)
-                    return itemDate >= fromDate && itemDate <= toDate
-                }
-                return itemDate.getTime() === fromDate.getTime()
-            })
+                    if (dateRange.to) {
+                        const toDate = new Date(dateRange.to)
+                        toDate.setHours(23, 59, 59, 999)
+                        return itemDate >= fromDate && itemDate <= toDate
+                    }
+                    return itemDate.getTime() === fromDate.getTime()
+                })
+            }
         }
 
         setFilteredData(result)
-    }, [data, dateRange, selectedSupplier, selectedAccount])
+    }, [data, dateRange, selectedSupplier, selectedAccount, paymentId])
 
     const totalAmount = filteredData.reduce((acc, curr) => acc + curr.amount, 0)
     const formattedTotal = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -142,7 +167,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                     description={"Suivez tous les décaissements fournisseurs — Achats et Règlements"}
                 />
                 <div className="flex items-center gap-3">
-                    <div className="bg-red-50 text-red-700 dark:bg-red-950/30 font-bold px-4 py-2 rounded-md border border-red-200 shadow-sm">
+                    <div className="bg-red-50 text-red-700 dark:bg-red-955/30 font-bold px-4 py-2 rounded-md border border-red-200 shadow-sm">
                         Total: {formattedTotal}
                     </div>
                     <Button onClick={() => setCreateOpen(true)}>
@@ -152,6 +177,23 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                 </div>
             </div>
             <Separator />
+
+            {paymentId && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-center justify-between mt-4 dark:bg-blue-950/20 dark:border-blue-900/50 dark:text-blue-300">
+                    <span className="text-sm font-medium">Affichage d'une seule opération (Paiement).</span>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-bold hover:bg-blue-100/50 dark:hover:bg-blue-900/30" 
+                        onClick={() => {
+                            window.history.replaceState({}, '', window.location.pathname)
+                            setPaymentId(null)
+                        }}
+                    >
+                        Voir toutes les opérations
+                    </Button>
+                </div>
+            )}
 
             {/* Filters Row */}
             <div className="flex flex-col sm:flex-row items-center gap-4 py-4">

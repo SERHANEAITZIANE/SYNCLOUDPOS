@@ -159,6 +159,9 @@ model RecurringInvoice {
   tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   items           RecurringInvoiceItem[]
   generatedOrders SalesOrder[]
+
+  @@index([tenantId, status])
+  @@index([nextRunDate])
 }
 
 model RecurringInvoiceItem {
@@ -183,6 +186,8 @@ model StockCountSession {
   approvedAt DateTime?
   items      StockCountItem[]
   tenant     Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 
 model StockCountItem {
@@ -196,6 +201,8 @@ model StockCountItem {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   session     StockCountSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 }
 
 model Promotion {
@@ -214,6 +221,8 @@ model Promotion {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   tenant        Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, isActive])
 }
 
 model User {
@@ -396,6 +405,7 @@ model Customer {
   @@index([tenantId])
   @@index([tenantId, balance])
   @@index([name])
+  @@index([tenantId, clientType])
 }
 
 model Supplier {
@@ -467,6 +477,9 @@ model OrderItem {
   serialNumber String?
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([orderId])
 }
 
 model PurchaseOrder {
@@ -568,6 +581,9 @@ model SalesOrderItem {
   serialNumber String?
   product      Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([salesOrderId])
 }
 
 model ExpenseCategory {
@@ -655,6 +671,9 @@ model Spoilage {
   store     Store?   @relation(fields: [storeId], references: [id])
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
 }
 
 model DailyClose {
@@ -720,6 +739,9 @@ model Reservation {
   customer      Customer? @relation(fields: [customerId], references: [id])
   product       Product   @relation(fields: [productId], references: [id])
   tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
 }
 
 model DeliveryShipment {
@@ -1122,6 +1144,7 @@ model Transfer {
   @@index([tenantId])
   @@index([fromStoreId])
   @@index([toStoreId])
+  @@index([tenantId, status])
 }
 
 model TransferItem {
@@ -1174,6 +1197,7 @@ model SellerCommissionPayment {
 
   @@index([tenantId])
   @@index([userId])
+  @@index([tenantId, date])
 }
 
 enum UserRole {

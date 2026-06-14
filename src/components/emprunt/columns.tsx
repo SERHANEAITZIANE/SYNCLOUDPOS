@@ -17,7 +17,7 @@ export type LoanColumn = {
     accountName?: string
 }
 
-export const useLoanColumns = (treasuryAccounts: { id: string; name: string }[]) => {
+export const useLoanColumns = (treasuryAccounts: { id: string; name: string; type: string }[]) => {
     const columns: ColumnDef<LoanColumn>[] = [
         {
             accessorKey: "date",
@@ -41,10 +41,23 @@ export const useLoanColumns = (treasuryAccounts: { id: string; name: string }[])
         },
         {
             accessorKey: "accountName",
-            header: "Compte / Caisse",
+            header: "Banque / Caisse",
             cell: ({ row }) => (
                 <div className="text-sm font-medium text-muted-foreground">{row.original.accountName || "-"}</div>
             )
+        },
+        {
+            id: "paymentMode",
+            header: "Mode de règlement",
+            cell: ({ row }) => {
+                const account = treasuryAccounts.find(a => a.id === row.original.accountId || a.name === row.original.accountName)
+                const type = account ? (account.type === "BANK" ? "Banque" : "Caisse") : "-"
+                return (
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${type === "Banque" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"}`}>
+                        {type}
+                    </span>
+                )
+            }
         },
         {
             accessorKey: "amount",

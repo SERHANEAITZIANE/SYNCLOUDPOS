@@ -6,6 +6,7 @@ import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileT
 import { useReactToPrint } from "react-to-print"
 import { useTranslations } from "next-intl"
 import { toast } from "react-hot-toast"
+import { printWithDefaultPrinter } from "@/lib/print-helper"
 
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
@@ -182,10 +183,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         if (printerReceipt !== "default") {
             document.title = printerReceipt
         }
-        handlePrintReceipt()
-        setTimeout(() => {
-            document.title = originalTitle
-        }, 1000)
+        printWithDefaultPrinter(printerReceipt, () => {
+            handlePrintReceipt()
+        }).finally(() => {
+            setTimeout(() => {
+                document.title = originalTitle
+            }, 1000)
+        })
     }
 
     const onPrintBL = () => {
@@ -194,10 +198,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         if (printerA4 !== "default") {
             document.title = printerA4
         }
-        handlePrintBL()
-        setTimeout(() => {
-            document.title = originalTitle
-        }, 1000)
+        printWithDefaultPrinter(printerA4, () => {
+            handlePrintBL()
+        }).finally(() => {
+            setTimeout(() => {
+                document.title = originalTitle
+            }, 1000)
+        })
     }
 
     const onPrintWarranty = () => {
@@ -206,10 +213,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         if (printerA4 !== "default") {
             document.title = printerA4
         }
-        handlePrintWarranty()
-        setTimeout(() => {
-            document.title = originalTitle
-        }, 1000)
+        printWithDefaultPrinter(printerA4, () => {
+            handlePrintWarranty()
+        }).finally(() => {
+            setTimeout(() => {
+                document.title = originalTitle
+            }, 1000)
+        })
     }
 
     const handleConfirm = async () => {
@@ -598,25 +608,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 placeholder={t("selectBankAccount")}
                             />
                         </div>
-
-                        {/* Quick Cash — only for CASH */}
-                        {method === "CASH" && (
-                            <div className="space-y-2">
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{t("quickCash")}</p>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2">
-                                    {quickCashOptions.map((amount) => (
-                                        <Button
-                                            key={amount}
-                                            variant="outline"
-                                            className="h-9 sm:h-10 rounded-xl font-bold text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-950 dark:hover:text-white transition-colors border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
-                                            onClick={() => setQuickCash(amount)}
-                                        >
-                                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Right Side: Numpad (dimmed when not CASH) */}

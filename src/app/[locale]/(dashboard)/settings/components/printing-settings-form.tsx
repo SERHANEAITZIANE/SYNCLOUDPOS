@@ -210,22 +210,41 @@ export const PrintingSettingsForm = ({
     const [localPrinters, setLocalPrinters] = useState<string[]>([])
     const [refreshingPrinters, setRefreshingPrinters] = useState(false)
 
-    const refreshPrinters = async () => {
-        setRefreshingPrinters(true)
+    const loadPrintersList = async (showToast = false) => {
+        try {
+            // Try client-side API route first
+            const res = await fetch("/api/printers")
+            if (res.ok) {
+                const printers = await res.json()
+                if (Array.isArray(printers) && printers.length > 0) {
+                    setLocalPrinters(printers)
+                    if (showToast) toast.success(`${printers.length} imprimante(s) détectée(s)`)
+                    return
+                }
+            }
+        } catch (apiErr) {
+            console.warn("API printer fetch failed, falling back to server action:", apiErr)
+        }
+
+        // Fallback to Server Action
         try {
             const printers = await getLocalPrinters()
             if (printers && printers.length > 0) {
                 setLocalPrinters(printers)
-                toast.success(`${printers.length} imprimante(s) détectée(s)`)
+                if (showToast) toast.success(`${printers.length} imprimante(s) détectée(s)`)
             } else {
-                toast.error("Aucune imprimante détectée")
+                if (showToast) toast.error("Aucune imprimante détectée")
             }
         } catch (err) {
             console.error("Failed to load local printers:", err)
-            toast.error("Erreur de détection des imprimantes")
-        } finally {
-            setRefreshingPrinters(false)
+            if (showToast) toast.error("Erreur de détection des imprimantes")
         }
+    }
+
+    const refreshPrinters = async () => {
+        setRefreshingPrinters(true)
+        await loadPrintersList(true)
+        setRefreshingPrinters(false)
     }
 
     useEffect(() => {
@@ -234,11 +253,7 @@ export const PrintingSettingsForm = ({
             if (stored) setPrefs({ ...defaults, ...JSON.parse(stored) })
         } catch { /* noop */ }
 
-        getLocalPrinters().then(printers => {
-            if (printers && printers.length > 0) {
-                setLocalPrinters(printers)
-            }
-        }).catch(err => console.error("Failed to load local printers:", err))
+        loadPrintersList(false)
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const getOptions = (currentValue: string) => {

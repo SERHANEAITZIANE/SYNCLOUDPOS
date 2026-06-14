@@ -52,6 +52,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
     const locale = useLocale()
 
     const typeFilter = searchParams.get("type") || "ALL"
+    const statusFilter = searchParams.get("status") || "ALL"
     const fromStr = searchParams.get("from")
     const toStr = searchParams.get("to")
 
@@ -68,6 +69,17 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
             params.set("type", value)
         } else {
             params.delete("type")
+        }
+        params.set("page", "1")
+        router.push(pathname + "?" + params.toString())
+    }
+
+    const setStatusFilter = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value && value !== "ALL") {
+            params.set("status", value)
+        } else {
+            params.delete("status")
         }
         params.set("page", "1")
         router.push(pathname + "?" + params.toString())
@@ -180,6 +192,21 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
                         <SelectItem value="QUOTE">{t("filters.quote")}</SelectItem>
                         <SelectItem value="ORDER">{t("filters.order")}</SelectItem>
                         <SelectItem value="INVOICE">{t("filters.invoice")}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select
+                    value={statusFilter}
+                    onValueChange={setStatusFilter}
+                >
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Filtrer par État" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ALL">Tous les états</SelectItem>
+                        <SelectItem value="DRAFT">{t("status.draft")}</SelectItem>
+                        <SelectItem value="VALIDATED">{t("status.validated")}</SelectItem>
+                        <SelectItem value="PAID">{t("status.paid")}</SelectItem>
+                        <SelectItem value="CANCELLED">{t("status.cancelled")}</SelectItem>
                     </SelectContent>
                 </Select>
                 <div className="w-full sm:w-auto">

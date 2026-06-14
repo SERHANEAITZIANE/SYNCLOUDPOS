@@ -28,35 +28,40 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
     const [orders, setOrders] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
 
-    // Fetch initial recent orders when dialog opens
+    // Fetch orders when query changes (with debounce, or immediately if empty)
     useEffect(() => {
-        if (isOpen) {
-            fetchInitialOrders()
-        } else {
+        if (!isOpen) {
             setQuery("")
+            setOrders([])
+            return
         }
-    }, [isOpen])
 
-    const fetchInitialOrders = async () => {
-        setLoading(true)
-        try {
-            // Fetch top 50 recent orders without a specific query
-            const results = await searchRecentSalesOrders("", "ORDER")
-            setOrders(results)
-        } catch (error) {
-            console.error("Failed to fetch orders", error)
-        } finally {
-            setLoading(false)
+        const fetchOrders = async (searchQuery: string) => {
+            setLoading(true)
+            try {
+                const results = await searchRecentSalesOrders(searchQuery, "ORDER")
+                setOrders(results || [])
+            } catch (error) {
+                console.error("Failed to fetch orders", error)
+            } finally {
+                setLoading(false)
+            }
         }
-    }
 
-    // Client-side filtering
-    const filteredOrders = orders.filter((order) => {
-        const normalizedQuery = query.toLowerCase()
-        const matchesReceipt = order.receiptNumber?.toLowerCase().includes(normalizedQuery)
-        const matchesCustomer = order.customer?.name?.toLowerCase().includes(normalizedQuery)
-        return matchesReceipt || matchesCustomer
-    })
+        if (query === "") {
+            fetchOrders("")
+            return
+        }
+
+        const delayDebounceFn = setTimeout(() => {
+            fetchOrders(query)
+        }, 300)
+
+        return () => clearTimeout(delayDebounceFn)
+    }, [query, isOpen])
+
+    // Since we now query database directly, the filteredOrders list is just the orders returned by the server
+    const filteredOrders = orders
 
     return (
         <Modal

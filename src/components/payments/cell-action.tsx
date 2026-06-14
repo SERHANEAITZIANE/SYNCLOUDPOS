@@ -11,12 +11,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { deletePayment, updatePayment } from "@/actions/payments"
 import { PaymentColumn } from "./columns"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 
 interface CellActionProps {
     data: PaymentColumn
+    accounts: { id: string; name: string; type: string }[]
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data }) => {
+export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
@@ -27,6 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [editAmount, setEditAmount] = useState(String(data.amount))
     const [editDescription, setEditDescription] = useState(data.description)
     const [editDate, setEditDate] = useState(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
+    const [editAccountId, setEditAccountId] = useState(data.accountId || "")
 
     const onDelete = async () => {
         try {
@@ -55,10 +58,16 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 setLoading(false)
                 return
             }
+            if (!editAccountId) {
+                toast.error("Veuillez sélectionner une caisse/banque")
+                setLoading(false)
+                return
+            }
             const result = await updatePayment(data.id, {
                 amount,
                 description: editDescription,
                 date: editDate || undefined,
+                accountId: editAccountId,
             })
             if ('error' in result) {
                 toast.error(result.error as string)
@@ -120,6 +129,16 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                                     step="0.01"
                                     value={editAmount}
                                     onChange={(e) => setEditAmount(e.target.value)}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Caisse / Banque</Label>
+                                <SearchableSelect
+                                    options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
+                                    value={editAccountId}
+                                    onChange={setEditAccountId}
+                                    placeholder="Sélectionner une caisse"
+                                    searchPlaceholder="Rechercher une caisse..."
                                 />
                             </div>
                             <div className="grid gap-2">

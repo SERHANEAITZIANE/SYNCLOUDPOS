@@ -40,6 +40,8 @@ const ProductPage = async ({
                     brands={brands}
                     initialData={safeProduct as any}
                     tvaEnabled={tvaEnabled}
+                    tenantName={tenant?.name || ""}
+                    tenantPhone={tenant?.phone || ""}
                 />
             </div>
         </div>

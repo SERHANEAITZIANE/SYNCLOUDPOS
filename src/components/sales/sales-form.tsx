@@ -10,6 +10,7 @@ import { InvoicePrintTemplate, BonLivraisonPrintTemplate, ProformaPrintTemplate,
 import { useReactToPrint } from "react-to-print"
 import { useRef } from "react"
 import { toast } from "react-hot-toast"
+import { printWithDefaultPrinter } from "@/lib/print-helper"
 import { format } from "date-fns"
 
 import { Input } from "@/components/ui/input"
@@ -396,17 +397,28 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                     {isEditMode && (
                         <div className="flex items-center gap-2 flex-wrap">
                             <Button variant="outline" size="sm" onClick={() => {
-                                const originalTitle = document.title
-                                if (printerA4 !== "default") {
-                                    document.title = printerA4
-                                }
-                                window.print()
-                                document.title = originalTitle
-                            }}>
+                                 const originalTitle = document.title
+                                 if (printerA4 !== "default") {
+                                     document.title = printerA4
+                                 }
+                                 printWithDefaultPrinter(printerA4, () => {
+                                     window.print()
+                                 }).finally(() => {
+                                     setTimeout(() => {
+                                         document.title = originalTitle
+                                     }, 1000)
+                                 })
+                             }}>
                                 <Printer className="h-4 w-4 mr-1.5" /> Imprimer
                             </Button>
                             {storeData?.warrantyEnabled && (
-                                <Button variant="outline" size="sm" onClick={() => handlePrintWarranty && handlePrintWarranty()}
+                                <Button variant="outline" size="sm" onClick={() => {
+                                    if (handlePrintWarranty) {
+                                        printWithDefaultPrinter(printerA4, () => {
+                                            handlePrintWarranty()
+                                        })
+                                    }
+                                }}
                                     className="text-blue-600 border-blue-200 hover:bg-blue-50">
                                     <FileText className="h-4 w-4 mr-1.5 text-blue-500" /> Garantie
                                 </Button>
@@ -740,14 +752,18 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                         {/* Total */}
                         <div className="flex justify-end mt-4">
                             <div className="bg-primary/5 border border-primary/20 rounded-xl px-6 py-4 flex flex-col md:flex-row items-end md:items-center gap-6 md:gap-12 min-w-full md:min-w-fit">
-                                <div className="text-right flex flex-col items-end">
-                                    <span className="text-xs text-muted-foreground uppercase font-semibold">Total HT</span>
-                                    <span className="font-medium text-lg">{subtotalHTStr}</span>
-                                </div>
-                                <div className="text-right flex flex-col items-end">
-                                    <span className="text-xs text-muted-foreground uppercase font-semibold">TVA</span>
-                                    <span className="font-medium text-lg">{tvaAmountStr}</span>
-                                </div>
+                                {tvaEnabled && (
+                                    <div className="text-right flex flex-col items-end">
+                                        <span className="text-xs text-muted-foreground uppercase font-semibold">Total HT</span>
+                                        <span className="font-medium text-lg">{subtotalHTStr}</span>
+                                    </div>
+                                )}
+                                {tvaEnabled && (
+                                    <div className="text-right flex flex-col items-end">
+                                        <span className="text-xs text-muted-foreground uppercase font-semibold">TVA</span>
+                                        <span className="font-medium text-lg">{tvaAmountStr}</span>
+                                    </div>
+                                )}
                                 <div className="text-right flex flex-col items-end">
                                     <span className="text-xs text-muted-foreground uppercase font-semibold">Timbre ({watchPaymentMethod})</span>
                                     <span className="font-medium text-lg">{stampTaxStr}</span>

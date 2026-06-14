@@ -88,6 +88,33 @@ export function useSalesColumns(): ColumnDef<SalesOrderColumn>[] {
             }
         },
         {
+            accessorKey: "paymentMethod",
+            header: "Mode de règlement",
+            cell: ({ row }) => {
+                const method = row.original.paymentMethod;
+                const labels: Record<string, string> = {
+                    CASH: "Espèces",
+                    CARD: "Carte",
+                    TRANSFER: "Virement",
+                    CHECK: "Chèque",
+                    TERM: "À terme",
+                };
+                const label = labels[method] || method || "-";
+                return (
+                    <span className={cn(
+                        "text-xs px-2 py-1 rounded-full font-medium",
+                        method === "CASH" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300" :
+                        method === "CARD" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" :
+                        method === "TRANSFER" ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300" :
+                        method === "CHECK" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" :
+                        "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300"
+                    )}>
+                        {label}
+                    </span>
+                );
+            }
+        },
+        {
             accessorKey: "total",
             header: t("fields.total"),
             cell: ({ row }) => <span className="font-bold">{row.original.total}</span>

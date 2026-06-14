@@ -31,6 +31,11 @@ export default async function BarcodeLabelPage({
         orderBy: { name: "asc" },
     });
 
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, phone: true }
+    });
+
     const serialized = products.map((p) => ({
         id: p.id,
         name: p.name,
@@ -39,5 +44,11 @@ export default async function BarcodeLabelPage({
         barcodes: p.barcodes.map((b) => b.value),
     }));
 
-    return <BarcodeLabelClient products={serialized} />;
+    return (
+        <BarcodeLabelClient 
+            products={serialized} 
+            tenantName={tenant?.name || ""} 
+            tenantPhone={tenant?.phone || ""} 
+        />
+    );
 }

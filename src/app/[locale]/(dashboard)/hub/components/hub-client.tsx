@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { VoiceAssistantWidget } from "@/components/ui/voice-assistant-widget";
 import {
     Package,
     ShoppingCart,
@@ -164,7 +165,6 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
         { label: t("links.products") || "Catalogue Produits", href: "/products", icon: Package, gradient: "linear-gradient(135deg, #10b981, #059669)" },
         { label: t("links.allSales") || "Bons de Livraison", href: "/sales", icon: ShoppingCart, gradient: "linear-gradient(135deg, #f59e0b, #ea580c)" },
         { label: t("links.analytics") || "Analyses & KPI", href: "/analytics", icon: LineChart, gradient: "linear-gradient(135deg, #ef4444, #db2777)" },
-        { label: t("links.aiChat") || "DHAKA IA Advisor", href: "/ai", icon: Sparkles, gradient: "linear-gradient(135deg, #8b5cf6, #ec4899)" },
     ], [t]);
 
     // ═══════════════ Module Sections with enriched direct functionalities ═══════════════
@@ -283,19 +283,6 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                 { label: t("links.fiscal") || "Impôts G50 / IFU / TAP", href: "/fiscal", icon: Receipt },
                 { label: t("links.annualInventory") || "Inventaires Annuels", href: "/inventaire-annuel", icon: Package },
                 { label: t("links.commissions") || "Commissions Vendeurs", href: "/commissions", icon: Award },
-            ],
-        },
-        {
-            id: "ai",
-            title: t("sections.ai.title") || "Intelligence Artificielle",
-            description: t("sections.ai.description") || "DHAKA AI Advisor, prévisions et OCR d'achats",
-            icon: Sparkles,
-            accentFrom: "#d946ef",
-            accentTo: "#ec4899",
-            accentColor: "#d946ef",
-            links: [
-                { label: t("links.aiChat") || "DHAKA IA Advisor", href: "/ai", icon: Sparkles },
-                { label: "Génération de Prévisions", href: "/ai", icon: TrendingUp },
             ],
         },
         {
