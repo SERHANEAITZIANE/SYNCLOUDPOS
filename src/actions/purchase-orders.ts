@@ -395,8 +395,9 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                 }
             }
 
-            // Delete existing old items
+            // Delete existing old items and their stock movements to prevent history duplication
             await tx.purchaseOrderItem.deleteMany({ where: { purchaseOrderId: id } })
+            await tx.stockMovement.deleteMany({ where: { referenceId: id } })
 
             let purchaseNumber = existing.purchaseNumber
             if (!purchaseNumber) {
