@@ -116,13 +116,13 @@ export async function createTreasuryAccount(values: z.infer<typeof TreasuryAccou
         }
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "TREASURY",
             entityId: account.id,
             description: `Compte de trésorerie créé : ${name} (${type}, Solde: ${balance} DA)`,
             after: { name, type, balance, rib }
-        }).catch(() => null)
+        })
         return {
             success: "Account created!",
             account: {
@@ -372,14 +372,14 @@ export async function updateTreasuryAccount(id: string, values: z.infer<typeof T
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "UPDATE",
             entity: "TREASURY",
             entityId: id,
             description: `Compte de trésorerie mis à jour : ${name}`,
             before: { name: existingAccount.name, type: existingAccount.type, rib: existingAccount.rib },
             after: { name, type, rib }
-        }).catch(() => null)
+        })
         return {
             success: "Compte mis à jour !",
             account: {
@@ -412,13 +412,13 @@ export async function deleteTreasuryAccount(id: string) {
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "DELETE",
             entity: "TREASURY",
             entityId: id,
             description: `Compte de trésorerie supprimé : ${existingAccount?.name || id}`,
             before: existingAccount ? { name: existingAccount.name, type: existingAccount.type, balance: Number(existingAccount.balance) } : undefined
-        }).catch(() => null)
+        })
         return { success: "Account deleted!" }
     } catch (error) {
         console.error("[DELETE_TREASURY_ACCOUNT]", error)
@@ -489,12 +489,12 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "TRANSFER",
             entity: "TREASURY",
             description: `Transfert de fonds : ${amount} DA transférés (Compte source ID: ${fromAccountId} → Compte destination ID: ${toAccountId})`,
             after: { fromAccountId, toAccountId, amount, description }
-        }).catch(() => null)
+        })
         return { success: "Transfer completed successfully!" }
     } catch (error: any) {
         console.error("[TRANSFER_FUNDS]", error)
@@ -542,12 +542,12 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: type === "CREDIT" ? "CREATE" : "VOID",
             entity: "TREASURY",
             description: `Opération manuelle sur compte ID ${accountId} : ${type === "CREDIT" ? "Entrée" : "Sortie"} de ${amount} DA (${description})`,
             after: { accountId, type, amount, description }
-        }).catch(() => null)
+        })
         return { success: "Transaction completed!" }
     } catch (error: any) {
         console.error("[MANUAL_TRANSACTION]", error)

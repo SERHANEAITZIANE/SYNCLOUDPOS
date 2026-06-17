@@ -94,13 +94,13 @@ export const createCustomer = async (data: CustomerData) => {
             }
         })
         revalidatePath("/(dashboard)/customers")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "CUSTOMER",
             entityId: customer.id,
             description: `Client créé : ${data.name} (${data.clientType}, Solde: ${initialBal} DA)`,
             after: { name: data.name, clientType: data.clientType, balance: initialBal }
-        }).catch(() => null)
+        })
         return { success: "Customer created", id: customer.id }
     } catch (error) {
         console.error("createCustomer error:", error)
@@ -155,7 +155,7 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
             }
         })
         revalidatePath("/(dashboard)/customers")
-        logAudit({
+        await logAudit({
             action: "UPDATE",
             entity: "CUSTOMER",
             entityId: id,
@@ -170,7 +170,7 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
                 clientType: data.clientType,
                 balance: newBalance
             }
-        }).catch(() => null)
+        })
         return { success: "Customer updated", id: customer.id }
     } catch (error: any) {
         console.error("updateCustomer error:", error)
@@ -195,7 +195,7 @@ export const deleteCustomer = async (id: string) => {
             data: { isArchived: true }
         })
         revalidatePath("/(dashboard)/customers")
-        logAudit({
+        await logAudit({
             action: "DELETE",
             entity: "CUSTOMER",
             entityId: id,
@@ -205,7 +205,7 @@ export const deleteCustomer = async (id: string) => {
                 clientType: existingCustomer?.clientType,
                 balance: existingCustomer?.balance ? Number(existingCustomer.balance) : 0
             }
-        }).catch(() => null)
+        })
         return { success: "Customer deleted" }
     } catch (_error) {
         return { error: "Failed to delete customer" }
@@ -313,12 +313,12 @@ export const importCustomers = async (rows: Record<string, string>[]) => {
     }
 
     revalidatePath("/(dashboard)/customers")
-    logAudit({
+    await logAudit({
         action: "IMPORT",
         entity: "CUSTOMER",
         description: `Importation de ${created} clients (${errors} lignes invalides)`,
         after: { count: created, errors }
-    }).catch(() => null)
+    })
     return { success: `${created} client(s) importé(s)`, errors }
 }
 
@@ -378,12 +378,12 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
 
         revalidatePath("/(dashboard)/customers")
         revalidatePath("/(dashboard)/treasury")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "PAYMENT",
             description: `Règlement client : ${data.amount} DA reçu pour ${data.notes || "règlement de dette"} (Compte ID: ${data.accountId})`,
             after: { customerId: data.customerId, amount: data.amount, accountId: data.accountId, notes: data.notes }
-        }).catch(() => null)
+        })
         return { success: "Payment registered successfully" }
     } catch (error) {
         console.error("registerCustomerPayment error:", error)
@@ -451,12 +451,12 @@ export const registerCustomerLoan = async (data: { customerId: string; amount: n
 
         revalidatePath("/(dashboard)/customers")
         revalidatePath("/(dashboard)/emprunt")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "LOAN",
             description: `Emprunt client : ${data.amount} DA accordé (Compte ID: ${data.accountId})`,
             after: { customerId: data.customerId, amount: data.amount, accountId: data.accountId, notes: data.notes }
-        }).catch(() => null)
+        })
         return { success: "Loan registered successfully" }
     } catch (error) {
         console.error("registerCustomerLoan error:", error)

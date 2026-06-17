@@ -67,7 +67,7 @@ export async function getCustomerLedger(customerId: string) {
                     }
                 }
             }),
-            db.customer.findUnique({
+            db.customer.findFirst({
                 where: { id: customerId, tenantId },
                 select: { balance: true, initialBalance: true, createdAt: true }
             })
@@ -257,7 +257,7 @@ export async function getSupplierLedger(supplierId: string) {
                     status: true,
                 },
             }),
-            db.supplier.findUnique({
+            db.supplier.findFirst({
                 where: { id: supplierId, tenantId },
                 select: { name: true, balance: true, createdAt: true }
             }),

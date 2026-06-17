@@ -103,7 +103,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             const stockStoreId = oldSalesOrder.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
                             const pBefore = await tx.product.findFirst({ where: { id: item.productId, tenantId }, include: { storeProducts: true } });
                             const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
-                            const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : (pBefore?.stock || 0);
+                            const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : 0;
                             const stockAfter = stockBefore + item.quantity;
 
                             if (stockStoreId) {
@@ -318,7 +318,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 return [
                     p.id, 
                     { 
-                        stock: sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0), 
+                        stock: sp?.stock !== undefined && sp?.stock !== null ? sp.stock : 0, 
                         minStock: sp?.minStock !== undefined && sp?.minStock !== null ? sp.minStock : (p.minStock || 10), 
                         hasStoreProduct: p.storeProducts.length > 0 
                     }

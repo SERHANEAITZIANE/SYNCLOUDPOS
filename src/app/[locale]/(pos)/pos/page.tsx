@@ -108,7 +108,7 @@ const PosPage = async () => {
 
     const formattedProducts = rawProducts.map((item: any) => {
         const storeStock = item.storeProducts?.[0]?.stock;
-        const stock = storeStock !== undefined && storeStock !== null ? storeStock : (item.stock || 0);
+        const stock = storeStock !== undefined && storeStock !== null ? storeStock : 0;
         const storeMinStock = item.storeProducts?.[0]?.minStock;
         const minStock = storeMinStock !== undefined && storeMinStock !== null ? storeMinStock : (item.minStock || 0);
         return {

@@ -136,7 +136,7 @@ export const TreasuryTransactionSchema = z.object({
     accountId: z.string(),
     type: z.enum(["CREDIT", "DEBIT"]),
     amount: z.coerce.number().min(0),
-    source: z.enum(["SALE", "PURCHASE", "EXPENSE", "MANUAL_IN", "MANUAL_OUT", "TRANSFER", "INITIAL_BALANCE"]),
+    source: z.enum(["SALE", "PURCHASE", "EXPENSE", "MANUAL_IN", "MANUAL_OUT", "TRANSFER", "INITIAL_BALANCE", "CUSTOMER_PAYMENT", "SUPPLIER_PAYMENT", "CUSTOMER_LOAN", "SUPPLIER_LOAN"]),
     referenceId: z.string().optional(),
     description: z.string().optional()
 })

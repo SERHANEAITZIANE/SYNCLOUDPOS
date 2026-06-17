@@ -112,7 +112,7 @@ export const createSalesOrder = async (data: {
                 const sp = p.storeProducts[0];
                 return [
                     p.id,
-                    sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0)
+                    sp?.stock !== undefined && sp?.stock !== null ? sp.stock : 0
                 ];
             }));
 
@@ -571,7 +571,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                     const sp = p.storeProducts[0];
                     return [
                         p.id,
-                        sp?.stock !== undefined && sp?.stock !== null ? sp.stock : (p.stock || 0)
+                        sp?.stock !== undefined && sp?.stock !== null ? sp.stock : 0
                     ];
                 }));
 

@@ -559,7 +559,9 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                 const isFeatured = parseBoolean(row["isFeatured"] || row["isfeatured"] || row["favoris"] || row["Favoris"])
                 const isArchived = parseBoolean(row["isArchived"] || row["isarchived"] || row["archivé"] || row["archive"] || row["Archive"] || row["Archiv\u00e9"])
 
-                await db.product.create({
+                const storeId = (await db.store.findFirst({ where: { tenantId } }))?.id;
+
+                const product = await db.product.create({
                     data: {
                         name: name.trim(),
                         price,
@@ -572,12 +574,42 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                         brandId,
                         isFeatured,
                         isArchived,
+                        stock: stock || 0,
                         tenantId,
                         ...(barcode ? {
                             barcodes: { create: [{ value: barcode }] }
                         } : {})
                     } as any
                 })
+                
+                if (storeId) {
+                    await db.storeProduct.create({
+                        data: {
+                            storeId,
+                            productId: product.id,
+                            stock: stock || 0,
+                            minStock: minStock || 0
+                        }
+                    })
+                }
+                
+                if (stock > 0) {
+                    const session = await auth()
+                    await db.stockMovement.create({
+                        data: {
+                            productId: product.id,
+                            type: "MANUAL_ADJUSTMENT",
+                            quantity: stock,
+                            stockBefore: 0,
+                            stockAfter: stock,
+                            reason: "Stock initial à l'import",
+                            userId: session?.user?.id || "SYSTEM",
+                            tenantId,
+                            storeId
+                        }
+                    })
+                }
+
                 created++
             } catch { errors++ }
         })

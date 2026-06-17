@@ -279,7 +279,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
 
             // 3. Deduct Stock (Global)
             const globalStockBefore = product.stock || 0
-            const globalStockAfter = Math.max(0, globalStockBefore - quantity)
+            const globalStockAfter = globalStockBefore - quantity
             await tx.product.update({
                 where: { id: productId },
                 data: { stock: globalStockAfter }
@@ -290,8 +290,8 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             let storeStockAfter = 0
             if (stockStoreId) {
                 const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
-                storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
-                storeStockAfter = Math.max(0, storeStockBefore - quantity)
+                storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : 0
+                storeStockAfter = storeStockBefore - quantity
 
                 await tx.storeProduct.upsert({
                     where: { storeId_productId: { storeId: stockStoreId, productId } },
@@ -791,7 +791,7 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
 
                 // Deduct Product Stock (Global)
                 const globalStockBefore = product.stock || 0
-                const globalStockAfter = Math.max(0, globalStockBefore - item.quantity)
+                const globalStockAfter = globalStockBefore - item.quantity
                 await tx.product.update({
                     where: { id: item.productId },
                     data: { stock: globalStockAfter }
@@ -802,8 +802,8 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
                 let storeStockAfter = 0
                 if (stockStoreId) {
                     const spBefore = product.storeProducts.find(sp => sp.storeId === stockStoreId)
-                    storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
-                    storeStockAfter = Math.max(0, storeStockBefore - item.quantity)
+                    storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : 0
+                    storeStockAfter = storeStockBefore - item.quantity
 
                     await tx.storeProduct.upsert({
                         where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
@@ -936,7 +936,7 @@ export const deleteClientReturn = async (id: string) => {
                 if (product) {
                     await tx.product.update({
                         where: { id: productReturn.productId },
-                        data: { stock: Math.max(0, (product.stock || 0) - qtyToAdjust) }
+                        data: { stock: (product.stock || 0) - qtyToAdjust }
                     })
                 }
 
@@ -948,7 +948,7 @@ export const deleteClientReturn = async (id: string) => {
                     if (sp) {
                         await tx.storeProduct.update({
                             where: { storeId_productId: { storeId: stockMovement.storeId, productId: productReturn.productId } },
-                            data: { stock: Math.max(0, (sp.stock || 0) - qtyToAdjust) }
+                            data: { stock: (sp.stock || 0) - qtyToAdjust }
                         })
                     }
                 }

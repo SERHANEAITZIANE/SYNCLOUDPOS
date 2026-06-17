@@ -27,13 +27,13 @@ export async function createExpenseCategory(data: { name: string; type: "FIXED" 
 
         revalidatePath("/dashboard/expenses")
         revalidatePath("/[locale]/(dashboard)/expenses", "page")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "EXPENSE_CATEGORY",
             entityId: category.id,
             description: `Catégorie de dépense créée : ${data.name} (${data.type})`,
             after: { name: data.name, type: data.type }
-        }).catch(() => null)
+        })
         return category
     } catch (error) {
         console.error("[CREATE_EXPENSE_CATEGORY]", error)
@@ -126,13 +126,13 @@ export async function createExpense(data: {
         revalidatePath("/dashboard/treasury")
         revalidatePath("/[locale]/(dashboard)/expenses", "page")
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "CREATE",
             entity: "EXPENSE",
             entityId: expense.id,
             description: `Dépense créée : ${data.description} (${data.amount} DA)`,
             after: { description: data.description, amount: data.amount, categoryId: data.categoryId, accountId: data.accountId }
-        }).catch(() => null)
+        })
         return { success: true, id: expense.id }
     } catch (error: any) {
         console.error("[CREATE_EXPENSE]", error)
@@ -211,13 +211,13 @@ export async function deleteExpense(id: string) {
         revalidatePath("/dashboard/treasury")
         revalidatePath("/[locale]/(dashboard)/expenses", "page")
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "DELETE",
             entity: "EXPENSE",
             entityId: id,
             description: `Dépense supprimée : ${deletedExpense?.description || id} (${deletedExpense?.amount || 0} DA)`,
             before: deletedExpense ? { description: deletedExpense.description, amount: Number(deletedExpense.amount), categoryId: deletedExpense.categoryId } : undefined
-        }).catch(() => null)
+        })
         return { success: true }
     } catch (error: any) {
         console.error("[DELETE_EXPENSE]", error)
@@ -344,14 +344,14 @@ export async function updateExpense(
         revalidatePath("/dashboard/treasury")
         revalidatePath("/[locale]/(dashboard)/expenses", "page")
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        logAudit({
+        await logAudit({
             action: "UPDATE",
             entity: "EXPENSE",
             entityId: id,
             description: `Dépense mise à jour : ${data.description} (${data.amount} DA)`,
             before: oldExpenseCopy ? { description: oldExpenseCopy.description, amount: Number(oldExpenseCopy.amount), categoryId: oldExpenseCopy.categoryId, accountId: oldExpenseCopy.accountId } : undefined,
             after: { description: data.description, amount: data.amount, categoryId: data.categoryId, accountId: data.accountId }
-        }).catch(() => null)
+        })
         return { success: true }
     } catch (error: any) {
         console.error("[UPDATE_EXPENSE]", error)

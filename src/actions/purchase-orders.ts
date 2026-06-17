@@ -376,14 +376,15 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                 for (const oldItem of oldItems) {
                     const p = await tx.product.findUnique({ where: { id: oldItem.productId }, include: { storeProducts: true } })
                     if (p) {
-                        const globalStockAfter = Math.max(0, (p.stock || 0) - oldItem.quantity)
+                        const globalStockAfter = (p.stock || 0) - oldItem.quantity
                         await tx.product.update({
                             where: { id: oldItem.productId },
                             data: { stock: globalStockAfter }
                         })
                         if (stockStoreId) {
                             const spBefore = p.storeProducts.find(sp => sp.storeId === stockStoreId)
-                            const storeStockAfter = Math.max(0, (spBefore?.stock || 0) - oldItem.quantity)
+                            const storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : 0
+                            const storeStockAfter = storeStockBefore - oldItem.quantity
                             await tx.storeProduct.upsert({
                                 where: { storeId_productId: { storeId: stockStoreId, productId: oldItem.productId } },
                                 update: { stock: storeStockAfter },

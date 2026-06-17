@@ -64,11 +64,6 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
             select: { id: true, name: true }
         })
 
-        const supplierCheck = await db.supplier.findMany({
-            where: { id: { in: customerIdsFromManual }, tenantId },
-            select: { id: true }
-        })
-
         const cheques = await db.cheque.findMany({
             where: { id: { in: customerIdsFromManual }, tenantId },
             include: { customer: { select: { id: true, name: true } } }
@@ -76,9 +71,6 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
 
         // Map everything together
         let mappedPayments = transactions.map(t => {
-            if ((t.source === "MANUAL_IN" || t.source === "CUSTOMER_PAYMENT") && t.referenceId && supplierCheck.some(s => s.id === t.referenceId)) {
-                return null; // This is a Supplier Loan, exclude from Customer Payments
-            }
 
             let customerName = "Client de passage"
             let foundCustomerId = undefined
@@ -172,11 +164,6 @@ export async function getSupplierPayments() {
             select: { id: true, name: true }
         })
 
-        const customerCheck = await db.customer.findMany({
-            where: { id: { in: supplierIds }, tenantId },
-            select: { id: true }
-        })
-
         const purchaseOrders = await db.purchaseOrder.findMany({
             where: { id: { in: purchaseIds }, tenantId },
             include: { supplier: { select: { id: true, name: true } } }
@@ -188,9 +175,6 @@ export async function getSupplierPayments() {
         })
 
         const mappedPayments = transactions.map(t => {
-            if ((t.source === "MANUAL_OUT" || t.source === "SUPPLIER_PAYMENT") && t.referenceId && customerCheck.some(c => c.id === t.referenceId)) {
-                return null; // This is a Customer Loan, exclude from Supplier Payments
-            }
 
             let supplierName = "Fournisseur inconnu"
             let foundSupplierId: string | undefined = undefined
@@ -363,14 +347,14 @@ export async function updatePayment(id: string, data: {
         revalidatePath("/(dashboard)/treasury")
         revalidatePath("/(dashboard)/emprunt")
         revalidatePath("/(dashboard)/emprunt-fournisseur")
-        logAudit({
+        await logAudit({
             action: "UPDATE",
             entity: "PAYMENT",
             entityId: id,
             description: `Paiement mis à jour : ${data.description || id} (Montant: ${data.amount} DA)`,
             before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId } : undefined,
             after: { amount: data.amount, description: data.description, accountId: data.accountId }
-        }).catch(() => null)
+        })
         return result
     } catch (error) {
         console.error("[UPDATE_PAYMENT]", error)
@@ -442,13 +426,13 @@ export async function deletePayment(id: string) {
         revalidatePath("/(dashboard)/suppliers")
         revalidatePath("/(dashboard)/emprunt")
         revalidatePath("/(dashboard)/emprunt-fournisseur")
-        logAudit({
+        await logAudit({
             action: "DELETE",
             entity: "PAYMENT",
             entityId: id,
             description: `Paiement supprimé : ${oldPaymentCopy?.description || id} (Montant: ${oldPaymentCopy?.amount ? Number(oldPaymentCopy.amount) : 0} DA)`,
             before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId } : undefined
-        }).catch(() => null)
+        })
         return result
     } catch (error) {
         console.error("[DELETE_PAYMENT]", error)
