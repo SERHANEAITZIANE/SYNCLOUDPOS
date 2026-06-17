@@ -357,17 +357,17 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
 
-    try {
         const existing = await db.purchaseOrder.findUnique({ where: { id, tenantId } })
         if (!existing) return { error: "Bon de commande introuvable" }
 
-        const stockStatuses = ["BON_LIVRAISON", "FACTURE", "COMPLETED"]
-        const isStockStatus = stockStatuses.includes(existing.status)
+        const isStockStatus = ["BON_LIVRAISON", "FACTURE", "COMPLETED"].includes(data.status)
+        const wasStockStatus = ["BON_LIVRAISON", "FACTURE", "COMPLETED"].includes(existing.status)
 
         await db.$transaction(async (tx) => {
-            const stockStoreId = existing.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            const stockStoreId = data.storeId || existing.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
 
-            if (isStockStatus) {
+            // Only revert previous stock if the order WAS in a stock-impacting status
+            if (wasStockStatus) {
                 // Fetch old items to revert their stocks
                 const oldItems = await tx.purchaseOrderItem.findMany({
                     where: { purchaseOrderId: id }
