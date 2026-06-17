@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
 import { format } from "date-fns"
+import { useEffect } from "react"
 import { Receipt, Calendar, Clock, Plus, Wallet, Tag } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -76,6 +77,32 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
             imageUrl: "",
         }
     })
+
+    // Load default account from pos preferences if creating a new expense
+    useEffect(() => {
+        if (!initialData) {
+            try {
+                const prefs = localStorage.getItem("pos_defaults_prefs")
+                if (prefs) {
+                    const parsed = JSON.parse(prefs)
+                    if (parsed.defaultAccountId && parsed.defaultAccountId !== "none") {
+                        form.setValue("accountId", parsed.defaultAccountId)
+                    } else {
+                        // Fallback to "CAISSE SECONDAIRE" or "CAISSE PRINCIPALE" if needed, matching POS behavior
+                        const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE SECONDAIRE" || a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                        if (defaultAccount) {
+                            form.setValue("accountId", defaultAccount.id)
+                        }
+                    }
+                } else {
+                    const defaultAccount = accounts?.find(a => a.name.toUpperCase() === "CAISSE SECONDAIRE" || a.name.toUpperCase() === "CAISSE PRINCIPALE")
+                    if (defaultAccount) {
+                        form.setValue("accountId", defaultAccount.id)
+                    }
+                }
+            } catch { /* ignore */ }
+        }
+    }, [initialData, form, accounts])
 
     const onSubmit = async (values: ExpenseFormValues) => {
         try {

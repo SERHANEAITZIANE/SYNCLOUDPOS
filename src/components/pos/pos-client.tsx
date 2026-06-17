@@ -31,11 +31,6 @@ import { ModeToggle } from "@/components/dashboard/mode-toggle"
 import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { toast } from "react-hot-toast"
-import { getSalesOrderByReceipt } from "@/actions/sales-orders"
-import { createProduct, suggestProductNames } from "@/actions/products"
-import { createCategory } from "@/actions/categories"
-import { createBrand } from "@/actions/brands"
-import { generateNextBarcode } from "@/actions/barcode"
 import { useTranslations } from "next-intl"
 
 interface PosClientProps {
@@ -74,6 +69,18 @@ interface PosClientProps {
     isElectronicsStore?: boolean
     sellers?: { id: string; name: string | null; role: string }[]
     currentUserId?: string
+    actionCreateOrder: (values: any) => Promise<any>
+    actionGetProductCustomerSellHistory: (productId: string, customerId: string) => Promise<any>
+    actionSendWhatsAppReceipt: (orderId: string) => Promise<any>
+    actionCreateCustomer: (data: any) => Promise<any>
+    actionGetActivePromotions: () => Promise<any[]>
+    actionGetSalesOrderByReceipt: (receiptNumber: string) => Promise<any>
+    actionSearchRecentSalesOrders: (query: string, type?: string) => Promise<any[]>
+    actionCreateProduct: (values: any) => Promise<any>
+    actionSuggestProductNames: (query: string) => Promise<any>
+    actionCreateCategory: (data: any) => Promise<any>
+    actionCreateBrand: (data: any) => Promise<any>
+    actionGenerateNextBarcode: () => Promise<any>
 }
 
 const getCategoryIcon = (name: string) => {
@@ -117,7 +124,19 @@ export const PosClient: FC<PosClientProps> = ({
     storeData,
     isElectronicsStore = false,
     sellers = [],
-    currentUserId
+    currentUserId,
+    actionCreateOrder,
+    actionGetProductCustomerSellHistory,
+    actionSendWhatsAppReceipt,
+    actionCreateCustomer,
+    actionGetActivePromotions,
+    actionGetSalesOrderByReceipt,
+    actionSearchRecentSalesOrders,
+    actionCreateProduct,
+    actionSuggestProductNames,
+    actionCreateCategory,
+    actionCreateBrand,
+    actionGenerateNextBarcode
 }) => {
     const t = useTranslations("PosClient")
     const tCommon = useTranslations("Common")
@@ -216,7 +235,7 @@ export const PosClient: FC<PosClientProps> = ({
 
     const handleGenerateQuickBarcode = async () => {
         try {
-            const res = await generateNextBarcode()
+            const res = await actionGenerateNextBarcode()
             if (res.success && res.barcode) {
                 setQuickBarcodes(prev => [...prev, { value: res.barcode, label: "Principal" }])
                 toast.success("Code-barre généré !")
@@ -232,7 +251,7 @@ export const PosClient: FC<PosClientProps> = ({
         if (!newCategoryName.trim()) return
         try {
             setCreatingCat(true)
-            const result = await createCategory({ name: newCategoryName.trim() })
+            const result = await actionCreateCategory({ name: newCategoryName.trim() })
             if (result.error) {
                 toast.error(result.error)
             } else if (result.data) {
@@ -252,7 +271,7 @@ export const PosClient: FC<PosClientProps> = ({
         if (!newBrandName.trim()) return
         try {
             setCreatingBrand(true)
-            const result = await createBrand({ name: newBrandName.trim() })
+            const result = await actionCreateBrand({ name: newBrandName.trim() })
             if (result.error) {
                 toast.error(result.error)
             } else if (result.data) {
@@ -310,7 +329,7 @@ export const PosClient: FC<PosClientProps> = ({
                 isArchived: quickIsArchived,
                 barcodes: quickBarcodes.map(b => ({ value: b.value, label: b.label || "" }))
             }
-            const result = await createProduct(payload)
+            const result = await actionCreateProduct(payload)
             if (result.error) {
                 toast.error(result.error)
             } else {
@@ -529,7 +548,7 @@ export const PosClient: FC<PosClientProps> = ({
     const handleCodeInput = async (code: string) => {
         // 1. Check if it's an Order Receipt (e.g. BL-2026/0001, FA-2026/...)
         if (code.includes("-") && code.includes("/")) {
-            const order = await getSalesOrderByReceipt(code)
+            const order = await actionGetSalesOrderByReceipt(code)
             if (order) {
                 cart.createSession()
                 const newSessionId = usePosStore.getState().activeSessionId
@@ -979,7 +998,23 @@ export const PosClient: FC<PosClientProps> = ({
                         <div className="flex-1 w-full h-[calc(100%-2rem)] flex flex-col pt-2">
                             {/* Draggable indicator line */}
                             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto my-2 flex-shrink-0" />
-                            <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} sellers={sellers} currentUserId={currentUserId} />
+                            <CartSidebar
+                                customers={customers}
+                                accounts={accounts}
+                                storeName={storeName}
+                                storeAddress={storeAddress}
+                                storePhone={storePhone}
+                                posTimbreEnabled={posTimbreEnabled}
+                                storeData={storeData}
+                                isElectronicsStore={isElectronicsStore}
+                                sellers={sellers}
+                                currentUserId={currentUserId}
+                                actionCreateOrder={actionCreateOrder}
+                                actionGetProductCustomerSellHistory={actionGetProductCustomerSellHistory}
+                                actionSendWhatsAppReceipt={actionSendWhatsAppReceipt}
+                                actionCreateCustomer={actionCreateCustomer}
+                                actionGetActivePromotions={actionGetActivePromotions}
+                            />
                         </div>
                     </SheetContent>
                 </Sheet>
@@ -1494,7 +1529,25 @@ export const PosClient: FC<PosClientProps> = ({
                     className="hidden lg:flex h-full shrink-0 z-20 transition-all duration-200 bg-white dark:bg-[#18181b] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[-4px_0_24px_rgba(0,0,0,0.3)] border-l border-gray-200 dark:border-gray-800 flex-col"
                     style={{ width: sidebarWidth === 'narrow' ? '30%' : sidebarWidth === 'wide' ? '50%' : '40%' }}
                 >
-                    <CartSidebar customers={customers} accounts={accounts} storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} posTimbreEnabled={posTimbreEnabled} storeData={storeData} isElectronicsStore={isElectronicsStore} sidebarWidth={sidebarWidth} setSidebarWidth={setSidebarWidth} sellers={sellers} currentUserId={currentUserId} />
+                    <CartSidebar
+                        customers={customers}
+                        accounts={accounts}
+                        storeName={storeName}
+                        storeAddress={storeAddress}
+                        storePhone={storePhone}
+                        posTimbreEnabled={posTimbreEnabled}
+                        storeData={storeData}
+                        isElectronicsStore={isElectronicsStore}
+                        sidebarWidth={sidebarWidth}
+                        setSidebarWidth={setSidebarWidth}
+                        sellers={sellers}
+                        currentUserId={currentUserId}
+                        actionCreateOrder={actionCreateOrder}
+                        actionGetProductCustomerSellHistory={actionGetProductCustomerSellHistory}
+                        actionSendWhatsAppReceipt={actionSendWhatsAppReceipt}
+                        actionCreateCustomer={actionCreateCustomer}
+                        actionGetActivePromotions={actionGetActivePromotions}
+                    />
                 </div>
 
             </div>
@@ -1505,6 +1558,7 @@ export const PosClient: FC<PosClientProps> = ({
                     isOpen={isSearchOrderOpen}
                     onClose={() => setIsSearchOrderOpen(false)}
                     onSelectOrder={handleLoadOrder}
+                    actionSearchRecentSalesOrders={actionSearchRecentSalesOrders}
                 />
             </Suspense>
 
@@ -1567,9 +1621,10 @@ export const PosClient: FC<PosClientProps> = ({
                                                 const val = e.target.value
                                                 setQuickName(val)
                                                 if (val.trim()) {
-                                                    const res = await suggestProductNames(val)
+                                                    const res = await actionSuggestProductNames(val)
                                                     setQuickSuggestions(res)
                                                     setShowQuickSuggestions(res.length > 0)
+                                                    const suggestionList = res
                                                 } else {
                                                     setQuickSuggestions([])
                                                     setShowQuickSuggestions(false)
@@ -1578,7 +1633,7 @@ export const PosClient: FC<PosClientProps> = ({
                                             }}
                                             onFocus={async () => {
                                                 if (quickName.trim()) {
-                                                    const res = await suggestProductNames(quickName)
+                                                    const res = await actionSuggestProductNames(quickName)
                                                     setQuickSuggestions(res)
                                                     setShowQuickSuggestions(res.length > 0)
                                                 }

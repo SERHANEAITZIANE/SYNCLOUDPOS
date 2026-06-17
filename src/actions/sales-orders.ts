@@ -68,6 +68,9 @@ export const createSalesOrder = async (data: {
         const receiptNumber = await generateReceiptNumber(data.type, tenantId)
 
         const salesOrder = await db.$transaction(async (tx) => {
+            const customer = await tx.customer.findFirst({ where: { id: data.customerId, tenantId } });
+            if (!customer) throw new Error("Client introuvable ou non autorisé");
+
             const order = await tx.salesOrder.create({
                 data: {
                     tenantId,
@@ -259,7 +262,8 @@ export async function getSalesOrders(
     type?: string,
     from?: string,
     to?: string,
-    status?: string
+    status?: string,
+    customerId?: string
 ) {
     try {
         const session = await auth()
@@ -281,6 +285,10 @@ export async function getSalesOrders(
                 { receiptNumber: { contains: search, mode: "insensitive" } },
                 { customer: { name: { contains: search, mode: "insensitive" } } }
             ]
+        }
+
+        if (customerId && customerId !== "ALL") {
+            where.customerId = customerId
         }
 
         if (from || to) {
@@ -431,7 +439,7 @@ export const updateSalesOrder = async (id: string, data: {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
-        const existing = await db.salesOrder.findUnique({ where: { id, tenantId }, include: { items: true } })
+        const existing = await db.salesOrder.findFirst({ where: { id, tenantId }, include: { items: true } })
         if (!existing) return { error: "Bon introuvable" }
 
         const newDate = data.createdAt ? new Date(data.createdAt) : undefined
@@ -465,6 +473,9 @@ export const updateSalesOrder = async (id: string, data: {
         }
 
         await db.$transaction(async (tx) => {
+            const customer = await tx.customer.findFirst({ where: { id: data.customerId, tenantId } });
+            if (!customer) throw new Error("Client introuvable ou non autorisé");
+
             await tx.salesOrderItem.deleteMany({ where: { salesOrderId: id } })
             
             const updateData: any = {
@@ -528,7 +539,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
         if (!session?.user?.id) throw new Error("Unauthorized")
         const tenantId = session.user.tenantId
 
-        const salesOrder = await db.salesOrder.findUnique({
+        const salesOrder = await db.salesOrder.findFirst({
             where: { id, tenantId },
             include: { items: true }
         })
@@ -690,7 +701,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                     });
 
                     if (linkedTx && linkedTx.referenceId) {
-                        linkedOrder = await tx.order.findUnique({ where: { id: linkedTx.referenceId } });
+                        linkedOrder = await tx.order.findFirst({ where: { id: linkedTx.referenceId, tenantId } });
                     } else {
                         const timeMin = new Date(salesOrder.createdAt.getTime() - 60000);
                         const timeMax = new Date(salesOrder.createdAt.getTime() + 60000);
@@ -784,7 +795,7 @@ export const deleteSalesOrder = async (id: string) => {
         let deletedOrderInfo: any = null;
 
         await db.$transaction(async (tx) => {
-            const order = await tx.salesOrder.findUnique({
+            const order = await tx.salesOrder.findFirst({
                 where: { id, tenantId },
                 include: { items: true }
             });
@@ -925,7 +936,9 @@ export const deleteSalesOrder = async (id: string) => {
             }
         });
 
-        revalidatePath("/(dashboard)/sales")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/(dashboard)/sales")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ 

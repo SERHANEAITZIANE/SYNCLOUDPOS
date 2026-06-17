@@ -4,18 +4,36 @@ import { PurchasesClient } from "@/components/purchases/client"
 import { PurchaseOrderColumn } from "@/components/purchases/types"
 import { getPurchaseOrders } from "@/actions/purchase-orders"
 import { formatter } from "@/lib/utils"
+import { db } from "@/lib/db"
+import { auth } from "@/auth"
 
 export default async function PurchasesPage({
     searchParams
 }: {
-    searchParams: Promise<{ page?: string, limit?: string, search?: string }>
+    searchParams: Promise<{ page?: string, limit?: string, search?: string, status?: string, from?: string, to?: string, supplierId?: string }>
 }) {
     const params = await searchParams
     const page = Number(params.page) || 1
     const limit = Number(params.limit) || 20
     const search = params.search || ""
+    const status = params.status || "ALL"
+    const from = params.from || undefined
+    const to = params.to || undefined
+    const supplierId = params.supplierId || "ALL"
 
-    const { purchaseOrders, totalCount } = await getPurchaseOrders(page, limit, search) as { purchaseOrders: any[], totalCount: number }
+    const session = await auth()
+    const tenantId = session?.user?.tenantId
+
+    const [ordersResult, suppliers] = await Promise.all([
+        getPurchaseOrders(page, limit, search, status, from, to, supplierId),
+        tenantId ? db.supplier.findMany({
+            where: { tenantId },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" }
+        }) : Promise.resolve([])
+    ])
+
+    const { purchaseOrders, totalCount } = ordersResult as { purchaseOrders: any[], totalCount: number }
 
     const formattedOrders: PurchaseOrderColumn[] = ((purchaseOrders as any) || []).map((item: any) => {
         const productCount = item.items?.length || 0
@@ -50,6 +68,7 @@ export default async function PurchasesPage({
                     totalCount={totalCount || 0}
                     pageCount={pageCount}
                     currentPage={page}
+                    suppliers={suppliers}
                 />
             </div>
         </div>

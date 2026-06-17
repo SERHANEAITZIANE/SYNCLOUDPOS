@@ -34,18 +34,18 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         await checkSubscription();
 
         if (idempotencyKey) {
-            const existingOrder = await db.order.findUnique({
-                where: { idempotencyKey }
+            const existingOrder = await db.order.findFirst({
+                where: { idempotencyKey, tenantId }
             });
             if (existingOrder) {
-                const existingSalesOrder = await db.salesOrder.findUnique({
-                    where: { idempotencyKey }
+                const existingSalesOrder = await db.salesOrder.findFirst({
+                    where: { idempotencyKey, tenantId }
                 });
                 let previousBalance = 0;
                 let newBalance = 0;
                 if (existingOrder.customerId) {
-                    const customer = await db.customer.findUnique({
-                        where: { id: existingOrder.customerId }
+                    const customer = await db.customer.findFirst({
+                        where: { id: existingOrder.customerId, tenantId }
                     });
                     newBalance = Number(customer?.balance || 0);
                     const debt = Number(existingOrder.total) - Number(existingOrder.paidAmount);
@@ -89,8 +89,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
             // --- EDIT MODE LOGIC ---
             if (originalOrderId) {
-                oldSalesOrder = await tx.salesOrder.findUnique({
-                    where: { id: originalOrderId },
+                oldSalesOrder = await tx.salesOrder.findFirst({
+                    where: { id: originalOrderId, tenantId },
                     include: { items: true }
                 });
 
@@ -101,7 +101,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     await Promise.all(
                         oldSalesOrder.items.map(async (item: any) => {
                             const stockStoreId = oldSalesOrder.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
-                            const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
+                            const pBefore = await tx.product.findFirst({ where: { id: item.productId, tenantId }, include: { storeProducts: true } });
                             const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
                             const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : (pBefore?.stock || 0);
                             const stockAfter = stockBefore + item.quantity;
@@ -176,7 +176,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     });
 
                     if (oldTx && oldTx.referenceId) {
-                        oldOrder = await tx.order.findUnique({ where: { id: oldTx.referenceId } });
+                        oldOrder = await tx.order.findFirst({ where: { id: oldTx.referenceId, tenantId } });
                     } else {
                         const timeMin = new Date(oldSalesOrder.createdAt.getTime() - 60000);
                         const timeMax = new Date(oldSalesOrder.createdAt.getTime() + 60000);
@@ -393,7 +393,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             let newBalance = 0;
 
             if (finalCustomerId) {
-                const customer = await tx.customer.findUnique({ where: { id: finalCustomerId } })
+                const customer = await tx.customer.findFirst({ where: { id: finalCustomerId, tenantId } })
                 previousBalance = Number(customer?.balance || 0)
 
                 const actualPaid = paidAmount ?? total
@@ -432,7 +432,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             // 4. Record Treasury Transaction if payment is collected
             const actualPaid = paidAmount ?? total
             if (actualPaid > 0 && accountId) {
-                const account = await tx.treasuryAccount.findUnique({ where: { id: accountId, tenantId } })
+                const account = await tx.treasuryAccount.findFirst({ where: { id: accountId, tenantId } })
                 if (account) {
                     const updatedAccount = await tx.treasuryAccount.update({
                         where: { id: accountId },
@@ -463,11 +463,13 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             }
         })
 
-        revalidatePath("/[locale]/(dashboard)/orders", "page")
-        revalidatePath("/[locale]/(dashboard)/products", "page")
-        revalidatePath("/[locale]/(dashboard)/treasury", "page")
-        revalidatePath("/[locale]/(dashboard)/sales", "page")
-        revalidatePath("/[locale]/(pos)/pos", "page")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/[locale]/(dashboard)/orders", "page")
+            revalidatePath("/[locale]/(dashboard)/products", "page")
+            revalidatePath("/[locale]/(dashboard)/treasury", "page")
+            revalidatePath("/[locale]/(dashboard)/sales", "page")
+            revalidatePath("/[locale]/(pos)/pos", "page")
+        }
 
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)

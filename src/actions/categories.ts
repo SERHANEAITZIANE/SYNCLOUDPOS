@@ -11,7 +11,7 @@ export const createCategory = async (values: z.infer<typeof CategorySchema>) => 
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("categories"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("categories:create"))) return { error: "Accès refusé" }
 
     const tenantId = session?.user?.tenantId
 
@@ -78,7 +78,7 @@ export const deleteCategory = async (id: string) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("categories"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("categories:delete"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -86,12 +86,16 @@ export const deleteCategory = async (id: string) => {
     }
 
     try {
-        await db.category.delete({
+        const res = await db.category.updateMany({
             where: {
                 id,
                 tenantId // Ensure deletion is scoped to tenant
+            },
+            data: {
+                isArchived: true
             }
         })
+        if (res.count === 0) return { error: "Category not found or unauthorized" }
 
         revalidatePath("/[locale]/dashboard/categories", "page")
         return { success: "Category deleted!" }
@@ -105,7 +109,7 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
 
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("categories"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("categories:update"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -121,7 +125,7 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
     const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
-        await db.category.update({
+        const res = await db.category.updateMany({
             where: {
                 id,
                 tenantId
@@ -135,6 +139,7 @@ export const updateCategory = async (id: string, values: z.infer<typeof Category
                 commissionRetail: commissionRetail ?? 0,
             }
         })
+        if (res.count === 0) return { error: "Category not found or unauthorized" }
 
         revalidatePath("/[locale]/dashboard/categories", "page")
         return { success: "Category updated!" }
@@ -148,7 +153,7 @@ export const importCategories = async (rows: { name: string }[]) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("categories"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("categories:create"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 

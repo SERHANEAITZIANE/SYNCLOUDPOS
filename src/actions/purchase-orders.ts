@@ -34,7 +34,15 @@ interface PurchaseOrderData {
     createdAt?: Date
 }
 
-export const getPurchaseOrders = async (page: number = 1, pageSize: number = 20, search?: string) => {
+export const getPurchaseOrders = async (
+    page: number = 1, 
+    pageSize: number = 20, 
+    search?: string,
+    status?: string,
+    from?: string,
+    to?: string,
+    supplierId?: string
+) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized", purchaseOrders: [], totalCount: 0 }
     const tenantId = session.user.tenantId
@@ -47,6 +55,24 @@ export const getPurchaseOrders = async (page: number = 1, pageSize: number = 20,
                 { purchaseNumber: { contains: search, mode: 'insensitive' } },
                 { supplier: { name: { contains: search, mode: 'insensitive' } } }
             ]
+        }
+
+        if (status && status !== "ALL") {
+            whereClause.status = status
+        }
+
+        if (supplierId && supplierId !== "ALL") {
+            whereClause.supplierId = supplierId
+        }
+
+        if (from || to) {
+            whereClause.createdAt = {}
+            if (from) whereClause.createdAt.gte = new Date(from)
+            if (to) {
+                const toDate = new Date(to)
+                toDate.setHours(23, 59, 59, 999)
+                whereClause.createdAt.lte = toDate
+            }
         }
 
         const safePage = Math.max(1, isNaN(page) ? 1 : page)
@@ -938,8 +964,8 @@ export const deletePurchaseOrder = async (id: string) => {
                 }
             }
 
-            // 4. Finally delete the order itself (cascade deletes items)
-            await tx.purchaseOrder.delete({ where: { id, tenantId } });
+            // 4. Finally mark the order as CANCELLED instead of deleting it
+            await tx.purchaseOrder.update({ where: { id, tenantId }, data: { status: "CANCELLED" } });
         });
 
         revalidatePath("/(dashboard)/purchases")

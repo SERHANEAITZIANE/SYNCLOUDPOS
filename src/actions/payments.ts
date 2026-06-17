@@ -258,7 +258,7 @@ export async function updatePayment(id: string, data: {
 
                 // 2. Apply new amount to new account
                 // Verify new account has enough funds if DEBIT
-                const newAccount = await tx.treasuryAccount.findUnique({
+                const newAccount = await tx.treasuryAccount.findFirst({
                     where: { id: data.accountId, tenantId }
                 })
                 if (!newAccount) throw new Error("Nouveau compte introuvable")
@@ -279,7 +279,7 @@ export async function updatePayment(id: string, data: {
                 if (diff !== 0) {
                     // Check if existing account has enough funds if DEBIT and diff > 0
                     if (existing.type === "DEBIT" && diff > 0) {
-                        const account = await tx.treasuryAccount.findUnique({
+                        const account = await tx.treasuryAccount.findFirst({
                             where: { id: existing.accountId, tenantId }
                         })
                         if (!account) throw new Error("Compte de trésorerie introuvable")
@@ -314,8 +314,8 @@ export async function updatePayment(id: string, data: {
             if (diff !== 0) {
                 // Adjust customer/supplier balance if this is a MANUAL transaction
                 if (existing.referenceId) {
-                    const isCustomer = await tx.customer.findUnique({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
-                    const isSupplier = await tx.supplier.findUnique({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+                    const isCustomer = await tx.customer.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+                    const isSupplier = await tx.supplier.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
 
                     if (isCustomer) {
                         if (existing.source === "MANUAL_IN") {
@@ -389,8 +389,8 @@ export async function deletePayment(id: string) {
 
             // Reverse customer/supplier balance if this is a MANUAL transaction
             if (existing.referenceId) {
-                const isCustomer = await tx.customer.findUnique({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
-                const isSupplier = await tx.supplier.findUnique({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+                const isCustomer = await tx.customer.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+                const isSupplier = await tx.supplier.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
 
                 if (isCustomer) {
                     if (existing.source === "MANUAL_IN") {

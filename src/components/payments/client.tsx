@@ -4,7 +4,7 @@ import * as React from "react"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
-import { Plus } from "lucide-react"
+import { Plus, Filter, User, Wallet, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 
 import { DataTable } from "@/components/ui/data-table"
 import { Heading } from "@/components/ui/heading"
@@ -198,39 +198,78 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                 </div>
             )}
 
-            {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 py-4">
-                {/* Filter by Client */}
-                <div className="w-full sm:w-[250px]">
-                    <SearchableSelect
-                        options={[
-                            { value: "ALL", label: "Tous les Clients" },
-                            ...customers.map(c => ({ value: c.id, label: c.name }))
-                        ]}
-                        value={selectedCustomer}
-                        onChange={setSelectedCustomer}
-                        placeholder="Filtrer par Client"
-                        searchPlaceholder="Rechercher un client..."
-                    />
+            {/* Premium Filter Area */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 my-6 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                            <Filter className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-200">Filtres de recherche avancés</h3>
+                    </div>
+                    {(selectedCustomer !== "ALL" || selectedAccount !== "ALL" || dateRange !== undefined) && (
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => {
+                                setSelectedCustomer("ALL")
+                                setSelectedAccount("ALL")
+                                setDateRange(undefined)
+                            }}
+                            className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
+                        >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Réinitialiser</span>
+                        </Button>
+                    )}
                 </div>
 
-                {/* Filter by Modalité (Account) */}
-                <div className="w-full sm:w-[220px]">
-                    <SearchableSelect
-                        options={[
-                            { value: "ALL", label: "Toutes les modalités" },
-                            ...uniqueAccounts.map(name => ({ value: name, label: name }))
-                        ]}
-                        value={selectedAccount}
-                        onChange={setSelectedAccount}
-                        placeholder="Modalité de paiement"
-                        searchPlaceholder="Rechercher une modalité..."
-                    />
-                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 relative z-10">
+                    {/* Filter by Client */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <User className="w-3 h-3" /> Client
+                        </label>
+                        <SearchableSelect
+                            options={[
+                                { value: "ALL", label: "Tous les Clients" },
+                                ...customers.map(c => ({ value: c.id, label: c.name }))
+                            ]}
+                            value={selectedCustomer}
+                            onChange={setSelectedCustomer}
+                            placeholder="Filtrer par Client"
+                            searchPlaceholder="Rechercher un client..."
+                        />
+                    </div>
 
-                {/* Filter by Date */}
-                <div className="w-full sm:w-auto">
-                    <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                    {/* Filter by Modalité (Account) */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Wallet className="w-3 h-3" /> Modalité de paiement
+                        </label>
+                        <SearchableSelect
+                            options={[
+                                { value: "ALL", label: "Toutes les modalités" },
+                                ...uniqueAccounts.map(name => ({ value: name, label: name }))
+                            ]}
+                            value={selectedAccount}
+                            onChange={setSelectedAccount}
+                            placeholder="Modalité de paiement"
+                            searchPlaceholder="Rechercher une modalité..."
+                        />
+                    </div>
+
+                    {/* Filter by Date */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> Période
+                        </label>
+                        <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-emerald-500/50 transition-all shadow-inner w-full">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
+                    </div>
                 </div>
             </div>
 

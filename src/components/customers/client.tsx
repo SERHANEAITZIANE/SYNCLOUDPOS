@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { registerCustomerPayment, deleteCustomer, importCustomers } from "@/actions/customers"
 import { ExcelImportModal } from "@/components/ui/excel-import-modal"
 import { Edit, Trash, ScrollText, HandCoins } from "lucide-react"
@@ -229,16 +230,13 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="account" className="text-right">Caisse/Banque</Label>
                             <div className="col-span-3">
-                                <Select value={accountId} onValueChange={setAccountId}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Sélectionnez un compte" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {accounts.map(acc => (
-                                            <SelectItem key={acc.id} value={acc.id}>{acc.name} ({acc.type})</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <SearchableSelect
+                                    options={accounts.map(acc => ({ value: acc.id, label: `${acc.name} (${acc.type})` }))}
+                                    value={accountId}
+                                    onChange={setAccountId}
+                                    placeholder="Sélectionnez un compte"
+                                    searchPlaceholder="Rechercher un compte..."
+                                />
                             </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">

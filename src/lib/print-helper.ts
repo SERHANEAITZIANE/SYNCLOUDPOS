@@ -33,8 +33,8 @@ export async function printWithDefaultPrinter(targetPrinter: string, printCallba
         console.error("Failed to set default printer:", err)
     }
 
-    // Short delay to allow OS/Chrome to recognize the new default printer
-    await new Promise(resolve => setTimeout(resolve, 300))
+    // Delay to allow OS/Chrome to recognize the new default printer
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     try {
         await printCallback()

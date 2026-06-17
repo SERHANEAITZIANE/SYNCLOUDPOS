@@ -64,7 +64,7 @@ export async function updateChequeStatus(id: string, status: ChequeStatus, accou
     if (!tenantId) return { error: "Tenant ID missing" }
 
     try {
-        const cheque = await db.cheque.findUnique({ where: { id, tenantId } });
+        const cheque = await db.cheque.findFirst({ where: { id, tenantId } });
         if (!cheque) return { error: "Cheque not found" }
 
         if (status === "CLEARED") {
@@ -72,7 +72,7 @@ export async function updateChequeStatus(id: string, status: ChequeStatus, accou
             const targetAccountId = accountId || cheque.accountId;
             if (!targetAccountId) return { error: "Compte bancaire requis pour l'encaissement" }
             
-            const account = await db.treasuryAccount.findUnique({ where: { id: targetAccountId } });
+            const account = await db.treasuryAccount.findFirst({ where: { id: targetAccountId, tenantId } });
             if (!account) return { error: "Compte introuvable" }
 
             await db.$transaction(async (tx) => {
@@ -107,7 +107,7 @@ export async function updateChequeStatus(id: string, status: ChequeStatus, accou
             });
         } else {
             await db.cheque.update({
-                where: { id, tenantId },
+                where: { id },
                 data: { status }
             });
         }

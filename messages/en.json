@@ -910,9 +910,11 @@
   },
   "ModeToggle": {
     "toggleTheme": "Toggle theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+    "light": "Standard Light",
+    "dark": "Standard Dark",
+    "system": "System Default",
+    "ghardaia": "Ghardaïa Clay (Light)",
+    "ghardaiaDark": "Ghardaïa Night (Dark)"
   },
   "DataTable": {
     "search": "Search...",
@@ -952,7 +954,14 @@
     "total": "Total",
     "checkout": "Checkout",
     "errorValidation": "Validation error.",
-    "orderValidated": "Order validated!"
+    "orderValidated": "Order validated!",
+    "newCustomer": "New Customer",
+    "fullName": "Full Name *",
+    "phoneOptional": "Phone (Optional)",
+    "historyLoading": "Loading history...",
+    "clientHistory": "Purchase History",
+    "noHistory": "No purchase history found.",
+    "selectClientFirst": "Please select a client first"
   },
   "PaymentModal": {
     "transactionComplete": "Transaction Complete",
@@ -979,7 +988,9 @@
     "balance": "Balance",
     "cancel": "Cancel",
     "processing": "Processing...",
-    "completeOrder": "Complete Order"
+    "completeOrder": "Complete Order",
+    "saveOnly": "Save Only",
+    "saveAndPrint": "Save & Print"
   },
   "PosHeader": {
     "online": "Online"

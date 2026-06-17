@@ -73,7 +73,7 @@ export async function updateTransferStatus(id: string, status: string) {
     if (!tenantId) return { error: "Tenant ID missing" }
 
     try {
-        const transfer = await db.transfer.findUnique({ 
+        const transfer = await db.transfer.findFirst({ 
             where: { id, tenantId },
             include: { items: true }
         });
@@ -156,12 +156,12 @@ export async function updateTransferStatus(id: string, status: string) {
             });
         } else if (status === "SENT") {
             await db.transfer.update({
-                where: { id, tenantId },
+                where: { id },
                 data: { status, sentAt: new Date() }
             });
         } else {
             await db.transfer.update({
-                where: { id, tenantId },
+                where: { id },
                 data: { status }
             });
         }

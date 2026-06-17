@@ -1,0 +1,4715 @@
+{
+  "Already Activated": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Open App →": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "SYNCLOUDPOS": [
+    "\\src\\app\\activate\\page.tsx",
+    "\\src\\components\\ui\\data-table.tsx"
+  ],
+  "Software Activation": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Request Sent! ✅": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Your request has been registered. We will prepare your activation key shortly.": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Contact us to get your activation key:": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "WhatsApp: 0696 92 82 27": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Remplissez vos informations — votre demande sera traitée et vous serez contacté au": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Enter License Key": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "Paste the key you received via WhatsApp or email.": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "WhatsApp 0696 92 82 27": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Company Name *\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Owner Name *\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Phone *\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Email *\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Address\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Wilaya\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "placeholder=\"Paste license key here...\"": [
+    "\\src\\app\\activate\\page.tsx"
+  ],
+  "string): Promise": [
+    "\\src\\app\\api\\ai-analysis\\route.ts"
+  ],
+  "= 7 && h": [
+    "\\src\\app\\api\\mobile\\gerant\\analytics\\route.ts"
+  ],
+  "c.status === \"en_attente\" && c.daysUntilMaturity": [
+    "\\src\\app\\api\\mobile\\gerant\\cheques\\route.ts"
+  ],
+  "new Date(l.date)": [
+    "\\src\\app\\api\\mobile\\gerant\\client\\[id]\\ledger\\route.ts",
+    "\\src\\app\\api\\mobile\\gerant\\supplier\\[id]\\ledger\\route.ts"
+  ],
+  "= start.getTime() && t": [
+    "\\src\\app\\api\\mobile\\gerant\\dashboard\\route.ts"
+  ],
+  "0 && minStock > 0 && stock": [
+    "\\src\\app\\api\\mobile\\gerant\\stock-health\\route.ts"
+  ],
+  "0 ? \"NOUS_DEVONS\" : balance": [
+    "\\src\\app\\api\\mobile\\gerant\\suppliers\\route.ts"
+  ],
+  "s.balance": [
+    "\\src\\app\\api\\mobile\\gerant\\suppliers\\route.ts"
+  ],
+  "Critical Error": [
+    "\\src\\app\\global-error.tsx"
+  ],
+  "⚠ Error": [
+    "\\src\\app\\[locale]\\(auth)\\error\\page.tsx"
+  ],
+  "Something went wrong during authentication.": [
+    "\\src\\app\\[locale]\\(auth)\\error\\page.tsx"
+  ],
+  "SyncCloud": [
+    "\\src\\app\\[locale]\\(auth)\\login\\page.tsx",
+    "\\src\\app\\[locale]\\(auth)\\register\\page.tsx"
+  ],
+  "Point of Sale": [
+    "\\src\\app\\[locale]\\(auth)\\login\\page.tsx",
+    "\\src\\app\\[locale]\\(auth)\\register\\page.tsx"
+  ],
+  "Chiffre du jour": [
+    "\\src\\app\\[locale]\\(auth)\\login\\page.tsx"
+  ],
+  "↑ vs hier": [
+    "\\src\\app\\[locale]\\(auth)\\login\\page.tsx"
+  ],
+  "SyncCloud POS": [
+    "\\src\\app\\[locale]\\(auth)\\login\\page.tsx",
+    "\\src\\app\\[locale]\\(auth)\\register\\page.tsx"
+  ],
+  "Rentabilité Estimée": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Bénéfice net après dépenses globales": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Rentabilité saine": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Flux déficitaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Chiffre d'Affaires": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Total généré sur la période active": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Caisse POS": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Bons Livraison (BL)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Alertes Inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "articles alertés": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Suivi des ruptures et stocks de sécurité": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Ruptures": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Stock minimum": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Trésorerie & Crédits": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Solde total dû par vos clients (Crédit)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Crédits Clients": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Dettes Fournisseurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "🇩🇿 Estimation Fiscale": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "IFU (est.)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Simulation d'impôts sur la base des ventes": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Seuil IFU de 15M DA respecté": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Stock Forecasting": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "🔮 Prévisions de Demande (30 jours)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Analyse la vélocité de vos articles sur 90 jours pour prévoir les ruptures de stock.": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Rapport prédictif généré": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Extraction de la vélocité moyenne...": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Marge & Fiscalité": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "💸 Simulateur de Prix Algérien": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Calcule la marge optimale en incorporant les taxes et le transport local.": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Marge brute ciblée": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Régime Fiscal": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "IFU 5% (Activité commerciale)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "IFU 12% (Prof. Libérales / Services)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Réel G50 (TVA + TAP + IBS)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Aucun / Régime libre": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Wilaya de distribution": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Alger / Centre (Métropole)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Oran / Ouest (Régional)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Constantine / Est (Régional)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Grand Sud / Sahara (+Transport)": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Scenario Simulator": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "📊 Simulateur Financier Stratégique": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Simulez mathématiquement l'impact de décisions majeures sur votre trésorerie.": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Sélectionner une décision": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Voice Intelligence": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "🎙️ Assistant Vocal Intuitif": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Posez des questions courtes et écoutez les réponses lues à voix haute.": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Réponse de l'assistant": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "PRO SUITE": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Bilan commercial & Simulateurs prédictifs": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Période d'analyse": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Modèle d'IA": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Configuration des clés API": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "centralement": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Aucune clé API configurée pour ce modèle.": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "system_logs.sh": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "&gt;": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "&gt; online: ready": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Tous les fournisseurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Gemini": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "ChatGPT": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Claude": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Aucune conversation archivée": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Question posée": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Analyse de l'analyste IA": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "p.id === msg.provider)?.emoji ??": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "p.id === msg.provider)?.name}": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "placeholder=\"Ex: 'شحال كاين كاسة اليوم ؟' ou 'État du profit...'\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\ai\\components\\ai-client.tsx"
+  ],
+  "Application Mobile SynCloud": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\components\\client.tsx"
+  ],
+  "Analyse de l'historique de vos commandes et calcul des projections 🚀": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\forecast\\components\\forecast-client.tsx"
+  ],
+  "Échec de la prévision": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\forecast\\components\\forecast-client.tsx"
+  ],
+  "Rapport d'Intelligence Artificielle": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\forecast\\components\\forecast-client.tsx"
+  ],
+  "Error loading analytics": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\page.tsx"
+  ],
+  "Something went wrong while fetching data. Please try again later.": [
+    "\\src\\app\\[locale]\\(dashboard)\\analytics\\page.tsx"
+  ],
+  "Filtres du journal": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Utilisateur": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Tous les utilisateurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Action / Opération": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Toutes les actions": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Module / Entité": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Tous les modules": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Période": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx",
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "Date Heure": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Module": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Adresse IP": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Description": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\components\\expenses\\expense-form.tsx",
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Avant": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Après": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "placeholder=\"Tous les utilisateurs\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "placeholder=\"Toutes les actions\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "placeholder=\"Tous les modules\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\audit-log\\audit-log-client.tsx"
+  ],
+  "Gestion des Avaries": [
+    "\\src\\app\\[locale]\\(dashboard)\\avaries\\page.tsx"
+  ],
+  "Aucun produit trouvé": [
+    "\\src\\app\\[locale]\\(dashboard)\\barcode-labels\\barcode-label-client.tsx"
+  ],
+  "Modèle d'impression": [
+    "\\src\\app\\[locale]\\(dashboard)\\barcode-labels\\barcode-label-client.tsx"
+  ],
+  "Aperçu en temps réel": [
+    "\\src\\app\\[locale]\\(dashboard)\\barcode-labels\\barcode-label-client.tsx"
+  ],
+  "Cliquez sur un produit pour ajouter des étiquettes": [
+    "\\src\\app\\[locale]\\(dashboard)\\barcode-labels\\barcode-label-client.tsx"
+  ],
+  "placeholder=\"Rechercher un produit ou code-barres...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\barcode-labels\\barcode-label-client.tsx"
+  ],
+  "Étape 1: Type de Client": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Sélectionnez le profil tarifaire à appliquer au catalogue": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Étape 2: Marques Disponibles": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Sélectionnez une marque pour afficher les produits en stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Aucune marque trouvée": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Essayez un autre mot-clé ou modifiez les filtres.": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Cliquez sur un produit pour voir sa fiche détaillée": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Aucun produit en stock pour cette marque": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Recherchez un autre produit ou retournez aux marques.": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Aucune Image": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Stock Disponible": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Code à barres": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Prix de Détail (Public)": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Prix de Gros": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Prix Revendeur / Partenaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "Description de l'article": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "placeholder=\"Rechercher une marque...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx"
+  ],
+  "placeholder=\"Rechercher un produit...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\components\\catalog-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\session-detail-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Erreur de chargement": [
+    "\\src\\app\\[locale]\\(dashboard)\\catalog\\page.tsx"
+  ],
+  "Promise": [
+    "\\src\\app\\[locale]\\(dashboard)\\cloture\\components\\cloture-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx",
+    "\\src\\components\\pos\\cart-sidebar.tsx",
+    "\\src\\components\\pos\\payment-modal.tsx",
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\sales-order-search-dialog.tsx"
+  ],
+  "Gérez les commissions sur les Bons de Livraison (BL) encaissés et effectuez les règlements": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Période (Mois)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Année": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Mode de Calcul": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "CA Encaissé (Période)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Comm. Acquises (Période)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Au prorata des BL payés": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Solde Actuel Dû (Total)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Reste à verser aux commerciaux": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Aucune transaction ou commission enregistrée sur cette période": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Rang": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Vendeur": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "BL Validés": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Comm. Acquise (Période)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Solde Restant Dû": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Actions": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Aucun règlement de commission n'a été enregistré à ce jour.": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Date": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\reconciliation\\components\\client.tsx",
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\customers\\ledger-print-templates.tsx",
+    "\\src\\components\\customers\\unpaid-client.tsx",
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx",
+    "\\src\\components\\expenses\\expense-form.tsx",
+    "\\src\\components\\payments\\cell-action.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Bénéficiaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Notes / Méthode": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Montant Réglé": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Calcul des commissions en cours...": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Solde Actuel Restant Dû": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Montant du règlement (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Date du règlement": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Notes / Mode de règlement": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "placeholder=\"Ex: Espèces, Virement CCP, Chèque n°12345...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\commissions\\page.tsx"
+  ],
+  "Statut de l'Abonnement": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Version illimitée ou statut non défini.": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Identité": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Nom et activité principale": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Nom de la Société": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Nom du Propriétaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Activité": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Logo & Marque": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Identité visuelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Contact": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Comment vous joindre": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Téléphone": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "E-mail": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Fax": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Localisation": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Adresse physique": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Wilaya": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Commune": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Adresse complète": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Fiscalité & Législation": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "NIF (Identifiant Fiscale)": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "RC (Registre Commerce)": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "NIS (Identifiant Statistique)": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Banque": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "Compte bancaire principal (RIB)": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Numéro de Compte / RIB": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Personnalisation des Documents": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Ce texte apparaîtra sur vos bons et factures": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Entête / Pied de page additionnel": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"SynCloud Solutions\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"John Doe\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx",
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "placeholder=\"Décrivez votre activité...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"contact@example.com\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N° de Fax\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"Ex. Alger\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"Ex. Bab Ezzouar\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N°, Rue...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N° NIF\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N° RC\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N° NIS\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"N° AI\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"Saisir le RIB complet\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "placeholder=\"Slogan, conditions générales courtes, remerciements...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\company-form.tsx"
+  ],
+  "Sauvegarde et Restauration": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\database-backup.tsx"
+  ],
+  "effacera définitivement toutes vos données actuelles": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\database-backup.tsx"
+  ],
+  "Fichier de sauvegarde (.json)": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\database-backup.tsx"
+  ],
+  "setOpen(false)}>Annuler": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\database-backup.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "placeholder=\"CONFIRMER\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\company\\components\\database-backup.tsx"
+  ],
+  "Expéditions Livraison": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Yalidine · DHD · HDD · Procolis · Zr Express": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Chargement...": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx",
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Aucune expédition enregistrée": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Transporteur": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Client": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx",
+    "\\src\\components\\customers\\ledger-print-templates.tsx",
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Commande": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "COD": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Tracking": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Statut": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\reconciliation\\components\\client.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "sur": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Nouveau Colis": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "![\"PROCOLIS\", \"ZR_EXPRESS\"].includes(p.id)).map(p =>": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Nom client": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Adresse": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Poids (kg)": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Montant à encaisser (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "Contenu / Notes": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "placeholder=\"Description du colis...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\delivery\\page.tsx"
+  ],
+  "SyncloudPOS": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Portail Livreur": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Email ou Téléphone": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Mot de passe": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Restants": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Visités": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Encaissé": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Aucune tournée assignée": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Contactez votre manager pour planifier une tournée": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "placeholder=\"email@example.com\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver\\page.tsx"
+  ],
+  "Livreurs actifs": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "BLs créés aujourd&apos;hui": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Encaissé (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Clients visités": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Aucun livreur trouvé": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Les livreurs apparaîtront ici dès qu&apos;ils se connectent à l&apos;app mobile": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Points GPS": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Distance totale": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "Début": [
+    "\\src\\app\\[locale]\\(dashboard)\\driver-tracking\\page.tsx"
+  ],
+  "= fromTime && itemTime": [
+    "\\src\\app\\[locale]\\(dashboard)\\expenses\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx",
+    "\\src\\components\\purchases\\client.tsx"
+  ],
+  "RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "MINISTÈRE DES FINANCES": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "DIRECTION GÉNÉRALE DES IMPÔTS": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Wilaya / Commune :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Exercice (السنة المالية) :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "CADRE I : IDENTIFICATION DU CONTRIBUABLE — الإطار الأول : هوية المكلف بالضريبة": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Nom, Prénom ou Raison Sociale :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Adresse du local professionnel :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Nature de l&apos;activité exercée :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "N.I.F :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Article :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "N.I.S :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "R.C :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Tél :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Fax / E-mail :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "PÉRIODICITÉ (الفترة)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "CHIFFRE D&apos;AFFAIRES H.T. (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "MONTANT I.F.U. À VERSER (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "I.F.U.": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "(Auto-entrepreneur)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "(Production/Vente)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "(Services/Autres)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "ÉCHÉANCE": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "MONTANT (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Lors du dépôt de la déclaration (30 juin)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Du 1er au 15 septembre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Du 1er au 15 décembre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "TOTAL À PAYER": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "📊 NOTE DE PROJECTION INTERNE (Non certifiée DGI — للاستعمال الداخلي فقط)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "écoulé(s), votre CA projeté en fin d&apos;exercice est de :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "CADRE RÉSERVÉ À L&apos;ADMINISTRATION": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Reçu et enregistré le :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx"
+  ],
+  "Cachet et visa du Receveur": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "SIGNATURE ET CACHET DU DÉCLARANT": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g12-print-template.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "SÉRIE G N° 50": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Recette des impôts de :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Mois de :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Adresse de l&apos;activité :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Activité exercée :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "NATURE DES IMPÔTS ET TAXES": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "BASE IMPOSABLE": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "(DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "TAUX": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "DROITS": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Ventes et prestations de services imposables au taux normal": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Ventes et prestations de services imposables au taux réduit": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Opérations exonérées": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "CHIFFRE D&apos;AFFAIRES TOTAL RÉALISÉ (01+02+03)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "TOTAL T.V.A. COLLECTÉE (A)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "T.V.A. déductible sur achats (B)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Précompte (Crédit du mois précédent) (C)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "T.V.A. À PAYER (A) − (B) − (C)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Chiffre d&apos;affaires taxable": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "I.R.G. / Traitements et salaires": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "I.R.G. / Revenus des capitaux mobiliers (RCM)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Retenue à la source / Fournisseurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Retenue à la source / Loyers": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Acomptes provisionnels (1er, 2ème, 3ème)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Solde de liquidation": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Droits de timbre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Taxe de formation professionnelle et d&apos;apprentissage": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Pénalités de retard (10% — 25%)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Arrêté le présent bordereau à la somme de (en toutes lettres) :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "Mode de règlement :": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\components\\g50-print-template.tsx"
+  ],
+  "G12 Prévisionnel": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "— À déposer avant le": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "30 juin": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "G12 Bis Définitif": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "20 janvier": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Année fiscale": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Taux IFU applicable": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "non assujetties à la TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "G50": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Trimestre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "CA HT (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Échéance": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "TOTAL ANNUEL": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Projection Fin d'Année": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "CA Annuel Projeté": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "IFU Annuel Projeté": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Sélectionnez l'année, le taux IFU, et cliquez sur Calculer": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "G12 = Prévisionnel (avant 30 juin) · G12 Bis = Définitif (avant 20 janvier)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g12-client.tsx"
+  ],
+  "Mois": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Factures (INVOICE)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Avoirs (CREDIT_NOTE)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Bons d'achat (FACTURE/COMPLETED)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "APERÇU DÉCLARATION G50": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Taux TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Base HT (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "TVA (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Total TTC (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Total Collectée": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Base HT Achat (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "TVA Déductible (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Total Déductible": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "TVA Nette à Payer": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Timbre Collecté": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Droit de timbre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Total à Verser": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "TVA + TAP + Timbre": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Retenue à la Source Effectuée": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Montant retenu sur les achats fournisseurs ce mois": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Sélectionnez une période et cliquez sur Calculer G50": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Les données seront basées sur vos factures de type INVOICE": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\g50-client.tsx"
+  ],
+  "Déclarations Fiscales": [
+    "\\src\\app\\[locale]\\(dashboard)\\fiscal\\page.tsx"
+  ],
+  "SynCloudPOS": [
+    "\\src\\app\\[locale]\\(dashboard)\\formation\\components\\formation-client.tsx"
+  ],
+  "POS": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx",
+    "\\src\\app\\[locale]\\landing-client.tsx",
+    "\\src\\components\\dashboard\\sidebar.tsx"
+  ],
+  "v1.8": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx"
+  ],
+  "SYSTEM STATUS:": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx"
+  ],
+  "Online Terminal Launcher": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx"
+  ],
+  "Accédez instantanément à vos modules et actions favoris.": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx"
+  ],
+  "LAUNCH": [
+    "\\src\\app\\[locale]\\(dashboard)\\hub\\components\\hub-client.tsx"
+  ],
+  "Inventaire Annuel": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Valorisation du stock par catégorie": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Exercice": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Références": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Unités en stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Valeur au Prix d'Achat": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Valeur au Prix de Vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Produit": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\session-detail-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx",
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx",
+    "\\src\\components\\products\\price-list-modal.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx",
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "P.U. Achat": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "P.U. Vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Val. Achat": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Val. Vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Sélectionnez l'exercice et générez l'inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Valorisation du stock actuel par catégorie et totaux": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventaire-annuel\\page.tsx"
+  ],
+  "Nouvelle Session d&apos;Inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\new-session-button.tsx"
+  ],
+  "Nom de la session": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\new-session-button.tsx"
+  ],
+  "Notes (optionnel)": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\new-session-button.tsx"
+  ],
+  "Annuler": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\new-session-button.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "placeholder=\"Ex: Inventaire trimestriel...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\new-session-button.tsx"
+  ],
+  "Stock Attendu": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\session-detail-client.tsx"
+  ],
+  "Stock Réel": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\session-detail-client.tsx"
+  ],
+  "Écart": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\components\\session-detail-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Audit d&apos;Inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\page.tsx"
+  ],
+  "Comptez votre stock physique et appliquez les ajustements.": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\page.tsx"
+  ],
+  "Aucune session d&apos;inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\page.tsx"
+  ],
+  "Créez votre première session pour commencer le comptage physique de votre stock.": [
+    "\\src\\app\\[locale]\\(dashboard)\\inventory-audit\\page.tsx"
+  ],
+  "Client *": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "N° BL": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Articles": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Total": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\components\\pos\\cart-sidebar.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Quantité totale": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Prix HT": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx"
+  ],
+  "TVA %": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Total HT": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Sous-total HT": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Total TTC": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Mode de paiement": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx"
+  ],
+  "Notes": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx",
+    "\\src\\components\\customers\\customer-form.tsx",
+    "\\src\\components\\suppliers\\supplier-form.tsx"
+  ],
+  "placeholder=\"Sélectionnez un client\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "placeholder=\"Notes sur la facture...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\new\\page.tsx"
+  ],
+  "Enregistrer un paiement": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx"
+  ],
+  "Montant restant": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx"
+  ],
+  "Montant à payer": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx"
+  ],
+  "Payé": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Restant": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Prix HT unitaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx"
+  ],
+  "Qté": [
+    "\\src\\app\\[locale]\\(dashboard)\\invoices\\[invoiceId]\\invoice-detail.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Tous les types": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Factures uniquement": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Bons de livraison": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Avoirs": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Type": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "NIF": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "TVA 19%": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "TVA 9%": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Total TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Timbre": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "TTC": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "TOTAUX": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Fournisseur": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Référence": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "TVA Déductible": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Retenue Source": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "· Période:": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Réf": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Recettes (+)": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Dépenses (-)": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Solde": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx",
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "SOLDE INITIAL": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "TOTAUX PÉRIODE": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Solde Final": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Sélectionnez une période et cliquez sur &quot;Générer&quot;": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Le journal sera généré à partir des données de facturation enregistrées": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "placeholder=\"Sélectionner...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\journals\\journals-client.tsx"
+  ],
+  "Accès refusé": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\stock\\page.tsx"
+  ],
+  "Vous n'avez pas l'autorisation d'accéder au contrôle du stock.": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\stock\\page.tsx"
+  ],
+  "Contrôle du Stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\stock\\page.tsx"
+  ],
+  "Valorisation financière et traçabilité des mouvements d'inventaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\stock\\page.tsx"
+  ],
+  "Stock Actuel": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx",
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Total Entrées": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Total Sorties": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Pertes Avaries": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Tracé chronologique du stock après chaque opération": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Estimation basée sur le coût d'achat et le prix de vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Coût d'achat U. :": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Prix de vente U. :": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Marge Unitaire :": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "0 ? (( (price - cost) / price ) * 100).toFixed(1) : 0}%)": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Comparaison du volume total de stock manipulé": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Dernières opérations de stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Les 5 plus récents flux enregistrés pour ce produit": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Aucune opération enregistrée.": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Motif / Raison": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "ID Référence": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Identifiant": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Opérateur": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Les mouvements correspondants s'afficheront dans ce tableau.": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Date & Heure": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Opération": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Quantité": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Variation": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Description complète": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "placeholder=\"Rechercher par motif, référence, opérateur...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\products\\[productId]\\movements\\components\\stock-movements-client.tsx"
+  ],
+  "Prix TTC": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx"
+  ],
+  "placeholder=\"Notes internes...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx"
+  ],
+  "placeholder=\"Ajouter un produit...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\new\\page.tsx"
+  ],
+  "Qté commandée": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Déjà livré": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Prix unitaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\proformas\\[proformaId]\\proforma-detail.tsx"
+  ],
+  "Aucune promotion": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Créez votre première offre promotionnelle en cliquant sur le bouton ci-dessus.": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Type :": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Remise :": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Désactiver": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Activer": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\client.tsx"
+  ],
+  "Nouvelle Promotion": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Nom de la promotion": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Type de promotion": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Nième article remisé": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "1 acheté = 1 offert": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Type de remise": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Pourcentage (%)": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Montant fixe (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Appliquer sur": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Tous les produits": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Une catégorie": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Un produit spécifique": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Catégorie cible": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "Produit cible": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "placeholder=\"Ex: 2ème article -30%\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "placeholder=\"Choisir une catégorie\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\promotions\\components\\promotion-modal.tsx"
+  ],
+  "BON DE COMMANDE": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx"
+  ],
+  "Nos coordonnées": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Tél": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Email": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\unified-settings-client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "NIS": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Art. Imp": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "RIB": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Désignation": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "&nbsp;": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Récapitulatif TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Taux": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Base HT": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Montant TVA": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Retenue à la source": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx"
+  ],
+  "NET À PAYER": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx"
+  ],
+  "Cachet et Signature de l&apos;entreprise": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx"
+  ],
+  "Cachet et Signature du fournisseur": [
+    "\\src\\app\\[locale]\\(dashboard)\\purchases\\[id]\\print\\print-client.tsx"
+  ],
+  "Nouvelle Facture Récurrente": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "ID Client (Pour test)": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "ID Produit (Pour test)": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Fréquence": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Hebdomadaire": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Mensuelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Annuelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Date de début": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "placeholder=\"Entrez un ID client valide\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "placeholder=\"Entrez un ID produit valide\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\new-recurring-dialog.tsx"
+  ],
+  "Prochain BL:": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\components\\recurring-list-client.tsx"
+  ],
+  "Factures Récurrentes": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\page.tsx"
+  ],
+  "Automatisez la création de vos Bons de Livraison (BL) périodiques.": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\page.tsx"
+  ],
+  "Aucun abonnement configuré": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\page.tsx"
+  ],
+  "Créez votre première facture récurrente pour automatiser la facturation loto, abonnement internet, etc.": [
+    "\\src\\app\\[locale]\\(dashboard)\\recurring-invoices\\page.tsx"
+  ],
+  "Réapprovisionnement Intelligent": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Basé sur la vélocité de vente des 30 derniers jours.": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Tous les stocks sont OK !": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Aucun produit ne nécessite de réapprovisionnement dans les 14 prochains jours.": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Stock:": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Ventes/jour:": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Qté suggérée": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "Niveau de stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\reorder\\page.tsx"
+  ],
+  "0 - 30 Jours": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\aging\\components\\client.tsx"
+  ],
+  "30 - 60 Jours": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\aging\\components\\client.tsx"
+  ],
+  "60 - 90 Jours": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\aging\\components\\client.tsx"
+  ],
+  "90+ Jours": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\aging\\components\\client.tsx"
+  ],
+  "Détail par client": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\aging\\components\\client.tsx"
+  ],
+  "Total Clients": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\customers\\components\\client.tsx"
+  ],
+  "Clients Endettés": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\customers\\components\\client.tsx"
+  ],
+  "Dette Globale": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\customers\\components\\client.tsx"
+  ],
+  "Détail des soldes": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\customers\\components\\client.tsx"
+  ],
+  "p.stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx",
+    "\\src\\components\\products\\low-stock-client.tsx"
+  ],
+  "Rupture": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Totaux des produits affichés": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Valeur d'Achat (Coût global)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Capital immobilisé de tout le stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Valeur de Revente ( globale )": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Chiffre d'affaires potentiel": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Produits en Alerte": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Produits sous leur seuil minimum": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Famille": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Toutes les familles": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "Marque": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Toutes les marques": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "placeholder=\"Toutes les familles\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx"
+  ],
+  "placeholder=\"Toutes les marques\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\inventory\\components\\client.tsx",
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Tous les clients": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Client de Détail": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Grossiste": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Revendeur": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\categories\\category-modal.tsx",
+    "\\src\\components\\customers\\customer-form.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Toutes catégories": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "CA, charges et bénéfices nets cumulés jour par jour": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Catégories de charges d'exploitation": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Aucune charge enregistrée": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Chiffre d'affaires comparé au bénéfice par catégorie": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Aucune donnée de catégorie": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Rapports Détails": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Tableaux analytiques détaillés de vos performances.": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Aucune donnée pour les filtres sélectionnés": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "N° Vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Coût": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Bénéfice": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Marge": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Catégorie": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\products\\price-list-modal.tsx",
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Qté Vendue": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Coût d'Achat": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Bénéfice Brut": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Marge %": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Période Actuelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Période Précédente (Comparaison)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Indicateurs de Performance Financière": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Comparatif détaillé entre la période sélectionnée et la période précédente": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Indicateur": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Actuelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Précédente": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Évolution": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Coût d'Achat (COGS)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Frais Généraux": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Bénéfice Net Net": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Rentabilité Comparée": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Graphique comparatif CA vs Bénéfice Net": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "placeholder=\"Catégorie Client\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "placeholder=\"Catégorie Produit\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "placeholder=\"Marque\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "placeholder=\"N° de vente (ex: POS-12A5)\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\profit\\components\\profit-client.tsx"
+  ],
+  "Volume Total des Achats": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\purchases\\components\\client.tsx"
+  ],
+  "Dépenses globales d'approvisionnement": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\purchases\\components\\client.tsx"
+  ],
+  "Dettes Fournisseurs (A Payer)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\purchases\\components\\client.tsx"
+  ],
+  "Montant total restant à régler à vos fournisseurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\purchases\\components\\client.tsx"
+  ],
+  "Chiffre d'Affaires Global": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx"
+  ],
+  "Total des ventes (payées ou non)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx"
+  ],
+  "Total Encaissé": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "Argent réellement perçu": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx"
+  ],
+  "Reste à Recouvrer": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "Dettes générées par ces ventes": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\sales\\components\\client.tsx"
+  ],
+  "Entrée": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Sortie": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Autre": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\mouvements-columns.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\columns.tsx"
+  ],
+  "Trésorerie Globale": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Total Caisse + Banque": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Liquidité (Caisse)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Fonds Bancaires": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Journal des Transactions (Entrées / Sorties)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\treasury\\components\\client.tsx"
+  ],
+  "Module en cours de développement": [
+    "\\src\\app\\[locale]\\(dashboard)\\reports\\[reportType]\\page.tsx"
+  ],
+  "Réservations": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Produits réservés avec acompte versé": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Aucune réservation": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Acompte": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Nouvelle Réservation": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "ID Produit": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Copiez l'ID du produit depuis la liste des produits": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "ID Client (optionnel)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Acompte (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Total attendu (DA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Date limite": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "placeholder=\"ex: product-id-here\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "placeholder=\"ex: customer-id-here\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "placeholder=\"Détails de la réservation...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\reservations\\page.tsx"
+  ],
+  "Total des Ventes": [
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "Articles Vendus": [
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "Tous les états": [
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "placeholder=\"Filtrer par État\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\sales\\components\\client.tsx"
+  ],
+  "Zone Sensible": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx"
+  ],
+  "redémarrage du serveur": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx"
+  ],
+  "Chaîne de connexion (DATABASE_URL)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "postgresql://user:pass@host/db": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx"
+  ],
+  "file:./dev.db": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "placeholder=\"postgresql://user:pass@localhost:5432/dbname\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\advanced-settings-form.tsx"
+  ],
+  "Modèle Gemini": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Sélectionnez un modèle": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Gemini 2.0 Flash (Stable — Recommandé — Excellent Darija & Rapide)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Gemini 3.5 Flash (Dernier 2026 — Ultra-Rapide)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Gemini 3 Flash Preview": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Gemini 2.5 Pro (Raisonnement Profond)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Modèle ChatGPT": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "GPT-4o (Dernier Flagship OpenAI — Excellent pour le Darija)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "GPT-4o Mini (Ultra-Rapide & Économique)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Modèle Claude": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Claude Opus 4.7 (Intelligence Suprême 2026 — Recommandé)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Claude 3.5 Sonnet (Standard)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Claude 3.5 Haiku (Rapide)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "placeholder=\"AIzaSy...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "placeholder=\"sk-proj-...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "placeholder=\"sk-ant-...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\ai-settings-form.tsx"
+  ],
+  "Mode Ramadan": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Affiche les horaires de l'Iftar et du Suhoor dans le tableau de bord": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Commissions Vendeurs": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Mode de calcul principal": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Par Catégorie de Produit": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Par Marque (Famille)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Détermine si les taux spécifiques sont appliqués par catégorie ou par marque": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Taux de commission par défaut (%)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Taux de secours si aucun taux spécifique n'est défini pour le produit/catégorie/marque": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Régime d'imposition": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "G50 — Régime du Réel (TVA)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "G12 / G12 Bis — IFU (Forfait)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Taux IFU": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "5% — Production & vente de biens": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "12% — Services & commerce": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "0,5% — Auto-entrepreneur": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "TAP — Taxe sur l'Activité Professionnelle": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Taux TAP": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "1% — Production de biens": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "2% — Commerce & Services (défaut)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "3% — Professions libérales": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Calculée sur le CA HT et déclarée mensuellement sur le G50": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Taxes & Paramètres Facturation": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Calcul de la TVA (Taxe sur la Valeur Ajoutée)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Active l'application et le calcul de la TVA sur vos produits, ventes et POS": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Timbre sur Factures & BL": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Applique le timbre fiscal sur les factures et bons de livraison (paiements espèce)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Timbre sur Ventes POS (Caisse)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Applique le droit de timbre automatiquement sur les ventes POS en espèce": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Arrondi de Caisse POS (Espèces)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Arrondit automatiquement le total des ventes en espèces au 5 DA le plus proche": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Sélection du vendeur obligatoire au POS": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Demande obligatoirement la sélection d'un vendeur/caissier lors de la validation d'une vente au POS pour le calcul des commissions": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Bon de Garantie Client (A4/A5)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Active la possibilité d'imprimer un bon de garantie pour vos clients détail lors d'une vente": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Bloquer la vente hors-stock": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Bloque l'ajout au panier POS des produits épuisés (stock égal ou inférieur à zéro)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Barème 2025 :": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Retenue à la Source (حجز من المنبع)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Barème Retenue à la Source :": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "— Achats de marchandises": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "— Prestations de services (avec RC)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "— Prestations de services (sans RC)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "— Fournisseurs exonérés": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Le taux est configuré par fournisseur dans la fiche fournisseur.": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Avoirs (فاتورة الإلغاء)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Conformité :": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Clés API Livraison": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "🚀 Yalidine API ID": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "🚀 Yalidine API Token": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "🟡 DHD API Token": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "🔴 HDD API Token": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Procolis": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Zr Express": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "placeholder=\"Choisir le mode\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "placeholder=\"Yalidine API ID...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "placeholder=\"Yalidine API Token...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "placeholder=\"DHD Token...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "placeholder=\"HDD Token...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\algerian-settings-form.tsx"
+  ],
+  "Résumé des Données": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Exporter une Sauvegarde": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  ".json": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Restaurer une Sauvegarde": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Attention :": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Fichier de restauration (.json)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Uniquement les fichiers .json exportés par cette application": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Sauvegarde des Préférences Locales": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backup-restore-form.tsx"
+  ],
+  "Sauvegardes Locales (VPS)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Aucune sauvegarde trouvée.": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Le dossier /backups/ est actuellement vide.": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Fichier d'archive": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Date de création": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Taille": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\backups-list-client.tsx"
+  ],
+  "Email / SMTP": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Configuré": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Non configuré": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Serveur SMTP": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Port SMTP": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Email / Identifiant": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Mot de passe / App Password": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Nom d&apos;expéditeur (optionnel)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "placeholder=\"smtp.gmail.com\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "placeholder=\"votre.email@gmail.com\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "placeholder=\"Mon Magasin <shop@gmail.com>\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\email-settings-form.tsx"
+  ],
+  "Style visuel global du document imprimé.": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "Modèle Carte Fidélité": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "BOUTIQUE": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "NOM DU CLIENT": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "pts": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "Mode d'impression (Caisse)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "Activer l'Aperçu Avant Impression ou Impression Directe": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\printing-settings-form.tsx"
+  ],
+  "Apparence & Ergonomie": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Modèle de Bon de Livraison par défaut": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Standard (Classique)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Compact (Idéal thermiques 80mm/etc)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "AITEE (Facture Style structuré)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Clé API Google Gemini": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "Google AI Studio": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "redémarrage du serveur Node.js (ou VPS)": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "sera nécessaire pour prendre en compte le nouveau fichier": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  ".env": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "(SQLite) ou": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "mysql://root:pass@127.0.0.1:3306/pos": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "placeholder=\"Sélectionner le modèle\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "placeholder=\"mysql://user:password@localhost:3306/db_name\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\system-settings-form.tsx"
+  ],
+  "🇩🇿 Algérie": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\unified-settings-client.tsx"
+  ],
+  "Sécurité": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\unified-settings-client.tsx"
+  ],
+  "placeholder=\"EAAxxxxxx...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\settings\\components\\whatsapp-settings-form.tsx"
+  ],
+  "Dépôt Source": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "Dépôt Destination": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "Produits à transférer": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "placeholder=\"Sélectionnez un dépôt\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "placeholder=\"Sélectionnez un produit\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "placeholder=\"Motif du transfert...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\new\\components\\transfer-form.tsx"
+  ],
+  "Erreur de chargement des transferts": [
+    "\\src\\app\\[locale]\\(dashboard)\\transfers\\page.tsx"
+  ],
+  "Filtres de recherche": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Reçu (Entrant)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Émis (Sortant)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Tous les statuts": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "En attente": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Rejeté": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "Annulé": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "placeholder=\"Tous les types\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx"
+  ],
+  "placeholder=\"Tous les statuts\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\components\\client.tsx",
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Reçu (Client)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "Émis (Fournisseur)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "Numéro de chèque": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "Montant": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx",
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\reconciliation\\components\\client.tsx",
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\customers\\unpaid-client.tsx",
+    "\\src\\components\\expenses\\expense-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Date d'échéance": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "placeholder=\"Sélectionnez un type\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx",
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "placeholder=\"ex: BDL, BNA...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "placeholder=\"Sélectionnez un fournisseur\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\new\\components\\cheque-form.tsx"
+  ],
+  "Erreur de chargement des chèques": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\cheques\\page.tsx"
+  ],
+  "Type de compte": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx"
+  ],
+  "Nom du compte": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx"
+  ],
+  "RIB / Identifiant bancaire (Optionnel)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx"
+  ],
+  "placeholder=\"Ex: Caisse Principale, BNA...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx"
+  ],
+  "placeholder=\"Numéro de compte bancaire...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\account-modal.tsx"
+  ],
+  "Total Entrées (Crédits)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Flux entrant sur la période": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Total Sorties (Débits)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Flux sortant sur la période": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Flux Net de Trésorerie": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Solde net des opérations": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Solde de Clôture": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Solde disponible au dernier jour": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Actif Global de Trésorerie": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\analytics-tab.tsx"
+  ],
+  "Open menu": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\cell-action.tsx"
+  ],
+  "Tous les comptes": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\client.tsx",
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Tous les comptes\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\client.tsx",
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "Saisie Hors-ERP (Non-justifiée)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "Enregistrer une entrée ou sortie de caisse / banque (Hors ventes/achats)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "Compte concerné": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "Type d'opération": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "Description / Motif": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "placeholder=\"Sélectionner un compte...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Raison de la transaction...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transaction-modal.tsx"
+  ],
+  "Virement entre comptes": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "Transférer des fonds d'un compte à un autre": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "De (Source)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "Vers (Destination)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "Motif (Optionnel)": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "placeholder=\"Compte source\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "placeholder=\"Compte destination\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "placeholder=\"Raison du virement...\"": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\components\\transfer-modal.tsx"
+  ],
+  "Résultats du Rapprochement": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\reconciliation\\components\\client.tsx"
+  ],
+  "Libellé": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\reconciliation\\components\\client.tsx"
+  ],
+  "Avant la période filtrée": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx"
+  ],
+  "Total des entrées": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx"
+  ],
+  "Total des dépenses / sorties": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx"
+  ],
+  "Solde net sur la période": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx"
+  ],
+  "Solde disponible final": [
+    "\\src\\app\\[locale]\\(dashboard)\\treasury\\[accountId]\\components\\client.tsx"
+  ],
+  "Users": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx"
+  ],
+  "Manage your team and their roles.": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx"
+  ],
+  "Name": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx",
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\categories\\category-modal.tsx",
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Username (Identifiant)": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx"
+  ],
+  "Role": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx",
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Joined": [
+    "\\src\\app\\[locale]\\(dashboard)\\users\\page.tsx"
+  ],
+  "En attente de la caisse...": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "Bienvenue !": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "Panier vide": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "Précédent Article": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "Économies (Remises)": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "Total à payer": [
+    "\\src\\app\\[locale]\\(pos)\\display\\components\\client.tsx"
+  ],
+  "No Store Available": [
+    "\\src\\app\\[locale]\\(pos)\\pos\\page.tsx"
+  ],
+  "Ouvrir le menu": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "Abonnement": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "Utilisateurs": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "Réinitialiser le mot de passe": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "Nouveau mot de passe": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx",
+    "\\src\\components\\auth\\change-password-form.tsx"
+  ],
+  "setResetOpen(false)}>Annuler": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "placeholder=\"Minimum 6 caractères\"": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\cell-action.tsx"
+  ],
+  "!t.isBlocked && (!t.subscriptionEndsAt || new Date(t.subscriptionEndsAt)": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Espace Superadmin": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Annuaire des Espaces": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Actifs": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Expirés": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "Bloqués": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "placeholder=\"Recherche nom, email, tél...\"": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\client.tsx"
+  ],
+  "BLOQUÉ": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\columns.tsx"
+  ],
+  "Aucun": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\columns.tsx",
+    "\\src\\components\\expenses\\columns.tsx"
+  ],
+  "N/A": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\columns.tsx"
+  ],
+  "Inconnue": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\columns.tsx"
+  ],
+  "Top 10 Espaces par Revenus": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\usage-charts.tsx"
+  ],
+  "Chiffre d'affaires total généré (DZD)": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\usage-charts.tsx"
+  ],
+  "Consommation des Ressources": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\usage-charts.tsx"
+  ],
+  "Commandes vs Produits vs Utilisateurs (Top 10)": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\components\\usage-charts.tsx"
+  ],
+  "License Requests": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "Loading...": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "License Plan": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "♾️ Lifetime (Recommended)": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "⭐ Pro — 1 Year": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "🔹 Starter — 6 Months": [
+    "\\src\\app\\[locale]\\(superadmin)\\superadmin\\licenses\\licenses-client.tsx"
+  ],
+  "Something went wrong!": [
+    "\\src\\app\\[locale]\\error.tsx"
+  ],
+  "Syncl": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "oud": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "SyncloudPOS – Dashboard": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "Clients": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "Stats": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "Trésor": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "850 200 DA": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "312 500 DA": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "📱 Android & iOS": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "850K DA": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "312K DA": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "145K DA": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "WhatsApp": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "7j/7 · 8h – 22h": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "setLang('fr')}>🇫🇷 Français": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "setLang('en')}>🇬🇧 English": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "setLang('ar')}>🇩🇿 العربية": [
+    "\\src\\app\\[locale]\\landing-client.tsx"
+  ],
+  "Page Not Found": [
+    "\\src\\app\\[locale]\\not-found.tsx"
+  ],
+  "Could not find requested resource": [
+    "\\src\\app\\[locale]\\not-found.tsx"
+  ],
+  "item.balance": [
+    "\\src\\components\\analytics\\components\\client.tsx"
+  ],
+  "Mettez à jour votre mot de passe de connexion.": [
+    "\\src\\components\\auth\\change-password-form.tsx"
+  ],
+  "Mot de passe actuel": [
+    "\\src\\components\\auth\\change-password-form.tsx"
+  ],
+  "Confirmer le nouveau mot de passe": [
+    "\\src\\components\\auth\\change-password-form.tsx"
+  ],
+  "Bon retour 👋": [
+    "\\src\\components\\auth\\login-form.tsx"
+  ],
+  "placeholder=\"Email, nom d'utilisateur ou téléphone...\"": [
+    "\\src\\components\\auth\\login-form.tsx"
+  ],
+  "Créer un compte": [
+    "\\src\\components\\auth\\register-form.tsx"
+  ],
+  "Loading verification...": [
+    "\\src\\components\\auth\\subscription-guard.tsx"
+  ],
+  "Quantité avariée": [
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx"
+  ],
+  "Date de déclaration": [
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx"
+  ],
+  "Motif (Périmé, Cassé, etc.)": [
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx"
+  ],
+  "placeholder=\"Sélectionner un produit\"": [
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx"
+  ],
+  "placeholder=\"ex: Produit expiré\"": [
+    "\\src\\components\\avaries\\add-spoilage-modal.tsx"
+  ],
+  "setIsModalOpen(true)}>Déclarer une Avarie (Perte stock)": [
+    "\\src\\components\\avaries\\data-table.tsx"
+  ],
+  "Photo / Logo": [
+    "\\src\\components\\brands\\brand-modal.tsx"
+  ],
+  "Archivée": [
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\brands\\columns.tsx",
+    "\\src\\components\\categories\\category-modal.tsx",
+    "\\src\\components\\categories\\columns.tsx"
+  ],
+  "Commissions par Type de Client (%)": [
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\categories\\category-modal.tsx"
+  ],
+  "Détail": [
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\categories\\category-modal.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Gros": [
+    "\\src\\components\\brands\\brand-modal.tsx",
+    "\\src\\components\\categories\\category-modal.tsx"
+  ],
+  "placeholder=\"Brand name\"": [
+    "\\src\\components\\brands\\brand-modal.tsx"
+  ],
+  "Active": [
+    "\\src\\components\\brands\\columns.tsx",
+    "\\src\\components\\categories\\columns.tsx"
+  ],
+  "Photo": [
+    "\\src\\components\\categories\\category-modal.tsx"
+  ],
+  "[F8]": [
+    "\\src\\components\\categories\\category-modal.tsx",
+    "\\src\\components\\customers\\customer-form.tsx",
+    "\\src\\components\\expenses\\expense-form.tsx",
+    "\\src\\components\\products\\product-form.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx",
+    "\\src\\components\\suppliers\\supplier-form.tsx"
+  ],
+  "placeholder=\"Category name\"": [
+    "\\src\\components\\categories\\category-modal.tsx"
+  ],
+  "[F3]": [
+    "\\src\\components\\categories\\client.tsx",
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\products\\client.tsx",
+    "\\src\\components\\purchases\\client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Enregistrer un Paiement (Avance / Réglement)": [
+    "\\src\\components\\customers\\client.tsx"
+  ],
+  "Caisse/Banque": [
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\customers\\unpaid-client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Observation": [
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\customers\\unpaid-client.tsx",
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx",
+    "\\src\\components\\payments\\cell-action.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "placeholder=\"Sélectionnez un compte\"": [
+    "\\src\\components\\customers\\client.tsx",
+    "\\src\\components\\customers\\unpaid-client.tsx",
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Informations générales": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Type de Client": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Détaillant": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Code-barres": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Solde Initial (DA)": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Notes / Remarques": [
+    "\\src\\components\\customers\\customer-form.tsx",
+    "\\src\\components\\suppliers\\supplier-form.tsx"
+  ],
+  "Informations fiscales": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "placeholder=\"Scan ou saisir\"": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "placeholder=\"Remarques, conditions particulières, historique...\"": [
+    "\\src\\components\\customers\\customer-form.tsx"
+  ],
+  "Historique détaillé des ventes, emprunts et paiements": [
+    "\\src\\components\\customers\\ledger-client.tsx"
+  ],
+  "Total Vente / Emprunt": [
+    "\\src\\components\\customers\\ledger-client.tsx"
+  ],
+  "Total Paiement": [
+    "\\src\\components\\customers\\ledger-client.tsx",
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Solde Actuel": [
+    "\\src\\components\\customers\\ledger-client.tsx",
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Vente/Emprunt": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Paiement": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Observations": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "0 ? formatCurrency(line.debit) : \"—\"}": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "0 ? formatCurrency(line.credit) : \"—\"}": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Relevé de Compte": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Client:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Tél:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "NIF:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Adresse:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Total Vente/Emprunt": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Date d&apos;émission": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Informations Client": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Type:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "RELEVÉ": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Résumé": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Opérations:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Période:": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "0 ? format(new Date(data[0].date), \"MM/yyyy\") : \"—\"}": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Le Client": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "Cachet & Signature": [
+    "\\src\\components\\customers\\ledger-print-templates.tsx"
+  ],
+  "CARTE FIDÉLITÉ": [
+    "\\src\\components\\customers\\loyalty-badge-modal.tsx"
+  ],
+  "points": [
+    "\\src\\components\\customers\\loyalty-badge-modal.tsx"
+  ],
+  "window.close(), 1000); }": [
+    "\\src\\components\\customers\\loyalty-badge-modal.tsx"
+  ],
+  "Enregistrer un Paiement": [
+    "\\src\\components\\customers\\unpaid-client.tsx"
+  ],
+  "0 && days": [
+    "\\src\\components\\dashboard\\expiration-alert.tsx"
+  ],
+  "Appareil Mobile Détecté": [
+    "\\src\\components\\dashboard\\header-mobile-connect.tsx"
+  ],
+  "placeholder=\"Search products...\"": [
+    "\\src\\components\\dashboard\\header.tsx"
+  ],
+  "Toggle language": [
+    "\\src\\components\\dashboard\\language-switcher.tsx"
+  ],
+  "Alertes & Notifications": [
+    "\\src\\components\\dashboard\\notification-bell.tsx"
+  ],
+  "Tout est en ordre !": [
+    "\\src\\components\\dashboard\\notification-bell.tsx"
+  ],
+  "Aucune alerte en cours": [
+    "\\src\\components\\dashboard\\notification-bell.tsx"
+  ],
+  "⇧⌘P": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "⇧⌘Q": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "Nom Complet": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "Adresse E-mail": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "Nom d'utilisateur (Username)": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "Nouveau Mot de Passe (Optionnel)": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "placeholder=\"Votre nom complet...\"": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "placeholder=\"votre-email@exemple.com\"": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "placeholder=\"johndoe\"": [
+    "\\src\\components\\dashboard\\user-nav.tsx",
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "placeholder=\"Laisser vide pour ne pas modifier...\"": [
+    "\\src\\components\\dashboard\\user-nav.tsx"
+  ],
+  "Êtes-vous sûr ?": [
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx",
+    "\\src\\components\\payments\\cell-action.tsx"
+  ],
+  "Modifier l'emprunt": [
+    "\\src\\components\\emprunt\\cell-action.tsx"
+  ],
+  "Montant (DA)": [
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx",
+    "\\src\\components\\payments\\cell-action.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Caisse / Banque": [
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx",
+    "\\src\\components\\payments\\cell-action.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Sélectionner un compte\"": [
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx"
+  ],
+  "placeholder=\"Observation\"": [
+    "\\src\\components\\emprunt\\cell-action.tsx",
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx"
+  ],
+  "item.amount": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "= fromDate && itemDate": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "Recherche": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "Tous les Clients": [
+    "\\src\\components\\emprunt\\client.tsx"
+  ],
+  "Montant Min (DA)": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "Montant Max (DA)": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Rechercher par nom, observation...\"": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Tous les Clients\"": [
+    "\\src\\components\\emprunt\\client.tsx"
+  ],
+  "placeholder=\"Min\"": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Max\"": [
+    "\\src\\components\\emprunt\\client.tsx",
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "Observation (optionnel)": [
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx"
+  ],
+  "placeholder=\"Sélectionner un client...\"": [
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\retours\\returns-client.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "placeholder=\"Sélectionner une caisse/banque...\"": [
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx"
+  ],
+  "placeholder=\"Raison de l'emprunt...\"": [
+    "\\src\\components\\emprunt\\loan-modal.tsx",
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx"
+  ],
+  "Modifier l'emprunt fournisseur": [
+    "\\src\\components\\emprunt-fournisseur\\cell-action.tsx"
+  ],
+  "Tous les Fournisseurs": [
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Tous les Fournisseurs\"": [
+    "\\src\\components\\emprunt-fournisseur\\client.tsx"
+  ],
+  "placeholder=\"Sélectionner un fournisseur...\"": [
+    "\\src\\components\\emprunt-fournisseur\\loan-modal.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "setOpenCategoryModal(false)}>Annuler": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "Créer": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "Notes (Optionnel)": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "Catégorie de dépense": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "Aucun — Enregistrement seulement": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "Montant à débiter": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "placeholder=\"Nom de la catégorie (ex: Loyer, Électricité...)\"": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "placeholder=\"Ex: Loyer mensuel, facture EGA...\"": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "placeholder=\"Informations supplémentaires...\"": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "placeholder=\"Sélectionner une catégorie...\"": [
+    "\\src\\components\\expenses\\expense-form.tsx",
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "placeholder=\"Sélectionner Caisse / Banque...\"": [
+    "\\src\\components\\expenses\\expense-form.tsx"
+  ],
+  "OSM": [
+    "\\src\\components\\maps\\leaflet-map.tsx"
+  ],
+  "Modifier le paiement": [
+    "\\src\\components\\payments\\cell-action.tsx"
+  ],
+  "placeholder=\"Sélectionner une caisse\"": [
+    "\\src\\components\\payments\\cell-action.tsx",
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "placeholder=\"Description du paiement\"": [
+    "\\src\\components\\payments\\cell-action.tsx"
+  ],
+  "Affichage d'une seule opération (Paiement).": [
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "Nouveau Paiement Client": [
+    "\\src\\components\\payments\\client.tsx"
+  ],
+  "placeholder=\"Filtrer par Client\"": [
+    "\\src\\components\\payments\\client.tsx"
+  ],
+  "placeholder=\"Modalité de paiement\"": [
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "placeholder=\"Sélectionner un client\"": [
+    "\\src\\components\\payments\\client.tsx"
+  ],
+  "placeholder=\"Note optionnelle\"": [
+    "\\src\\components\\payments\\client.tsx",
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "Vente Directe": [
+    "\\src\\components\\payments\\columns.tsx"
+  ],
+  "Recouvrement": [
+    "\\src\\components\\payments\\columns.tsx"
+  ],
+  "Nouveau Paiement Fournisseur": [
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "Justificatif de Paiement (Photo)": [
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "placeholder=\"Filtrer par Fournisseur\"": [
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "placeholder=\"Sélectionner un fournisseur\"": [
+    "\\src\\components\\payments\\supplier-client.tsx"
+  ],
+  "Achat": [
+    "\\src\\components\\payments\\supplier-columns.tsx",
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Règlement": [
+    "\\src\\components\\payments\\supplier-columns.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Aucune": [
+    "\\src\\components\\payments\\supplier-columns.tsx",
+    "\\src\\components\\purchases\\columns.tsx"
+  ],
+  "S/N:": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Nouveau Client": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Nom complet *": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Téléphone (Optionnel)": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "setNewCustomerModalOpen(false)} className=\"rounded-xl font-bold\">Annuler": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Enregistrer": [
+    "\\src\\components\\pos\\cart-sidebar.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Space / F9": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "pour le client": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Chargement de l'historique...": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Aucun historique d'achat trouvé": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "C'est la première fois que ce client achète ce produit.": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "Qté:": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "setHistoryItem(null)}>Fermer": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "placeholder=\"Numéro de série...\"": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "placeholder=\"Ahmed Benali\"": [
+    "\\src\\components\\pos\\cart-sidebar.tsx"
+  ],
+  "= \"0\" && e.key": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Aucun (Par défaut)": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Ticket (80mm)": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Impression auto": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Bon Livraison": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Garantie": [
+    "\\src\\components\\pos\\payment-modal.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Bon Garantie": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "handleNumpad(\"C\")}>C": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "handleNumpad(\"0\")}>0": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "handleNumpad(\"00\")}>00": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Esc": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "Enter": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "placeholder=\"Sélectionner le vendeur...\"": [
+    "\\src\\components\\pos\\payment-modal.tsx"
+  ],
+  "code.startsWith(b) && b.length >= 4 && b.length": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Express": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "p === 1 || p === totalPages || Math.abs(p - currentPage)": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Nom du Produit *": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "= 0 && focusedQuickSuggestionIndex": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Catégorie *": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Marque *": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Description du produit": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Taux de TVA (%)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "19% (Taux normal)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "9% (Taux réduit)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "0% (Exonéré)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Aucun code-barre. Cliquez sur Générer ou Ajouter.": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Images du produit (Max 3)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Stock Initial": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Stock Minimum": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Paramètres de visibilité": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Mettre en avant sur la caisse tactile.": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Masquer du POS et du catalogue.": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Raccourcis Clavier Caisse": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Changer / Switch de Panier": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Ajouter un Article Express": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Changer de Catégorie": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Rechercher un produit": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "F4 ou F": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Toutes les catégories (reset)": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Encaisser la vente (Paiement)": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "F9 ou Espace": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Page suivante / précédente": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "PgUp / PgDn": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "Fermer les modals / Effacer la recherche": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "ESC": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "un.": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Alerte Min": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Grille Tarifaire (DZD)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Détail (Retail)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Gros (Wholesale)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Revendeur (Dealer)": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Codes-barres liés": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "item.productId === selectedProductForInfo.id)?.quantity || 0))": [
+    "\\src\\components\\pos\\pos-client.tsx"
+  ],
+  "placeholder=\"Ex: Coca Cola 33cl ou iPhone 14 Pro Max\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Choisir la catégorie...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Nom catégorie...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Choisir la marque...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Nom marque...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Fiche technique ou description rapide du produit...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"TVA...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Code-barre (scanner ou taper)...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Type (ex: Cartouche)...\"": [
+    "\\src\\components\\pos\\pos-client.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "0 && (data.stock - quantityInCart)": [
+    "\\src\\components\\pos\\product-card.tsx"
+  ],
+  "Droit de Timbre": [
+    "\\src\\components\\pos\\receipt.tsx",
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Arrondi": [
+    "\\src\\components\\pos\\receipt.tsx"
+  ],
+  "Scannez pour votre facture": [
+    "\\src\\components\\pos\\receipt.tsx"
+  ],
+  "SYNCLOUDPOS ERP": [
+    "\\src\\components\\pos\\receipt.tsx"
+  ],
+  "BaridiMob Pay": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "RIB:": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Titu:": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "FACTURE": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Arrêtée la présente facture à la somme de :": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Arrondi de Caisse": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Signature du Client": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Précédé de la mention &quot;Lu et approuvé&quot;": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Cachet &amp; Signature": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "BON DE LIVRAISON": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "P.U (DA)": [
+    "\\src\\components\\print\\print-templates.tsx",
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Ancien Solde": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "dont TVA": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "dont Timbre": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "dont Arrondi": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "NOUVEAU SOLDE": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Reçu par (Client)": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Livré par": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "PROFORMA": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "DEVIS / PROFORMA": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Émetteur": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Arrêté le présent devis à la somme de :": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Note :": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Bon pour accord (Client)": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Précédé de la mention &quot;Bon pour accord&quot;": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "BON DE GARANTIE": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Garant émetteur": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Désignation de l'article": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Numéro de Série (S/N)": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "12 Mois": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Conditions Générales de Garantie": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "1. Les articles désignés ci-dessus bénéficient d&apos;une garantie pièces et main-d&apos;œuvre pendant une période de": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "12 mois": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "à compter de la date de livraison.": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "2. La garantie couvre uniquement les défauts de fabrication et vices cachés, sous réserve d&apos;une utilisation conforme aux spécifications techniques.": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "3. Sont exclus de la garantie : les pannes résultant de chocs, chutes, surtension électrique, humidité, ou toute intervention ou modification effectuée par un tiers non agréé.": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "4. La présentation de ce bon muni du numéro de série lisible est obligatoire pour toute demande de prise en charge sous garantie.": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "L&apos;Agent Émetteur": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Cachet de la Caisse": [
+    "\\src\\components\\print\\print-templates.tsx"
+  ],
+  "Achat:": [
+    "\\src\\components\\products\\columns.tsx"
+  ],
+  "Vente (Détail):": [
+    "\\src\\components\\products\\columns.tsx"
+  ],
+  "Gros:": [
+    "\\src\\components\\products\\columns.tsx"
+  ],
+  "Revendeur:": [
+    "\\src\\components\\products\\columns.tsx"
+  ],
+  "Attention": [
+    "\\src\\components\\products\\low-stock-client.tsx"
+  ],
+  "Générer Catalogue Externe": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Créez un catalogue PDF ou texte pour vos clients": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Toutes les catégories": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Détaillant (Prix Vente)": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Grossiste (Prix Gros)": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Revendeur (Prix Revendeur)": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Aperçu du catalogue": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Aucun produit pour ces critères": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Prix": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "placeholder=\"Toutes les catégories\"": [
+    "\\src\\components\\products\\price-list-modal.tsx"
+  ],
+  "Nombre d'exemplaires": [
+    "\\src\\components\\products\\print-barcode-modal.tsx"
+  ],
+  "Quantité à imprimer": [
+    "\\src\\components\\products\\print-barcode-modal.tsx"
+  ],
+  "= 0 && focusedSuggestionIndex": [
+    "\\src\\components\\products\\product-form.tsx"
+  ],
+  "La TVA est désactivée dans les paramètres généraux. Elle ne sera pas appliquée.": [
+    "\\src\\components\\products\\product-form.tsx"
+  ],
+  "Image introuvable": [
+    "\\src\\components\\products\\product-grid-view.tsx"
+  ],
+  "0 && item.stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Init": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Retour Clt": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Vente": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Avarie": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Retour Frs": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Ajustement": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Quantité en Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Valeur d'Achat globale": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Valeur Vente Approximative": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Réservations & Avaries": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Toutes Catégories": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Toutes Marques": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Tous Niveaux Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Rupture de Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Stock Critique (Alerte)": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Stock Correct": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Toute Inactivité": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Inactif &gt; 30 jours": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Inactif &gt; 60 jours": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Inactif &gt; 90 jours": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Jamais vendu": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Date Début": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Date Fin": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx",
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Produit / Caractéristiques": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Niveau de Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Dernière Vente": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Entrées": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Sorties": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Retour Client": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Retour Fournisseur": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Réservé": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Avarié": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Montant Achat": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Montant Approx Vente": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Type d'Entrée": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Stock Avant": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Stock Après": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Motif / Réf": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Type de Sortie": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Seuil d'Alerte": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "unités": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Prix d'Achat (PMP/Cost)": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Prix de Vente (Retail)": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Montant d'Achat Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Montant de Vente Stock": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Marge Brute Estimée": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "Aucun mouvement enregistré pour ce produit.": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "placeholder=\"Rechercher par nom de produit, barcode, catégorie, marque...\"": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "placeholder=\"Catégorie\"": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "placeholder=\"Alerte\"": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "placeholder=\"Inactivité / Stock Mort\"": [
+    "\\src\\components\\products\\stock-dashboard-client.tsx"
+  ],
+  "définitive": [
+    "\\src\\components\\purchases\\cell-action.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Saisir le mot de passe...\"": [
+    "\\src\\components\\purchases\\cell-action.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "PENDING": [
+    "\\src\\components\\purchases\\client.tsx"
+  ],
+  "COMPLETED": [
+    "\\src\\components\\purchases\\client.tsx"
+  ],
+  "CANCELLED": [
+    "\\src\\components\\purchases\\client.tsx"
+  ],
+  "Texte extrait": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Prix (DA)": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Aucun produit ne semble correspondre dans votre catalogue. Vous pouvez le créer rapidement ci-dessous.": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Ou créer un nouveau produit": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Nom final du produit": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Prix d'achat (DA)": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Prix de vente détail (DA)": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "placeholder=\"Sélectionner une marque...\"": [
+    "\\src\\components\\purchases\\missing-products-form.tsx"
+  ],
+  "Scanner un bon de livraison": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "fournisseur": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  ", les": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "produits": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "quantités": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "prix unitaires": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "Analyse IA en cours...": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "L'IA détecte les articles...": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "Résultat IA — Bon de livraison": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "Analyse incomplète": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx"
+  ],
+  "TOTAL": [
+    "\\src\\components\\purchases\\ocr-receipt-uploader.tsx",
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "SYNCLOUD POS": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Fournisseur:": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Total (DA)": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Signature Fournisseur": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Signature Responsable": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Nouveau Fournisseur": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Nom *": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Solde dû": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Total bon": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Type de document": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Bon de Réception (BR) (+Stock)": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Bon de Commande": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Facture": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Brouillon": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Compte de paiement": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Réf. Fournisseur (Facture/BL)": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Date de transaction": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Nom du produit ou Code-barre": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Prix d'achat unitaire": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "S/N": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Produits uniques": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Net à payer au fournisseur": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "La retenue est versée à la DGI via le G50": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Règlement Initial": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Enregistrer un versement immédiat": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Montant à régler": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Mode de règlement": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "💵 Espèce": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "🏦 Versement": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "⚡ Virement": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "✍️ Chèque": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "💳 Carte Bancaire": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Observation / Notes": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Produit sélectionné": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Nouvel Achat": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Détail / Public": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Prix public conseillé": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Prix revendeurs B2B": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Demi-Gros / Gros": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Prix de vente de gros": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Montant du règlement (DA) *": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Espèce": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Chèque": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Carte Bancaire": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Virement": [
+    "\\src\\components\\purchases\\purchase-form.tsx",
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Observation / Notes (Optionnel)": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Nom du fournisseur\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Téléphone\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Ex: FAC-2024-001\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Exemple de ligne à coller :&#10;Coca Cola 33cl\t12\t80&#10;789456123\t24\t120\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Rechercher par nom, code, code-barre...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Numéros de série (S/N séparés par virgule)...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Choisir la caisse/banque...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Choisir le mode...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Acompte, paiement solde...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Ajouter des notes ou remarques particulières...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Mode...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Compte...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "placeholder=\"Ex: Acompte n°1, chèque reçu...\"": [
+    "\\src\\components\\purchases\\purchase-form.tsx"
+  ],
+  "Magasin / Dépôt": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Tous les Dépôts": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Compensation": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Toutes compensations": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Remboursement Cash": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "P.U": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Motif": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Auteur": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "CASH": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "CRÉDIT": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Coût U.": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Enregistré Par": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Bon de Livraison (BL) *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Produits du bon de livraison": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Codebarre": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Retournée Précédemment": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Qté à Retourner": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Dépôt / Magasin de restockage": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Motif du Retour *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Total Retour Marchandise": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Mode de Compensation": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Crédit Client (Solde)": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Génère un crédit ou réduit sa dette pour un futur BL": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Rembourser Cash (Caisse)": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Caisse de Remboursement *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Sélectionnez un compte...": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Notes Internes (facultatif)": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Fournisseur *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Bon d'Achat / Commande *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Produits achetés du bon": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Qté Achetée": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Dépôt / Magasin de déstockage": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Déduire du solde (Dette)": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Réduit ce que nous devons au fournisseur": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Récupérer Cash (Remboursement)": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Caisse de Dépôt *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Notes Internes": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Motif *": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Re-déduire les produits du stock (ou les re-créditer pour les retours fournisseurs).": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Restaurer les soldes du client ou fournisseur si c'était un retour à crédit.": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Restaurer les soldes de caisse et supprimer la transaction financière si c'était un retour en espèces (cash).": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"Rechercher...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"ex: Article défectueux, Non conforme...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"Notes de commentaires internes...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"ex: Article défectueux, Erreur de commande...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"Motif du retour...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "placeholder=\"Notes additionnelles...\"": [
+    "\\src\\components\\retours\\returns-client.tsx"
+  ],
+  "Aucun article": [
+    "\\src\\components\\sales\\columns.tsx"
+  ],
+  "Total ce bon": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "N° Référence": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Devis": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Bon de Livraison (-Stock)": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Avoir (Annulation partielle)": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Validé": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "À Terme": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Avoir — Référence Facture Originale": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Prix unitaire (DA)": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Total à Payer": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "placeholder=\"Rechercher par N° facture ou nom client...\"": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "placeholder=\"Rechercher produit...\"": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "placeholder=\"N° de Série (Optionnel)...\"": [
+    "\\src\\components\\sales\\sales-form.tsx"
+  ],
+  "Pas de téléphone": [
+    "\\src\\components\\sales\\send-document-dialog.tsx"
+  ],
+  "Pas d&apos;email": [
+    "\\src\\components\\sales\\send-document-dialog.tsx"
+  ],
+  "Enregistrer un Paiement Fournisseur": [
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Justificatif (Photo)": [
+    "\\src\\components\\suppliers\\client.tsx"
+  ],
+  "Totaux": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "Relevé de Compte Fournisseur": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "Total Achats": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "Total Paiements": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "Total Emprunts": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "Total Retours": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "0 ? 'text-red-600' : 'text-emerald-600'}`}>Reste à payer": [
+    "\\src\\components\\suppliers\\ledger-client.tsx"
+  ],
+  "placeholder=\"Remarques, conditions de paiement, délais...\"": [
+    "\\src\\components\\suppliers\\supplier-form.tsx"
+  ],
+  "Close": [
+    "\\src\\components\\ui\\dialog.tsx",
+    "\\src\\components\\ui\\sheet.tsx"
+  ],
+  "[]) => Promise": [
+    "\\src\\components\\ui\\excel-import-modal.tsx"
+  ],
+  "Télécharger le modèle Excel": [
+    "\\src\\components\\ui\\excel-import-modal.tsx"
+  ],
+  "c.label).join(\", \")}": [
+    "\\src\\components\\ui\\excel-import-modal.tsx"
+  ],
+  ".xlsx / .xls / .csv": [
+    "\\src\\components\\ui\\excel-import-modal.tsx"
+  ],
+  "Aperçu (5 premières lignes) :": [
+    "\\src\\components\\ui\\excel-import-modal.tsx"
+  ],
+  "= FieldPath": [
+    "\\src\\components\\ui\\form.tsx"
+  ],
+  "placeholder=\"Nom ou code-barre...\"": [
+    "\\src\\components\\ui\\product-search-combobox.tsx"
+  ],
+  "SYNCLOUD AI": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Assistant Vocal": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Français": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Options & Personnalisation": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Moteur IA :": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "GPT-4o (Ultra-Darija)": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Gemini 2.0 (Stable)": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Claude 3.5 Sonnet": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Vitesse de lecture :": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Style de Réponse :": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Votre Commande": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Appuyez sur le micro pour parler...": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Questions fréquentes": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Réponse Assistant": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "L'assistant vocal parlera après votre commande...": [
+    "\\src\\components\\ui\\voice-assistant-widget.tsx"
+  ],
+  "Add New User": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Username (Identifiant unique - non sensible à la casse)": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Password": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Admin": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Manager": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Cashier (Vendeur)": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Accountant (Comptable)": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Stock Manager (Gestionnaire Stock)": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Permissions du Vendeur": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Autoriser la modification": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Peut modifier les commandes, clients, etc.": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Autoriser la suppression": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Peut supprimer des données du système.": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Create User": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "placeholder=\"john@example.com\"": [
+    "\\src\\components\\users\\add-user-modal.tsx",
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "placeholder=\"Select a role\"": [
+    "\\src\\components\\users\\add-user-modal.tsx"
+  ],
+  "Modifier l'utilisateur": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Nom complet": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Nouveau mot de passe (Laisser vide pour ne pas changer)": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Rôle": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Permissions Spécifiques": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "Peut modifier les informations.": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ],
+  "placeholder=\"Selectionner le rôle\"": [
+    "\\src\\components\\users\\edit-user-modal.tsx"
+  ]
+}

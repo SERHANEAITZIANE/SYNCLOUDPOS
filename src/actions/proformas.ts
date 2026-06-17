@@ -45,6 +45,9 @@ export async function createProforma(data: {
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
     const tenantId = session.user.tenantId
 
+    const customer = await db.customer.findFirst({ where: { id: data.customerId, tenantId } })
+    if (!customer) return { error: "Client introuvable ou non autorisé" }
+
     const proformaNumber = await generateProformaNumber(tenantId)
 
     const proforma = await db.proforma.create({

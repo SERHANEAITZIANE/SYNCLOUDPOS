@@ -48,6 +48,9 @@ const nextConfig: import('next').NextConfig = {
     serverExternalPackages: ['@prisma/client', 'bcryptjs'],
 
     async headers() {
+        if (process.env.NODE_ENV === 'development') {
+            return [];
+        }
         return [
             {
                 source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|woff|woff2)',

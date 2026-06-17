@@ -11,7 +11,7 @@ export const createBrand = async (values: z.infer<typeof BrandSchema>) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("brands:create"))) return { error: "Accès refusé" }
 
     const tenantId = session?.user?.tenantId
 
@@ -78,7 +78,7 @@ export const deleteBrand = async (id: string) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("brands:delete"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -86,12 +86,16 @@ export const deleteBrand = async (id: string) => {
     }
 
     try {
-        await db.brand.delete({
+        const res = await db.brand.updateMany({
             where: {
                 id,
                 tenantId // Ensure deletion is scoped to tenant
+            },
+            data: {
+                isArchived: true
             }
         })
+        if (res.count === 0) return { error: "Brand not found or unauthorized" }
 
         revalidatePath("/[locale]/dashboard/brands", "page")
         return { success: "Brand deleted!" }
@@ -105,7 +109,7 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
 
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("brands:update"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
 
     if (!tenantId) {
@@ -121,7 +125,7 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
     const { name, imageUrl, isArchived, commissionWholesale, commissionReseller, commissionRetail } = validatedFields.data
 
     try {
-        await db.brand.update({
+        const res = await db.brand.updateMany({
             where: {
                 id,
                 tenantId
@@ -135,6 +139,7 @@ export const updateBrand = async (id: string, values: z.infer<typeof BrandSchema
                 commissionRetail: commissionRetail ?? 0,
             }
         })
+        if (res.count === 0) return { error: "Brand not found or unauthorized" }
 
         revalidatePath("/[locale]/dashboard/brands", "page")
         return { success: "Brand updated!" }
@@ -148,7 +153,7 @@ export const importBrands = async (rows: { name: string }[]) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("brands"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("brands:create"))) return { error: "Accès refusé" }
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 

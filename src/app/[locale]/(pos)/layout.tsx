@@ -20,7 +20,7 @@ export default async function PosLayout({
                 subscriptionEndsAt={session?.user?.subscriptionEndsAt}
                 isBlocked={session?.user?.isBlocked}
             >
-                <div className="h-full w-full bg-slate-100 dark:bg-slate-900">
+                <div className="pos-layout-wrapper h-full w-full bg-slate-100 dark:bg-slate-900">
                     {children}
                 </div>
             </SubscriptionGuard>

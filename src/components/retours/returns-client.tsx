@@ -68,9 +68,9 @@ interface ReturnsClientProps {
     supplierReturns: any[]
     products: ProductOption[]
     customers: CustomerOption[]
-    suppliers: SupplierOption[]
     accounts: AccountOption[]
     stores: StoreOption[]
+    initialTab?: "client" | "supplier"
 }
 
 export function ReturnsClient({
@@ -80,10 +80,11 @@ export function ReturnsClient({
     customers = [],
     suppliers = [],
     accounts = [],
-    stores = []
+    stores = [],
+    initialTab = "client"
 }: ReturnsClientProps) {
     const router = useRouter()
-    const [activeTab, setActiveTab] = useState<"client" | "supplier">("client")
+    const [activeTab, setActiveTab] = useState<"client" | "supplier">(initialTab)
     const [searchQuery, setSearchQuery] = useState("")
 
     // Advanced Filters State (Client)
@@ -91,12 +92,14 @@ export function ReturnsClient({
     const [clientEndDate, setClientEndDate] = useState("")
     const [clientStoreFilter, setClientStoreFilter] = useState("all")
     const [clientCompensationFilter, setClientCompensationFilter] = useState("all")
+    const [clientCustomerFilter, setClientCustomerFilter] = useState("all")
 
     // Advanced Filters State (Supplier)
     const [supplierStartDate, setSupplierStartDate] = useState("")
     const [supplierEndDate, setSupplierEndDate] = useState("")
     const [supplierStoreFilter, setSupplierStoreFilter] = useState("all")
     const [supplierCompensationFilter, setSupplierCompensationFilter] = useState("all")
+    const [supplierFilter, setSupplierFilter] = useState("all")
 
     // Modals visibility
     const [isClientModalOpen, setIsClientModalOpen] = useState(false)
@@ -166,6 +169,18 @@ export function ReturnsClient({
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState("")
     const [successMsg, setSuccessMsg] = useState("")
+
+    // Print State
+    interface SubmittedReturn {
+        salesOrder: any;
+        items: any[];
+        returnTotal: number;
+        amountPaid: number;
+        refundAmount: number;
+        date: Date;
+        customerName: string;
+    }
+    const [submittedReturn, setSubmittedReturn] = useState<SubmittedReturn | null>(null)
 
     // Edit Return State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -263,6 +278,7 @@ export function ReturnsClient({
         setClientNotes("")
         setErrorMsg("")
         setSuccessMsg("")
+        setSubmittedReturn(null)
     }
 
     // Reset Supplier Form
@@ -358,12 +374,136 @@ export function ReturnsClient({
             setErrorMsg(res.error)
         } else {
             setSuccessMsg(res.success || "Retour enregistré avec succès")
-            setTimeout(() => {
-                setIsClientModalOpen(false)
-                resetClientForm()
-                router.refresh()
-            }, 1800)
+            
+            // Capture data for printing
+            const itemsPrint = itemsToReturn.map((itr: any) => {
+               const prod = selectedSalesOrder.items.find((i: any) => i.productId === itr.productId)
+               return {
+                  name: prod.product.name,
+                  soldQty: prod.quantity,
+                  qty: itr.quantity,
+                  price: itr.unitPrice
+               }
+            })
+            setSubmittedReturn({
+                salesOrder: selectedSalesOrder,
+                items: itemsPrint,
+                returnTotal: clientTotal,
+                amountPaid: amountPaid,
+                refundAmount: refundCash ? Math.min(maxRefundCapacity, clientTotal) : 0,
+                date: new Date(),
+                customerName: selectedCustomer?.name || ""
+            })
         }
+    }
+
+    const printReturnReceipt = (data: SubmittedReturn) => {
+        const printWindow = window.open('', '_blank')
+        if (!printWindow) return
+
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Bon de Retour</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #000; }
+                    .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+                    .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+                    .info-grid { display: flex; justify-content: space-between; margin-bottom: 30px; }
+                    .info-box { width: 48%; line-height: 1.6; }
+                    table { border-collapse: collapse; margin-bottom: 30px; width: 100%; }
+                    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+                    th { background-color: #f5f5f5; font-weight: bold; }
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                    .totals { width: 50%; margin-left: auto; }
+                    .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+                    .total-row.bold { font-weight: bold; font-size: 1.1em; border-top: 2px solid #000; border-bottom: none; padding-top: 10px; }
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div class="title">BON DE RETOUR CLIENT</div>
+                    <div>Date d'édition: ${new Date().toLocaleString('fr-FR')}</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <strong>Informations Client:</strong><br/>
+                        Nom: ${data.customerName}
+                    </div>
+                    <div class="info-box text-right">
+                        <strong>Informations Vente Originale:</strong><br/>
+                        N° BL / Vente: ${data.salesOrder.receiptNumber || data.salesOrder.id.substring(0,8)}<br/>
+                        Date de vente: ${new Date(data.salesOrder.createdAt).toLocaleDateString('fr-FR')}
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Désignation Produit</th>
+                            <th class="text-center">Qté Vendue</th>
+                            <th class="text-center">Qté Retournée</th>
+                            <th class="text-right">P.U (DA)</th>
+                            <th class="text-right">Total (DA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.items.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td class="text-center">${item.soldQty}</td>
+                                <td class="text-center">${item.qty}</td>
+                                <td class="text-right">${Number(item.price).toLocaleString()}</td>
+                                <td class="text-right">${(item.qty * item.price).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="totals">
+                    <div class="total-row">
+                        <span>Montant Original du BL:</span>
+                        <span>${Number(data.salesOrder.total).toLocaleString()} DA</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Montant Déjà Payé par Client:</span>
+                        <span>${Number(data.amountPaid).toLocaleString()} DA</span>
+                    </div>
+                    <div class="total-row" style="margin-top: 15px; border-top: 1px dashed #ccc;">
+                        <span>Valeur de la Marchandise Retournée:</span>
+                        <span>${data.returnTotal.toLocaleString()} DA</span>
+                    </div>
+                    <div class="total-row bold" style="color: ${data.refundAmount > 0 ? '#000' : '#666'}">
+                        <span>Montant à Rembourser (Cash):</span>
+                        <span>${data.refundAmount.toLocaleString()} DA</span>
+                    </div>
+                    ${data.refundAmount < data.returnTotal ? `
+                    <div class="total-row">
+                        <span>Compensation en Crédit (Déduction dette):</span>
+                        <span>${(data.returnTotal - data.refundAmount).toLocaleString()} DA</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <div style="margin-top: 80px; display: flex; justify-content: space-between;">
+                    <div style="text-align: center; width: 200px; border-top: 1px solid #000; padding-top: 10px;">Signature Client</div>
+                    <div style="text-align: center; width: 200px; border-top: 1px solid #000; padding-top: 10px;">Signature Responsable</div>
+                </div>
+            </body>
+            </html>
+        `
+        printWindow.document.write(html)
+        printWindow.document.close()
+        
+        setTimeout(() => {
+            printWindow.print()
+        }, 250)
     }
 
     // Handle Supplier Return submission
@@ -436,7 +576,10 @@ export function ReturnsClient({
         const matchesCompensation = clientCompensationFilter === "all" ||
             (clientCompensationFilter === "CASH" ? r.returnType === "CASH" : r.returnType === "CREDIT")
 
-        return matchesSearch && matchesStartDate && matchesEndDate && matchesStore && matchesCompensation
+        // Customer
+        const matchesCustomer = clientCustomerFilter === "all" || r.customerId === clientCustomerFilter
+
+        return matchesSearch && matchesStartDate && matchesEndDate && matchesStore && matchesCompensation && matchesCustomer
     })
 
     const filteredSupplierReturns = supplierReturns.filter(r => {
@@ -459,7 +602,10 @@ export function ReturnsClient({
         const matchesCompensation = supplierCompensationFilter === "all" ||
             (supplierCompensationFilter === "CASH" ? r.returnType === "CASH" : r.returnType === "CREDIT")
 
-        return matchesSearch && matchesStartDate && matchesEndDate && matchesStore && matchesCompensation
+        // Supplier
+        const matchesSupplier = supplierFilter === "all" || r.supplierId === supplierFilter
+
+        return matchesSearch && matchesStartDate && matchesEndDate && matchesStore && matchesCompensation && matchesSupplier
     })
 
     return (
@@ -535,7 +681,7 @@ export function ReturnsClient({
             </div>
 
             {/* Advanced Filters */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-900 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-900 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                 <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Date Début</label>
                     <input
@@ -579,10 +725,41 @@ export function ReturnsClient({
                         <option value="CASH">Remboursement Cash</option>
                     </select>
                 </div>
+                {activeTab === "client" ? (
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Client</label>
+                        <SearchableSelect
+                            options={[
+                                { label: "Tous les clients", value: "all" },
+                                ...customers.map(c => ({ label: c.name, value: c.id }))
+                            ]}
+                            value={clientCustomerFilter}
+                            onChange={setClientCustomerFilter}
+                            placeholder="Tous les clients"
+                            searchPlaceholder="Rechercher un client..."
+                            className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-slate-700 h-[30px]"
+                        />
+                    </div>
+                ) : (
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Fournisseur</label>
+                        <SearchableSelect
+                            options={[
+                                { label: "Tous les fournisseurs", value: "all" },
+                                ...suppliers.map(s => ({ label: s.name, value: s.id }))
+                            ]}
+                            value={supplierFilter}
+                            onChange={setSupplierFilter}
+                            placeholder="Tous les fournisseurs"
+                            searchPlaceholder="Rechercher un fournisseur..."
+                            className="w-full bg-slate-900 text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-slate-700 h-[30px]"
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Clear filters trigger */}
-            {((activeTab === "client" ? (clientStartDate || clientEndDate || clientStoreFilter !== "all" || clientCompensationFilter !== "all") : (supplierStartDate || supplierEndDate || supplierStoreFilter !== "all" || supplierCompensationFilter !== "all"))) && (
+            {((activeTab === "client" ? (clientStartDate || clientEndDate || clientStoreFilter !== "all" || clientCompensationFilter !== "all" || clientCustomerFilter !== "all") : (supplierStartDate || supplierEndDate || supplierStoreFilter !== "all" || supplierCompensationFilter !== "all" || supplierFilter !== "all"))) && (
                 <div className="flex justify-end -mt-2">
                     <button
                         onClick={() => {
@@ -591,11 +768,13 @@ export function ReturnsClient({
                                 setClientEndDate("")
                                 setClientStoreFilter("all")
                                 setClientCompensationFilter("all")
+                                setClientCustomerFilter("all")
                             } else {
                                 setSupplierStartDate("")
                                 setSupplierEndDate("")
                                 setSupplierStoreFilter("all")
                                 setSupplierCompensationFilter("all")
+                                setSupplierFilter("all")
                             }
                         }}
                         className="text-xs text-rose-400 hover:text-rose-300 font-semibold transition-colors"
@@ -908,7 +1087,7 @@ export function ReturnsClient({
                             {/* Summary and Financial Options */}
                             {selectedSalesOrder && clientTotal > 0 && (
                                 <div className="space-y-4">
-                                    <div className="bg-purple-950/20 border border-purple-500/10 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
+                                    <div className="bg-purple-950/20 border border-purple-500/10 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs mb-4">
                                         <div className="flex items-center gap-2 text-slate-300">
                                             <Package className="h-5 w-5 text-purple-400" />
                                             <div>
@@ -922,6 +1101,21 @@ export function ReturnsClient({
                                             <span className="text-xl font-black text-purple-400">
                                                 {clientTotal.toLocaleString()} DA
                                             </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                                        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Total BL Initial</div>
+                                            <div className="text-base font-bold text-slate-300">{salesOrderTotal.toLocaleString()} DA</div>
+                                        </div>
+                                        <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                                            <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">Montant Payé</div>
+                                            <div className="text-base font-bold text-emerald-400">{amountPaid.toLocaleString()} DA</div>
+                                        </div>
+                                        <div className="bg-purple-900/20 p-3 rounded-xl border border-purple-500/30">
+                                            <div className="text-[10px] text-purple-400 uppercase font-bold mb-1">Montant à retourner (Max)</div>
+                                            <div className="text-base font-bold text-purple-400">{maxRefundCapacity.toLocaleString()} DA</div>
                                         </div>
                                     </div>
 
@@ -1012,37 +1206,53 @@ export function ReturnsClient({
                                 />
                             </div>
 
-                            {/* Feedback messages */}
                             {errorMsg && (
-                                <div className="p-3 bg-red-950/20 border border-red-500/20 text-red-400 rounded-xl text-xs font-semibold flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                                <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs font-medium">
                                     {errorMsg}
                                 </div>
                             )}
 
                             {successMsg && (
-                                <div className="p-3 bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold flex items-center gap-2">
-                                    <CheckCircle2 className="h-4 w-4 shrink-0" />
-                                    {successMsg}
+                                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-bold flex flex-col items-center justify-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="h-5 w-5" />
+                                        {successMsg}
+                                    </div>
+                                    {submittedReturn && (
+                                        <button
+                                            type="button"
+                                            onClick={() => printReturnReceipt(submittedReturn)}
+                                            className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm transition-colors shadow-lg flex items-center gap-2 mt-2"
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            Imprimer le Bon de Retour
+                                        </button>
+                                    )}
                                 </div>
                             )}
 
-                            {/* Form actions */}
-                            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-900">
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-900">
                                 <button
                                     type="button"
-                                    onClick={() => setIsClientModalOpen(false)}
-                                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition-all"
+                                    onClick={() => {
+                                        setIsClientModalOpen(false)
+                                        if (submittedReturn) {
+                                            router.refresh()
+                                        }
+                                    }}
+                                    className="px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg text-xs font-semibold transition-colors"
                                 >
-                                    Annuler
+                                    Fermer
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={loading || (refundCash && selectedAccountInfo && Number(selectedAccountInfo.balance) < Math.min(maxRefundCapacity, clientTotal))}
-                                    className="px-5 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md shadow-purple-500/10 transition-all"
-                                >
-                                    {loading ? "Enregistrement..." : "Enregistrer le Retour"}
-                                </button>
+                                {!submittedReturn && (
+                                    <button
+                                        type="submit"
+                                        disabled={loading || !selectedSalesOrderId || clientTotal <= 0}
+                                        className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-lg shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {loading ? "Traitement..." : "Valider le Retour"}
+                                    </button>
+                                )}
                             </div>
                         </form>
                     </div>

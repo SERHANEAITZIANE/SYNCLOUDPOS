@@ -16,7 +16,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { SupplierLoanModal } from "./loan-modal"
+import { Search, Building2, Wallet, Calendar as CalendarIcon, ArrowDownUp, RefreshCw, Filter } from "lucide-react"
 
 interface EmpruntFournisseurClientProps {
     data: SupplierLoanColumn[]
@@ -121,86 +123,117 @@ export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> =
             <Separator />
 
             {/* Premium Filter Area */}
-            <div className="bg-card p-4 rounded-lg border shadow-sm space-y-4 my-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 my-6 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="flex items-center gap-2 mb-2 relative z-10">
+                    <div className="p-1.5 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <Filter className="w-4 h-4 text-orange-400" />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-200">Filtres de recherche avancés</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 relative z-10">
                     {/* Search */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recherche</label>
-                        <Input
-                            placeholder="Rechercher par nom, observation..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full"
-                        />
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Search className="w-3 h-3" /> Recherche
+                        </label>
+                        <div className="relative">
+                            <Input
+                                placeholder="Rechercher par nom, observation..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-950/50 border-slate-800 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all rounded-xl pl-3 shadow-inner"
+                            />
+                        </div>
                     </div>
 
                     {/* Supplier Select */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fournisseur</label>
-                        <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Tous les Fournisseurs" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Tous les Fournisseurs</SelectItem>
-                                {suppliers.map(s => (
-                                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Building2 className="w-3 h-3" /> Fournisseur
+                        </label>
+                        <SearchableSelect
+                            options={[
+                                { label: "Tous les Fournisseurs", value: "ALL" },
+                                ...suppliers.map(s => ({ label: s.name, value: s.id }))
+                            ]}
+                            value={selectedSupplier}
+                            onChange={setSelectedSupplier}
+                            placeholder="Tous les Fournisseurs"
+                            searchPlaceholder="Rechercher un fournisseur..."
+                            className="bg-slate-950/50 border-slate-800 focus:border-orange-500/50 rounded-xl shadow-inner"
+                        />
                     </div>
 
                     {/* Treasury Account Select */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Caisse / Banque</label>
-                        <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Tous les comptes" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Tous les comptes</SelectItem>
-                                {treasuryAccounts.map(acc => (
-                                    <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Wallet className="w-3 h-3" /> Caisse / Banque
+                        </label>
+                        <SearchableSelect
+                            options={[
+                                { label: "Tous les comptes", value: "ALL" },
+                                ...treasuryAccounts.map(acc => ({ label: `${acc.name} (${acc.type})`, value: acc.id }))
+                            ]}
+                            value={selectedAccount}
+                            onChange={setSelectedAccount}
+                            placeholder="Tous les comptes"
+                            searchPlaceholder="Rechercher un compte..."
+                            className="bg-slate-950/50 border-slate-800 focus:border-orange-500/50 rounded-xl shadow-inner"
+                        />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 items-end relative z-10">
                     {/* Date range picker */}
-                    <div className="space-y-1 sm:col-span-2">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">Période</label>
-                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                    <div className="space-y-1.5 sm:col-span-2">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> Période
+                        </label>
+                        <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-orange-500/50 transition-all shadow-inner">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
                     </div>
 
                     {/* Min Amount */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Montant Min (DA)</label>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <ArrowDownUp className="w-3 h-3" /> Montant Min (DA)
+                        </label>
                         <Input
                             type="number"
                             placeholder="Min"
                             value={minAmount}
                             onChange={(e) => setMinAmount(e.target.value)}
-                            className="w-full"
+                            className="w-full bg-slate-950/50 border-slate-800 focus:border-orange-500/50 rounded-xl shadow-inner"
                         />
                     </div>
 
                     {/* Max Amount */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Montant Max (DA)</label>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <ArrowDownUp className="w-3 h-3" /> Montant Max (DA)
+                        </label>
                         <Input
                             type="number"
                             placeholder="Max"
                             value={maxAmount}
                             onChange={(e) => setMaxAmount(e.target.value)}
-                            className="w-full"
+                            className="w-full bg-slate-950/50 border-slate-800 focus:border-orange-500/50 rounded-xl shadow-inner"
                         />
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t">
-                    <Button variant="outline" size="sm" onClick={onReset}>
+                <div className="flex justify-end gap-2 pt-4 border-t border-slate-800/60 relative z-10 mt-2">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={onReset}
+                        className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2"
+                    >
+                        <RefreshCw className="w-3.5 h-3.5" />
                         Réinitialiser les filtres
                     </Button>
                 </div>

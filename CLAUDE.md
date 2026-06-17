@@ -83,7 +83,11 @@ npx prisma db push
 - Fetch session via `auth()`, extract `tenantId` for multi-tenancy
 - Return `{ success/error, data }` objects (never throw to client)
 - Use `revalidatePath()` for ISR cache invalidation
-- Permission checks via `requirePermission()` from `src/lib/rbac.ts`
+- Permission checks via `src/lib/rbac.ts`. Two patterns in use:
+  - Most actions: `const { hasPermission } = await import("@/lib/rbac")` then `if (!(await hasPermission("module:action"))) return { error: "Accès refusé" }`
+  - Some actions: `requirePermission("module:action")` (throws on denial)
+  - Both take a `"module:action"` permission string (NOT a session arg) and resolve the session internally via `auth()`
+  - Prisma client is imported as `import { db } from "@/lib/db"`
 
 ### Treasury as Financial Source of Truth
 - **Critical**: All financial flows (sales, purchases, expenses) create `TreasuryTransaction` entries
@@ -190,7 +194,7 @@ LICENSE_FILE=<license-path>
 1. Always fetch session: `const session = await auth()`
 2. Extract tenantId: `const tenantId = session?.user?.tenantId`
 3. Filter all queries by tenantId
-4. Check permissions: `await requirePermission(session, 'permission_name')`
+4. Check permissions: `await requirePermission("module:action")` or `await hasPermission("module:action")` (takes a permission string, not the session — resolves session internally)
 5. Use `revalidatePath()` after mutations
 6. Return `{ success: true, data }` or `{ error: 'message' }`
 
@@ -253,7 +257,8 @@ Dockerfile          # Multi-stage build
 
 ### Deployment
 - Docker-based deployment (see docker-compose.yml)
-- Migrations run automatically via `docker-entrypoint.sh`
+- On container start, `docker-entrypoint.sh` waits for the DB then runs `npx prisma db push --skip-generate` (schema sync, NOT migration files), then `node server.js`
+- No `npm test` script exists — there is no test runner configured in this project
 - Health check endpoint: `/api/health`
 - Production URL: https://chirpedbeo.online
 

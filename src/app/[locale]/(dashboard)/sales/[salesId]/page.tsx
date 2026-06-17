@@ -17,7 +17,55 @@ const SalesOrderPage = async ({
     const store = tenantId ? await db.tenant.findUnique({ where: { id: tenantId } }) : null;
 
     // Only fetch sales order if it's not "new"
-    const salesOrder = (salesId === "new") ? null : await getSalesOrder(salesId)
+    let salesOrder = (salesId === "new") ? null : await getSalesOrder(salesId)
+
+    // Fallback: If it's a POS Order ID, find the corresponding SalesOrder via TreasuryTransaction
+    if (!salesOrder && salesId !== "new" && tenantId) {
+        const tx = await db.treasuryTransaction.findFirst({
+            where: { referenceId: salesId, source: "SALE", tenantId }
+        })
+        if (tx && tx.description) {
+            // Description format: "Paiement Vente N° BL-2026/XXXX"
+            const match = tx.description.match(/N°\s*(.+)$/i)
+            if (match) {
+                const receiptNumber = match[1].trim()
+                const foundByReceipt = await db.salesOrder.findFirst({
+                    where: { receiptNumber, tenantId },
+                    include: {
+                        customer: true,
+                        items: { include: { product: { include: { barcodes: true } } } }
+                    }
+                })
+                if (foundByReceipt) {
+                    salesOrder = JSON.parse(JSON.stringify(foundByReceipt))
+                }
+            }
+        }
+        
+        // If still not found, try finding SalesOrder with exact same total and customer created around the same time
+        if (!salesOrder) {
+            const posOrder = await db.order.findUnique({ where: { id: salesId, tenantId } })
+            if (posOrder) {
+                const timeMin = new Date(posOrder.createdAt.getTime() - 60000)
+                const timeMax = new Date(posOrder.createdAt.getTime() + 60000)
+                const fallbackSo = await db.salesOrder.findFirst({
+                    where: {
+                        tenantId,
+                        total: posOrder.total,
+                        customerId: posOrder.customerId,
+                        createdAt: { gte: timeMin, lte: timeMax }
+                    },
+                    include: {
+                        customer: true,
+                        items: { include: { product: { include: { barcodes: true } } } }
+                    }
+                })
+                if (fallbackSo) {
+                    salesOrder = JSON.parse(JSON.stringify(fallbackSo))
+                }
+            }
+        }
+    }
 
     // Helper to ensure data is safe for client components
     const plainify = (obj: any): any => {

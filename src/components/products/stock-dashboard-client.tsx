@@ -134,7 +134,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
 
     // Client-side pagination states
     const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage] = useState(10)
+    const [itemsPerPage, setItemsPerPage] = useState(20)
 
     const [entriesPage, setEntriesPage] = useState(1)
     const [exitsPage, setExitsPage] = useState(1)
@@ -629,34 +629,65 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                         </div>
 
                         {/* Pagination Footer */}
-                        {totalStockPages > 1 && (
-                            <div className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
-                                <div className="text-xs text-muted-foreground font-medium">
-                                    Affichage de {indexOfFirstItem + 1} à {Math.min(indexOfLastItem, filteredStockItems.length)} sur {filteredStockItems.length} produits
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                        disabled={currentPage === 1}
-                                        className="h-8 font-semibold"
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
+                                <div className="flex items-center gap-1">
+                                    {[20, 50, 100, 200].map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => { setItemsPerPage(size); setCurrentPage(1); }}
+                                            className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                                itemsPerPage === size 
+                                                    ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                    : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => { setItemsPerPage(999999); setCurrentPage(1); }}
+                                        className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                            itemsPerPage >= 999999 
+                                                ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                        }`}
                                     >
-                                        Précédent
-                                    </Button>
-                                    <span className="text-xs font-semibold px-2">Page {currentPage} sur {totalStockPages}</span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setCurrentPage(prev => Math.min(totalStockPages, prev + 1))}
-                                        disabled={currentPage === totalStockPages}
-                                        className="h-8 font-semibold"
-                                    >
-                                        Suivant
-                                    </Button>
+                                        Tout
+                                    </button>
                                 </div>
                             </div>
-                        )}
+
+                            {totalStockPages > 1 && (
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="text-xs text-muted-foreground font-medium">
+                                        Affichage de {indexOfFirstItem + 1} à {Math.min(indexOfLastItem, filteredStockItems.length)} sur {filteredStockItems.length} produits
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Précédent
+                                        </Button>
+                                        <span className="text-xs font-semibold px-2">Page {currentPage} sur {totalStockPages}</span>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentPage(prev => Math.min(totalStockPages, prev + 1))}
+                                            disabled={currentPage === totalStockPages}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Suivant
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
 
@@ -725,34 +756,65 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                         </div>
 
                         {/* Pagination Footer */}
-                        {totalEntriesPages > 1 && (
-                            <div className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
-                                <div className="text-xs text-muted-foreground font-medium">
-                                    Affichage de {((entriesPage - 1) * itemsPerPage) + 1} à {Math.min(entriesPage * itemsPerPage, filteredEntries.length)} sur {filteredEntries.length} entrées
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setEntriesPage(prev => Math.max(1, prev - 1))}
-                                        disabled={entriesPage === 1}
-                                        className="h-8 font-semibold"
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
+                                <div className="flex items-center gap-1">
+                                    {[20, 50, 100, 200].map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => { setItemsPerPage(size); setEntriesPage(1); }}
+                                            className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                                itemsPerPage === size 
+                                                    ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                    : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => { setItemsPerPage(999999); setEntriesPage(1); }}
+                                        className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                            itemsPerPage >= 999999 
+                                                ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                        }`}
                                     >
-                                        Précédent
-                                    </Button>
-                                    <span className="text-xs font-semibold px-2">Page {entriesPage} sur {totalEntriesPages}</span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setEntriesPage(prev => Math.min(totalEntriesPages, prev + 1))}
-                                        disabled={entriesPage === totalEntriesPages}
-                                        className="h-8 font-semibold"
-                                    >
-                                        Suivant
-                                    </Button>
+                                        Tout
+                                    </button>
                                 </div>
                             </div>
-                        )}
+
+                            {totalEntriesPages > 1 && (
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="text-xs text-muted-foreground font-medium">
+                                        Affichage de {((entriesPage - 1) * itemsPerPage) + 1} à {Math.min(entriesPage * itemsPerPage, filteredEntries.length)} sur {filteredEntries.length} entrées
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setEntriesPage(prev => Math.max(1, prev - 1))}
+                                            disabled={entriesPage === 1}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Précédent
+                                        </Button>
+                                        <span className="text-xs font-semibold px-2">Page {entriesPage} sur {totalEntriesPages}</span>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setEntriesPage(prev => Math.min(totalEntriesPages, prev + 1))}
+                                            disabled={entriesPage === totalEntriesPages}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Suivant
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
 
@@ -821,34 +883,65 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                         </div>
 
                         {/* Pagination Footer */}
-                        {totalExitsPages > 1 && (
-                            <div className="flex items-center justify-between p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
-                                <div className="text-xs text-muted-foreground font-medium">
-                                    Affichage de {((exitsPage - 1) * itemsPerPage) + 1} à {Math.min(exitsPage * itemsPerPage, filteredExits.length)} sur {filteredExits.length} sorties
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setExitsPage(prev => Math.max(1, prev - 1))}
-                                        disabled={exitsPage === 1}
-                                        className="h-8 font-semibold"
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-border/80">
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground font-medium">Afficher :</span>
+                                <div className="flex items-center gap-1">
+                                    {[20, 50, 100, 200].map(size => (
+                                        <button
+                                            key={size}
+                                            onClick={() => { setItemsPerPage(size); setExitsPage(1); }}
+                                            className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                                itemsPerPage === size 
+                                                    ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                    : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => { setItemsPerPage(999999); setExitsPage(1); }}
+                                        className={`h-7 px-2.5 rounded-md text-xs font-semibold border transition-colors ${
+                                            itemsPerPage >= 999999 
+                                                ? 'bg-emerald-600 text-white border-emerald-600' 
+                                                : 'bg-white dark:bg-zinc-900 border-border/80 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                                        }`}
                                     >
-                                        Précédent
-                                    </Button>
-                                    <span className="text-xs font-semibold px-2">Page {exitsPage} sur {totalExitsPages}</span>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setExitsPage(prev => Math.min(totalExitsPages, prev + 1))}
-                                        disabled={exitsPage === totalExitsPages}
-                                        className="h-8 font-semibold"
-                                    >
-                                        Suivant
-                                    </Button>
+                                        Tout
+                                    </button>
                                 </div>
                             </div>
-                        )}
+
+                            {totalExitsPages > 1 && (
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="text-xs text-muted-foreground font-medium">
+                                        Affichage de {((exitsPage - 1) * itemsPerPage) + 1} à {Math.min(exitsPage * itemsPerPage, filteredExits.length)} sur {filteredExits.length} sorties
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setExitsPage(prev => Math.max(1, prev - 1))}
+                                            disabled={exitsPage === 1}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Précédent
+                                        </Button>
+                                        <span className="text-xs font-semibold px-2">Page {exitsPage} sur {totalExitsPages}</span>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setExitsPage(prev => Math.min(totalExitsPages, prev + 1))}
+                                            disabled={exitsPage === totalExitsPages}
+                                            className="h-8 font-semibold"
+                                        >
+                                            Suivant
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
             </Tabs>

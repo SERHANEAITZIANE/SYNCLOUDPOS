@@ -6,7 +6,7 @@ import { QRCodeSVG } from "qrcode.react"
 
 // ─── Shared Types ───────────────────────────────────────────────────────────────
 export interface PrintableItem {
-    product?: { 
+    product?: {
         name: string
         id?: string
         code?: string | null
@@ -69,6 +69,7 @@ export interface PrintTemplateProps {
     paymentAmount?: number
     newBalance?: number
     documentId?: string
+    force80mm?: boolean
 }
 
 // ─── Utility: Number to French Words ─────────────────────────────────────────
@@ -274,7 +275,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
     }
 
     const colModel = store?.posBlColumns || "standard"
-    
+
     // First column header label
     let firstColHeader = "N°"
     if (colModel === "code") firstColHeader = "Code"
@@ -296,7 +297,8 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
     return (
         <div className={`print-template print-facture ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
             {/* ── Dynamic Page Sizing Styles ── */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @page {
                     size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
                     margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
@@ -347,7 +349,7 @@ export function InvoicePrintTemplate(props: PrintTemplateProps) {
                             const rate = tvaEnabled ? Number(item.tvaRate ?? 0) : 0
                             const originalHT = tvaEnabled ? (item.priceHt || item.unitPrice / (1 + rate / 100)) : item.unitPrice
                             const discountAmount = item.discountAmount || 0
-                            
+
                             const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
                             const netHT = tvaEnabled ? (netUnitPriceTTC / (1 + rate / 100)) : netUnitPriceTTC
                             const lineHT = item.quantity * netHT
@@ -550,7 +552,7 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
 
     const tvaEnabled = store?.tvaEnabled ?? false
     const colModel = store?.posBlColumns || "standard"
-    
+
     // First column header label
     let firstColHeader = "N°"
     if (colModel === "code") firstColHeader = "Code"
@@ -569,10 +571,106 @@ export function BonLivraisonPrintTemplate(props: PrintTemplateProps) {
     const firstColStyle = colModel === "standard" ? "print-th-num" : "print-th-designation text-left pl-3"
     const firstColTdStyle = colModel === "standard" ? "print-td-num" : "print-td-num text-left pl-3 font-mono text-[9px] text-gray-600"
 
+    // If POS BL format is set to 80mm, return the thermal layout
+    if (props.force80mm || store?.posBlFormat === "80mm") {
+        return (
+            <div className="w-[80mm] p-4 bg-white text-black font-sans text-base leading-tight mx-auto print:m-0 print:shadow-none shadow-lg border border-gray-200 print:border-0" style={{ breakInside: "avoid" }}>
+                {/* Header */}
+                <div className="text-center mb-4 space-y-1">
+                    {store?.logo && (
+                        <div className="flex justify-center mb-2">
+                            <img src={store.logo} alt="Logo" className="max-h-[60px] max-w-[60mm] object-contain" />
+                        </div>
+                    )}
+                    <h1 className="font-black text-xl uppercase">{store?.name || "VOTRE BOUTIQUE"}</h1>
+                    <p className="text-xs font-bold">{store?.address || "Adresse de la boutique"}</p>
+                    {store?.phone && <p className="text-xs font-bold">Tel: {store.phone}</p>}
+                    <div className="mt-3 pt-2 border-t border-dashed border-gray-400">
+                        <h2 className="font-bold text-lg uppercase tracking-widest bg-black text-white py-1 mt-1 text-center">
+                            BON DE LIVRAISON
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Info Block */}
+                <div className="border-b border-gray-400 pb-2 mb-3 text-xs space-y-1">
+                    <div className="flex justify-between">
+                        <span className="text-gray-600">Date:</span>
+                        <span className="font-bold">{format(date, "dd/MM/yyyy", { locale: fr })}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-600">N° BL:</span>
+                        <span className="font-bold">{receiptNumber || `BL-${documentId?.slice(-6) || "000000"}`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-600">Client:</span>
+                        <span className="font-bold uppercase text-right max-w-[45mm] truncate">
+                            {customer?.name || "Client Comptoir"}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Items */}
+                <div className="mb-4">
+                    <table className="w-full text-xs">
+                        <thead>
+                            <tr className="border-b border-black">
+                                <th className="text-left py-1 w-2/3">Article</th>
+                                <th className="text-right py-1">Qté</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items.map((item, index) => (
+                                <tr key={index} className="border-b border-gray-200 border-dashed last:border-0">
+                                    <td className="py-2 leading-tight text-left pr-2">
+                                        <div className="font-bold">{item.product?.name}</div>
+                                        {item.serialNumber && (
+                                            <div className="text-[10px] text-gray-700 font-mono mt-0.5">
+                                                S/N: {item.serialNumber}
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="py-2 text-right align-top font-bold text-sm">
+                                        {item.quantity}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Totals */}
+                <div className="border-t border-black pt-2 mb-4">
+                    <div className="flex justify-between text-sm font-black">
+                        <span>TOTAL:</span>
+                        <span>{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(totalTTC)} DA</span>
+                    </div>
+                </div>
+
+                {/* Signatures */}
+                <div className="flex justify-between mt-6 text-[10px] font-bold">
+                    <div className="text-center">
+                        <p>Signature Client</p>
+                        <p className="text-[8px] font-normal italic mt-1">(Reçu conforme)</p>
+                    </div>
+                    <div className="text-center">
+                        <p>Cachet & Signature</p>
+                        <p className="text-[8px] font-normal italic mt-1">(Le Vendeur)</p>
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-dashed border-gray-400 flex flex-col items-center">
+                    <p className="text-[8px] text-gray-500 font-bold mt-2 uppercase tracking-widest">Généré par SYNCLOUDPOS</p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className={`print-template print-bl ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
             {/* ── Dynamic Page Sizing Styles ── */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @page {
                     size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
                     margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
@@ -767,7 +865,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
     validityDate.setDate(validityDate.getDate() + 30)
 
     const colModel = store?.posBlColumns || "standard"
-    
+
     // First column header label
     let firstColHeader = "N°"
     if (colModel === "code") firstColHeader = "Code"
@@ -789,7 +887,8 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
     return (
         <div className={`print-template print-proforma ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
             {/* ── Dynamic Page Sizing Styles ── */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @page {
                     size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
                     margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
@@ -846,7 +945,7 @@ export function ProformaPrintTemplate(props: PrintTemplateProps) {
                             const rate = tvaEnabled ? Number(item.tvaRate ?? 0) : 0
                             const originalHT = tvaEnabled ? (item.priceHt || item.unitPrice / (1 + rate / 100)) : item.unitPrice
                             const discountAmount = item.discountAmount || 0
-                            
+
                             const netUnitPriceTTC = Number(item.unitPrice) - (item.quantity === 0 ? 0 : discountAmount / item.quantity)
                             const netHT = tvaEnabled ? (netUnitPriceTTC / (1 + rate / 100)) : netUnitPriceTTC
                             const lineHT = item.quantity * netHT
@@ -993,7 +1092,7 @@ export function BonGarantiePrintTemplate(props: PrintTemplateProps) {
     } = props
 
     const colModel = store?.posBlColumns || "standard"
-    
+
     // First column header label
     let firstColHeader = "N°"
     if (colModel === "code") firstColHeader = "Code"
@@ -1015,10 +1114,109 @@ export function BonGarantiePrintTemplate(props: PrintTemplateProps) {
     // Only filter items that have serial numbers for the warranty slip
     const serialItems = items.filter(item => item.serialNumber);
 
+    // If POS BL format is set to 80mm, return the thermal layout
+    if (props.force80mm || store?.posBlFormat === "80mm") {
+        return (
+            <div className="w-[80mm] p-4 bg-[#f8fafc] text-indigo-950 font-sans text-base font-bold leading-tight print:shadow-none shadow-lg print:m-0 mx-auto print:bg-white print:text-black border border-indigo-100 print:border-0 rounded-2xl print:rounded-none" style={{ breakInside: "avoid" }}>
+                {/* Header */}
+                <div className="text-center mb-6 space-y-1">
+                    {store?.logo && (
+                        <div className="flex justify-center mb-2">
+                            <img src={store.logo} alt="Logo" className="max-h-[60px] max-w-[60mm] object-contain" />
+                        </div>
+                    )}
+                    <h1 className="font-black text-2xl tracking-tighter uppercase text-indigo-900 print:text-black">{store?.name || "VOTRE BOUTIQUE"}</h1>
+                    <p className="text-sm text-indigo-950 print:text-black font-bold">{store?.address || "Adresse de la boutique"}</p>
+                    {store?.phone && <p className="text-sm text-indigo-950 print:text-black font-bold">Tel: {store.phone}</p>}
+                    <div className="mt-4 pt-3 border-t-2 border-dashed border-indigo-900/30 print:border-black">
+                        <h2 className="font-bold text-lg uppercase tracking-widest bg-indigo-900 text-white py-1 rounded-sm mt-1 print:bg-black">
+                            BON DE GARANTIE
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Info Block */}
+                <div className="border-b-2 border-indigo-900/30 print:border-black pb-3 mb-4 text-sm font-bold space-y-1.5">
+                    <div className="flex justify-between">
+                        <span className="text-indigo-900/70 print:text-black">Date:</span>
+                        <span>{format(date, "dd/MM/yyyy", { locale: fr })}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-indigo-900/70 print:text-black">N° Ticket:</span>
+                        <span className="font-bold">{receiptNumber || `GA-${documentId?.slice(-6) || "000000"}`}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-indigo-900/70 print:text-black">Client:</span>
+                        <span className="font-bold uppercase max-w-[45mm] truncate text-right">
+                            {customer?.name || "Client Comptoir"}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Items */}
+                <div className="mb-4">
+                    <h3 className="font-black text-xs uppercase border-b-2 border-indigo-900/30 print:border-black pb-1 mb-2 text-indigo-900 print:text-black">Articles Couverts</h3>
+                    <table className="w-full text-sm font-bold">
+                        <tbody className="font-black">
+                            {(serialItems.length > 0 ? serialItems : items).map((item, index) => (
+                                <tr key={index} className="border-b border-indigo-900/10 print:border-black last:border-0">
+                                    <td className="py-2 pr-2 leading-tight break-words text-left">
+                                        <div className="text-indigo-950 print:text-black">{item.quantity} X {item.product?.name}</div>
+                                        {item.serialNumber ? (
+                                            <div className="text-indigo-900/60 print:text-black">
+                                                S/N: {item.serialNumber}
+                                            </div>
+                                        ) : (
+                                            <div className="text-[10px] text-indigo-900/50 print:text-black font-normal italic mt-0.5">
+                                                Aucun numéro de série
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Warranty Rules */}
+                <div className="border border-indigo-900/20 print:border-2 print:border-black rounded-xl p-3 mb-6 bg-indigo-50/20 print:bg-white">
+                    <h3 className="font-black text-[11px] uppercase border-b-2 border-indigo-900/20 print:border-black pb-1 mb-2 text-center text-indigo-900 print:text-black">
+                        Conditions de Garantie
+                    </h3>
+                    <ul className="text-[9px] space-y-1.5 list-disc pl-3 text-justify leading-snug text-indigo-950 print:text-black font-bold">
+                        <li><span className="font-black text-indigo-900 print:text-black">Durée:</span> Garantie matérielle selon constructeur (Généralement 12 Mois).</li>
+                        <li><span className="font-black text-indigo-900 print:text-black">Exclusions:</span> Casse d'écran, oxydation, dégâts liquides, chocs.</li>
+                        <li><span className="font-black text-indigo-900 print:text-black">Accessoires:</span> Chargeurs, câbles, écouteurs, batteries non couverts.</li>
+                        <li><span className="font-black text-indigo-900 print:text-black">Réclamation:</span> Présentation de ce bon original obligatoire.</li>
+                        <li><span className="font-black text-indigo-900 print:text-black">Annulation:</span> Tout démontage par un tiers non agréé annule la garantie.</li>
+                    </ul>
+                </div>
+
+                {/* Signatures */}
+                <div className="flex justify-between mt-6 text-[10px] font-black text-indigo-950 print:text-black">
+                    <div className="text-center">
+                        <p>Signature Client</p>
+                        <p className="text-[8px] font-bold text-indigo-900/70 print:text-black italic mt-1">(Lu et approuvé)</p>
+                    </div>
+                    <div className="text-center">
+                        <p>Cachet & Signature</p>
+                        <p className="text-[8px] font-bold text-indigo-900/70 print:text-black italic mt-1">(Le Vendeur)</p>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 pt-4 border-t-2 border-dashed border-indigo-900/30 print:border-black flex flex-col items-center">
+                    <p className="text-[9px] text-indigo-900/40 print:text-black font-black uppercase tracking-widest mt-2">SYNCLOUDPOS ERP</p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className={`print-template print-garantie ${store?.posBlFormat === "A5" ? "format-a5" : ""}`}>
             {/* ── Dynamic Page Sizing Styles ── */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @page {
                     size: ${store?.posBlFormat === "A5" ? "A5 portrait" : "A4 portrait"};
                     margin: ${store?.posBlFormat === "A5" ? "5mm 6mm" : "10mm 12mm"};
@@ -1131,3 +1329,4 @@ export function BonGarantiePrintTemplate(props: PrintTemplateProps) {
         </div>
     )
 }
+

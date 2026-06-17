@@ -7,9 +7,13 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { ReturnsClient } from "@/components/retours/returns-client"
 
-export default async function RetoursPage() {
+export default async function RetoursPage(
+    props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
+) {
+    const searchParams = await props.searchParams;
     const session = await auth()
     const tenantId = session?.user?.tenantId
+    const returnId = searchParams?.returnId as string | undefined;
 
     // 1. Fetch returns data
     const [clientReturnsData, supplierReturnsData] = await Promise.all([
@@ -25,8 +29,17 @@ export default async function RetoursPage() {
     const stores = tenantId ? await db.store.findMany({ where: { tenantId } }) : []
 
     // 3. Format inputs safely
-    const formattedClientReturns = clientReturnsData.returns || []
-    const formattedSupplierReturns = supplierReturnsData.returns || []
+    let formattedClientReturns = clientReturnsData.returns || []
+    let formattedSupplierReturns = supplierReturnsData.returns || []
+
+    if (returnId) {
+        formattedClientReturns = formattedClientReturns.filter((r: any) => r.id === returnId)
+        formattedSupplierReturns = formattedSupplierReturns.filter((r: any) => r.id === returnId)
+    }
+
+    const initialTab = (returnId && formattedSupplierReturns.length > 0 && formattedClientReturns.length === 0) 
+        ? "supplier" 
+        : "client"
 
     const rawProducts = ('items' in productsData ? productsData.items : productsData) || []
     const formattedProducts = rawProducts.map((p: any) => ({
@@ -74,6 +87,7 @@ export default async function RetoursPage() {
                     suppliers={formattedSuppliers}
                     accounts={formattedAccounts}
                     stores={formattedStores}
+                    initialTab={initialTab}
                 />
             </div>
         </div>

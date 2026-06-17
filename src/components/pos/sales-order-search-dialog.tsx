@@ -10,18 +10,18 @@ import { cn } from "@/lib/utils"
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { searchRecentSalesOrders } from "@/actions/sales-orders"
-
 interface SalesOrderSearchDialogProps {
     isOpen: boolean
     onClose: () => void
     onSelectOrder: (order: any) => void
+    actionSearchRecentSalesOrders: (query: string, type?: string) => Promise<any[]>
 }
 
 export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
     isOpen,
     onClose,
-    onSelectOrder
+    onSelectOrder,
+    actionSearchRecentSalesOrders
 }) => {
     const t = useTranslations("SalesOrderSearchDialog")
     const [query, setQuery] = useState("")
@@ -39,7 +39,7 @@ export const SalesOrderSearchDialog: React.FC<SalesOrderSearchDialogProps> = ({
         const fetchOrders = async (searchQuery: string) => {
             setLoading(true)
             try {
-                const results = await searchRecentSalesOrders(searchQuery, "ORDER")
+                const results = await actionSearchRecentSalesOrders(searchQuery, "ORDER")
                 setOrders(results || [])
             } catch (error) {
                 console.error("Failed to fetch orders", error)

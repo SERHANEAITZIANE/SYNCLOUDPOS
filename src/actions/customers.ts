@@ -25,7 +25,7 @@ interface CustomerData {
     initialBalance?: number
 }
 
-export const getCustomers = async (page: number = 1, pageSize: number = 20, search?: string) => {
+export const getCustomers = async (page: number = 1, pageSize: number = 20, search?: string, includeArchived: boolean = false) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized", customers: [], totalCount: 0 }
 
@@ -35,6 +35,9 @@ export const getCustomers = async (page: number = 1, pageSize: number = 20, sear
 
     try {
         const whereClause: any = { tenantId }
+        if (!includeArchived) {
+            whereClause.isArchived = false
+        }
 
         if (search) {
             whereClause.OR = [
@@ -187,8 +190,9 @@ export const deleteCustomer = async (id: string) => {
             where: { id, tenantId }
         })
 
-        await db.customer.delete({
-            where: { id, tenantId }
+        await db.customer.update({
+            where: { id, tenantId },
+            data: { isArchived: true }
         })
         revalidatePath("/(dashboard)/customers")
         logAudit({

@@ -8,8 +8,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -81,6 +82,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
 }
 
 .dark {
@@ -115,6 +119,378 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA CLAY — M'ZAB VALLEY PREMIUM THEME
+   Inspired by the UNESCO World Heritage architecture of Ghardaïa,
+   the pentapolis of the M'zab Valley: terracotta walls, 
+   turquoise minarets, golden sand dunes, and oasis gardens.
+   ═══════════════════════════════════════════════════════════════ */
+
+.ghardaia {
+  --radius: 0.625rem;
+  /* Warm parchment base — like sun-bleached plaster walls */
+  --background: #FBF7F0;
+  --foreground: #2C1810;
+  /* Cards: clean cream with warm undertone */
+  --card: #FFFFFF;
+  --card-foreground: #2C1810;
+  --popover: #FFFFFF;
+  --popover-foreground: #2C1810;
+  /* Primary: Rich terracotta — the signature clay of M'zab */
+  --primary: #C4593A;
+  --primary-foreground: #FFF8F0;
+  /* Secondary: Deep oasis blue — inspired by the turquoise minarets */
+  --secondary: #1B5E7B;
+  --secondary-foreground: #FFFFFF;
+  /* Muted: Warm sand tones */
+  --muted: #F3EDE3;
+  --muted-foreground: #6B5D52;
+  /* Accent: Warm golden sand highlight */
+  --accent: #F0E8DA;
+  --accent-foreground: #2C1810;
+  /* Destructive: Deep brick red */
+  --destructive: #9E3B2F;
+  --destructive-foreground: #FFFFFF;
+  /* Borders: Subtle warm sandstone */
+  --border: #E4D9C8;
+  --input: #E8DED0;
+  --ring: #C4593A;
+  /* Charts: M'zab color palette */
+  --chart-1: #C4593A;  /* Terracotta */
+  --chart-2: #1B5E7B;  /* Oasis Blue */
+  --chart-3: #3A7D5C;  /* Palm Garden Green */
+  --chart-4: #D4952B;  /* Golden Sand */
+  --chart-5: #8B4A6B;  /* Desert Sunset Mauve */
+  /* Sidebar */
+  --sidebar: #FAF5EC;
+  --sidebar-foreground: #2C1810;
+  --sidebar-primary: #C4593A;
+  --sidebar-primary-foreground: #FFF8F0;
+  --sidebar-accent: #F0E8DA;
+  --sidebar-accent-foreground: #2C1810;
+  --sidebar-border: #E4D9C8;
+  --sidebar-ring: #C4593A;
+  /* Fonts */
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-serif-ghardaia);
+  --font-mono: var(--font-mono-ghardaia);
+  /* Custom Ghardaïa tokens */
+  --ghardaia-glow: #C4593A;
+  --ghardaia-gold: #D4952B;
+  --ghardaia-oasis: #1B5E7B;
+  --ghardaia-palm: #3A7D5C;
+}
+
+.ghardaia-dark {
+  --radius: 0.625rem;
+  /* Deep desert night — warm charcoal with brown undertone */
+  --background: #0F0D0B;
+  --foreground: #F2EDE5;
+  /* Cards: Dark clay with warm base */
+  --card: #1A1614;
+  --card-foreground: #F2EDE5;
+  --popover: #1A1614;
+  --popover-foreground: #F2EDE5;
+  /* Primary: Bright terracotta glow — clay warmed by firelight */
+  --primary: #E8724A;
+  --primary-foreground: #0F0D0B;
+  /* Secondary: Luminous oasis teal */
+  --secondary: #5BA4C0;
+  --secondary-foreground: #0F0D0B;
+  /* Muted: Deep warm brown */
+  --muted: #2A2420;
+  --muted-foreground: #A89A8C;
+  /* Accent: Warm ember glow */
+  --accent: #2A2420;
+  --accent-foreground: #F2EDE5;
+  /* Destructive */
+  --destructive: #C04A3F;
+  --destructive-foreground: #FFFFFF;
+  /* Borders: Subtle warm separation */
+  --border: #352E28;
+  --input: #302A24;
+  --ring: #E8724A;
+  /* Charts */
+  --chart-1: #E8724A;
+  --chart-2: #5BA4C0;
+  --chart-3: #5AAB7B;
+  --chart-4: #E0A840;
+  --chart-5: #C04A3F;
+  /* Sidebar */
+  --sidebar: #161310;
+  --sidebar-foreground: #F2EDE5;
+  --sidebar-primary: #E8724A;
+  --sidebar-primary-foreground: #0F0D0B;
+  --sidebar-accent: #2A2420;
+  --sidebar-accent-foreground: #F2EDE5;
+  --sidebar-border: #352E28;
+  --sidebar-ring: #E8724A;
+  /* Fonts */
+  --font-sans: var(--font-outfit);
+  --font-serif: var(--font-serif-ghardaia);
+  --font-mono: var(--font-mono-ghardaia);
+  /* Custom Ghardaïa dark tokens */
+  --ghardaia-glow: #E8724A;
+  --ghardaia-gold: #E0A840;
+  --ghardaia-oasis: #5BA4C0;
+  --ghardaia-palm: #5AAB7B;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RIVIERA — MEDITERRANEAN COASTLINE THEME
+   Whitewashed seaside towns, azure sea, lavender fields,
+   lemon groves, and terracotta rooftops.
+   ═══════════════════════════════════════════════════════════════ */
+
+.riviera {
+  --radius: 0.625rem;
+  --background: #FDFBF7;
+  --foreground: #0C1829;
+  --card: #FFFFFF;
+  --card-foreground: #0C1829;
+  --popover: #FFFFFF;
+  --popover-foreground: #0C1829;
+  --primary: #2B6699;
+  --primary-foreground: #FFFFFF;
+  --secondary: #7A6CB8;
+  --secondary-foreground: #FFFFFF;
+  --muted: #F3EEE7;
+  --muted-foreground: #4A5568;
+  --accent: #F0EBE3;
+  --accent-foreground: #0C1829;
+  --destructive: #C4463A;
+  --destructive-foreground: #FFFFFF;
+  --border: #E2DDD4;
+  --input: #E8E3DA;
+  --ring: #3578B2;
+  --chart-1: #3578B2;
+  --chart-2: #E8956A;
+  --chart-3: #7BA05B;
+  --chart-4: #8B7EC8;
+  --chart-5: #C49B3C;
+  --sidebar: #F0F5F3;
+  --sidebar-foreground: #0C1829;
+  --sidebar-primary: #2B6699;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E6F0ED;
+  --sidebar-accent-foreground: #0C1829;
+  --sidebar-border: #DDE5E1;
+  --sidebar-ring: #3578B2;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+.riviera-dark {
+  --radius: 0.625rem;
+  --background: #0E1A25;
+  --foreground: #E8ECF1;
+  --card: #152232;
+  --card-foreground: #E8ECF1;
+  --popover: #152232;
+  --popover-foreground: #E8ECF1;
+  --primary: #5ABED6;
+  --primary-foreground: #0E1A25;
+  --secondary: #A899E0;
+  --secondary-foreground: #0E1A25;
+  --muted: #1D2D3D;
+  --muted-foreground: #8A9BB0;
+  --accent: #1D2D3D;
+  --accent-foreground: #E8ECF1;
+  --destructive: #E05A4E;
+  --destructive-foreground: #FFFFFF;
+  --border: #1F3044;
+  --input: #1A2836;
+  --ring: #5ABED6;
+  --chart-1: #5ABED6;
+  --chart-2: #F0A87E;
+  --chart-3: #8FBB6D;
+  --chart-4: #A899E0;
+  --chart-5: #DDB555;
+  --sidebar: #0B1520;
+  --sidebar-foreground: #E8ECF1;
+  --sidebar-primary: #5ABED6;
+  --sidebar-primary-foreground: #0E1A25;
+  --sidebar-accent: #1D2D3D;
+  --sidebar-accent-foreground: #E8ECF1;
+  --sidebar-border: #1F3044;
+  --sidebar-ring: #5ABED6;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ATLAS — MOUNTAIN GARDEN THEME
+   Cedar forests, cascading gardens with roses and jasmine,
+   cobalt blue fountains, honey-colored stone archways.
+   ═══════════════════════════════════════════════════════════════ */
+
+.atlas {
+  --radius: 0.625rem;
+  --background: #FAF8F3;
+  --foreground: #0A1A12;
+  --card: #FFFFFF;
+  --card-foreground: #0A1A12;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A1A12;
+  --primary: #22573F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #374FA0;
+  --secondary-foreground: #FFFFFF;
+  --muted: #EDEBE5;
+  --muted-foreground: #475550;
+  --accent: #E8E5DD;
+  --accent-foreground: #0A1A12;
+  --destructive: #B5443A;
+  --destructive-foreground: #FFFFFF;
+  --border: #DDD9D0;
+  --input: #E3DFD6;
+  --ring: #2D6A4F;
+  --chart-1: #2D6A4F;
+  --chart-2: #4361B2;
+  --chart-3: #C77D8A;
+  --chart-4: #C49B3C;
+  --chart-5: #7B68AE;
+  --sidebar: #F2F0EB;
+  --sidebar-foreground: #0A1A12;
+  --sidebar-primary: #22573F;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E5E2DA;
+  --sidebar-accent-foreground: #0A1A12;
+  --sidebar-border: #DDD9D0;
+  --sidebar-ring: #2D6A4F;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+.atlas-dark {
+  --radius: 0.625rem;
+  --background: #0D1210;
+  --foreground: #E4EBE6;
+  --card: #161E1A;
+  --card-foreground: #E4EBE6;
+  --popover: #161E1A;
+  --popover-foreground: #E4EBE6;
+  --primary: #4AAF75;
+  --primary-foreground: #0D1210;
+  --secondary: #6B8ADB;
+  --secondary-foreground: #0D1210;
+  --muted: #1E2A24;
+  --muted-foreground: #8A9B8E;
+  --accent: #1E2A24;
+  --accent-foreground: #E4EBE6;
+  --destructive: #D65A50;
+  --destructive-foreground: #FFFFFF;
+  --border: #253029;
+  --input: #1C2620;
+  --ring: #4AAF75;
+  --chart-1: #4AAF75;
+  --chart-2: #6B8ADB;
+  --chart-3: #E09AAA;
+  --chart-4: #DDB555;
+  --chart-5: #9B8FCC;
+  --sidebar: #111915;
+  --sidebar-foreground: #E4EBE6;
+  --sidebar-primary: #4AAF75;
+  --sidebar-primary-foreground: #0D1210;
+  --sidebar-accent: #1E2A24;
+  --sidebar-accent-foreground: #E4EBE6;
+  --sidebar-border: #253029;
+  --sidebar-ring: #4AAF75;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HORIZON — DAWN TO DUSK SKY THEME
+   The sky's story from morning blues to golden hour warmth,
+   sunset corals, and twilight violets.
+   ═══════════════════════════════════════════════════════════════ */
+
+.horizon {
+  --radius: 0.625rem;
+  --background: #F5F7FA;
+  --foreground: #0C0F1D;
+  --card: #FFFFFF;
+  --card-foreground: #0C0F1D;
+  --popover: #FFFFFF;
+  --popover-foreground: #0C0F1D;
+  --primary: #2D6BA8;
+  --primary-foreground: #FFFFFF;
+  --secondary: #6A5D96;
+  --secondary-foreground: #FFFFFF;
+  --muted: #EDF0F5;
+  --muted-foreground: #48506A;
+  --accent: #E8EBF2;
+  --accent-foreground: #0C0F1D;
+  --destructive: #C44848;
+  --destructive-foreground: #FFFFFF;
+  --border: #DDE1E8;
+  --input: #E3E7EE;
+  --ring: #3B82C4;
+  --chart-1: #3B82C4;
+  --chart-2: #E07A5F;
+  --chart-3: #D4A35A;
+  --chart-4: #7C6FAA;
+  --chart-5: #5B9A6F;
+  --sidebar: #EEF1F6;
+  --sidebar-foreground: #0C0F1D;
+  --sidebar-primary: #2D6BA8;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E4E8F0;
+  --sidebar-accent-foreground: #0C0F1D;
+  --sidebar-border: #DDE1E8;
+  --sidebar-ring: #3B82C4;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+.horizon-dark {
+  --radius: 0.625rem;
+  --background: #0F1117;
+  --foreground: #E4E7EF;
+  --card: #181B24;
+  --card-foreground: #E4E7EF;
+  --popover: #181B24;
+  --popover-foreground: #E4E7EF;
+  --primary: #5BA3E0;
+  --primary-foreground: #0F1117;
+  --secondary: #9B8FCC;
+  --secondary-foreground: #0F1117;
+  --muted: #1E2130;
+  --muted-foreground: #8A8FA0;
+  --accent: #1E2130;
+  --accent-foreground: #E4E7EF;
+  --destructive: #E05858;
+  --destructive-foreground: #FFFFFF;
+  --border: #252938;
+  --input: #1C2030;
+  --ring: #5BA3E0;
+  --chart-1: #5BA3E0;
+  --chart-2: #F09580;
+  --chart-3: #E8BA70;
+  --chart-4: #9B8FCC;
+  --chart-5: #6DB882;
+  --sidebar: #131620;
+  --sidebar-foreground: #E4E7EF;
+  --sidebar-primary: #5BA3E0;
+  --sidebar-primary-foreground: #0F1117;
+  --sidebar-accent: #1E2130;
+  --sidebar-accent-foreground: #E4E7EF;
+  --sidebar-border: #252938;
+  --sidebar-ring: #5BA3E0;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
 }
 
 @layer base {
@@ -126,8 +502,36 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-    background-image: radial-gradient(circle at 50% 0%, hsl(var(--primary)/0.03) 0%, transparent 70%);
+    background-image: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 3%, transparent) 0%, transparent 70%);
     background-attachment: fixed;
+  }
+
+  /* ═══════════ Ghardaïa Light — Saharan Daylight ═══════════ */
+  html.ghardaia body {
+    background-color: var(--background);
+    background-image: 
+      /* Warm ambient glow from top — like sun through a window arch */
+      radial-gradient(ellipse 80% 50% at 50% -5%, rgba(196, 89, 58, 0.06) 0%, transparent 60%),
+      /* Secondary oasis glow — bottom right corner */
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(27, 94, 123, 0.04) 0%, transparent 60%),
+      /* Subtle geometric dot pattern — inspired by Islamic zellige */
+      radial-gradient(circle at center, rgba(44, 24, 16, 0.018) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 24px 24px;
+    background-attachment: fixed, fixed, fixed;
+  }
+
+  /* ═══════════ Ghardaïa Dark — Desert Starlight ═══════════ */
+  html.ghardaia-dark body {
+    background-color: var(--background);
+    background-image: 
+      /* Warm ember glow from above — campfire ambiance */
+      radial-gradient(ellipse 70% 40% at 50% -5%, rgba(232, 114, 74, 0.08) 0%, transparent 55%),
+      /* Distant oasis glow — like moonlight on water */
+      radial-gradient(ellipse 50% 35% at 85% 95%, rgba(91, 164, 192, 0.05) 0%, transparent 55%),
+      /* Geometric pattern — barely visible stars in the desert */
+      radial-gradient(circle at center, rgba(242, 237, 229, 0.012) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 24px 24px;
+    background-attachment: fixed, fixed, fixed;
   }
 
   /* Smooth transitions for interactive elements */
@@ -143,6 +547,369 @@
   .glass-panel {
     @apply bg-background/60 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-[0_8px_32px_#0000000a] dark:shadow-[0_8px_32px_#0000001f];
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA THEME — PREMIUM UI OVERRIDES
+   These overrides adapt the dark-mode-centric hub UI to the 
+   warm, earthen Ghardaïa palette. Each selector is precise 
+   to avoid bleeding into other themes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Background & Base Colors ─── */
+html.ghardaia .min-h-screen.bg-\[\#020205\],
+html.ghardaia .bg-\[\#020205\] {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+}
+
+/* ─── Glass Panels & Cards ─── */
+html.ghardaia .bg-slate-950\/80 {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+html.ghardaia .bg-gradient-to-b.from-\[\#090b16\]\/70,
+html.ghardaia .from-\[\#090b16\]\/70 {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(1.3) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 4px 24px rgba(196, 89, 58, 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset !important;
+}
+
+html.ghardaia .bg-gradient-to-b.from-\[\#080a18\]\/70,
+html.ghardaia .from-\[\#080a18\]\/70 {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.ghardaia .bg-\[\#070810\]\/70,
+html.ghardaia .bg-\[\#0f1122\]\/90 {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* ─── Borders ─── */
+html.ghardaia .border-white\/\[0\.02\], 
+html.ghardaia .border-white\/\[0\.04\],
+html.ghardaia .border-slate-800\/80,
+html.ghardaia .border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+/* ─── Text Colors ─── */
+html.ghardaia .text-slate-400 {
+  color: #7A6E63 !important;
+}
+
+html.ghardaia .text-slate-500 {
+  color: #8A7E73 !important;
+}
+
+/* ─── Gradient Text Fix ─── */
+html.ghardaia .bg-gradient-to-r.from-white {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  color: var(--foreground) !important;
+}
+
+/* ─── Header ─── */
+html.ghardaia header.relative {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* ─── Inputs ─── */
+html.ghardaia input {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* ─── Cyber Grid Tone Down ─── */
+html.ghardaia .cyber-grid {
+  background-image: 
+    linear-gradient(rgba(196, 89, 58, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196, 89, 58, 0.02) 1px, transparent 1px) !important;
+  opacity: 0.5 !important;
+}
+
+/* ═══════════════ Ghardaïa Dark Mode Overrides ═══════════════ */
+
+html.ghardaia-dark .min-h-screen.bg-\[\#020205\],
+html.ghardaia-dark .bg-\[\#020205\] {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+}
+
+html.ghardaia-dark .bg-slate-950\/80 {
+  background-color: rgba(26, 22, 20, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  border-color: var(--border) !important;
+}
+
+html.ghardaia-dark .bg-gradient-to-b.from-\[\#090b16\]\/70,
+html.ghardaia-dark .from-\[\#090b16\]\/70 {
+  background: rgba(26, 22, 20, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 4px 24px rgba(232, 114, 74, 0.06), 0 1px 0 rgba(255, 255, 255, 0.02) inset !important;
+}
+
+html.ghardaia-dark .bg-gradient-to-b.from-\[\#080a18\]\/70,
+html.ghardaia-dark .from-\[\#080a18\]\/70 {
+  background: rgba(26, 22, 20, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: var(--border) !important;
+}
+
+html.ghardaia-dark .bg-\[\#070810\]\/70,
+html.ghardaia-dark .bg-\[\#0f1122\]\/90 {
+  background-color: rgba(26, 22, 20, 0.8) !important;
+  backdrop-filter: blur(16px) !important;
+  border-color: var(--border) !important;
+}
+
+html.ghardaia-dark .border-white\/\[0\.02\], 
+html.ghardaia-dark .border-white\/\[0\.04\],
+html.ghardaia-dark .border-slate-800\/80,
+html.ghardaia-dark .border-slate-800 {
+  border-color: var(--border) !important;
+}
+
+html.ghardaia-dark .text-slate-400 {
+  color: var(--muted-foreground) !important;
+}
+
+html.ghardaia-dark header.relative {
+  background: rgba(26, 22, 20, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+html.ghardaia-dark input {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+html.ghardaia-dark .cyber-grid {
+  background-image: 
+    linear-gradient(rgba(232, 114, 74, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 114, 74, 0.015) 1px, transparent 1px) !important;
+  opacity: 0.4 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA — PREMIUM VISUAL EFFECTS & MICRO-ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Warm Card Hover Glow ─── */
+html.ghardaia .group:hover .cyber-corner::before,
+html.ghardaia .group:hover .cyber-corner::after {
+  border-color: var(--primary) !important;
+}
+
+html.ghardaia-dark .group:hover .cyber-corner::before,
+html.ghardaia-dark .group:hover .cyber-corner::after {
+  border-color: var(--primary) !important;
+}
+
+/* ─── Ghardaïa Scrollbar Styling ─── */
+html.ghardaia ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.ghardaia ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.ghardaia ::-webkit-scrollbar-thumb {
+  background: rgba(196, 89, 58, 0.2);
+  border-radius: 9999px;
+}
+html.ghardaia ::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 89, 58, 0.4);
+}
+
+html.ghardaia-dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.ghardaia-dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+html.ghardaia-dark ::-webkit-scrollbar-thumb {
+  background: rgba(232, 114, 74, 0.2);
+  border-radius: 9999px;
+}
+html.ghardaia-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 114, 74, 0.4);
+}
+
+/* ─── Text Selection ─── */
+html.ghardaia ::selection {
+  background: rgba(196, 89, 58, 0.18);
+  color: #2C1810;
+}
+html.ghardaia-dark ::selection {
+  background: rgba(232, 114, 74, 0.25);
+  color: #F2EDE5;
+}
+
+/* ─── Focus Ring Styling ─── */
+html.ghardaia *:focus-visible {
+  outline-color: rgba(196, 89, 58, 0.5) !important;
+}
+html.ghardaia-dark *:focus-visible {
+  outline-color: rgba(232, 114, 74, 0.5) !important;
+}
+
+/* ─── Ghardaïa Button Overrides — warm active states ─── */
+html.ghardaia button:active:not(:disabled),
+html.ghardaia a:active {
+  transform: scale(0.985);
+}
+html.ghardaia-dark button:active:not(:disabled),
+html.ghardaia-dark a:active {
+  transform: scale(0.985);
+}
+
+/* ─── Premium Ghardaïa Card Shadow System ─── */
+html.ghardaia .rounded-2xl {
+  box-shadow: 0 1px 3px rgba(196, 89, 58, 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+html.ghardaia .rounded-2xl:hover {
+  box-shadow: 0 2px 8px rgba(196, 89, 58, 0.08), 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+html.ghardaia-dark .rounded-2xl {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+html.ghardaia-dark .rounded-2xl:hover {
+  box-shadow: 0 2px 8px rgba(232, 114, 74, 0.1), 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Radar Line Override for warm theme ─── */
+html.ghardaia .radar-line {
+  animation-duration: 24s;
+}
+
+/* ─── Warm Gradient Text for Ghardaïa ─── */
+html.ghardaia .bg-clip-text {
+  background: linear-gradient(135deg, #C4593A, #D4952B) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+html.ghardaia-dark .bg-clip-text {
+  background: linear-gradient(135deg, #E8724A, #E0A840) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* ─── Ambient Glow Pulse Decorations ─── */
+html.ghardaia .animate-pulse {
+  animation-duration: 4s;
+}
+html.ghardaia-dark .animate-pulse {
+  animation-duration: 4s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA SIGNATURE FLOURISHES
+   Desert heat shimmer, firelit clay buttons, M'zab serif display,
+   and golden zellige accents. All scoped to the theme.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Desert Heat Shimmer — slow drifting ambient aurora ─── */
+@keyframes ghardaia-shimmer {
+  0%   { transform: translate3d(0, 0, 0) scale(1);      opacity: 0.9; }
+  50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.06); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1);      opacity: 0.9; }
+}
+
+html.ghardaia body::before,
+html.ghardaia-dark body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 35% at 18% 12%, var(--ghardaia-glow) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 85% 8%, var(--ghardaia-gold) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 78% 92%, var(--ghardaia-oasis) 0%, transparent 60%);
+  opacity: 0.05;
+  filter: blur(40px);
+  animation: ghardaia-shimmer 26s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+html.ghardaia-dark body::before {
+  opacity: 0.08;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.ghardaia body::before,
+  html.ghardaia-dark body::before {
+    animation: none;
+  }
+}
+
+/* ─── Firelit Clay — primary buttons get a warm gradient + glow ─── */
+html.ghardaia button.bg-primary,
+html.ghardaia .bg-primary[role="button"],
+html.ghardaia-dark button.bg-primary,
+html.ghardaia-dark .bg-primary[role="button"] {
+  background: linear-gradient(135deg, var(--ghardaia-glow) 0%, var(--ghardaia-gold) 140%) !important;
+  border: 1px solid color-mix(in srgb, var(--ghardaia-glow) 60%, transparent) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 6px 18px color-mix(in srgb, var(--ghardaia-glow) 28%, transparent);
+  transition: box-shadow 0.25s ease, transform 0.12s ease;
+}
+html.ghardaia button.bg-primary:hover,
+html.ghardaia-dark button.bg-primary:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 10px 28px color-mix(in srgb, var(--ghardaia-glow) 42%, transparent);
+}
+
+/* ─── M'zab Display — serif headings with desert letterspacing ─── */
+html.ghardaia h1, html.ghardaia h2,
+html.ghardaia-dark h1, html.ghardaia-dark h2 {
+  font-family: var(--font-serif-ghardaia), serif;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Golden Zellige — gilt accent bar on active sidebar items ─── */
+html.ghardaia [data-active="true"],
+html.ghardaia .bg-sidebar-accent,
+html.ghardaia-dark [data-active="true"],
+html.ghardaia-dark .bg-sidebar-accent {
+  position: relative;
+}
+html.ghardaia [data-active="true"]::before,
+html.ghardaia-dark [data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, var(--ghardaia-gold), var(--ghardaia-glow));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ghardaia-gold) 50%, transparent);
 }
 
 /* Auth page blob animation */
@@ -214,4 +981,1144 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA — FULL-APP DEEP OVERRIDES
+   Covers: POS, Dashboard Sidebar, Buttons, Tables, Modals,
+   Badges, Links, Inputs, and Decorative Effects
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── POS Layout ─── */
+html.ghardaia .pos-layout-wrapper {
+  background: linear-gradient(180deg, #FBF7F0 0%, #F5EEE2 100%) !important;
+}
+html.ghardaia-dark .pos-layout-wrapper {
+  background: linear-gradient(180deg, #0F0D0B 0%, #141110 100%) !important;
+}
+
+/* ─── POS Cart Sidebar ─── */
+html.ghardaia .flex.h-full.flex-col.bg-white {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(1.3) !important;
+}
+html.ghardaia-dark .flex.h-full.flex-col.bg-white,
+html.ghardaia-dark .dark\:bg-\[\#18181b\] {
+  background: rgba(26, 22, 20, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* ─── POS Checkout Button — Terracotta instead of emerald ─── */
+html.ghardaia .bg-emerald-600 {
+  background: linear-gradient(135deg, #C4593A 0%, #D4952B 100%) !important;
+  box-shadow: 0 4px 16px rgba(196, 89, 58, 0.3) !important;
+}
+html.ghardaia .bg-emerald-600:hover {
+  background: linear-gradient(135deg, #B34F32 0%, #C48A24 100%) !important;
+  box-shadow: 0 6px 24px rgba(196, 89, 58, 0.4) !important;
+}
+html.ghardaia-dark .bg-emerald-600 {
+  background: linear-gradient(135deg, #E8724A 0%, #E0A840 100%) !important;
+  box-shadow: 0 4px 16px rgba(232, 114, 74, 0.3) !important;
+}
+html.ghardaia-dark .bg-emerald-600:hover {
+  background: linear-gradient(135deg, #D6653F 0%, #D09A38 100%) !important;
+  box-shadow: 0 6px 24px rgba(232, 114, 74, 0.4) !important;
+}
+
+/* ─── Dashboard Sidebar ─── */
+html.ghardaia .border-r.bg-gray-100\/40 {
+  background: rgba(250, 245, 236, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: var(--border) !important;
+}
+html.ghardaia-dark .border-r.bg-gray-100\/40,
+html.ghardaia-dark .dark\:bg-gray-800\/40 {
+  background: rgba(22, 19, 16, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: var(--border) !important;
+}
+
+/* ─── Table & Data Rows ─── */
+html.ghardaia table tbody tr:nth-child(even) {
+  background-color: rgba(240, 232, 218, 0.3) !important;
+}
+html.ghardaia table tbody tr:hover {
+  background-color: rgba(196, 89, 58, 0.06) !important;
+}
+html.ghardaia-dark table tbody tr:nth-child(even) {
+  background-color: rgba(42, 36, 32, 0.4) !important;
+}
+html.ghardaia-dark table tbody tr:hover {
+  background-color: rgba(232, 114, 74, 0.08) !important;
+}
+
+/* ─── Warm Badge / Pill Colors ─── */
+html.ghardaia .bg-emerald-500\/10 {
+  background-color: rgba(58, 125, 92, 0.1) !important;
+}
+html.ghardaia .text-emerald-600 {
+  color: #3A7D5C !important;
+}
+html.ghardaia .text-emerald-400 {
+  color: #5AAB7B !important;
+}
+html.ghardaia-dark .text-emerald-600 {
+  color: #5AAB7B !important;
+}
+html.ghardaia-dark .text-emerald-400 {
+  color: #6BC48E !important;
+}
+
+html.ghardaia .bg-indigo-50\/60 {
+  background-color: rgba(240, 232, 218, 0.5) !important;
+}
+html.ghardaia .border-indigo-200\/60 {
+  border-color: rgba(228, 217, 200, 0.6) !important;
+}
+html.ghardaia .text-indigo-500,
+html.ghardaia .text-indigo-400 {
+  color: #C4593A !important;
+}
+html.ghardaia-dark .text-indigo-500,
+html.ghardaia-dark .text-indigo-400 {
+  color: #E8724A !important;
+}
+
+/* ─── Dialog / Modal Warm Backdrop ─── */
+html.ghardaia [data-state="open"][role="dialog"] {
+  border-color: var(--border) !important;
+}
+html.ghardaia-dark [data-state="open"][role="dialog"] {
+  border-color: var(--border) !important;
+}
+
+/* ─── Warm Popover & Dropdown Overrides ─── */
+html.ghardaia [data-radix-popper-content-wrapper] [role="listbox"],
+html.ghardaia [data-radix-popper-content-wrapper] [role="menu"] {
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(196, 89, 58, 0.06), 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+html.ghardaia-dark [data-radix-popper-content-wrapper] [role="listbox"],
+html.ghardaia-dark [data-radix-popper-content-wrapper] [role="menu"] {
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(232, 114, 74, 0.08) !important;
+}
+
+/* ─── Link Hover States — Warm Terracotta ─── */
+html.ghardaia a:hover {
+  color: #C4593A;
+}
+html.ghardaia-dark a:hover {
+  color: #E8724A;
+}
+
+/* ─── Stat Card Accent Override ─── */
+html.ghardaia .tabular-nums.text-2xl {
+  color: var(--foreground) !important;
+}
+
+/* ─── Primary Button Overrides ─── */
+html.ghardaia .bg-primary {
+  background: linear-gradient(135deg, #C4593A, #B34F32) !important;
+}
+html.ghardaia .bg-primary:hover {
+  background: linear-gradient(135deg, #B34F32, #A24529) !important;
+}
+html.ghardaia-dark .bg-primary {
+  background: linear-gradient(135deg, #E8724A, #D6653F) !important;
+}
+html.ghardaia-dark .bg-primary:hover {
+  background: linear-gradient(135deg, #D6653F, #C45835) !important;
+}
+
+/* ─── Warm Toast Styling ─── */
+html.ghardaia [data-sonner-toast],
+html.ghardaia .go685806154 {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+}
+html.ghardaia-dark [data-sonner-toast],
+html.ghardaia-dark .go685806154 {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+}
+
+/* ─── Product Card Hover for POS ─── */
+html.ghardaia .group\/product:hover {
+  border-color: rgba(196, 89, 58, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(196, 89, 58, 0.08) !important;
+}
+html.ghardaia-dark .group\/product:hover {
+  border-color: rgba(232, 114, 74, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(232, 114, 74, 0.1) !important;
+}
+
+/* ─── Warm Separator ─── */
+html.ghardaia [data-orientation="horizontal"] {
+  background-color: var(--border) !important;
+}
+html.ghardaia-dark [data-orientation="horizontal"] {
+  background-color: var(--border) !important;
+}
+
+/* ─── Cart Item Row — Warm Alternating ─── */
+html.ghardaia .border-indigo-200\/60.bg-indigo-50\/60 {
+  background-color: rgba(240, 232, 218, 0.5) !important;
+  border-color: rgba(228, 217, 200, 0.6) !important;
+}
+html.ghardaia-dark .border-indigo-200\/60.bg-indigo-50\/60,
+html.ghardaia-dark .dark\:border-indigo-900\/40.dark\:bg-indigo-950\/40 {
+  background-color: rgba(42, 36, 32, 0.4) !important;
+  border-color: rgba(53, 46, 40, 0.4) !important;
+}
+
+/* ─── Animate Ping — Warm Pulse ─── */
+html.ghardaia .animate-ping {
+  background-color: #C4593A !important;
+}
+html.ghardaia-dark .animate-ping {
+  background-color: #E8724A !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GHARDAÏA — DECORATIVE ARABESQUE PATTERN OVERLAY
+   A subtle geometric pattern inspired by Islamic architecture
+   that appears on the hub header and key containers.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes ghardaia-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+html.ghardaia .rounded-\[24px\] {
+  position: relative;
+}
+
+/* Warm shimmer line on card top borders */
+html.ghardaia .rounded-\[24px\]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 89, 58, 0.3) 25%,
+    rgba(212, 149, 43, 0.5) 50%,
+    rgba(196, 89, 58, 0.3) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: ghardaia-shimmer 6s ease-in-out infinite;
+  border-radius: 24px 24px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.ghardaia-dark .rounded-\[24px\]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(232, 114, 74, 0.3) 25%,
+    rgba(224, 168, 64, 0.5) 50%,
+    rgba(232, 114, 74, 0.3) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: ghardaia-shimmer 6s ease-in-out infinite;
+  border-radius: 24px 24px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Warm Keyframe for ambient card glow ─── */
+@keyframes ghardaia-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(196, 89, 58, 0.05), 0 4px 16px rgba(0,0,0,0.03);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(196, 89, 58, 0.1), 0 8px 24px rgba(0,0,0,0.05);
+  }
+}
+
+@keyframes ghardaia-glow-dark {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(232, 114, 74, 0.06), 0 4px 16px rgba(0,0,0,0.15);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(232, 114, 74, 0.12), 0 8px 24px rgba(0,0,0,0.2);
+  }
+}
+
+/* Apply ambient glow to main hub header */
+html.ghardaia motion\.header,
+html.ghardaia .rounded-\[24px\].border {
+  animation: ghardaia-glow 8s ease-in-out infinite;
+}
+html.ghardaia-dark motion\.header,
+html.ghardaia-dark .rounded-\[24px\].border {
+  animation: ghardaia-glow-dark 8s ease-in-out infinite;
+}
+
+/* ─── Warm Shadow for Stat Cards ─── */
+html.ghardaia .grid-cols-2 > div {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.ghardaia .grid-cols-2 > div:hover {
+  box-shadow: 0 8px 32px rgba(196, 89, 58, 0.1), 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+html.ghardaia-dark .grid-cols-2 > div:hover {
+  box-shadow: 0 8px 32px rgba(232, 114, 74, 0.12), 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+/* ─── POS Search Bar Warm Focus ─── */
+html.ghardaia input:focus {
+  border-color: rgba(196, 89, 58, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(196, 89, 58, 0.1) !important;
+}
+html.ghardaia-dark input:focus {
+  border-color: rgba(232, 114, 74, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(232, 114, 74, 0.15) !important;
+}
+
+/* ─── POS Layout Warm Slate Override ─── */
+html.ghardaia .bg-slate-100 {
+  background-color: var(--background) !important;
+}
+html.ghardaia-dark .bg-slate-100,
+html.ghardaia-dark .dark\:bg-slate-900 {
+  background-color: var(--background) !important;
+}
+
+/* ─── Top 5 Ghardaïa Premium Effects ─── */
+
+/* 1. Desert Sun Shadow (#21) - Warm, directional bottom-right shadows */
+html.ghardaia [role="dialog"],
+html.ghardaia .shadow-md,
+html.ghardaia .shadow-lg,
+html.ghardaia .shadow-xl,
+html.ghardaia .shadow-2xl {
+  box-shadow: 6px 6px 20px rgba(196, 89, 58, 0.08), 1px 1px 4px rgba(196, 89, 58, 0.04) !important;
+}
+html.ghardaia-dark [role="dialog"],
+html.ghardaia-dark .shadow-md,
+html.ghardaia-dark .shadow-lg,
+html.ghardaia-dark .shadow-xl,
+html.ghardaia-dark .shadow-2xl {
+  box-shadow: 6px 6px 24px rgba(232, 114, 74, 0.12), 1px 1px 6px rgba(0,0,0,0.35) !important;
+}
+
+/* 2. Minaret Gradient Buttons (#3) - Vertical gradient with hover transition */
+html.ghardaia .bg-primary {
+  background: linear-gradient(180deg, #D4A853 0%, #8B3A22 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(139, 58, 34, 0.35) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+html.ghardaia .bg-primary:hover {
+  background: linear-gradient(180deg, #E2B65C 0%, #A6462B 100%) !important;
+  box-shadow: 0 6px 16px rgba(139, 58, 34, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+html.ghardaia-dark .bg-primary {
+  background: linear-gradient(180deg, #E8724A 0%, #8B3A22 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(232, 114, 74, 0.35) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+html.ghardaia-dark .bg-primary:hover {
+  background: linear-gradient(180deg, #FA835B 0%, #9F4128 100%) !important;
+  box-shadow: 0 6px 20px rgba(232, 114, 74, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 3. Star Twinkle for Success (#13) - CSS particles twinkling on toasts & success cards */
+@keyframes ghardaia-twinkle-1 {
+  0%, 100% { opacity: 0.15; transform: scale(0.6) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.1) translate(-4px, -4px); }
+}
+@keyframes ghardaia-twinkle-2 {
+  0%, 100% { opacity: 0.25; transform: scale(0.8) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.3) translate(5px, -3px); }
+}
+html.ghardaia div[role="status"] {
+  position: relative;
+}
+html.ghardaia div[role="status"]::before {
+  content: '✦';
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  font-size: 10px;
+  color: #D4A853;
+  animation: ghardaia-twinkle-1 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+html.ghardaia div[role="status"]::after {
+  content: '✧';
+  position: absolute;
+  bottom: 6px;
+  left: 14px;
+  font-size: 9px;
+  color: #E8724A;
+  animation: ghardaia-twinkle-2 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+html.ghardaia-dark div[role="status"] {
+  position: relative;
+}
+html.ghardaia-dark div[role="status"]::before {
+  content: '✦';
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  font-size: 10px;
+  color: #FA835B;
+  animation: ghardaia-twinkle-1 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+html.ghardaia-dark div[role="status"]::after {
+  content: '✧';
+  position: absolute;
+  bottom: 6px;
+  left: 14px;
+  font-size: 9px;
+  color: #E0A840;
+  animation: ghardaia-twinkle-2 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* 4. Muezzin Call Notification Entrance (#10) - Toast enters with minaret acoustic arc + bounce */
+@keyframes ghardaia-muezzin-entrance {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -60px, 0) scale(0.85) rotate(-3deg);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(8px, 12px, 0) scale(1.02) rotate(1deg);
+  }
+  75% {
+    transform: translate3d(-3px, -2px, 0) scale(0.99) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+}
+html.ghardaia div[role="status"],
+html.ghardaia-dark div[role="status"] {
+  animation: ghardaia-muezzin-entrance 0.58s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* 5. Chiseled Number Display (#29) - Sandstone-carved dual text shadows */
+html.ghardaia h1,
+html.ghardaia h2,
+html.ghardaia .text-3xl,
+html.ghardaia .text-4xl,
+html.ghardaia .text-5xl,
+html.ghardaia .text-6xl,
+html.ghardaia [data-chiseled="true"] {
+  text-shadow: -1px -1px 0px rgba(255, 255, 255, 0.8), 1px 1px 0px rgba(139, 58, 34, 0.28) !important;
+}
+html.ghardaia-dark h1,
+html.ghardaia-dark h2,
+html.ghardaia-dark .text-3xl,
+html.ghardaia-dark .text-4xl,
+html.ghardaia-dark .text-5xl,
+html.ghardaia-dark .text-6xl,
+html.ghardaia-dark [data-chiseled="true"] {
+  text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.65), 1px 1px 0px rgba(232, 114, 74, 0.35) !important;
+}
+
+/* ─── Ghardaïa Secondary Visual Refinements ─── */
+
+/* 6. Classical Serif Heading Typography */
+html.ghardaia h1,
+html.ghardaia h2,
+html.ghardaia h3,
+html.ghardaia .serif-title,
+html.ghardaia-dark h1,
+html.ghardaia-dark h2,
+html.ghardaia-dark h3,
+html.ghardaia-dark .serif-title {
+  font-family: var(--font-serif), Georgia, serif !important;
+  letter-spacing: 0.015em !important;
+}
+
+/* 7. Oasis Scrollbars - Custom-styled scrollbar tracks and thumbs */
+html.ghardaia ::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+html.ghardaia ::-webkit-scrollbar-track {
+  background: #FAF5EC !important;
+}
+html.ghardaia ::-webkit-scrollbar-thumb {
+  background: #C4593A !important;
+  border-radius: 9999px !important;
+  border: 2px solid #FAF5EC !important;
+}
+html.ghardaia ::-webkit-scrollbar-thumb:hover {
+  background: #8B3A22 !important;
+}
+
+html.ghardaia-dark ::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+html.ghardaia-dark ::-webkit-scrollbar-track {
+  background: #161310 !important;
+}
+html.ghardaia-dark ::-webkit-scrollbar-thumb {
+  background: #E8724A !important;
+  border-radius: 9999px !important;
+  border: 2px solid #161310 !important;
+}
+html.ghardaia-dark ::-webkit-scrollbar-thumb:hover {
+  background: #FA835B !important;
+}
+
+/* 8. Moucharabieh Latticework Dividers - Dotted pattern for horizontal lines */
+html.ghardaia hr,
+html.ghardaia [data-orientation="horizontal"] {
+  background-image: radial-gradient(circle, #C4593A 1.2px, transparent 1.2px) !important;
+  background-size: 5px 5px !important;
+  background-repeat: repeat-x !important;
+  background-color: transparent !important;
+  height: 2px !important;
+  border: none !important;
+}
+html.ghardaia-dark hr,
+html.ghardaia-dark [data-orientation="horizontal"] {
+  background-image: radial-gradient(circle, #E8724A 1.2px, transparent 1.2px) !important;
+  background-size: 5px 5px !important;
+  background-repeat: repeat-x !important;
+  background-color: transparent !important;
+  height: 2px !important;
+  border: none !important;
+}
+
+/* 9. Campfire Warm Bottom Glow for Desert Night */
+html.ghardaia-dark body::before {
+  content: '';
+  position: fixed;
+  bottom: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(232, 114, 74, 0.045) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 10. Mozabite Stone-Carved Small-Caps Labels */
+html.ghardaia .text-xs.font-semibold,
+html.ghardaia [data-heading="section"],
+html.ghardaia-dark .text-xs.font-semibold,
+html.ghardaia-dark [data-heading="section"] {
+  font-variant: all-small-caps !important;
+  letter-spacing: 0.16em !important;
+  text-transform: lowercase !important;
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RIVIERA, ATLAS, HORIZON — SHARED THEME ENGINE
+   A unified override system that uses CSS custom properties
+   to avoid hundreds of lines of per-theme !important hacks.
+   Each theme only needs to set a few accent variables.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Theme accent tokens (set per theme) ─── */
+html.riviera       { --theme-accent: 43, 102, 153; --theme-accent-hex: #2B6699; }
+html.riviera-dark  { --theme-accent: 90, 190, 214; --theme-accent-hex: #5ABED6; }
+html.atlas         { --theme-accent: 34, 87, 63;  --theme-accent-hex: #22573F; }
+html.atlas-dark    { --theme-accent: 74, 175, 117; --theme-accent-hex: #4AAF75; }
+html.horizon       { --theme-accent: 45, 107, 168; --theme-accent-hex: #2D6BA8; }
+html.horizon-dark  { --theme-accent: 91, 163, 224; --theme-accent-hex: #5BA3E0; }
+
+/* ─── Body Backgrounds ─── */
+html.riviera body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(var(--theme-accent), 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(139, 126, 200, 0.03) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+html.riviera-dark body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% -5%, rgba(var(--theme-accent), 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 35% at 85% 95%, rgba(168, 153, 224, 0.04) 0%, transparent 55%);
+  background-attachment: fixed;
+}
+html.atlas body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(var(--theme-accent), 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(67, 97, 178, 0.03) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+html.atlas-dark body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% -5%, rgba(var(--theme-accent), 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 35% at 85% 95%, rgba(107, 138, 219, 0.04) 0%, transparent 55%);
+  background-attachment: fixed;
+}
+html.horizon body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -5%, rgba(var(--theme-accent), 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(124, 111, 170, 0.03) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+html.horizon-dark body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% -5%, rgba(var(--theme-accent), 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 35% at 85% 95%, rgba(155, 143, 204, 0.04) 0%, transparent 55%);
+  background-attachment: fixed;
+}
+
+/* ─── Shared Light Theme Overrides ─── */
+html.riviera, html.atlas, html.horizon {
+  /* Dark background overrides */
+  & .min-h-screen.bg-\[\#020205\],
+  & .bg-\[\#020205\] {
+    background-color: transparent !important;
+    color: var(--foreground) !important;
+  }
+  /* Glass panels */
+  & .bg-slate-950\/80 {
+    background-color: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(20px) saturate(1.4) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  & .bg-gradient-to-b.from-\[\#090b16\]\/70,
+  & .from-\[\#090b16\]\/70 {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(24px) saturate(1.3) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    box-shadow: 0 4px 24px rgba(var(--theme-accent), 0.04), 0 1px 0 rgba(255, 255, 255, 0.8) inset !important;
+  }
+  & .bg-gradient-to-b.from-\[\#080a18\]\/70,
+  & .from-\[\#080a18\]\/70 {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  & .bg-\[\#070810\]\/70,
+  & .bg-\[\#0f1122\]\/90 {
+    background-color: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(16px) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  /* Borders */
+  & .border-white\/\[0\.02\],
+  & .border-white\/\[0\.04\],
+  & .border-slate-800\/80,
+  & .border-slate-800 {
+    border-color: var(--border) !important;
+  }
+  /* Text */
+  & .text-slate-400 { color: var(--muted-foreground) !important; }
+  & .text-slate-500 { color: var(--muted-foreground) !important; }
+  & .text-slate-300 { color: var(--foreground) !important; }
+  & .text-slate-200 { color: var(--foreground) !important; }
+  & .text-slate-100 { color: var(--foreground) !important; }
+  & .text-white { color: var(--foreground) !important; }
+  & .text-white\/90 { color: var(--foreground) !important; }
+  & .text-white\/80 { color: var(--foreground) !important; }
+  & .text-white\/70 { color: var(--muted-foreground) !important; }
+  & .text-white\/60 { color: var(--muted-foreground) !important; }
+  & .text-white\/50 { color: var(--muted-foreground) !important; }
+  /* Gradient text fix — make it solid dark */
+  & .bg-gradient-to-r.from-white,
+  & .bg-gradient-to-r.from-slate-100,
+  & [class*="bg-gradient"][class*="bg-clip-text"] {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: var(--foreground) !important;
+    color: var(--foreground) !important;
+  }
+  /* Kill clip-text entirely on light themes — use solid foreground */
+  & .bg-clip-text {
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    -webkit-text-fill-color: var(--foreground) !important;
+    color: var(--foreground) !important;
+  }
+  /* Module card titles and descriptions */
+  & h1, & h2, & h3, & h4, & h5, & h6 {
+    color: var(--foreground) !important;
+  }
+  & p {
+    color: var(--foreground);
+  }
+  /* Header */
+  & header.relative {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) saturate(1.3) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  /* Inputs */
+  & input {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  & input:focus {
+    border-color: rgba(var(--theme-accent), 0.5) !important;
+    box-shadow: 0 0 0 2px rgba(var(--theme-accent), 0.1) !important;
+  }
+  /* Cyber grid */
+  & .cyber-grid {
+    background-image:
+      linear-gradient(rgba(var(--theme-accent), 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--theme-accent), 0.02) 1px, transparent 1px) !important;
+    opacity: 0.5 !important;
+  }
+  /* Table rows */
+  & table tbody tr:nth-child(even) {
+    background-color: rgba(var(--theme-accent), 0.03) !important;
+  }
+  & table tbody tr:hover {
+    background-color: rgba(var(--theme-accent), 0.06) !important;
+  }
+  /* POS layout */
+  & .bg-slate-100 {
+    background-color: var(--background) !important;
+  }
+  /* Primary button gradient */
+  & .bg-primary {
+    background: var(--primary) !important;
+  }
+  & .bg-primary:hover {
+    filter: brightness(0.92) !important;
+  }
+  /* Emerald → theme primary */
+  & .bg-emerald-600 {
+    background: var(--primary) !important;
+    box-shadow: 0 4px 16px rgba(var(--theme-accent), 0.3) !important;
+  }
+  & .bg-emerald-600:hover {
+    filter: brightness(0.92) !important;
+    box-shadow: 0 6px 24px rgba(var(--theme-accent), 0.4) !important;
+  }
+}
+
+/* ─── Shared Dark Theme Overrides ─── */
+html.riviera-dark, html.atlas-dark, html.horizon-dark {
+  & .min-h-screen.bg-\[\#020205\],
+  & .bg-\[\#020205\] {
+    background-color: transparent !important;
+    color: var(--foreground) !important;
+  }
+  & .bg-slate-950\/80 {
+    background-color: var(--card) !important;
+    backdrop-filter: blur(20px) saturate(1.2) !important;
+    border-color: var(--border) !important;
+  }
+  & .bg-gradient-to-b.from-\[\#090b16\]\/70,
+  & .from-\[\#090b16\]\/70 {
+    background: var(--card) !important;
+    backdrop-filter: blur(24px) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 4px 24px rgba(var(--theme-accent), 0.06), 0 1px 0 rgba(255, 255, 255, 0.02) inset !important;
+  }
+  & .bg-gradient-to-b.from-\[\#080a18\]\/70,
+  & .from-\[\#080a18\]\/70 {
+    background: var(--card) !important;
+    backdrop-filter: blur(20px) !important;
+    border-color: var(--border) !important;
+  }
+  & .bg-\[\#070810\]\/70,
+  & .bg-\[\#0f1122\]\/90 {
+    background-color: var(--card) !important;
+    backdrop-filter: blur(16px) !important;
+    border-color: var(--border) !important;
+  }
+  & .border-white\/\[0\.02\],
+  & .border-white\/\[0\.04\],
+  & .border-slate-800\/80,
+  & .border-slate-800 {
+    border-color: var(--border) !important;
+  }
+  & .text-slate-400 { color: var(--muted-foreground) !important; }
+  & header.relative {
+    background: var(--card) !important;
+    backdrop-filter: blur(20px) saturate(1.2) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  & input {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+  }
+  & input:focus {
+    border-color: rgba(var(--theme-accent), 0.5) !important;
+    box-shadow: 0 0 0 2px rgba(var(--theme-accent), 0.15) !important;
+  }
+  & .cyber-grid {
+    background-image:
+      linear-gradient(rgba(var(--theme-accent), 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--theme-accent), 0.015) 1px, transparent 1px) !important;
+    opacity: 0.4 !important;
+  }
+  & table tbody tr:nth-child(even) {
+    background-color: rgba(var(--theme-accent), 0.04) !important;
+  }
+  & table tbody tr:hover {
+    background-color: rgba(var(--theme-accent), 0.08) !important;
+  }
+  & .bg-slate-100,
+  & .dark\:bg-slate-900 {
+    background-color: var(--background) !important;
+  }
+  & .bg-clip-text {
+    background: var(--theme-accent-hex) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+  & .bg-primary {
+    background: var(--primary) !important;
+  }
+  & .bg-emerald-600 {
+    background: var(--primary) !important;
+    box-shadow: 0 4px 16px rgba(var(--theme-accent), 0.3) !important;
+  }
+}
+
+/* ─── Theme-Specific Scrollbars ─── */
+html.riviera ::-webkit-scrollbar, html.atlas ::-webkit-scrollbar, html.horizon ::-webkit-scrollbar,
+html.riviera-dark ::-webkit-scrollbar, html.atlas-dark ::-webkit-scrollbar, html.horizon-dark ::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+/* Riviera: Marine sand and turquoise water */
+html.riviera ::-webkit-scrollbar-track { background: #FAF7F2 !important; }
+html.riviera ::-webkit-scrollbar-thumb {
+  background: #2B6699 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #FAF7F2 !important;
+}
+html.riviera ::-webkit-scrollbar-thumb:hover { background: #1F4C73 !important; }
+
+html.riviera-dark ::-webkit-scrollbar-track { background: #0E161F !important; }
+html.riviera-dark ::-webkit-scrollbar-thumb {
+  background: #5ABED6 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #0E161F !important;
+}
+html.riviera-dark ::-webkit-scrollbar-thumb:hover { background: #3FA8C0 !important; }
+
+/* Atlas: Granite slate and forest moss */
+html.atlas ::-webkit-scrollbar-track { background: #F4F6F3 !important; }
+html.atlas ::-webkit-scrollbar-thumb {
+  background: #22573F !important;
+  border-radius: 9999px !important;
+  border: 2px solid #F4F6F3 !important;
+}
+html.atlas ::-webkit-scrollbar-thumb:hover { background: #173D2C !important; }
+
+html.atlas-dark ::-webkit-scrollbar-track { background: #0E1411 !important; }
+html.atlas-dark ::-webkit-scrollbar-thumb {
+  background: #4AAF75 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #0E1411 !important;
+}
+html.atlas-dark ::-webkit-scrollbar-thumb:hover { background: #3C8E5F !important; }
+
+/* Horizon: Twilight fog and sky blue */
+html.horizon ::-webkit-scrollbar-track { background: #F3F2F7 !important; }
+html.horizon ::-webkit-scrollbar-thumb {
+  background: #2D6BA8 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #F3F2F7 !important;
+}
+html.horizon ::-webkit-scrollbar-thumb:hover { background: #1E4E7C !important; }
+
+html.horizon-dark ::-webkit-scrollbar-track { background: #100F17 !important; }
+html.horizon-dark ::-webkit-scrollbar-thumb {
+  background: #5BA3E0 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #100F17 !important;
+}
+html.horizon-dark ::-webkit-scrollbar-thumb:hover { background: #3D82C2 !important; }
+
+
+/* ─── Text Selection ─── */
+html.riviera ::selection, html.atlas ::selection, html.horizon ::selection {
+  background: rgba(var(--theme-accent), 0.18);
+}
+html.riviera-dark ::selection, html.atlas-dark ::selection, html.horizon-dark ::selection {
+  background: rgba(var(--theme-accent), 0.25);
+}
+
+/* ─── Focus Ring ─── */
+html.riviera *:focus-visible, html.atlas *:focus-visible, html.horizon *:focus-visible,
+html.riviera-dark *:focus-visible, html.atlas-dark *:focus-visible, html.horizon-dark *:focus-visible {
+  outline-color: rgba(var(--theme-accent), 0.5) !important;
+}
+
+/* ─── Card Shadows ─── */
+html.riviera .rounded-2xl, html.atlas .rounded-2xl, html.horizon .rounded-2xl {
+  box-shadow: 0 1px 3px rgba(var(--theme-accent), 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+html.riviera .rounded-2xl:hover, html.atlas .rounded-2xl:hover, html.horizon .rounded-2xl:hover {
+  box-shadow: 0 2px 8px rgba(var(--theme-accent), 0.08), 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+html.riviera-dark .rounded-2xl, html.atlas-dark .rounded-2xl, html.horizon-dark .rounded-2xl {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+html.riviera-dark .rounded-2xl:hover, html.atlas-dark .rounded-2xl:hover, html.horizon-dark .rounded-2xl:hover {
+  box-shadow: 0 2px 8px rgba(var(--theme-accent), 0.1), 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Button Press ─── */
+html.riviera button:active:not(:disabled), html.atlas button:active:not(:disabled), html.horizon button:active:not(:disabled),
+html.riviera-dark button:active:not(:disabled), html.atlas-dark button:active:not(:disabled), html.horizon-dark button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* ─── Toast Styling & Theme-Specific Entrance Animations ─── */
+@keyframes riviera-wave-entrance {
+  0% { opacity: 0; transform: translate3d(50px, 0, 0) scale(0.96) rotate(1.5deg); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+}
+@keyframes atlas-solid-entrance {
+  0% { opacity: 0; transform: translate3d(0, -35px, 0) scale(0.98); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes horizon-mist-entrance {
+  0% { opacity: 0; transform: scale(0.96) translate3d(0, 15px, 0); filter: blur(2px); }
+  100% { opacity: 1; transform: scale(1) translate3d(0, 0, 0); filter: blur(0); }
+}
+
+html.riviera div[role="status"], html.riviera-dark div[role="status"] {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+  animation: riviera-wave-entrance 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards !important;
+}
+html.atlas div[role="status"], html.atlas-dark div[role="status"] {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+  animation: atlas-solid-entrance 0.45s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+}
+html.horizon div[role="status"], html.horizon-dark div[role="status"] {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+  animation: horizon-mist-entrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+html.riviera [data-sonner-toast], html.atlas [data-sonner-toast], html.horizon [data-sonner-toast],
+html.riviera-dark [data-sonner-toast], html.atlas-dark [data-sonner-toast], html.horizon-dark [data-sonner-toast] {
+  border-color: var(--border) !important;
+  background: var(--card) !important;
+}
+
+/* ─── Theme-Specific Ambient Body Glows ─── */
+html.riviera-dark body::before {
+  content: '';
+  position: fixed;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(90, 190, 214, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+html.atlas-dark body::before {
+  content: '';
+  position: fixed;
+  top: 30%;
+  left: -150px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(74, 175, 117, 0.035) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+html.horizon-dark body::before {
+  content: '';
+  position: fixed;
+  bottom: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(155, 143, 204, 0.045) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ─── Ambient Shimmer for New Themes ─── */
+@keyframes theme-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+html.riviera .rounded-\[24px\], html.atlas .rounded-\[24px\], html.horizon .rounded-\[24px\] {
+  position: relative;
+}
+html.riviera .rounded-\[24px\]::after,
+html.atlas .rounded-\[24px\]::after,
+html.horizon .rounded-\[24px\]::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--theme-accent), 0.25) 25%,
+    rgba(var(--theme-accent), 0.5) 50%,
+    rgba(var(--theme-accent), 0.25) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: theme-shimmer 6s ease-in-out infinite;
+  border-radius: 24px 24px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+html.riviera-dark .rounded-\[24px\]::after,
+html.atlas-dark .rounded-\[24px\]::after,
+html.horizon-dark .rounded-\[24px\]::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--theme-accent), 0.25) 25%,
+    rgba(var(--theme-accent), 0.5) 50%,
+    rgba(var(--theme-accent), 0.25) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: theme-shimmer 6s ease-in-out infinite;
+  border-radius: 24px 24px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Ambient Card Glow ─── */
+@keyframes theme-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(var(--theme-accent), 0.05), 0 4px 16px rgba(0,0,0,0.03); }
+  50% { box-shadow: 0 0 30px rgba(var(--theme-accent), 0.1), 0 8px 24px rgba(0,0,0,0.05); }
+}
+@keyframes theme-glow-dark {
+  0%, 100% { box-shadow: 0 0 20px rgba(var(--theme-accent), 0.06), 0 4px 16px rgba(0,0,0,0.15); }
+  50% { box-shadow: 0 0 35px rgba(var(--theme-accent), 0.12), 0 8px 24px rgba(0,0,0,0.2); }
+}
+
+html.riviera .rounded-\[24px\].border, html.atlas .rounded-\[24px\].border, html.horizon .rounded-\[24px\].border {
+  animation: theme-glow 8s ease-in-out infinite;
+}
+html.riviera-dark .rounded-\[24px\].border, html.atlas-dark .rounded-\[24px\].border, html.horizon-dark .rounded-\[24px\].border {
+  animation: theme-glow-dark 8s ease-in-out infinite;
+}
+
+/* ─── Stat Card Hover ─── */
+html.riviera .grid-cols-2 > div, html.atlas .grid-cols-2 > div, html.horizon .grid-cols-2 > div {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.riviera .grid-cols-2 > div:hover, html.atlas .grid-cols-2 > div:hover, html.horizon .grid-cols-2 > div:hover {
+  box-shadow: 0 8px 32px rgba(var(--theme-accent), 0.1), 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+html.riviera-dark .grid-cols-2 > div:hover, html.atlas-dark .grid-cols-2 > div:hover, html.horizon-dark .grid-cols-2 > div:hover {
+  box-shadow: 0 8px 32px rgba(var(--theme-accent), 0.12), 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+/* ─── Link Hover ─── */
+html.riviera a:hover, html.atlas a:hover, html.horizon a:hover {
+  color: var(--primary);
+}
+html.riviera-dark a:hover, html.atlas-dark a:hover, html.horizon-dark a:hover {
+  color: var(--primary);
+}
+
+/* ─── Radar line speed ─── */
+html.riviera .radar-line, html.atlas .radar-line, html.horizon .radar-line {
+  animation-duration: 24s;
+}
+
+/* ─── Animate Pulse ─── */
+html.riviera .animate-pulse, html.atlas .animate-pulse, html.horizon .animate-pulse,
+html.riviera-dark .animate-pulse, html.atlas-dark .animate-pulse, html.horizon-dark .animate-pulse {
+  animation-duration: 4s;
+}
+
+/* ─── Product Card Hover for POS ─── */
+html.riviera .group\/product:hover, html.atlas .group\/product:hover, html.horizon .group\/product:hover {
+  border-color: rgba(var(--theme-accent), 0.3) !important;
+  box-shadow: 0 4px 16px rgba(var(--theme-accent), 0.08) !important;
+}
+html.riviera-dark .group\/product:hover, html.atlas-dark .group\/product:hover, html.horizon-dark .group\/product:hover {
+  border-color: rgba(var(--theme-accent), 0.25) !important;
+  box-shadow: 0 4px 16px rgba(var(--theme-accent), 0.1) !important;
+}
+
+/* ─── Warm Separator ─── */
+html.riviera [data-orientation="horizontal"], html.atlas [data-orientation="horizontal"], html.horizon [data-orientation="horizontal"],
+html.riviera-dark [data-orientation="horizontal"], html.atlas-dark [data-orientation="horizontal"], html.horizon-dark [data-orientation="horizontal"] {
+  background-color: var(--border) !important;
+}
+
+/* ─── Popover & Dropdown ─── */
+html.riviera [data-radix-popper-content-wrapper] [role="listbox"],
+html.riviera [data-radix-popper-content-wrapper] [role="menu"],
+html.atlas [data-radix-popper-content-wrapper] [role="listbox"],
+html.atlas [data-radix-popper-content-wrapper] [role="menu"],
+html.horizon [data-radix-popper-content-wrapper] [role="listbox"],
+html.horizon [data-radix-popper-content-wrapper] [role="menu"] {
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(var(--theme-accent), 0.06), 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+html.riviera-dark [data-radix-popper-content-wrapper] [role="listbox"],
+html.riviera-dark [data-radix-popper-content-wrapper] [role="menu"],
+html.atlas-dark [data-radix-popper-content-wrapper] [role="listbox"],
+html.atlas-dark [data-radix-popper-content-wrapper] [role="menu"],
+html.horizon-dark [data-radix-popper-content-wrapper] [role="listbox"],
+html.horizon-dark [data-radix-popper-content-wrapper] [role="menu"] {
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(var(--theme-accent), 0.08) !important;
+}
+
+/* ─── Dialog / Modal ─── */
+html.riviera [data-state="open"][role="dialog"], html.atlas [data-state="open"][role="dialog"], html.horizon [data-state="open"][role="dialog"],
+html.riviera-dark [data-state="open"][role="dialog"], html.atlas-dark [data-state="open"][role="dialog"], html.horizon-dark [data-state="open"][role="dialog"] {
+  border-color: var(--border) !important;
 }

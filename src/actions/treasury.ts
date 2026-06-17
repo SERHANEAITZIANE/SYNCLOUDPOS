@@ -165,7 +165,7 @@ export async function getTreasuryAccount(id: string) {
 
         const tenantId = session.user.tenantId
 
-        const account = await db.treasuryAccount.findUnique({
+        const account = await db.treasuryAccount.findFirst({
             where: { id, tenantId }
         })
 
@@ -229,7 +229,7 @@ export async function getCashbook(accountId: string, year: number, month: number
         const startDate = new Date(year, month - 1, 1)
         const endDate = new Date(year, month, 0, 23, 59, 59, 999)
 
-        const account = await db.treasuryAccount.findUnique({
+        const account = await db.treasuryAccount.findFirst({
             where: { id: accountId, tenantId }
         })
         if (!account) return { error: "Compte introuvable" }
@@ -357,13 +357,13 @@ export async function updateTreasuryAccount(id: string, values: z.infer<typeof T
 
         const { name, type, rib } = validatedFields.data
 
-        const existingAccount = await db.treasuryAccount.findUnique({
+        const existingAccount = await db.treasuryAccount.findFirst({
             where: { id, tenantId }
         })
         if (!existingAccount) return { error: "Compte introuvable" }
 
         const account = await db.treasuryAccount.update({
-            where: { id, tenantId },
+            where: { id },
             data: {
                 name,
                 type,
@@ -401,12 +401,14 @@ export async function deleteTreasuryAccount(id: string) {
 
         const tenantId = session.user.tenantId
 
-        const existingAccount = await db.treasuryAccount.findUnique({
+        const existingAccount = await db.treasuryAccount.findFirst({
             where: { id, tenantId }
         })
 
+        if (!existingAccount) return { error: "Compte introuvable" }
+
         await db.treasuryAccount.delete({
-            where: { id, tenantId }
+            where: { id }
         })
 
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
@@ -436,8 +438,8 @@ export async function transferFunds(fromAccountId: string, toAccountId: string, 
         if (fromAccountId === toAccountId) return { error: "Cannot transfer to the same account" }
 
         await db.$transaction(async (tx) => {
-            const fromAccount = await tx.treasuryAccount.findUnique({ where: { id: fromAccountId, tenantId } })
-            const toAccount = await tx.treasuryAccount.findUnique({ where: { id: toAccountId, tenantId } })
+            const fromAccount = await tx.treasuryAccount.findFirst({ where: { id: fromAccountId, tenantId } })
+            const toAccount = await tx.treasuryAccount.findFirst({ where: { id: toAccountId, tenantId } })
 
             if (!fromAccount || !toAccount) {
                 throw new Error("Account not found")
@@ -511,7 +513,7 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
         if (amount <= 0) return { error: "Amount must be greater than 0" }
 
         await db.$transaction(async (tx) => {
-            const account = await tx.treasuryAccount.findUnique({ where: { id: accountId, tenantId } })
+            const account = await tx.treasuryAccount.findFirst({ where: { id: accountId, tenantId } })
             if (!account) throw new Error("Account not found")
 
             if (type === "DEBIT" && Number(account.balance) < amount) {

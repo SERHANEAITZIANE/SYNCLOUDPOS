@@ -351,7 +351,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
     }, [sections, customButtons]);
 
     return (
-        <div className="relative min-h-screen bg-[#020205] text-white overflow-x-hidden select-none">
+        <div className="relative min-h-screen bg-transparent text-foreground overflow-x-hidden select-none">
             {/* CSS ANIMATION STYLES FOR RADAR & DATA FLOW */}
             <style>{`
                 @keyframes pulseReactor {
@@ -450,15 +450,14 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                 }
             `}</style>
 
-            {/* ═══════ Advanced Glow Orbs & Grid Background ═══════ */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
                 <div className="absolute inset-0 cyber-grid opacity-[0.8]" />
                 
                 {/* Parallax Glowing space depth */}
-                <div className="absolute top-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-900/10 blur-[130px] animate-pulse" style={{ animationDuration: "14s" }} />
-                <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-900/15 blur-[150px] animate-pulse" style={{ animationDuration: "18s" }} />
-                <div className="absolute top-[25%] left-[20%] w-[50%] h-[50%] rounded-full bg-emerald-950/5 blur-[170px]" />
-                <div className="absolute bottom-[20%] left-[-5%] w-[40%] h-[40%] rounded-full bg-cyan-900/5 blur-[130px]" />
+                <div className="absolute top-[-15%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/5 dark:bg-blue-900/10 blur-[130px] animate-pulse" style={{ animationDuration: "14s" }} />
+                <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-secondary/5 dark:bg-indigo-900/15 blur-[150px] animate-pulse" style={{ animationDuration: "18s" }} />
+                <div className="absolute top-[25%] left-[20%] w-[50%] h-[50%] rounded-full bg-primary/5 dark:bg-emerald-950/5 blur-[170px]" />
+                <div className="absolute bottom-[20%] left-[-5%] w-[40%] h-[40%] rounded-full bg-secondary/5 dark:bg-cyan-900/5 blur-[130px]" />
             </div>
 
             <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 space-y-8">
@@ -468,12 +467,9 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative overflow-hidden rounded-[24px] border border-white/[0.04] backdrop-blur-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)]"
-                    style={{
-                        background: "linear-gradient(135deg, rgba(6,8,20,0.85) 0%, rgba(10,9,26,0.75) 50%, rgba(6,8,20,0.85) 100%)",
-                    }}
+                    className="relative overflow-hidden rounded-[24px] border border-border bg-card/85 backdrop-blur-3xl shadow-lg dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.95)]"
                 >
-                    <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-500/40 to-emerald-500/20" />
+                    <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-primary/40 to-secondary/20" />
                     
                     <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-6 p-6 sm:p-8">
                         <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
@@ -482,46 +478,46 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                 transition={{ type: "spring", stiffness: 350, damping: 12 }}
                                 className="relative shrink-0"
                             >
-                                <div className="absolute -inset-2 rounded-2xl blur-xl opacity-60 bg-gradient-to-tr from-cyan-500 via-emerald-500 to-indigo-500 animate-pulse" style={{ animationDuration: "6s" }} />
-                                <div className="relative w-16 h-16 flex items-center justify-center rounded-2xl shadow-2xl bg-gradient-to-br from-[#0c0f24] to-[#050611] border border-white/10">
-                                    <div className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-400 shadow-lg shadow-cyan-500/20">
-                                        <Store className="w-5.5 h-5.5 text-white" />
+                                <div className="absolute -inset-2 rounded-2xl blur-xl opacity-60 bg-gradient-to-tr from-primary via-primary/80 to-secondary animate-pulse" style={{ animationDuration: "6s" }} />
+                                <div className="relative w-16 h-16 flex items-center justify-center rounded-2xl shadow-xl bg-card border border-border">
+                                    <div className="w-11 h-11 flex items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-secondary/80 shadow-lg shadow-primary/20">
+                                        <Store className="w-5.5 h-5.5 text-primary-foreground" />
                                     </div>
                                 </div>
                             </motion.div>
                             <div>
-                                <h1 className="text-3xl font-black tracking-tight text-white flex items-center justify-center sm:justify-start gap-2.5">
-                                    SYNCLOUD<span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent font-black tracking-widest text-2xl">POS</span>
-                                    <span className="text-[9px] font-mono tracking-widest font-bold px-2 py-0.5 rounded bg-slate-900 border border-white/5 text-slate-500 uppercase">v1.8</span>
+                                <h1 className="text-3xl font-black tracking-tight text-foreground flex items-center justify-center sm:justify-start gap-2.5">
+                                    SYNCLOUD<span className="bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent font-black tracking-widest text-2xl">POS</span>
+                                    <span className="text-[9px] font-mono tracking-widest font-bold px-2 py-0.5 rounded bg-muted border border-border text-muted-foreground uppercase">v1.8</span>
                                 </h1>
-                                <p className="text-[10px] sm:text-xs text-slate-400 font-extrabold uppercase mt-1.5 tracking-[0.2em] flex items-center gap-2 justify-center sm:justify-start">
+                                <p className="text-[10px] sm:text-xs text-muted-foreground font-extrabold uppercase mt-1.5 tracking-[0.2em] flex items-center gap-2 justify-center sm:justify-start">
                                     <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                     </span>
                                     {t("commandCenter") || "Centre de Contrôle Général"} 
-                                    <span className="text-slate-700">|</span> 
-                                    <span className="bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400 bg-clip-text text-transparent font-medium">{t("subtitle") || "Premium POS & ERP"}</span>
+                                    <span className="text-border">|</span> 
+                                    <span className="text-muted-foreground/80 font-medium">{t("subtitle") || "Premium POS & ERP"}</span>
                                 </p>
                             </div>
                         </div>
 
                         {/* HIGH-TECH VIEW MODE SWITCHER & REAL-TIME SEARCH */}
                         <div className="flex flex-col lg:flex-row items-center gap-4 w-full xl:w-auto">
-                            <div className="relative flex p-1 rounded-2xl bg-slate-950/80 border border-white/[0.04] w-full lg:w-auto overflow-hidden">
+                            <div className="relative flex p-1 rounded-2xl bg-muted/80 border border-border w-full lg:w-auto overflow-hidden">
                                 {/* Slide indicators will glow according to active views */}
                                 <button
                                     onClick={() => changeViewMode("grid")}
                                     className={`relative z-10 flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all duration-300 cursor-pointer ${
                                         viewMode === "grid"
-                                            ? "text-cyan-400 shadow-md"
-                                            : "text-slate-500 hover:text-slate-300"
+                                            ? "text-primary shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
                                     }`}
                                 >
                                     {viewMode === "grid" && (
                                         <motion.div 
                                             layoutId="activeTab"
-                                            className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-900/30 to-cyan-900/20 border border-cyan-500/30 -z-10 shadow-[inset_0_1px_8px_rgba(6,182,212,0.15)]"
+                                            className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/20 -z-10 shadow-[inset_0_1px_8px_rgba(0,0,0,0.05)]"
                                         />
                                     )}
                                     <LayoutGrid className="w-4 h-4" />
@@ -531,14 +527,14 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                     onClick={() => changeViewMode("custom")}
                                     className={`relative z-10 flex-1 lg:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all duration-300 cursor-pointer ${
                                         viewMode === "custom"
-                                            ? "text-emerald-400 shadow-md"
-                                            : "text-slate-500 hover:text-slate-300"
+                                            ? "text-primary shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
                                     }`}
                                 >
                                     {viewMode === "custom" && (
                                         <motion.div 
                                             layoutId="activeTab"
-                                            className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-900/30 to-indigo-900/20 border border-indigo-500/30 -z-10 shadow-[inset_0_1px_8px_rgba(139,92,246,0.15)]"
+                                            className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/20 -z-10 shadow-[inset_0_1px_8px_rgba(0,0,0,0.05)]"
                                         />
                                     )}
                                     <Zap className="w-4 h-4" />
@@ -547,17 +543,17 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             </div>
 
                             <div className="relative w-full lg:w-64">
-                                <Search className="absolute left-3.5 top-3.5 w-3.5 h-3.5 text-slate-500" />
-                                <span className="absolute left-2.5 top-[18px] w-1 h-1 bg-cyan-400 rounded-full animate-ping pointer-events-none" />
+                                <Search className="absolute left-3.5 top-3.5 w-3.5 h-3.5 text-muted-foreground" />
+                                <span className="absolute left-2.5 top-[18px] w-1 h-1 bg-primary rounded-full animate-ping pointer-events-none" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder={t("searchPlaceholder") || "Rechercher un module..."}
-                                    className="w-full pl-10 pr-9 py-3 bg-slate-950/80 text-white placeholder:text-slate-600 rounded-xl text-xs outline-none border border-white/[0.04] focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/25 shadow-inner shadow-black/80 transition-all duration-300 font-bold"
+                                    className="w-full pl-10 pr-9 py-3 bg-muted/80 text-foreground placeholder:text-muted-foreground/60 rounded-xl text-xs outline-none border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/25 transition-all duration-300 font-bold"
                                 />
                                 {searchQuery && (
-                                    <button onClick={() => setSearchQuery("")} className="absolute right-3 top-2.5 p-1 rounded-md hover:bg-slate-900 text-slate-400 transition-colors">
+                                    <button onClick={() => setSearchQuery("")} className="absolute right-3 top-2.5 p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors">
                                         <X className="w-3.5 h-3.5" />
                                     </button>
                                 )}
@@ -577,45 +573,40 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                         <motion.div
                             key={stat.label}
                             whileHover={{ y: -4, scale: 1.01 }}
-                            className="group relative overflow-hidden rounded-2xl p-5 bg-gradient-to-b from-[#090b16]/70 to-[#04050a]/90 backdrop-blur-2xl border border-white/[0.02] hover:border-slate-800 transition-all duration-300 shadow-[0_10px_35px_rgba(0,0,0,0.6)]"
-                            style={{
-                                boxShadow: `0 4px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02)`,
-                            }}
+                            className="group relative overflow-hidden rounded-2xl p-5 bg-card/60 backdrop-blur-2xl border border-border hover:border-primary/20 transition-all duration-300 shadow-sm hover:shadow-md"
                         >
                             {/* Diagnostic brackets */}
-                            <div className="absolute top-2 left-2 w-1.5 h-1.5 border-t border-l border-slate-700/60 pointer-events-none" />
-                            <div className="absolute top-2 right-2 w-1.5 h-1.5 border-t border-r border-slate-700/60 pointer-events-none" />
-                            <div className="absolute bottom-2 left-2 w-1.5 h-1.5 border-b border-l border-slate-700/60 pointer-events-none" />
-                            <div className="absolute bottom-2 right-2 w-1.5 h-1.5 border-b border-r border-slate-700/60 pointer-events-none" />
+                            <div className="absolute top-2 left-2 w-1.5 h-1.5 border-t border-l border-muted-foreground/30 pointer-events-none" />
+                            <div className="absolute top-2 right-2 w-1.5 h-1.5 border-t border-r border-muted-foreground/30 pointer-events-none" />
+                            <div className="absolute bottom-2 left-2 w-1.5 h-1.5 border-b border-l border-muted-foreground/30 pointer-events-none" />
+                            <div className="absolute bottom-2 right-2 w-1.5 h-1.5 border-b border-r border-muted-foreground/30 pointer-events-none" />
 
-                            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full opacity-0 group-hover:opacity-15 transition-opacity duration-500 blur-2xl pointer-events-none"
+                            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-2xl pointer-events-none"
                                 style={{ background: stat.from }}
                             />
                             
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <span className="text-[9px] font-black uppercase tracking-widest block text-slate-500 group-hover:text-slate-300 transition-colors">
+                                    <span className="text-[9px] font-black uppercase tracking-widest block text-muted-foreground group-hover:text-foreground transition-colors">
                                         {stat.label}
                                     </span>
-                                    <span className="text-2xl font-black tracking-tight block tabular-nums bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent"
-                                        style={{ textShadow: `0 0 15px ${stat.from}15` }}
-                                    >
+                                    <span className="text-2xl font-black tracking-tight block tabular-nums text-foreground">
                                         {stat.value.toLocaleString()}
                                     </span>
                                     
                                     {/* Beautiful Diagnostic Trend Indicator */}
                                     <div className="flex items-center gap-1.5 pt-1.5">
-                                        <span className="text-[8px] font-mono font-bold text-slate-600 block">SYSTEM STATUS:</span>
-                                        <span className="text-[8px] font-mono font-bold px-1 py-0.5 rounded bg-emerald-500/10 text-emerald-400 flex items-center gap-0.5 tracking-wider">
-                                            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                                        <span className="text-[8px] font-mono font-bold text-muted-foreground/60 block">SYSTEM STATUS:</span>
+                                        <span className="text-[8px] font-mono font-bold px-1 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 tracking-wider">
+                                            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                                             OK
                                         </span>
                                     </div>
                                 </div>
                                 
                                 <div className="flex flex-col items-end gap-3 shrink-0">
-                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border border-white/[0.04] transition-all duration-300 group-hover:scale-105"
+                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg border border-border transition-all duration-300 group-hover:scale-105"
                                         style={{
                                             background: `linear-gradient(135deg, ${stat.from}10, ${stat.to}18)`,
                                             boxShadow: `0 8px 24px -8px ${stat.shadowColor}`,
@@ -653,14 +644,14 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             className="space-y-8"
                         >
                             {/* SYSTEM QUICK SHORTCUTS DOCK */}
-                            <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-950/60 to-slate-950/30 border border-white/[0.03] space-y-4 backdrop-blur-3xl relative overflow-hidden">
+                            <div className="p-5 rounded-2xl bg-card/60 border border-border space-y-4 backdrop-blur-3xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl pointer-events-none" />
-                                <div className="flex items-center justify-between text-slate-500 px-1">
+                                <div className="flex items-center justify-between text-muted-foreground px-1">
                                     <div className="flex items-center gap-2">
                                         <Zap className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t("quickAccess") || "Raccourcis Système"}</h2>
+                                        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{t("quickAccess") || "Raccourcis Système"}</h2>
                                     </div>
-                                    <span className="text-[8px] font-mono font-bold tracking-widest text-slate-600 uppercase">Online Terminal Launcher</span>
+                                    <span className="text-[8px] font-mono font-bold tracking-widest text-muted-foreground/60 uppercase">Online Terminal Launcher</span>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
                                     {quickActions.map((action, i) => (
@@ -672,16 +663,16 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                         >
                                             <Link
                                                 href={action.href}
-                                                className="group flex items-center gap-3 px-4.5 py-3 rounded-xl bg-[#070810]/70 hover:bg-[#0f1122]/90 border border-white/[0.02] hover:border-slate-800 active:scale-[0.98] transition-all duration-300 shadow-md hover:shadow-cyan-500/[0.03]"
+                                                className="group flex items-center gap-3 px-4.5 py-3 rounded-xl bg-muted/40 hover:bg-muted/70 border border-border active:scale-[0.98] transition-all duration-300 shadow-sm hover:shadow-md"
                                             >
                                                 <div className="w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
                                                     style={{ background: action.gradient }}>
                                                     <action.icon className="w-4 h-4 text-white" />
                                                 </div>
-                                                <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">
+                                                <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors">
                                                     {action.label}
                                                 </span>
-                                                <ArrowRight className="w-3.5 h-3.5 text-slate-700 group-hover:text-slate-400 group-hover:translate-x-1 transition-all" />
+                                                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/45 group-hover:text-muted-foreground group-hover:translate-x-1 transition-all" />
                                             </Link>
                                         </motion.div>
                                     ))}
@@ -705,9 +696,9 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                 "--accent": section.accentFrom,
                                                 boxShadow: hoveredCard === section.id
                                                     ? `0 20px 45px -15px ${section.accentFrom}18, inset 0 1px 0 rgba(255,255,255,0.03)`
-                                                    : "0 12px 35px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.01)",
+                                                    : "0 12px 35px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.01)",
                                             } as React.CSSProperties}
-                                            className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-gradient-to-b from-[#080a18]/70 to-[#04050a]/90 border border-white/[0.02] hover:border-slate-800/80 transition-all duration-300 hover:-translate-y-1 cyber-corner"
+                                            className="group relative flex flex-col h-full rounded-2xl overflow-hidden bg-card/60 hover:bg-card/85 border border-border hover:border-primary/20 transition-all duration-300 hover:-translate-y-1 cyber-corner"
                                         >
                                             {/* Glowing card border sweep line */}
                                             <div className="absolute top-0 left-0 w-full h-[1.5px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 group-hover:opacity-100 overflow-hidden"
@@ -717,12 +708,12 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                             />
                                             
                                             {/* Laser scanning strip inside the card */}
-                                            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.01] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.01] to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                             <div className="relative z-10 flex flex-col h-full p-5.5">
-                                                <div className="flex items-start justify-between pb-3.5 mb-4 border-b border-white/[0.04]">
+                                                <div className="flex items-start justify-between pb-3.5 mb-4 border-b border-border">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="p-2.5 rounded-xl shrink-0 border border-white/[0.03] transition-all duration-300 group-hover:scale-105"
+                                                        <div className="p-2.5 rounded-xl shrink-0 border border-border transition-all duration-300 group-hover:scale-105"
                                                             style={{
                                                                 background: `linear-gradient(135deg, ${section.accentFrom}15, ${section.accentTo}20)`,
                                                                 boxShadow: `0 4px 15px -4px ${section.accentFrom}40`,
@@ -731,11 +722,11 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                             <section.icon className="w-4.5 h-4.5" style={{ color: section.accentFrom }} />
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <h3 className="text-xs font-black tracking-widest text-white uppercase group-hover:text-slate-100 flex items-center gap-1.5">
-                                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors" style={{ backgroundColor: hoveredCard === section.id ? section.accentFrom : undefined }} />
+                                                            <h3 className="text-xs font-black tracking-widest text-foreground uppercase group-hover:text-foreground/95 flex items-center gap-1.5">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 transition-colors" style={{ backgroundColor: hoveredCard === section.id ? section.accentFrom : undefined }} />
                                                                 {section.title}
                                                             </h3>
-                                                            <p className="text-[10px] text-slate-500 font-bold mt-0.5 leading-relaxed truncate max-w-[200px]">
+                                                            <p className="text-[10px] text-muted-foreground font-bold mt-0.5 leading-relaxed truncate max-w-[200px]">
                                                                 {section.description}
                                                             </p>
                                                         </div>
@@ -746,7 +737,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                             <span className="text-base font-black tracking-tight tabular-nums font-mono" style={{ color: section.accentFrom }}>
                                                                 {section.stat}
                                                             </span>
-                                                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                                                            <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">
                                                                 {section.statLabel}
                                                             </span>
                                                         </div>
@@ -756,7 +747,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                 <div className="space-y-1.5 mt-auto">
                                                     {section.links.map((link) => {
                                                         const isMobileConnect = link.href === "/mobile-connect";
-                                                        const itemClass = "group/link flex items-center justify-between w-full p-2.5 rounded-xl bg-slate-950/45 hover:bg-slate-900/60 border border-white/[0.01] hover:border-slate-800/80 active:scale-[0.99] transition-all duration-200 cursor-pointer overflow-hidden relative";
+                                                        const itemClass = "group/link flex items-center justify-between w-full p-2.5 rounded-xl bg-muted/30 hover:bg-muted/65 border border-border active:scale-[0.99] transition-all duration-200 cursor-pointer overflow-hidden relative";
                                                         
                                                         const linkHoverIndicator = (
                                                             <div className="absolute left-0 top-0 bottom-0 w-0 bg-transparent group-hover/link:w-[2.5px] transition-all duration-200"
@@ -767,11 +758,11 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                         const content = (
                                                             <div className="flex items-center justify-between w-full gap-3 z-10 transition-transform duration-200 group-hover/link:translate-x-1">
                                                                 <div className="flex items-center gap-3 min-w-0">
-                                                                    <div className="w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 border border-white/[0.02] bg-slate-950 text-slate-500 group-hover/link:text-white transition-colors"
+                                                                    <div className="w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 border border-border bg-background text-muted-foreground group-hover/link:text-foreground transition-colors"
                                                                         style={{ color: hoveredCard === section.id ? section.accentFrom : undefined }}>
                                                                         <link.icon className="w-3.5 h-3.5 shrink-0" />
                                                                     </div>
-                                                                    <span className="text-xs font-bold text-slate-400 group-hover/link:text-white transition-colors truncate">
+                                                                    <span className="text-xs font-bold text-muted-foreground group-hover/link:text-foreground transition-colors truncate">
                                                                         {link.label}
                                                                     </span>
                                                                     {link.badge && (
@@ -795,7 +786,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                                             {link.description}
                                                                         </span>
                                                                     )}
-                                                                    <ChevronRight className="w-3.5 h-3.5 text-slate-700 group-hover/link:text-white group-hover/link:translate-x-0.5 transition-all" />
+                                                                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60 group-hover/link:text-foreground group-hover/link:translate-x-0.5 transition-all" />
                                                                 </div>
                                                             </div>
                                                         );
@@ -842,16 +833,16 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             transition={{ duration: 0.4 }}
                             className="space-y-6"
                         >
-                            <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-gradient-to-r from-slate-950/80 to-slate-950/45 border border-white/[0.04] rounded-2xl backdrop-blur-3xl gap-4">
+                            <div className="flex flex-col sm:flex-row items-center justify-between p-5 bg-card border border-border rounded-2xl backdrop-blur-3xl gap-4">
                                 <div className="text-center sm:text-left">
-                                    <h2 className="text-sm font-black uppercase tracking-widest text-white flex items-center justify-center sm:justify-start gap-2.5">
+                                    <h2 className="text-sm font-black uppercase tracking-widest text-foreground flex items-center justify-center sm:justify-start gap-2.5">
                                         <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                         </span>
                                         Mon Hub Paramétrable
                                     </h2>
-                                    <p className="text-[10px] text-slate-400 font-bold mt-1">Accédez instantanément à vos modules et actions favoris.</p>
+                                    <p className="text-[10px] text-muted-foreground font-bold mt-1">Accédez instantanément à vos modules et actions favoris.</p>
                                 </div>
                                 <button 
                                     onClick={() => setIsCustomizerOpen(true)}
@@ -862,26 +853,26 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             </div>
 
                             {selectedLinks.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-center bg-gradient-to-b from-slate-950/50 to-transparent rounded-3xl border border-dashed border-white/[0.04] p-6 relative overflow-hidden min-h-[380px]">
+                                <div className="flex flex-col items-center justify-center py-20 text-center bg-muted/20 rounded-3xl border border-dashed border-border p-6 relative overflow-hidden min-h-[380px]">
                                     {/* Holographic grid mockup inside empty state */}
                                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-5 select-none">
                                         <div className="w-[300px] h-[300px] border border-cyan-500 rounded-full" />
                                         <div className="w-[150px] h-[150px] border border-dashed border-cyan-500 rounded-full absolute" />
                                     </div>
                                     
-                                    <div className="w-16 h-16 rounded-2xl bg-slate-950 flex items-center justify-center mb-5 border border-slate-900 shadow-2xl shadow-emerald-500/5 relative">
+                                    <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center mb-5 border border-border shadow-md relative">
                                         <div className="absolute -inset-1 rounded-2xl bg-emerald-500/10 animate-ping opacity-40" />
                                         <Sparkles className="w-6 h-6 text-emerald-400 animate-pulse" />
                                     </div>
-                                    <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest">
+                                    <h3 className="text-xs font-black text-foreground uppercase tracking-widest">
                                         Votre Hub est vide
                                     </h3>
-                                    <p className="text-[10px] text-slate-500 mt-2.5 max-w-xs leading-relaxed font-bold">
+                                    <p className="text-[10px] text-muted-foreground mt-2.5 max-w-xs leading-relaxed font-bold">
                                         Sélectionnez les raccourcis système dont vous avez besoin pour configurer votre propre tableau de bord.
                                     </p>
                                     <button 
                                         onClick={() => setIsCustomizerOpen(true)} 
-                                        className="mt-6 px-5 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 font-bold text-xs cursor-pointer active:scale-95 transition-all flex items-center gap-2"
+                                        className="mt-6 px-5 py-3 rounded-xl bg-muted border border-border text-foreground hover:bg-muted/80 font-bold text-xs cursor-pointer active:scale-95 transition-all flex items-center gap-2"
                                     >
                                         ⚙️ Choisir mes Raccourcis
                                     </button>
@@ -891,7 +882,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                     {selectedLinks.map((link) => {
                                         const isMobileConnect = link.href === "/mobile-connect";
                                         const isDirectTransaction = link.href.startsWith("/treasury?action=");
-                                        const itemClass = "group flex flex-col justify-between p-5 rounded-2xl bg-gradient-to-b from-[#090b16]/75 to-[#04050a]/95 border border-white/[0.02] hover:border-slate-800 shadow-xl hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.9)] active:scale-[0.98] transition-all duration-300 relative overflow-hidden text-left cursor-pointer cyber-corner";
+                                        const itemClass = "group flex flex-col justify-between p-5 rounded-2xl bg-card border border-border hover:border-primary/20 shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-300 relative overflow-hidden text-left cursor-pointer cyber-corner";
                                         
                                         const cardHeader = (
                                             <div className="absolute top-0 left-0 right-0 h-1 transition-colors"
@@ -904,7 +895,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                         const cardContent = (
                                             <div className="flex flex-col h-full gap-4 mt-2">
                                                 <div className="flex items-start justify-between">
-                                                    <div className="p-2.5 rounded-xl shrink-0 border border-white/[0.03] bg-slate-900"
+                                                    <div className="p-2.5 rounded-xl shrink-0 border border-border bg-background"
                                                         style={{
                                                             background: `${link.accentFrom}15`,
                                                             boxShadow: `0 4px 10px -4px ${link.accentFrom}40`,
@@ -926,16 +917,16 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                 </div>
                                                 
                                                 <div>
-                                                    <h4 className="text-xs font-black tracking-widest text-white uppercase group-hover:text-slate-100 flex items-center gap-1.5">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors" style={{ backgroundColor: link.accentFrom }} />
+                                                    <h4 className="text-xs font-black tracking-widest text-foreground uppercase group-hover:text-foreground/95 flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 transition-colors" style={{ backgroundColor: link.accentFrom }} />
                                                         {link.label}
                                                     </h4>
-                                                    <p className="text-[9px] text-slate-500 font-bold mt-1.5 leading-relaxed">
+                                                    <p className="text-[9px] text-muted-foreground font-bold mt-1.5 leading-relaxed">
                                                         {isDirectTransaction ? "Saisie directe de trésorerie" : "Accès direct au module"}
                                                     </p>
                                                 </div>
 
-                                                <div className="flex items-center justify-end text-slate-700 group-hover:text-slate-400 transition-colors pt-2.5 border-t border-white/[0.03] mt-auto">
+                                                <div className="flex items-center justify-end text-muted-foreground/60 group-hover:text-foreground transition-colors pt-2.5 border-t border-border mt-auto">
                                                     <span className="text-[8px] font-black tracking-widest uppercase mr-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 font-mono">LAUNCH</span>
                                                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-all" />
                                                 </div>
@@ -982,13 +973,13 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex flex-col items-center justify-center py-20 text-center"
                     >
-                        <div className="w-14 h-14 rounded-2xl bg-slate-950 flex items-center justify-center mb-4 border border-slate-900 shadow-xl shadow-cyan-500/5">
-                            <Search className="w-5 h-5 text-slate-600 animate-pulse" />
+                        <div className="w-14 h-14 rounded-2xl bg-card flex items-center justify-center mb-4 border border-border shadow-sm">
+                            <Search className="w-5 h-5 text-muted-foreground/60 animate-pulse" />
                         </div>
-                        <h3 className="text-xs font-black text-slate-300 uppercase tracking-widest">
+                        <h3 className="text-xs font-black text-foreground uppercase tracking-widest">
                             {t("noResults") || "Aucun module trouvé"}
                         </h3>
-                        <p className="text-[10px] text-slate-500 mt-2.5 max-w-xs leading-relaxed font-bold">
+                        <p className="text-[10px] text-muted-foreground mt-2.5 max-w-xs leading-relaxed font-bold">
                             {t("noResultsDesc", { query: searchQuery }) || `Aucune action ou section ne correspond à "${searchQuery}".`}
                         </p>
                     </motion.div>
@@ -999,13 +990,13 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.6 }}
-                    className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/[0.02] gap-3"
+                    className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-border gap-3"
                 >
-                    <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.25em] text-slate-600 hover:text-slate-400 transition-colors select-none">
+                    <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.25em] text-muted-foreground/60 hover:text-muted-foreground transition-colors select-none">
                         <Globe className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: "20s" }} />
                         <span className="font-black">{t("footer") || "SYNCLOUDPOS PREMIUM DECK PANEL"}</span>
                     </div>
-                    <span className="text-[9px] font-mono text-slate-700 tracking-widest select-none">
+                    <span className="text-[9px] font-mono text-muted-foreground/45 tracking-widest select-none">
                         V1.8.2 ACTIVE DEPLOY
                     </span>
                 </motion.footer>
@@ -1028,21 +1019,21 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 15 }}
                             transition={{ type: "spring", duration: 0.5 }}
-                            className="relative w-full max-w-lg overflow-hidden rounded-[24px] bg-[#05060b] border border-white/[0.04] shadow-2xl flex flex-col z-10 p-6 space-y-5"
+                            className="relative w-full max-w-lg overflow-hidden rounded-[24px] bg-card border border-border shadow-2xl flex flex-col z-10 p-6 space-y-5"
                         >
                             <div className="absolute top-[-10%] right-[-10%] w-36 h-36 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
                             <div className="absolute bottom-[-10%] left-[-10%] w-36 h-36 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
 
-                            <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.03]">
+                            <div className="flex items-center justify-between pb-3.5 border-b border-border">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/15 shrink-0">
                                         <Smartphone className="w-4.5 h-4.5 text-white" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                                        <h3 className="text-xs font-black text-foreground uppercase tracking-widest">
                                             {t("links.scanQrCode") || "Connexion Mobile App"}
                                         </h3>
-                                        <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-bold mt-0.5">
                                             {t("links.mobileConnectDesc") || "Scannez le QR Code pour connecter votre mobile"}
                                         </p>
                                     </div>
@@ -1050,20 +1041,20 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                 <button
                                     type="button"
                                     onClick={() => setShowQrModal(false)}
-                                    className="p-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-white border border-white/[0.03] transition-colors cursor-pointer"
+                                    className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border transition-colors cursor-pointer"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            <div className="flex p-0.5 rounded-xl bg-slate-950 border border-white/[0.03]">
+                            <div className="flex p-0.5 rounded-xl bg-muted border border-border">
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("gerant")}
                                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[10px] font-black tracking-wider transition-all cursor-pointer ${
                                         activeTab === "gerant"
-                                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm"
-                                            : "text-slate-500 hover:text-slate-300 border border-transparent"
+                                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground border border-transparent"
                                     }`}
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${activeTab === "gerant" ? "bg-emerald-400 animate-pulse" : "bg-slate-700"}`} />
@@ -1074,8 +1065,8 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                     onClick={() => setActiveTab("tournee")}
                                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-[10px] font-black tracking-wider transition-all cursor-pointer ${
                                         activeTab === "tournee"
-                                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-sm"
-                                            : "text-slate-500 hover:text-slate-300 border border-transparent"
+                                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground border border-transparent"
                                     }`}
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${activeTab === "tournee" ? "bg-blue-400 animate-pulse" : "bg-slate-700"}`} />
@@ -1106,32 +1097,32 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                             includeMargin={false}
                                         />
                                     </div>
-                                    <span className="text-[8px] uppercase tracking-widest font-black text-slate-500 mt-2.5">
+                                    <span className="text-[8px] uppercase tracking-widest font-black text-muted-foreground mt-2.5">
                                         Scan QR to install
                                     </span>
                                 </div>
 
                                 <div className="flex-1 space-y-3">
-                                    <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 flex items-center gap-1.5">
+                                    <h4 className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground flex items-center gap-1.5">
                                         <Wifi className="w-3.5 h-3.5" />
                                         {t("links.howToConnect") || "Instructions de connexion :"}
                                     </h4>
                                     
                                     <div className="space-y-2">
-                                        <div className="flex gap-2 text-xs leading-relaxed text-slate-400">
-                                            <div className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center shrink-0 text-[10px] font-black border border-slate-800">1</div>
+                                        <div className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
+                                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center shrink-0 text-[10px] font-black border border-border">1</div>
                                             <p className="flex-1 text-[10px] font-medium leading-relaxed">
                                                 Scannez le QR code avec votre appareil pour charger la page de build.
                                             </p>
                                         </div>
-                                        <div className="flex gap-2 text-xs leading-relaxed text-slate-400">
-                                            <div className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center shrink-0 text-[10px] font-black border border-slate-800">2</div>
+                                        <div className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
+                                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center shrink-0 text-[10px] font-black border border-border">2</div>
                                             <p className="flex-1 text-[10px] font-medium leading-relaxed">
                                                 Téléchargez la dernière version APK et installez-la sur votre téléphone.
                                             </p>
                                         </div>
-                                        <div className="flex gap-2 text-xs leading-relaxed text-slate-400">
-                                            <div className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center shrink-0 text-[10px] font-black border border-slate-800">3</div>
+                                        <div className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
+                                            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center shrink-0 text-[10px] font-black border border-border">3</div>
                                             <p className="flex-1 text-[10px] font-medium leading-relaxed">
                                                 Ouvrez l&apos;application et connectez-vous avec vos identifiants SynCloud.
                                             </p>
@@ -1140,13 +1131,13 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                 </div>
                             </div>
 
-                            <div className="p-3 rounded-xl bg-slate-950 border border-white/[0.02] flex flex-col space-y-1.5">
-                                <span className="text-[8px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-1">
+                            <div className="p-3 rounded-xl bg-muted border border-border flex flex-col space-y-1.5">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
                                     <Download className="w-3.5 h-3.5" />
                                     Copier le lien direct de build :
                                 </span>
-                                <div className="bg-slate-900 px-3 py-2 rounded-lg border border-slate-950 overflow-x-auto flex items-center justify-between">
-                                    <code className="text-[9px] text-slate-400 break-all select-all font-mono">
+                                <div className="bg-background px-3 py-2 rounded-lg border border-border overflow-x-auto flex items-center justify-between">
+                                    <code className="text-[9px] text-muted-foreground break-all select-all font-mono">
                                         {getAppDownloadUrl(activeTab)}
                                     </code>
                                     <button 
@@ -1155,7 +1146,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                 navigator.clipboard.writeText(getAppDownloadUrl(activeTab));
                                             }
                                         }}
-                                        className="text-[9px] font-black text-emerald-400 hover:text-emerald-300 ml-2 uppercase shrink-0 cursor-pointer"
+                                        className="text-[9px] font-black text-emerald-500 hover:text-emerald-400 ml-2 uppercase shrink-0 cursor-pointer"
                                     >
                                         Copier
                                     </button>
@@ -1183,23 +1174,23 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 15 }}
                             transition={{ type: "spring", duration: 0.5 }}
-                            className="relative w-full max-w-4xl overflow-hidden rounded-[24px] bg-[#05060b] border border-white/[0.04] shadow-2xl flex flex-col z-10 max-h-[90vh]"
+                            className="relative w-full max-w-4xl overflow-hidden rounded-[24px] bg-card border border-border shadow-2xl flex flex-col z-10 max-h-[90vh]"
                         >
                             {/* Ambient Glows */}
                             <div className="absolute top-[-10%] right-[-10%] w-48 h-48 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
                             <div className="absolute bottom-[-10%] left-[-10%] w-48 h-48 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
 
                             {/* Header */}
-                            <div className="flex items-center justify-between p-6 border-b border-white/[0.03] shrink-0">
+                            <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-indigo-500 flex items-center justify-center shadow-lg shrink-0">
                                         <Zap className="w-4.5 h-4.5 text-white animate-bounce" />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-black text-white uppercase tracking-widest">
+                                        <h3 className="text-sm font-black text-foreground uppercase tracking-widest">
                                             Personnaliser mon Hub
                                         </h3>
-                                        <p className="text-[10px] text-slate-500 font-bold mt-0.5">
+                                        <p className="text-[10px] text-muted-foreground font-bold mt-0.5">
                                             Sélectionnez les raccourcis à afficher sur votre tableau de bord personnel.
                                         </p>
                                     </div>
@@ -1207,7 +1198,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                 <button
                                     type="button"
                                     onClick={() => setIsCustomizerOpen(false)}
-                                    className="p-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-white border border-white/[0.03] transition-colors cursor-pointer"
+                                    className="p-2 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border transition-colors cursor-pointer"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -1217,9 +1208,9 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
                                 {sections.map((section) => (
                                     <div key={section.id} className="space-y-3">
-                                        <div className="flex items-center gap-2 text-slate-400 px-1">
+                                        <div className="flex items-center gap-2 text-muted-foreground px-1">
                                             <section.icon className="w-4.5 h-4.5" style={{ color: section.accentFrom }} />
-                                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">{section.title}</h4>
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground">{section.title}</h4>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                             {section.links.map((link) => {
@@ -1231,12 +1222,12 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                                         onClick={() => toggleCustomButton(link.href)}
                                                         className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${
                                                             isSelected
-                                                                ? "bg-slate-900/40 border-emerald-500/30 text-white shadow-lg"
-                                                                : "bg-slate-950/20 border-white/[0.02] text-slate-400 hover:border-slate-800 hover:text-slate-200"
+                                                                ? "bg-muted border-primary/20 text-foreground shadow-sm"
+                                                                : "bg-transparent border-border text-muted-foreground hover:border-muted-foreground/30 hover:text-foreground"
                                                         }`}
                                                     >
                                                         <div className="flex items-center gap-2.5 min-w-0">
-                                                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-white/[0.02]"
+                                                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-border"
                                                                 style={{
                                                                     background: isSelected ? `${section.accentFrom}20` : "rgba(255,255,255,0.01)",
                                                                     color: isSelected ? section.accentFrom : undefined
@@ -1263,7 +1254,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                             </div>
 
                             {/* Footer Buttons */}
-                            <div className="p-6 border-t border-white/[0.03] bg-slate-950/40 flex items-center justify-end gap-3 shrink-0">
+                            <div className="p-6 border-t border-border bg-muted/40 flex items-center justify-end gap-3 shrink-0">
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -1272,7 +1263,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                         setCustomButtons(allHrefs);
                                         localStorage.setItem("syncloudpos_custom_hub_links", JSON.stringify(allHrefs));
                                     }}
-                                    className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 border border-white/[0.02] text-slate-400 hover:text-white font-bold text-xs cursor-pointer transition-colors"
+                                    className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 border border-border text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                                 >
                                     Tout sélectionner
                                 </button>
@@ -1282,7 +1273,7 @@ export const HubClient: React.FC<HubClientProps> = ({ metrics }) => {
                                         setCustomButtons([]);
                                         localStorage.setItem("syncloudpos_custom_hub_links", JSON.stringify([]));
                                     }}
-                                    className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 border border-white/[0.02] text-slate-400 hover:text-white font-bold text-xs cursor-pointer transition-colors"
+                                    className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 border border-border text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                                 >
                                     Tout désélectionner
                                 </button>

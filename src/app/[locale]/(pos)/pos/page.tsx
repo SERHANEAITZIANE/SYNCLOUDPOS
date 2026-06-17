@@ -1,5 +1,5 @@
-import { getCategories } from "@/actions/categories"
-import { getBrands } from "@/actions/brands"
+import { getCategories, createCategory } from "@/actions/categories"
+import { getBrands, createBrand } from "@/actions/brands"
 import { getTreasuryAccounts } from "@/actions/treasury"
 import { PosClient } from "@/components/pos/pos-client"
 import { db } from "@/lib/db"
@@ -8,6 +8,13 @@ import { auth } from "@/auth"
 import { getTranslations } from "next-intl/server"
 import { redirect } from "next/navigation"
 import { withCache } from "@/lib/redis"
+import { createOrder, getProductCustomerSellHistory } from "@/actions/orders"
+import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
+import { createCustomer } from "@/actions/customers"
+import { getActivePromotions } from "@/actions/promotions"
+import { getSalesOrderByReceipt, searchRecentSalesOrders } from "@/actions/sales-orders"
+import { createProduct, suggestProductNames } from "@/actions/products"
+import { generateNextBarcode } from "@/actions/barcode"
 
 const PosPage = async () => {
     const [t, session] = await Promise.all([
@@ -127,7 +134,33 @@ const PosPage = async () => {
 
     return (
         <div className="absolute inset-0 animate-in fade-in zoom-in-95 duration-500">
-            <PosClient storeName={storeName} storeAddress={storeAddress} storePhone={storePhone} products={formattedProducts} categories={categories} brands={brands} customers={formattedCustomers as any} accounts={accounts} posTimbreEnabled={tenant?.posTimbreEnabled ?? false} storeData={tenant} isElectronicsStore={isElectronicsStore} sellers={salespeople} currentUserId={session.user.id} />
+            <PosClient
+                storeName={storeName}
+                storeAddress={storeAddress}
+                storePhone={storePhone}
+                products={formattedProducts}
+                categories={categories}
+                brands={brands}
+                customers={formattedCustomers as any}
+                accounts={accounts}
+                posTimbreEnabled={tenant?.posTimbreEnabled ?? false}
+                storeData={tenant}
+                isElectronicsStore={isElectronicsStore}
+                sellers={salespeople}
+                currentUserId={session.user.id}
+                actionCreateOrder={createOrder}
+                actionGetProductCustomerSellHistory={getProductCustomerSellHistory}
+                actionSendWhatsAppReceipt={sendWhatsAppReceipt}
+                actionCreateCustomer={createCustomer}
+                actionGetActivePromotions={getActivePromotions}
+                actionGetSalesOrderByReceipt={getSalesOrderByReceipt}
+                actionSearchRecentSalesOrders={searchRecentSalesOrders}
+                actionCreateProduct={createProduct}
+                actionSuggestProductNames={suggestProductNames}
+                actionCreateCategory={createCategory}
+                actionCreateBrand={createBrand}
+                actionGenerateNextBarcode={generateNextBarcode}
+            />
         </div>
     )
 }

@@ -29,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { useRouter } from "@/i18n/routing"
 
 interface SupplierLoanModalProps {
@@ -116,18 +117,19 @@ export const SupplierLoanModal: React.FC<SupplierLoanModalProps> = ({ open, onCl
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Fournisseur</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionner un fournisseur..." />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent position="popper" className="z-[9999]">
-                                            {suppliers.map(s => (
-                                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                        <SearchableSelect
+                                            options={suppliers.map(s => ({
+                                                label: s.name,
+                                                value: s.id
+                                            }))}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Sélectionner un fournisseur..."
+                                            searchPlaceholder="Rechercher un fournisseur..."
+                                            emptyMessage="Aucun fournisseur trouvé."
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}

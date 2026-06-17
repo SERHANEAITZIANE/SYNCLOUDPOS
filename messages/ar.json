@@ -910,9 +910,11 @@
   },
   "ModeToggle": {
     "toggleTheme": "تغيير المظهر",
-    "light": "فاتح",
-    "dark": "داكن",
-    "system": "النظام"
+    "light": "افتراضي فاتح",
+    "dark": "افتراضي داكن",
+    "system": "تلقائي حسب النظام",
+    "ghardaia": "غرداية طيني (فاتح)",
+    "ghardaiaDark": "غرداية ليلي (داكن)"
   },
   "DataTable": {
     "search": "بحث...",
@@ -952,7 +954,14 @@
     "total": "المجموع",
     "checkout": "الدفع",
     "errorValidation": "خطأ في التحقق.",
-    "orderValidated": "تم تأكيد الطلب!"
+    "orderValidated": "تم تأكيد الطلب!",
+    "newCustomer": "زبون جديد",
+    "fullName": "الاسم الكامل *",
+    "phoneOptional": "رقم الهاتف (اختياري)",
+    "historyLoading": "جاري تحميل السجل...",
+    "clientHistory": "سجل المشتريات",
+    "noHistory": "لا يوجد سجل مشتريات.",
+    "selectClientFirst": "يرجى تحديد زبون أولاً"
   },
   "PaymentModal": {
     "transactionComplete": "عملية ناجحة",
@@ -979,7 +988,9 @@
     "balance": "الرصيد",
     "cancel": "إلغاء",
     "processing": "جارٍ المعالجة...",
-    "completeOrder": "إتمام الطلب"
+    "completeOrder": "إتمام الطلب",
+    "saveOnly": "حفظ فقط",
+    "saveAndPrint": "حفظ وطباعة"
   },
   "PosHeader": {
     "online": "متصل"

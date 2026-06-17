@@ -29,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { useRouter } from "@/i18n/routing"
 
 interface LoanModalProps {
@@ -116,18 +117,19 @@ export const LoanModal: React.FC<LoanModalProps> = ({ open, onClose, customers, 
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Client</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Sélectionner un client..." />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent position="popper" className="z-[9999]">
-                                            {customers.map(c => (
-                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                        <SearchableSelect
+                                            options={customers.map(c => ({
+                                                label: c.name,
+                                                value: c.id
+                                            }))}
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Sélectionner un client..."
+                                            searchPlaceholder="Rechercher un client..."
+                                            emptyMessage="Aucun client trouvé."
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}

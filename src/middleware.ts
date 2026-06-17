@@ -183,7 +183,7 @@ export default auth(async function middleware(request) {
     // Content Security Policy
     response.headers.set("Content-Security-Policy",
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+      "script-src 'self' 'unsafe-inline'; " +
       "style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: https: blob:; " +
       "connect-src 'self' https://graph.facebook.com https://*.googleapis.com https://*.tile.openstreetmap.org; " +

@@ -194,20 +194,6 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
             <div className="text-center text-sm mt-6 space-y-2 text-indigo-950 print:text-black">
                 <p className="font-bold italic">{t("thanks")}</p>
 
-                {/* Barcode Mockup based on orderId */}
-                <div className="mt-4 pt-4 border-t border-indigo-900/10 print:border-t-2 print:border-black flex flex-col items-center justify-center">
-                    <Barcode
-                        value={orderId}
-                        height={40}
-                        width={1.5}
-                        fontSize={14}
-                        fontOptions="bold"
-                        displayValue={true}
-                        background="transparent"
-                        lineColor="#1e1b4b"
-                        margin={0}
-                    />
-                </div>
 
                 {/* QR Code — links to online receipt portal */}
                 <div className="mt-4 flex flex-col items-center gap-1">

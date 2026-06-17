@@ -12,6 +12,9 @@ export async function createExpenseCategory(data: { name: string; type: "FIXED" 
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
+        const { hasPermission } = await import("@/lib/rbac")
+        if (!(await hasPermission("expenses:create"))) throw new Error("Accès refusé")
+
         const tenantId = session.user.tenantId
 
         const category = await db.expenseCategory.create({
@@ -70,6 +73,9 @@ export async function createExpense(data: {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
+        const { hasPermission } = await import("@/lib/rbac")
+        if (!(await hasPermission("expenses:create"))) throw new Error("Accès refusé")
+
         const tenantId = session.user.tenantId
 
         const expense = await db.$transaction(async (tx) => {
@@ -86,7 +92,7 @@ export async function createExpense(data: {
             })
 
             if (data.accountId && data.amount > 0) {
-                const account = await tx.treasuryAccount.findUnique({ where: { id: data.accountId, tenantId } })
+                const account = await tx.treasuryAccount.findFirst({ where: { id: data.accountId, tenantId } })
                 if (account) {
                     if (Number(account.balance) < data.amount) {
                         throw new Error("Insufficient funds in the selected account")
@@ -161,10 +167,13 @@ export async function deleteExpense(id: string) {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
+        const { hasPermission } = await import("@/lib/rbac")
+        if (!(await hasPermission("expenses:delete"))) throw new Error("Accès refusé")
+
         const tenantId = session.user.tenantId
 
         await db.$transaction(async (tx) => {
-            const expense = await tx.expense.findUnique({
+            const expense = await tx.expense.findFirst({
                 where: { id, tenantId }
             })
 
@@ -173,7 +182,7 @@ export async function deleteExpense(id: string) {
 
             // If it had a treasury account imputed, refund it
             if (expense.accountId && Number(expense.amount) > 0) {
-                const account = await tx.treasuryAccount.findUnique({
+                const account = await tx.treasuryAccount.findFirst({
                     where: { id: expense.accountId, tenantId }
                 })
                 if (account) {
@@ -194,7 +203,7 @@ export async function deleteExpense(id: string) {
             }
 
             await tx.expense.delete({
-                where: { id, tenantId }
+                where: { id }
             })
         })
 
@@ -223,7 +232,7 @@ export async function getExpense(id: string) {
 
         const tenantId = session.user.tenantId
 
-        const expense = await db.expense.findUnique({
+        const expense = await db.expense.findFirst({
             where: { id, tenantId },
             include: { category: true }
         })
@@ -252,10 +261,13 @@ export async function updateExpense(
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
 
+        const { hasPermission } = await import("@/lib/rbac")
+        if (!(await hasPermission("expenses:update"))) throw new Error("Accès refusé")
+
         const tenantId = session.user.tenantId
 
         await db.$transaction(async (tx) => {
-            const oldExpense = await tx.expense.findUnique({
+            const oldExpense = await tx.expense.findFirst({
                 where: { id, tenantId }
             })
 
@@ -264,7 +276,7 @@ export async function updateExpense(
 
             // 1. Undo old treasury effect
             if (oldExpense.accountId && Number(oldExpense.amount) > 0) {
-                const oldAccount = await tx.treasuryAccount.findUnique({
+                const oldAccount = await tx.treasuryAccount.findFirst({
                     where: { id: oldExpense.accountId, tenantId }
                 })
                 if (oldAccount) {
@@ -285,7 +297,7 @@ export async function updateExpense(
 
             // 2. Apply new treasury effect
             if (data.accountId && data.accountId !== "none" && data.amount > 0) {
-                const newAccount = await tx.treasuryAccount.findUnique({
+                const newAccount = await tx.treasuryAccount.findFirst({
                     where: { id: data.accountId, tenantId }
                 })
                 if (!newAccount) throw new Error("Selected treasury account not found")
@@ -316,7 +328,7 @@ export async function updateExpense(
 
             // 3. Update expense row
             await tx.expense.update({
-                where: { id, tenantId },
+                where: { id },
                 data: {
                     description: data.description,
                     amount: data.amount,

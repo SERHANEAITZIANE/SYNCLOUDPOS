@@ -8,13 +8,14 @@ import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
 import { logAudit } from "./audit-log"
+import { serializeData } from "@/lib/serialize"
 
 export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const session = await auth()
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("products:create"))) return { error: "Accès refusé" }
 
     await checkSubscription();
 
@@ -132,14 +133,14 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
-        return { success: "Product created!", product: JSON.parse(JSON.stringify(createdProduct)) }
+        return { success: "Product created!", product: serializeData(createdProduct) }
     } catch (error) {
         console.error("Error creating product:", error)
         return { error: "Something went wrong!" }
     }
 }
 
-export const getProducts = async (page: number = 1, pageSize: number = 20, search?: string) => {
+export const getProducts = async (page: number = 1, pageSize: number = 20, search?: string, includeArchived: boolean = false) => {
     const session = await auth()
     const tenantId = session?.user?.tenantId
 
@@ -149,6 +150,9 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
 
     try {
         const whereClause: any = { tenantId }
+        if (!includeArchived) {
+            whereClause.isArchived = false
+        }
 
         const safeSearch = typeof search === 'string' ? search : (Array.isArray(search) ? search[0] : '')
 
@@ -164,7 +168,7 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         const safePageSize = isNaN(pageSize) ? 20 : pageSize;
 
         return cacheMonitor.withCache(
-            `products:${tenantId}:p${safePage}:s${safePageSize}:q${safeSearch || ""}`,
+            `products:${tenantId}:p${safePage}:s${safePageSize}:q${safeSearch || ""}:a${includeArchived}`,
             async () => {
                 const [products, totalCount] = await Promise.all([
                     db.product.findMany({
@@ -255,7 +259,7 @@ export const deleteProduct = async (id: string) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("products:delete"))) return { error: "Accès refusé" }
 
     await checkSubscription();
     const tenantId = session?.user?.tenantId
@@ -265,15 +269,22 @@ export const deleteProduct = async (id: string) => {
     }
 
     try {
-        const productToDelete = await db.product.findUnique({
+        const productToDelete = await db.product.findFirst({
             where: { id, tenantId },
             select: { name: true, price: true, cost: true, stock: true }
         });
 
-        await db.product.delete({
+        if (!productToDelete) {
+            return { error: "Product not found or unauthorized" }
+        }
+
+        await db.product.updateMany({
             where: {
                 id,
-                tenantId // Ensure deletion is scoped to tenant
+                tenantId
+            },
+            data: {
+                isArchived: true
             }
         })
 
@@ -298,7 +309,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
 
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("products:update"))) return { error: "Accès refusé" }
 
     await checkSubscription();
     const tenantId = session?.user?.tenantId
@@ -333,16 +344,22 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
     } = validatedFields.data
 
     try {
-        const previousProduct = await db.product.findUnique({
+        const previousProduct = await db.product.findFirst({
             where: { id, tenantId },
             include: { storeProducts: true }
         });
 
+        if (!previousProduct) {
+            return { error: "Product not found or unauthorized" }
+        }
+
         await db.$transaction(async (tx) => {
+            // Because updateMany doesn't return the updated record or support nested relations in the same way,
+            // we will first verify existence (done above) and then we can safely update by ID only, 
+            // since we've proven the tenant owns this product.
             await tx.product.update({
                 where: {
-                    id,
-                    tenantId
+                    id
                 },
                 data: {
                     name,
@@ -448,7 +465,7 @@ export const importProducts = async (rows: Record<string, string>[]) => {
     
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("products:create"))) return { error: "Accès refusé" }
 
     await checkSubscription();
     const tenantId = session?.user?.tenantId
@@ -648,15 +665,18 @@ export const updateProductPrices = async (
 ) => {
     const session = await auth()
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("products"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("products:update"))) return { error: "Accès refusé" }
     
     await checkSubscription();
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
 
     try {
+        const existing = await db.product.findFirst({ where: { id, tenantId } });
+        if (!existing) return { error: "Produit non trouvé ou non autorisé" };
+
         const product = await db.product.update({
-            where: { id, tenantId },
+            where: { id },
             data: {
                 cost: prices.cost,
                 price: prices.price,

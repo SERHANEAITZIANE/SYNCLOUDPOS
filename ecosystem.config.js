@@ -42,6 +42,23 @@ module.exports = {
             error_file: "/var/log/pm2/backup-error.log",
             out_file: "/var/log/pm2/backup-out.log",
             merge_logs: true,
+        },
+        {
+            name: "syncloudpos-stock-reconciliation",
+            script: "scripts/reconcile-stock.js",
+            args: "--write",
+            cwd: "/var/www/syncloudpos",
+            instances: 1,
+            exec_mode: "fork",
+            watch: false,
+            autorestart: false, // cron script, no loop
+            cron_restart: "0 2 * * *", // Run daily at 2:00 AM
+            env: {
+                NODE_ENV: "production",
+            },
+            error_file: "/var/log/pm2/stock-reconcile-error.log",
+            out_file: "/var/log/pm2/stock-reconcile-out.log",
+            merge_logs: true,
         }
     ]
 }

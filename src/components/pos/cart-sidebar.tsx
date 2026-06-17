@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo, Suspense } from "react"
-import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag, History, Clock } from "lucide-react"
+import { useState, useEffect, useMemo, Suspense, useRef } from "react"
+import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag, History, Clock, Printer } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
@@ -15,27 +15,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { createOrder, getProductCustomerSellHistory } from "@/actions/orders"
-import { sendWhatsAppReceipt } from "@/actions/whatsapp-receipt"
-import { createCustomer } from "@/actions/customers"
 import dynamic from "next/dynamic"
+import { useReactToPrint } from "react-to-print"
+import { printWithDefaultPrinter } from "@/lib/print-helper"
+import { Receipt } from "./receipt"
+import { BonLivraisonPrintTemplate, BonGarantiePrintTemplate } from "@/components/print/print-templates"
+
 const PaymentModal = dynamic(() => import("./payment-modal").then(m => m.PaymentModal), { ssr: false })
 import { cn } from "@/lib/utils"
-import { getActivePromotions } from "@/actions/promotions"
 import { applyPromotionsToCart, ActivePromotion } from "@/lib/promotions-engine"
-
-interface CartSidebarProps {
-    customers?: any[]
-    accounts?: any[]
-    storeName?: string
-    storeAddress?: string
-    storePhone?: string
-    posTimbreEnabled?: boolean
-    storeData?: any
-    isElectronicsStore?: boolean
-    sellers?: { id: string; name: string | null; role: string }[]
-    currentUserId?: string
-}
 
 interface CartSidebarProps {
     customers?: any[]
@@ -50,6 +38,11 @@ interface CartSidebarProps {
     setSidebarWidth?: (w: 'narrow' | 'standard' | 'wide') => void
     sellers?: { id: string; name: string | null; role: string }[]
     currentUserId?: string
+    actionCreateOrder: (values: any) => Promise<any>
+    actionGetProductCustomerSellHistory: (productId: string, customerId: string) => Promise<any>
+    actionSendWhatsAppReceipt: (orderId: string) => Promise<any>
+    actionCreateCustomer: (data: any) => Promise<any>
+    actionGetActivePromotions: () => Promise<any[]>
 }
 
 interface CartItemRowProps {
@@ -118,69 +111,69 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
         <div
             onDoubleClick={() => document.getElementById(`price-input-${item.id}`)?.focus()}
             className={cn(
-                "flex flex-col py-1.5 px-3 rounded-lg border transition-all duration-150 group/item gap-1 shadow-xs relative",
+                "flex flex-col py-2 px-3 rounded-xl border transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md group/item gap-2 relative overflow-hidden",
                 index % 2 === 0
-                    ? "border-slate-200 dark:border-slate-800/70 bg-white dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-850/50"
-                    : "border-indigo-200/60 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-950/40 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30"
+                    ? "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-primary/30"
+                    : "border-orange-200/60 dark:border-orange-900/40 bg-orange-50/50 dark:bg-orange-950/40 hover:bg-orange-100/60 dark:hover:bg-orange-900/60 hover:border-primary/40"
             )}
         >
             {/* Line 1: Index + Name + History / Remove Button */}
-            <div className="flex justify-between items-center gap-2">
-                <h4 className="font-bold text-gray-900 dark:text-slate-100 text-xs leading-none flex-1 min-w-0 truncate" title={item.name}>
-                    <span className="text-indigo-500 dark:text-indigo-400 mr-1 text-[10px] font-black">#{index + 1}</span>
+            <div className="flex justify-between items-start gap-2">
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[13px] leading-tight flex-1 min-w-0" title={item.name}>
+                    <span className={cn("mr-1.5 text-[11px] font-black", index % 2 === 0 ? "text-slate-500" : "text-orange-600 dark:text-orange-500")}>#{index + 1}</span>
                     {item.name}
                 </h4>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                     {activeSession?.customerId && activeSession.customerName?.toUpperCase() !== "DIVERS" && activeSession.customerName?.toUpperCase() !== "PASSAGER" && (
                         <button
                             type="button"
-                            className="text-slate-400 hover:text-indigo-500 transition-colors p-0.5 rounded hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
+                            className="text-slate-400 hover:text-orange-500 transition-colors p-1 rounded-md hover:bg-orange-100 dark:hover:bg-orange-900/30"
                             onClick={() => handleViewHistory(item)}
                             title="Historique d'achat du client"
                         >
-                            <History size={12} />
+                            <History size={14} />
                         </button>
                     )}
                     <button
                         type="button"
-                        className="text-gray-400 hover:text-red-500 transition-colors p-0.5 rounded hover:bg-red-50 dark:hover:bg-red-950/30"
+                        className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30"
                         onClick={() => cart.removeItem(item.id)}
                         title="Supprimer"
                     >
-                        <X size={12} />
+                        <X size={14} />
                     </button>
                 </div>
             </div>
 
             {/* Line 2: S/N input if electronics */}
             {isElectronics && (
-                <div className="flex items-center gap-1 bg-white dark:bg-slate-950 px-2 py-0.5 rounded-md border border-slate-100 dark:border-slate-900 mt-0.5">
-                    <span className="text-[8px] font-bold uppercase text-slate-400 dark:text-slate-500 tracking-wider">S/N:</span>
+                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 px-2.5 py-1.5 rounded-md border border-slate-200 dark:border-slate-800 w-full mt-0.5">
+                    <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest shrink-0">S/N:</span>
                     <input
                         type="text"
                         placeholder="Numéro de série..."
-                        className="flex-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300 bg-transparent border-none focus:outline-none focus:ring-0 focus-visible:outline-none p-0"
+                        className="flex-1 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-transparent border-none focus:outline-none focus:ring-0 p-0"
                         value={item.serialNumber || ""}
                         onChange={(e) => cart.updateSerialNumber(item.id, e.target.value)}
                     />
                 </div>
             )}
 
-            {/* Line 4: Controls (Price input, Quantity input, Total) */}
-            <div className="flex items-center justify-between gap-2.5 mt-0.5 border-t border-dashed border-gray-200 dark:border-slate-800/60 pt-1">
+            {/* Line 3: Controls (Price input, Quantity input, Total) */}
+            <div className="flex items-end justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 mt-1">
                 {/* Price Input Column */}
-                <div className="flex flex-col gap-0.5 flex-1 min-w-[85px]">
-                    <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-0.5 select-none">
+                <div className="flex flex-col gap-1.5 flex-1 min-w-[90px]">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none">
                         Prix
                         {isNewest && (
-                            <span className="bg-slate-200 dark:bg-slate-800 text-[8px] font-black px-0.5 py-0 rounded border border-gray-300/30 dark:border-slate-700/50 shrink-0 text-gray-500 dark:text-slate-400">F2</span>
+                            <span className="bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400 text-[8px] font-black px-1 py-0.5 rounded border border-orange-200 dark:border-orange-800 shrink-0">F2</span>
                         )}
                     </span>
-                    <div 
+                    <div
                         onClick={() => document.getElementById(`price-input-${item.id}`)?.focus()}
                         className={cn(
-                            "flex items-center gap-0.5 bg-white dark:bg-slate-950 px-1.5 py-0.5 h-7 rounded-md border border-slate-200 dark:border-slate-800 focus-within:border-indigo-500 dark:focus-within:border-indigo-400 focus-within:ring-1 focus-within:ring-indigo-500 transition-all cursor-text",
-                            item.cost && item.price < item.cost ? "border-red-300 dark:border-red-900" : ""
+                            "flex items-center gap-1 bg-white dark:bg-slate-950 px-2 py-1 h-8 rounded-md border border-slate-200 dark:border-slate-700 focus-within:border-orange-500 dark:focus-within:border-orange-400 focus-within:ring-1 focus-within:ring-orange-500 transition-all cursor-text",
+                            item.cost && item.price < item.cost ? "border-red-300 dark:border-red-900 bg-red-50 dark:bg-red-950/30" : ""
                         )}
                     >
                         <input
@@ -188,59 +181,59 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
                             type="text"
                             inputMode="decimal"
                             className={cn(
-                                "w-full text-[11px] font-bold bg-transparent text-center focus:outline-none focus:ring-0 tabular-nums p-0 border-none focus-visible:outline-none",
+                                "w-full text-xs font-bold bg-transparent text-center focus:outline-none focus:ring-0 tabular-nums p-0 border-none focus-visible:outline-none",
                                 item.cost && item.price < item.cost
-                                    ? "text-red-500 underline decoration-wavy decoration-red-550"
+                                    ? "text-red-600 dark:text-red-400 underline decoration-wavy decoration-red-500"
                                     : "text-slate-800 dark:text-slate-200"
                             )}
                             value={priceValue}
                             onChange={(e) => handlePriceChange(e.target.value)}
                             onBlur={handlePriceBlur}
                         />
-                        <span className="text-[8px] font-bold text-slate-400 select-none">DA</span>
+                        <span className="text-[9px] font-bold text-slate-400 select-none">DA</span>
                     </div>
                 </div>
 
                 {/* Quantity Input Column */}
-                <div className="flex flex-col gap-0.5 shrink-0">
-                    <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-0.5 select-none">
-                        Qte
+                <div className="flex flex-col gap-1.5 shrink-0">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none">
+                        Qté
                         {isNewest && (
-                            <span className="bg-slate-200 dark:bg-slate-800 text-[8px] font-black px-0.5 py-0 rounded border border-gray-300/30 dark:border-slate-700/50 shrink-0 text-gray-500 dark:text-slate-400">F8</span>
+                            <span className="bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-400 text-[8px] font-black px-1 py-0.5 rounded border border-orange-200 dark:border-orange-800 shrink-0">F8</span>
                         )}
                     </span>
-                    <div className="flex items-center bg-white dark:bg-slate-950 rounded-md border border-slate-200 dark:border-slate-800 overflow-hidden h-7">
+                    <div className="flex items-center bg-white dark:bg-slate-950 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden h-8">
                         <button
                             type="button"
-                            className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors w-6 h-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-900"
+                            className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors w-7 h-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800"
                             onClick={() => cart.updateQuantity(item.id, Math.max(0.01, item.quantity - 1))}
                         >
-                            <Minus size={8} />
+                            <Minus size={10} />
                         </button>
                         <input
                             id={`qty-input-${item.id}`}
                             type="text"
                             inputMode="decimal"
-                            className="w-8 text-center font-bold text-[11px] bg-transparent border-none focus:outline-none focus:ring-0 tabular-nums p-0 focus-visible:outline-none"
+                            className="w-10 text-center font-bold text-xs bg-transparent border-none focus:outline-none focus:ring-0 tabular-nums p-0 focus-visible:outline-none text-slate-800 dark:text-slate-200"
                             value={qtyValue}
                             onChange={(e) => handleQtyChange(e.target.value)}
                             onBlur={handleQtyBlur}
                         />
                         <button
                             type="button"
-                            className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors w-6 h-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-900"
+                            className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors w-7 h-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800"
                             onClick={() => cart.updateQuantity(item.id, item.quantity + 1)}
                         >
-                            <Plus size={8} />
+                            <Plus size={10} />
                         </button>
                     </div>
                 </div>
 
                 {/* Line Total Column */}
-                <div className="flex flex-col items-end gap-0.5 shrink-0 min-w-[70px] select-none">
-                    <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total</span>
-                    <div className="flex items-center h-7">
-                        <span className="font-black text-xs text-slate-800 dark:text-slate-200 tracking-tight tabular-nums truncate">
+                <div className="flex flex-col items-end gap-1.5 shrink-0 min-w-[85px] select-none">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total</span>
+                    <div className="flex items-center h-8">
+                        <span className="font-black text-[13px] text-slate-800 dark:text-slate-100 tracking-tight tabular-nums truncate">
                             {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.price * item.quantity)} DA
                         </span>
                     </div>
@@ -250,25 +243,234 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
     )
 }
 
-export const CartSidebar = ({ 
-    customers = [], 
-    accounts = [], 
-    storeName, 
-    storeAddress, 
-    storePhone, 
-    posTimbreEnabled = false, 
-    storeData, 
+export const CartSidebar = ({
+    customers = [],
+    accounts = [],
+    storeName,
+    storeAddress,
+    storePhone,
+    posTimbreEnabled = false,
+    storeData,
     isElectronicsStore = false,
     sidebarWidth,
     setSidebarWidth,
     sellers = [],
-    currentUserId
+    currentUserId,
+    actionCreateOrder,
+    actionGetProductCustomerSellHistory,
+    actionSendWhatsAppReceipt,
+    actionCreateCustomer,
+    actionGetActivePromotions
 }: CartSidebarProps) => {
     const t = useTranslations("CartSidebar")
     const cart = usePosStore()
     const isElectronics = cart.forceElectronicsMode || isElectronicsStore || storeData?.isElectronics || storeData?.name?.toLowerCase().includes("electr") || false;
     const router = useRouter()
     const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null)
+
+    // Printing States & Refs
+    const [printOrderData, setPrintOrderData] = useState<any>(null) // Trigger state
+    const [activePrintOrder, setActivePrintOrder] = useState<any>(null) // Rendering state
+    const [printerReceipt, setPrinterReceipt] = useState("default")
+    const [printerA4, setPrinterA4] = useState("default")
+
+    // Sequential Print Queue
+    const [printQueue, setPrintQueue] = useState<string[]>([])
+    const queueRef = useRef<string[]>([])
+    useEffect(() => {
+        queueRef.current = printQueue
+    }, [printQueue])
+
+    const receiptRef = useRef<HTMLDivElement>(null)
+    const blRef = useRef<HTMLDivElement>(null)
+    const warrantyRef = useRef<HTMLDivElement>(null)
+    const combinedBlWarrantyRef = useRef<HTMLDivElement>(null)
+
+    const [printMode, setPrintMode] = useState<"preview" | "direct">("preview")
+
+    // Load printer preferences on mount
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("pos_printing_prefs")
+            if (stored) {
+                const prefs = JSON.parse(stored)
+                if (prefs.printerReceipt) setPrinterReceipt(prefs.printerReceipt)
+                if (prefs.printerA4) setPrinterA4(prefs.printerA4)
+                if (prefs.printMode) setPrintMode(prefs.printMode)
+            }
+        } catch (err) {
+            console.error("Failed to load local printing prefs in cart-sidebar:", err)
+        }
+    }, [])
+
+    const handleNextPrint = () => {
+        const currentQueue = queueRef.current
+        if (currentQueue.length <= 1) {
+            setPrintQueue([])
+            setActivePrintOrder(null) // Safe to clear active order data now that all print jobs are finished
+            return
+        }
+
+        const nextQueue = currentQueue.slice(1)
+        setPrintQueue(nextQueue)
+        queueRef.current = nextQueue // sync ref immediately
+
+        const nextJob = nextQueue[0]
+        setTimeout(() => {
+            if (nextJob === "TICKET") {
+                onPrintReceipt()
+            } else if (nextJob === "BL") {
+                onPrintBL()
+            } else if (nextJob === "WARRANTY") {
+                onPrintWarranty()
+            } else if (nextJob === "COMBINED") {
+                onPrintCombined()
+            }
+        }, 100) // 100ms delay to let the previous print dialog fully close
+    }
+
+    const blPrinterToUse = storeData?.posBlFormat === "80mm" ? printerReceipt : printerA4;
+
+    const handlePrintReceipt = useReactToPrint({
+        contentRef: receiptRef,
+        documentTitle: printerReceipt !== "default" ? printerReceipt : "Ticket de Caisse",
+        onAfterPrint: handleNextPrint
+    })
+
+    const handlePrintBL = useReactToPrint({
+        contentRef: blRef,
+        documentTitle: blPrinterToUse !== "default" ? blPrinterToUse : "Bon de Livraison",
+        onAfterPrint: handleNextPrint
+    })
+
+    const handlePrintWarranty = useReactToPrint({
+        contentRef: warrantyRef,
+        documentTitle: blPrinterToUse !== "default" ? blPrinterToUse : "Bon de Garantie",
+        onAfterPrint: handleNextPrint
+    })
+
+    const handlePrintCombined = useReactToPrint({
+        contentRef: combinedBlWarrantyRef,
+        documentTitle: blPrinterToUse !== "default" ? blPrinterToUse : "Documents Combinés",
+        onAfterPrint: handleNextPrint
+    })
+
+    const onPrintReceipt = () => {
+        if (!handlePrintReceipt) return
+        const originalTitle = document.title
+        if (printerReceipt !== "default") document.title = printerReceipt
+        printWithDefaultPrinter(printerReceipt, () => {
+            handlePrintReceipt()
+        }).finally(() => {
+            setTimeout(() => document.title = originalTitle, 1000)
+        })
+    }
+
+    const onPrintBL = () => {
+        if (!handlePrintBL) return
+        const originalTitle = document.title
+        if (blPrinterToUse !== "default") document.title = blPrinterToUse
+        printWithDefaultPrinter(blPrinterToUse, () => {
+            handlePrintBL()
+        }).finally(() => {
+            setTimeout(() => document.title = originalTitle, 1000)
+        })
+    }
+
+    const onPrintWarranty = () => {
+        if (!handlePrintWarranty) return
+        const isWarranty80mm = activePrintOrder?.printTicket;
+        const targetPrinter = isWarranty80mm ? printerReceipt : blPrinterToUse;
+        const originalTitle = document.title
+        if (targetPrinter !== "default") document.title = targetPrinter
+        printWithDefaultPrinter(targetPrinter, () => {
+            handlePrintWarranty()
+        }).finally(() => {
+            setTimeout(() => document.title = originalTitle, 1000)
+        })
+    }
+
+    const onPrintCombined = () => {
+        if (!handlePrintCombined) return
+        const originalTitle = document.title
+        if (blPrinterToUse !== "default") document.title = blPrinterToUse
+        printWithDefaultPrinter(blPrinterToUse, () => {
+            handlePrintCombined()
+        }).finally(() => {
+            setTimeout(() => document.title = originalTitle, 1000)
+        })
+    }
+
+    // Pending print flags — set by Phase 1, consumed by Phase 2
+    const pendingPrintRef = useRef<{ printTicket: boolean; printBL: boolean; printWarranty: boolean } | null>(null)
+
+    // Phase 1: When printOrderData arrives, copy it to activePrintOrder (which renders the templates)
+    // and store what we need to print. Clear the trigger immediately to prevent loops.
+    useEffect(() => {
+        if (printOrderData) {
+            pendingPrintRef.current = {
+                printTicket: !!printOrderData.printTicket,
+                printBL: !!printOrderData.printBL,
+                printWarranty: !!printOrderData.printWarranty
+            }
+            setActivePrintOrder(printOrderData)
+            setPrintOrderData(null)
+        }
+    }, [printOrderData])
+
+    // Phase 2: When activePrintOrder is set AND we have pending flags,
+    // wait for the templates to render, then build the queue and fire.
+    useEffect(() => {
+        if (!activePrintOrder || !pendingPrintRef.current) return
+
+        const pending = pendingPrintRef.current
+        pendingPrintRef.current = null // consume immediately
+
+        // Wait for React to render the templates with the new data
+        const timer = setTimeout(() => {
+            const queue: string[] = []
+            if (pending.printTicket && receiptRef.current) {
+                queue.push("TICKET")
+            }
+            if (pending.printBL && blRef.current && pending.printWarranty && storeData?.warrantyEnabled && warrantyRef.current) {
+                if (pending.printTicket) {
+                    // If printing a ticket, warranty goes to receipt printer. So don't combine with BL.
+                    queue.push("BL")
+                    queue.push("WARRANTY")
+                } else {
+                    queue.push("COMBINED")
+                }
+            } else {
+                if (pending.printBL && blRef.current) queue.push("BL")
+                if (pending.printWarranty && storeData?.warrantyEnabled && warrantyRef.current) queue.push("WARRANTY")
+            }
+
+            if (queue.length > 0) {
+                setPrintQueue(queue)
+                queueRef.current = queue // sync immediately
+
+                triggerPrintQueue(queue)
+            }
+        }, 50) // 50ms to allow React render cycle + DOM paint
+
+        return () => clearTimeout(timer)
+    }, [activePrintOrder])
+
+    const triggerPrintQueue = (queue: string[]) => {
+        const firstJob = queue[0]
+        // Additional delay to ensure DOM is fully painted
+        setTimeout(() => {
+            if (firstJob === "TICKET") {
+                onPrintReceipt()
+            } else if (firstJob === "BL") {
+                onPrintBL()
+            } else if (firstJob === "WARRANTY") {
+                onPrintWarranty()
+            } else if (firstJob === "COMBINED") {
+                onPrintCombined()
+            }
+        }, 50)
+    }
 
     useEffect(() => {
         if (!idempotencyKey) {
@@ -335,7 +537,7 @@ export const CartSidebar = ({
         if (!newCustomerName.trim()) return
         try {
             setLoading(true)
-            const result = await createCustomer({
+            const result = await actionCreateCustomer({
                 name: newCustomerName.trim(),
                 phone: newCustomerPhone.trim() || undefined,
                 clientType: "RETAIL"
@@ -378,8 +580,8 @@ export const CartSidebar = ({
             setHistoryItem(item)
             setLoadingHistory(true)
             setSellHistory([])
-            
-            const res = await getProductCustomerSellHistory(item.productId, activeSession.customerId)
+
+            const res = await actionGetProductCustomerSellHistory(item.productId, activeSession.customerId)
             if (res.error) {
                 toast.error(res.error)
             } else if (res.history) {
@@ -415,7 +617,7 @@ export const CartSidebar = ({
 
     useEffect(() => {
         const fetchPromos = async () => {
-            const promos = await getActivePromotions()
+            const promos = await actionGetActivePromotions()
             setActivePromotions(promos.map(p => ({
                 ...p,
                 discountValue: Number(p.discountValue),
@@ -480,10 +682,23 @@ export const CartSidebar = ({
         }
     }, [promotedItems, total, totalDiscount, pointsDiscount, activeSession?.customerName]);
 
-    const onCheckout = async (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number, vendorId?: string) => {
+    const onCheckout = async (
+        method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM",
+        paidAmount: number,
+        accountId: string | undefined,
+        stampTax: number,
+        subtotal: number,
+        tvaAmount: number,
+        totalTTC: number,
+        vendorId: string | undefined,
+        shouldPrint: boolean,
+        printTicket: boolean,
+        printBL: boolean,
+        printWarranty: boolean
+    ) => {
         setLoading(true)
         try {
-            const response = await createOrder({
+            const response = await actionCreateOrder({
                 storeId: "default",
                 items: promotedItems.map((item) => {
                     const itemDiscount = item.discountAmount || 0;
@@ -527,13 +742,31 @@ export const CartSidebar = ({
                 return { success: false }
             } else {
                 toast.success(t("orderValidated"))
+                if (shouldPrint) {
+                    setPrintOrderData({
+                        receiptNumber: response.receiptNumber,
+                        paidAmount: paidAmount,
+                        previousBalance: response.previousBalance,
+                        newBalance: response.newBalance,
+                        stampTax,
+                        subtotal,
+                        tvaAmount,
+                        totalTTC,
+                        method,
+                        customerName: activeSession?.customerName,
+                        items: [...promotedItems],
+                        printTicket,
+                        printBL,
+                        printWarranty
+                    })
+                }
                 cart.resetSession()
                 setIdempotencyKey(null)
                 setUsePointsMode(false)
                 setLoyaltyPointsToUse(0)
                 // Fire WhatsApp receipt in background (non-blocking)
                 if (response.orderId) {
-                    sendWhatsAppReceipt(response.orderId).catch(() => null)
+                    actionSendWhatsAppReceipt(response.orderId).catch(() => null)
                 }
                 router.refresh()
                 return {
@@ -550,7 +783,7 @@ export const CartSidebar = ({
             console.error("POS Checkout Error:", error)
             // Extract the most useful error message
             const errorMsg = error?.message || error?.digest || String(error)
-            
+
             if (error instanceof TypeError && (error.message.includes("fetch") || error.message.includes("network"))) {
                 toast.error("🌐 Connexion perdue. Veuillez vérifier votre réseau et réessayer.", { duration: 5000 })
             } else if (errorMsg.includes("abonnement") || errorMsg.includes("bloqué") || errorMsg.includes("expiré")) {
@@ -612,11 +845,11 @@ export const CartSidebar = ({
             <Dialog open={newCustomerModalOpen} onOpenChange={setNewCustomerModalOpen}>
                 <DialogContent className="sm:max-w-[425px] rounded-3xl">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-black">Nouveau Client</DialogTitle>
+                        <DialogTitle className="text-xl font-black">{t("newCustomer")}</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="cust-name" className="text-xs font-bold text-gray-700 dark:text-slate-300">Nom complet *</Label>
+                            <Label htmlFor="cust-name" className="text-xs font-bold text-gray-700 dark:text-slate-300">{t("fullName")}</Label>
                             <Input
                                 id="cust-name"
                                 value={newCustomerName}
@@ -627,7 +860,7 @@ export const CartSidebar = ({
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="cust-phone" className="text-xs font-bold text-gray-700 dark:text-slate-300">Téléphone (Optionnel)</Label>
+                            <Label htmlFor="cust-phone" className="text-xs font-bold text-gray-700 dark:text-slate-300">{t("phoneOptional")}</Label>
                             <Input
                                 id="cust-phone"
                                 value={newCustomerPhone}
@@ -638,8 +871,8 @@ export const CartSidebar = ({
                         </div>
                     </div>
                     <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="outline" onClick={() => setNewCustomerModalOpen(false)} className="rounded-xl font-bold">Annuler</Button>
-                        <Button onClick={handleCreateCustomer} disabled={loading || !newCustomerName.trim()} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Enregistrer</Button>
+                        <Button variant="outline" onClick={() => setNewCustomerModalOpen(false)} className="rounded-xl font-bold">{t("cancel")}</Button>
+                        <Button onClick={handleCreateCustomer} disabled={loading || !newCustomerName.trim()} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">{t("save")}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -648,7 +881,9 @@ export const CartSidebar = ({
                 <PaymentModal
                     isOpen={open}
                     onClose={() => setOpen(false)}
-                    onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC, vendorId) => onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC, vendorId)}
+                    onConfirm={(method, paidAmount, accountId, stampTax, subtotal, tvaAmount, totalTTC, vendorId, shouldPrint, printTicket, printBL, printWarranty) =>
+                        onCheckout(method, paidAmount, accountId || undefined, stampTax, subtotal, tvaAmount, totalTTC, vendorId, shouldPrint, printTicket, printBL, printWarranty)
+                    }
                     loading={loading}
                     total={total}
                     items={promotedItems}
@@ -671,11 +906,11 @@ export const CartSidebar = ({
                         <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
                             {t("order")} {cart.sessions.findIndex(s => s.id === cart.activeSessionId) + 1}
                         </h2>
-                        <div 
+                        <div
                             className={cn(
                                 "flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 select-none w-fit",
-                                isElectronics 
-                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400" 
+                                isElectronics
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400"
                                     : "bg-gray-100 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700/50"
                             )}
                         >
@@ -758,17 +993,17 @@ export const CartSidebar = ({
                                         <CommandEmpty>
                                             <div className="p-3 text-center">
                                                 <p className="text-sm text-muted-foreground">{t("noClientFound")}</p>
-                                                <Button 
-                                                    type="button" 
-                                                    variant="outline" 
-                                                    size="sm" 
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
                                                     className="mt-2 text-xs font-bold gap-1 rounded-xl text-emerald-600 border-emerald-250 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800"
                                                     onClick={() => {
                                                         setOpenCustomer(false);
                                                         setNewCustomerModalOpen(true);
                                                     }}
                                                 >
-                                                    <PlusCircle className="h-3.5 w-3.5" /> Créer ce client (F4)
+                                                    <PlusCircle className="h-3.5 w-3.5" /> {t("newCustomer")} (F4)
                                                 </Button>
                                             </div>
                                         </CommandEmpty>
@@ -932,49 +1167,191 @@ export const CartSidebar = ({
                             Historique des ventes du produit <strong className="text-slate-800 dark:text-slate-200">{historyItem?.name}</strong> pour le client <strong className="text-slate-850 dark:text-slate-150">{activeSession?.customerName}</strong>
                         </p>
                     </DialogHeader>
-                    
+
                     <div className="py-4 max-h-[300px] overflow-y-auto space-y-3 pr-1">
-                         {loadingHistory ? (
-                             <div className="flex flex-col items-center justify-center py-8 space-y-2">
-                                 <Clock className="h-8 w-8 text-indigo-650 animate-spin" />
-                                 <p className="text-xs text-muted-foreground">Chargement de l'historique...</p>
-                             </div>
-                         ) : sellHistory.length === 0 ? (
-                             <div className="flex flex-col items-center justify-center py-10 text-center">
-                                 <p className="text-sm font-semibold text-slate-500">Aucun historique d'achat trouvé</p>
-                                 <p className="text-xs text-muted-foreground mt-1">C'est la première fois que ce client achète ce produit.</p>
-                             </div>
-                         ) : (
-                             <div className="space-y-2.5">
-                                 {sellHistory.map((h, i) => (
-                                     <div key={i} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors">
-                                         <div className="space-y-0.5">
-                                             <div className="flex items-center gap-2">
-                                                 <span className={cn(
-                                                     "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md",
-                                                     h.type === "POS" ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20" : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20"
-                                                 )}>
-                                                     {h.type}
-                                                 </span>
-                                                 <span className="text-xs font-semibold text-muted-foreground">{new Date(h.date).toLocaleDateString("fr-FR", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                                             </div>
-                                             <p className="text-[10px] font-bold text-muted-foreground">{h.receiptNumber}</p>
-                                         </div>
-                                         <div className="text-right">
-                                             <p className="text-sm font-black text-slate-900 dark:text-slate-100">{h.price.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</p>
-                                             <p className="text-[10px] text-muted-foreground">Qté: <strong className="text-slate-800 dark:text-slate-200">{h.quantity}</strong></p>
-                                         </div>
-                                     </div>
-                                 ))}
-                             </div>
-                         )}
+                        {loadingHistory ? (
+                            <div className="flex flex-col items-center justify-center py-8 space-y-2">
+                                <Clock className="h-8 w-8 text-indigo-650 animate-spin" />
+                                <p className="text-xs text-muted-foreground">Chargement de l'historique...</p>
+                            </div>
+                        ) : sellHistory.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-10 text-center">
+                                <p className="text-sm font-semibold text-slate-500">Aucun historique d'achat trouvé</p>
+                                <p className="text-xs text-muted-foreground mt-1">C'est la première fois que ce client achète ce produit.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5">
+                                {sellHistory.map((h, i) => (
+                                    <div key={i} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-900 transition-colors">
+                                        <div className="space-y-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn(
+                                                    "text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md",
+                                                    h.type === "POS" ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20" : "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20"
+                                                )}>
+                                                    {h.type}
+                                                </span>
+                                                <span className="text-xs font-semibold text-muted-foreground">{new Date(h.date).toLocaleDateString("fr-FR", { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                            </div>
+                                            <p className="text-[10px] font-bold text-muted-foreground">{h.receiptNumber}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-black text-slate-900 dark:text-slate-100">{h.price.toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA</p>
+                                            <p className="text-[10px] text-muted-foreground">Qté: <strong className="text-slate-800 dark:text-slate-200">{h.quantity}</strong></p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    
+
                     <DialogFooter>
                         <Button variant="outline" className="w-full rounded-xl" onClick={() => setHistoryItem(null)}>Fermer</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Hidden Components for Printing */}
+            <div className="hidden">
+                <Receipt
+                    ref={receiptRef}
+                    items={activePrintOrder?.items || []}
+                    total={activePrintOrder?.totalTTC || 0}
+                    stampTax={activePrintOrder?.stampTax || 0}
+                    rounding={activePrintOrder ? activePrintOrder.totalTTC - (activePrintOrder.items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0) + activePrintOrder.stampTax) : 0}
+                    date={new Date()}
+                    orderId={activePrintOrder?.receiptNumber}
+                    storeName={storeData?.name || storeName}
+                    storeAddress={storeAddress}
+                    storePhone={storePhone}
+                    customerName={activePrintOrder?.customerName}
+                    paidAmount={activePrintOrder?.paidAmount}
+                    previousBalance={activePrintOrder?.previousBalance}
+                    newBalance={activePrintOrder?.newBalance}
+                    logo={storeData?.logo}
+                />
+                <div ref={blRef}>
+                    <BonLivraisonPrintTemplate
+                        items={(activePrintOrder?.items || []).map((item: any) => {
+                            const rate = (storeData?.tvaEnabled ?? false) ? (item.tvaRate ?? 0) : 0;
+                            return {
+                                product: { name: item.name },
+                                quantity: item.quantity,
+                                unitPrice: item.price,
+                                tvaRate: rate,
+                                priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                serialNumber: item.serialNumber,
+                                discountAmount: item.discountAmount,
+                                discountLabel: item.discountLabel
+                            };
+                        })}
+                        customer={{
+                            name: activePrintOrder?.customerName || "Client Standard",
+                        }}
+                        store={storeData}
+                        receiptNumber={activePrintOrder?.receiptNumber}
+                        date={new Date()}
+                        subtotalHT={activePrintOrder?.subtotal || 0}
+                        totalTVA={activePrintOrder?.tvaAmount || 0}
+                        stampTax={activePrintOrder?.stampTax || 0}
+                        totalTTC={activePrintOrder?.totalTTC || 0}
+                        paymentMethod={activePrintOrder?.method || "CASH"}
+                        previousBalance={activePrintOrder?.previousBalance || 0}
+                        paymentAmount={activePrintOrder?.paidAmount || 0}
+                        newBalance={activePrintOrder?.newBalance || 0}
+                    />
+                </div>
+                <div ref={warrantyRef}>
+                    <BonGarantiePrintTemplate
+                        items={(activePrintOrder?.items || []).map((item: any) => {
+                            const rate = (storeData?.tvaEnabled ?? false) ? (item.tvaRate ?? 0) : 0;
+                            return {
+                                product: { name: item.name },
+                                quantity: item.quantity,
+                                unitPrice: item.price,
+                                tvaRate: rate,
+                                priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                serialNumber: item.serialNumber,
+                                discountAmount: item.discountAmount,
+                                discountLabel: item.discountLabel
+                            };
+                        })}
+                        customer={{
+                            name: activePrintOrder?.customerName || "Client Standard",
+                        }}
+                        store={storeData}
+                        receiptNumber={activePrintOrder?.receiptNumber}
+                        date={new Date()}
+                        subtotalHT={activePrintOrder?.subtotal || 0}
+                        totalTVA={activePrintOrder?.tvaAmount || 0}
+                        stampTax={activePrintOrder?.stampTax || 0}
+                        totalTTC={activePrintOrder?.totalTTC || 0}
+                        paymentMethod={activePrintOrder?.method || "CASH"}
+                        force80mm={!!activePrintOrder?.printTicket}
+                    />
+                </div>
+                <div ref={combinedBlWarrantyRef}>
+                    <div style={{ pageBreakAfter: 'always' }}>
+                        <BonLivraisonPrintTemplate
+                            items={(activePrintOrder?.items || []).map((item: any) => {
+                                const rate = (storeData?.tvaEnabled ?? false) ? (item.tvaRate ?? 0) : 0;
+                                return {
+                                    product: { name: item.name },
+                                    quantity: item.quantity,
+                                    unitPrice: item.price,
+                                    tvaRate: rate,
+                                    priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                    serialNumber: item.serialNumber,
+                                    discountAmount: item.discountAmount,
+                                    discountLabel: item.discountLabel
+                                };
+                            })}
+                            customer={{
+                                name: activePrintOrder?.customerName || "Client Standard",
+                            }}
+                            store={storeData}
+                            receiptNumber={activePrintOrder?.receiptNumber}
+                            date={new Date()}
+                            subtotalHT={activePrintOrder?.subtotal || 0}
+                            totalTVA={activePrintOrder?.tvaAmount || 0}
+                            stampTax={activePrintOrder?.stampTax || 0}
+                            totalTTC={activePrintOrder?.totalTTC || 0}
+                            paymentMethod={activePrintOrder?.method || "CASH"}
+                            previousBalance={activePrintOrder?.previousBalance || 0}
+                            paymentAmount={activePrintOrder?.paidAmount || 0}
+                            newBalance={activePrintOrder?.newBalance || 0}
+                        />
+                    </div>
+                    <div>
+                        <BonGarantiePrintTemplate
+                            items={(activePrintOrder?.items || []).map((item: any) => {
+                                const rate = (storeData?.tvaEnabled ?? false) ? (item.tvaRate ?? 0) : 0;
+                                return {
+                                    product: { name: item.name },
+                                    quantity: item.quantity,
+                                    unitPrice: item.price,
+                                    tvaRate: rate,
+                                    priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
+                                    serialNumber: item.serialNumber,
+                                    discountAmount: item.discountAmount,
+                                    discountLabel: item.discountLabel
+                                };
+                            })}
+                            customer={{
+                                name: activePrintOrder?.customerName || "Client Standard",
+                            }}
+                            store={storeData}
+                            receiptNumber={activePrintOrder?.receiptNumber}
+                            date={new Date()}
+                            subtotalHT={activePrintOrder?.subtotal || 0}
+                            totalTVA={activePrintOrder?.tvaAmount || 0}
+                            stampTax={activePrintOrder?.stampTax || 0}
+                            totalTTC={activePrintOrder?.totalTTC || 0}
+                            paymentMethod={activePrintOrder?.method || "CASH"}
+                        />
+                    </div>
+                </div>
+            </div>
         </>
     )
 }

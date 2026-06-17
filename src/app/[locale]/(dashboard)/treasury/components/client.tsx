@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Plus, ArrowRightLeft, ArrowRight, Wallet, History, TrendingUp } from "lucide-react"
+import { Plus, ArrowRightLeft, ArrowRight, Wallet, History, TrendingUp, Filter, Activity, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
@@ -39,6 +39,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
     // Global Filter States
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
     const [selectedAccount, setSelectedAccount] = useState<string>("ALL")
+    const [selectedSource, setSelectedSource] = useState<string>("ALL")
     
     // Manual transaction type pre-selection
     const [defaultTransactionType, setDefaultTransactionType] = useState<"CREDIT" | "DEBIT">("CREDIT")
@@ -70,6 +71,28 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
             }
         }
 
+        if (selectedSource !== "ALL") {
+            if (selectedSource === "CREDIT_TYPE") {
+                result = result.filter(item => item.type === "CREDIT")
+            } else if (selectedSource === "DEBIT_TYPE") {
+                result = result.filter(item => item.type === "DEBIT")
+            } else if (selectedSource === "PAIEMENT_CLIENT") {
+                result = result.filter(item => item.source === "SALE" || item.source === "CUSTOMER_PAYMENT" || (item.source === "MANUAL_IN" && !item.description?.toLowerCase().includes("emprunt") && !item.description?.toLowerCase().includes("retour")))
+            } else if (selectedSource === "PAIEMENT_FOURNISSEUR") {
+                result = result.filter(item => item.source === "PURCHASE" || item.source === "SUPPLIER_PAYMENT" || (item.source === "MANUAL_OUT" && !item.description?.toLowerCase().includes("emprunt") && !item.description?.toLowerCase().includes("prêt") && !item.description?.toLowerCase().includes("retour")))
+            } else if (selectedSource === "RETOUR_CLIENT") {
+                result = result.filter(item => (item.source === "RETURN" && item.type === "DEBIT") || (item.source === "MANUAL_OUT" && item.description?.toLowerCase().includes("retour")))
+            } else if (selectedSource === "RETOUR_FOURNISSEUR") {
+                result = result.filter(item => (item.source === "RETURN" && item.type === "CREDIT") || (item.source === "MANUAL_IN" && item.description?.toLowerCase().includes("retour")))
+            } else if (selectedSource === "EMPRUNT_CLIENT") {
+                result = result.filter(item => (item.source === "LOAN" && item.type === "DEBIT") || (item.source === "MANUAL_OUT" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
+            } else if (selectedSource === "EMPRUNT_FOURNISSEUR") {
+                result = result.filter(item => (item.source === "LOAN" && item.type === "CREDIT") || (item.source === "MANUAL_IN" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
+            } else {
+                result = result.filter(item => item.source === selectedSource)
+            }
+        }
+
         if (dateRange?.from) {
             const fromTime = dateRange.from.getTime()
             const toTime = dateRange.to ? dateRange.to.getTime() + 86400000 : fromTime + 86400000
@@ -81,7 +104,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
         }
 
         return result
-    }, [movements, accounts, selectedAccount, dateRange])
+    }, [movements, accounts, selectedAccount, selectedSource, dateRange])
 
     return (
         <div className="space-y-6">
@@ -131,29 +154,89 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
                     </button>
                 </div>
 
-                {/* Global Filters (shown for history and analytics tabs) */}
-                {activeTab !== "accounts" && (
-                    <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                        <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                            <SelectTrigger className="w-[180px] h-9 text-xs font-semibold">
-                                <SelectValue placeholder="Tous les comptes" />
-                            </SelectTrigger>
-                            <SelectContent position="popper" className="z-[9999]">
-                                <SelectItem value="ALL">Tous les comptes</SelectItem>
-                                {accounts.map(acc => (
-                                    <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <DatePickerWithRange
-                            date={dateRange}
-                            setDate={setDateRange}
-                            className="w-[250px] sm:w-[280px]"
-                        />
-                    </div>
-                )}
             </div>
+
+            {/* Premium Filter Area (shown for history and analytics tabs) */}
+            {activeTab !== "accounts" && (
+                <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 my-6 relative overflow-hidden group animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                    
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                                <Filter className="w-4 h-4 text-emerald-400" />
+                            </div>
+                            <h3 className="text-sm font-bold text-slate-200">Filtres Globaux</h3>
+                        </div>
+                        {(selectedAccount !== "ALL" || selectedSource !== "ALL" || dateRange !== undefined) && (
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                    setSelectedAccount("ALL")
+                                    setSelectedSource("ALL")
+                                    setDateRange(undefined)
+                                }}
+                                className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Réinitialiser</span>
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 relative z-10">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Wallet className="w-3 h-3" /> Caisse / Banque
+                            </label>
+                            <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                                <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-emerald-500/50 rounded-xl shadow-inner">
+                                    <SelectValue placeholder="Tous les comptes" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
+                                    <SelectItem value="ALL">Tous les comptes</SelectItem>
+                                    {accounts.map(acc => (
+                                        <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <Activity className="w-3 h-3" /> Type d'opération
+                            </label>
+                            <Select value={selectedSource} onValueChange={setSelectedSource}>
+                                <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-emerald-500/50 rounded-xl shadow-inner">
+                                    <SelectValue placeholder="Tous les types" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
+                                    <SelectItem value="ALL">Tous les types</SelectItem>
+                                    <SelectItem value="CREDIT_TYPE">Entrée (Crédit)</SelectItem>
+                                    <SelectItem value="DEBIT_TYPE">Sortie (Débit)</SelectItem>
+                                    <SelectItem value="PAIEMENT_CLIENT">Paiement Client</SelectItem>
+                                    <SelectItem value="PAIEMENT_FOURNISSEUR">Paiement Fournisseur</SelectItem>
+                                    <SelectItem value="RETOUR_CLIENT">Retour Client</SelectItem>
+                                    <SelectItem value="RETOUR_FOURNISSEUR">Retour Fournisseur</SelectItem>
+                                    <SelectItem value="EXPENSE">Dépense</SelectItem>
+                                    <SelectItem value="EMPRUNT_CLIENT">Emprunt Client</SelectItem>
+                                    <SelectItem value="EMPRUNT_FOURNISSEUR">Emprunt Fournisseur</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <CalendarIcon className="w-3 h-3" /> Période
+                            </label>
+                            <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-emerald-500/50 transition-all shadow-inner w-full">
+                                <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {activeTab === "accounts" ? (
                 <div className="space-y-4">

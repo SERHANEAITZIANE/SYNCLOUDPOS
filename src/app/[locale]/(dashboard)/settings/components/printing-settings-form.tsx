@@ -27,6 +27,7 @@ export interface PrintingPrefs {
     loyaltyCardModel: string
     showBarcodeOnReceipt: boolean
     showLogoOnBL: boolean
+    printMode: "preview" | "direct"
 }
 
 const defaults: PrintingPrefs = {
@@ -37,6 +38,7 @@ const defaults: PrintingPrefs = {
     loyaltyCardModel: "violet",
     showBarcodeOnReceipt: true,
     showLogoOnBL: true,
+    printMode: "preview",
 }
 
 // ─── Printer select with optional custom input ───────────────────
@@ -526,6 +528,29 @@ export const PrintingSettingsForm = ({
                             checked={prefs.showLogoOnBL}
                             onCheckedChange={(v) => setPrefs(p => ({ ...p, showLogoOnBL: v }))}
                         />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label>Mode d'impression (Caisse)</Label>
+                            <p className="text-xs text-muted-foreground mt-0.5">Activer l'Aperçu Avant Impression ou Impression Directe</p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
+                            <button 
+                                type="button"
+                                onClick={() => setPrefs(p => ({ ...p, printMode: "preview" }))}
+                                className={cn("px-3 py-1.5 rounded-md text-xs font-semibold transition-all", prefs.printMode === "preview" ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}
+                            >
+                                Aperçu
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={() => setPrefs(p => ({ ...p, printMode: "direct" }))}
+                                className={cn("px-3 py-1.5 rounded-md text-xs font-semibold transition-all", prefs.printMode === "direct" ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}
+                            >
+                                Directe
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -100,8 +100,10 @@ export async function createSpoilage(data: SpoilageData) {
             })
         })
 
-        revalidatePath("/avaries")
-        revalidatePath("/products")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/avaries")
+            revalidatePath("/products")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
 
@@ -216,8 +218,10 @@ export async function deleteSpoilage(id: string) {
             })
         })
 
-        revalidatePath("/avaries")
-        revalidatePath("/products")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/avaries")
+            revalidatePath("/products")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
 
@@ -327,8 +331,10 @@ export async function updateSpoilage(id: string, data: SpoilageData) {
             })
         })
 
-        revalidatePath("/avaries")
-        revalidatePath("/products")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/avaries")
+            revalidatePath("/products")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
 

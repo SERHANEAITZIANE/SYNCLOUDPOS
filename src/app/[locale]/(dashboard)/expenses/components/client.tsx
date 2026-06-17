@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Filter, X } from "lucide-react"
+import { Plus, Filter, X, Tag, Wallet, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useTranslations, useLocale } from "next-intl"
 import { useState, useMemo } from "react"
@@ -116,22 +116,42 @@ export const ExpensesClient: React.FC<ExpensesClientProps> = ({
             </div>
             <Separator />
             
-            {/* Filter controls */}
-            <div className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200/60 dark:border-slate-800/60 rounded-xl p-4 shadow-sm space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    <Filter className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    <span>{appLocale === 'fr' ? 'Filtres de recherche' : appLocale === 'ar' ? 'فلاتر البحث' : 'Search Filters'}</span>
+            {/* Premium Filter Area */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 my-6 relative overflow-hidden group animate-in fade-in slide-in-from-top-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-rose-500/10 rounded-lg border border-rose-500/20">
+                            <Filter className="w-4 h-4 text-rose-400" />
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-200">
+                            {appLocale === 'fr' ? 'Filtres de recherche avancés' : appLocale === 'ar' ? 'فلاتر البحث المتقدمة' : 'Advanced Search Filters'}
+                        </h3>
+                    </div>
+                    {(selectedCategory !== "all" || selectedAccount !== "all" || dateRange !== undefined) && (
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleReset}
+                            className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
+                        >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{dict.resetFilters}</span>
+                        </Button>
+                    )}
                 </div>
-                <div className="flex flex-wrap items-end gap-4">
-                    <div className="flex flex-col gap-1.5 min-w-[200px] flex-1 sm:flex-initial">
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            {dict.categoryLabel}
-                        </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 relative z-10">
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Tag className="w-3 h-3" /> {dict.categoryLabel}
+                        </label>
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                            <SelectTrigger className="w-full sm:w-[200px] h-9 text-xs font-medium">
+                            <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-rose-500/50 rounded-xl shadow-inner">
                                 <SelectValue placeholder={dict.allCategories} />
                             </SelectTrigger>
-                            <SelectContent className="z-[9999]">
+                            <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
                                 <SelectItem value="all">{dict.allCategories}</SelectItem>
                                 {categories.map((cat) => (
                                     <SelectItem key={cat.id} value={cat.id}>
@@ -142,15 +162,15 @@ export const ExpensesClient: React.FC<ExpensesClientProps> = ({
                         </Select>
                     </div>
 
-                    <div className="flex flex-col gap-1.5 min-w-[200px] flex-1 sm:flex-initial">
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            {dict.accountLabel}
-                        </span>
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Wallet className="w-3 h-3" /> {dict.accountLabel}
+                        </label>
                         <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                            <SelectTrigger className="w-full sm:w-[200px] h-9 text-xs font-medium">
+                            <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-rose-500/50 rounded-xl shadow-inner">
                                 <SelectValue placeholder={dict.allAccounts} />
                             </SelectTrigger>
-                            <SelectContent className="z-[9999]">
+                            <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
                                 <SelectItem value="all">{dict.allAccounts}</SelectItem>
                                 <SelectItem value="none">{dict.noAccount}</SelectItem>
                                 {accounts.map((acc) => (
@@ -162,27 +182,14 @@ export const ExpensesClient: React.FC<ExpensesClientProps> = ({
                         </Select>
                     </div>
 
-                    <div className="flex flex-col gap-1.5 flex-1 sm:flex-initial">
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            {dict.dateLabel}
-                        </span>
-                        <DatePickerWithRange
-                            date={dateRange}
-                            setDate={setDateRange}
-                            className="w-full sm:w-[260px] md:w-[280px]"
-                        />
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> {dict.dateLabel}
+                        </label>
+                        <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-rose-500/50 transition-all shadow-inner w-full">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
                     </div>
-
-                    {(selectedCategory !== "all" || selectedAccount !== "all" || dateRange !== undefined) && (
-                        <Button
-                            variant="ghost"
-                            onClick={handleReset}
-                            className="h-9 px-3 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1 animate-in fade-in slide-in-from-left-2 duration-200"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                            {dict.resetFilters}
-                        </Button>
-                    )}
                 </div>
             </div>
 

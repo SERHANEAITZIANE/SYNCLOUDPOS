@@ -8,11 +8,10 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        if (process.platform !== "win32") {
-            return NextResponse.json({ defaultPrinter: "default" })
-        }
-        const { stdout } = await execAsync("powershell -Command \"Get-CimInstance Win32_Printer -Filter 'Default=True' | Select-Object -ExpandProperty Name\"")
-        return NextResponse.json({ defaultPrinter: stdout.trim() })
+        const { stdout } = await execAsync('reg query "HKCU\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows" /v Device')
+        const match = stdout.match(/Device\\s+REG_SZ\\s+([^,]+)/)
+        const printerName = match ? match[1].trim() : "default"
+        return NextResponse.json({ defaultPrinter: printerName })
     } catch (error) {
         console.error("Failed to get default printer:", error)
         return NextResponse.json({ error: "Failed to get default printer" }, { status: 500 })
@@ -30,8 +29,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, message: "Not on Windows, skipped setting default" })
         }
 
-        // Set default printer using COM object WScript.Network (very fast and compatible)
-        const cmd = `powershell -Command "(New-Object -ComObject WScript.Network).SetDefaultPrinter('${printerName.replace(/'/g, "''")}')"`
+        // Set default printer using COM object WScript.Network (this broadcasts WM_SETTINGCHANGE so Chrome detects it instantly)
+        // We use -NoProfile to make PowerShell start much faster (takes ~300ms instead of 2000ms)
+        const cmd = `powershell -NoProfile -Command "(New-Object -ComObject WScript.Network).SetDefaultPrinter('${printerName.replace(/'/g, "''")}')"`
         await execAsync(cmd)
 
         return NextResponse.json({ success: true })

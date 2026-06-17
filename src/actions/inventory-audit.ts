@@ -50,9 +50,12 @@ export async function createStockCountSession(name: string, notes?: string) {
 /** Update actual count for one item */
 export async function updateStockCountItem(itemId: string, actualQty: number) {
     const session = await auth()
-    if (!session?.user?.tenantId) return { error: "Unauthorized" }
+    const tenantId = session?.user?.tenantId
+    if (!tenantId) return { error: "Unauthorized" }
 
-    const item = await db.stockCountItem.findUnique({ where: { id: itemId } })
+    const item = await db.stockCountItem.findFirst({ 
+        where: { id: itemId, session: { tenantId } } 
+    })
     if (!item) return { error: "Item not found" }
 
     await db.stockCountItem.update({
@@ -128,7 +131,7 @@ export async function approveStockCountSession(sessionId: string) {
                 .filter(i => i.difference !== 0)
                 .map(i =>
                     db.product.updateMany({
-                        where: { id: i.productId },
+                        where: { id: i.productId, tenantId },
                         data: { stock: { increment: i.difference } }
                     })
                 ),

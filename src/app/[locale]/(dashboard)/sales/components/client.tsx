@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus, ShoppingCart, CreditCard, DollarSign, Package, TrendingUp } from "lucide-react"
+import { Plus, ShoppingCart, CreditCard, DollarSign, Package, TrendingUp, Filter, Tag, Activity, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 import { useRouter, usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { DateRange } from "react-day-picker"
@@ -22,6 +22,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { SearchableSelect } from "@/components/ui/searchable-select"
+import { Users } from "lucide-react"
 
 interface SalesOrderClientProps {
     data: SalesOrderColumn[]
@@ -34,6 +36,7 @@ interface SalesOrderClientProps {
         totalUnpaidAmount: string
         totalItemsSold: number
     }
+    customers?: { id: string, name: string }[]
 }
 
 export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
@@ -41,7 +44,8 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
     totalCount,
     pageCount,
     currentPage,
-    summary
+    summary,
+    customers = []
 }) => {
     const t = useTranslations("Sales")
     const tCommon = useTranslations("Common")
@@ -53,6 +57,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
 
     const typeFilter = searchParams.get("type") || "ALL"
     const statusFilter = searchParams.get("status") || "ALL"
+    const customerFilter = searchParams.get("customerId") || "ALL"
     const fromStr = searchParams.get("from")
     const toStr = searchParams.get("to")
 
@@ -85,6 +90,17 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
         router.push(pathname + "?" + params.toString())
     }
 
+    const setCustomerFilter = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (value && value !== "ALL") {
+            params.set("customerId", value)
+        } else {
+            params.delete("customerId")
+        }
+        params.set("page", "1")
+        router.push(pathname + "?" + params.toString())
+    }
+
     const setDateRange = (range: DateRange | undefined) => {
         const params = new URLSearchParams(searchParams.toString())
         if (range?.from) {
@@ -97,6 +113,17 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
         } else {
             params.delete("to")
         }
+        params.set("page", "1")
+        router.push(pathname + "?" + params.toString())
+    }
+
+    const onReset = () => {
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete("type")
+        params.delete("status")
+        params.delete("customerId")
+        params.delete("from")
+        params.delete("to")
         params.set("page", "1")
         router.push(pathname + "?" + params.toString())
     }
@@ -179,38 +206,93 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
                 </div>
             )}
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 py-4">
-                <Select
-                    value={typeFilter}
-                    onValueChange={setTypeFilter}
-                >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t("filters.filterByType")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">{t("filters.allTypes")}</SelectItem>
-                        <SelectItem value="QUOTE">{t("filters.quote")}</SelectItem>
-                        <SelectItem value="ORDER">{t("filters.order")}</SelectItem>
-                        <SelectItem value="INVOICE">{t("filters.invoice")}</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
-                >
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filtrer par État" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">Tous les états</SelectItem>
-                        <SelectItem value="DRAFT">{t("status.draft")}</SelectItem>
-                        <SelectItem value="VALIDATED">{t("status.validated")}</SelectItem>
-                        <SelectItem value="PAID">{t("status.paid")}</SelectItem>
-                        <SelectItem value="CANCELLED">{t("status.cancelled")}</SelectItem>
-                    </SelectContent>
-                </Select>
-                <div className="w-full sm:w-auto">
-                    <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+            {/* Premium Filter Area */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 mt-6 mb-4 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+                            <Filter className="w-4 h-4 text-indigo-400" />
+                        </div>
+                        <h3 className="text-sm font-bold text-slate-200">Filtres de recherche avancés</h3>
+                    </div>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={onReset}
+                        className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
+                    >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Réinitialiser</span>
+                    </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 relative z-10">
+                    {/* Type Filter */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Tag className="w-3 h-3" /> Type de document
+                        </label>
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-indigo-500/50 rounded-xl shadow-inner">
+                                <SelectValue placeholder={t("filters.filterByType")} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
+                                <SelectItem value="ALL">{t("filters.allTypes")}</SelectItem>
+                                <SelectItem value="QUOTE">{t("filters.quote")}</SelectItem>
+                                <SelectItem value="ORDER">{t("filters.order")}</SelectItem>
+                                <SelectItem value="INVOICE">{t("filters.invoice")}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Activity className="w-3 h-3" /> État
+                        </label>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-indigo-500/50 rounded-xl shadow-inner">
+                                <SelectValue placeholder="Filtrer par État" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
+                                <SelectItem value="ALL">Tous les états</SelectItem>
+                                <SelectItem value="DRAFT">{t("status.draft")}</SelectItem>
+                                <SelectItem value="VALIDATED">{t("status.validated")}</SelectItem>
+                                <SelectItem value="PAID">{t("status.paid")}</SelectItem>
+                                <SelectItem value="CANCELLED">{t("status.cancelled")}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Customer Filter */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Users className="w-3 h-3" /> Client
+                        </label>
+                        <SearchableSelect
+                            options={[
+                                { label: "Tous les clients", value: "ALL" },
+                                ...customers.map(c => ({ label: c.name, value: c.id }))
+                            ]}
+                            value={customerFilter}
+                            onChange={setCustomerFilter}
+                            placeholder="Tous les clients"
+                            searchPlaceholder="Rechercher un client..."
+                            className="bg-slate-950/50 border-slate-800 focus:border-indigo-500/50 rounded-xl shadow-inner"
+                        />
+                    </div>
+
+                    {/* Date range picker */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CalendarIcon className="w-3 h-3" /> Période
+                        </label>
+                        <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-indigo-500/50 transition-all shadow-inner">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
+                    </div>
                 </div>
             </div>
 

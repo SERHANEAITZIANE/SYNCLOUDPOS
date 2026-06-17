@@ -12,7 +12,7 @@ export async function createSellerPayment(data: {
 }) {
     const session = await auth()
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("commissions"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("commissions:create"))) return { error: "Accès refusé" }
 
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -64,7 +64,7 @@ export async function getSellerPayments(userId?: string) {
 export async function deleteSellerPayment(id: string) {
     const session = await auth()
     const { hasPermission } = await import("@/lib/rbac")
-    if (!(await hasPermission("commissions"))) return { error: "Accès refusé" }
+    if (!(await hasPermission("commissions:delete"))) return { error: "Accès refusé" }
 
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

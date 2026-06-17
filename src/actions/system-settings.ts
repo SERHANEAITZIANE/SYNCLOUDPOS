@@ -5,9 +5,15 @@ import path from "path"
 import { revalidatePath } from "next/cache"
 import { getActiveTenantId } from "./get-active-tenant"
 import { db } from "@/lib/db"
+import { auth } from "@/auth"
 
 export async function getEnvDatabaseUrl(): Promise<string> {
     try {
+        const session = await auth()
+        if (!session?.user?.id) return "";
+        const user = await db.user.findUnique({ where: { id: session.user.id } });
+        if (!user?.isSuperadmin) return "";
+
         const envPath = path.join(process.cwd(), ".env");
         if (!fs.existsSync(envPath)) return "";
 
@@ -26,6 +32,11 @@ export async function getEnvDatabaseUrl(): Promise<string> {
 
 export async function updateEnvDatabaseUrl(newUrl: string): Promise<{ success?: string, error?: string }> {
     try {
+        const session = await auth()
+        if (!session?.user?.id) return { error: "Unauthorized" };
+        const user = await db.user.findUnique({ where: { id: session.user.id } });
+        if (!user?.isSuperadmin) return { error: "Accès refusé" };
+
         const envPath = path.join(process.cwd(), ".env");
         let content = "";
 

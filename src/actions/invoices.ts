@@ -41,6 +41,9 @@ export async function createInvoiceFromBLs(data: {
       return { error: "Sélectionnez au moins un BL" }
     }
 
+    const customer = await db.customer.findFirst({ where: { id: data.customerId, tenantId } });
+    if (!customer) return { error: "Client introuvable ou non autorisé" };
+
     // Load all BLs and verify they belong to the same tenant + customer
     const bls = await db.salesOrder.findMany({
       where: {
@@ -280,8 +283,8 @@ export async function recordInvoicePayment(data: {
 
       // Create treasury transaction if account provided
       if (data.accountId) {
-        const account = await tx.treasuryAccount.findUnique({
-          where: { id: data.accountId },
+        const account = await tx.treasuryAccount.findFirst({
+          where: { id: data.accountId, tenantId },
         })
         if (account) {
           const balanceBefore = Number(account.balance)

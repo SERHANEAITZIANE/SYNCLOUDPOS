@@ -910,9 +910,11 @@
   },
   "ModeToggle": {
     "toggleTheme": "Changer le thème",
-    "light": "Clair",
-    "dark": "Sombre",
-    "system": "Système"
+    "light": "Standard Clair",
+    "dark": "Standard Sombre",
+    "system": "Système par Défaut",
+    "ghardaia": "Ghardaïa Argile (Clair)",
+    "ghardaiaDark": "Ghardaïa Nuit (Sombre)"
   },
   "DataTable": {
     "search": "Rechercher...",
@@ -952,7 +954,14 @@
     "total": "Total",
     "checkout": "Encaisser",
     "errorValidation": "Erreur lors de la validation.",
-    "orderValidated": "Commande validée!"
+    "orderValidated": "Commande validée!",
+    "newCustomer": "Nouveau Client",
+    "fullName": "Nom complet *",
+    "phoneOptional": "Téléphone (Optionnel)",
+    "historyLoading": "Chargement de l'historique...",
+    "clientHistory": "Historique d'achat",
+    "noHistory": "Aucun historique d'achat trouvé.",
+    "selectClientFirst": "Veuillez d'abord sélectionner un client"
   },
   "PaymentModal": {
     "transactionComplete": "Transaction Terminée",
@@ -979,7 +988,9 @@
     "balance": "Reste",
     "cancel": "Annuler",
     "processing": "Traitement...",
-    "completeOrder": "Valider la Commande"
+    "completeOrder": "Valider la Commande",
+    "saveOnly": "Valider Uniquement",
+    "saveAndPrint": "Valider & Imprimer"
   },
   "PosHeader": {
     "online": "En ligne"

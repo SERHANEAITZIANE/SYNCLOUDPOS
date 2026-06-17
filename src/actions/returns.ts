@@ -73,6 +73,9 @@ export const processClientReturn = async (params: ClientReturnParams) => {
 
     try {
         const result = await db.$transaction(async (tx) => {
+            const customer = await tx.customer.findFirst({ where: { id: customerId, tenantId } });
+            if (!customer) throw new Error("Client introuvable ou non autorisé");
+
             const returnId = crypto.randomUUID()
 
             // 1. Fetch product to get unit price and current stock details
@@ -187,10 +190,12 @@ export const processClientReturn = async (params: ClientReturnParams) => {
             return productReturn
         })
 
-        revalidatePath("/(dashboard)/retours")
-        revalidatePath("/(dashboard)/products")
-        revalidatePath("/(dashboard)/customers")
-        revalidatePath("/(dashboard)/treasury")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/(dashboard)/retours")
+            revalidatePath("/(dashboard)/products")
+            revalidatePath("/(dashboard)/customers")
+            revalidatePath("/(dashboard)/treasury")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
@@ -255,10 +260,10 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             const returnId = crypto.randomUUID()
 
             // 1. Fetch supplier info
-            const supplier = await tx.supplier.findUnique({
+            const supplier = await tx.supplier.findFirst({
                 where: { id: supplierId, tenantId }
             })
-            if (!supplier) throw new Error("Fournisseur introuvable")
+            if (!supplier) throw new Error("Fournisseur introuvable ou non autorisé")
 
             // 2. Fetch product info to get cost price and stock details
             const product = await tx.product.findUnique({
@@ -368,10 +373,12 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             return supplierReturn
         })
 
-        revalidatePath("/(dashboard)/retours")
-        revalidatePath("/(dashboard)/products")
-        revalidatePath("/(dashboard)/suppliers")
-        revalidatePath("/(dashboard)/treasury")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/(dashboard)/retours")
+            revalidatePath("/(dashboard)/products")
+            revalidatePath("/(dashboard)/suppliers")
+            revalidatePath("/(dashboard)/treasury")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
@@ -464,6 +471,9 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
 
     try {
         const result = await db.$transaction(async (tx) => {
+            const customer = await tx.customer.findFirst({ where: { id: customerId, tenantId } });
+            if (!customer) throw new Error("Client introuvable ou non autorisé");
+
             // 1. Fetch sales order (BL) details
             const salesOrder = await tx.salesOrder.findFirst({
                 where: { id: salesOrderId, tenantId, customerId }
@@ -606,10 +616,12 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
             return { success: true }
         })
 
-        revalidatePath("/(dashboard)/retours")
-        revalidatePath("/(dashboard)/products")
-        revalidatePath("/(dashboard)/customers")
-        revalidatePath("/(dashboard)/treasury")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/(dashboard)/retours")
+            revalidatePath("/(dashboard)/products")
+            revalidatePath("/(dashboard)/customers")
+            revalidatePath("/(dashboard)/treasury")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         await cacheMonitor.invalidateCache(`treasury:${tenantId}`)
@@ -723,6 +735,9 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
 
     try {
         const result = await db.$transaction(async (tx) => {
+            const supplier = await tx.supplier.findFirst({ where: { id: supplierId, tenantId } });
+            if (!supplier) throw new Error("Fournisseur introuvable ou non autorisé");
+
             // 1. Fetch purchase order (BL/Facture) details
             const purchaseOrder = await tx.purchaseOrder.findFirst({
                 where: { id: purchaseOrderId, tenantId, supplierId }
@@ -834,7 +849,7 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
                             balanceAfter: currentAccountBalance + itemCashRefund,
                             source: "MANUAL_IN",
                             referenceId: returnId,
-                            description: `Remboursement Retour Fournisseur (Bon N°: ${purchaseOrder.reference || 'N/A'} / ID: ${purchaseOrder.id.slice(-8).toUpperCase()}): ${reason}`,
+                            description: `Remboursement Retour Fournisseur (Bon N°: ${purchaseOrder.reference || 'N/A'}): ${reason}`,
                             tenantId
                         }
                     })
@@ -874,10 +889,12 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
             return { success: true }
         })
 
-        revalidatePath("/(dashboard)/retours")
-        revalidatePath("/(dashboard)/products")
-        revalidatePath("/(dashboard)/suppliers")
-        revalidatePath("/(dashboard)/treasury")
+        if (!process.env.AUDIT_TENANT_ID) {
+            revalidatePath("/(dashboard)/retours")
+            revalidatePath("/(dashboard)/products")
+            revalidatePath("/(dashboard)/suppliers")
+            revalidatePath("/(dashboard)/treasury")
+        }
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         await cacheMonitor.invalidateCache(`treasury:${tenantId}`)

@@ -226,7 +226,7 @@ export async function getCustomerLedger(customerId: string) {
         })
 
         return {
-            lines: finalizedLedger,
+            lines: finalizedLedger.reverse(),
             finalBalance: currentBalance
         }
 
@@ -425,7 +425,7 @@ export async function getSupplierLedger(supplierId: string) {
         })
 
         return {
-            lines: finalizedLedger,
+            lines: finalizedLedger.reverse(),
             finalBalance: currentBalance
         }
 

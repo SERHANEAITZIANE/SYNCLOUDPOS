@@ -2,17 +2,13 @@
 
 import * as React from "react"
 import { useState, useRef, useEffect } from "react"
-import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileText, Clock } from "lucide-react"
-import { useReactToPrint } from "react-to-print"
+import { CreditCard, Banknote, Printer, CheckCircle, ArrowRight, Landmark, FileText, Clock, Shield } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { toast } from "react-hot-toast"
-import { printWithDefaultPrinter } from "@/lib/print-helper"
 
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Receipt } from "./receipt"
-import { BonLivraisonPrintTemplate, BonGarantiePrintTemplate } from "@/components/print/print-templates"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { Label } from "@/components/ui/label"
@@ -20,15 +16,28 @@ import { Label } from "@/components/ui/label"
 interface PaymentModalProps {
     isOpen: boolean
     onClose: () => void
-    onConfirm: (method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM", paidAmount: number, accountId: string | undefined, stampTax: number, subtotal: number, tvaAmount: number, totalTTC: number, vendorId?: string) => Promise<{ success: boolean; data?: any } | void>
+    onConfirm: (
+        method: "CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM",
+        paidAmount: number,
+        accountId: string | undefined,
+        stampTax: number,
+        subtotal: number,
+        tvaAmount: number,
+        totalTTC: number,
+        vendorId: string | undefined,
+        shouldPrint: boolean,
+        printTicket: boolean,
+        printBL: boolean,
+        printWarranty: boolean
+    ) => Promise<{ success: boolean; data?: any } | void>
     loading: boolean
     total: number
-    items?: { 
-        name: string; 
-        quantity: number; 
-        price: number; 
-        tvaRate?: number; 
-        priceHt?: number; 
+    items?: {
+        name: string;
+        quantity: number;
+        price: number;
+        tvaRate?: number;
+        priceHt?: number;
         serialNumber?: string;
         discountAmount?: number;
         discountLabel?: string;
@@ -67,6 +76,74 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const [method, setMethod] = useState<"CASH" | "CARD" | "TRANSFER" | "CHECK" | "TERM">("CASH")
     const [accountId, setAccountId] = useState("none")
     const [selectedVendorId, setSelectedVendorId] = useState<string>(currentUserId || "")
+
+    const [printTicket, setPrintTicket] = useState(true)
+    const [printBL, setPrintBL] = useState(false)
+    const [printWarranty, setPrintWarranty] = useState(false)
+
+    // Load auto-print preferences
+    useEffect(() => {
+        if (isOpen) {
+            try {
+                const stored = localStorage.getItem("pos_auto_print_prefs")
+                if (stored) {
+                    const prefs = JSON.parse(stored)
+                    let ticket = prefs.printTicket !== undefined ? prefs.printTicket : true
+                    let bl = prefs.printBL !== undefined ? prefs.printBL : false
+                    if (ticket && bl) {
+                        bl = false // Resolve mutual exclusivity conflict
+                    }
+                    setPrintTicket(ticket)
+                    setPrintBL(bl)
+                    if (prefs.printWarranty !== undefined) setPrintWarranty(prefs.printWarranty)
+                } else {
+                    setPrintTicket(true)
+                    setPrintBL(false)
+                    setPrintWarranty(false)
+                }
+            } catch (err) {
+                console.error("Failed to load local auto-print prefs:", err)
+            }
+        }
+    }, [isOpen])
+
+    const togglePrintTicket = (val: boolean) => {
+        setPrintTicket(val)
+        if (val) {
+            setPrintBL(false)
+        }
+        try {
+            const stored = localStorage.getItem("pos_auto_print_prefs")
+            const prefs = stored ? JSON.parse(stored) : {}
+            prefs.printTicket = val
+            if (val) prefs.printBL = false
+            localStorage.setItem("pos_auto_print_prefs", JSON.stringify(prefs))
+        } catch { }
+    }
+
+    const togglePrintBL = (val: boolean) => {
+        setPrintBL(val)
+        if (val) {
+            setPrintTicket(false)
+        }
+        try {
+            const stored = localStorage.getItem("pos_auto_print_prefs")
+            const prefs = stored ? JSON.parse(stored) : {}
+            prefs.printBL = val
+            if (val) prefs.printTicket = false
+            localStorage.setItem("pos_auto_print_prefs", JSON.stringify(prefs))
+        } catch { }
+    }
+
+    const togglePrintWarranty = (val: boolean) => {
+        setPrintWarranty(val)
+        try {
+            const stored = localStorage.getItem("pos_auto_print_prefs")
+            const prefs = stored ? JSON.parse(stored) : {}
+            prefs.printWarranty = val
+            localStorage.setItem("pos_auto_print_prefs", JSON.stringify(prefs))
+        } catch { }
+    }
 
     useEffect(() => {
         if (isOpen && currentUserId) {
@@ -148,81 +225,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         }
     }, [isOpen])
 
-    const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
-    const [success, setSuccess] = useState(false)
-    const [orderData, setOrderData] = useState<any>(null)
-    const [finalItems, setFinalItems] = useState<any[]>([])
-    const [finalTotal, setFinalTotal] = useState<number>(0)
-    const [finalCustomerName, setFinalCustomerName] = useState<string | undefined>(undefined)
-    const [hasAutoPrinted, setHasAutoPrinted] = useState(false)
-    const receiptRef = useRef<HTMLDivElement>(null)
-    const blRef = useRef<HTMLDivElement>(null)
-    const warrantyRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        if (isOpen) {
+            // Blur any parent page inputs to prevent capturing keyboard events
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur()
+            }
+        }
+    }, [isOpen])
 
-    const tenderedAmount = tenderedStr ? parseInt(tenderedStr, 10) : 0
+    const [tenderedStr, setTenderedStr] = useState(finalTotalTTC.toString())
+    const tenderedAmount = tenderedStr ? parseFloat(tenderedStr) : 0
     const changeAmount = Math.max(0, tenderedAmount - finalTotalTTC)
 
-    const handlePrintReceipt = useReactToPrint({
-        contentRef: receiptRef,
-        documentTitle: printerReceipt !== "default" ? printerReceipt : "Ticket de Caisse",
-    })
-
-    const handlePrintBL = useReactToPrint({
-        contentRef: blRef,
-        documentTitle: printerA4 !== "default" ? printerA4 : "Bon de Livraison",
-    })
-
-    const handlePrintWarranty = useReactToPrint({
-        contentRef: warrantyRef,
-        documentTitle: printerA4 !== "default" ? printerA4 : "Bon de Garantie",
-    })
-
-    const onPrintReceipt = () => {
-        if (!handlePrintReceipt) return
-        const originalTitle = document.title
-        if (printerReceipt !== "default") {
-            document.title = printerReceipt
-        }
-        printWithDefaultPrinter(printerReceipt, () => {
-            handlePrintReceipt()
-        }).finally(() => {
-            setTimeout(() => {
-                document.title = originalTitle
-            }, 1000)
-        })
-    }
-
-    const onPrintBL = () => {
-        if (!handlePrintBL) return
-        const originalTitle = document.title
-        if (printerA4 !== "default") {
-            document.title = printerA4
-        }
-        printWithDefaultPrinter(printerA4, () => {
-            handlePrintBL()
-        }).finally(() => {
-            setTimeout(() => {
-                document.title = originalTitle
-            }, 1000)
-        })
-    }
-
-    const onPrintWarranty = () => {
-        if (!handlePrintWarranty) return
-        const originalTitle = document.title
-        if (printerA4 !== "default") {
-            document.title = printerA4
-        }
-        printWithDefaultPrinter(printerA4, () => {
-            handlePrintWarranty()
-        }).finally(() => {
-            setTimeout(() => {
-                document.title = originalTitle
-            }, 1000)
-        })
-    }
-
-    const handleConfirm = async () => {
+    const handleConfirm = async (shouldPrint: boolean) => {
         if (storeData?.posVendorRequired && !selectedVendorId) {
             toast.error("Veuillez sélectionner un vendeur pour continuer.")
             return
@@ -231,23 +247,26 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         const actualPaidAmount = method === "CASH"
             ? (finalTotalTTC < 0 ? Math.max(tenderedAmount, finalTotalTTC) : Math.min(tenderedAmount, finalTotalTTC))
             : finalTotalTTC
-        const result = await onConfirm(method, actualPaidAmount, finalAccountId, stampTax, subtotal, tvaAmount, finalTotalTTC, selectedVendorId)
+        const result = await onConfirm(
+            method,
+            actualPaidAmount,
+            finalAccountId,
+            stampTax,
+            subtotal,
+            tvaAmount,
+            finalTotalTTC,
+            selectedVendorId,
+            shouldPrint,
+            printTicket,
+            printBL,
+            printWarranty
+        )
         if (result && result.success) {
-            setFinalItems(items)
-            setFinalTotal(finalTotalTTC)
-            setFinalCustomerName(customerName)
-            if (result.data) setOrderData(result.data)
-            setSuccess(true)
-            setHasAutoPrinted(false) // Reset auto-print state for the new order
+            handleClose()
         }
     }
 
     const handleClose = () => {
-        setSuccess(false)
-        setOrderData(null)
-        setFinalItems([])
-        setFinalTotal(0)
-        setFinalCustomerName(undefined)
         setMethod("CASH")
         setAccountId("none")
         setTenderedStr(total.toString())
@@ -277,17 +296,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         })
     }, [])
 
-    const setQuickCash = (amount: number) => {
-        isPristineRef.current = false
-        setTenderedStr(amount.toString())
-    }
-
     // Keyboard support
     useEffect(() => {
-        if (!isOpen || success) return
+        if (!isOpen) return
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return
+            const activeEl = document.activeElement
+            if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
+                const isInsideModalOrPopover = activeEl.closest('[role="dialog"]') || activeEl.closest('[data-radix-popper-content-wrapper]')
+                if (isInsideModalOrPopover) {
+                    return
+                }
+            }
 
             if (e.key >= "0" && e.key <= "9") {
                 e.preventDefault()
@@ -299,7 +319,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 e.preventDefault()
                 const isMethodCashAndInsufficient = method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer
                 if (!loading && !isMethodCashAndInsufficient) {
-                    handleConfirm()
+                    handleConfirm(true)
                 }
             } else if (e.key === "Escape") {
                 e.preventDefault()
@@ -312,191 +332,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen, success, handleNumpad, loading, method, tenderedAmount, finalTotalTTC, hasCustomer])
+    }, [isOpen, handleNumpad, loading, method, tenderedAmount, finalTotalTTC, hasCustomer])
 
-    // Auto-print effect
-    React.useEffect(() => {
-        let timeoutId: any
+    // Success View is bypassed to return directly to POS
 
-        if (success && !hasAutoPrinted) {
-            setHasAutoPrinted(true)
-
-            // Allow React to mount the <Receipt /> component inside the success view
-            timeoutId = setTimeout(() => {
-                if (receiptRef.current && handlePrintReceipt) {
-                    onPrintReceipt()
-                } else {
-                    console.log("Print failed: Component ref is null")
-                }
-            }, 800)
-        }
-
-        return () => {
-            if (timeoutId) clearTimeout(timeoutId)
-        }
-    }, [success, handlePrintReceipt, hasAutoPrinted, printerReceipt])
-
-    // Success View
-    if (success) {
-        return (
-            <Modal
-                title={t("transactionComplete")}
-                description={t("orderProcessed")}
-                isOpen={isOpen}
-                onClose={handleClose}
-            >
-                <div className="flex flex-col items-center justify-center space-y-8 py-6">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />
-                        <div className="relative bg-gradient-to-tr from-green-400 to-green-600 rounded-full p-5 shadow-2xl shadow-green-500/40">
-                            <CheckCircle className="h-16 w-16 text-white" />
-                        </div>
-                    </div>
-
-                    <div className="text-center space-y-2">
-                        <p className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest text-sm">{t("amountPaid")}</p>
-                        <h3 className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter">
-                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
-                            <span className="text-xl font-bold text-gray-400 ml-2">DA</span>
-                        </h3>
-                        {orderData?.receiptNumber && (
-                            <p className="text-lg font-bold text-emerald-600 mt-2 text-center bg-emerald-50 dark:bg-emerald-900/20 py-1.5 px-4 rounded-full border border-emerald-200">
-                                {orderData.receiptNumber}
-                            </p>
-                        )}
-                    </div>
-
-                    {method === "CASH" && changeAmount > 0 && (
-                        <div className="w-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-2xl p-4 flex justify-between items-center">
-                            <span className="text-green-700 dark:text-green-400 font-bold uppercase tracking-wider text-sm">{t("changeToReturn")}</span>
-                            <span className="text-2xl font-black text-green-700 dark:text-green-400">
-                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}
-                                <span className="text-sm font-bold ml-1">DA</span>
-                            </span>
-                        </div>
-                    )}
-
-                    <div className="flex w-full flex-col gap-3 mt-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-gray-200 hover:bg-gray-50 dark:border-gray-800" onClick={() => onPrintReceipt()}>
-                                <Printer size={20} />
-                                {t("printTicket", { fallback: "Imprimer Ticket (80mm)" })}
-                            </Button>
-                            <Button variant="outline" size="lg" className="h-16 rounded-xl text-base font-bold gap-3 border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/20" onClick={() => onPrintBL()}>
-                                <FileText size={20} className="text-emerald-600" />
-                                {storeData?.posBlFormat === "A5" ? "Imprimer BL (A5)" : "Imprimer BL (A4)"}
-                            </Button>
-                            {storeData?.warrantyEnabled && (
-                                <Button variant="outline" size="lg" className="col-span-1 sm:col-span-2 h-16 rounded-xl text-base font-bold gap-3 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/20" onClick={() => onPrintWarranty()}>
-                                    <FileText size={20} className="text-blue-600" />
-                                    Imprimer Garantie ({storeData?.posBlFormat === "A5" ? "A5" : "A4"})
-                                </Button>
-                            )}
-                        </div>
-                        <Button size="lg" className="w-full h-14 rounded-xl text-lg font-bold gap-3 shadow-xl hover:-translate-y-0.5 transition-transform" onClick={handleClose}>
-                            {t("newOrder")}
-                            <ArrowRight size={22} />
-                        </Button>
-                    </div>
-
-                    {/* Hidden Components for Printing */}
-                    <div className="hidden">
-                        <Receipt
-                            ref={receiptRef}
-                            items={finalItems.length > 0 ? finalItems : items}
-                            total={success ? finalTotal : finalTotalTTC}
-                            stampTax={stampTax}
-                            rounding={roundingDifference}
-                            date={new Date()}
-                            orderId={orderData?.receiptNumber}
-                            storeName={storeData?.name || storeName}
-                            storeAddress={storeAddress}
-                            storePhone={storePhone}
-                            customerName={success ? finalCustomerName : customerName}
-                            paidAmount={orderData?.paidAmount}
-                            previousBalance={orderData?.previousBalance}
-                            newBalance={orderData?.newBalance}
-                            logo={storeData?.logo}
-                        />
-                        <div ref={blRef}>
-                            <BonLivraisonPrintTemplate
-                                items={(finalItems.length > 0 ? finalItems : items).map(item => {
-                                    const rate = tvaEnabled ? (item.tvaRate ?? 0) : 0;
-                                    return {
-                                        product: { name: item.name },
-                                        quantity: item.quantity,
-                                        unitPrice: item.price,
-                                        tvaRate: rate,
-                                        priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
-                                        serialNumber: item.serialNumber,
-                                        discountAmount: item.discountAmount,
-                                        discountLabel: item.discountLabel
-                                    };
-                                })}
-                                customer={{
-                                    name: success ? (finalCustomerName || "Client Standard") : (customerName || "Client Standard"),
-                                }}
-                                store={storeData}
-                                receiptNumber={orderData?.receiptNumber}
-                                date={new Date()}
-                                subtotalHT={subtotal}
-                                totalTVA={tvaAmount}
-                                stampTax={stampTax}
-                                totalTTC={success ? finalTotal : finalTotalTTC}
-                                paymentMethod={method}
-                                previousBalance={orderData?.previousBalance || 0}
-                                paymentAmount={orderData?.paidAmount || 0}
-                                newBalance={orderData?.newBalance || 0}
-                            />
-                        </div>
-                        <div ref={warrantyRef}>
-                            <BonGarantiePrintTemplate
-                                items={(finalItems.length > 0 ? finalItems : items).map(item => {
-                                    const rate = tvaEnabled ? (item.tvaRate ?? 0) : 0;
-                                    return {
-                                        product: { name: item.name },
-                                        quantity: item.quantity,
-                                        unitPrice: item.price,
-                                        tvaRate: rate,
-                                        priceHt: item.priceHt ?? (item.price / (1 + rate / 100)),
-                                        serialNumber: item.serialNumber,
-                                        discountAmount: item.discountAmount,
-                                        discountLabel: item.discountLabel
-                                    };
-                                })}
-                                customer={{
-                                    name: success ? (finalCustomerName || "Client Standard") : (customerName || "Client Standard"),
-                                }}
-                                store={storeData}
-                                receiptNumber={orderData?.receiptNumber}
-                                date={new Date()}
-                                subtotalHT={subtotal}
-                                totalTVA={tvaAmount}
-                                stampTax={stampTax}
-                                totalTTC={success ? finalTotal : finalTotalTTC}
-                                paymentMethod={method}
-                            />
-                        </div>
-                    </div>
-                </div>
-            </Modal>
-        )
-    }
-
-    // Determine viable quick-cash amounts based on total
-    const roundedUp100 = Math.ceil(total / 100) * 100
-    const roundedUp500 = Math.ceil(total / 500) * 500
-    const roundedUp1000 = Math.ceil(total / 1000) * 1000
-    const roundedUp2000 = Math.ceil(total / 2000) * 2000
-
-    const quickCashOptions = Array.from(new Set([
-        finalTotalTTC,
-        roundedUp100 > finalTotalTTC ? roundedUp100 : null,
-        roundedUp500 > roundedUp100 ? roundedUp500 : null,
-        roundedUp1000 > roundedUp500 ? roundedUp1000 : null,
-        roundedUp2000 > roundedUp1000 ? roundedUp2000 : null,
-        5000
-    ].filter(Boolean) as number[])).sort((a, b) => a - b).slice(0, 4)
 
     return (
         <Modal
@@ -513,14 +352,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div className="flex-1 flex flex-col gap-4">
 
                         {/* Total Due */}
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 sm:p-5 text-center border border-gray-100 dark:border-gray-800 shadow-sm">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t("totalDue")}</p>
-                            <div className="text-4xl sm:text-5xl leading-none font-black text-gray-900 dark:text-white tracking-tighter">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/10 rounded-2xl p-4 sm:p-5 text-center border border-blue-100 dark:border-blue-900/30 shadow-md">
+                            <p className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">{t("totalDue")}</p>
+                            <div className="text-4xl sm:text-5xl leading-none font-black text-blue-700 dark:text-blue-300 tracking-tighter">
                                 {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(finalTotalTTC)}
-                                <span className="text-xl text-gray-400 font-bold ml-2">DA</span>
+                                <span className="text-xl text-blue-500 font-bold ml-2">DA</span>
                             </div>
                             {(stampTax > 0 || roundingDifference !== 0) && (
-                                <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-gray-500 font-medium">
+                                <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-blue-800 dark:text-blue-400/80 font-medium">
                                     <span>Sous-total: {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(total)} DA</span>
                                     {stampTax > 0 && (
                                         <span className="text-amber-600 font-bold">Timbre: +{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(stampTax)} DA</span>
@@ -528,8 +367,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                     {roundingDifference !== 0 && (
                                         <span className={cn(
                                             "font-bold font-mono px-2.5 py-0.5 rounded-full text-[10px] shadow-sm select-none border",
-                                            roundingDifference > 0 
-                                                ? "bg-amber-50/80 border-amber-200 text-amber-600 dark:bg-amber-950/20 dark:border-amber-900/30" 
+                                            roundingDifference > 0
+                                                ? "bg-amber-50/80 border-amber-200 text-amber-600 dark:bg-amber-950/20 dark:border-amber-900/30"
                                                 : "bg-emerald-50/80 border-emerald-200 text-emerald-600 dark:bg-emerald-950/20 dark:border-emerald-900/30"
                                         )}>
                                             Arrondi: {roundingDifference > 0 ? "+" : ""}{new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(roundingDifference)} DA
@@ -538,7 +377,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 </div>
                             )}
                         </div>
-                        {/* Payment Method — 2 rows on mobile, 1 row on bigger */}
+
+                        {/* Payment Method — 2 rows on mobile, 1 row on bigger */}
                         <div className="grid grid-cols-5 gap-2">
                             {([
                                 { key: "CASH", label: t("cash"), Icon: Banknote },
@@ -553,7 +393,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                     className={cn(
                                         "flex flex-col items-center justify-center py-2 sm:py-2.5 rounded-xl border transition-all duration-200 cursor-pointer gap-1",
                                         method === key
-                                            ? "bg-gray-900 dark:bg-white border-gray-900 dark:border-white text-white dark:text-black"
+                                            ? "bg-primary border-primary text-primary-foreground"
                                             : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 hover:border-gray-300 text-gray-500"
                                     )}
                                 >
@@ -608,6 +448,67 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                                 placeholder={t("selectBankAccount")}
                             />
                         </div>
+
+                        {/* Printing Options */}
+                        <div className="space-y-2 pt-1">
+                            <Label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5">
+                                <Printer className="h-3 w-3 text-gray-400" /> Options d'impression auto
+                            </Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => togglePrintTicket(!printTicket)}
+                                    className={cn(
+                                        "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-left",
+                                        printTicket
+                                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                                            : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500"
+                                    )}
+                                >
+                                    <Printer className="h-3.5 w-3.5 shrink-0" />
+                                    <div className="flex flex-col">
+                                        <span className="font-bold text-[9px] leading-tight">Ticket (80mm)</span>
+                                        <span className="text-[7.5px] opacity-70">Impression auto</span>
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => togglePrintBL(!printBL)}
+                                    className={cn(
+                                        "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-left",
+                                        printBL
+                                            ? "bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400"
+                                            : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500"
+                                    )}
+                                >
+                                    <FileText className="h-3.5 w-3.5 shrink-0" />
+                                    <div className="flex flex-col">
+                                        <span className="font-bold text-[9px] leading-tight">Bon Livraison</span>
+                                        <span className="text-[7.5px] opacity-70">Format {storeData?.posBlFormat === "A5" ? "A5" : "A4"}</span>
+                                    </div>
+                                </button>
+
+                                {storeData?.warrantyEnabled && (
+                                    <button
+                                        type="button"
+                                        onClick={() => togglePrintWarranty(!printWarranty)}
+                                        className={cn(
+                                            "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-left col-span-1 sm:col-span-2 lg:col-span-1",
+                                            printWarranty
+                                                ? "bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400"
+                                                : "bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-500"
+                                        )}
+                                    >
+                                        <Shield className="h-3.5 w-3.5 shrink-0" />
+                                        <div className="flex flex-col">
+                                            <span className="font-bold text-[9px] leading-tight">Garantie</span>
+                                            <span className="text-[7.5px] opacity-70">Bon Garantie</span>
+                                        </div>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right Side: Numpad (dimmed when not CASH) */}
@@ -616,30 +517,64 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         method !== "CASH" ? "opacity-30 pointer-events-none blur-[1px]" : "opacity-100"
                     )}>
                         {/* Tendered Amount */}
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl px-5 py-4 border border-gray-100 dark:border-gray-800 text-right shadow-sm relative">
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t("tendered")}</p>
-                            <p className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50/30 dark:from-amber-950/20 dark:to-orange-950/10 rounded-2xl px-5 py-4 border border-amber-100 dark:border-amber-900/30 text-right shadow-md relative">
+                            <p className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1">{t("tendered")}</p>
+                            <p className="text-4xl sm:text-5xl font-black text-amber-700 dark:text-amber-300 tracking-tight">
                                 {tenderedStr ? new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(tenderedAmount) : "0"}
+                                <span className="text-lg text-amber-500 font-bold ml-1.5">DA</span>
                             </p>
                         </div>
 
                         {/* Change / Remaining */}
-                        <div className={cn(
-                            "flex flex-row justify-between items-center px-4 py-3 rounded-xl border",
-                            changeAmount > 0
-                                ? "bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30"
-                                : "bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-800"
-                        )}>
-                            <span className={cn("font-bold text-base", changeAmount > 0 ? "text-green-700 dark:text-green-400" : "text-gray-500")}>
-                                {changeAmount > 0 ? t("change") : t("balance")}
-                            </span>
-                            <span className={cn("text-xl font-black", changeAmount > 0 ? "text-green-600 dark:text-green-400" : "text-gray-400")}>
-                                {changeAmount > 0
-                                    ? `+${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)}`
-                                    : new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, finalTotalTTC - tenderedAmount))
+                        {(() => {
+                            const balanceState = tenderedAmount === finalTotalTTC
+                                ? "exact"
+                                : changeAmount > 0
+                                    ? "change"
+                                    : "debt";
+
+                            const balanceStyles = {
+                                change: {
+                                    container: "bg-gradient-to-r from-emerald-50 to-green-50/50 dark:from-emerald-950/20 dark:to-green-950/10 border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-300",
+                                    text: "text-emerald-700 dark:text-emerald-400",
+                                    value: "text-emerald-600 dark:text-emerald-400"
+                                },
+                                exact: {
+                                    container: "bg-gradient-to-r from-teal-50 to-cyan-50/50 dark:from-teal-950/20 dark:to-cyan-950/10 border-teal-200 dark:border-teal-900/40 text-teal-800 dark:text-teal-300",
+                                    text: "text-teal-700 dark:text-teal-400",
+                                    value: "text-teal-600 dark:text-teal-400"
+                                },
+                                debt: {
+                                    container: "bg-gradient-to-r from-rose-50 to-red-50/50 dark:from-rose-950/20 dark:to-red-950/10 border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300",
+                                    text: "text-rose-700 dark:text-rose-400",
+                                    value: "text-rose-600 dark:text-rose-400"
                                 }
-                            </span>
-                        </div>
+                            }[balanceState];
+
+                            return (
+                                <div className={cn(
+                                    "flex flex-row justify-between items-center px-4 py-3 rounded-xl border shadow-sm transition-all duration-300",
+                                    balanceStyles.container
+                                )}>
+                                    <span className={cn("font-bold text-base", balanceStyles.text)}>
+                                        {balanceState === "change"
+                                            ? t("change")
+                                            : balanceState === "exact"
+                                                ? "Règlement Exact"
+                                                : t("balance")
+                                        }
+                                    </span>
+                                    <span className={cn("text-xl font-black", balanceStyles.value)}>
+                                        {balanceState === "change"
+                                            ? `+${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(changeAmount)} DA`
+                                            : balanceState === "exact"
+                                                ? "0.00 DA"
+                                                : `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.max(0, finalTotalTTC - tenderedAmount))} DA`
+                                        }
+                                    </span>
+                                </div>
+                            );
+                        })()}
 
                         {/* Numpad */}
                         <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
@@ -668,10 +603,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </Button>
                 <Button
                     disabled={loading || (method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer)}
-                    className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-xl font-black text-xs sm:text-sm bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-100 shadow-xl transition-all disabled:opacity-50"
-                    onClick={handleConfirm}
+                    variant="outline"
+                    className="w-full sm:w-auto h-10 sm:h-11 px-5 rounded-xl font-bold text-xs sm:text-sm border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-900/40 dark:text-blue-400 dark:hover:bg-blue-950/20 shadow-sm transition-all disabled:opacity-50"
+                    onClick={() => handleConfirm(false)}
                 >
-                    {loading ? t("processing") : t("completeOrder")}
+                    {loading ? t("processing") : t("saveOnly")}
+                </Button>
+                <Button
+                    disabled={loading || (method === "CASH" && tenderedAmount < finalTotalTTC && !hasCustomer)}
+                    className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-xl font-black text-xs sm:text-sm bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl transition-all disabled:opacity-50"
+                    onClick={() => handleConfirm(true)}
+                >
+                    {loading ? t("processing") : t("saveAndPrint")}
                     {!loading && <span className="text-[10px] opacity-60 font-bold tracking-widest ml-2 hidden sm:inline">Enter</span>}
                 </Button>
             </div>
