@@ -17,6 +17,7 @@ export type TreasuryMovementColumn = {
     description: string
     accountName: string
     referenceId: string | null
+    referenceNumber?: string | null
 }
 
 export const columns: ColumnDef<TreasuryMovementColumn>[] = [
@@ -103,12 +104,13 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
             const desc = (row.original.description || "").toLowerCase()
             
             const isRetour = source === "RETURN" || desc.includes("retour client") || desc.includes("retour fournisseur")
-
             const isEmprunt = source === "LOAN" || desc.includes("emprunt") || desc.includes("prêt")
+            const refNumber = row.original.referenceNumber
 
             if (isRetour) {
                 href = `/retours?returnId=${refId}`
                 label = type === "DEBIT" ? "Retour Client" : "Retour Fournisseur"
+                if (refNumber) label += ` (${refNumber})`
             } else if (isEmprunt) {
                 if (type === "DEBIT") {
                     href = `/emprunt`
@@ -117,12 +119,24 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
                     href = `/emprunt-fournisseur`
                     label = "Emprunt Fournisseur"
                 }
-            } else if (source === "SALE" || source === "MANUAL_IN" || source === "CUSTOMER_PAYMENT") {
-                href = `/payments?paymentId=${txId}`
+            } else if (source === "SALE") {
+                href = `/sales/${refId}`
+                label = "Vente POS"
+                if (refNumber) label += ` (${refNumber})`
+            } else if (source === "CUSTOMER_PAYMENT") {
+                href = `/sales/${refId}`
                 label = "Paiement Client"
-            } else if (source === "PURCHASE" || source === "MANUAL_OUT" || source === "SUPPLIER_PAYMENT") {
+                if (refNumber) label += ` (${refNumber})`
+            } else if (source === "PURCHASE") {
+                href = `/purchases/${refId}`
+                label = "Achat / BL"
+                if (refNumber) label += ` (${refNumber})`
+            } else if (source === "MANUAL_IN") {
+                href = `/payments?paymentId=${txId}`
+                label = "Entrée Manuelle"
+            } else if (source === "MANUAL_OUT" || source === "SUPPLIER_PAYMENT") {
                 href = `/payments/suppliers?paymentId=${txId}`
-                label = "Paiement Fournisseur"
+                label = "Sortie Manuelle"
             } else if (source === "EXPENSE") {
                 href = `/expenses/${refId}`
                 label = "Dépense"
@@ -130,7 +144,6 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
                 href = `/transfers`
                 label = type === "DEBIT" ? "Virement Sortant" : "Virement Entrant"
             } else if (source === "INITIAL_BALANCE") {
-                // No specific page for initial balance, but we can prevent showing "Autre"
                 href = ""
                 label = "Solde Initial"
             } else if (source === "PAYMENT") {

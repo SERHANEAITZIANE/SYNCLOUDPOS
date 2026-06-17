@@ -31,7 +31,9 @@ const TransactionLogPage = async ({
         rawBalanceAfter: Number(item.balanceAfter),
         source: item.source,
         description: item.description || "-",
-        referenceId: item.referenceId || null
+        accountName: account.name,
+        referenceId: item.referenceId,
+        referenceNumber: (item as any).referenceNumber || null
     }))
 
     return (

@@ -211,8 +211,31 @@ export async function getTreasuryTransactions(accountId: string) {
             }
         })
 
+        const purchaseIds = recalculated.filter(t => t.source === "PURCHASE" && t.referenceId).map(t => t.referenceId as string)
+        const salesIds = recalculated.filter(t => (t.source === "SALE" || t.source === "CUSTOMER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
+        const returnIds = recalculated.filter(t => t.source === "RETURN" && t.referenceId).map(t => t.referenceId as string)
+
+        const [purchases, sales, pos, returns] = await Promise.all([
+            db.purchaseOrder.findMany({ where: { id: { in: purchaseIds } }, select: { id: true, purchaseNumber: true } }),
+            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
+            db.order.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
+            db.productReturn.findMany({ where: { id: { in: returnIds } }, select: { id: true, returnNumber: true } })
+        ])
+
+        const refMap = new Map([
+            ...purchases.map(p => [p.id, p.purchaseNumber]),
+            ...sales.map(s => [s.id, s.receiptNumber]),
+            ...pos.map(o => [o.id, o.receiptNumber]),
+            ...returns.map(r => [r.id, r.returnNumber])
+        ])
+
+        const finalResults = recalculated.map(t => ({
+            ...t,
+            referenceNumber: t.referenceId ? refMap.get(t.referenceId) || null : null
+        }))
+
         // Return in DESC order (newest first) for display
-        return recalculated.reverse()
+        return finalResults.reverse()
     } catch (error) {
         console.error("[GET_TREASURY_TRANSACTIONS]", error)
         return []
@@ -336,8 +359,31 @@ export async function getAllTreasuryTransactions() {
             }
         })
 
+        const purchaseIds = recalculated.filter(t => t.source === "PURCHASE" && t.referenceId).map(t => t.referenceId as string)
+        const salesIds = recalculated.filter(t => (t.source === "SALE" || t.source === "CUSTOMER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
+        const returnIds = recalculated.filter(t => t.source === "RETURN" && t.referenceId).map(t => t.referenceId as string)
+
+        const [purchases, sales, pos, returns] = await Promise.all([
+            db.purchaseOrder.findMany({ where: { id: { in: purchaseIds } }, select: { id: true, purchaseNumber: true } }),
+            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
+            db.order.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
+            db.productReturn.findMany({ where: { id: { in: returnIds } }, select: { id: true, returnNumber: true } })
+        ])
+
+        const refMap = new Map([
+            ...purchases.map(p => [p.id, p.purchaseNumber]),
+            ...sales.map(s => [s.id, s.receiptNumber]),
+            ...pos.map(o => [o.id, o.receiptNumber]),
+            ...returns.map(r => [r.id, r.returnNumber])
+        ])
+
+        const finalResults = recalculated.map(t => ({
+            ...t,
+            referenceNumber: t.referenceId ? refMap.get(t.referenceId) || null : null
+        }))
+
         // Return in DESC order (newest first) for display
-        return recalculated.reverse()
+        return finalResults.reverse()
     } catch (error) {
         console.error("[GET_ALL_TREASURY_TRANSACTIONS]", error)
         return []

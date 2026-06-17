@@ -42,7 +42,8 @@ const TreasuryPage = async () => {
         source: item.source,
         description: item.description || "-",
         accountName: item.accountName,
-        referenceId: item.referenceId
+        referenceId: item.referenceId,
+        referenceNumber: (item as any).referenceNumber || null
     }))
 
     return (
