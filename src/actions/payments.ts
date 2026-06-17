@@ -64,6 +64,11 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
             select: { id: true, name: true }
         })
 
+        const supplierCheck = await db.supplier.findMany({
+            where: { id: { in: customerIdsFromManual }, tenantId },
+            select: { id: true }
+        })
+
         const cheques = await db.cheque.findMany({
             where: { id: { in: customerIdsFromManual }, tenantId },
             include: { customer: { select: { id: true, name: true } } }
@@ -71,6 +76,10 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
 
         // Map everything together
         let mappedPayments = transactions.map(t => {
+            if ((t.source === "MANUAL_IN" || t.source === "CUSTOMER_PAYMENT") && t.referenceId && supplierCheck.some(s => s.id === t.referenceId)) {
+                return null; // This is a Supplier Loan, exclude from Customer Payments
+            }
+
             let customerName = "Client de passage"
             let foundCustomerId = undefined
             // Determine payment method from the account name or source
@@ -115,7 +124,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
                 customerName,
                 customerId: foundCustomerId
             }
-        })
+        }).filter(Boolean) as any[]
 
         // Filter by customer if requested (since we map it post-query for SALES due to the relation hop)
         if (customerId && customerId !== "ALL") {
@@ -163,6 +172,11 @@ export async function getSupplierPayments() {
             select: { id: true, name: true }
         })
 
+        const customerCheck = await db.customer.findMany({
+            where: { id: { in: supplierIds }, tenantId },
+            select: { id: true }
+        })
+
         const purchaseOrders = await db.purchaseOrder.findMany({
             where: { id: { in: purchaseIds }, tenantId },
             include: { supplier: { select: { id: true, name: true } } }
@@ -174,6 +188,10 @@ export async function getSupplierPayments() {
         })
 
         const mappedPayments = transactions.map(t => {
+            if ((t.source === "MANUAL_OUT" || t.source === "SUPPLIER_PAYMENT") && t.referenceId && customerCheck.some(c => c.id === t.referenceId)) {
+                return null; // This is a Customer Loan, exclude from Supplier Payments
+            }
+
             let supplierName = "Fournisseur inconnu"
             let foundSupplierId: string | undefined = undefined
             const paymentMethod = t.account?.name || "Inconnu"
@@ -210,7 +228,7 @@ export async function getSupplierPayments() {
                 supplierId: foundSupplierId,
                 imageUrl: t.imageUrl,
             }
-        })
+        }).filter(Boolean) as any[]
 
         return mappedPayments
     } catch (error) {
