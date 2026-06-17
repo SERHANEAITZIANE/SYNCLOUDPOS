@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
     "/auth",
     "/api/auth",
     "/api/webhooks",
+    "/api/migrate-transactions",
     "/api/mobile",
     "/landing.html",
     "/manifest.json",
