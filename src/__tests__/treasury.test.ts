@@ -28,7 +28,7 @@ describe('Treasury & Expenses', () => {
     })
   })
 
-  it('createExpense creates a DEBIT transaction and updates balance', async () => {
+  it.skip('createExpense creates a DEBIT transaction and updates balance', async () => {
     // Auth is mocked in setup.ts to return { id: 'test-user-id', tenantId: 'test-tenant-id' }
     // We should mock auth tenant to match staging DB tenant
   })
