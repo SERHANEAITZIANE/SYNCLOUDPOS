@@ -70,48 +70,48 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
             </div>
 
             <Tabs defaultValue="company" className="w-full">
-                <TabsList className="w-full h-auto flex-wrap gap-1 bg-muted/60 p-1 rounded-xl mb-6 overflow-x-auto justify-start">
-                    <TabsTrigger value="company" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                <TabsList className="w-full h-auto flex-nowrap gap-1 bg-muted/60 p-1 rounded-xl mb-6 overflow-x-auto justify-start [&::-webkit-scrollbar]:hidden">
+                    <TabsTrigger value="company" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Building2 className="w-4 h-4" />
                         <span>{t("Tabs.company")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="printing" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="printing" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Printer className="w-4 h-4" />
                         <span>{t("Tabs.printing")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="pos" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="pos" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Store className="w-4 h-4" />
                         <span>{t("Tabs.pos")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="ai" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="ai" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Sparkles className="w-4 h-4" />
                         <span>{t("Tabs.ai")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="advanced" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="advanced" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Settings2 className="w-4 h-4" />
                         <span>{t("Tabs.advanced")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="loyalty" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="loyalty" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Star className="w-4 h-4" />
                         <span>{t("Tabs.loyalty")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="backup" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="backup" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <HardDrive className="w-4 h-4" />
                         <span>{t("Tabs.backup")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="whatsapp" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="whatsapp" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <MessageCircle className="w-4 h-4" />
                         <span>{t("Tabs.whatsapp")}</span>
                     </TabsTrigger>
-                    <TabsTrigger value="email" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="email" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Mail className="w-4 h-4" />
                         <span>Email</span>
                     </TabsTrigger>
-                    <TabsTrigger value="algeria" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="algeria" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Flag className="w-4 h-4" />
                         <span>🇩🇿 Algérie</span>
                     </TabsTrigger>
-                    <TabsTrigger value="security" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                    <TabsTrigger value="security" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Lock className="w-4 h-4" />
                         <span>Sécurité</span>
                     </TabsTrigger>

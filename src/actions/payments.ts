@@ -17,7 +17,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
         // Build where clause
         const where: any = {
             tenantId,
-            source: { in: ["SALE", "MANUAL_IN"] },
+            source: { in: ["SALE", "MANUAL_IN", "CUSTOMER_PAYMENT"] },
             type: "CREDIT"
         }
 
@@ -46,7 +46,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
 
         // Let's fetch the necessary Orders, Customers, and Cheques to resolve the names
         const orderIds = transactions.filter(t => t.source === "SALE" && t.referenceId).map(t => t.referenceId as string)
-        const customerIdsFromManual = transactions.filter(t => t.source === "MANUAL_IN" && t.referenceId).map(t => t.referenceId as string)
+        const customerIdsFromManual = transactions.filter(t => (t.source === "MANUAL_IN" || t.source === "CUSTOMER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
 
         const orders = await db.order.findMany({
             where: { id: { in: orderIds }, tenantId },
@@ -88,7 +88,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
                         foundCustomerId = sOrder.customer.id
                     }
                 }
-            } else if (t.source === "MANUAL_IN") {
+            } else if (t.source === "MANUAL_IN" || t.source === "CUSTOMER_PAYMENT") {
                 const customer = customers.find(c => c.id === t.referenceId)
                 if (customer) {
                     customerName = customer.name
@@ -144,7 +144,8 @@ export async function getSupplierPayments() {
                 tenantId,
                 OR: [
                     { source: "MANUAL_OUT", type: "DEBIT" },
-                    { source: "PURCHASE", type: "DEBIT" }
+                    { source: "PURCHASE", type: "DEBIT" },
+                    { source: "SUPPLIER_PAYMENT", type: "DEBIT" }
                 ]
             },
             include: {
@@ -154,7 +155,7 @@ export async function getSupplierPayments() {
         })
 
         // Resolve supplier names
-        const supplierIds = transactions.filter(t => t.source === "MANUAL_OUT" && t.referenceId).map(t => t.referenceId as string)
+        const supplierIds = transactions.filter(t => (t.source === "MANUAL_OUT" || t.source === "SUPPLIER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
         const purchaseIds = transactions.filter(t => t.source === "PURCHASE" && t.referenceId).map(t => t.referenceId as string)
 
         const suppliers = await db.supplier.findMany({
@@ -177,7 +178,7 @@ export async function getSupplierPayments() {
             let foundSupplierId: string | undefined = undefined
             const paymentMethod = t.account?.name || "Inconnu"
 
-            if (t.source === "MANUAL_OUT") {
+            if (t.source === "MANUAL_OUT" || t.source === "SUPPLIER_PAYMENT") {
                 const supplier = suppliers.find(s => s.id === t.referenceId)
                 if (supplier) {
                     supplierName = supplier.name
@@ -318,18 +319,18 @@ export async function updatePayment(id: string, data: {
                     const isSupplier = await tx.supplier.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
 
                     if (isCustomer) {
-                        if (existing.source === "MANUAL_IN") {
+                        if (existing.source === "MANUAL_IN" || existing.source === "CUSTOMER_PAYMENT") {
                             // Customer payment: more payment = less debt
                             await tx.customer.update({ where: { id: isCustomer.id }, data: { balance: { decrement: diff } } });
-                        } else if (existing.source === "MANUAL_OUT") {
+                        } else if (existing.source === "MANUAL_OUT" || existing.source === "CUSTOMER_LOAN") {
                             // Customer loan: more loan = more debt 
                             await tx.customer.update({ where: { id: isCustomer.id }, data: { balance: { increment: diff } } });
                         }
                     } else if (isSupplier) {
-                        if (existing.source === "MANUAL_OUT") {
+                        if (existing.source === "MANUAL_OUT" || existing.source === "SUPPLIER_PAYMENT") {
                             // Supplier payment: more payment = less debt
                             await tx.supplier.update({ where: { id: isSupplier.id }, data: { balance: { decrement: diff } } });
-                        } else if (existing.source === "MANUAL_IN") {
+                        } else if (existing.source === "MANUAL_IN" || existing.source === "SUPPLIER_LOAN") {
                             // Supplier loan: more loan = more debt
                             await tx.supplier.update({ where: { id: isSupplier.id }, data: { balance: { increment: diff } } });
                         }
@@ -393,18 +394,18 @@ export async function deletePayment(id: string) {
                 const isSupplier = await tx.supplier.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
 
                 if (isCustomer) {
-                    if (existing.source === "MANUAL_IN") {
+                    if (existing.source === "MANUAL_IN" || existing.source === "CUSTOMER_PAYMENT") {
                         // Reverse Customer payment: debt comes back (+amount)
                         await tx.customer.update({ where: { id: isCustomer.id }, data: { balance: { increment: amount } } });
-                    } else if (existing.source === "MANUAL_OUT") {
+                    } else if (existing.source === "MANUAL_OUT" || existing.source === "CUSTOMER_LOAN") {
                         // Reverse Customer loan: debt goes away (-amount)
                         await tx.customer.update({ where: { id: isCustomer.id }, data: { balance: { decrement: amount } } });
                     }
                 } else if (isSupplier) {
-                    if (existing.source === "MANUAL_OUT") {
+                    if (existing.source === "MANUAL_OUT" || existing.source === "SUPPLIER_PAYMENT") {
                         // Reverse Supplier payment: debt comes back (+amount)
                         await tx.supplier.update({ where: { id: isSupplier.id }, data: { balance: { increment: amount } } });
-                    } else if (existing.source === "MANUAL_IN") {
+                    } else if (existing.source === "MANUAL_IN" || existing.source === "SUPPLIER_LOAN") {
                         // Reverse Supplier loan: debt goes away (-amount)
                         await tx.supplier.update({ where: { id: isSupplier.id }, data: { balance: { decrement: amount } } });
                     }
