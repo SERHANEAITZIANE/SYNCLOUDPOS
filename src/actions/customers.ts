@@ -439,7 +439,7 @@ export const registerCustomerLoan = async (data: { customerId: string; amount: n
                     amount: data.amount,
                     balanceBefore: account.balance,
                     balanceAfter: updatedAccount.balance,
-                    source: "MANUAL_OUT",
+                    source: "CUSTOMER_LOAN",
                     referenceId: data.customerId,
                     description: `Prêt accordé au client: ${customer?.name || "Inconnu"}`,
                     tenantId
@@ -488,7 +488,7 @@ export const getCustomerLoans = async (customerId?: string) => {
         const transactions = await db.treasuryTransaction.findMany({
             where: {
                 tenantId,
-                source: "MANUAL_OUT",
+                source: "CUSTOMER_LOAN",
                 referenceId: { in: customerIds }
             },
             include: {

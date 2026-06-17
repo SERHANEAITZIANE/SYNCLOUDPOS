@@ -369,7 +369,7 @@ export const registerSupplierLoan = async (data: { supplierId: string; amount: n
                     amount: data.amount,
                     balanceBefore: account.balance,
                     balanceAfter: updatedAccount.balance,
-                    source: "MANUAL_IN",
+                    source: "SUPPLIER_LOAN",
                     referenceId: data.supplierId,
                     description: `Emprunt Fournisseur: ${supplier?.name || "Inconnu"}${data.notes ? ` - ${data.notes}` : ""}`,
                     tenantId
@@ -418,7 +418,7 @@ export const getSupplierLoans = async (supplierId?: string) => {
         const transactions = await db.treasuryTransaction.findMany({
             where: {
                 tenantId,
-                source: "MANUAL_IN",
+                source: "SUPPLIER_LOAN",
                 referenceId: { in: supplierIds }
             },
             include: {

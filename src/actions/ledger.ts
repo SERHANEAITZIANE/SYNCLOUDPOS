@@ -162,7 +162,7 @@ export async function getCustomerLedger(customerId: string) {
         for (const pay of credits) {
             let label = pay.description || "Paiement"
             if (pay.source === "SALE") label = `Paiement (${pay.description || "Vente"})`
-            else if (pay.source === "MANUAL_IN") label = pay.description || "Règlement de dette"
+            else if (pay.source === "MANUAL_IN" || pay.source === "CUSTOMER_PAYMENT") label = pay.description || "Règlement de dette"
 
             ledgerLines.push({
                 id: `pay-${pay.id}`,
@@ -341,7 +341,7 @@ export async function getSupplierLedger(supplierId: string) {
                 // Money leaving our treasury => Payment to supplier (reduces our debt to them)
                 let label = tx.description || "Paiement envoyé"
                 if (tx.source === "PURCHASE") label = "Paiement sur Achat"
-                else if (tx.source === "MANUAL_OUT") label = "Règlement / Avance"
+                else if (tx.source === "MANUAL_OUT" || tx.source === "SUPPLIER_PAYMENT") label = "Règlement / Avance"
 
                 ledgerLines.push({
                     id: `pay-${tx.id}`,

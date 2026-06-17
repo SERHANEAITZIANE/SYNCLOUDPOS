@@ -43,7 +43,7 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
             const isRetour = source === "RETURN" || desc.includes("retour client") || desc.includes("retour fournisseur")
 
             // Retroactive fix for old loans that were saved as MANUAL_IN/OUT
-            const isEmprunt = source === "LOAN" || desc.includes("emprunt") || desc.includes("prêt")
+            const isEmprunt = source === "LOAN" || source === "CUSTOMER_LOAN" || source === "SUPPLIER_LOAN" || desc.includes("emprunt") || desc.includes("prêt")
 
             if (isRetour) {
                 displaySource = type === "DEBIT" ? "Retour Client" : "Retour Fournisseur"
@@ -58,7 +58,7 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
             else if (source === "TRANSFER") {
                 displaySource = type === "DEBIT" ? "Virement Sortant" : "Virement Entrant"
             }
-            else if (source === "LOAN") {
+            else if (source === "LOAN" || source === "CUSTOMER_LOAN" || source === "SUPPLIER_LOAN") {
                 displaySource = type === "DEBIT" ? "Emprunt Client" : "Emprunt Fournisseur"
             }
             else if (source === "INITIAL_BALANCE") displaySource = "Solde Initial"
