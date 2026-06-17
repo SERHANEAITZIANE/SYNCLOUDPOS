@@ -357,6 +357,7 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
 
+    try {
         const existing = await db.purchaseOrder.findUnique({ where: { id, tenantId } })
         if (!existing) return { error: "Bon de commande introuvable" }
 
