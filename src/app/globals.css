@@ -2229,8 +2229,9 @@ html, body {
 
 /* POS layout fix — ensure content doesn't overflow on tiny screens */
 .pos-layout-wrapper {
-  contain: layout style;
-  isolation: isolate;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* Smooth momentum scrolling on iOS */
