@@ -3,10 +3,11 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { format } from "date-fns"
+import { sendEvolutionMessage } from "@/lib/whatsapp"
 
 /**
  * Sends a WhatsApp receipt message to a customer after a POS sale.
- * Uses the tenant's WhatsApp Cloud API token and phone number ID stored in settings.
+ * Uses the Evolution API.
  * Fire-and-forget — called after order is saved.
  */
 export async function sendWhatsAppReceipt(orderId: string) {
@@ -19,15 +20,23 @@ export async function sendWhatsAppReceipt(orderId: string) {
         const tenant = await db.tenant.findUnique({
             where: { id: tenantId },
             select: {
-                whatsappToken: true,
-                whatsappPhoneId: true,
+                whatsappMode: true,
+                whatsappAutoReceipt: true,
+                whatsappInstanceId: true,
+                whatsappStatus: true,
                 name: true,
             }
         })
 
-        if (!tenant?.whatsappToken || !tenant?.whatsappPhoneId) {
-            // WhatsApp not configured — silently skip
-            return { skipped: true }
+        const mode = tenant?.whatsappMode || "FREE"
+
+        // Check if receipt sending is turned on
+        if (!tenant?.whatsappAutoReceipt) {
+            return { skipped: true, reason: "WhatsApp Receipts not enabled" }
+        }
+
+        if (mode === "AUTOMATIC" && tenant?.whatsappStatus !== "CONNECTED") {
+            return { skipped: true, reason: "WhatsApp Automatic Mode disconnected" }
         }
 
         const order = await db.order.findUnique({
@@ -46,10 +55,7 @@ export async function sendWhatsAppReceipt(orderId: string) {
 
         // Only send if customer has a phone number
         const phone = order.customer?.phone?.replace(/\D/g, "")
-        if (!phone) return { skipped: true, reason: "no customer phone" }
-
-        // Build WhatsApp number — add country code if not present
-        const wa = phone.startsWith("213") ? phone : `213${phone.replace(/^0/, "")}`
+        if (!phone) return { skipped: true, reason: "No customer phone" }
 
         // Build receipt text
         const itemLines = order.items
@@ -59,6 +65,7 @@ export async function sendWhatsAppReceipt(orderId: string) {
         const body = [
             `🧾 *Reçu — ${tenant.name}*`,
             `📅 ${format(order.createdAt, "dd/MM/yyyy HH:mm")}`,
+            `N° ${order.receiptNumber}`,
             ``,
             itemLines,
             ``,
@@ -68,27 +75,17 @@ export async function sendWhatsAppReceipt(orderId: string) {
             `Merci pour votre achat ! 🙏`
         ].join("\n")
 
-        const response = await fetch(
-            `https://graph.facebook.com/v19.0/${tenant.whatsappPhoneId}/messages`,
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${tenant.whatsappToken}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    messaging_product: "whatsapp",
-                    to: wa,
-                    type: "text",
-                    text: { body }
-                })
-            }
-        )
+        if (mode === "FREE") {
+            // Import generateWaMeLink dynamically to avoid circular dependencies if any
+            const { generateWaMeLink } = await import("@/lib/whatsapp")
+            const waUrl = generateWaMeLink(phone, body)
+            return { waUrl }
+        }
 
-        if (!response.ok) {
-            const err = await response.json()
-            console.error("[WHATSAPP_RECEIPT]", err)
-            return { error: "WhatsApp API error", details: err }
+        const sent = await sendEvolutionMessage(tenantId, phone, body)
+
+        if (!sent) {
+            return { error: "Failed to send message via Evolution API" }
         }
 
         return { success: true }

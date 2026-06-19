@@ -24,6 +24,8 @@ async function getPeriodData(
 
     // 1. Build Query Conditions for Items
     const orderItemWhere: any = {
+        quantity: { gt: 0 },
+        price: { gt: 0 },
         order: {
             tenantId,
             status: "COMPLETED",
@@ -43,9 +45,11 @@ async function getPeriodData(
     }
 
     const salesOrderItemWhere: any = {
+        quantity: { gt: 0 },
+        unitPrice: { gt: 0 },
         salesOrder: {
             tenantId,
-            status: "PAID",
+            status: { notIn: ["CANCELLED", "DRAFT"] },
             createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
         }
     }
@@ -161,6 +165,9 @@ async function getPeriodData(
     if (brandId) {
         returns = returns.filter(r => r.product?.brandId === brandId)
     }
+
+    // Filter out returns that have 0 revenue impact
+    returns = returns.filter(r => Number(r.totalAmount || (r.unitPrice * r.quantity)) > 0)
 
     // 4. Aggregate metrics by Product (Subtracting Returns)
     const productMap = new Map<string, {
@@ -295,8 +302,8 @@ async function getPeriodData(
             _itemNames: new Set<string>()
         }
         existing.revenue += Number(item.price) * item.quantity
-        existing.cost += Number(item.product.cost || 0) * item.quantity
-        existing._itemNames.add(`${item.product.name} (x${item.quantity})`)
+        existing.cost += Number(item.product?.cost || 0) * item.quantity
+        existing._itemNames.add(`${item.product?.name || "Produit supprimé"} (x${item.quantity})`)
         salesMap.set(oid, existing)
     })
 
@@ -314,8 +321,8 @@ async function getPeriodData(
             _itemNames: new Set<string>()
         }
         existing.revenue += Number(item.unitPrice) * item.quantity
-        existing.cost += Number(item.product.cost || 0) * item.quantity
-        existing._itemNames.add(`${item.product.name} (x${item.quantity})`)
+        existing.cost += Number(item.product?.cost || 0) * item.quantity
+        existing._itemNames.add(`${item.product?.name || "Produit supprimé"} (x${item.quantity})`)
         salesMap.set(soid, existing)
     })
 
@@ -389,7 +396,7 @@ async function getPeriodData(
         if (dailyMap.has(dateStr)) {
             const dayData = dailyMap.get(dateStr)!
             dayData.revenue += Number(item.price) * item.quantity
-            dayData.cost += Number(item.product.cost || 0) * item.quantity
+            dayData.cost += Number(item.product?.cost || 0) * item.quantity
         }
     })
 
@@ -398,7 +405,7 @@ async function getPeriodData(
         if (dailyMap.has(dateStr)) {
             const dayData = dailyMap.get(dateStr)!
             dayData.revenue += Number(item.unitPrice) * item.quantity
-            dayData.cost += Number(item.product.cost || 0) * item.quantity
+            dayData.cost += Number(item.product?.cost || 0) * item.quantity
         }
     })
 

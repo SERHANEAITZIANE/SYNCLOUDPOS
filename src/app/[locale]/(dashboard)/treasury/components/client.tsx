@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Plus, ArrowRightLeft, ArrowRight, Wallet, History, TrendingUp, Filter, Activity, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
+import { Plus, ArrowRightLeft, ArrowRight, Wallet, History, TrendingUp, Filter, Activity, Calendar as CalendarIcon, RefreshCw, Building, Search, Calculator } from "lucide-react"
+import { format } from "date-fns"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
@@ -12,6 +14,7 @@ import { TreasuryAccountColumn } from "./types"
 import { AccountModal } from "./account-modal"
 import { TransactionModal } from "./transaction-modal"
 import { TransferModal } from "./transfer-modal"
+import { ReconciliationModal } from "./reconciliation-modal"
 import { MouvementsClient } from "./mouvements-client"
 import { TreasuryMovementColumn } from "./mouvements-columns"
 import { AnalyticsTab } from "./analytics-tab"
@@ -20,7 +23,6 @@ import { cn } from "@/lib/utils"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateRange } from "react-day-picker"
-import { useSearchParams } from "next/navigation"
 
 interface TreasuryClientProps {
     accounts: TreasuryAccountColumn[]
@@ -34,6 +36,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
     const [isAccountOpen, setIsAccountOpen] = useState(false)
     const [isTransactionOpen, setIsTransactionOpen] = useState(false)
     const [isTransferOpen, setIsTransferOpen] = useState(false)
+    const [isReconciliationOpen, setIsReconciliationOpen] = useState(false)
     const [activeTab, setActiveTab] = useState<"accounts" | "movements" | "analytics">("accounts")
 
     // Global Filter States
@@ -85,9 +88,9 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
             } else if (selectedSource === "RETOUR_FOURNISSEUR") {
                 result = result.filter(item => (item.source === "RETURN" && item.type === "CREDIT") || (item.source === "MANUAL_IN" && item.description?.toLowerCase().includes("retour")))
             } else if (selectedSource === "EMPRUNT_CLIENT") {
-                result = result.filter(item => (item.source === "LOAN" && item.type === "DEBIT") || (item.source === "MANUAL_OUT" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
+                result = result.filter(item => (item.source === "LOAN" && item.type === "DEBIT") || (item.source === "CUSTOMER_LOAN") || (item.source === "MANUAL_OUT" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
             } else if (selectedSource === "EMPRUNT_FOURNISSEUR") {
-                result = result.filter(item => (item.source === "LOAN" && item.type === "CREDIT") || (item.source === "MANUAL_IN" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
+                result = result.filter(item => (item.source === "LOAN" && item.type === "CREDIT") || (item.source === "SUPPLIER_LOAN") || (item.source === "MANUAL_IN" && (item.description?.toLowerCase().includes("emprunt") || item.description?.toLowerCase().includes("prêt"))))
             } else {
                 result = result.filter(item => item.source === selectedSource)
             }
@@ -111,6 +114,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
             <AccountModal isOpen={isAccountOpen} onClose={() => setIsAccountOpen(false)} />
             <TransactionModal accounts={accounts} isOpen={isTransactionOpen} onClose={() => setIsTransactionOpen(false)} defaultType={defaultTransactionType} />
             <TransferModal accounts={accounts} isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} />
+            <ReconciliationModal accounts={accounts} isOpen={isReconciliationOpen} onClose={() => setIsReconciliationOpen(false)} />
 
             {/* Header Toolbar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -246,17 +250,17 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
                             description="Gérez vos caisses et comptes bancaires"
                         />
                         <div className="flex space-x-2">
+                            <Button variant="outline" onClick={() => setIsReconciliationOpen(true)}>
+                                <Calculator className="mr-2 h-4 w-4" />
+                                Rapprochement
+                            </Button>
                             <Button variant="outline" onClick={() => setIsTransferOpen(true)}>
                                 <ArrowRightLeft className="mr-2 h-4 w-4" />
-                                Virement
+                                Transfert
                             </Button>
-                            <Button variant="outline" onClick={() => setIsTransactionOpen(true)}>
-                                <ArrowRight className="mr-2 h-4 w-4" />
-                                Saisie Manuelle
-                            </Button>
-                            <Button onClick={() => setIsAccountOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+                            <Button onClick={() => setIsTransactionOpen(true)} className="bg-emerald-600 hover:bg-emerald-700">
                                 <Plus className="mr-2 h-4 w-4" />
-                                Nouveau Compte
+                                Nouvelle Transaction
                             </Button>
                         </div>
                     </div>

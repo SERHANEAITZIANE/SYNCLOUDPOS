@@ -35,6 +35,12 @@ model Tenant {
   whatsappToken        String?
   whatsappPhoneId      String?
   whatsappPhone        String?
+  whatsappMode         String?               @default("NONE") // "NONE", "FREE", "AUTOMATIC"
+  whatsappInstanceId   String?               // The instance name in Evolution API
+  whatsappStatus       String?               // "DISCONNECTED", "CONNECTED", "QR_READY"
+  whatsappAutoReceipt  Boolean               @default(false)
+  whatsappAutoInvoice  Boolean               @default(false)
+  whatsappPaymentReminder Boolean            @default(false)
   loyaltyPointsPerDa   Int                   @default(1)
   loyaltyDaPerPoint    Int                   @default(100)
   subscriptionEndsAt   DateTime?

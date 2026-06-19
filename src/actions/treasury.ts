@@ -213,20 +213,15 @@ export async function getTreasuryTransactions(accountId: string) {
 
         const purchaseIds = recalculated.filter(t => t.source === "PURCHASE" && t.referenceId).map(t => t.referenceId as string)
         const salesIds = recalculated.filter(t => (t.source === "SALE" || t.source === "CUSTOMER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
-        const returnIds = recalculated.filter(t => t.source === "RETURN" && t.referenceId).map(t => t.referenceId as string)
 
-        const [purchases, sales, pos, returns] = await Promise.all([
+        const [purchases, sales] = await Promise.all([
             db.purchaseOrder.findMany({ where: { id: { in: purchaseIds } }, select: { id: true, purchaseNumber: true } }),
-            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
-            db.order.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
-            db.productReturn.findMany({ where: { id: { in: returnIds } }, select: { id: true, returnNumber: true } })
+            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } })
         ])
 
-        const refMap = new Map([
-            ...purchases.map(p => [p.id, p.purchaseNumber]),
-            ...sales.map(s => [s.id, s.receiptNumber]),
-            ...pos.map(o => [o.id, o.receiptNumber]),
-            ...returns.map(r => [r.id, r.returnNumber])
+        const refMap = new Map<string, string | null>([
+            ...purchases.map(p => [p.id, p.purchaseNumber] as [string, string | null]),
+            ...sales.map(s => [s.id, s.receiptNumber] as [string, string | null])
         ])
 
         const finalResults = recalculated.map(t => ({
@@ -361,20 +356,15 @@ export async function getAllTreasuryTransactions() {
 
         const purchaseIds = recalculated.filter(t => t.source === "PURCHASE" && t.referenceId).map(t => t.referenceId as string)
         const salesIds = recalculated.filter(t => (t.source === "SALE" || t.source === "CUSTOMER_PAYMENT") && t.referenceId).map(t => t.referenceId as string)
-        const returnIds = recalculated.filter(t => t.source === "RETURN" && t.referenceId).map(t => t.referenceId as string)
 
-        const [purchases, sales, pos, returns] = await Promise.all([
+        const [purchases, sales] = await Promise.all([
             db.purchaseOrder.findMany({ where: { id: { in: purchaseIds } }, select: { id: true, purchaseNumber: true } }),
-            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
-            db.order.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } }),
-            db.productReturn.findMany({ where: { id: { in: returnIds } }, select: { id: true, returnNumber: true } })
+            db.salesOrder.findMany({ where: { id: { in: salesIds } }, select: { id: true, receiptNumber: true } })
         ])
 
-        const refMap = new Map([
-            ...purchases.map(p => [p.id, p.purchaseNumber]),
-            ...sales.map(s => [s.id, s.receiptNumber]),
-            ...pos.map(o => [o.id, o.receiptNumber]),
-            ...returns.map(r => [r.id, r.returnNumber])
+        const refMap = new Map<string, string | null>([
+            ...purchases.map(p => [p.id, p.purchaseNumber] as [string, string | null]),
+            ...sales.map(s => [s.id, s.receiptNumber] as [string, string | null])
         ])
 
         const finalResults = recalculated.map(t => ({
@@ -601,3 +591,58 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
     }
 }
 
+export async function createReconciliation(accountId: string, realAmount: number) {
+    await checkSubscription();
+    try {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error("Unauthorized")
+
+        const tenantId = session.user.tenantId
+
+        if (realAmount < 0) return { error: "Le montant réel doit être positif" }
+
+        await db.$transaction(async (tx) => {
+            const account = await tx.treasuryAccount.findFirst({ where: { id: accountId, tenantId } })
+            if (!account) throw new Error("Account not found")
+
+            const softwareBalance = Number(account.balance)
+            const difference = realAmount - softwareBalance
+
+            if (difference === 0) return
+
+            const type = difference > 0 ? "CREDIT" : "DEBIT"
+            const absDifference = Math.abs(difference)
+
+            const updatedAccount = await tx.treasuryAccount.update({
+                where: { id: accountId },
+                data: { balance: realAmount }
+            })
+
+            await tx.treasuryTransaction.create({
+                data: {
+                    accountId,
+                    type,
+                    amount: absDifference,
+                    balanceBefore: softwareBalance,
+                    balanceAfter: realAmount,
+                    source: difference > 0 ? "MANUAL_IN" : "MANUAL_OUT",
+                    description: `Écart de caisse (Rapprochement) : Logiciel ${softwareBalance} DA -> Réel ${realAmount} DA`,
+                    tenantId
+                }
+            })
+        })
+
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        const { logAudit } = await import("./audit-log")
+        await logAudit({
+            action: "UPDATE",
+            entity: "TREASURY",
+            description: `Rapprochement de caisse (ID: ${accountId}) vers le nouveau solde ${realAmount} DA`,
+            after: { accountId, realAmount }
+        })
+        return { success: "Rapprochement effectué avec succès!" }
+    } catch (error: any) {
+        console.error("[RECONCILIATION]", error)
+        return { error: error.message || "Internal Error" }
+    }
+}

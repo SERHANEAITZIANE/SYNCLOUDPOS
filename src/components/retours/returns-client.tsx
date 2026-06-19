@@ -68,6 +68,7 @@ interface ReturnsClientProps {
     supplierReturns: any[]
     products: ProductOption[]
     customers: CustomerOption[]
+    suppliers: SupplierOption[]
     accounts: AccountOption[]
     stores: StoreOption[]
     initialTab?: "client" | "supplier"

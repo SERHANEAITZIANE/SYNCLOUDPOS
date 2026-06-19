@@ -789,33 +789,65 @@ html.ghardaia-dark a:active {
 }
 
 /* ─── Onglets (Tabs) Custom Ghardaïa Styling ─── */
-html.ghardaia [data-slot="tabs-list"]:not([data-variant="line"]) {
+html.ghardaia [data-slot="tabs-list"] {
   background-color: rgba(196, 89, 58, 0.06) !important;
-  border: 1px solid rgba(196, 89, 58, 0.15);
-  border-radius: 0.75rem;
-  padding: 4px;
+  border: 1px solid rgba(196, 89, 58, 0.12) !important;
+  border-radius: 0.75rem !important;
+  padding: 4px !important;
+  background-image: none !important;
+  height: auto !important;
+}
+html.ghardaia [data-slot="tabs-trigger"] {
+  background-image: none !important;
+  border: none !important;
+  font-variant: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  color: var(--muted-foreground) !important;
+  transition: all 0.2s ease !important;
+}
+html.ghardaia [data-slot="tabs-trigger"]:hover {
+  color: var(--foreground) !important;
+  background-color: rgba(196, 89, 58, 0.06) !important;
 }
 html.ghardaia [data-slot="tabs-trigger"][data-state="active"] {
   background: white !important;
   color: var(--primary) !important;
   box-shadow: 0 2px 8px rgba(196, 89, 58, 0.15) !important;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
 }
 
-html.ghardaia-dark [data-slot="tabs-list"]:not([data-variant="line"]) {
-  background-color: rgba(232, 114, 74, 0.1) !important;
-  border: 1px solid rgba(232, 114, 74, 0.2);
-  border-radius: 0.75rem;
-  padding: 4px;
+html.ghardaia-dark [data-slot="tabs-list"] {
+  background-color: rgba(232, 114, 74, 0.08) !important;
+  border: 1px solid rgba(232, 114, 74, 0.15) !important;
+  border-radius: 0.75rem !important;
+  padding: 4px !important;
+  background-image: none !important;
+  height: auto !important;
+}
+html.ghardaia-dark [data-slot="tabs-trigger"] {
+  background-image: none !important;
+  border: none !important;
+  font-variant: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  color: var(--muted-foreground) !important;
+  transition: all 0.2s ease !important;
+}
+html.ghardaia-dark [data-slot="tabs-trigger"]:hover {
+  color: var(--foreground) !important;
+  background-color: rgba(232, 114, 74, 0.06) !important;
 }
 html.ghardaia-dark [data-slot="tabs-trigger"][data-state="active"] {
   background: rgba(42, 36, 32, 0.95) !important;
   color: var(--ghardaia-gold) !important;
-  box-shadow: 0 2px 8px rgba(232, 114, 74, 0.25) !important;
-  border: 1px solid rgba(232, 114, 74, 0.3) !important;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(232, 114, 74, 0.2) !important;
+  border: 1px solid rgba(232, 114, 74, 0.25) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
 }
 
 /* ─── Premium Ghardaïa Card Shadow System ─── */
@@ -1186,12 +1218,22 @@ html.ghardaia-dark .group\/product:hover {
   box-shadow: 0 4px 16px rgba(232, 114, 74, 0.1) !important;
 }
 
-/* ─── Warm Separator ─── */
-html.ghardaia [data-orientation="horizontal"] {
+/* ─── Warm Separator (exclude ALL tab elements) ─── */
+html.ghardaia [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]) {
   background-color: var(--border) !important;
 }
-html.ghardaia-dark [data-orientation="horizontal"] {
+html.ghardaia-dark [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]) {
   background-color: var(--border) !important;
+}
+
+/* Kill ALL background-image / dot patterns INSIDE any tabs component */
+html.ghardaia [data-slot="tabs"] *,
+html.ghardaia [data-slot="tabs"] {
+  background-image: none;
+}
+html.ghardaia-dark [data-slot="tabs"] *,
+html.ghardaia-dark [data-slot="tabs"] {
+  background-image: none;
 }
 
 /* ─── Cart Item Row — Warm Alternating ─── */
@@ -1459,36 +1501,26 @@ html.ghardaia-dark div[role="status"] {
   animation: ghardaia-muezzin-entrance 0.58s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
 }
 
-/* 5. Chiseled Number Display (#29) - Sandstone-carved dual text shadows */
-html.ghardaia h1,
-html.ghardaia h2,
-html.ghardaia .text-3xl,
-html.ghardaia .text-4xl,
-html.ghardaia .text-5xl,
-html.ghardaia .text-6xl,
+/* 5. Chiseled Number Display (#29) - Sandstone-carved dual text shadows (skip clip-text elements) */
+html.ghardaia h1:not(.bg-clip-text),
+html.ghardaia h2:not(.bg-clip-text),
 html.ghardaia [data-chiseled="true"] {
-  text-shadow: -1px -1px 0px rgba(255, 255, 255, 0.8), 1px 1px 0px rgba(139, 58, 34, 0.28) !important;
+  text-shadow: -1px -1px 0px rgba(255, 255, 255, 0.6), 1px 1px 0px rgba(139, 58, 34, 0.15) !important;
 }
-html.ghardaia-dark h1,
-html.ghardaia-dark h2,
-html.ghardaia-dark .text-3xl,
-html.ghardaia-dark .text-4xl,
-html.ghardaia-dark .text-5xl,
-html.ghardaia-dark .text-6xl,
+html.ghardaia-dark h1:not(.bg-clip-text),
+html.ghardaia-dark h2:not(.bg-clip-text),
 html.ghardaia-dark [data-chiseled="true"] {
-  text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.65), 1px 1px 0px rgba(232, 114, 74, 0.35) !important;
+  text-shadow: -1px -1px 0px rgba(0, 0, 0, 0.5), 1px 1px 0px rgba(232, 114, 74, 0.2) !important;
 }
 
 /* ─── Ghardaïa Secondary Visual Refinements ─── */
 
-/* 6. Classical Serif Heading Typography */
-html.ghardaia h1,
-html.ghardaia h2,
-html.ghardaia h3,
+/* 6. Classical Serif Heading Typography — only page-level headings, not tab triggers or labels */
+html.ghardaia h1:not([data-slot]),
+html.ghardaia h2:not([data-slot]),
 html.ghardaia .serif-title,
-html.ghardaia-dark h1,
-html.ghardaia-dark h2,
-html.ghardaia-dark h3,
+html.ghardaia-dark h1:not([data-slot]),
+html.ghardaia-dark h2:not([data-slot]),
 html.ghardaia-dark .serif-title {
   font-family: var(--font-serif), Georgia, serif !important;
   letter-spacing: 0.015em !important;
@@ -1527,20 +1559,18 @@ html.ghardaia-dark ::-webkit-scrollbar-thumb:hover {
   background: #FA835B !important;
 }
 
-/* 8. Moucharabieh Latticework Dividers - Dotted pattern for horizontal lines */
-html.ghardaia hr,
-html.ghardaia [data-orientation="horizontal"] {
-  background-image: radial-gradient(circle, #C4593A 1.2px, transparent 1.2px) !important;
-  background-size: 5px 5px !important;
+/* 8. Moucharabieh Latticework Dividers - Dotted pattern for hr separators ONLY (NOT tabs, NOT tab triggers) */
+html.ghardaia hr:not([data-slot]):not([role]) {
+  background-image: radial-gradient(circle, rgba(196, 89, 58, 0.35) 1px, transparent 1px) !important;
+  background-size: 6px 6px !important;
   background-repeat: repeat-x !important;
   background-color: transparent !important;
   height: 2px !important;
   border: none !important;
 }
-html.ghardaia-dark hr,
-html.ghardaia-dark [data-orientation="horizontal"] {
-  background-image: radial-gradient(circle, #E8724A 1.2px, transparent 1.2px) !important;
-  background-size: 5px 5px !important;
+html.ghardaia-dark hr:not([data-slot]):not([role]) {
+  background-image: radial-gradient(circle, rgba(232, 114, 74, 0.35) 1px, transparent 1px) !important;
+  background-size: 6px 6px !important;
   background-repeat: repeat-x !important;
   background-color: transparent !important;
   height: 2px !important;
@@ -1561,13 +1591,11 @@ html.ghardaia-dark body::before {
   z-index: 0;
 }
 
-/* 10. Mozabite Stone-Carved Small-Caps Labels */
-html.ghardaia .text-xs.font-semibold,
+/* 10. Mozabite Stone-Carved Small-Caps Labels — only for explicit section headings */
 html.ghardaia [data-heading="section"],
-html.ghardaia-dark .text-xs.font-semibold,
 html.ghardaia-dark [data-heading="section"] {
   font-variant: all-small-caps !important;
-  letter-spacing: 0.16em !important;
+  letter-spacing: 0.12em !important;
   text-transform: lowercase !important;
 }
 
@@ -2123,9 +2151,13 @@ html.riviera-dark .group\/product:hover, html.atlas-dark .group\/product:hover, 
   box-shadow: 0 4px 16px rgba(var(--theme-accent), 0.1) !important;
 }
 
-/* ─── Warm Separator ─── */
-html.riviera [data-orientation="horizontal"], html.atlas [data-orientation="horizontal"], html.horizon [data-orientation="horizontal"],
-html.riviera-dark [data-orientation="horizontal"], html.atlas-dark [data-orientation="horizontal"], html.horizon-dark [data-orientation="horizontal"] {
+/* ─── Warm Separator (exclude tabs) ─── */
+html.riviera [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]),
+html.atlas [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]),
+html.horizon [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]),
+html.riviera-dark [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]),
+html.atlas-dark [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]),
+html.horizon-dark [data-orientation="horizontal"]:not([data-slot="tabs"]):not([data-slot="tabs-list"]):not([data-slot="tabs-trigger"]):not([data-slot="tabs-content"]) {
   background-color: var(--border) !important;
 }
 
@@ -2149,8 +2181,67 @@ html.horizon-dark [data-radix-popper-content-wrapper] [role="menu"] {
   box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(var(--theme-accent), 0.08) !important;
 }
 
-/* ─── Dialog / Modal ─── */
 html.riviera [data-state="open"][role="dialog"], html.atlas [data-state="open"][role="dialog"], html.horizon [data-state="open"][role="dialog"],
 html.riviera-dark [data-state="open"][role="dialog"], html.atlas-dark [data-state="open"][role="dialog"], html.horizon-dark [data-state="open"][role="dialog"] {
   border-color: var(--border) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE & TOUCH RESPONSIVE UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Safe area bottom padding — iPhone notch / home indicator support */
+.safe-area-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.safe-area-top {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Touch feedback for mobile tap targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent text selection during swipe gestures */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* POS layout fix — ensure content doesn't overflow on tiny screens */
+.pos-layout-wrapper {
+  contain: layout style;
+  isolation: isolate;
+}
+
+/* Smooth momentum scrolling on iOS */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: scroll;
+}
+
+/* Better tap highlight on mobile */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
 }

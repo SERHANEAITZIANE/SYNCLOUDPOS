@@ -83,6 +83,9 @@ export const UnpaidClient: React.FC<UnpaidClientProps> = ({ data, accounts }) =>
                                     })
                                     if (res.error) {
                                         toast.error(res.error)
+                                    } else if (res.waUrl) {
+                                        window.open(res.waUrl, "_blank")
+                                        toast.success("Redirection vers WhatsApp...")
                                     } else {
                                         toast.success("Rappel de dette envoyé avec succès !")
                                     }

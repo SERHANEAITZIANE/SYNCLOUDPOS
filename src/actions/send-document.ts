@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { generateSalesOrderPDF } from "@/lib/pdf-generator"
 import nodemailer from "nodemailer"
+import { sendEvolutionMessage, generateWaMeLink } from "@/lib/whatsapp"
 
 // ─── Helper: fetch full sales order + store data ─────────────────────────────
 
@@ -26,9 +27,10 @@ async function fetchSalesOrderForPDF(salesOrderId: string) {
         where: { id: tenantId },
         select: {
             name: true, activity: true, address: true, phone: true, fax: true,
+            name: true, activity: true, address: true, phone: true, fax: true,
             email: true, nif: true, rc: true, nis: true, artImposition: true,
             bankAccount: true, logo: true, headerText: true,
-            whatsappToken: true, whatsappPhoneId: true,
+            whatsappMode: true, whatsappInstanceId: true, whatsappStatus: true,
             smtpHost: true, smtpPort: true, smtpUser: true, smtpPass: true, smtpFrom: true,
         },
     })
@@ -65,100 +67,80 @@ const TYPE_LABELS: Record<string, string> = {
 
 export async function sendDocumentViaWhatsApp(
     salesOrderId: string
-): Promise<{ success?: string; error?: string }> {
+): Promise<{ success?: string; error?: string; waUrl?: string }> {
     try {
         const { salesOrder, store, tenant } = await fetchSalesOrderForPDF(salesOrderId)
-
-        if (!tenant?.whatsappToken || !tenant?.whatsappPhoneId) {
-            return { error: "WhatsApp non configuré. Allez dans Paramètres → WhatsApp." }
-        }
+        const mode = tenant?.whatsappMode || "FREE"
 
         const phone = salesOrder.customer.phone?.replace(/\D/g, "")
         if (!phone) {
             return { error: "Ce client n'a pas de numéro de téléphone." }
         }
 
-        // Ensure international format (Algeria)
-        const wa = phone.startsWith("213") ? phone : `213${phone.replace(/^0/, "")}`
-
-        // Generate PDF
-        const pdfBuffer = await generateSalesOrderPDF(
-            {
-                id: salesOrder.id,
-                receiptNumber: salesOrder.receiptNumber,
-                type: salesOrder.type,
-                status: salesOrder.status,
-                paymentMethod: salesOrder.paymentMethod,
-                subtotal: Number(salesOrder.subtotal),
-                tvaAmount: Number(salesOrder.tvaAmount),
-                stampTax: Number(salesOrder.stampTax),
-                total: Number(salesOrder.total),
-                createdAt: salesOrder.createdAt,
-                customer: { ...salesOrder.customer, balance: Number(salesOrder.customer.balance) },
-                items: salesOrder.items.map(item => ({
-                    product: { name: item.product.name },
-                    quantity: item.quantity,
-                    unitPrice: Number(item.unitPrice),
-                    tvaRate: Number(item.tvaRate),
-                    priceHt: Number(item.priceHt),
-                })),
-            },
-            store
-        )
-
-        const filename = `${salesOrder.receiptNumber || salesOrder.id.slice(-8)}.pdf`
-
-        // Step 1: Upload PDF to WhatsApp Media API
-        const formData = new FormData()
-        formData.append("file", new Blob([pdfBuffer as unknown as BlobPart], { type: "application/pdf" }), filename)
-        formData.append("messaging_product", "whatsapp")
-        formData.append("type", "application/pdf")
-
-        const uploadRes = await fetch(
-            `https://graph.facebook.com/v21.0/${tenant.whatsappPhoneId}/media`,
-            {
-                method: "POST",
-                headers: { Authorization: `Bearer ${tenant.whatsappToken}` },
-                body: formData,
-            }
-        )
-        const uploadData = await uploadRes.json()
-        if (!uploadRes.ok) {
-            console.error("[WHATSAPP_UPLOAD]", uploadData)
-            return { error: `Erreur upload WhatsApp: ${uploadData?.error?.message || "Erreur inconnue"}` }
-        }
-
-        const mediaId = uploadData.id
-
-        // Step 2: Send document message
         const docLabel = TYPE_LABELS[salesOrder.type] || "Document"
-        const sendRes = await fetch(
-            `https://graph.facebook.com/v21.0/${tenant.whatsappPhoneId}/messages`,
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${tenant.whatsappToken}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    messaging_product: "whatsapp",
-                    to: wa,
-                    type: "document",
-                    document: {
-                        id: mediaId,
-                        filename,
-                        caption: `📄 ${docLabel} ${salesOrder.receiptNumber || ""} — ${store.name || "SYNCLOUDPOS"}\nMontant: ${Number(salesOrder.total).toLocaleString("fr-DZ")} DA`,
-                    },
-                }),
+        const companyName = store.name || "SYNCLOUDPOS"
+        
+        // Build receipt text
+        const itemLines = salesOrder.items
+            .map(i => `  • ${i.product.name} ×${i.quantity} — ${(Number(i.unitPrice) * Number(i.quantity)).toLocaleString("fr-DZ")} DA`)
+            .join("\n")
+
+        const body = [
+            `📄 *${docLabel}* — ${companyName}`,
+            `N° ${salesOrder.receiptNumber || salesOrder.id.slice(-8)}`,
+            ``,
+            itemLines,
+            ``,
+            `💰 *Total : ${Number(salesOrder.total).toLocaleString("fr-DZ")} DA*`,
+            ``,
+            `Merci pour votre confiance ! 🙏`
+        ].join("\n")
+
+        if (mode === "FREE") {
+            const waUrl = generateWaMeLink(phone, body)
+            return { waUrl }
+        } else if (mode === "AUTOMATIC") {
+            if (tenant?.whatsappStatus !== "CONNECTED") {
+                return { error: "WhatsApp (Automatique) n'est pas connecté. Veuillez vérifier les paramètres." }
             }
-        )
-        const sendData = await sendRes.json()
-        if (!sendRes.ok) {
-            console.error("[WHATSAPP_SEND]", sendData)
-            return { error: `Erreur envoi WhatsApp: ${sendData?.error?.message || "Erreur inconnue"}` }
+
+            // Generate PDF for automatic mode
+            const pdfBuffer = await generateSalesOrderPDF(
+                {
+                    id: salesOrder.id,
+                    receiptNumber: salesOrder.receiptNumber,
+                    type: salesOrder.type,
+                    status: salesOrder.status,
+                    paymentMethod: salesOrder.paymentMethod,
+                    subtotal: Number(salesOrder.subtotal),
+                    tvaAmount: Number(salesOrder.tvaAmount),
+                    stampTax: Number(salesOrder.stampTax),
+                    total: Number(salesOrder.total),
+                    createdAt: salesOrder.createdAt,
+                    customer: { ...salesOrder.customer, balance: Number(salesOrder.customer.balance) },
+                    items: salesOrder.items.map(item => ({
+                        product: { name: item.product.name },
+                        quantity: item.quantity,
+                        unitPrice: Number(item.unitPrice),
+                        tvaRate: Number(item.tvaRate),
+                        priceHt: Number(item.priceHt),
+                    })),
+                },
+                store
+            )
+
+            const filename = `${salesOrder.receiptNumber || salesOrder.id.slice(-8)}.pdf`
+
+            // Pass the pdfBuffer and filename to sendEvolutionMessage to attach the document
+            const sent = await sendEvolutionMessage(tenant.id, phone, body, pdfBuffer as Buffer, filename)
+            if (!sent) {
+                return { error: "Erreur lors de l'envoi WhatsApp via Evolution API." }
+            }
+
+            return { success: `${docLabel} envoyé par WhatsApp à ${salesOrder.customer.name}` }
         }
 
-        return { success: `${docLabel} envoyé(e) par WhatsApp à ${salesOrder.customer.name}` }
+        return { error: "Mode WhatsApp non reconnu." }
     } catch (e) {
         console.error("[SEND_WHATSAPP_DOC]", e)
         return { error: "Erreur lors de l'envoi WhatsApp." }

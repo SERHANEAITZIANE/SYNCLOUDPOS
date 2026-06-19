@@ -232,8 +232,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                         if (stockStoreId) {
                             await tx.storeProduct.upsert({
                                 where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                                update: { stock: stockAfter },
-                                create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                                update: { stock: { increment: item.quantity } },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
                             });
                         }
 
@@ -375,23 +375,16 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                 })
 
                 for (const oldItem of oldItems) {
-                    const p = await tx.product.findUnique({ where: { id: oldItem.productId }, include: { storeProducts: true } })
-                    if (p) {
-                        const globalStockAfter = (p.stock || 0) - oldItem.quantity
-                        await tx.product.update({
-                            where: { id: oldItem.productId },
-                            data: { stock: globalStockAfter }
+                    await tx.product.update({
+                        where: { id: oldItem.productId },
+                        data: { stock: { decrement: oldItem.quantity } }
+                    })
+                    if (stockStoreId) {
+                        await tx.storeProduct.upsert({
+                            where: { storeId_productId: { storeId: stockStoreId, productId: oldItem.productId } },
+                            update: { stock: { decrement: oldItem.quantity } },
+                            create: { storeId: stockStoreId, productId: oldItem.productId, stock: 0 }
                         })
-                        if (stockStoreId) {
-                            const spBefore = p.storeProducts.find(sp => sp.storeId === stockStoreId)
-                            const storeStockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : 0
-                            const storeStockAfter = storeStockBefore - oldItem.quantity
-                            await tx.storeProduct.upsert({
-                                where: { storeId_productId: { storeId: stockStoreId, productId: oldItem.productId } },
-                                update: { stock: storeStockAfter },
-                                create: { storeId: stockStoreId, productId: oldItem.productId, stock: storeStockAfter }
-                            })
-                        }
                     }
                 }
             }
@@ -466,7 +459,7 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                         where: { id: item.productId },
                         data: {
                             cost: newCump,
-                            stock: globalStockAfter
+                            stock: { increment: item.quantity }
                         }
                     })
 
@@ -477,8 +470,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 
                         await tx.storeProduct.upsert({
                             where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                            update: { stock: stockAfter },
-                            create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                            update: { stock: { increment: item.quantity } },
+                            create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
                         })
 
                         await tx.stockMovement.create({
@@ -742,15 +735,15 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                             where: { id: item.productId },
                             data: { 
                                 cost: newCump,
-                                stock: globalStockAfter
+                                stock: { increment: item.quantity }
                             }
                         });
 
                         if (stockStoreId) {
                             await tx.storeProduct.upsert({
                                 where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                                update: { stock: stockAfter },
-                                create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                                update: { stock: { increment: item.quantity } },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
                             });
                         }
 

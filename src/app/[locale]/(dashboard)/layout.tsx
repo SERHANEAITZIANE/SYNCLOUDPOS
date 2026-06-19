@@ -61,7 +61,7 @@ export default async function DashboardLayout({
                             isBlocked={subStatus.isBlocked}
                         />
                     )}
-                    <main className="flex-1 p-4 md:p-6">
+                    <main className="flex-1 p-2 sm:p-4 md:p-6">
                         <ExpirationAlert subscriptionEndsAt={session.user?.subscriptionEndsAt} />
                         {children}
                     </main>

@@ -766,7 +766,11 @@ export const CartSidebar = ({
                 setLoyaltyPointsToUse(0)
                 // Fire WhatsApp receipt in background (non-blocking)
                 if (response.orderId) {
-                    actionSendWhatsAppReceipt(response.orderId).catch(() => null)
+                    actionSendWhatsAppReceipt(response.orderId).then((res) => {
+                        if (res && res.waUrl) {
+                            window.open(res.waUrl, "_blank");
+                        }
+                    }).catch(() => null)
                 }
                 router.refresh()
                 return {

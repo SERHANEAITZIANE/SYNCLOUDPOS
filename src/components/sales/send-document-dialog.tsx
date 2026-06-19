@@ -53,6 +53,10 @@ export function SendDocumentDialog({
             const result = await sendDocumentViaWhatsApp(salesOrderId)
             if (result.error) {
                 toast.error(result.error)
+            } else if (result.waUrl) {
+                window.open(result.waUrl, "_blank")
+                toast.success("Redirection vers WhatsApp...")
+                onClose()
             } else {
                 toast.success(result.success || "Envoyé par WhatsApp !")
                 onClose()

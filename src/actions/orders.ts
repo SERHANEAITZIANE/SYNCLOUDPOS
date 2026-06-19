@@ -109,8 +109,8 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             if (stockStoreId) {
                                 await tx.storeProduct.upsert({
                                     where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                                    update: { stock: stockAfter },
-                                    create: { storeId: stockStoreId, productId: item.productId, stock: stockAfter, minStock: spBefore?.minStock || 10 }
+                                    update: { stock: { increment: item.quantity } },
+                                    create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
                                 });
                             }
 

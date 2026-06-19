@@ -920,7 +920,7 @@ export const PosClient: FC<PosClientProps> = ({
             <PosHeader storeName={storeName} />
             
             {/* Multi-Session Hold Carts Bar */}
-            <div className="flex items-center justify-between px-6 py-2 bg-[#1b1c21] dark:bg-[#131418] border-b border-gray-800 shrink-0 select-none overflow-x-auto scrollbar-none h-11">
+            <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1 sm:py-1.5 lg:py-2 bg-[#1b1c21] dark:bg-[#131418] border-b border-gray-800 shrink-0 select-none overflow-x-auto scrollbar-none h-9 sm:h-10 lg:h-11">
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
                     {cart.sessions.map((session, index) => {
                         const isActive = session.id === cart.activeSessionId;
@@ -938,8 +938,9 @@ export const PosClient: FC<PosClientProps> = ({
                                         : "bg-gray-800/40 text-gray-400 border-transparent hover:bg-gray-800/80 hover:text-gray-300"
                                 )}
                             >
-                                <span className="font-mono text-[10px] text-gray-500">#{index + 1}</span>
-                                <span>{session.name || `Panier ${index + 1}`}</span>
+                                <span className="font-mono text-[8px] sm:text-[10px] text-gray-500">#{index + 1}</span>
+                                <span className="hidden sm:inline">{session.name || `Panier ${index + 1}`}</span>
+                                <span className="sm:hidden">P{index + 1}</span>
                                 
                                 {sessionItemsCount > 0 && (
                                     <span className={cn(
@@ -950,7 +951,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     </span>
                                 )}
                                 
-                                <span className="font-extrabold text-[10px] tracking-tight pl-1 border-l border-gray-700/50">
+                                <span className="font-extrabold text-[9px] sm:text-[10px] tracking-tight pl-1 border-l border-gray-700/50 hidden sm:inline">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sessionTotal)} DA
                                 </span>
 
@@ -1023,14 +1024,14 @@ export const PosClient: FC<PosClientProps> = ({
                 <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-transparent w-full">
 
                     {/* Filter Bar */}
-                    <div className="px-3 lg:px-6 py-2 lg:py-3 shrink-0 select-none">
-                        <div className="flex items-center gap-2 lg:gap-3 max-w-7xl mx-auto w-full">
+                    <div className="px-2 sm:px-3 lg:px-6 py-1.5 sm:py-2 lg:py-3 shrink-0 select-none">
+                        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 max-w-7xl mx-auto w-full">
                             {/* Search bar input container */}
                             <div className="relative group flex-1 min-w-0">
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors duration-200" />
                                 <Input
                                     placeholder={t("searchPlaceholder")}
-                                    className="pl-10 pr-4 h-11 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all rounded-xl text-xs lg:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 font-bold pos-search-input"
+                                    className="pl-9 sm:pl-10 pr-3 sm:pr-4 h-9 sm:h-10 lg:h-11 w-full bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all rounded-lg sm:rounded-xl text-xs lg:text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 font-bold pos-search-input"
                                     value={searchQuery}
                                     onChange={(e) => {
                                         setSearchQuery(e.target.value)
@@ -1044,11 +1045,11 @@ export const PosClient: FC<PosClientProps> = ({
                             </div>
 
                             {/* Buttons and Action items */}
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                                 {/* Express creation button */}
                                 <Button
                                     variant="outline"
-                                    className="h-11 px-3 lg:px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:border-emerald-500/30 shadow-sm gap-2 font-bold text-xs transition-all shrink-0"
+                                    className="h-9 sm:h-10 lg:h-11 px-2 sm:px-3 lg:px-4 rounded-lg sm:rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:border-emerald-500/30 shadow-sm gap-1.5 sm:gap-2 font-bold text-xs transition-all shrink-0"
                                     onClick={() => {
                                         setQuickName("");
                                         setQuickDescription("");
@@ -1077,7 +1078,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 {/* Load Order button */}
                                 <Button
                                     variant="outline"
-                                    className="h-11 px-3 lg:px-4 rounded-xl bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-800 shadow-sm gap-2 font-bold text-xs text-gray-700 dark:text-slate-200 shrink-0 hover:bg-gray-50 dark:hover:bg-slate-800"
+                                    className="h-9 sm:h-10 lg:h-11 px-2 sm:px-3 lg:px-4 rounded-lg sm:rounded-xl bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-800 shadow-sm gap-1.5 sm:gap-2 font-bold text-xs text-gray-700 dark:text-slate-200 shrink-0 hover:bg-gray-50 dark:hover:bg-slate-800 hidden sm:flex"
                                     onClick={() => setIsSearchOrderOpen(true)}
                                     title="Charger Commande"
                                 >
@@ -1152,7 +1153,7 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                     {/* Category Selector Bar with Navigation Buttons - Always visible, sticky (F6 to cycle) */}
-                    <div className="relative flex items-center w-full px-3 lg:px-6 shrink-0 select-none group/cat-bar bg-[#f8f9fa] dark:bg-[#0f1115] py-1.5 border-b border-gray-200/60 dark:border-slate-800/60 sticky top-0 z-30 backdrop-blur-md">
+                    <div className="relative flex items-center w-full px-1.5 sm:px-3 lg:px-6 shrink-0 select-none group/cat-bar bg-[#f8f9fa] dark:bg-[#0f1115] py-1 sm:py-1.5 border-b border-gray-200/60 dark:border-slate-800/60 sticky top-0 z-30 backdrop-blur-md">
                         {/* Scroll Left Button */}
                         <Button
                             variant="outline"
@@ -1169,12 +1170,12 @@ export const PosClient: FC<PosClientProps> = ({
                             onWheel={handleCategoryWheel}
                             className="w-full overflow-x-auto scrollbar-none whitespace-nowrap py-1 scroll-smooth"
                         >
-                            <div className="flex gap-1.5 lg:gap-2 pb-1.5 px-1 w-max">
+                            <div className="flex gap-1 sm:gap-1.5 lg:gap-2 pb-1 sm:pb-1.5 px-0.5 sm:px-1 w-max">
                                 <Button
                                     variant={selectedCategory === null ? "default" : "outline"}
                                     onClick={() => setSelectedCategory(null)}
                                     className={cn(
-                                        "group rounded-full px-2.5 lg:px-4 h-7 lg:h-8 text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
+                                        "group rounded-full px-2 sm:px-2.5 lg:px-4 h-6 sm:h-7 lg:h-8 text-[9px] sm:text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1 sm:gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
                                         selectedCategory === null 
                                             ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.2)]" 
                                             : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
@@ -1196,7 +1197,7 @@ export const PosClient: FC<PosClientProps> = ({
                                             variant={isActive ? "default" : "outline"}
                                             onClick={() => setSelectedCategory(category.id)}
                                             className={cn(
-                                                "group rounded-full px-2.5 lg:px-4 h-7 lg:h-8 text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
+                                                "group rounded-full px-2 sm:px-2.5 lg:px-4 h-6 sm:h-7 lg:h-8 text-[9px] sm:text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1 sm:gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
                                                 isActive 
                                                     ? getCategoryActiveStyle(index + 1)
                                                     : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
@@ -1228,30 +1229,30 @@ export const PosClient: FC<PosClientProps> = ({
 
                     {/* Content Area (Grid or List) */}
                     <ScrollArea 
-                        className="flex-1 min-h-0 px-3 lg:px-6 pt-2 pb-20 lg:pb-6"
+                        className="flex-1 min-h-0 px-1.5 sm:px-3 lg:px-6 pt-1.5 sm:pt-2 pb-24 sm:pb-20 lg:pb-6"
                         onWheel={handleProductsWheel}
                     >
                         {viewMode === "grid" ? (
                             <div className={cn(
-                                "grid gap-2.5 lg:gap-3 pb-8 pos-products-grid",
+                                "grid gap-1.5 sm:gap-2 lg:gap-3 pb-8 pos-products-grid",
                                 posUiSize === "sm" ? (
                                     sidebarWidth === 'wide'
-                                        ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
                                         : sidebarWidth === 'narrow'
-                                        ? "grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 min-[1800px]:grid-cols-10"
-                                        : "grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                        ? "grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 min-[1800px]:grid-cols-10"
+                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
                                 ) : posUiSize === "lg" ? (
                                     sidebarWidth === 'wide'
                                         ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1800px]:grid-cols-6"
                                         : sidebarWidth === 'narrow'
                                         ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
-                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
+                                        : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
                                 ) : (
                                     sidebarWidth === 'wide' 
                                         ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
                                         : sidebarWidth === 'narrow'
-                                        ? "grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
-                                        : "grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
                                 )
                             )}>
                                 {renderedProducts.map((product, index) => (
@@ -1498,27 +1499,27 @@ export const PosClient: FC<PosClientProps> = ({
                     </ScrollArea>
 
                     {/* Absolute Mobile Bottom Action Bar */}
-                    <div className="lg:hidden absolute bottom-0 left-0 right-0 p-3 pt-8 bg-gradient-to-t from-white dark:from-[#0f1115] via-white/90 dark:via-[#0f1115]/90 to-transparent pointer-events-none z-10 flex flex-col justify-end">
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 p-2 sm:p-3 pt-6 sm:pt-8 bg-gradient-to-t from-white dark:from-[#0f1115] via-white/95 dark:via-[#0f1115]/95 to-transparent pointer-events-none z-40 flex flex-col justify-end safe-area-bottom">
                         <Button
                             onClick={() => setIsMobileCartOpen(true)}
-                            className="w-full h-12 rounded-2xl shadow-xl pointer-events-auto bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-white flex items-center justify-between px-4 border border-gray-800 dark:border-gray-200"
+                            className="w-full h-12 sm:h-13 rounded-2xl shadow-xl pointer-events-auto bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 text-white flex items-center justify-between px-3 sm:px-4 border border-gray-800 dark:border-gray-200"
                         >
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-2 sm:gap-2.5">
                                 <div className="relative">
-                                    <ShoppingCart size={18} />
+                                    <ShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
                                     {totalItemsCount > 0 && (
-                                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-gray-900 dark:border-gray-100">
+                                        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[8px] sm:text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-gray-900 dark:border-gray-100">
                                             {totalItemsCount}
                                         </div>
                                     )}
                                 </div>
-                                <span className="font-bold text-sm">{t("viewCart")}</span>
+                                <span className="font-bold text-xs sm:text-sm">{t("viewCart")}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-black text-base tracking-tight">
+                            <div className="flex items-center gap-1 sm:gap-1.5">
+                                <span className="font-black text-sm sm:text-base tracking-tight">
                                     {formatter.format(cartTotal)}
                                 </span>
-                                <ChevronUp size={18} className="text-gray-400 dark:text-gray-500" />
+                                <ChevronUp size={16} className="text-gray-400 dark:text-gray-500 sm:w-[18px] sm:h-[18px]" />
                             </div>
                         </Button>
                     </div>
@@ -1564,7 +1565,7 @@ export const PosClient: FC<PosClientProps> = ({
 
             {/* Stunning inline Quick Product Dialog with Tabbed Navigation (Fiche Produit Complète Express) */}
             <Dialog open={quickProductOpen} onOpenChange={setQuickProductOpen}>
-                <DialogContent className="max-w-3xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 overflow-hidden">
+                <DialogContent className="max-w-[95vw] sm:max-w-xl lg:max-w-3xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl p-3 sm:p-4 lg:p-6 overflow-hidden max-h-[90vh] overflow-y-auto">
                     <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-900">
                         <DialogTitle className="text-xl font-bold flex items-center justify-between text-indigo-950 dark:text-indigo-400">
                             <span className="flex items-center gap-2">

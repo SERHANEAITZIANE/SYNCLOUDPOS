@@ -9,7 +9,7 @@ import { AiSettingsForm } from "./ai-settings-form"
 import { AdvancedSettingsForm } from "./advanced-settings-form"
 import { BackupsListClient } from "./backups-list-client"
 import { LoyaltySettingsForm } from "./loyalty-settings-form"
-import { WhatsAppSettingsForm } from "./whatsapp-settings-form"
+import { WhatsappSettingsClient } from "../whatsapp/components/whatsapp-settings-client"
 import { EmailSettingsForm } from "./email-settings-form"
 import { AlgerianSettingsForm } from "./algerian-settings-form"
 import { ChangePasswordForm } from "@/components/auth/change-password-form"
@@ -70,56 +70,56 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
             </div>
 
             <Tabs defaultValue="company" className="w-full">
-                <TabsList className="w-full h-auto flex-nowrap gap-1 bg-muted/60 p-1 rounded-xl mb-6 overflow-x-auto justify-start [&::-webkit-scrollbar]:hidden">
+                <TabsList className="w-full h-auto flex-nowrap gap-0.5 sm:gap-1 bg-muted/60 p-1 rounded-xl mb-4 sm:mb-6 overflow-x-auto justify-start [&::-webkit-scrollbar]:hidden scrollbar-none">
                     <TabsTrigger value="company" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Building2 className="w-4 h-4" />
-                        <span>{t("Tabs.company")}</span>
+                        <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.company")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="printing" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Printer className="w-4 h-4" />
-                        <span>{t("Tabs.printing")}</span>
+                        <Printer className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.printing")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="pos" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Store className="w-4 h-4" />
-                        <span>{t("Tabs.pos")}</span>
+                        <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.pos")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="ai" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Sparkles className="w-4 h-4" />
-                        <span>{t("Tabs.ai")}</span>
+                        <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.ai")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="advanced" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Settings2 className="w-4 h-4" />
-                        <span>{t("Tabs.advanced")}</span>
+                        <Settings2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.advanced")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="loyalty" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Star className="w-4 h-4" />
-                        <span>{t("Tabs.loyalty")}</span>
+                        <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.loyalty")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="backup" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <HardDrive className="w-4 h-4" />
-                        <span>{t("Tabs.backup")}</span>
+                        <HardDrive className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.backup")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="whatsapp" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <MessageCircle className="w-4 h-4" />
-                        <span>{t("Tabs.whatsapp")}</span>
+                        <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.whatsapp")}</span>
                     </TabsTrigger>
                     <TabsTrigger value="email" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Mail className="w-4 h-4" />
-                        <span>Email</span>
+                        <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Email</span>
                     </TabsTrigger>
                     <TabsTrigger value="algeria" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Flag className="w-4 h-4" />
-                        <span>🇩🇿 Algérie</span>
+                        <Flag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">🇩🇿 Algérie</span>
                     </TabsTrigger>
                     <TabsTrigger value="security" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
-                        <Lock className="w-4 h-4" />
-                        <span>Sécurité</span>
+                        <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Sécurité</span>
                     </TabsTrigger>
                 </TabsList>
 
                 {/* Tab 1 — Company / Entreprise */}
                 <TabsContent value="company" className="mt-0">
-                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                    <div className="bg-card border rounded-xl p-3 sm:p-4 md:p-6 shadow-sm">
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold flex items-center gap-2">
                                 <Building2 className="w-5 h-5 text-blue-500" />
@@ -257,7 +257,7 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                                 {t("Whatsapp.description")}
                             </p>
                         </div>
-                        <WhatsAppSettingsForm />
+                        <WhatsappSettingsClient initialData={tenant} />
                     </div>
                 </TabsContent>
                 {/* Tab — Email / SMTP */}

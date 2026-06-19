@@ -95,7 +95,7 @@ export const processClientReturn = async (params: ClientReturnParams) => {
             const globalStockAfter = globalStockBefore + quantity
             await tx.product.update({
                 where: { id: productId },
-                data: { stock: globalStockAfter }
+                data: { stock: { increment: quantity } }
             })
 
             // 3. Restock Product (Store specific)
@@ -108,8 +108,8 @@ export const processClientReturn = async (params: ClientReturnParams) => {
 
                 await tx.storeProduct.upsert({
                     where: { storeId_productId: { storeId: stockStoreId, productId } },
-                    update: { stock: storeStockAfter },
-                    create: { storeId: stockStoreId, productId, stock: storeStockAfter, minStock: spBefore?.minStock || 10 }
+                    update: { stock: { increment: quantity } },
+                    create: { storeId: stockStoreId, productId, stock: quantity, minStock: spBefore?.minStock || 10 }
                 })
             }
 
@@ -282,7 +282,7 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
             const globalStockAfter = globalStockBefore - quantity
             await tx.product.update({
                 where: { id: productId },
-                data: { stock: globalStockAfter }
+                data: { stock: { decrement: quantity } }
             })
 
             // 4. Deduct Stock (Store specific)
@@ -295,8 +295,8 @@ export const processSupplierReturn = async (params: SupplierReturnParams) => {
 
                 await tx.storeProduct.upsert({
                     where: { storeId_productId: { storeId: stockStoreId, productId } },
-                    update: { stock: storeStockAfter },
-                    create: { storeId: stockStoreId, productId, stock: storeStockAfter }
+                    update: { stock: { decrement: quantity } },
+                    create: { storeId: stockStoreId, productId, stock: -quantity }
                 })
             }
 
@@ -521,7 +521,7 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
                 const globalStockAfter = globalStockBefore + item.quantity
                 await tx.product.update({
                     where: { id: item.productId },
-                    data: { stock: globalStockAfter }
+                    data: { stock: { increment: item.quantity } }
                 })
 
                 // Restock Product (Store specific)
@@ -534,8 +534,8 @@ export async function processBulkClientReturn(params: BulkClientReturnParams) {
 
                     await tx.storeProduct.upsert({
                         where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                        update: { stock: storeStockAfter },
-                        create: { storeId: stockStoreId, productId: item.productId, stock: storeStockAfter, minStock: spBefore?.minStock || 10 }
+                        update: { stock: { increment: item.quantity } },
+                        create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
                     })
                 }
 
@@ -794,7 +794,7 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
                 const globalStockAfter = globalStockBefore - item.quantity
                 await tx.product.update({
                     where: { id: item.productId },
-                    data: { stock: globalStockAfter }
+                    data: { stock: { decrement: item.quantity } }
                 })
 
                 // Deduct Product Stock (Store specific)
@@ -807,8 +807,8 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
 
                     await tx.storeProduct.upsert({
                         where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                        update: { stock: storeStockAfter },
-                        create: { storeId: stockStoreId, productId: item.productId, stock: storeStockAfter }
+                        update: { stock: { decrement: item.quantity } },
+                        create: { storeId: stockStoreId, productId: item.productId, stock: -item.quantity }
                     })
                 }
 

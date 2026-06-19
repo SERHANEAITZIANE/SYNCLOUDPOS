@@ -59,6 +59,12 @@ export default async function SettingsPage() {
                         loyaltyPointsPerDa: store.loyaltyPointsPerDa ?? 1,
                         loyaltyDaPerPoint: store.loyaltyDaPerPoint ?? 100,
                         isElectronics: store.isElectronics || false,
+                        whatsappMode: store.whatsappMode || "NONE",
+                        whatsappAutoReceipt: store.whatsappAutoReceipt || false,
+                        whatsappAutoInvoice: store.whatsappAutoInvoice || false,
+                        whatsappPaymentReminder: store.whatsappPaymentReminder || false,
+                        whatsappInstanceId: store.whatsappInstanceId || null,
+                        whatsappStatus: store.whatsappStatus || "DISCONNECTED",
                     }}
                     accounts={accounts}
                     databaseUrl={databaseUrl || ""}
