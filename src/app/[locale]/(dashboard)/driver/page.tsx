@@ -177,7 +177,7 @@ export default function DriverPortalPage() {
     // ── Render ──
     if (!token || !user) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
+            <div className="min-h-dvh bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
                 <div className="w-full max-w-sm">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
@@ -242,7 +242,7 @@ export default function DriverPortalPage() {
     const progress = tour ? Math.round((visitedStops.length / Math.max(tour.stops.length, 1)) * 100) : 0
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 safe-area-inset">
                 <div className="flex items-center justify-between">

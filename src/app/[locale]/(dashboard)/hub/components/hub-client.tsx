@@ -253,7 +253,7 @@ export const HubClient: React.FC = () => {
 
     /* ═══════════ RENDER ═══════════ */
     return (
-        <div className="relative min-h-screen bg-transparent text-foreground overflow-x-hidden select-none">
+        <div className="relative min-h-dvh bg-transparent text-foreground overflow-x-hidden select-none">
             <div className="relative z-10 max-w-[1440px] mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-6 pb-20 space-y-4 sm:space-y-6">
 
                 {/* ═══════════ HEADER ═══════════ */}

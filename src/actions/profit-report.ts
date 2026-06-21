@@ -157,7 +157,11 @@ async function getPeriodData(
 
     // Apply Product Category/Brand Filters to Returns in-memory
     if (clientType && clientType !== "ALL") {
-        returns = returns.filter(r => r.customer?.clientType === clientType)
+        if (clientType === "RETAIL") {
+            returns = returns.filter(r => !r.customer || r.customer.clientType === "RETAIL")
+        } else {
+            returns = returns.filter(r => r.customer?.clientType === clientType)
+        }
     }
     if (categoryId) {
         returns = returns.filter(r => r.product?.categoryId === categoryId)
@@ -180,10 +184,9 @@ async function getPeriodData(
     }>()
 
     const processItem = (item: any, isSalesOrder = false) => {
-        if (!item.product) return
-        const pid = item.product.id
+        const pid = item.product?.id || "deleted-product"
         const existing = productMap.get(pid) || {
-            name: item.product.name,
+            name: item.product?.name || "Produit supprimé",
             category: item.product.category?.name || "Sans catégorie",
             brand: item.product.brand?.name || "Sans marque",
             qtySold: 0,
@@ -203,10 +206,9 @@ async function getPeriodData(
 
     // Subtract returns from Product Aggregates
     returns.forEach(r => {
-        if (!r.product) return
-        const pid = r.product.id
+        const pid = r.product?.id || "deleted-product"
         const existing = productMap.get(pid) || {
-            name: r.product.name,
+            name: r.product?.name || "Produit supprimé",
             category: r.product.category?.name || "Sans catégorie",
             brand: r.product.brand?.name || "Sans marque",
             qtySold: 0,

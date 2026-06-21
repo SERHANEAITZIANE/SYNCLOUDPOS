@@ -42,7 +42,7 @@ export default async function DashboardLayout({
             subscriptionEndsAt={session.user?.subscriptionEndsAt}
             isBlocked={session.user?.isBlocked}
         >
-            <div className="flex min-h-screen flex-col md:flex-row">
+            <div className="flex min-h-dvh flex-col md:flex-row">
                 <div className="hidden border-r bg-gray-100/40 md:block dark:bg-gray-800/40">
                     <DashboardSidebar
                         isSuperadmin={session.user?.isSuperadmin}

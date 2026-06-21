@@ -10,7 +10,7 @@ export default async function HubPage() {
     }
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-dvh">
             <HubClient />
         </div>
     );

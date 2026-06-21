@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -1100,7 +1100,7 @@ export const CartSidebar = ({
                     )}
                 </div>
 
-                <ScrollArea className="flex-1 min-h-0 px-2.5">
+                <div className="flex-1 min-h-0 px-2.5 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {items.length === 0 && (
                         <div className="flex h-full flex-col items-center justify-center space-y-4 text-gray-400 dark:text-gray-500 mt-28">
                             <div className="p-6 rounded-full bg-gray-50 dark:bg-gray-800/50">
@@ -1125,7 +1125,7 @@ export const CartSidebar = ({
                             />
                         ))}
                     </div>
-                </ScrollArea>
+                </div>
 
                 <div className="px-4 py-2 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-[#18181b] z-30 shrink-0 shadow-[0_-2px_16px_rgba(0,0,0,0.02)] dark:shadow-[0_-2px_16px_rgba(0,0,0,0.15)]">
                     <div className="mb-2 space-y-0.5">

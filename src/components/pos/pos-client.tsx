@@ -6,7 +6,7 @@ import Image from "next/image"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+
 import { useSwipe } from "@/hooks/use-swipe"
 import { cn, formatter, scrollIntoViewSafe } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -743,7 +743,7 @@ export const PosClient: FC<PosClientProps> = ({
     const lastScrollPageChange = useRef<number>(0);
 
     const handleProductsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-        const viewport = e.currentTarget.querySelector('[data-slot="scroll-area-viewport"]') as HTMLDivElement;
+        const viewport = e.currentTarget as HTMLDivElement;
         if (!viewport) return;
 
         const now = Date.now();
@@ -1078,12 +1078,12 @@ export const PosClient: FC<PosClientProps> = ({
                                 {/* Load Order button */}
                                 <Button
                                     variant="outline"
-                                    className="h-9 sm:h-10 lg:h-11 px-2 sm:px-3 lg:px-4 rounded-lg sm:rounded-xl bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-800 shadow-sm gap-1.5 sm:gap-2 font-bold text-xs text-gray-700 dark:text-slate-200 shrink-0 hover:bg-gray-50 dark:hover:bg-slate-800 hidden sm:flex"
+                                    className="h-9 sm:h-10 lg:h-11 w-9 sm:w-auto px-0 sm:px-3 lg:px-4 rounded-lg sm:rounded-xl bg-white dark:bg-[#1e293b] border-gray-200 dark:border-slate-800 shadow-sm sm:gap-2 font-bold text-xs text-gray-700 dark:text-slate-200 shrink-0 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center justify-center"
                                     onClick={() => setIsSearchOrderOpen(true)}
                                     title="Charger Commande"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500 shrink-0"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" x2="8" y1="13" y2="13" /><line x1="16" x2="8" y1="17" y2="17" /><line x1="10" x2="8" y1="9" y2="9" /></svg>
-                                    <span className="hidden md:inline lg:hidden xl:inline">{t("loadOrder")}</span>
+                                    <span className="hidden sm:inline-block md:inline lg:hidden xl:inline">{t("loadOrder")}</span>
                                 </Button>
 
                                 {/* Compact Actions Toolbar (icons only, super premium) */}
@@ -1228,8 +1228,9 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                     {/* Content Area (Grid or List) */}
-                    <ScrollArea 
-                        className="flex-1 min-h-0 px-1.5 sm:px-3 lg:px-6 pt-1.5 sm:pt-2 pb-24 sm:pb-20 lg:pb-6"
+                    <div 
+                        className="flex-1 min-h-0 px-1.5 sm:px-3 lg:px-6 pt-1.5 sm:pt-2 pb-24 sm:pb-20 lg:pb-6 overflow-y-auto overscroll-contain"
+                        style={{ WebkitOverflowScrolling: 'touch' }}
                         onWheel={handleProductsWheel}
                     >
                         {viewMode === "grid" ? (
@@ -1496,7 +1497,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 <p className="text-xs lg:text-sm opacity-70 mt-1">{t("tryRefiningSearch")}</p>
                             </div>
                         )}
-                    </ScrollArea>
+                    </div>
 
                     {/* Absolute Mobile Bottom Action Bar */}
                     <div className="lg:hidden fixed bottom-0 left-0 right-0 p-2 sm:p-3 pt-6 sm:pt-8 bg-gradient-to-t from-white dark:from-[#0f1115] via-white/95 dark:via-[#0f1115]/95 to-transparent pointer-events-none z-40 flex flex-col justify-end safe-area-bottom">

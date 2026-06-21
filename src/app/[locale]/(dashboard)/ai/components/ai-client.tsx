@@ -1188,7 +1188,7 @@ Simule l'impact mathématique de cette décision sur ma trésorerie, projette me
     );
 
     return (
-        <div className="flex flex-col h-screen bg-[#060609] text-white overflow-hidden relative font-sans">
+        <div className="flex flex-col h-dvh bg-[#060609] text-white overflow-hidden relative font-sans">
             
             {/* Inline floating orbs keyframe styles for outstanding ambient effect */}
             <style>{`

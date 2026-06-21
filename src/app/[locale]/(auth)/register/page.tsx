@@ -3,7 +3,7 @@ import { ShoppingBag, Users, BarChart2, Package } from "lucide-react"
 
 const RegisterPage = () => {
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-dvh flex">
             {/* Left panel - branding */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col items-center justify-center p-12"
                 style={{

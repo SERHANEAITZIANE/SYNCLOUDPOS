@@ -126,7 +126,7 @@ export const CatalogClient: React.FC<CatalogClientProps> = ({ initialBrands, ini
     })
 
     return (
-        <div className="flex flex-col min-h-screen text-white p-4 pb-24 md:p-6 lg:p-8 rounded-3xl" style={{ backgroundColor: '#07070a', color: '#ffffff' }}>
+        <div className="flex flex-col min-h-dvh text-white p-4 pb-24 md:p-6 lg:p-8 rounded-3xl" style={{ backgroundColor: '#07070a', color: '#ffffff' }}>
             
             {/* Header Area */}
             <div className="flex flex-col space-y-2 mb-6">

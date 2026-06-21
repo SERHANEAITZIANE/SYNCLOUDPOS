@@ -104,6 +104,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const printRef = useRef<HTMLDivElement>(null)
 
     const [localProducts, setLocalProducts] = useState(products)
+    const [localSuppliers, setLocalSuppliers] = useState<any[]>(suppliers || [])
     const [localCategories, setLocalCategories] = useState<any[]>(categories || [])
     const [localBrands, setLocalBrands] = useState<any[]>(brands || [])
     const [showNewCategoryInput, setShowNewCategoryInput] = useState(false)
@@ -112,6 +113,22 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const [newBrandName, setNewBrandName] = useState("")
     const [creatingCat, setCreatingCat] = useState(false)
     const [creatingBrand, setCreatingBrand] = useState(false)
+
+    useEffect(() => {
+        setLocalProducts(products)
+    }, [products])
+
+    useEffect(() => {
+        setLocalSuppliers(suppliers || [])
+    }, [suppliers])
+
+    useEffect(() => {
+        setLocalCategories(categories || [])
+    }, [categories])
+
+    useEffect(() => {
+        setLocalBrands(brands || [])
+    }, [brands])
 
     // Initial Payment State on Creation
     const [payImmediately, setPayImmediately] = useState(false)
@@ -132,6 +149,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 setLocalCategories(prev => [...prev, result.data])
                 setQuickCategoryId(result.data.id)
                 setShowNewCategoryInput(false)
+                router.refresh()
             }
         } catch {
             toast.error("Erreur de création de la catégorie")
@@ -152,6 +170,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 setLocalBrands(prev => [...prev, result.data])
                 setQuickBrandId(result.data.id)
                 setShowNewBrandInput(false)
+                router.refresh()
             }
         } catch {
             toast.error("Erreur de création de la marque")
@@ -375,6 +394,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     }
                 }
                 setQuickProductOpen(false)
+                router.refresh()
             }
         } catch (err) {
             toast.error("Erreur de création du produit.")
@@ -584,7 +604,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
     const watchItems = form.watch("items")
     const watchSupplierId = form.watch("supplierId")
-    const selectedSupplier = suppliers.find(s => s.id === watchSupplierId)
+    const selectedSupplier = localSuppliers.find(s => s.id === watchSupplierId)
 
     const total = watchItems.reduce((acc, item) => acc + (item.quantity * item.costPrice), 0)
 
@@ -658,11 +678,17 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             } else {
                 toast.success("Fournisseur créé")
                 setSupplierModalOpen(false)
-                setNewSupplierName("")
-                setNewSupplierPhone("")
                 if (result.id) {
+                    const newSupplier = {
+                        id: result.id,
+                        name: newSupplierName,
+                        phone: newSupplierPhone
+                    }
+                    setLocalSuppliers(prev => [newSupplier, ...prev])
                     form.setValue("supplierId", result.id)
                 }
+                setNewSupplierName("")
+                setNewSupplierPhone("")
                 router.refresh()
             }
         } catch (error) {
@@ -693,7 +719,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         // Auto-select supplier if Gemini detected one
         if (supplierName && supplierName.trim()) {
             const lower = supplierName.trim().toLowerCase()
-            const match = suppliers.find(s =>
+            const match = localSuppliers.find(s =>
                 s.name.toLowerCase() === lower ||
                 s.name.toLowerCase().includes(lower) ||
                 lower.includes(s.name.toLowerCase())
@@ -871,7 +897,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     <div className="flex items-center gap-2">
                                         <div className="flex-1">
                                             <SearchableSelect
-                                                options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                                                options={localSuppliers.map(s => ({ value: s.id, label: s.name }))}
                                                 value={field.value}
                                                 onChange={field.onChange}
                                                 disabled={loading || !canEdit}

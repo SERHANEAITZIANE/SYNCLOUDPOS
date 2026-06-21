@@ -6,8 +6,19 @@ client.connect('155.133.26.217', 22, 'root', 'C4r3vL[N7~_ulO%^')
 
 sftp = client.open_sftp()
 files = [
-    'src/components/products/columns.tsx',
-    'src/app/[locale]/(dashboard)/products/page.tsx',
+    'src/components/pos/pos-client.tsx',
+    'src/components/pos/cart-sidebar.tsx',
+    'src/app/[locale]/(dashboard)/layout.tsx',
+    'src/app/[locale]/(pos)/display/page.tsx',
+    'src/app/[locale]/(superadmin)/layout.tsx',
+    'src/app/[locale]/(dashboard)/hub/page.tsx',
+    'src/app/[locale]/(dashboard)/hub/components/hub-client.tsx',
+    'src/app/[locale]/(auth)/login/page.tsx',
+    'src/app/[locale]/(auth)/register/page.tsx',
+    'src/app/[locale]/(dashboard)/driver/page.tsx',
+    'src/app/[locale]/(dashboard)/analytics/forecast/page.tsx',
+    'src/app/[locale]/(dashboard)/catalog/components/catalog-client.tsx',
+    'src/app/[locale]/(dashboard)/ai/components/ai-client.tsx'
 ]
 for f in files:
     r = f'/var/www/syncloudpos/{f}'
@@ -28,5 +39,5 @@ def run(cmd):
 
 run('cd /var/www/syncloudpos && npm run build')
 run('pm2 restart syncloudpos')
-print('\n✅ Prix Achat column deployed!')
+print('\n✅ Mobile touch scroll and layout vibration fixes deployed!')
 client.close()

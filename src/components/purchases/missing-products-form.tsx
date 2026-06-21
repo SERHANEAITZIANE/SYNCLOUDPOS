@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -53,6 +54,7 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
     const [finalItems, setFinalItems] = useState<{ productId: string, quantity: number, costPrice: number }[]>([])
     const [isCreating, setIsCreating] = useState(false)
     const t = useTranslations("Common")
+    const router = useRouter()
 
     // The current scanned item we are deciding on
     const currentItem = scannedItems[currentIndex]
@@ -132,9 +134,15 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                 isArchived: false
             })
 
-            if (result && "success" in result && result.success && "data" in result && result.data) {
-                // @ts-ignore
-                handleNext(result.data.id, currentItem.quantity, values.cost)
+            if (result && "success" in result && result.success) {
+                // The backend returns { product: ... }
+                const newProduct = (result as any).product || (result as any).data;
+                if (newProduct && newProduct.id) {
+                    handleNext(newProduct.id, currentItem.quantity, values.cost)
+                    router.refresh()
+                } else {
+                    console.error("No product returned", result);
+                }
             }
         } catch (error) {
             console.error("Failed to create product", error)

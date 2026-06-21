@@ -3,7 +3,7 @@ import { ForecastClient } from "./components/forecast-client"
 
 export default function AIForecastPage() {
     return (
-        <div className="flex flex-col flex-1 h-full min-h-screen">
+        <div className="flex flex-col flex-1 h-full min-h-dvh">
             <div className="flex-1 p-4 md:p-8 pt-6 w-full max-w-6xl mx-auto space-y-6">
                 <div>
                     <h2 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">

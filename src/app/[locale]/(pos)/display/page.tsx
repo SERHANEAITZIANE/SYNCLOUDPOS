@@ -20,7 +20,7 @@ export default async function DisplayPage({
     params: Promise<{ locale: string }>
 }) {
     return (
-        <div className="flex flex-col h-screen w-full bg-slate-50 dark:bg-slate-900">
+        <div className="flex flex-col h-dvh w-full bg-slate-50 dark:bg-slate-900">
             <DisplayClient />
         </div>
     )
