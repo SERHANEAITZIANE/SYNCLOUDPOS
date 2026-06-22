@@ -133,7 +133,24 @@ async function getPeriodData(
         })
     ])
 
-    let posItems = posItemsRaw
+    // Deduplicate: Orders created via POS also generate a SalesOrder simultaneously.
+    // We filter out any POS order that has an exact matching SalesOrder (same time & total).
+    const salesOrderMatches = salesItemsRaw.map(si => ({
+        time: si.salesOrder.createdAt.getTime(),
+        total: Number(si.salesOrder.total)
+    }))
+
+    const deduplicatedPosItems = posItemsRaw.filter(item => {
+        const oTime = item.order.createdAt.getTime()
+        const oTotal = Number(item.order.total)
+        // If a SalesOrder exists within 5 seconds with the same total, we skip the POS Order
+        const isDuplicate = salesOrderMatches.some(so => 
+            Math.abs(so.time - oTime) < 5000 && so.total === oTotal
+        )
+        return !isDuplicate
+    })
+
+    let posItems = deduplicatedPosItems
     let salesItems = salesItemsRaw
     let returns = returnsRaw
 
