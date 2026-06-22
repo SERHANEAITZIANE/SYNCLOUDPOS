@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
     "/api/webhooks",
     "/api/migrate-transactions",
     "/api/mobile",
+    "/api/ping",
     "/landing.html",
     "/manifest.json",
     "/manifest.webmanifest",

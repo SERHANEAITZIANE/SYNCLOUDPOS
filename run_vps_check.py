@@ -1,13 +1,19 @@
 import paramiko
 import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 host = '155.133.26.217'
 port = 22
 username = 'root'
-password = 'pkn567ftXW3L'
+password = 'C4r3vL[N7~_ulO%^'
 
 commands = [
-    "cd /var/www/syncloudpos && node vps_check_db.js"
+    "pm2 status",
+    "pm2 logs syncloudpos --nostream --lines 30",
+    "curl -s -o /dev/null -w 'https://chirpedbeo.online/api/ping: HTTP %{http_code}\\n' https://chirpedbeo.online/api/ping",
+    "curl -s -o /dev/null -w 'https://chirpedbeo.online/fr/login: HTTP %{http_code}\\n' https://chirpedbeo.online/fr/login"
 ]
 
 try:
