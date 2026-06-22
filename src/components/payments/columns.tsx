@@ -91,7 +91,7 @@ export const usePaymentColumns = (accounts: { id: string; name: string; type: st
                 if (source === "SALE") {
                     return <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900/30 dark:text-blue-300">Vente Directe</span>
                 }
-                if (source === "MANUAL_IN") {
+                if (source === "MANUAL_IN" || source === "CUSTOMER_PAYMENT") {
                     return <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full dark:bg-amber-900/30 dark:text-amber-300">Recouvrement</span>
                 }
                 return source

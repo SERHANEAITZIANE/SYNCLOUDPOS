@@ -1044,3 +1044,51 @@ export const createSupplierPayment = async (data: {
     }
 }
 
+export const getUnpaidPurchaseOrders = async (supplierId: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized", purchaseOrders: [] }
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing", purchaseOrders: [] }
+
+    try {
+        const purchaseOrders = await db.purchaseOrder.findMany({
+            where: {
+                supplierId,
+                tenantId,
+                status: { in: ["FACTURE", "BON_LIVRAISON"] }
+            },
+            orderBy: { createdAt: "desc" }
+        })
+
+        const poIds = purchaseOrders.map(po => po.id)
+        const transactions = await db.treasuryTransaction.findMany({
+            where: {
+                tenantId,
+                source: "PURCHASE",
+                referenceId: { in: poIds }
+            }
+        })
+
+        const result = purchaseOrders.map(po => {
+            const paid = transactions
+                .filter(t => t.referenceId === po.id)
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+            const remaining = Number(po.total) - paid
+            return {
+                id: po.id,
+                purchaseNumber: po.purchaseNumber || po.id.slice(-8).toUpperCase(),
+                total: Number(po.total),
+                paid,
+                remaining,
+                createdAt: po.createdAt
+            }
+        }).filter(po => po.remaining > 0)
+
+        return { purchaseOrders: result }
+    } catch (error) {
+        console.error("getUnpaidPurchaseOrders error:", error)
+        return { error: "Failed to fetch purchase orders", purchaseOrders: [] }
+    }
+}
+
+

@@ -339,7 +339,7 @@ export const getUnpaidCustomers = async () => {
     }
 }
 
-export const registerCustomerPayment = async (data: { customerId: string; amount: number; accountId: string; notes?: string; date?: Date | string }) => {
+export const registerCustomerPayment = async (data: { customerId: string; amount: number; accountId: string; notes?: string; date?: Date | string; salesOrderId?: string }) => {
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -359,6 +359,26 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
                 data: { balance: { increment: data.amount } }
             });
 
+            let finalDescription = data.notes || "Règlement de dette";
+            if (data.salesOrderId) {
+                const salesOrder = await tx.salesOrder.findUnique({
+                    where: { id: data.salesOrderId }
+                });
+                if (salesOrder) {
+                    const newPaidAmount = Number(salesOrder.amountPaid) + data.amount;
+                    const newPaymentStatus = newPaidAmount >= Number(salesOrder.total) ? "PAID" : "PARTIAL";
+
+                    await tx.salesOrder.update({
+                        where: { id: data.salesOrderId },
+                        data: {
+                            amountPaid: newPaidAmount,
+                            paymentStatus: newPaymentStatus
+                        }
+                    });
+                    finalDescription = data.notes || `Règlement BL N° ${salesOrder.receiptNumber || salesOrder.id.slice(-6)}`;
+                }
+            }
+
             // 3. Log transaction
             await tx.treasuryTransaction.create({
                 data: {
@@ -370,7 +390,7 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
                     balanceAfter: account.balance,
                     source: "CUSTOMER_PAYMENT",
                     referenceId: data.customerId, // Link to customer
-                    description: `Paiement Client: ${data.notes || "Règlement de dette"}`,
+                    description: `Paiement Client: ${finalDescription}`,
                     date: data.date ? new Date(data.date) : new Date(),
                 }
             });

@@ -387,14 +387,23 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 toast.success("Produit créé et sélectionné !")
                 const newProduct = result.product
                 if (newProduct) {
-                    setLocalProducts((prev) => [newProduct, ...prev])
+                    const productWithBarcodes = {
+                        ...newProduct,
+                        price: Number(newProduct.price ?? quickPrice),
+                        cost: Number(newProduct.cost ?? quickCost),
+                        stock: Number(newProduct.stock ?? quickStock),
+                        barcodes: quickBarcodes.map(b => ({ value: b.value }))
+                    }
+                    setLocalProducts((prev) => [productWithBarcodes, ...prev])
                     if (quickProductRowIndex !== null) {
                         form.setValue(`items.${quickProductRowIndex}.productId`, newProduct.id)
                         form.setValue(`items.${quickProductRowIndex}.costPrice`, quickCost)
                     }
                 }
                 setQuickProductOpen(false)
-                router.refresh()
+                setTimeout(() => {
+                    router.refresh()
+                }, 100)
             }
         } catch (err) {
             toast.error("Erreur de création du produit.")
@@ -600,7 +609,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         }
     })
 
-    const { fields, prepend, remove } = useFieldArray({ control: form.control, name: "items" })
+    const { fields, prepend, remove, update } = useFieldArray({ control: form.control, name: "items" })
 
     const watchItems = form.watch("items")
     const watchSupplierId = form.watch("supplierId")
@@ -822,7 +831,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 </Dialog>
 
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3">
                         <Heading title={title} description={isEditMode ? `Fournisseur: ${initialData?.supplier?.name}` : "Créer un bon d'achat"} />
                         {isEditMode && (
@@ -833,32 +842,32 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     </div>
                     {/* Action buttons for existing orders */}
                     {isEditMode && (
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <Button variant="outline" size="sm" onClick={handlePrint}>
+                        <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                            <Button variant="outline" size="sm" onClick={handlePrint} className="flex-1 md:flex-none">
                                 <Printer className="h-4 w-4 mr-1.5" /> Imprimer
                             </Button>
                             {currentStatus === "PENDING" || currentStatus === "BON_COMMANDE" ? (
-                                <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white" disabled={loading}
+                                <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 md:flex-none" disabled={loading}
                                     onClick={() => handleStatusChange("BON_LIVRAISON")}>
                                     <TruckIcon className="h-4 w-4 mr-1.5" /> Valider la Réception (BR)
                                 </Button>
                             ) : null}
                             {currentStatus === "BON_LIVRAISON" && (
-                                <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white" disabled={loading}
+                                <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white flex-1 md:flex-none" disabled={loading}
                                     onClick={() => handleStatusChange("FACTURE")}>
                                     <FileText className="h-4 w-4 mr-1.5" /> Créer Facture
                                 </Button>
                             )}
                             {currentStatus === "FACTURE" && (
-                                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={loading}
+                                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1 md:flex-none" disabled={loading}
                                     onClick={() => {
                                         const accId = form.getValues("accountId")
                                         handleStatusChange("COMPLETED", accId)
                                     }}>
-                                    <CheckCircle className="h-4 w-4 mr-1.5" /> Marquer Payé
+                                        <CheckCircle className="h-4 w-4 mr-1.5" /> Marquer Payé
                                 </Button>
                             )}
-                            <Button variant="destructive" size="sm" disabled={loading} onClick={() => setDeleteFormOpen(true)}>
+                            <Button variant="destructive" size="sm" disabled={loading} onClick={() => setDeleteFormOpen(true)} className="flex-1 md:flex-none">
                                 <Trash className="h-4 w-4 mr-1.5" /> Supprimer
                             </Button>
                         </div>
@@ -1073,10 +1082,10 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                 return (
                                                     <div 
                                                         key={field.id} 
-                                                        className="grid grid-cols-12 gap-3 px-4 py-4 md:px-5 md:py-3.5 items-center hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors"
+                                                        className="flex flex-col gap-4 p-4 md:grid md:grid-cols-12 md:gap-3 md:px-5 md:py-3.5 items-center hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors border-b last:border-b-0 md:border-b-0"
                                                     >
                                                         {/* Product Search */}
-                                                        <div className="col-span-12 md:col-span-4 min-w-0 flex flex-col gap-1.5">
+                                                        <div className="col-span-12 md:col-span-4 min-w-0 flex flex-col gap-1.5 w-full">
                                                             <FormField control={form.control} name={`items.${index}.productId`} render={({ field: f }) => (
                                                                 <FormItem className="m-0 space-y-0">
                                                                     <FormControl>
@@ -1130,102 +1139,111 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                             )}
                                                         </div>
 
-                                                        {/* Quantity */}
-                                                        <div className="col-span-4 md:col-span-2">
-                                                            <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
-                                                                <FormItem className="m-0 space-y-0">
-                                                                    <FormControl>
-                                                                        <Input 
-                                                                            type="number" 
-                                                                            min={1} 
-                                                                            disabled={loading || !canEdit} 
-                                                                            className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
-                                                                            {...f} 
-                                                                            onChange={e => f.onChange(e.target.valueAsNumber || 1)} 
-                                                                        />
-                                                                    </FormControl>
-                                                                </FormItem>
-                                                            )} />
-                                                        </div>
-
-                                                        {/* Unit Price with absolute Sparkle button */}
-                                                        <div className={cn("col-span-4", storeData?.tvaEnabled ? "md:col-span-2" : "md:col-span-4")}>
-                                                            <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
-                                                                <FormItem className="m-0 space-y-0">
-                                                                    <FormControl>
-                                                                        <div className="relative flex items-center w-full">
+                                                        {/* Grid-based inputs on mobile, ignored on desktop via md:contents */}
+                                                        <div className="grid grid-cols-2 gap-3 w-full md:grid-cols-12 md:gap-3 md:col-span-8 md:p-0 md:border-0 p-3 bg-slate-50/50 dark:bg-slate-900/20 rounded-xl border border-slate-100 dark:border-slate-800/40 md:bg-transparent dark:md:bg-transparent md:contents">
+                                                            {/* Quantity */}
+                                                            <div className="col-span-1 md:col-span-2">
+                                                                <span className="block md:hidden text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Quantité</span>
+                                                                <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
+                                                                    <FormItem className="m-0 space-y-0">
+                                                                        <FormControl>
                                                                             <Input 
                                                                                 type="number" 
-                                                                                step="0.01" 
-                                                                                min={0} 
-                                                                                disabled={loading || !canEdit}
-                                                                                className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
+                                                                                min={1} 
+                                                                                disabled={loading || !canEdit} 
+                                                                                className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
                                                                                 {...f} 
-                                                                                onChange={e => f.onChange(e.target.valueAsNumber || 0)} 
+                                                                                onChange={e => f.onChange(e.target.valueAsNumber || 1)} 
                                                                             />
-                                                                            {watchItems[index]?.productId && (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => handleOpenPmpSuggester(index)}
-                                                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 rounded transition-colors shrink-0"
-                                                                                    title="Simuler PMP & Ajuster les Prix"
-                                                                                >
-                                                                                    <Sparkles className="h-4 w-4 animate-pulse" />
-                                                                                </button>
-                                                                            )}
-                                                                        </div>
-                                                                    </FormControl>
-                                                                </FormItem>
-                                                            )} />
-                                                        </div>
-
-                                                        {/* TVA */}
-                                                        {storeData?.tvaEnabled && (
-                                                            <div className="col-span-4 md:col-span-2">
-                                                                <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => {
-                                                                    const isDisabled = loading || !canEdit;
-                                                                    const val = f.value?.toString() ?? "0";
-                                                                    return (
-                                                                        <FormItem className="m-0 space-y-0">
-                                                                            <Select disabled={isDisabled} onValueChange={(v) => f.onChange(Number(v))} value={val}>
-                                                                                <FormControl>
-                                                                                    <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
-                                                                                        <SelectValue placeholder="TVA..." />
-                                                                                    </SelectTrigger>
-                                                                                </FormControl>
-                                                                                <SelectContent>
-                                                                                    <SelectItem value="19">19%</SelectItem>
-                                                                                    <SelectItem value="9">9%</SelectItem>
-                                                                                    <SelectItem value="0">0%</SelectItem>
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                        </FormItem>
-                                                                    );
-                                                                }} />
+                                                                        </FormControl>
+                                                                    </FormItem>
+                                                                )} />
                                                             </div>
-                                                        )}
 
-                                                        {/* Total Line (HT) */}
-                                                        <div className="col-span-8 md:col-span-1 text-right">
-                                                            <span className="text-sm font-black text-slate-900 dark:text-slate-100">
-                                                                {lineTotal.toLocaleString("fr-DZ")} <span className="text-[10px] font-bold text-slate-400">DA</span>
-                                                            </span>
-                                                        </div>
+                                                            {/* Unit Price */}
+                                                            <div className={cn("col-span-1", storeData?.tvaEnabled ? "md:col-span-2" : "md:col-span-4")}>
+                                                                <span className="block md:hidden text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                                                                    {storeData?.tvaEnabled ? "P.U. HT (DA)" : "P.U. (DA)"}
+                                                                </span>
+                                                                <FormField control={form.control} name={`items.${index}.costPrice`} render={({ field: f }) => (
+                                                                    <FormItem className="m-0 space-y-0">
+                                                                        <FormControl>
+                                                                            <div className="relative flex items-center w-full">
+                                                                                <Input 
+                                                                                    type="number" 
+                                                                                    step="0.01" 
+                                                                                    min={0} 
+                                                                                    disabled={loading || !canEdit}
+                                                                                    className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
+                                                                                    {...f} 
+                                                                                    onChange={e => f.onChange(e.target.valueAsNumber || 0)} 
+                                                                                />
+                                                                                {watchItems[index]?.productId && (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => handleOpenPmpSuggester(index)}
+                                                                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 rounded transition-colors shrink-0"
+                                                                                        title="Simuler PMP & Ajuster les Prix"
+                                                                                    >
+                                                                                        <Sparkles className="h-4 w-4 animate-pulse" />
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                        </FormControl>
+                                                                    </FormItem>
+                                                                )} />
+                                                            </div>
 
-                                                        {/* Trash Action */}
-                                                        <div className="col-span-4 md:col-span-1 flex justify-end">
-                                                            {canEdit && (
-                                                                <Button 
-                                                                    type="button" 
-                                                                    variant="ghost" 
-                                                                    size="icon" 
-                                                                    className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all"
-                                                                    onClick={() => remove(index)} 
-                                                                    disabled={fields.length === 1}
-                                                                >
-                                                                    <Trash className="h-4 w-4" />
-                                                                </Button>
+                                                            {/* TVA */}
+                                                            {storeData?.tvaEnabled && (
+                                                                <div className="col-span-2 sm:col-span-1 md:col-span-2">
+                                                                    <span className="block md:hidden text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">TVA</span>
+                                                                    <FormField control={form.control} name={`items.${index}.tvaRate`} render={({ field: f }) => {
+                                                                        const isDisabled = loading || !canEdit;
+                                                                        const val = f.value?.toString() ?? "0";
+                                                                        return (
+                                                                            <FormItem className="m-0 space-y-0">
+                                                                                <Select disabled={isDisabled} onValueChange={(v) => f.onChange(Number(v))} value={val}>
+                                                                                    <FormControl>
+                                                                                        <SelectTrigger className="font-bold h-9 border-slate-200 dark:border-slate-800 focus:ring-emerald-500 rounded-xl">
+                                                                                            <SelectValue placeholder="TVA..." />
+                                                                                        </SelectTrigger>
+                                                                                    </FormControl>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="19">19%</SelectItem>
+                                                                                        <SelectItem value="9">9%</SelectItem>
+                                                                                        <SelectItem value="0">0%</SelectItem>
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </FormItem>
+                                                                        );
+                                                                    }} />
+                                                                </div>
                                                             )}
+
+                                                            {/* Total Line (HT) */}
+                                                            <div className="col-span-1 md:col-span-1 flex flex-col justify-center items-start md:items-end">
+                                                                <span className="block md:hidden text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Total Ligne</span>
+                                                                <span className="text-sm font-black text-slate-900 dark:text-slate-100 py-1.5 md:py-0">
+                                                                    {lineTotal.toLocaleString("fr-DZ")} <span className="text-[10px] font-bold text-slate-400">DA</span>
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Trash Action */}
+                                                            <div className="col-span-1 md:col-span-1 flex justify-end items-end md:items-center py-1 md:py-0">
+                                                                {canEdit && (
+                                                                    <Button 
+                                                                        type="button" 
+                                                                        variant="ghost" 
+                                                                        size="icon" 
+                                                                        className="h-9 w-9 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all"
+                                                                        onClick={() => remove(index)} 
+                                                                        disabled={fields.length === 1}
+                                                                    >
+                                                                        <Trash className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 )

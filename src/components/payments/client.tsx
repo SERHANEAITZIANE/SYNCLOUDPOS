@@ -23,6 +23,7 @@ import {
     DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { registerCustomerPayment } from "@/actions/customers"
+import { getUnpaidSalesOrders } from "@/actions/sales-orders"
 
 interface PaymentsClientProps {
     data: PaymentColumn[]
@@ -51,6 +52,28 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
         notes: "",
         date: new Date().toISOString().slice(0, 10),
     })
+    const [salesOrders, setSalesOrders] = React.useState<any[]>([])
+    const [selectedSalesOrderId, setSelectedSalesOrderId] = React.useState<string>("")
+
+    React.useEffect(() => {
+        if (!newPayment.customerId) {
+            setSalesOrders([])
+            setSelectedSalesOrderId("")
+            return
+        }
+
+        const fetchOrders = async () => {
+            try {
+                const res = await getUnpaidSalesOrders(newPayment.customerId)
+                if ('salesOrders' in res) {
+                    setSalesOrders(res.salesOrders)
+                }
+            } catch (err) {
+                console.error("Error fetching unpaid sales orders", err)
+            }
+        }
+        fetchOrders()
+    }, [newPayment.customerId])
 
     React.useEffect(() => {
         if (typeof window !== "undefined") {
@@ -145,6 +168,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                 accountId: newPayment.accountId,
                 notes: newPayment.notes,
                 date: newPayment.date,
+                salesOrderId: selectedSalesOrderId || undefined,
             })
 
             if ('error' in result) {
@@ -153,6 +177,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                 toast.success("Paiement enregistré")
                 setCreateOpen(false)
                 setNewPayment({ customerId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10) })
+                setSelectedSalesOrderId("")
                 router.refresh()
             }
         } catch {
@@ -276,7 +301,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
             <DataTable exportTitle={"Export"} exportDescription={""} searchKey="customerName" columns={columns} data={filteredData} />
 
             {/* Create Payment Dialog */}
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if(!open) setSelectedSalesOrderId("") }}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Nouveau Paiement Client</DialogTitle>
@@ -295,6 +320,38 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                                 searchPlaceholder="Rechercher un client..."
                             />
                         </div>
+                        {newPayment.customerId && salesOrders.length > 0 && (
+                            <div className="grid gap-2">
+                                <Label>Bon de Livraison (BL) - Optionnel</Label>
+                                <Select
+                                    value={selectedSalesOrderId}
+                                    onValueChange={(v) => {
+                                        const actualValue = v === "none" ? "" : v
+                                        setSelectedSalesOrderId(actualValue)
+                                        const selectedOrder = salesOrders.find(so => so.id === actualValue)
+                                        if (selectedOrder) {
+                                            const remaining = Number(selectedOrder.total) - Number(selectedOrder.amountPaid)
+                                            setNewPayment(prev => ({ ...prev, amount: remaining.toFixed(2) }))
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionner un Bon de livraison (BL)" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Aucun (Règlement de dette global)</SelectItem>
+                                        {salesOrders.map(so => {
+                                            const remaining = Number(so.total) - Number(so.amountPaid)
+                                            return (
+                                                <SelectItem key={so.id} value={so.id}>
+                                                    {so.receiptNumber} (Total: {Number(so.total).toLocaleString()} DA - Reste: {remaining.toLocaleString()} DA)
+                                                </SelectItem>
+                                            )
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         <div className="grid gap-2">
                             <Label>Montant (DA)</Label>
                             <Input

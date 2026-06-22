@@ -951,3 +951,34 @@ export const deleteSalesOrder = async (id: string) => {
         return { success: "Document annulé et stock restauré" }
     } catch { return { error: "Erreur lors de la suppression" } }
 }
+
+export const getUnpaidSalesOrders = async (customerId: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized", salesOrders: [] }
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing", salesOrders: [] }
+
+    try {
+        const salesOrders = await db.salesOrder.findMany({
+            where: {
+                customerId,
+                tenantId,
+                paymentStatus: { in: ["PENDING", "PARTIAL"] },
+                status: { notIn: ["CANCELLED", "DRAFT"] }
+            },
+            select: {
+                id: true,
+                receiptNumber: true,
+                total: true,
+                amountPaid: true,
+                createdAt: true
+            },
+            orderBy: { createdAt: "desc" }
+        })
+        return { salesOrders: JSON.parse(JSON.stringify(salesOrders)) }
+    } catch (error) {
+        console.error("getUnpaidSalesOrders error:", error)
+        return { error: "Failed to fetch sales orders", salesOrders: [] }
+    }
+}
+

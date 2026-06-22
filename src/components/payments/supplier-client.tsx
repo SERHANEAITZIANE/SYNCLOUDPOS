@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog"
 import { registerSupplierPayment } from "@/actions/suppliers"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { getUnpaidPurchaseOrders } from "@/actions/purchase-orders"
 
 interface SupplierPaymentsClientProps {
     data: SupplierPaymentColumn[]
@@ -73,6 +74,28 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
         date: new Date().toISOString().slice(0, 10),
         imageUrl: "",
     })
+    const [purchaseOrders, setPurchaseOrders] = React.useState<any[]>([])
+    const [selectedPurchaseOrderId, setSelectedPurchaseOrderId] = React.useState<string>("")
+
+    React.useEffect(() => {
+        if (!newPayment.supplierId) {
+            setPurchaseOrders([])
+            setSelectedPurchaseOrderId("")
+            return
+        }
+
+        const fetchOrders = async () => {
+            try {
+                const res = await getUnpaidPurchaseOrders(newPayment.supplierId)
+                if ('purchaseOrders' in res) {
+                    setPurchaseOrders(res.purchaseOrders)
+                }
+            } catch (err) {
+                console.error("Error fetching unpaid purchase orders", err)
+            }
+        }
+        fetchOrders()
+    }, [newPayment.supplierId])
 
     // Apply filters
     React.useEffect(() => {
@@ -142,6 +165,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                 notes: newPayment.notes,
                 date: newPayment.date,
                 imageUrl: newPayment.imageUrl || undefined,
+                purchaseOrderId: selectedPurchaseOrderId || undefined,
             })
 
             if ('error' in result) {
@@ -150,6 +174,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                 toast.success("Paiement fournisseur enregistré")
                 setCreateOpen(false)
                 setNewPayment({ supplierId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10), imageUrl: "" })
+                setSelectedPurchaseOrderId("")
                 router.refresh()
             }
         } catch {
@@ -231,7 +256,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             <DataTable exportTitle={"Export"} exportDescription={""} searchKey="supplierName" columns={columns} data={filteredData} />
 
             {/* Create Payment Dialog */}
-            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if(!open) setSelectedPurchaseOrderId("") }}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle>Nouveau Paiement Fournisseur</DialogTitle>
@@ -250,6 +275,34 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                                 searchPlaceholder="Rechercher un fournisseur..."
                             />
                         </div>
+                        {newPayment.supplierId && purchaseOrders.length > 0 && (
+                            <div className="grid gap-2">
+                                <Label>Bon d'Achat (Facture / BL) - Optionnel</Label>
+                                <Select
+                                    value={selectedPurchaseOrderId}
+                                    onValueChange={(v) => {
+                                        const actualValue = v === "none" ? "" : v
+                                        setSelectedPurchaseOrderId(actualValue)
+                                        const selectedOrder = purchaseOrders.find(po => po.id === actualValue)
+                                        if (selectedOrder) {
+                                            setNewPayment(prev => ({ ...prev, amount: selectedOrder.remaining.toFixed(2) }))
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionner un Bon d'Achat" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Aucun (Règlement de dette global)</SelectItem>
+                                        {purchaseOrders.map(po => (
+                                            <SelectItem key={po.id} value={po.id}>
+                                                {po.purchaseNumber} (Total: {po.total.toLocaleString()} DA - Reste: {po.remaining.toLocaleString()} DA)
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                         <div className="grid gap-2">
                             <Label>Montant (DA)</Label>
                             <Input

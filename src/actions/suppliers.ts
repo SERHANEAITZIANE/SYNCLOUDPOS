@@ -257,6 +257,7 @@ export const registerSupplierPayment = async (data: {
     notes?: string
     date?: string
     imageUrl?: string
+    purchaseOrderId?: string
 }) => {
     try {
         const session = await auth()
@@ -281,6 +282,36 @@ export const registerSupplierPayment = async (data: {
                 }
             })
 
+            let transactionSource: any = "SUPPLIER_PAYMENT"
+            let transactionRefId = data.supplierId
+            let transactionDesc = `Paiement Fournisseur: ${data.notes || "Règlement"}`
+
+            if (data.purchaseOrderId) {
+                const po = await tx.purchaseOrder.findUnique({
+                    where: { id: data.purchaseOrderId, tenantId }
+                })
+                if (po) {
+                    transactionSource = "PURCHASE"
+                    transactionRefId = data.purchaseOrderId
+                    
+                    // Fetch other payments for this PO to see if it becomes completed
+                    const otherPayments = await tx.treasuryTransaction.findMany({
+                        where: { referenceId: data.purchaseOrderId, source: "PURCHASE", tenantId }
+                    })
+                    const totalPaid = otherPayments.reduce((sum, p) => sum + Number(p.amount), 0) + data.amount
+                    
+                    const isCompleted = totalPaid >= Number(po.total)
+                    if (isCompleted) {
+                        await tx.purchaseOrder.update({
+                            where: { id: data.purchaseOrderId },
+                            data: { status: "COMPLETED" }
+                        })
+                    }
+
+                    transactionDesc = `Paiement Fournisseur [Bon N° ${po.purchaseNumber || po.id.slice(-8).toUpperCase()}]: ${data.notes || "Règlement"}`
+                }
+            }
+
             // 3. Create Treasury Transaction OUT
             await tx.treasuryTransaction.create({
                 data: {
@@ -290,9 +321,9 @@ export const registerSupplierPayment = async (data: {
                     amount: data.amount,
                     balanceBefore: Number(account.balance), // Before this txn
                     balanceAfter: Number(account.balance) - data.amount, // After
-                    source: "SUPPLIER_PAYMENT",
-                    referenceId: data.supplierId, // Link to supplier for history
-                    description: `Paiement Fournisseur: ${data.notes || "Règlement"}`,
+                    source: transactionSource,
+                    referenceId: transactionRefId,
+                    description: transactionDesc,
                     imageUrl: data.imageUrl || undefined,
                     date: data.date ? new Date(data.date) : new Date(),
                 }
