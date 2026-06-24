@@ -52,7 +52,7 @@ const formSchema = z.object({
     createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
-        quantity: z.number().min(1),
+        quantity: z.number().min(0),
         costPrice: z.number().min(0),
         tvaRate: z.number().optional(),
         serialNumber: z.string().optional()
@@ -384,6 +384,8 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             if (result.error) {
                 toast.error(result.error)
             } else {
+                // Close dialog FIRST to ensure it always closes
+                setQuickProductOpen(false)
                 toast.success("Produit créé et sélectionné !")
                 const newProduct = result.product
                 if (newProduct) {
@@ -395,17 +397,24 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                         barcodes: quickBarcodes.map(b => ({ value: b.value }))
                     }
                     setLocalProducts((prev) => [productWithBarcodes, ...prev])
-                    if (quickProductRowIndex !== null) {
-                        form.setValue(`items.${quickProductRowIndex}.productId`, newProduct.id)
-                        form.setValue(`items.${quickProductRowIndex}.costPrice`, quickCost)
+                    // Auto-select the new product in the row using useFieldArray's update()
+                    // which properly triggers re-renders of FormField components
+                    const rowIdx = quickProductRowIndex
+                    if (rowIdx !== null) {
+                        const currentItem = form.getValues(`items.${rowIdx}`)
+                        update(rowIdx, {
+                            ...currentItem,
+                            productId: newProduct.id,
+                            costPrice: quickCost
+                        })
                     }
                 }
-                setQuickProductOpen(false)
                 setTimeout(() => {
                     router.refresh()
-                }, 100)
+                }, 200)
             }
         } catch (err) {
+            setQuickProductOpen(false)
             toast.error("Erreur de création du produit.")
         } finally {
             setLoading(false)
@@ -899,86 +908,99 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         {/* Top fields */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                            <FormField control={form.control} name="supplierId" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fournisseur</FormLabel>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1">
+                        <div className="bg-gradient-to-br from-slate-50/80 to-slate-100/40 dark:from-slate-900/40 dark:to-slate-800/20 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 space-y-4 shadow-sm">
+                            {/* Row 1: Fournisseur and Réf. Fournisseur ONLY together */}
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div className="md:col-span-8">
+                                    <FormField control={form.control} name="supplierId" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Fournisseur</FormLabel>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1">
+                                                    <SearchableSelect
+                                                        options={localSuppliers.map(s => ({ value: s.id, label: s.name }))}
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        disabled={loading || !canEdit}
+                                                        placeholder="Sélectionner un fournisseur..."
+                                                        searchPlaceholder="Rechercher un fournisseur..."
+                                                    />
+                                                </div>
+                                                {canEdit && (
+                                                    <Button type="button" variant="outline" size="icon" onClick={() => setSupplierModalOpen(true)} disabled={loading} className="shrink-0">
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <div className="md:col-span-4">
+                                    <FormField control={form.control} name="reference" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Réf. Fournisseur (Facture/BL)</FormLabel>
+                                            <FormControl>
+                                                <Input disabled={loading || !canEdit} placeholder="Ex: FAC-2024-001" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                            </div>
+
+                            {/* Row 2: Date de transaction (small size) AND Règlement (Type de document) AND Compte de paiement together */}
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div className="md:col-span-3">
+                                    <FormField control={form.control} name="createdAt" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Date de transaction</FormLabel>
+                                            <FormControl>
+                                                <Input disabled={loading} type="date" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <div className="md:col-span-4">
+                                    <FormField control={form.control} name="status" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Type de document (Règlement)</FormLabel>
+                                            <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="BON_LIVRAISON">Bon de Réception (BR) (+Stock)</SelectItem>
+                                                    <SelectItem value="BON_COMMANDE">Bon de Commande</SelectItem>
+                                                    <SelectItem value="FACTURE">Facture</SelectItem>
+                                                    <SelectItem value="PENDING">Brouillon</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                                <div className="md:col-span-5">
+                                    <FormField control={form.control} name="accountId" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Compte de paiement</FormLabel>
                                             <SearchableSelect
-                                                options={localSuppliers.map(s => ({ value: s.id, label: s.name }))}
+                                                options={[
+                                                    { value: "none", label: "Aucun / À régler" },
+                                                    ...accounts.map(a => ({ value: a.id, label: `${a.name} — ${a.balance}` }))
+                                                ]}
                                                 value={field.value}
                                                 onChange={field.onChange}
-                                                disabled={loading || !canEdit}
-                                                placeholder="Sélectionner un fournisseur..."
-                                                searchPlaceholder="Rechercher un fournisseur..."
+                                                disabled={loading}
+                                                placeholder="Sélectionner un compte..."
+                                                searchPlaceholder="Rechercher un compte..."
                                             />
-                                        </div>
-                                        {canEdit && (
-                                            <Button type="button" variant="outline" size="icon" onClick={() => setSupplierModalOpen(true)} disabled={loading} className="shrink-0">
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="status" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Type de document</FormLabel>
-                                    <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger><SelectValue /></SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="BON_LIVRAISON">Bon de Réception (BR) (+Stock)</SelectItem>
-                                            <SelectItem value="BON_COMMANDE">Bon de Commande</SelectItem>
-                                            <SelectItem value="FACTURE">Facture</SelectItem>
-                                            <SelectItem value="PENDING">Brouillon</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="accountId" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Compte de paiement</FormLabel>
-                                    <SearchableSelect
-                                        options={[
-                                            { value: "none", label: "Aucun / À régler" },
-                                            ...accounts.map(a => ({ value: a.id, label: `${a.name} — ${a.balance}` }))
-                                        ]}
-                                        value={field.value}
-                                        onChange={field.onChange}
-                                        disabled={loading}
-                                        placeholder="Sélectionner un compte..."
-                                        searchPlaceholder="Rechercher un compte..."
-                                    />
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="reference" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Réf. Fournisseur (Facture/BL)</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading || !canEdit} placeholder="Ex: FAC-2024-001" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-
-                            <FormField control={form.control} name="createdAt" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Date de transaction</FormLabel>
-                                    <FormControl>
-                                        <Input disabled={loading} type="date" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )} />
+                                </div>
+                            </div>
                         </div>
 
                         <Separator />
@@ -995,13 +1017,6 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             </div>
                         ) : (
                             <>
-                                {/* OCR Entry Point */}
-                                {canEdit && (
-                                    <div className="mb-6">
-                                        <OcrReceiptUploader onProductsExtracted={handleOcrExtracted} disabled={loading} />
-                                    </div>
-                                )}
-
                                 {/* Items */}
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
@@ -1011,6 +1026,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                         </h3>
                                         {canEdit && (
                                             <div className="flex items-center gap-2">
+                                                <OcrReceiptUploader onProductsExtracted={handleOcrExtracted} disabled={loading} />
                                                 <Button type="button" variant="outline" size="sm" onClick={() => setClipboardOpen(!clipboardOpen)} className="text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all font-semibold">
                                                     <FileSpreadsheet className="h-4 w-4 mr-1.5" /> Import Excel/Coller
                                                 </Button>
@@ -1149,11 +1165,11 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                         <FormControl>
                                                                             <Input 
                                                                                 type="number" 
-                                                                                min={1} 
+                                                                                min={0} 
                                                                                 disabled={loading || !canEdit} 
                                                                                 className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
                                                                                 {...f} 
-                                                                                onChange={e => f.onChange(e.target.valueAsNumber || 1)} 
+                                                                                onChange={e => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} 
                                                                             />
                                                                         </FormControl>
                                                                     </FormItem>
@@ -1176,7 +1192,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                     disabled={loading || !canEdit}
                                                                                     className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
                                                                                     {...f} 
-                                                                                    onChange={e => f.onChange(e.target.valueAsNumber || 0)} 
+                                                                                    onChange={e => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} 
                                                                                 />
                                                                                 {watchItems[index]?.productId && (
                                                                                     <button
@@ -1384,8 +1400,8 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                           <Input
                                                               type="number"
                                                               placeholder="0.00"
-                                                              value={initialPayAmount || ""}
-                                                              onChange={e => setInitialPayAmount(e.target.valueAsNumber || 0)}
+                                                              value={initialPayAmount}
+                                                              onChange={e => setInitialPayAmount(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)}
                                                               className="font-extrabold text-base pr-10 border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 transition-all text-emerald-600 dark:text-emerald-400"
                                                           />
                                                           <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">DA</span>

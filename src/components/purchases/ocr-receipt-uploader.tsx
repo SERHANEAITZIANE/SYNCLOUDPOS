@@ -8,6 +8,8 @@ import { toast } from "react-hot-toast"
 import { Badge } from "@/components/ui/badge"
 import { analyzeInvoiceWithAI, type OcrInvoiceItem, type OcrInvoiceResult } from "@/actions/ocr-invoice"
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
 interface OcrReceiptUploaderProps {
     onProductsExtracted: (
         items: { name: string; price: number; quantity: number }[],
@@ -20,6 +22,7 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
     onProductsExtracted,
     disabled
 }) => {
+    const [isOpen, setIsOpen] = useState(false)
     const [image, setImage] = useState<string | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
     const [result, setResult] = useState<OcrInvoiceResult | null>(null)
@@ -89,6 +92,8 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
             quantity: item.quantity
         }))
         onProductsExtracted(items, result.supplier || undefined)
+        setIsOpen(false)
+        handleReset()
     }
 
     const handleReset = () => {
@@ -96,175 +101,169 @@ export const OcrReceiptUploader: React.FC<OcrReceiptUploaderProps> = ({
         setResult(null)
     }
 
-    // ─── Empty state ──────────────────────────────────────────────────
-    if (!image) {
-        return (
-            <div className="bg-gradient-to-br from-indigo-50/60 to-purple-50/60 dark:from-indigo-950/30 dark:to-purple-950/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="flex justify-center">
-                    <div className="h-14 w-14 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center ring-4 ring-indigo-50 dark:ring-indigo-950">
-                        <Sparkles className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                </div>
-                <div>
-                    <h3 className="font-bold text-lg text-indigo-900 dark:text-indigo-100">Scanner un bon de livraison</h3>
-                    <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                        L'IA détectera automatiquement le <strong>fournisseur</strong>, les <strong>produits</strong>, <strong>quantités</strong> et <strong>prix unitaires</strong>.
-                    </p>
-                </div>
-                <div className="flex gap-3 mt-2">
-                    <Button
-                        type="button"
-                        onClick={() => cameraInputRef.current?.click()}
-                        disabled={disabled || isProcessing}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                    >
-                        <Camera className="h-4 w-4 mr-2" />
-                        Prendre une photo
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={disabled || isProcessing}
-                    >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Importer image
-                    </Button>
-                </div>
+    return (
+        <>
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsOpen(true)}
+                disabled={disabled}
+                className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border-indigo-200 dark:border-indigo-800/80 text-indigo-600 dark:text-indigo-400 font-semibold transition-all duration-300 rounded-xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/10 gap-1.5"
+            >
+                <Sparkles className="h-4 w-4 text-indigo-500 animate-pulse" />
+                Scanner un bon (IA)
+            </Button>
 
-                <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} className="hidden" onChange={handleFileChange} />
-                <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-            </div>
-        )
-    }
+            <Dialog open={isOpen} onOpenChange={(open) => {
+                setIsOpen(open);
+                if (!open) handleReset();
+            }}>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl p-6">
+                    <DialogHeader className="pb-2 border-b">
+                        <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+                            <Sparkles className="h-5 w-5 text-indigo-500 animate-pulse" />
+                            Numérisation de Facture / Bon par IA
+                        </DialogTitle>
+                    </DialogHeader>
 
-    // ─── Processing state ─────────────────────────────────────────────
-    if (isProcessing) {
-        return (
-            <div className="border rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-4 min-h-[200px]">
-                <div className="relative h-40 w-full max-w-xs rounded-lg overflow-hidden border bg-black/5 mb-2">
-                    <Image src={image} alt="Invoice" fill className="object-contain opacity-50" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
-                        <Sparkles className="h-8 w-8 text-indigo-500 animate-pulse mb-2" />
-                        <p className="font-semibold text-sm text-indigo-700 dark:text-indigo-300">Analyse IA en cours...</p>
-                        <p className="text-xs text-muted-foreground mt-1">L'IA détecte les articles...</p>
-                    </div>
-                </div>
-                <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
-            </div>
-        )
-    }
-
-    // ─── Results state ────────────────────────────────────────────────
-    if (result) {
-        const hasError = !!result.error || result.items.length === 0
-        return (
-            <div className="border rounded-xl overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 bg-muted/40 border-b">
-                    <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-indigo-500" />
-                        <span className="font-semibold text-sm">Résultat IA — Bon de livraison</span>
-                        {result.supplier && (
-                            <Badge className="bg-indigo-100 text-indigo-800 border-0 text-xs font-semibold">
-                                📦 {result.supplier}
-                            </Badge>
-                        )}
-                    </div>
-                    <Button size="sm" variant="ghost" onClick={handleReset}>
-                        <X className="h-4 w-4 mr-1" /> Recommencer
-                    </Button>
-                </div>
-
-                {hasError ? (
-                    <div className="p-6 flex flex-col items-center gap-3 text-center">
-                        <AlertTriangle className="h-10 w-10 text-amber-500" />
-                        <p className="font-semibold">Analyse incomplète</p>
-                        <p className="text-sm text-muted-foreground max-w-xs">{result.error || "Aucun article détecté. Essayez avec une image plus claire ou mieux cadrée."}</p>
-                        <Button variant="outline" onClick={handleReset} className="mt-2">
-                            Réessayer avec une autre image
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="p-4 space-y-3">
-                        {/* Preview image + totals */}
-                        <div className="flex gap-4">
-                            <div className="relative h-28 w-24 shrink-0 rounded-lg overflow-hidden border bg-black/5">
-                                <Image src={image} alt="Invoice preview" fill className="object-contain" />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                {/* Total verification */}
-                                <div className={`rounded-lg px-3 py-2 border flex items-center justify-between text-sm font-medium ${result.isValid ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-amber-50 border-amber-200 text-amber-800"}`}>
-                                    <div className="flex items-center gap-1.5">
-                                        {result.isValid
-                                            ? <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                                            : <AlertTriangle className="h-4 w-4 text-amber-600" />
-                                        }
-                                        {result.isValid ? "Totaux vérifiés ✓" : "Écart dans les totaux"}
+                    <div className="py-4">
+                        {/* ─── Empty state ────────────────────────────────────────────────── */}
+                        {!image && (
+                            <div className="space-y-5">
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="border-2 border-dashed border-slate-300 dark:border-slate-800 rounded-2xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/40 hover:border-indigo-500 dark:hover:border-indigo-500/80 transition-all group min-h-[220px]"
+                                >
+                                    <div className="p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-full text-indigo-600 dark:text-indigo-400 mb-4 group-hover:scale-110 transition-transform">
+                                        <Upload className="h-8 w-8" />
                                     </div>
-                                    <span className="font-bold">{result.grandTotal.toLocaleString("fr-DZ")} DA</span>
-                                </div>
-                                {!result.isValid && (
-                                    <p className="text-xs text-muted-foreground">
-                                        Calculé: {result.calculatedTotal.toLocaleString("fr-DZ")} DA • Document: {result.grandTotal.toLocaleString("fr-DZ")} DA
+                                    <p className="font-bold text-base text-slate-800 dark:text-slate-200 mb-1">
+                                        Sélectionner une image ou un document
                                     </p>
+                                    <p className="text-sm text-muted-foreground max-w-xs">
+                                        Cliquez pour parcourir ou glissez-déposez votre facture/bon de livraison.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-center gap-3">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => cameraInputRef.current?.click()}
+                                        className="gap-2 rounded-xl border-slate-200 dark:border-slate-800"
+                                        disabled={disabled}
+                                    >
+                                        <Camera className="h-4 w-4 text-muted-foreground" />
+                                        Prendre une photo (Caméra)
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ─── Processing state ───────────────────────────────────────────── */}
+                        {isProcessing && (
+                            <div className="flex flex-col items-center justify-center text-center py-8 space-y-5">
+                                {image && (
+                                    <div className="relative h-48 w-40 rounded-xl overflow-hidden border bg-black/5 shadow-md">
+                                        <Image src={image} alt="Invoice" fill className="object-contain opacity-50" />
+                                        <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                                            <Loader2 className="h-8 w-8 animate-spin text-white" />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="space-y-1.5">
+                                    <p className="font-bold text-lg text-slate-800 dark:text-slate-200">Analyse intelligente en cours...</p>
+                                    <p className="text-sm text-muted-foreground max-w-sm">
+                                        Notre modèle Gemini extrait les produits, les quantités et les prix d'achat de votre document.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ─── Results state ──────────────────────────────────────────────── */}
+                        {!isProcessing && result && (
+                            <div className="space-y-4">
+                                {result.error || result.items.length === 0 ? (
+                                    <div className="p-6 flex flex-col items-center gap-3 text-center">
+                                        <AlertTriangle className="h-10 w-10 text-amber-500" />
+                                        <p className="font-semibold">Analyse incomplète</p>
+                                        <p className="text-sm text-muted-foreground max-w-xs">{result.error || "Aucun article détecté. Essayez avec une image plus claire ou mieux cadrée."}</p>
+                                        <Button variant="outline" onClick={handleReset} className="mt-2 rounded-xl">
+                                            Réessayer avec une autre image
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-150 dark:border-slate-800/85">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <Badge className="bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900 text-xs font-semibold px-2.5 py-1">
+                                                    📦 {result.supplier || "Fournisseur non détecté"}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {result.items.length} article(s) trouvé(s)
+                                                </span>
+                                            </div>
+                                            <div className={`rounded-lg px-3 py-1 border flex items-center gap-1.5 text-xs font-bold ${result.isValid ? "bg-emerald-50 dark:bg-emerald-950/45 border-emerald-255 text-emerald-800 dark:text-emerald-400" : "bg-amber-50 dark:bg-amber-950/45 border-amber-255 text-amber-800 dark:text-amber-400"}`}>
+                                                {result.isValid
+                                                    ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                                    : <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                                                }
+                                                Total document: {result.grandTotal.toLocaleString("fr-DZ")} DA
+                                            </div>
+                                        </div>
+
+                                        <div className="border rounded-xl overflow-hidden shadow-sm max-h-[300px] overflow-y-auto">
+                                            <table className="w-full text-sm">
+                                                <thead className="bg-slate-50 dark:bg-slate-900/60 sticky top-0 border-b">
+                                                    <tr className="text-xs uppercase text-slate-500 dark:text-slate-400 font-bold">
+                                                        <th className="px-4 py-3 text-left">Désignation</th>
+                                                        <th className="px-4 py-3 text-center w-16">Qté</th>
+                                                        <th className="px-4 py-3 text-right w-28">P.U (DA)</th>
+                                                        <th className="px-4 py-3 text-right w-32">Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-850 bg-white dark:bg-slate-950">
+                                                    {result.items.map((item: OcrInvoiceItem, i: number) => (
+                                                        <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+                                                            <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{item.name}</td>
+                                                            <td className="px-4 py-3 text-center font-semibold">{item.quantity}</td>
+                                                            <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
+                                                                {item.unitPrice.toLocaleString("fr-DZ")}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right font-bold text-slate-900 dark:text-slate-100">
+                                                                {(item.quantity * item.unitPrice).toLocaleString("fr-DZ")}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        {/* Confirm/Reset buttons */}
+                                        <div className="flex gap-3 pt-2">
+                                            <Button
+                                                type="button"
+                                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl font-semibold shadow-md shadow-indigo-500/10"
+                                                onClick={handleConfirm}
+                                            >
+                                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                                Importer ces {result.items.length} articles dans le bon
+                                            </Button>
+                                            <Button type="button" variant="outline" onClick={handleReset} className="rounded-xl border-slate-200 dark:border-slate-800">
+                                                Recommencer
+                                            </Button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
-                        </div>
-
-                        {/* Items table */}
-                        <div className="border rounded-lg overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead className="bg-muted/50">
-                                    <tr className="text-xs uppercase text-muted-foreground">
-                                        <th className="px-3 py-2 text-left font-semibold">Désignation</th>
-                                        <th className="px-3 py-2 text-center font-semibold w-14">Qté</th>
-                                        <th className="px-3 py-2 text-right font-semibold w-24">P.U (DA)</th>
-                                        <th className="px-3 py-2 text-right font-semibold w-28">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {result.items.map((item: OcrInvoiceItem, i: number) => (
-                                        <tr key={i} className="border-t hover:bg-muted/20">
-                                            <td className="px-3 py-2 font-medium">{item.name}</td>
-                                            <td className="px-3 py-2 text-center">{item.quantity}</td>
-                                            <td className="px-3 py-2 text-right text-muted-foreground">
-                                                {item.unitPrice.toLocaleString("fr-DZ")}
-                                            </td>
-                                            <td className="px-3 py-2 text-right font-semibold text-primary">
-                                                {(item.quantity * item.unitPrice).toLocaleString("fr-DZ")}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                                <tfoot className="bg-muted/30 border-t-2">
-                                    <tr>
-                                        <td colSpan={3} className="px-3 py-2 text-right font-bold text-xs uppercase">TOTAL</td>
-                                        <td className="px-3 py-2 text-right font-bold">{result.grandTotal.toLocaleString("fr-DZ")} DA</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        {/* Confirm */}
-                        <div className="flex gap-3 pt-1">
-                            <Button
-                                type="button"
-                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
-                                onClick={handleConfirm}
-                            >
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Importer ces {result.items.length} articles
-                            </Button>
-                            <Button type="button" variant="outline" onClick={handleReset}>
-                                Recommencer
-                            </Button>
-                        </div>
+                        )}
                     </div>
-                )}
-            </div>
-        )
-    }
+                </DialogContent>
+            </Dialog>
 
-    return null
+            <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} className="hidden" onChange={handleFileChange} />
+            <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+        </>
+    )
 }
