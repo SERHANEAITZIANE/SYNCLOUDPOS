@@ -203,7 +203,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
                 <h3 className="text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-indigo-500" /> {t("purePerformance")}
                 </h3>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                     <KpiCard
                         title={tDashboard("totalRevenue")}
                         value={formatter.format(data.totalRevenue)}
@@ -222,13 +222,6 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
                         icon={Package}
                         color="orange"
                         sub={t("cogsDesc")}
-                    />
-                    <KpiCard
-                        title={tAnalytics("expenses")}
-                        value={formatter.format(data.totalExpenses)}
-                        icon={TrendingDown}
-                        color="red"
-                        sub={t("expensesDesc")}
                     />
                     <KpiCard
                         title={tAnalytics("profit")}
@@ -280,32 +273,7 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
             </div>
 
             {/* ── Charts Row ─────────────────────────────── */}
-            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-                <Card className="shadow-md border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
-                    <CardHeader>
-                        <CardTitle className="text-base text-slate-800 dark:text-slate-200">{t("revenueVsExpenses")}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={320}>
-                            <LineChart data={data.revenueOverTime} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                                <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" dy={10} />
-                                <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="hsl(var(--muted-foreground))" tickFormatter={v => `${(v / 1000)}k`} dx={-10} />
-                                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--muted))', strokeWidth: 2 }} />
-                                <Legend wrapperStyle={{ paddingTop: "20px" }} />
-                                <Line type="monotone" dataKey="revenue" name={t("revenues")} stroke="#6366f1" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} />
-                                <Line type="monotone" dataKey="expenses" name={t("expenses")} stroke="#ef4444" strokeWidth={3} dot={false} strokeDasharray="5 5" activeDot={{ r: 6, strokeWidth: 0 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-
+            <div className="grid gap-6 grid-cols-1">
                 {/* Category Bar Chart */}
                 <Card className="shadow-md border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
                     <CardHeader>

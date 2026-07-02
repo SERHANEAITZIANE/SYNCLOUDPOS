@@ -30,8 +30,8 @@ export default async function ProfitReportPage({ searchParams }: PageProps) {
     const tenantId = session.user.tenantId
 
     const data = await getProfitReport({
-        from: from ? new Date(from) : undefined,
-        to: to ? new Date(to) : undefined,
+        from: from || undefined,
+        to: to || undefined,
         clientType: clientType || undefined,
         categoryId: categoryId || undefined,
         brandId: brandId || undefined,

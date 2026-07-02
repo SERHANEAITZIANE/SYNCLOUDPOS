@@ -47,6 +47,7 @@ export default async function TreasuryReportPage() {
                     totalCash={totalCash}
                     totalBank={totalBank}
                     transactions={formattedTransactions}
+                    accounts={accounts}
                 />
             </div>
         </div>

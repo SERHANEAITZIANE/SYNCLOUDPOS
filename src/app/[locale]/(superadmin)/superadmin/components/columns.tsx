@@ -66,10 +66,36 @@ export const columns: ColumnDef<TenantColumn>[] = [
             const orgPhone = row.original.phone;
             const ownerPhone = row.original.ownerDetails?.phone;
 
+            const getWhatsAppUrl = (phone: string) => {
+                const cleaned = phone.replace(/\D/g, "");
+                if (cleaned.startsWith("0")) {
+                    return `https://wa.me/213${cleaned.slice(1)}`;
+                }
+                return `https://wa.me/${cleaned}`;
+            };
+
             return (
                 <div className="flex flex-col gap-1">
-                    {orgPhone && <span className="text-xs break-keep whitespace-nowrap">Org: {orgPhone}</span>}
-                    {ownerPhone && <span className="text-xs break-keep whitespace-nowrap">User: {ownerPhone}</span>}
+                    {orgPhone && (
+                        <a 
+                            href={getWhatsAppUrl(orgPhone)} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-xs break-keep whitespace-nowrap text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                            Org: {orgPhone}
+                        </a>
+                    )}
+                    {ownerPhone && (
+                        <a 
+                            href={getWhatsAppUrl(ownerPhone)} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-xs break-keep whitespace-nowrap text-emerald-600 dark:text-emerald-400 hover:underline"
+                        >
+                            User: {ownerPhone}
+                        </a>
+                    )}
                     {!orgPhone && !ownerPhone && <span className="text-xs text-muted-foreground">Aucun</span>}
                 </div>
             )

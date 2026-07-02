@@ -2,6 +2,7 @@
 
 import { Plus, Filter, X, Activity, Calendar as CalendarIcon, RefreshCw, Users } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
+import { format } from "date-fns"
 import { useRouter } from "@/i18n/routing"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useState, useMemo } from "react"
@@ -71,9 +72,14 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
     const toStr = searchParams.get("to")
 
     const dateRange = useMemo(() => {
+        const parseDate = (str: string | null) => {
+            if (!str) return undefined
+            const d = new Date(str)
+            return isNaN(d.getTime()) ? undefined : d
+        }
         return {
-            from: fromStr ? new Date(fromStr) : undefined,
-            to: toStr ? new Date(toStr) : undefined
+            from: parseDate(fromStr),
+            to: parseDate(toStr)
         }
     }, [fromStr, toStr])
 
@@ -101,13 +107,13 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
 
     const setDateRange = (range: DateRange | undefined) => {
         const params = new URLSearchParams(searchParams.toString())
-        if (range?.from) {
-            params.set("from", range.from.toISOString())
+        if (range?.from && !isNaN(range.from.getTime())) {
+            params.set("from", format(range.from, "yyyy-MM-dd"))
         } else {
             params.delete("from")
         }
-        if (range?.to) {
-            params.set("to", range.to.toISOString())
+        if (range?.to && !isNaN(range.to.getTime())) {
+            params.set("to", format(range.to, "yyyy-MM-dd"))
         } else {
             params.delete("to")
         }

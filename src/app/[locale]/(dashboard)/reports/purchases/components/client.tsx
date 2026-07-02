@@ -8,6 +8,7 @@ import { ShoppingCart, Truck, FileOutput } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 interface PurchasesReportProps {
     totalPurchasesValue: number;
@@ -53,6 +54,13 @@ export const PurchasesReportClient: React.FC<PurchasesReportProps> = ({
         },
     ];
 
+    const footerRow = (
+        <TableRow>
+            <TableCell colSpan={3} className="text-right font-bold uppercase tracking-wider">Total Général</TableCell>
+            <TableCell className="font-bold">{formatter.format(totalPurchasesValue)}</TableCell>
+        </TableRow>
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -95,7 +103,7 @@ export const PurchasesReportClient: React.FC<PurchasesReportProps> = ({
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable  exportTitle={"Rapport des Achats"} exportDescription={"Suivi de vos dépenses fournisseurs et de l'historique d'approvisionnement."} searchKey="supplier" columns={columns} data={purchaseOrders} />
+                    <DataTable exportTitle={"Rapport des Achats"} exportDescription={"Analyse des commandes et montants dus aux fournisseurs."} searchKey="supplier" columns={columns} data={purchaseOrders} footerRow={footerRow} />
                 </CardContent>
             </Card>
         </div>

@@ -217,6 +217,20 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 }
             }
 
+            // 2.5 Periodic tenant sync: if user's DB tenantId differs from token, refresh
+            if (token.sub && token.tenantId) {
+                const currentUser = await db.user.findUnique({
+                    where: { id: token.sub },
+                    select: { tenantId: true, defaultStoreId: true, tenant: { select: { subscriptionEndsAt: true, isBlocked: true } } }
+                });
+                if (currentUser && currentUser.tenantId !== token.tenantId) {
+                    token.tenantId = currentUser.tenantId;
+                    token.subscriptionEndsAt = currentUser.tenant?.subscriptionEndsAt;
+                    token.isBlocked = currentUser.tenant?.isBlocked;
+                    token.defaultStoreId = currentUser.defaultStoreId;
+                }
+            }
+
             // 3. Fallback for legacy tokens if they lack tenantId
             if (!token.tenantId && token.sub) {
                 const foundUser = await db.user.findUnique({

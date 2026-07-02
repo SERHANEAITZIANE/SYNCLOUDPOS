@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Plus, ShieldCheck, Clock, KeyRound, ShieldOff, Download } from "lucide-react"
+import { MoreHorizontal, Plus, ShieldCheck, Clock, KeyRound, ShieldOff, Download, Eye, UserPlus } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 
@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { updateTenantSubscription, toggleTenantBlock, resetUserPassword } from "@/actions/superadmin"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { updateTenantSubscription, toggleTenantBlock, resetUserPassword, impersonateTenant, assignUserToTenant } from "@/actions/superadmin"
 import { TenantColumn } from "./columns"
 
 interface CellActionProps {
@@ -35,6 +36,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [resetOpen, setResetOpen] = useState(false)
     const [selectedUserId, setSelectedUserId] = useState("")
     const [newPassword, setNewPassword] = useState("")
+
+    // Impersonate / Link states
+    const [assignOpen, setAssignOpen] = useState(false)
+    const [assignEmail, setAssignEmail] = useState("")
+    const [assignRole, setAssignRole] = useState<"ADMIN" | "CASHIER" | "MANAGER" | "STOCK_MANAGER" | "ACCOUNTANT" | "VENDEUR">("CASHIER")
 
     const onExtend = async (months: number) => {
         try {
@@ -108,6 +114,48 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         }
     }
 
+    const onImpersonate = async () => {
+        try {
+            setLoading(true)
+            toast.loading("Connexion en cours...", { id: "impersonate" })
+            const result = await impersonateTenant(data.id)
+            if (result.success) {
+                toast.success("Connecté !", { id: "impersonate" })
+                // Force full client reload to ensure next-auth session updates
+                window.location.href = "/dashboard"
+            } else {
+                toast.error(result.error || "Erreur d'impersonation", { id: "impersonate" })
+            }
+        } catch {
+            toast.error("Erreur de connexion", { id: "impersonate" })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const onAssignUser = async () => {
+        if (!assignEmail.trim()) {
+            toast.error("Veuillez saisir un e-mail")
+            return
+        }
+        try {
+            setLoading(true)
+            const result = await assignUserToTenant(assignEmail, data.id, assignRole)
+            if (result.success) {
+                toast.success(result.success)
+                setAssignOpen(false)
+                setAssignEmail("")
+                router.refresh()
+            } else {
+                toast.error(result.error || "Erreur")
+            }
+        } catch {
+            toast.error("Erreur système")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <>
             <DropdownMenu>
@@ -117,7 +165,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <MoreHorizontal className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Contrôle</DropdownMenuLabel>
+                    <DropdownMenuItem disabled={loading} onClick={onImpersonate}>
+                        <Eye className="mr-2 h-4 w-4 text-violet-500" />
+                        Se connecter en tant que
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled={loading} onClick={() => setAssignOpen(true)}>
+                        <UserPlus className="mr-2 h-4 w-4 text-blue-500" />
+                        Affecter un utilisateur
+                    </DropdownMenuItem>
+                    <div className="h-px bg-slate-200 my-1" />
                     <DropdownMenuLabel>Abonnement</DropdownMenuLabel>
                     <DropdownMenuItem disabled={loading} onClick={() => onExtend(1)}>
                         <Plus className="mr-2 h-4 w-4 text-emerald-500" />
@@ -170,6 +228,49 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setResetOpen(false)}>Annuler</Button>
                         <Button disabled={loading} onClick={onResetPassword}>
+                            Confirmer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Affect User Dialog */}
+            <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Affecter un utilisateur à {data.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email de l'utilisateur existant</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="nom@exemple.com"
+                                value={assignEmail}
+                                onChange={e => setAssignEmail(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="role">Rôle dans la boutique</Label>
+                            <Select value={assignRole} onValueChange={(val: any) => setAssignRole(val)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choisir un rôle" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ADMIN">ADMIN</SelectItem>
+                                    <SelectItem value="MANAGER">MANAGER</SelectItem>
+                                    <SelectItem value="CASHIER">CASHIER</SelectItem>
+                                    <SelectItem value="STOCK_MANAGER">STOCK_MANAGER</SelectItem>
+                                    <SelectItem value="ACCOUNTANT">ACCOUNTANT</SelectItem>
+                                    <SelectItem value="VENDEUR">VENDEUR</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setAssignOpen(false)}>Annuler</Button>
+                        <Button disabled={loading} onClick={onAssignUser}>
                             Confirmer
                         </Button>
                     </DialogFooter>

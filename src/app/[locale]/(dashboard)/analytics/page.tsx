@@ -20,11 +20,8 @@ const AnalyticsPage = async ({
     let errorMessage: string | null = null
 
     try {
-        const fromDate = from ? new Date(from) : undefined;
-        const toDate = to ? new Date(to) : undefined;
-
         analyticsData = await getAnalyticsData(
-            fromDate && toDate ? { from: fromDate, to: toDate } : undefined
+            from && to ? { from, to } : undefined
         )
     } catch (error) {
         console.error("Failed to load analytics data:", error)

@@ -268,7 +268,7 @@ export const TreasuryClient: React.FC<TreasuryClientProps> = ({
                     <DataTable exportTitle={"Export"} exportDescription={""} searchKey="name" columns={columns} data={accounts} />
                 </div>
             ) : activeTab === "movements" ? (
-                <MouvementsClient data={filteredMovements} />
+                <MouvementsClient data={filteredMovements} accounts={accounts} />
             ) : (
                 <AnalyticsTab movements={filteredMovements} accounts={accounts} dateRange={dateRange} selectedAccount={selectedAccount} />
             )}

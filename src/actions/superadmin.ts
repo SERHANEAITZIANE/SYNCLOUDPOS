@@ -120,3 +120,250 @@ export const changeMyPassword = async (currentPassword: string, newPassword: str
     await db.user.update({ where: { id: user.id }, data: { password: hashed } })
     return { success: "Mot de passe modifié avec succès" }
 }
+
+import { cookies } from "next/headers"
+
+// Impersonate a tenant
+export const impersonateTenant = async (tenantId: string) => {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
+
+        // Find the first store of target tenant
+        const firstStore = await db.store.findFirst({
+            where: { tenantId },
+            select: { id: true }
+        })
+
+        // Fetch user from DB to get their current real tenantId
+        const user = await db.user.findUnique({
+            where: { id: session.user.id }
+        })
+        if (!user) return { error: "User not found" }
+
+        // Store the original tenantId in a cookie if not already impersonating
+        const cookieStore = await cookies()
+        const alreadyImpersonating = cookieStore.get("original_tenant_id")
+        if (!alreadyImpersonating) {
+            cookieStore.set("original_tenant_id", user.tenantId, { path: "/" })
+        }
+
+        // Switch user's active tenant and store
+        await db.user.update({
+            where: { id: session.user.id },
+            data: {
+                tenantId,
+                defaultStoreId: firstStore?.id ?? null
+            }
+        })
+
+        revalidatePath("/dashboard")
+        return { success: "Impersonation started" }
+    } catch (error) {
+        console.error("Impersonation failed:", error)
+        return { error: "Failed to impersonate" }
+    }
+}
+
+// Stop impersonating and restore original tenant
+export const stopImpersonation = async () => {
+    try {
+        const session = await auth()
+        if (!session?.user?.id) return { error: "Unauthorized" }
+
+        const cookieStore = await cookies()
+        const originalTenantId = cookieStore.get("original_tenant_id")?.value
+        if (!originalTenantId) {
+            return { error: "Not currently impersonating" }
+        }
+
+        // Find first store of original tenant
+        const firstStore = await db.store.findFirst({
+            where: { tenantId: originalTenantId },
+            select: { id: true }
+        })
+
+        // Switch user's active tenant and store back
+        await db.user.update({
+            where: { id: session.user.id },
+            data: {
+                tenantId: originalTenantId,
+                defaultStoreId: firstStore?.id ?? null
+            }
+        })
+
+        // Clear cookie
+        cookieStore.delete("original_tenant_id")
+
+        revalidatePath("/dashboard")
+        return { success: "Restored original session" }
+    } catch (error) {
+        console.error("Failed to stop impersonation:", error)
+        return { error: "Failed to stop impersonation" }
+    }
+}
+
+// Create a new tenant space directly (Superadmin only)
+export const createTenantDirect = async (values: {
+    name: string
+    ownerName: string
+    email: string
+    phone?: string
+    password?: string
+    subscriptionMonths: number
+}) => {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
+
+        const { name, ownerName, email, phone, password, subscriptionMonths } = values
+
+        // Validation
+        if (!name || !ownerName || !email) {
+            return { error: "Name, owner name, and email are required" }
+        }
+
+        const existingUser = await db.user.findUnique({
+            where: { email: email.trim().toLowerCase() }
+        })
+
+        if (existingUser) {
+            return { error: "Email already in use!" }
+        }
+
+        const pass = password || "syncloud123456" // Default password if not provided
+        const hashedPassword = await bcrypt.hash(pass, 10)
+
+        // Calculate subscription date
+        const subEndDate = new Date()
+        subEndDate.setMonth(subEndDate.getMonth() + subscriptionMonths)
+
+        // Create Tenant
+        const tenant = await db.tenant.create({
+            data: {
+                name,
+                ownerName,
+                phone,
+                email,
+                subscriptionEndsAt: subEndDate
+            }
+        })
+
+        // Create Default Store
+        const defaultStore = await db.store.create({
+            data: {
+                name: "Boutique Principale",
+                tenantId: tenant.id
+            }
+        })
+
+        // Create Admin User
+        const newUser = await db.user.create({
+            data: {
+                name: ownerName,
+                email: email.trim().toLowerCase(),
+                phone,
+                password: hashedPassword,
+                tenantId: tenant.id,
+                role: "ADMIN",
+                defaultStoreId: defaultStore.id
+            }
+        })
+
+        // Create TenantUser relation
+        await db.tenantUser.create({
+            data: {
+                userId: newUser.id,
+                tenantId: tenant.id,
+                role: "ADMIN"
+            }
+        })
+
+        // Seed Treasury and Customer
+        await Promise.all([
+            db.treasuryAccount.createMany({
+                data: [
+                    { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
+                    { name: "TPE", type: "BANK", tenantId: tenant.id }
+                ]
+            }),
+            db.customer.create({
+                data: {
+                    name: "DIVERS",
+                    clientType: "RETAIL",
+                    tenantId: tenant.id
+                }
+            })
+        ])
+
+        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
+        return { success: `Client space '${name}' created successfully.` }
+    } catch (error: any) {
+        console.error("Failed to create tenant:", error)
+        return { error: "Failed to create: " + error.message }
+    }
+}
+
+// Assign an existing user to a store/tenant
+export const assignUserToTenant = async (
+    email: string, 
+    tenantId: string, 
+    role: "ADMIN" | "CASHIER" | "MANAGER" | "STOCK_MANAGER" | "ACCOUNTANT" | "VENDEUR"
+) => {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
+
+        // Find user by email
+        const user = await db.user.findUnique({
+            where: { email: email.trim().toLowerCase() }
+        })
+        if (!user) return { error: "User not found with this email" }
+
+        // Check if already in TenantUser
+        const existing = await db.tenantUser.findUnique({
+            where: {
+                userId_tenantId: {
+                    userId: user.id,
+                    tenantId
+                }
+            }
+        })
+
+        if (existing) {
+            return { error: "User already belongs to this store/tenant" }
+        }
+
+        // Get first store of tenant
+        const firstStore = await db.store.findFirst({
+            where: { tenantId },
+            select: { id: true }
+        })
+
+        // Add user to TenantUser
+        const tenantRole = role === "ADMIN" ? "ADMIN" : "USER"
+        await db.tenantUser.create({
+            data: {
+                userId: user.id,
+                tenantId,
+                role: tenantRole
+            }
+        })
+
+        // Update active tenant and store for that user
+        await db.user.update({
+            where: { id: user.id },
+            data: {
+                tenantId,
+                defaultStoreId: firstStore?.id ?? user.defaultStoreId
+            }
+        })
+
+        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
+        return { success: `Successfully linked ${email} to the store.` }
+    } catch (error: any) {
+        console.error("Failed to link user:", error)
+        return { error: "Failed to link user: " + error.message }
+    }
+}

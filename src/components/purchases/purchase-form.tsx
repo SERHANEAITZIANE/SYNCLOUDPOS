@@ -666,8 +666,35 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 toast.success("Bon modifié.")
                 router.refresh()
             }
-        } catch { toast.error("Une erreur est survenue.") }
+        } catch (error: any) { toast.error(error?.message || "Une erreur est survenue.") }
         finally { setLoading(false) }
+    }
+
+    const onInvalid = (errors: any) => {
+        const fieldLabels: Record<string, string> = {
+            supplierId: "Fournisseur",
+            purchaseNumber: "Numéro de Facture/Bon",
+            paymentAccountId: "Compte de règlement",
+            paymentAmount: "Montant payé",
+            items: "Articles",
+            status: "Statut"
+        }
+        const errorMessages = Object.entries(errors)
+            .map(([field, err]: [string, any]) => {
+                const label = fieldLabels[field] || field
+                if (Array.isArray(err)) {
+                    return "un ou plusieurs articles invalides"
+                }
+                const msg = err.message || "requis ou invalide"
+                return `${label} (${msg})`
+            })
+            .filter(Boolean)
+
+        if (errorMessages.length > 0) {
+            toast.error(`Champs invalides : ${errorMessages.slice(0, 3).join(", ")}`, {
+                duration: 5000
+            })
+        }
     }
 
     const handleStatusChange = async (newStatus: string, accountId?: string) => {
@@ -679,7 +706,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             toast.success(result.success || "Statut mis à jour.")
             router.refresh()
             window.location.reload()
-        } catch { toast.error("Erreur lors de la mise à jour.") }
+        } catch (error: any) { toast.error(error?.message || "Erreur lors de la mise à jour.") }
         finally { setLoading(false) }
     }
 
@@ -906,7 +933,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 )}
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
                         {/* Top fields */}
                         <div className="bg-gradient-to-br from-slate-50/80 to-slate-100/40 dark:from-slate-900/40 dark:to-slate-800/20 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 space-y-4 shadow-sm">
                             {/* Row 1: Fournisseur and Réf. Fournisseur ONLY together */}

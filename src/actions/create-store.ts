@@ -12,7 +12,8 @@ export const createStore = async (name: string) => {
     }
 
     const dbUser = await db.user.findUnique({
-        where: { id: session.user.id }
+        where: { id: session.user.id },
+        include: { tenant: { select: { subscriptionEndsAt: true } } }
     })
 
     if (!dbUser) {
@@ -20,12 +21,23 @@ export const createStore = async (name: string) => {
     }
 
     try {
-        // 1. Create the new tenant
+        // 1. Create the new tenant — inherit subscription from current tenant
         const tenant = await db.tenant.create({
-            data: { name }
+            data: {
+                name,
+                subscriptionEndsAt: dbUser.tenant?.subscriptionEndsAt ?? null
+            }
         })
 
-        // 2. Create the TenantUser join record (user belongs to this tenant)
+        // 2. Create default store for the new tenant
+        const defaultStore = await db.store.create({
+            data: {
+                name: "Boutique Principale",
+                tenantId: tenant.id,
+            }
+        })
+
+        // 3. Create the TenantUser join record (user belongs to this tenant)
         await db.tenantUser.create({
             data: {
                 userId: session.user.id,
@@ -34,13 +46,16 @@ export const createStore = async (name: string) => {
             }
         })
 
-        // 3. Switch the user's active store to the new one
+        // 4. Switch the user's active store to the new one
         await db.user.update({
             where: { id: session.user.id },
-            data: { tenantId: tenant.id }
+            data: {
+                tenantId: tenant.id,
+                defaultStoreId: defaultStore.id
+            }
         })
 
-        // 4. Seed default accounts and customer
+        // 5. Seed default accounts and customer
         await Promise.all([
             db.treasuryAccount.createMany({
                 data: [

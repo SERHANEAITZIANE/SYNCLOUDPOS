@@ -178,27 +178,29 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
                 </div>
             )}
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
                 {canEdit && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 gap-1.5 text-amber-700 bg-amber-50 border-amber-200 hover:text-amber-800 hover:bg-amber-100 hover:border-amber-300 dark:text-amber-400 dark:bg-amber-950/40 dark:border-amber-800/50 dark:hover:bg-amber-950/60 dark:hover:border-amber-700 transition-all duration-200 shadow-sm hover:shadow"
                         onClick={() => setEditOpen(true)}
                         title="Modifier"
                     >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5" />
+                        <span className="hidden lg:inline text-xs font-medium">Modifier</span>
                     </Button>
                 )}
                 {canDelete && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 gap-1.5 text-red-700 bg-red-50 border-red-200 hover:text-red-800 hover:bg-red-100 hover:border-red-300 dark:text-red-400 dark:bg-red-950/40 dark:border-red-800/50 dark:hover:bg-red-950/60 dark:hover:border-red-700 transition-all duration-200 shadow-sm hover:shadow"
                         onClick={() => setDeleteOpen(true)}
                         title="Supprimer"
                     >
-                        <Trash className="h-4 w-4" />
+                        <Trash className="h-3.5 w-3.5" />
+                        <span className="hidden lg:inline text-xs font-medium">Supprimer</span>
                     </Button>
                 )}
             </div>

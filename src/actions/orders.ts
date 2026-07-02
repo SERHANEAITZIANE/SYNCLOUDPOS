@@ -252,6 +252,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                             quantity: item.quantity,
                             price: item.price,
                             priceHt: item.priceHt ?? item.price,
+                            costAtSale: item.costAtSale ?? null,
                             tvaRate: item.tvaRate ?? 19,
                             serialNumber: item.serialNumber || null
                         }))
@@ -274,6 +275,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                                 productId: item.productId,
                                 quantity: item.quantity,
                                 unitPrice: item.price,
+                                priceHt: item.priceHt ?? item.price,
+                                tvaRate: item.tvaRate ?? 19,
+                                costAtSale: item.costAtSale ?? null,
                                 serialNumber: item.serialNumber || null
                             }))
                         }
@@ -298,6 +302,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                                 productId: item.productId,
                                 quantity: item.quantity,
                                 unitPrice: item.price,
+                                priceHt: item.priceHt ?? item.price,
+                                tvaRate: item.tvaRate ?? 19,
+                                costAtSale: item.costAtSale ?? null,
                                 serialNumber: item.serialNumber || null
                             }))
                         }

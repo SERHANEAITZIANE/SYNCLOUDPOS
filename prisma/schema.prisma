@@ -8,106 +8,106 @@ datasource db {
 }
 
 model Tenant {
-  id                   String                @id @default(uuid())
-  name                 String
-  ownerName            String?
-  activity             String?
-  address              String?
-  wilaya               String?
-  commune              String?
-  phone                String?
-  fax                  String?
-  email                String?
-  nif                  String?
-  rc                   String?
-  artImposition        String?
-  nis                  String?
-  bankAccount          String?
-  logo                 String?
-  headerText           String?
-  blTemplate           String?               @default("standard")
-  posBlFormat          String?               @default("A4")
-  posBlColumns         String?               @default("standard")
-  aiProvider           String?               @default("GEMINI")
-  geminiApiKey         String?
-  openaiApiKey         String?
-  anthropicApiKey      String?
-  whatsappToken        String?
-  whatsappPhoneId      String?
-  whatsappPhone        String?
-  whatsappMode         String?               @default("NONE") // "NONE", "FREE", "AUTOMATIC"
-  whatsappInstanceId   String?               // The instance name in Evolution API
-  whatsappStatus       String?               // "DISCONNECTED", "CONNECTED", "QR_READY"
-  whatsappAutoReceipt  Boolean               @default(false)
-  whatsappAutoInvoice  Boolean               @default(false)
-  whatsappPaymentReminder Boolean            @default(false)
-  loyaltyPointsPerDa   Int                   @default(1)
-  loyaltyDaPerPoint    Int                   @default(100)
-  subscriptionEndsAt   DateTime?
-  warrantyEnabled      Boolean               @default(false)
-  tvaEnabled           Boolean               @default(false)
-  isElectronics        Boolean               @default(false)
-  blockNegativeStock   Boolean               @default(false)
-  isBlocked            Boolean               @default(false)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  yalidineApiId        String?
-  yalidineApiToken     String?
-  dhdApiToken          String?
-  hddApiToken          String?
-  ramadanMode          Boolean               @default(false)
-  commissionRate       Float                 @default(0)
-  commissionMode       String                @default("CATEGORY")
-  taxRegime            String?               @default("G50")
-  ifuRate              Float?                @default(5)
-  tapRate              Float                 @default(2)
-  stampTaxEnabled      Boolean               @default(true)
-  posTimbreEnabled     Boolean               @default(false)
-  posCashRounding      Boolean               @default(true)
-  posVendorRequired    Boolean               @default(false)
-  aiModel              String?               @default("gemini-1.5-flash")
-  smtpHost             String?
-  smtpPort             String?
-  smtpUser             String?
-  smtpPass             String?
-  smtpFrom             String?
-  AiLog                AiLog[]
-  auditLogs            AuditLog[]
-  brands               Brand[]
-  categories           Category[]
-  customers            Customer[]
-  dailyCloses          DailyClose[]
-  deliveryShipments    DeliveryShipment[]
-  deliveryTours        DeliveryTour[]
-  driverLocations      DriverLocation[]
-  expenses             Expense[]
-  expenseCategories    ExpenseCategory[]
-  invoices             Invoice[]
-  mobileTokens         MobileRefreshToken[]
-  orders               Order[]
-  products             Product[]
-  productReturns       ProductReturn[]
-  supplierReturns      SupplierReturn[]
-  proformas            Proforma[]
-  promotions           Promotion[]
-  purchaseOrders       PurchaseOrder[]
-  recurringInvoices    RecurringInvoice[]
-  reservations         Reservation[]
-  salesOrders          SalesOrder[]
-  sequenceCounters     SequenceCounter[]
-  spoilages            Spoilage[]
-  stockCountSessions   StockCountSession[]
-  stockMovements       StockMovement[]
-  stores               Store[]
-  suppliers            Supplier[]
-  tenantUsers          TenantUser[]
-  treasuryAccounts     TreasuryAccount[]
-  treasuryTransactions TreasuryTransaction[]
-  truckLoads           TruckLoad[]
-  users                User[]
-  Cheque               Cheque[]
-  Transfer             Transfer[]
-  commissionPayments   SellerCommissionPayment[]
+  id                      String                    @id @default(uuid())
+  name                    String
+  ownerName               String?
+  activity                String?
+  address                 String?
+  wilaya                  String?
+  commune                 String?
+  phone                   String?
+  fax                     String?
+  email                   String?
+  nif                     String?
+  rc                      String?
+  artImposition           String?
+  nis                     String?
+  bankAccount             String?
+  logo                    String?
+  headerText              String?
+  blTemplate              String?                   @default("standard")
+  aiProvider              String?                   @default("GEMINI")
+  geminiApiKey            String?
+  openaiApiKey            String?
+  anthropicApiKey         String?
+  whatsappToken           String?
+  whatsappPhoneId         String?
+  whatsappPhone           String?
+  loyaltyPointsPerDa      Int                       @default(1)
+  loyaltyDaPerPoint       Int                       @default(100)
+  subscriptionEndsAt      DateTime?
+  isBlocked               Boolean                   @default(false)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  yalidineApiId           String?
+  yalidineApiToken        String?
+  dhdApiToken             String?
+  hddApiToken             String?
+  ramadanMode             Boolean                   @default(false)
+  commissionRate          Float                     @default(0)
+  taxRegime               String?                   @default("G50")
+  ifuRate                 Float?                    @default(5)
+  posTimbreEnabled        Boolean                   @default(false)
+  stampTaxEnabled         Boolean                   @default(true)
+  tapRate                 Float                     @default(2)
+  aiModel                 String?                   @default("gemini-1.5-flash")
+  commissionMode          String                    @default("CATEGORY")
+  smtpFrom                String?
+  smtpHost                String?
+  smtpPass                String?
+  smtpPort                String?
+  smtpUser                String?
+  posBlColumns            String?                   @default("standard")
+  posBlFormat             String?                   @default("A4")
+  blockNegativeStock      Boolean                   @default(false)
+  isElectronics           Boolean                   @default(false)
+  warrantyEnabled         Boolean                   @default(false)
+  tvaEnabled              Boolean                   @default(false)
+  posCashRounding         Boolean                   @default(true)
+  posVendorRequired       Boolean                   @default(false)
+  whatsappAutoInvoice     Boolean                   @default(false)
+  whatsappAutoReceipt     Boolean                   @default(false)
+  whatsappInstanceId      String?
+  whatsappMode            String?                   @default("NONE")
+  whatsappPaymentReminder Boolean                   @default(false)
+  whatsappStatus          String?
+  AiLog                   AiLog[]
+  auditLogs               AuditLog[]
+  brands                  Brand[]
+  categories              Category[]
+  Cheque                  Cheque[]
+  customers               Customer[]
+  dailyCloses             DailyClose[]
+  deliveryShipments       DeliveryShipment[]
+  deliveryTours           DeliveryTour[]
+  driverLocations         DriverLocation[]
+  expenses                Expense[]
+  expenseCategories       ExpenseCategory[]
+  invoices                Invoice[]
+  mobileTokens            MobileRefreshToken[]
+  orders                  Order[]
+  products                Product[]
+  productReturns          ProductReturn[]
+  proformas               Proforma[]
+  promotions              Promotion[]
+  purchaseOrders          PurchaseOrder[]
+  recurringInvoices       RecurringInvoice[]
+  reservations            Reservation[]
+  salesOrders             SalesOrder[]
+  commissionPayments      SellerCommissionPayment[]
+  sequenceCounters        SequenceCounter[]
+  spoilages               Spoilage[]
+  stockCountSessions      StockCountSession[]
+  stockMovements          StockMovement[]
+  stores                  Store[]
+  suppliers               Supplier[]
+  supplierReturns         SupplierReturn[]
+  tenantUsers             TenantUser[]
+  Transfer                Transfer[]
+  treasuryAccounts        TreasuryAccount[]
+  treasuryTransactions    TreasuryTransaction[]
+  truckLoads              TruckLoad[]
+  users                   User[]
 }
 
 model Store {
@@ -115,9 +115,9 @@ model Store {
   tenantId       String
   name           String
   address        String?
-  isElectronics  Boolean         @default(false)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  isElectronics  Boolean         @default(false)
   dailyCloses    DailyClose[]
   invoices       Invoice[]
   orders         Order[]
@@ -128,9 +128,9 @@ model Store {
   stockMovements StockMovement[]
   tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   storeProducts  StoreProduct[]
-  users          User[]          @relation("UserDefaultStore")
   transfersFrom  Transfer[]      @relation("TransfersFrom")
   transfersTo    Transfer[]      @relation("TransfersTo")
+  users          User[]          @relation("UserDefaultStore")
 }
 
 model StoreProduct {
@@ -232,89 +232,89 @@ model Promotion {
 }
 
 model User {
-  id              String               @id @default(uuid())
-  email           String               @unique
-  username        String?              @unique
-  name            String?
-  password        String
-  phone           String?
-  isSuperadmin    Boolean              @default(false)
-  canEdit         Boolean              @default(false)
-  canDelete       Boolean              @default(false)
-  role            UserRole             @default(CASHIER)
-  tenantId        String
-  defaultStoreId  String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  deliveryTours   DeliveryTour[]
-  driverLocations DriverLocation[]
-  mobileTokens    MobileRefreshToken[]
-  orders          Order[]
-  productReturns  ProductReturn[]
-  supplierReturns SupplierReturn[]
-  spoilages       Spoilage[]
-  stockMovements  StockMovement[]
-  tenantUsers        TenantUser[]
-  truckLoads         TruckLoad[]
+  id                 String                    @id @default(uuid())
+  email              String                    @unique
+  name               String?
+  password           String
+  phone              String?
+  isSuperadmin       Boolean                   @default(false)
+  canEdit            Boolean                   @default(false)
+  canDelete          Boolean                   @default(false)
+  role               UserRole                  @default(CASHIER)
+  tenantId           String
+  defaultStoreId     String?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  username           String?                   @unique
+  deliveryTours      DeliveryTour[]
+  driverLocations    DriverLocation[]
+  mobileTokens       MobileRefreshToken[]
+  orders             Order[]
+  productReturns     ProductReturn[]
   salesOrders        SalesOrder[]              @relation("UserSalesOrders")
   commissionPayments SellerCommissionPayment[] @relation("UserCommissionPayments")
+  spoilages          Spoilage[]
+  stockMovements     StockMovement[]
+  supplierReturns    SupplierReturn[]
+  tenantUsers        TenantUser[]
+  Transfer           Transfer[]
+  truckLoads         TruckLoad[]
   defaultStore       Store?                    @relation("UserDefaultStore", fields: [defaultStoreId], references: [id])
   tenant             Tenant                    @relation(fields: [tenantId], references: [id])
-  Transfer           Transfer[]
 
   @@index([tenantId])
   @@index([email])
 }
 
 model TenantUser {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   userId    String
   tenantId  String
-  role      TenantUserRole   @default(ADMIN)
-  createdAt DateTime @default(now())
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      TenantUserRole @default(ADMIN)
+  createdAt DateTime       @default(now())
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, tenantId])
 }
 
 model Product {
-  id             String                 @id @default(uuid())
-  name           String
-  description    String?
-  price          Decimal
-  cost           Decimal?
-  wholesalePrice Decimal?
-  dealerPrice    Decimal?
-  tvaRate        Decimal                @default(0)
-  isFeatured     Boolean                @default(false)
-  isArchived     Boolean                @default(false)
-  stock          Int                    @default(0)
-  minStock       Int                    @default(0)
-  categoryId     String?
-  brandId        String?
-  tenantId       String
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
-  barcodes       Barcode[]
-  images         Image[]
-  invoiceItems   InvoiceItem[]
-  orderItems     OrderItem[]
-  brand          Brand?                 @relation(fields: [brandId], references: [id])
-  category       Category?              @relation(fields: [categoryId], references: [id])
-  tenant         Tenant                 @relation(fields: [tenantId], references: [id])
-  productReturns ProductReturn[]
+  id              String                 @id @default(uuid())
+  name            String
+  description     String?
+  price           Decimal
+  cost            Decimal?
+  wholesalePrice  Decimal?
+  dealerPrice     Decimal?
+  tvaRate         Decimal                @default(0)
+  isFeatured      Boolean                @default(false)
+  isArchived      Boolean                @default(false)
+  stock           Int                    @default(0)
+  minStock        Int                    @default(0)
+  categoryId      String?
+  brandId         String?
+  tenantId        String
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  barcodes        Barcode[]
+  images          Image[]
+  invoiceItems    InvoiceItem[]
+  orderItems      OrderItem[]
+  brand           Brand?                 @relation(fields: [brandId], references: [id])
+  category        Category?              @relation(fields: [categoryId], references: [id])
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id])
+  productReturns  ProductReturn[]
+  proformaItems   ProformaItem[]
+  purchaseItems   PurchaseOrderItem[]
+  recurringItems  RecurringInvoiceItem[]
+  reservations    Reservation[]
+  salesItems      SalesOrderItem[]
+  spoilages       Spoilage[]
+  stockMovements  StockMovement[]
+  storeProducts   StoreProduct[]
   supplierReturns SupplierReturn[]
-  proformaItems  ProformaItem[]
-  purchaseItems  PurchaseOrderItem[]
-  recurringItems RecurringInvoiceItem[]
-  reservations   Reservation[]
-  salesItems     SalesOrderItem[]
-  spoilages      Spoilage[]
-  stockMovements StockMovement[]
-  storeProducts  StoreProduct[]
-  truckLoadItems TruckLoadItem[]
-  TransferItem   TransferItem[]
+  TransferItem    TransferItem[]
+  truckLoadItems  TruckLoadItem[]
 
   @@index([tenantId])
   @@index([tenantId, isArchived])
@@ -345,31 +345,31 @@ model Barcode {
 }
 
 model Category {
-  id        String    @id @default(uuid())
-  name      String
-  tenantId  String
-  imageUrl            String?
-  isArchived          Boolean   @default(false)
+  id                  String    @id @default(uuid())
+  name                String
+  tenantId            String
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  commissionWholesale Float     @default(0)
   commissionReseller  Float     @default(0)
   commissionRetail    Float     @default(0)
+  commissionWholesale Float     @default(0)
+  imageUrl            String?
+  isArchived          Boolean   @default(false)
   tenant              Tenant    @relation(fields: [tenantId], references: [id])
   products            Product[]
 }
 
 model Brand {
-  id        String    @id @default(uuid())
-  name      String
-  tenantId  String
-  imageUrl            String?
-  isArchived          Boolean   @default(false)
+  id                  String    @id @default(uuid())
+  name                String
+  tenantId            String
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  commissionWholesale Float     @default(0)
   commissionReseller  Float     @default(0)
   commissionRetail    Float     @default(0)
+  commissionWholesale Float     @default(0)
+  imageUrl            String?
+  isArchived          Boolean   @default(false)
   tenant              Tenant    @relation(fields: [tenantId], references: [id])
   products            Product[]
 }
@@ -391,12 +391,13 @@ model Customer {
   barcode           String?            @unique
   loyaltyPoints     Int                @default(0)
   balance           Decimal            @default(0)
-  initialBalance    Decimal            @default(0)
   tenantId          String
-  clientType        ClientType             @default(RETAIL)
-  isArchived        Boolean            @default(false)
+  clientType        ClientType         @default(RETAIL)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  isArchived        Boolean            @default(false)
+  initialBalance    Decimal            @default(0)
+  Cheque            Cheque[]
   tenant            Tenant             @relation(fields: [tenantId], references: [id])
   invoices          Invoice[]
   orders            Order[]
@@ -406,7 +407,6 @@ model Customer {
   reservations      Reservation[]
   salesOrders       SalesOrder[]
   tourStops         TourStop[]
-  Cheque            Cheque[]
 
   @@index([tenantId])
   @@index([tenantId, balance])
@@ -415,7 +415,7 @@ model Customer {
 }
 
 model Supplier {
-  id              String          @id @default(uuid())
+  id              String           @id @default(uuid())
   name            String
   contactPerson   String?
   email           String?
@@ -428,40 +428,40 @@ model Supplier {
   rc              String?
   rib             String?
   notes           String?
-  balance         Decimal         @default(0)
-  withholdingRate Float           @default(0)
+  balance         Decimal          @default(0)
   tenantId        String
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  purchaseOrders  PurchaseOrder[]
-  supplierReturns SupplierReturn[]
-  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  withholdingRate Float            @default(0)
   Cheque          Cheque[]
+  purchaseOrders  PurchaseOrder[]
+  tenant          Tenant           @relation(fields: [tenantId], references: [id])
+  supplierReturns SupplierReturn[]
 }
 
 model Order {
-  id            String           @id @default(uuid())
-  subtotal      Decimal          @default(0)
-  tvaAmount     Decimal          @default(0)
-  stampTax      Decimal          @default(0)
-  total         Decimal
-  paidAmount    Decimal          @default(0)
-  status        OrderStatus      @default(COMPLETED)
-  paymentMethod PaymentMethod    @default(CASH)
-  userId        String
-  customerId    String?
-  tenantId      String
-  storeId       String?
-  accountId     String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  idempotencyKey String?         @unique
-  account       TreasuryAccount? @relation(fields: [accountId], references: [id])
-  customer      Customer?        @relation(fields: [customerId], references: [id])
-  store         Store?           @relation(fields: [storeId], references: [id])
-  tenant        Tenant           @relation(fields: [tenantId], references: [id])
-  user          User             @relation(fields: [userId], references: [id])
-  items         OrderItem[]
+  id             String           @id @default(uuid())
+  subtotal       Decimal          @default(0)
+  tvaAmount      Decimal          @default(0)
+  stampTax       Decimal          @default(0)
+  total          Decimal
+  paidAmount     Decimal          @default(0)
+  status         OrderStatus      @default(COMPLETED)
+  paymentMethod  PaymentMethod    @default(CASH)
+  userId         String
+  customerId     String?
+  tenantId       String
+  storeId        String?
+  accountId      String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  idempotencyKey String?          @unique
+  account        TreasuryAccount? @relation(fields: [accountId], references: [id])
+  customer       Customer?        @relation(fields: [customerId], references: [id])
+  store          Store?           @relation(fields: [storeId], references: [id])
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+  user           User             @relation(fields: [userId], references: [id])
+  items          OrderItem[]
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -478,11 +478,12 @@ model OrderItem {
   productId    String
   quantity     Int
   price        Decimal
+  costAtSale   Decimal?
   priceHt      Decimal @default(0)
   tvaRate      Decimal @default(0)
   serialNumber String?
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [productId], references: [id])
 
   @@index([productId])
   @@index([orderId])
@@ -494,16 +495,16 @@ model PurchaseOrder {
   tenantId          String
   storeId           String?
   total             Decimal
-  withholdingAmount Decimal             @default(0)
-  status            PurchaseOrderStatus              @default(PENDING)
+  status            PurchaseOrderStatus @default(PENDING)
   accountId         String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
+  withholdingAmount Decimal             @default(0)
   reference         String?
-  purchaseNumber    String?
   imageUrl1         String?
   imageUrl2         String?
   imageUrl3         String?
+  purchaseNumber    String?
   account           TreasuryAccount?    @relation(fields: [accountId], references: [id])
   store             Store?              @relation(fields: [storeId], references: [id])
   supplier          Supplier            @relation(fields: [supplierId], references: [id])
@@ -525,44 +526,44 @@ model PurchaseOrderItem {
   costPrice       Decimal
   tvaRate         Decimal       @default(0)
   serialNumber    String?
-  product         Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product         Product       @relation(fields: [productId], references: [id])
   purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
 }
 
 model SalesOrder {
-  id                  String            @id @default(uuid())
+  id                  String             @id @default(uuid())
   tenantId            String
   storeId             String?
   customerId          String
-  type                SalesOrderType    @default(ORDER)
-  status              SalesOrderStatus  @default(DRAFT)
+  type                SalesOrderType     @default(ORDER)
+  status              SalesOrderStatus   @default(DRAFT)
   receiptNumber       String?
-  paymentMethod       PaymentMethod     @default(CASH)
-  paymentStatus       PaymentStatus     @default(PENDING)
-  amountPaid          Decimal           @default(0)
-  subtotal            Decimal           @default(0)
-  tvaAmount           Decimal           @default(0)
-  stampTax            Decimal           @default(0)
+  paymentMethod       PaymentMethod      @default(CASH)
+  subtotal            Decimal            @default(0)
+  tvaAmount           Decimal            @default(0)
+  stampTax            Decimal            @default(0)
   total               Decimal
-  notes               String?
-  idempotencyKey      String?           @unique
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   recurringInvoiceId  String?
   relatedSalesOrderId String?
+  amountPaid          Decimal            @default(0)
+  notes               String?
+  paymentStatus       PaymentStatus      @default(PENDING)
   proformaId          String?
-  invoiceItems        InvoiceItem[]
-  customer            Customer          @relation(fields: [customerId], references: [id])
-  proforma            Proforma?         @relation(fields: [proformaId], references: [id])
-  recurringInvoice    RecurringInvoice? @relation(fields: [recurringInvoiceId], references: [id])
-  store               Store?            @relation(fields: [storeId], references: [id])
-  tenant              Tenant            @relation(fields: [tenantId], references: [id])
+  source              OrderSource        @default(POS)
   userId              String?
-  user                User?             @relation("UserSalesOrders", fields: [userId], references: [id])
-  items               SalesOrderItem[]
+  idempotencyKey      String?            @unique
   deliveryShipments   DeliveryShipment[]
-  source              OrderSource       @default(POS) // POS, MOBILE, ECOMMERCE
+  invoiceItems        InvoiceItem[]
   productReturns      ProductReturn[]
+  customer            Customer           @relation(fields: [customerId], references: [id])
+  proforma            Proforma?          @relation(fields: [proformaId], references: [id])
+  recurringInvoice    RecurringInvoice?  @relation(fields: [recurringInvoiceId], references: [id])
+  store               Store?             @relation(fields: [storeId], references: [id])
+  tenant              Tenant             @relation(fields: [tenantId], references: [id])
+  user                User?              @relation("UserSalesOrders", fields: [userId], references: [id])
+  items               SalesOrderItem[]
 
   @@index([tenantId])
   @@index([tenantId, storeId])
@@ -582,10 +583,11 @@ model SalesOrderItem {
   productId    String
   quantity     Int
   unitPrice    Decimal
+  costAtSale   Decimal?
   tvaRate      Decimal    @default(0)
   priceHt      Decimal    @default(0)
   serialNumber String?
-  product      Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product      Product    @relation(fields: [productId], references: [id])
   salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -593,14 +595,14 @@ model SalesOrderItem {
 }
 
 model ExpenseCategory {
-  id        String    @id @default(uuid())
+  id        String              @id @default(uuid())
   name      String
-  type      ExpenseCategoryType    @default(VARIABLE)
+  type      ExpenseCategoryType @default(VARIABLE)
   tenantId  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
   expenses  Expense[]
-  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  tenant    Tenant              @relation(fields: [tenantId], references: [id])
 }
 
 model Expense {
@@ -632,16 +634,16 @@ model TreasuryAccount {
   tenantId     String
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
+  Cheque       Cheque[]
   expenses     Expense[]
   orders       Order[]
   purchases    PurchaseOrder[]
   tenant       Tenant                @relation(fields: [tenantId], references: [id])
   transactions TreasuryTransaction[]
-  Cheque       Cheque[]
 }
 
 model TreasuryTransaction {
-  id            String          @id @default(uuid())
+  id            String                    @id @default(uuid())
   accountId     String
   type          TreasuryTransactionType
   amount        Decimal
@@ -650,12 +652,12 @@ model TreasuryTransaction {
   source        TreasuryTransactionSource
   referenceId   String?
   description   String?
-  imageUrl      String?
-  date          DateTime        @default(now())
+  date          DateTime                  @default(now())
   tenantId      String
-  createdAt     DateTime        @default(now())
-  account       TreasuryAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime                  @default(now())
+  imageUrl      String?
+  account       TreasuryAccount           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tenant        Tenant                    @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, accountId, createdAt])
   @@index([referenceId, source])
@@ -706,7 +708,7 @@ model DailyClose {
 }
 
 model StockMovement {
-  id          String   @id @default(uuid())
+  id          String            @id @default(uuid())
   productId   String
   type        StockMovementType
   quantity    Int
@@ -717,12 +719,12 @@ model StockMovement {
   userId      String?
   tenantId    String
   storeId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  store       Store?   @relation(fields: [storeId], references: [id])
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user        User?    @relation(fields: [userId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  product     Product           @relation(fields: [productId], references: [id])
+  store       Store?            @relation(fields: [storeId], references: [id])
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id])
 
   @@index([tenantId])
   @@index([tenantId, productId])
@@ -751,7 +753,7 @@ model Reservation {
 }
 
 model DeliveryShipment {
-  id              String   @id @default(uuid())
+  id              String      @id @default(uuid())
   tenantId        String
   salesOrderId    String?
   provider        String
@@ -762,15 +764,15 @@ model DeliveryShipment {
   customerAddress String
   wilaya          String
   commune         String?
-  weight          Float    @default(0.5)
-  codAmount       Float    @default(0)
-  deliveryCost    Float    @default(0)
-  status          String   @default("PENDING")
+  weight          Float       @default(0.5)
+  codAmount       Float       @default(0)
+  status          String      @default("PENDING")
   notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  salesOrder      SalesOrder? @relation(fields: [salesOrderId], references: [id], onDelete: SetNull)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deliveryCost    Float       @default(0)
+  salesOrder      SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model OtpCode {
@@ -944,28 +946,28 @@ model TruckLoadItem {
 }
 
 model ProductReturn {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tourStopId  String?
-  customerId  String
-  driverId    String
-  productId   String
-  quantity    Int
-  unitPrice   Float    @default(0)
-  totalAmount Float    @default(0)
-  reason      String
-  photoUrl    String?
-  notes       String?
-  status      String   @default("PENDING")
-  returnType  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  customer    Customer @relation(fields: [customerId], references: [id])
-  driver      User     @relation(fields: [driverId], references: [id])
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String      @id @default(uuid())
+  tenantId     String
+  tourStopId   String?
+  customerId   String
+  driverId     String
+  productId    String
+  quantity     Int
+  unitPrice    Float       @default(0)
+  totalAmount  Float       @default(0)
+  reason       String
+  photoUrl     String?
+  notes        String?
+  status       String      @default("PENDING")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   salesOrderId String?
+  returnType   String?
+  customer     Customer    @relation(fields: [customerId], references: [id])
+  driver       User        @relation(fields: [driverId], references: [id])
+  product      Product     @relation(fields: [productId], references: [id])
   salesOrder   SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([customerId])
@@ -989,11 +991,11 @@ model SupplierReturn {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   purchaseOrderId String?
+  product         Product        @relation(fields: [productId], references: [id])
   purchaseOrder   PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
   supplier        Supplier       @relation(fields: [supplierId], references: [id])
-  user            User           @relation(fields: [userId], references: [id])
-  product         Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
   tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id])
 
   @@index([tenantId])
   @@index([supplierId])
@@ -1105,8 +1107,8 @@ model InvoiceItem {
   tvaRate      Decimal    @default(0)
   priceHt      Decimal    @default(0)
   invoice      Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  product      Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
-  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Restrict)
+  product      Product    @relation(fields: [productId], references: [id])
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id])
 
   @@index([invoiceId])
   @@index([salesOrderId])
@@ -1133,7 +1135,7 @@ model Transfer {
   reference   String
   fromStoreId String
   toStoreId   String
-  status      String         @default("PENDING") // PENDING, SENT, COMPLETED, CANCELLED
+  status      String         @default("PENDING")
   tenantId    String
   createdById String
   createdAt   DateTime       @default(now())
@@ -1141,10 +1143,10 @@ model Transfer {
   sentAt      DateTime?
   completedAt DateTime?
   notes       String?
-  fromStore   Store          @relation("TransfersFrom", fields: [fromStoreId], references: [id])
-  toStore     Store          @relation("TransfersTo", fields: [toStoreId], references: [id])
-  tenant      Tenant         @relation(fields: [tenantId], references: [id])
   createdBy   User           @relation(fields: [createdById], references: [id])
+  fromStore   Store          @relation("TransfersFrom", fields: [fromStoreId], references: [id])
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  toStore     Store          @relation("TransfersTo", fields: [toStoreId], references: [id])
   items       TransferItem[]
 
   @@index([tenantId])
@@ -1158,7 +1160,7 @@ model TransferItem {
   transferId String
   productId  String
   quantity   Int
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  product    Product  @relation(fields: [productId], references: [id])
   transfer   Transfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
 
   @@index([transferId])
@@ -1167,22 +1169,22 @@ model TransferItem {
 
 model Cheque {
   id         String           @id @default(uuid())
-  number     String // Cheque number
-  bank       String // Bank name
+  number     String
+  bank       String
   amount     Decimal
   dueDate    DateTime
-  status     ChequeStatus     @default(PENDING) // PENDING, CLEARED, BOUNCED, CANCELLED
-  type       ChequeType // ISSUED, RECEIVED
+  status     ChequeStatus     @default(PENDING)
+  type       ChequeType
   customerId String?
-  customer   Customer?        @relation(fields: [customerId], references: [id])
   supplierId String?
-  supplier   Supplier?        @relation(fields: [supplierId], references: [id])
-  accountId  String? // Which account it clears to
-  account    TreasuryAccount? @relation(fields: [accountId], references: [id])
+  accountId  String?
   tenantId   String
-  tenant     Tenant           @relation(fields: [tenantId], references: [id])
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
+  account    TreasuryAccount? @relation(fields: [accountId], references: [id])
+  customer   Customer?        @relation(fields: [customerId], references: [id])
+  supplier   Supplier?        @relation(fields: [supplierId], references: [id])
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -1314,9 +1316,9 @@ enum TreasuryTransactionSource {
   INITIAL_BALANCE
   CUSTOMER_PAYMENT
   SUPPLIER_PAYMENT
+  PAYMENT
   CUSTOMER_LOAN
   SUPPLIER_LOAN
-  PAYMENT
 }
 
 enum StockMovementType {
@@ -1343,4 +1345,3 @@ enum ChequeType {
   ISSUED
   RECEIVED
 }
-

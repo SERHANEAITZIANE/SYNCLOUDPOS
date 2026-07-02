@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast"
 import { ArrowDownCircle, ArrowUpCircle, Calendar, Clock } from "lucide-react"
 import { format } from "date-fns"
 
-import { createManualTransaction } from "@/actions/treasury"
+import { createManualTransaction, updateManualTransaction } from "@/actions/treasury"
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -32,6 +32,7 @@ interface TransactionModalProps {
     onClose: () => void
     accounts: TreasuryAccountColumn[]
     defaultType?: "CREDIT" | "DEBIT"
+    initialData?: any
 }
 
 const now = () => {
@@ -39,7 +40,7 @@ const now = () => {
     return { date: format(d, "yyyy-MM-dd"), time: format(d, "HH:mm") }
 }
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, accounts, defaultType = "CREDIT" }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, accounts, defaultType = "CREDIT", initialData }) => {
     const [loading, setLoading] = useState(false)
     const { date: defaultDate, time: defaultTime } = now()
 
@@ -57,24 +58,43 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
 
     useEffect(() => {
         if (isOpen) {
-            form.reset({
-                accountId: "",
-                type: defaultType,
-                amount: 0,
-                description: "",
-                date: defaultDate,
-                time: defaultTime,
-            })
+            if (initialData) {
+                const dateObj = new Date(initialData.createdAt)
+                form.reset({
+                    accountId: initialData.accountId,
+                    type: initialData.type,
+                    amount: initialData.amount,
+                    description: initialData.description,
+                    date: format(dateObj, "yyyy-MM-dd"),
+                    time: format(dateObj, "HH:mm"),
+                })
+            } else {
+                form.reset({
+                    accountId: "",
+                    type: defaultType,
+                    amount: 0,
+                    description: "",
+                    date: defaultDate,
+                    time: defaultTime,
+                })
+            }
         }
     }, [isOpen, defaultType])
 
     const onSubmit = async (values: any) => {
         try {
             setLoading(true)
-            const result = await createManualTransaction(values.accountId, values.type, values.amount, values.description)
+            let result
+            if (initialData) {
+                const combinedDate = new Date(`${values.date}T${values.time}`)
+                result = await updateManualTransaction(initialData.id, values.amount, values.description, combinedDate)
+            } else {
+                // Ignore date/time for new manual transactions for now, they use server timestamp (or we could pass it if we update createManualTransaction)
+                result = await createManualTransaction(values.accountId, values.type, values.amount, values.description)
+            }
             if (result.error) { toast.error(result.error) }
             else {
-                toast.success(result.success || "Transaction enregistrée.")
+                toast.success(result.success || (initialData ? "Transaction modifiée." : "Transaction enregistrée."))
                 form.reset({ ...form.getValues(), amount: 0, description: "", ...now() })
                 onClose()
             }
@@ -135,7 +155,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                     <FormField control={form.control} name="accountId" render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Compte concerné</FormLabel>
-                            <Select disabled={loading} onValueChange={field.onChange} value={field.value}>
+                            <Select disabled={loading || !!initialData} onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Sélectionner un compte..." />
@@ -163,6 +183,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
+                                    disabled={loading || !!initialData}
                                     onClick={() => field.onChange("CREDIT")}
                                     className={cn(
                                         "flex items-center gap-2 justify-center p-3 rounded-lg border-2 transition-all font-medium text-sm",
@@ -176,6 +197,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                                 </button>
                                 <button
                                     type="button"
+                                    disabled={loading || !!initialData}
                                     onClick={() => field.onChange("DEBIT")}
                                     className={cn(
                                         "flex items-center gap-2 justify-center p-3 rounded-lg border-2 transition-all font-medium text-sm",
@@ -226,14 +248,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
 
                     <Separator />
 
-                    <div className="flex items-center justify-end gap-2 pt-1">
-                        <Button disabled={loading} variant="outline" type="button" onClick={onClose}>Annuler</Button>
-                        <Button
-                            disabled={loading}
-                            type="submit"
-                            className={cn("min-w-24", isCredit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-500 hover:bg-red-600")}
-                        >
-                            {loading ? "En cours..." : isCredit ? "✓ Valider l'entrée" : "✓ Valider la sortie"}
+                    <div className="pt-4 flex items-center justify-end gap-2">
+                        <Button disabled={loading} variant="outline" onClick={onClose} type="button">Annuler</Button>
+                        <Button disabled={loading} type="submit" className={cn(isCredit ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700")}>
+                            {loading ? "Chargement..." : initialData ? "Modifier l'opération" : "Confirmer l'opération"}
                         </Button>
                     </div>
                 </form>

@@ -123,6 +123,34 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }
     }
 
+    const onInvalid = (errors: any) => {
+        const fieldLabels: Record<string, string> = {
+            name: "Nom/Désignation",
+            price: "Prix de vente",
+            cost: "Coût d'achat",
+            categoryId: "Catégorie (Famille)",
+            brandId: "Marque",
+            stock: "Quantité en stock",
+            minStock: "Seuil de stock",
+            barcodes: "Codes à barres",
+            tvaRate: "Taux TVA",
+            description: "Description"
+        }
+        const errorMessages = Object.entries(errors)
+            .map(([field, err]: [string, any]) => {
+                const label = fieldLabels[field] || field
+                const msg = err.message || "requis ou invalide"
+                return `${label} (${msg})`
+            })
+            .filter(Boolean)
+
+        if (errorMessages.length > 0) {
+            toast.error(`Champs invalides : ${errorMessages.slice(0, 3).join(", ")}`, {
+                duration: 5000
+            })
+        }
+    }
+
     const onDelete = async () => {
         try {
             setLoading(true)
@@ -214,9 +242,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         tenantName={tenantName}
                         tenantPhone={tenantPhone}
                     />
+                    <Button variant="outline" size="sm" onClick={() => router.push(`/products`)} className="rounded-xl">
+                        {tCommon("cancel")}
+                    </Button>
                     {initialData && (
-                        <Button disabled={loading} variant="destructive" size="icon" onClick={() => setOpen(true)}>
-                            <Trash className="h-4 w-4" />
+                        <Button variant="destructive" size="sm" onClick={() => setOpen(true)} className="rounded-xl">
+                            {tCommon("delete")}
                         </Button>
                     )}
                 </div>
@@ -224,7 +255,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             <Separator />
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
 
                     {/* ── TWO-PANEL LAYOUT ─────────────────────────────── */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

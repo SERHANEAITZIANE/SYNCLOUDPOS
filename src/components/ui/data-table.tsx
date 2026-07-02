@@ -31,7 +31,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useState, useMemo, useRef, useCallback } from "react"
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, FileText, Printer, FileSpreadsheet } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, FileText, Printer, FileSpreadsheet, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
@@ -306,15 +306,34 @@ export function DataTable<TData, TValue>({
                     <TableHeader className="bg-muted/50 sticky top-0 z-10 print:bg-gray-100 print:text-black print:border-b-2 print:border-gray-800">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="print:border-b print:border-gray-300">
-                                {headerGroup.headers.map((header) => {
+                                {headerGroup.headers.map((header, headerIndex) => {
+                                    const isSticky = headerIndex === 0 && (header.column.columnDef.meta as any)?.sticky
                                     return (
-                                        <TableHead key={header.id} className="whitespace-nowrap print:text-black print:font-bold">
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                        <TableHead key={header.id} className={cn(
+                                            "whitespace-nowrap print:text-black print:font-bold",
+                                            isSticky && "sticky left-0 z-20 bg-muted/95 backdrop-blur-sm shadow-[2px_0_8px_-2px_rgba(0,0,0,0.1)] after:absolute after:top-0 after:right-0 after:bottom-0 after:w-[1px] after:bg-border",
+                                            header.column.getCanSort() && "cursor-pointer select-none hover:bg-muted/80"
+                                        )}
+                                        onClick={header.column.getToggleSortingHandler()}
+                                        >
+                                            {header.isPlaceholder ? null : (
+                                                <div className={cn("flex items-center gap-2", header.column.getCanSort() && "cursor-pointer")}>
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                    {header.column.getCanSort() && (
+                                                        <div className="flex flex-col items-center justify-center text-muted-foreground w-4">
+                                                            {{
+                                                                asc: <ArrowUp className="h-3 w-3" />,
+                                                                desc: <ArrowDown className="h-3 w-3" />,
+                                                            }[header.column.getIsSorted() as string] ?? (
+                                                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </TableHead>
                                     )
                                 })}
@@ -328,14 +347,20 @@ export function DataTable<TData, TValue>({
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id} className="whitespace-normal min-w-[150px]">
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
+                                    {row.getVisibleCells().map((cell, cellIndex) => {
+                                        const isSticky = cellIndex === 0 && (cell.column.columnDef.meta as any)?.sticky
+                                        return (
+                                            <TableCell key={cell.id} className={cn(
+                                                "whitespace-normal min-w-[150px]",
+                                                isSticky && "sticky left-0 z-10 bg-background/95 backdrop-blur-sm shadow-[2px_0_8px_-2px_rgba(0,0,0,0.08)] after:absolute after:top-0 after:right-0 after:bottom-0 after:w-[1px] after:bg-border/50"
+                                            )}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </TableCell>
+                                        )
+                                    })}
                                 </TableRow>
                             ))
                         ) : (

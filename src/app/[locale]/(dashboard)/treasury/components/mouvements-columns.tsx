@@ -18,9 +18,12 @@ export type TreasuryMovementColumn = {
     accountName: string
     referenceId: string | null
     referenceNumber?: string | null
+    accountId?: string // Added accountId
 }
 
-export const columns: ColumnDef<TreasuryMovementColumn>[] = [
+import { MovementCellAction } from "./movement-cell-action"
+
+export const getColumns = (accounts: any[] = []): ColumnDef<TreasuryMovementColumn>[] => [
     {
         accessorKey: "date",
         header: "Date",
@@ -170,5 +173,9 @@ export const columns: ColumnDef<TreasuryMovementColumn>[] = [
                 </Link>
             )
         }
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => <MovementCellAction data={row.original} accounts={accounts} />
     }
 ]

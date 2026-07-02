@@ -36,11 +36,16 @@ export const PrintBarcodeModal = ({
     tenantName = "",
     tenantPhone = ""
 }: PrintBarcodeModalProps) => {
-    const [copies, setCopies] = useState(1)
+    const [copies, setCopies] = useState<Record<string, number>>({})
     const [selectedBarcodeIndex, setSelectedBarcodeIndex] = useState(0)
     const [barcodeModel, setBarcodeModel] = useState<BarcodeLabelModel>("simple_40x20")
     const [isPrinting, setIsPrinting] = useState(false)
     const [printerBarcode, setPrinterBarcode] = useState("default")
+
+    const getCopies = (barcode: string) => copies[barcode] ?? 1
+    const setBarcodeCopies = (barcode: string, num: number) => {
+        setCopies(prev => ({ ...prev, [barcode]: Math.max(0, Math.min(500, num)) }))
+    }
 
     useEffect(() => {
         try {
@@ -124,6 +129,8 @@ export const PrintBarcodeModal = ({
     const hasBarcodes = validBarcodes.length > 0;
     const activeIndex = selectedBarcodeIndex < validBarcodes.length ? selectedBarcodeIndex : 0;
     const activeBarcode = hasBarcodes ? validBarcodes[activeIndex].value : "";
+    
+    const totalCopiesToPrint = validBarcodes.reduce((sum, b) => sum + getCopies(b.value), 0)
 
     return (
         <Dialog>
@@ -156,31 +163,44 @@ export const PrintBarcodeModal = ({
 
                             {hasBarcodes && (
                                 <div className="space-y-5 py-2">
-                                    {/* 1. Barcode Selection */}
-                                    {validBarcodes.length > 1 && (
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-                                                Code-barres actif
-                                            </Label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {validBarcodes.map((b, i) => (
-                                                    <button
-                                                        key={i}
-                                                        type="button"
-                                                        onClick={() => setSelectedBarcodeIndex(i)}
-                                                        className={cn(
-                                                            "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200",
-                                                            activeIndex === i
-                                                                ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm"
-                                                                : "bg-white dark:bg-[#151525] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                                        )}
-                                                    >
-                                                        {b.value}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                    {/* 1. Barcode Selection & Quantity */}
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                            Code-barres à imprimer
+                                        </Label>
+                                        <div className="flex flex-col gap-2">
+                                            {validBarcodes.map((b, i) => (
+                                                <div key={i} className={cn(
+                                                    "flex items-center justify-between p-2 rounded-xl border transition-all duration-200 cursor-pointer",
+                                                    activeIndex === i
+                                                        ? "border-gray-900 bg-gray-50 dark:border-white dark:bg-gray-800 shadow-sm"
+                                                        : "border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                                )} onClick={() => setSelectedBarcodeIndex(i)}>
+                                                    <span className="font-semibold text-sm px-2 text-gray-900 dark:text-gray-100">{b.value}</span>
+                                                    <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setBarcodeCopies(b.value, getCopies(b.value) - 1)}
+                                                            className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-bold text-gray-700 dark:text-gray-200"
+                                                        ><Minus className="h-3 w-3" /></button>
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            max={500}
+                                                            value={getCopies(b.value)}
+                                                            onChange={(e) => setBarcodeCopies(b.value, parseInt(e.target.value) || 0)}
+                                                            className="w-10 text-center font-bold bg-transparent border-none focus:outline-none text-sm p-0 text-gray-900 dark:text-gray-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setBarcodeCopies(b.value, getCopies(b.value) + 1)}
+                                                            className="w-7 h-7 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-bold text-gray-700 dark:text-gray-200"
+                                                        ><Plus className="h-3 w-3" /></button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
 
                                     {/* 2. Style Selection */}
                                     <div className="space-y-2.5">
@@ -221,40 +241,6 @@ export const PrintBarcodeModal = ({
                                                     )}
                                                 </button>
                                             ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 3. Quantity Stepper */}
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between p-3.5 bg-white dark:bg-[#121220] rounded-xl border border-gray-200 dark:border-gray-800">
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Nombre d'exemplaires</span>
-                                                <span className="text-[10px] text-gray-400 dark:text-gray-500">Quantité à imprimer</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCopies(prev => Math.max(1, prev - 1))}
-                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-305 transition-colors font-bold text-base"
-                                                >
-                                                    <Minus className="h-3.5 w-3.5" />
-                                                </button>
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    max={500}
-                                                    value={copies}
-                                                    onChange={(e) => setCopies(Math.max(1, parseInt(e.target.value) || 1))}
-                                                    className="w-12 text-center font-black bg-transparent border-none text-gray-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCopies(prev => Math.min(500, prev + 1))}
-                                                    className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-355 transition-colors font-bold text-base"
-                                                >
-                                                    <Plus className="h-3.5 w-3.5" />
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -305,11 +291,11 @@ export const PrintBarcodeModal = ({
                             <Button
                                 type="button"
                                 onClick={onPrintClick}
-                                disabled={!hasBarcodes}
+                                disabled={!hasBarcodes || totalCopiesToPrint === 0}
                                 className="w-full h-12 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold shadow-lg shadow-pink-500/20 hover:shadow-pink-500/30 transition-all duration-200 flex items-center justify-center gap-2 text-sm border-none"
                             >
                                 <Printer className="h-4 w-4" />
-                                Imprimer {copies} étiquette{copies > 1 ? "s" : ""}
+                                Imprimer {totalCopiesToPrint} étiquette{totalCopiesToPrint > 1 ? "s" : ""}
                             </Button>
                         </div>
                     </div>
@@ -318,18 +304,20 @@ export const PrintBarcodeModal = ({
                 {/* Hidden container specifically for printing multiple copies */}
                 <div className="hidden">
                     <div ref={printRef} className="print-container" data-printer={printerBarcode} data-printer-name={printerBarcode} data-selected-printer={printerBarcode}>
-                        {isPrinting && Array.from({ length: copies }).map((_, i) => (
-                            <BarcodeLabel
-                                key={i}
-                                productName={productName}
-                                price={price}
-                                barcodeValue={activeBarcode}
-                                size={dim.labelSize}
-                                model={barcodeModel}
-                                tenantName={tenantName}
-                                tenantPhone={tenantPhone}
-                            />
-                        ))}
+                        {isPrinting && validBarcodes.flatMap(b => 
+                            Array.from({ length: getCopies(b.value) }).map((_, i) => (
+                                <BarcodeLabel
+                                    key={`${b.value}-${i}`}
+                                    productName={productName}
+                                    price={price}
+                                    barcodeValue={b.value}
+                                    size={dim.labelSize}
+                                    model={barcodeModel}
+                                    tenantName={tenantName}
+                                    tenantPhone={tenantPhone}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
             </DialogContent>

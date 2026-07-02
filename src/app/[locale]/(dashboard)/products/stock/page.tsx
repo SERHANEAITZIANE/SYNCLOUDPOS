@@ -27,7 +27,7 @@ const StockDashboardPage = async () => {
     }
 
     // Parallelize data fetching for lightning fast load times
-    const [dashboardRes, movementsRes, categories, brands] = await Promise.all([
+    const [dashboardRes, movementsRes, categories, brands, users] = await Promise.all([
         getStockDashboardData(),
         getStockEntriesAndExitsLogs(),
         db.category.findMany({
@@ -38,6 +38,11 @@ const StockDashboardPage = async () => {
         db.brand.findMany({
             where: { tenantId, isArchived: false },
             select: { id: true, name: true },
+            orderBy: { name: "asc" }
+        }),
+        db.user.findMany({
+            where: { tenantId },
+            select: { id: true, name: true, email: true },
             orderBy: { name: "asc" }
         })
     ])
@@ -70,6 +75,7 @@ const StockDashboardPage = async () => {
                     initialExits={exits}
                     categories={categories}
                     brands={brands}
+                    users={users}
                 />
             </div>
         </div>

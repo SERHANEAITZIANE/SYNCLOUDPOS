@@ -26,10 +26,19 @@ export const switchStore = async (tenantId: string) => {
             return { error: "You don't have access to this store" }
         }
 
-        // Switch active tenant
+        // Find the first store of the target tenant
+        const firstStore = await db.store.findFirst({
+            where: { tenantId },
+            select: { id: true }
+        })
+
+        // Switch active tenant and set default store
         await db.user.update({
             where: { id: session.user.id },
-            data: { tenantId }
+            data: {
+                tenantId,
+                defaultStoreId: firstStore?.id ?? null
+            }
         })
 
         revalidatePath("/dashboard")

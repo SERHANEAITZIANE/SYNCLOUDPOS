@@ -9,6 +9,8 @@ import { getSubscriptionStatus } from "@/lib/subscription";
 import { SubscriptionBanner } from "@/components/dashboard/subscription-banner";
 import { getUserTenants } from "@/actions/get-tenants";
 import { getActiveTenantId } from "@/actions/get-active-tenant";
+import { cookies } from "next/headers";
+import { ImpersonationBanner } from "@/components/dashboard/impersonation-banner";
 
 export default async function DashboardLayout({
     children,
@@ -36,6 +38,10 @@ export default async function DashboardLayout({
         value: t.id
     }));
 
+    const cookieStore = await cookies();
+    const isImpersonating = cookieStore.has("original_tenant_id");
+    const activeTenantName = tenantsData.find((t: any) => t.id === activeTenantId)?.name || "Client";
+
     return (
         <SubscriptionGuard
             isSuperadmin={session.user?.isSuperadmin}
@@ -53,6 +59,7 @@ export default async function DashboardLayout({
                 </div>
                 <GlobalShortcuts />
                 <div className="flex-1 flex flex-col">
+                    {isImpersonating && <ImpersonationBanner tenantName={activeTenantName} />}
                     <DashboardHeader user={session!.user} />
                     {subStatus && (
                         <SubscriptionBanner

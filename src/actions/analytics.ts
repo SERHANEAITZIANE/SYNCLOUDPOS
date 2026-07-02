@@ -5,15 +5,31 @@ import { auth } from "@/auth"
 import { withCache } from "@/lib/redis"
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
 
-export async function getAnalyticsData(dateRange?: { from: Date; to: Date }) {
+export async function getAnalyticsData(dateRange?: { from: string; to: string }) {
     try {
         const session = await auth();
         if (!session?.user?.id) throw new Error("Unauthorized");
 
         const tenantId = session.user.tenantId;
         const defaultStoreId = session.user.defaultStoreId;
-        const toDate = dateRange?.to || endOfDay(new Date());
-        const fromDate = dateRange?.from || startOfDay(new Date());
+
+        let fromDate: Date
+        let toDate: Date
+
+        if (dateRange?.to) {
+            const parts = dateRange.to.split("-")
+            toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
+        } else {
+            toDate = endOfDay(new Date())
+        }
+
+        if (dateRange?.from) {
+            const parts = dateRange.from.split("-")
+            fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
+        } else {
+            fromDate = startOfDay(new Date())
+        }
+
         const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         const dateKey = `${format(fromDate, 'yyyyMMdd')}-${format(toDate, 'yyyyMMdd')}`

@@ -6,8 +6,8 @@ import { startOfDay, endOfDay, differenceInDays, eachDayOfInterval, format, subD
 import { ClientType } from "@prisma/client"
 
 interface ProfitFilters {
-    from?: Date
-    to?: Date
+    from?: string
+    to?: string
     clientType?: string
     categoryId?: string
     brandId?: string
@@ -29,7 +29,7 @@ async function getPeriodData(
         order: {
             tenantId,
             status: "COMPLETED",
-            createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+            createdAt: { gte: fromDate, lte: toDate }
         }
     }
 
@@ -50,7 +50,7 @@ async function getPeriodData(
         salesOrder: {
             tenantId,
             status: { notIn: ["CANCELLED", "DRAFT"] },
-            createdAt: { gte: startOfDay(fromDate), lte: endOfDay(toDate) }
+            createdAt: { gte: fromDate, lte: toDate }
         }
     }
 
@@ -212,9 +212,10 @@ async function getPeriodData(
         }
 
         const price = isSalesOrder ? Number(item.unitPrice) : Number(item.price)
+        const cost = item.costAtSale != null ? Number(item.costAtSale) : Number(item.product?.cost || 0)
         existing.qtySold += item.quantity
         existing.revenue += price * item.quantity
-        existing.cost += Number(item.product.cost || 0) * item.quantity
+        existing.cost += cost * item.quantity
         productMap.set(pid, existing)
     }
 
@@ -233,9 +234,10 @@ async function getPeriodData(
             cost: 0
         }
 
+        const cost = r.costAtSale != null ? Number(r.costAtSale) : Number(r.product?.cost || 0)
         existing.qtySold -= r.quantity
         existing.revenue -= Number(r.totalAmount || (r.unitPrice * r.quantity))
-        existing.cost -= Number(r.product.cost || 0) * r.quantity
+        existing.cost -= cost * r.quantity
         productMap.set(pid, existing)
     })
 
@@ -483,10 +485,22 @@ export async function getProfitReport(options?: ProfitFilters) {
     if (!session?.user?.id) throw new Error("Unauthorized")
 
     const tenantId = session.user.tenantId
+    let fromDate: Date
+    let toDate: Date
 
-    // Define date ranges
-    const toDate = options?.to || endOfDay(new Date())
-    const fromDate = options?.from || startOfDay(subDays(toDate, 30)) // Default to last 30 days
+    if (options?.to) {
+        const parts = options.to.split("-")
+        toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
+    } else {
+        toDate = endOfDay(new Date())
+    }
+
+    if (options?.from) {
+        const parts = options.from.split("-")
+        fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
+    } else {
+        fromDate = startOfDay(subDays(toDate, 30))
+    }
 
     // Calculate previous period
     const diff = toDate.getTime() - fromDate.getTime()

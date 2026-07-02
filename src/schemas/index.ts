@@ -72,6 +72,7 @@ export const OrderSchema = z.object({
         price: z.coerce.number(),
         tvaRate: z.coerce.number().optional().default(0),
         priceHt: z.coerce.number().optional(),
+        costAtSale: z.coerce.number().optional(),
         serialNumber: z.string().optional(),
     })),
     subtotal: z.coerce.number().optional().default(0),

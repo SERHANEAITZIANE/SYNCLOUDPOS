@@ -281,6 +281,33 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         } finally { setLoading(false) }
     }
 
+    const onInvalid = (errors: any) => {
+        const fieldLabels: Record<string, string> = {
+            customerId: "Client",
+            paymentAccountId: "Compte de règlement",
+            paymentAmount: "Montant payé",
+            items: "Articles",
+            status: "Statut",
+            type: "Type de document"
+        }
+        const errorMessages = Object.entries(errors)
+            .map(([field, err]: [string, any]) => {
+                const label = fieldLabels[field] || field
+                if (Array.isArray(err)) {
+                    return "un ou plusieurs articles de vente invalides"
+                }
+                const msg = err.message || "requis ou invalide"
+                return `${label} (${msg})`
+            })
+            .filter(Boolean)
+
+        if (errorMessages.length > 0) {
+            toast.error(`Champs invalides : ${errorMessages.slice(0, 3).join(", ")}`, {
+                duration: 5000
+            })
+        }
+    }
+
     const handleStatusChange = async (newStatus: string) => {
         if (!initialData) return
         try {
@@ -466,7 +493,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                 )}
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                             <FormField control={form.control} name="receiptNumber" render={({ field }) => (
                                 <FormItem>

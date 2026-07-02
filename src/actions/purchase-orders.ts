@@ -67,11 +67,13 @@ export const getPurchaseOrders = async (
 
         if (from || to) {
             whereClause.createdAt = {}
-            if (from) whereClause.createdAt.gte = new Date(from)
+            if (from) {
+                const parts = from.split("-");
+                whereClause.createdAt.gte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
+            }
             if (to) {
-                const toDate = new Date(to)
-                toDate.setHours(23, 59, 59, 999)
-                whereClause.createdAt.lte = toDate
+                const parts = to.split("-");
+                whereClause.createdAt.lte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
             }
         }
 

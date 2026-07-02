@@ -14,6 +14,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
+    TableFooter,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +31,7 @@ import { useRouter, usePathname } from "@/i18n/routing"
 import { useCallback, useState, useEffect, useRef } from "react"
 import { useDebounce } from "use-debounce"
 import { useTranslations } from "next-intl"
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { useReactToPrint } from "react-to-print"
@@ -45,6 +47,7 @@ interface ServerDataTableProps<TData, TValue> {
     currentPage: number
     exportTitle?: string
     exportDescription?: string
+    footerRow?: React.ReactNode
 }
 
 export function ServerDataTable<TData, TValue>({
@@ -55,6 +58,7 @@ export function ServerDataTable<TData, TValue>({
     currentPage,
     exportTitle = "Export Data",
     exportDescription = "",
+    footerRow
 }: ServerDataTableProps<TData, TValue>) {
     const t = useTranslations("Common")
     const tDataTable = useTranslations("DataTable")
@@ -307,13 +311,30 @@ export function ServerDataTable<TData, TValue>({
                             <TableRow key={headerGroup.id} className="border-b border-zinc-200/80 dark:border-zinc-800/60 bg-zinc-50/80 dark:bg-zinc-900/40 hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40 print:border-b print:border-gray-300">
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 h-11 px-4 first:pl-4 print:text-black print:font-bold">
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                        <TableHead key={header.id} className={cn(
+                                            "text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 h-11 px-4 first:pl-4 print:text-black print:font-bold",
+                                            header.column.getCanSort() && "cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                                        )}
+                                        onClick={header.column.getToggleSortingHandler()}
+                                        >
+                                            {header.isPlaceholder ? null : (
+                                                <div className={cn("flex items-center gap-2", header.column.getCanSort() && "cursor-pointer")}>
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                    {header.column.getCanSort() && (
+                                                        <div className="flex flex-col items-center justify-center text-muted-foreground w-4">
+                                                            {{
+                                                                asc: <ArrowUp className="h-3 w-3" />,
+                                                                desc: <ArrowDown className="h-3 w-3" />,
+                                                            }[header.column.getIsSorted() as string] ?? (
+                                                                <ArrowUpDown className="h-3 w-3 opacity-30" />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </TableHead>
                                     )
                                 })}
@@ -357,6 +378,11 @@ export function ServerDataTable<TData, TValue>({
                             </TableRow>
                         )}
                     </TableBody>
+                    {footerRow && (
+                        <TableFooter className="bg-muted/50 border-t-2 border-border font-medium">
+                            {footerRow}
+                        </TableFooter>
+                    )}
                 </Table>
             </div>
 

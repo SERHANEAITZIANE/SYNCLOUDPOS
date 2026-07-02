@@ -21,6 +21,12 @@ export type PaymentColumn = {
 export const usePaymentColumns = (accounts: { id: string; name: string; type: string }[]) => {
     const columns: ColumnDef<PaymentColumn>[] = [
         {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => <CellAction data={row.original} accounts={accounts} />,
+            meta: { sticky: true },
+        },
+        {
             accessorKey: "date",
             header: ({ column }) => {
                 return (
@@ -104,11 +110,6 @@ export const usePaymentColumns = (accounts: { id: string; name: string; type: st
                 return <span className="text-sm text-muted-foreground">{row.original.description || "-"}</span>
             }
         },
-        {
-            id: "actions",
-            header: "",
-            cell: ({ row }) => <CellAction data={row.original} accounts={accounts} />
-        }
     ]
 
     return columns

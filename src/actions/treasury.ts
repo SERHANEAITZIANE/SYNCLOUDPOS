@@ -591,6 +591,123 @@ export async function createManualTransaction(accountId: string, type: "CREDIT" 
     }
 }
 
+export async function updateManualTransaction(id: string, amount: number, description: string, date?: Date) {
+    await checkSubscription();
+    try {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error("Unauthorized")
+        const tenantId = session.user.tenantId
+        if (amount <= 0) return { error: "Amount must be greater than 0" }
+
+        await db.$transaction(async (tx) => {
+            const txRecord = await tx.treasuryTransaction.findFirst({
+                where: { id, tenantId, source: { in: ["MANUAL_IN", "MANUAL_OUT"] } }
+            })
+            if (!txRecord) throw new Error("Transaction not found or not editable")
+            
+            const account = await tx.treasuryAccount.findFirst({ where: { id: txRecord.accountId, tenantId } })
+            if (!account) throw new Error("Account not found")
+
+            // Reverse old transaction effect
+            let newBalance = Number(account.balance)
+            if (txRecord.type === "CREDIT") {
+                newBalance -= Number(txRecord.amount)
+            } else {
+                newBalance += Number(txRecord.amount)
+            }
+
+            // Apply new transaction effect
+            if (txRecord.type === "CREDIT") {
+                newBalance += amount
+            } else {
+                newBalance -= amount
+                if (newBalance < 0) throw new Error("Insufficient funds for this update")
+            }
+
+            await tx.treasuryAccount.update({
+                where: { id: account.id },
+                data: { balance: newBalance }
+            })
+
+            await tx.treasuryTransaction.update({
+                where: { id },
+                data: {
+                    amount,
+                    description,
+                    createdAt: date || txRecord.createdAt
+                }
+            })
+        })
+
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/reports/treasury", "page")
+        
+        await logAudit({
+            action: "UPDATE",
+            entity: "TREASURY",
+            description: `Opération manuelle modifiée (ID ${id}) : Nouveau montant = ${amount} DA`,
+            after: { id, amount, description }
+        })
+        
+        return { success: "Transaction updated successfully!" }
+    } catch (error: any) {
+        console.error("[UPDATE_MANUAL_TRANSACTION]", error)
+        return { error: error.message || "Internal Error" }
+    }
+}
+
+export async function deleteManualTransaction(id: string) {
+    await checkSubscription();
+    try {
+        const session = await auth()
+        if (!session?.user?.id) throw new Error("Unauthorized")
+        const tenantId = session.user.tenantId
+
+        await db.$transaction(async (tx) => {
+            const txRecord = await tx.treasuryTransaction.findFirst({
+                where: { id, tenantId, source: { in: ["MANUAL_IN", "MANUAL_OUT"] } }
+            })
+            if (!txRecord) throw new Error("Transaction not found or not deletable")
+            
+            const account = await tx.treasuryAccount.findFirst({ where: { id: txRecord.accountId, tenantId } })
+            if (!account) throw new Error("Account not found")
+
+            // Reverse old transaction effect
+            let newBalance = Number(account.balance)
+            if (txRecord.type === "CREDIT") {
+                newBalance -= Number(txRecord.amount)
+                if (newBalance < 0) throw new Error("Reversing this credit results in negative balance")
+            } else {
+                newBalance += Number(txRecord.amount)
+            }
+
+            await tx.treasuryAccount.update({
+                where: { id: account.id },
+                data: { balance: newBalance }
+            })
+
+            await tx.treasuryTransaction.delete({
+                where: { id }
+            })
+        })
+
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/reports/treasury", "page")
+        
+        await logAudit({
+            action: "DELETE",
+            entity: "TREASURY",
+            description: `Opération manuelle supprimée (ID ${id})`,
+            after: { id }
+        })
+        
+        return { success: "Transaction deleted successfully!" }
+    } catch (error: any) {
+        console.error("[DELETE_MANUAL_TRANSACTION]", error)
+        return { error: error.message || "Internal Error" }
+    }
+}
+
 export async function createReconciliation(accountId: string, realAmount: number) {
     await checkSubscription();
     try {

@@ -9,9 +9,10 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 import { Link } from "@/i18n/routing";
-import { Eye } from "lucide-react";
+import { MovementCellAction } from "../../../treasury/components/movement-cell-action";
 
 interface TreasuryReportProps {
     totalCash: number;
@@ -25,13 +26,16 @@ interface TreasuryReportProps {
         description: string;
         source: string;
         referenceId: string | null;
+        accountId?: string;
     }[];
+    accounts?: any[];
 }
 
 export const TreasuryReportClient: React.FC<TreasuryReportProps> = ({
     totalCash,
     totalBank,
-    transactions
+    transactions,
+    accounts = []
 }) => {
     const t = useTranslations();
     const formatter = new Intl.NumberFormat("fr-DZ", {
@@ -135,10 +139,30 @@ export const TreasuryReportClient: React.FC<TreasuryReportProps> = ({
                     </Link>
                 )
             }
+        },
+        {
+            id: "actions",
+            cell: ({ row }) => <MovementCellAction data={row.original} accounts={accounts} />
         }
     ];
 
     const totalBalance = totalCash + totalBank;
+
+    const totalIn = transactions.filter(t => t.type === "IN").reduce((acc, curr) => acc + curr.amount, 0);
+    const totalOut = transactions.filter(t => t.type === "OUT").reduce((acc, curr) => acc + curr.amount, 0);
+
+    const footerRow = (
+        <TableRow>
+            <TableCell colSpan={3} className="text-right font-bold uppercase tracking-wider">Total Période</TableCell>
+            <TableCell className="font-bold">
+                <div className="flex items-center gap-4">
+                    <span className="text-green-600 flex items-center gap-1"><ArrowDownToLine className="w-3 h-3" /> {formatter.format(totalIn)}</span>
+                    <span className="text-red-500 flex items-center gap-1"><ArrowUpFromLine className="w-3 h-3" /> {formatter.format(totalOut)}</span>
+                </div>
+            </TableCell>
+            <TableCell colSpan={2} />
+        </TableRow>
+    );
 
     return (
         <div className="space-y-6">
@@ -190,7 +214,7 @@ export const TreasuryReportClient: React.FC<TreasuryReportProps> = ({
                     <CardTitle>Journal des Transactions (Entrées / Sorties)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable  exportTitle={"Rapport de Trésorerie"} exportDescription={"Vue d'ensemble de vos liquidités, comptes bancaires et flux financiers."} searchKey="description" columns={columns} data={transactions} />
+                    <DataTable exportTitle={"Rapport de Trésorerie"} exportDescription={"Vue d'ensemble de vos liquidités, comptes bancaires et flux financiers."} searchKey="description" columns={columns} data={transactions} footerRow={footerRow} />
                 </CardContent>
             </Card>
         </div>

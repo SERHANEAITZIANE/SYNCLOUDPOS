@@ -1,16 +1,18 @@
 "use client"
 
 import { DataTable } from "@/components/ui/data-table"
-import { columns, TreasuryMovementColumn } from "./mouvements-columns"
+import { getColumns, TreasuryMovementColumn } from "./mouvements-columns"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 
 interface MouvementsClientProps {
     data: TreasuryMovementColumn[]
+    accounts?: any[]
 }
 
 export const MouvementsClient: React.FC<MouvementsClientProps> = ({
-    data
+    data,
+    accounts = []
 }) => {
     return (
         <div className="space-y-4">
@@ -21,7 +23,7 @@ export const MouvementsClient: React.FC<MouvementsClientProps> = ({
                 />
             </div>
             <Separator />
-            <DataTable exportTitle={"Export"} exportDescription={""} searchKey="description" columns={columns} data={data} />
+            <DataTable exportTitle={"Export"} exportDescription={""} searchKey="description" columns={getColumns(accounts)} data={data} />
         </div>
     )
 }

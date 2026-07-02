@@ -95,6 +95,9 @@ interface MovementLog {
     reason: string
     userName: string
     createdAt: string
+    categoryId?: string
+    brandId?: string
+    userId?: string | null
 }
 
 interface StockDashboardClientProps {
@@ -104,6 +107,7 @@ interface StockDashboardClientProps {
     initialExits: MovementLog[]
     categories: { id: string; name: string }[]
     brands: { id: string; name: string }[]
+    users: { id: string; name: string | null; email: string | null }[]
 }
 
 export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
@@ -112,7 +116,8 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
     initialEntries,
     initialExits,
     categories,
-    brands
+    brands,
+    users
 }) => {
     // Tab states
     const [activeTab, setActiveTab] = useState("stock_actuel")
@@ -125,6 +130,11 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
     const [deadStockFilter, setDeadStockFilter] = useState("all")
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
+
+    // Movements specific filter states
+    const [movementCategoryFilter, setMovementCategoryFilter] = useState("all")
+    const [movementBrandFilter, setMovementBrandFilter] = useState("all")
+    const [movementUserFilter, setMovementUserFilter] = useState("all")
 
     // Detailed Drawer states
     const [selectedProduct, setSelectedProduct] = useState<StockItem | null>(null)
@@ -219,7 +229,11 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
         const matchesStartDate = !startDate || entryDateStr >= startDate
         const matchesEndDate = !endDate || entryDateStr <= endDate
 
-        return matchesSearch && matchesStartDate && matchesEndDate
+        const matchesCategory = movementCategoryFilter === "all" || entry.categoryId === movementCategoryFilter
+        const matchesBrand = movementBrandFilter === "all" || entry.brandId === movementBrandFilter
+        const matchesUser = movementUserFilter === "all" || entry.userId === movementUserFilter
+
+        return matchesSearch && matchesStartDate && matchesEndDate && matchesCategory && matchesBrand && matchesUser
     })
 
     // --- Tab 3: Exits Filter Logic ---
@@ -232,17 +246,21 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
         const matchesStartDate = !startDate || exitDateStr >= startDate
         const matchesEndDate = !endDate || exitDateStr <= endDate
 
-        return matchesSearch && matchesStartDate && matchesEndDate
+        const matchesCategory = movementCategoryFilter === "all" || exit.categoryId === movementCategoryFilter
+        const matchesBrand = movementBrandFilter === "all" || exit.brandId === movementBrandFilter
+        const matchesUser = movementUserFilter === "all" || exit.userId === movementUserFilter
+
+        return matchesSearch && matchesStartDate && matchesEndDate && matchesCategory && matchesBrand && matchesUser
     })
 
     // Reset pagination for entries/exits when filters change
     useEffect(() => {
         setEntriesPage(1)
-    }, [searchQuery, startDate, endDate])
+    }, [searchQuery, startDate, endDate, movementCategoryFilter, movementBrandFilter, movementUserFilter])
 
     useEffect(() => {
         setExitsPage(1)
-    }, [searchQuery, startDate, endDate])
+    }, [searchQuery, startDate, endDate, movementCategoryFilter, movementBrandFilter, movementUserFilter])
 
     // Paginated Slices
     const indexOfLastItem = currentPage * itemsPerPage
@@ -304,7 +322,7 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
     return (
         <div className="space-y-6">
             {/* Top Stat Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
                 <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg border-0 transition-transform duration-300 hover:scale-[1.02]">
                     <div className="absolute right-3 top-3 opacity-15">
                         <Package className="h-20 w-20 text-white" />
@@ -327,19 +345,6 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                         <h3 className="text-3xl font-black mt-2">{formatCurrency(initialKpi.totalCostValuation)}</h3>
                         <p className="text-xs opacity-75 mt-2 flex items-center gap-1">
                             <TrendingUp className="h-3 w-3" /> Investissement total
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg border-0 transition-transform duration-300 hover:scale-[1.02]">
-                    <div className="absolute right-3 top-3 opacity-15">
-                        <DollarSign className="h-20 w-20 text-white" />
-                    </div>
-                    <CardContent className="p-6">
-                        <p className="text-sm font-semibold opacity-90 uppercase tracking-wider">Valeur Vente Approximative</p>
-                        <h3 className="text-3xl font-black mt-2">{formatCurrency(initialKpi.totalSalesValuation)}</h3>
-                        <p className="text-xs opacity-75 mt-2 flex items-center gap-1">
-                            <Percent className="h-3 w-3" /> Marge potentielle : {initialKpi.totalCostValuation > 0 ? ((initialKpi.totalSalesValuation - initialKpi.totalCostValuation) / initialKpi.totalCostValuation * 100).toFixed(1) : 0}%
                         </p>
                     </CardContent>
                 </Card>
@@ -453,13 +458,53 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                         className="w-[140px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs text-slate-700 dark:text-slate-300 border-border/80"
                                     />
                                 </div>
-                                {(startDate || endDate) && (
+
+                                <Select value={movementCategoryFilter} onValueChange={setMovementCategoryFilter}>
+                                    <SelectTrigger className="w-[150px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs border-border/80 text-slate-700 dark:text-slate-300">
+                                        <SelectValue placeholder="Famille" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Toutes familles</SelectItem>
+                                        {categories.map(c => (
+                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={movementBrandFilter} onValueChange={setMovementBrandFilter}>
+                                    <SelectTrigger className="w-[150px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs border-border/80 text-slate-700 dark:text-slate-300">
+                                        <SelectValue placeholder="Marque" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Toutes marques</SelectItem>
+                                        {brands.map(b => (
+                                            <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={movementUserFilter} onValueChange={setMovementUserFilter}>
+                                    <SelectTrigger className="w-[150px] h-9 bg-zinc-50 dark:bg-zinc-900 text-xs border-border/80 text-slate-700 dark:text-slate-300">
+                                        <SelectValue placeholder="Utilisateur" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Tous utilisateurs</SelectItem>
+                                        {users.map(u => (
+                                            <SelectItem key={u.id} value={u.id}>{u.name || u.email}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                {(startDate || endDate || movementCategoryFilter !== "all" || movementBrandFilter !== "all" || movementUserFilter !== "all") && (
                                     <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => {
                                             setStartDate("")
                                             setEndDate("")
+                                            setMovementCategoryFilter("all")
+                                            setMovementBrandFilter("all")
+                                            setMovementUserFilter("all")
                                         }}
                                         className="h-8 px-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
                                     >

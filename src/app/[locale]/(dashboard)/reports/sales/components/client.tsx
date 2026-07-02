@@ -8,6 +8,7 @@ import { CalendarRange, CreditCard, DollarSign, Wallet } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 interface SalesReportProps {
     data: {
@@ -66,6 +67,15 @@ export const SalesReportClient: React.FC<SalesReportProps> = ({ data }) => {
         },
     ];
 
+    const footerRow = (
+        <TableRow>
+            <TableCell colSpan={2} className="text-right font-bold uppercase tracking-wider">Total Général</TableCell>
+            <TableCell className="font-bold">{formatter.format(totalSales)}</TableCell>
+            <TableCell className="font-bold text-green-600">{formatter.format(totalPaid)}</TableCell>
+            <TableCell className="font-bold text-red-500">{formatter.format(totalUnpaid)}</TableCell>
+        </TableRow>
+    );
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -120,7 +130,7 @@ export const SalesReportClient: React.FC<SalesReportProps> = ({ data }) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <DataTable  exportTitle={"Journal des Ventes"} exportDescription={"Analyse des ventes, montants encaissés et restes à recouvrer."} searchKey="customer" columns={columns} data={data} />
+                    <DataTable exportTitle={"Journal des Ventes"} exportDescription={"Analyse des ventes, montants encaissés et restes à recouvrer."} searchKey="customer" columns={columns} data={data} footerRow={footerRow} />
                 </CardContent>
             </Card>
         </div>

@@ -24,6 +24,19 @@ export type SupplierPaymentColumn = {
 export const useSupplierPaymentColumns = (accounts: { id: string; name: string; type: string }[]) => {
     const columns: ColumnDef<SupplierPaymentColumn>[] = [
         {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => {
+                const adapted = {
+                    ...row.original,
+                    customerName: row.original.supplierName,
+                    customerId: row.original.supplierId,
+                }
+                return <CellAction data={adapted as any} accounts={accounts} />
+            },
+            meta: { sticky: true },
+        },
+        {
             accessorKey: "date",
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
@@ -129,19 +142,6 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
                 )
             }
         },
-        {
-            id: "actions",
-            header: "",
-            cell: ({ row }) => {
-                // Adapt to the same CellAction by mapping fields
-                const adapted = {
-                    ...row.original,
-                    customerName: row.original.supplierName,
-                    customerId: row.original.supplierId,
-                }
-                return <CellAction data={adapted as any} accounts={accounts} />
-            }
-        }
     ]
 
     return columns

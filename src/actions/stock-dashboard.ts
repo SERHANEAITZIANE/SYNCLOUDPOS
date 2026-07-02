@@ -219,7 +219,7 @@ export async function getStockEntriesAndExitsLogs() {
             where: { tenantId },
             include: {
                 product: {
-                    select: { name: true, cost: true, price: true }
+                    select: { name: true, cost: true, price: true, categoryId: true, brandId: true }
                 },
                 user: {
                     select: { name: true }
@@ -321,7 +321,10 @@ export async function getStockEntriesAndExitsLogs() {
                 stockAfter: m.stockAfter,
                 reason: m.reason || "",
                 userName: m.user?.name || "Système",
-                createdAt: m.createdAt
+                createdAt: m.createdAt,
+                categoryId: m.product.categoryId,
+                brandId: m.product.brandId,
+                userId: m.userId
             }
 
             const isSupplierReturn = m.reason?.startsWith("Retour Fournisseur")

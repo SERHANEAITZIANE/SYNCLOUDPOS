@@ -8,7 +8,17 @@ function Table({ className, containerClassName, ...props }: React.ComponentProps
   return (
     <div
       data-slot="table-container"
-      className={cn("relative w-full overflow-auto", containerClassName)}
+      className={cn(
+        "relative w-full overflow-auto cursor-grab active:cursor-grabbing",
+        // Custom scrollbar styling
+        "[&::-webkit-scrollbar]:h-3 [&::-webkit-scrollbar]:w-3",
+        "[&::-webkit-scrollbar-track]:bg-muted/30 [&::-webkit-scrollbar-track]:rounded-full",
+        "[&::-webkit-scrollbar-thumb]:bg-primary/30 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding",
+        "[&::-webkit-scrollbar-thumb:hover]:bg-primary/50",
+        // Scroll shadow indicators
+        "[background:linear-gradient(to_right,transparent_calc(100%-40px),rgba(0,0,0,0.08))_no-repeat_right/40px_100%]",
+        containerClassName
+      )}
     >
       <table
         data-slot="table"

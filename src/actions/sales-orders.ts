@@ -52,7 +52,7 @@ export const createSalesOrder = async (data: {
     subtotal: number
     tvaAmount: number
     stampTax: number
-    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; serialNumber?: string }[]
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; costAtSale?: number; serialNumber?: string }[]
     total: number
     receiptNumber?: string
     relatedSalesOrderId?: string
@@ -93,6 +93,7 @@ export const createSalesOrder = async (data: {
                             unitPrice: item.unitPrice,
                             tvaRate: item.tvaRate,
                             priceHt: item.priceHt,
+                            costAtSale: item.costAtSale ?? null,
                             serialNumber: item.serialNumber || null
                         }))
                     }
@@ -429,7 +430,7 @@ export const updateSalesOrder = async (id: string, data: {
     subtotal: number
     tvaAmount: number
     stampTax: number
-    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; serialNumber?: string }[]
+    items: { productId: string; quantity: number; unitPrice: number; tvaRate: number; priceHt: number; costAtSale?: number; serialNumber?: string }[]
     total: number
     createdAt?: Date
 }) => {
@@ -493,6 +494,7 @@ export const updateSalesOrder = async (id: string, data: {
                         unitPrice: item.unitPrice,
                         tvaRate: item.tvaRate,
                         priceHt: item.priceHt,
+                        costAtSale: item.costAtSale ?? null,
                         serialNumber: item.serialNumber || null
                     }))
                 }

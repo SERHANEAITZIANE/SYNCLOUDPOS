@@ -711,6 +711,7 @@ export const CartSidebar = ({
                         price: netPrice,
                         tvaRate: rate,
                         priceHt: netPriceHt,
+                        costAtSale: item.cost,
                         serialNumber: item.serialNumber
                     };
                 }),
@@ -979,14 +980,19 @@ export const CartSidebar = ({
                                     aria-expanded={openCustomer}
                                     className="flex-1 justify-between h-9 rounded-xl bg-[#f8f9fa] dark:bg-[#1e293b] border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-700 dark:text-slate-200 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-[#f8f9fa] dark:hover:bg-[#1e293b] shadow-sm truncate"
                                 >
-                                    <div className="flex items-center gap-1.5 truncate pr-2 border-none">
-                                        <span className="bg-slate-200 dark:bg-slate-800 text-[9px] font-black px-1 py-0.5 rounded border border-gray-300/30 dark:border-slate-700/50 shrink-0 text-gray-500 dark:text-slate-400">F3</span>
-                                        <span className="truncate">
-                                            {activeSession?.customerId
-                                                ? customers.find((c) => c.id === activeSession.customerId)?.name
-                                                : t("walkingCustomer")}
-                                        </span>
-                                    </div>
+                                        <div className="flex items-center flex-1 gap-1.5 truncate">
+                                            <span className="bg-slate-200 dark:bg-slate-800 text-[9px] font-black px-1 py-0.5 rounded border border-gray-300/30 dark:border-slate-700/50 shrink-0 text-gray-500 dark:text-slate-400">F3</span>
+                                            <span className="truncate">
+                                                {activeSession?.customerId
+                                                    ? customers.find((c) => c.id === activeSession.customerId)?.name
+                                                    : t("walkingCustomer")}
+                                            </span>
+                                        </div>
+                                        {activeSession?.customerId && customers.find((c) => c.id === activeSession.customerId)?.balance! < 0 && (
+                                            <span className="text-red-500 font-black text-[10px] shrink-0 bg-red-50 dark:bg-red-500/10 px-1.5 py-0.5 rounded ml-2">
+                                                {formatPrice(Math.abs(customers.find((c) => c.id === activeSession.customerId)?.balance || 0))}
+                                            </span>
+                                        )}
                                     <ChevronsUpDown className="ml-1.5 h-3.5 w-3.5 shrink-0 opacity-50" />
                                 </Button>
                             </PopoverTrigger>
@@ -1044,13 +1050,20 @@ export const CartSidebar = ({
                                                     className="font-medium cursor-pointer py-3"
                                                 >
                                                     <Check className={cn("mr-2 h-4 w-4", activeSession?.customerId === c.id ? "opacity-100" : "opacity-0")} />
-                                                    <div className="flex flex-col">
-                                                        <span>{c.name}</span>
-                                                        <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                                                            {c.phone}{c.phone && (c.barcode || c.loyaltyPoints) ? ' ·' : ''}
-                                                            {c.barcode && ` ${c.barcode}`}
-                                                            {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
-                                                        </span>
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <div className="flex flex-col">
+                                                            <span>{c.name}</span>
+                                                            <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                                                                {c.phone}{c.phone && (c.barcode || c.loyaltyPoints) ? ' ·' : ''}
+                                                                {c.barcode && ` ${c.barcode}`}
+                                                                {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
+                                                            </span>
+                                                        </div>
+                                                        {c.balance < 0 && (
+                                                            <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-500/10 px-2 py-1 rounded">
+                                                                Ancien Solde: {formatPrice(Math.abs(c.balance))}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </CommandItem>
                                             ))}

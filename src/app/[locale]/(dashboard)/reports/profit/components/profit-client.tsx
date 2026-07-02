@@ -162,13 +162,13 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data, ca
 
     const setDateRange = (range: DateRange | undefined) => {
         const params = new URLSearchParams(searchParams.toString())
-        if (range?.from) {
-            params.set("from", range.from.toISOString())
+        if (range?.from && !isNaN(range.from.getTime())) {
+            params.set("from", format(range.from, "yyyy-MM-dd"))
         } else {
             params.delete("from")
         }
-        if (range?.to) {
-            params.set("to", range.to.toISOString())
+        if (range?.to && !isNaN(range.to.getTime())) {
+            params.set("to", format(range.to, "yyyy-MM-dd"))
         } else {
             params.delete("to")
         }
@@ -704,6 +704,26 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data, ca
                                                     ))
                                                 )}
                                             </tbody>
+                                            <tfoot className="bg-muted/50 border-t-2 border-border font-bold">
+                                                {viewMode === "sales" ? (
+                                                    <tr>
+                                                        <td colSpan={4} className="text-right px-4 py-3 uppercase tracking-wider">Total Général</td>
+                                                        <td className="text-right px-4 py-3">{fmt((tableData as SalesData[]).reduce((sum, row) => sum + row.revenue, 0))}</td>
+                                                        <td className="text-right px-4 py-3 text-muted-foreground">{fmt((tableData as SalesData[]).reduce((sum, row) => sum + row.cost, 0))}</td>
+                                                        <td className="text-right px-4 py-3 text-emerald-600">{fmt((tableData as SalesData[]).reduce((sum, row) => sum + row.profit, 0))}</td>
+                                                        <td className="text-right px-4 py-3"></td>
+                                                    </tr>
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={viewMode === "products" ? 3 : 1} className="text-right px-4 py-3 uppercase tracking-wider">Total Général</td>
+                                                        <td className="text-right px-4 py-3">{(tableData as GroupData[]).reduce((sum, row) => sum + row.qtySold, 0)}</td>
+                                                        <td className="text-right px-4 py-3">{fmt((tableData as GroupData[]).reduce((sum, row) => sum + row.revenue, 0))}</td>
+                                                        <td className="text-right px-4 py-3 text-muted-foreground">{fmt((tableData as GroupData[]).reduce((sum, row) => sum + row.cost, 0))}</td>
+                                                        <td className="text-right px-4 py-3 text-emerald-600">{fmt((tableData as GroupData[]).reduce((sum, row) => sum + row.profit, 0))}</td>
+                                                        <td className="text-right px-4 py-3"></td>
+                                                    </tr>
+                                                )}
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div>

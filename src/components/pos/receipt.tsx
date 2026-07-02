@@ -99,6 +99,7 @@ export const Receipt = React.forwardRef<HTMLDivElement, ReceiptProps>(({
                             <tr key={index} className="border-b border-indigo-900/10 print:border-black last:border-0">
                                 <td className="py-2 pr-2 leading-tight break-words text-left">
                                     <div className="text-indigo-950 print:text-black">{item.quantity} X {item.name}</div>
+                                    <div className="text-xs text-indigo-900/60 print:text-black">P.U: {formatCurrency(item.price)} DA</div>
                                     {item.serialNumber && (
                                         <div className="text-indigo-900/60 print:text-black">
                                             S/N: {item.serialNumber}

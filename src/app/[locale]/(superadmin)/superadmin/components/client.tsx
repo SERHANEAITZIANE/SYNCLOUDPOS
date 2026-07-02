@@ -3,19 +3,42 @@
 import { useState } from "react"
 import { DataTable } from "@/components/ui/data-table"
 import { columns, TenantColumn } from "./columns"
-import { Users, Package, CheckCircle2, XCircle, ShieldOff, TrendingUp, Search, Filter } from "lucide-react"
+import { Users, Package, CheckCircle2, XCircle, ShieldOff, TrendingUp, Search, Filter, Plus } from "lucide-react"
 import { UsageCharts } from "./usage-charts"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { toast } from "react-hot-toast"
+import { useRouter } from "@/i18n/routing"
+import { createTenantDirect } from "@/actions/superadmin"
 
 interface SuperAdminClientProps {
     data: TenantColumn[]
 }
 
 export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
+    const router = useRouter()
     const [searchQuery, setSearchQuery] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
+
+    // Create Tenant Form State
+    const [createOpen, setCreateOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [name, setName] = useState("")
+    const [ownerName, setOwnerName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [password, setPassword] = useState("")
+    const [subscriptionMonths, setSubscriptionMonths] = useState(12)
 
     const now = new Date()
 
@@ -48,6 +71,43 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
     const expired = data.filter(t => !t.isBlocked && (!t.subscriptionEndsAt || new Date(t.subscriptionEndsAt) <= now)).length
     const blocked = data.filter(t => t.isBlocked).length
     const totalRevenue = data.reduce((acc, t) => acc + (t.usageStats?.totalRevenue || 0), 0)
+
+    const onCreateTenant = async () => {
+        if (!name.trim() || !ownerName.trim() || !email.trim()) {
+            toast.error("Veuillez remplir les champs obligatoires (Boutique, Propriétaire, Email)")
+            return
+        }
+        try {
+            setLoading(true)
+            const result = await createTenantDirect({
+                name,
+                ownerName,
+                email,
+                phone: phone || undefined,
+                password: password || undefined,
+                subscriptionMonths
+            })
+
+            if (result.success) {
+                toast.success(result.success)
+                setCreateOpen(false)
+                // Reset form
+                setName("")
+                setOwnerName("")
+                setEmail("")
+                setPhone("")
+                setPassword("")
+                setSubscriptionMonths(12)
+                router.refresh()
+            } else {
+                toast.error(result.error || "Erreur lors de la création")
+            }
+        } catch {
+            toast.error("Erreur système")
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const stats = [
         {
@@ -97,9 +157,15 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
                         Surveillance en temps réel, gestion des abonnements et analytique.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm">
-                    <Package className="w-4 h-4" />
-                    {data.length} Espaces
+                <div className="flex items-center gap-3">
+                    <Button onClick={() => setCreateOpen(true)} className="bg-blue-600 hover:bg-blue-500 text-white">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nouveau Client
+                    </Button>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium text-sm">
+                        <Package className="w-4 h-4" />
+                        {data.length} Espaces
+                    </div>
                 </div>
             </div>
 
@@ -162,6 +228,88 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
                     />
                 </CardContent>
             </Card>
+
+            {/* Direct Tenant Creation Dialog */}
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Créer un nouvel espace client</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Nom de la boutique (Espace)*</Label>
+                            <Input
+                                id="name"
+                                placeholder="ex: GT PHONE Ghardaia"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="ownerName">Nom du propriétaire*</Label>
+                            <Input
+                                id="ownerName"
+                                placeholder="ex: Abdallah Modabber"
+                                value={ownerName}
+                                onChange={e => setOwnerName(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email du compte admin*</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="proprietaire@gmail.com"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Téléphone</Label>
+                                <Input
+                                    id="phone"
+                                    placeholder="ex: 0555123456"
+                                    value={phone}
+                                    onChange={e => setPhone(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Mot de passe</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder="syncloud123456"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="months">Durée de l'abonnement initial (Mois)</Label>
+                            <Select value={subscriptionMonths.toString()} onValueChange={(val) => setSubscriptionMonths(parseInt(val))}>
+                                <SelectTrigger id="months">
+                                    <SelectValue placeholder="Choisir la durée" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">1 Mois (Essai)</SelectItem>
+                                    <SelectItem value="3">3 Mois</SelectItem>
+                                    <SelectItem value="6">6 Mois</SelectItem>
+                                    <SelectItem value="12">12 Mois (1 An)</SelectItem>
+                                    <SelectItem value="24">24 Mois (2 Ans)</SelectItem>
+                                    <SelectItem value="120">120 Mois (10 Ans / Lifetime)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setCreateOpen(false)}>Annuler</Button>
+                        <Button disabled={loading} onClick={onCreateTenant}>
+                            Créer
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
