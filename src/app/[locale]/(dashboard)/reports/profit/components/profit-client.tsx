@@ -170,7 +170,7 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data, ca
         } else {
             params.delete(key)
         }
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setDateRange = (range: DateRange | undefined) => {
@@ -185,12 +185,12 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data, ca
         } else {
             params.delete("to")
         }
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const clearFilters = () => {
         setSaleNoInput("")
-        router.push(pathname)
+        router.replace(pathname, { scroll: false })
     }
 
     const current = data.currentPeriod

@@ -90,7 +90,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
             params.delete("type")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setStatusFilter = (value: string) => {
@@ -101,7 +101,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
             params.delete("status")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setCustomerFilter = (value: string) => {
@@ -112,7 +112,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
             params.delete("customerId")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setDateRange = (range: DateRange | undefined) => {
@@ -128,7 +128,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
             params.delete("to")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const onReset = () => {
@@ -139,7 +139,7 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
         params.delete("from")
         params.delete("to")
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     return (

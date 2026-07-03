@@ -97,7 +97,7 @@ export function ServerDataTable<TData, TValue>({
                 params.delete(searchKey)
             }
             params.set("page", "1") // reset page on new search
-            router.push(pathname + "?" + params.toString())
+            router.replace(pathname + "?" + params.toString(), { scroll: false })
         }
     }, [debouncedSearch, pathname, router, getSafeSearchParam, getSafeSearchParamsString, searchKey])
 
@@ -194,7 +194,7 @@ export function ServerDataTable<TData, TValue>({
     }
 
     const goToPage = (page: number) => {
-        router.push(pathname + "?" + createQueryString("page", String(page)))
+        router.replace(pathname + "?" + createQueryString("page", String(page)), { scroll: false })
     }
 
     return (
@@ -263,7 +263,7 @@ export function ServerDataTable<TData, TValue>({
                                 const params = new URLSearchParams(getSafeSearchParamsString())
                                 params.set("limit", String(size))
                                 params.set("page", "1")
-                                router.push(pathname + "?" + params.toString())
+                                router.replace(pathname + "?" + params.toString(), { scroll: false })
                             }}
                         >
                             {size}
@@ -281,7 +281,7 @@ export function ServerDataTable<TData, TValue>({
                         const params = new URLSearchParams(getSafeSearchParamsString())
                         params.set("limit", "9999")
                         params.set("page", "1")
-                        router.push(pathname + "?" + params.toString())
+                        router.replace(pathname + "?" + params.toString(), { scroll: false })
                     }}
                 >
                     {tDataTable("all")}

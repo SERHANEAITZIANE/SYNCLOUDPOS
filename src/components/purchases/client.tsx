@@ -3,8 +3,7 @@
 import { Plus, Filter, X, Activity, Calendar as CalendarIcon, RefreshCw, Users } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
 import { format } from "date-fns"
-import { useRouter } from "@/i18n/routing"
-import { usePathname, useSearchParams } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useState, useMemo } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -99,7 +98,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
             params.delete("status")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setSupplierFilter = (value: string) => {
@@ -110,7 +109,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
             params.delete("supplierId")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const setDateRange = (range: DateRange | undefined) => {
@@ -126,7 +125,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
             params.delete("to")
         }
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const handleReset = () => {
@@ -136,7 +135,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
         params.delete("from")
         params.delete("to")
         params.set("page", "1")
-        router.push(pathname + "?" + params.toString())
+        router.replace(pathname + "?" + params.toString(), { scroll: false })
     }
 
     const supplierOptions = [
