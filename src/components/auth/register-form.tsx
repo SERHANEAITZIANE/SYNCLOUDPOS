@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { register } from "@/actions/register"
 import { signIn } from "next-auth/react"
 import { useTranslations } from "next-intl"
@@ -22,7 +22,12 @@ import { Loader2, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react"
 
 export const RegisterForm = () => {
     const t = useTranslations("Auth");
+    const [isMounted, setIsMounted] = useState(false);
     const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
@@ -48,6 +53,8 @@ export const RegisterForm = () => {
         setIsGooglePending(true);
         await signIn("google", { callbackUrl: "/fr/dashboard" });
     }
+
+    if (!isMounted) return null;
 
     return (
         <div className="w-full">

@@ -988,11 +988,21 @@ export const CartSidebar = ({
                                                     : t("walkingCustomer")}
                                             </span>
                                         </div>
-                                        {activeSession?.customerId && customers.find((c) => c.id === activeSession.customerId)?.balance! < 0 && (
-                                            <span className="text-red-500 font-black text-[10px] shrink-0 bg-red-50 dark:bg-red-500/10 px-1.5 py-0.5 rounded ml-2">
-                                                {formatPrice(Math.abs(customers.find((c) => c.id === activeSession.customerId)?.balance || 0))}
-                                            </span>
-                                        )}
+                                         {activeSession?.customerId && (() => {
+                                             const cust = customers.find((c) => c.id === activeSession.customerId);
+                                             const bal = cust ? Number(cust.balance) : 0;
+                                             if (bal === 0) return null;
+                                             return (
+                                                 <span className={cn(
+                                                     "font-black text-[10px] shrink-0 px-1.5 py-0.5 rounded ml-2",
+                                                     bal > 0 
+                                                         ? "text-red-500 bg-red-50 dark:bg-red-500/10" 
+                                                         : "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10"
+                                                 )}>
+                                                     {bal > 0 ? "Dette: " : "Crédit: "}{formatPrice(Math.abs(bal))}
+                                                 </span>
+                                             );
+                                         })()}
                                     <ChevronsUpDown className="ml-1.5 h-3.5 w-3.5 shrink-0 opacity-50" />
                                 </Button>
                             </PopoverTrigger>
@@ -1059,11 +1069,16 @@ export const CartSidebar = ({
                                                                 {c.loyaltyPoints > 0 && <span className="text-amber-600 font-semibold">★ {c.loyaltyPoints} pts</span>}
                                                             </span>
                                                         </div>
-                                                        {c.balance < 0 && (
-                                                            <div className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-500/10 px-2 py-1 rounded">
-                                                                Ancien Solde: {formatPrice(Math.abs(c.balance))}
-                                                            </div>
-                                                        )}
+                                                         {Number(c.balance) !== 0 && (
+                                                             <div className={cn(
+                                                                 "text-xs font-bold px-2 py-1 rounded",
+                                                                 Number(c.balance) > 0 
+                                                                     ? "text-red-500 bg-red-50 dark:bg-red-500/10" 
+                                                                     : "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10"
+                                                             )}>
+                                                                 {Number(c.balance) > 0 ? "Dette: " : "Crédit: "}{formatPrice(Math.abs(Number(c.balance)))}
+                                                             </div>
+                                                         )}
                                                     </div>
                                                 </CommandItem>
                                             ))}
