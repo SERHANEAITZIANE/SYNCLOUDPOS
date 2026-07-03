@@ -243,6 +243,10 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
     )
 }
 
+const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+};
+
 export const CartSidebar = ({
     customers = [],
     accounts = [],
