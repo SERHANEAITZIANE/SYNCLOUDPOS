@@ -25,6 +25,19 @@ import {
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { DateRange } from "react-day-picker"
 
+const parseLocalDate = (dateStr: string | null, isEndOfDay = false) => {
+    if (!dateStr) return undefined
+    const parts = dateStr.split(/[T -]/)
+    if (parts.length < 3) return undefined
+    const year = Number(parts[0])
+    const month = Number(parts[1]) - 1
+    const day = Number(parts[2])
+    if (isEndOfDay) {
+        return new Date(year, month, day, 23, 59, 59, 999)
+    }
+    return new Date(year, month, day, 0, 0, 0, 0)
+}
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Heading } from "@/components/ui/heading"
@@ -145,8 +158,8 @@ export const ProfitReportClient: React.FC<ProfitReportClientProps> = ({ data, ca
         defaultTo.setHours(23, 59, 59, 999)
 
         return {
-            from: fromStr ? new Date(fromStr) : defaultFrom,
-            to: toStr ? new Date(toStr) : defaultTo
+            from: parseLocalDate(fromStr) || defaultFrom,
+            to: parseLocalDate(toStr) || defaultTo
         }
     }, [fromStr, toStr])
 

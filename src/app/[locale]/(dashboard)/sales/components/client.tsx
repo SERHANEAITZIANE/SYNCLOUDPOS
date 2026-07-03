@@ -6,6 +6,20 @@ import { useRouter, usePathname } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { DateRange } from "react-day-picker"
 import { useSearchParams } from "next/navigation"
+import { format } from "date-fns"
+
+const parseLocalDate = (dateStr: string | null, isEndOfDay = false) => {
+    if (!dateStr) return undefined
+    const parts = dateStr.split(/[T -]/)
+    if (parts.length < 3) return undefined
+    const year = Number(parts[0])
+    const month = Number(parts[1]) - 1
+    const day = Number(parts[2])
+    if (isEndOfDay) {
+        return new Date(year, month, day, 23, 59, 59, 999)
+    }
+    return new Date(year, month, day, 0, 0, 0, 0)
+}
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -63,8 +77,8 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
 
     const dateRange = React.useMemo(() => {
         return {
-            from: fromStr ? new Date(fromStr) : undefined,
-            to: toStr ? new Date(toStr) : undefined
+            from: parseLocalDate(fromStr),
+            to: parseLocalDate(toStr)
         }
     }, [fromStr, toStr])
 
@@ -104,12 +118,12 @@ export const SalesOrderClient: React.FC<SalesOrderClientProps> = ({
     const setDateRange = (range: DateRange | undefined) => {
         const params = new URLSearchParams(searchParams.toString())
         if (range?.from) {
-            params.set("from", range.from.toISOString())
+            params.set("from", format(range.from, "yyyy-MM-dd"))
         } else {
             params.delete("from")
         }
         if (range?.to) {
-            params.set("to", range.to.toISOString())
+            params.set("to", format(range.to, "yyyy-MM-dd"))
         } else {
             params.delete("to")
         }

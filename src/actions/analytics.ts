@@ -17,14 +17,14 @@ export async function getAnalyticsData(dateRange?: { from: string; to: string })
         let toDate: Date
 
         if (dateRange?.to) {
-            const parts = dateRange.to.split("-")
+            const parts = dateRange.to.split(/[T -]/)
             toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
         } else {
             toDate = endOfDay(new Date())
         }
 
         if (dateRange?.from) {
-            const parts = dateRange.from.split("-")
+            const parts = dateRange.from.split(/[T -]/)
             fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
         } else {
             fromDate = startOfDay(new Date())

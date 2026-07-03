@@ -22,8 +22,10 @@ export async function GET(req: NextRequest) {
         let toDate: Date = endOfDay(new Date());
 
         if (fromStr && toStr) {
-            fromDate = startOfDay(new Date(fromStr));
-            toDate = endOfDay(new Date(toStr));
+            const fromParts = fromStr.split(/[T -]/);
+            fromDate = new Date(Number(fromParts[0]), Number(fromParts[1]) - 1, Number(fromParts[2]), 0, 0, 0, 0);
+            const toParts = toStr.split(/[T -]/);
+            toDate = new Date(Number(toParts[0]), Number(toParts[1]) - 1, Number(toParts[2]), 23, 59, 59, 999);
         } else {
             switch (period) {
                 case "week":

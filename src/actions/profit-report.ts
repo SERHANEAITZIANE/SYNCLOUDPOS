@@ -489,14 +489,14 @@ export async function getProfitReport(options?: ProfitFilters) {
     let toDate: Date
 
     if (options?.to) {
-        const parts = options.to.split("-")
+        const parts = options.to.split(/[T -]/)
         toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
     } else {
         toDate = endOfDay(new Date())
     }
 
     if (options?.from) {
-        const parts = options.from.split("-")
+        const parts = options.from.split(/[T -]/)
         fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
     } else {
         fromDate = startOfDay(subDays(toDate, 30))

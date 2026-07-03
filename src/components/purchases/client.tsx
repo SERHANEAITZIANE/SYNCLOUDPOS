@@ -20,6 +20,19 @@ import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { DateRange } from "react-day-picker"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 
+const parseLocalDate = (dateStr: string | null, isEndOfDay = false) => {
+    if (!dateStr) return undefined
+    const parts = dateStr.split(/[T -]/)
+    if (parts.length < 3) return undefined
+    const year = Number(parts[0])
+    const month = Number(parts[1]) - 1
+    const day = Number(parts[2])
+    if (isEndOfDay) {
+        return new Date(year, month, day, 23, 59, 59, 999)
+    }
+    return new Date(year, month, day, 0, 0, 0, 0)
+}
+
 interface PurchasesClientProps {
     data: PurchaseOrderColumn[]
     totalCount: number
@@ -72,14 +85,9 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
     const toStr = searchParams.get("to")
 
     const dateRange = useMemo(() => {
-        const parseDate = (str: string | null) => {
-            if (!str) return undefined
-            const d = new Date(str)
-            return isNaN(d.getTime()) ? undefined : d
-        }
         return {
-            from: parseDate(fromStr),
-            to: parseDate(toStr)
+            from: parseLocalDate(fromStr),
+            to: parseLocalDate(toStr)
         }
     }, [fromStr, toStr])
 

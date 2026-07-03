@@ -145,12 +145,13 @@ export async function GET(
         // Apply date filter
         let filteredLines = rawLines;
         if (fromStr) {
-            const from = new Date(fromStr);
+            const parts = fromStr.split(/[T -]/);
+            const from = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0);
             filteredLines = filteredLines.filter(l => new Date(l.date) >= from);
         }
         if (toStr) {
-            const to = new Date(toStr);
-            to.setHours(23, 59, 59, 999);
+            const parts = toStr.split(/[T -]/);
+            const to = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999);
             filteredLines = filteredLines.filter(l => new Date(l.date) <= to);
         }
 

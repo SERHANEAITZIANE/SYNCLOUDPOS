@@ -68,11 +68,11 @@ export const getPurchaseOrders = async (
         if (from || to) {
             whereClause.createdAt = {}
             if (from) {
-                const parts = from.split("-");
+                const parts = from.split(/[T -]/);
                 whereClause.createdAt.gte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
             }
             if (to) {
-                const parts = to.split("-");
+                const parts = to.split(/[T -]/);
                 whereClause.createdAt.lte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
             }
         }

@@ -61,3 +61,15 @@ export function scrollIntoViewSafe(element: HTMLElement | null) {
   }
 }
 
+export const parseLocalDate = (dateStr: string | null | undefined, isEndOfDay = false): Date | undefined => {
+  if (!dateStr) return undefined
+  const parts = dateStr.split(/[T -]/)
+  if (parts.length < 3) return undefined
+  const year = Number(parts[0])
+  const month = Number(parts[1]) - 1
+  const day = Number(parts[2])
+  if (isEndOfDay) {
+    return new Date(year, month, day, 23, 59, 59, 999)
+  }
+  return new Date(year, month, day, 0, 0, 0, 0)
+}

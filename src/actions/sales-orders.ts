@@ -294,11 +294,13 @@ export async function getSalesOrders(
 
         if (from || to) {
             where.createdAt = {}
-            if (from) where.createdAt.gte = new Date(from)
+            if (from) {
+                const parts = from.split(/[T -]/)
+                where.createdAt.gte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
+            }
             if (to) {
-                const toDate = new Date(to)
-                toDate.setHours(23, 59, 59, 999)
-                where.createdAt.lte = toDate
+                const parts = to.split(/[T -]/)
+                where.createdAt.lte = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
             }
         }
 
