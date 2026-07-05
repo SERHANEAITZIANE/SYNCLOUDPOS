@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { CellAction } from "./cell-action"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { useTranslations } from "next-intl"
 
 export type SupplierPaymentColumn = {
     id: string
@@ -22,10 +23,11 @@ export type SupplierPaymentColumn = {
 }
 
 export const useSupplierPaymentColumns = (accounts: { id: string; name: string; type: string }[]) => {
+    const t = useTranslations("Payments")
     const columns: ColumnDef<SupplierPaymentColumn>[] = [
         {
             id: "actions",
-            header: "Actions",
+            header: t("columns.actions"),
             cell: ({ row }) => {
                 const adapted = {
                     ...row.original,
@@ -40,7 +42,7 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
             accessorKey: "date",
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Date
+                    {t("columns.date")}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -48,7 +50,7 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
         },
         {
             accessorKey: "supplierName",
-            header: "Fournisseur",
+            header: t("columns.supplier"),
             cell: ({ row }) => (
                 <div className="font-medium">{row.original.supplierName}</div>
             )
@@ -57,7 +59,7 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
             accessorKey: "amount",
             header: ({ column }) => (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Montant
+                    {t("columns.amount")}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -70,7 +72,7 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
         },
         {
             accessorKey: "accountName",
-            header: "Banque / Caisse",
+            header: t("columns.bankRegister"),
             cell: ({ row }) => (
                 <span className="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full dark:bg-purple-900/30 dark:text-purple-300">
                     {row.original.accountName}
@@ -79,12 +81,12 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
         },
         {
             id: "paymentMode",
-            header: "Mode de règlement",
+            header: t("columns.paymentMode"),
             cell: ({ row }) => {
                 const account = accounts.find(a => a.id === row.original.accountId || a.name === row.original.accountName)
-                const type = account ? (account.type === "BANK" ? "Banque" : "Caisse") : "-"
+                const type = account ? (account.type === "BANK" ? t("columns.bank") : t("columns.register")) : "-"
                 return (
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${type === "Banque" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${account?.type === "BANK" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"}`}>
                         {type}
                     </span>
                 )
@@ -92,29 +94,29 @@ export const useSupplierPaymentColumns = (accounts: { id: string; name: string; 
         },
         {
             accessorKey: "source",
-            header: "Type",
+            header: t("columns.type"),
             cell: ({ row }) => {
                 const source = row.original.source
                 if (source === "PURCHASE") {
-                    return <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900/30 dark:text-blue-300">Achat</span>
+                    return <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900/30 dark:text-blue-300">{t("columns.purchase")}</span>
                 }
                 if (source === "MANUAL_OUT" || source === "SUPPLIER_PAYMENT") {
-                    return <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full dark:bg-amber-900/30 dark:text-amber-300">Règlement</span>
+                    return <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full dark:bg-amber-900/30 dark:text-amber-300">{t("columns.settlement")}</span>
                 }
                 return source
             }
         },
         {
             accessorKey: "description",
-            header: "Observation",
+            header: t("columns.observation"),
             cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.description || "-"}</span>
         },
         {
             accessorKey: "imageUrl",
-            header: "Preuve",
+            header: t("columns.proof"),
             cell: ({ row }) => {
                 const imageUrl = row.original.imageUrl
-                if (!imageUrl) return <span className="text-muted-foreground text-xs italic">Aucune</span>
+                if (!imageUrl) return <span className="text-muted-foreground text-xs italic">{t("columns.none")}</span>
                 return (
                     <Dialog>
                         <DialogTrigger asChild>

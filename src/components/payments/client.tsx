@@ -3,6 +3,7 @@
 import * as React from "react"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { toast } from "react-hot-toast"
 import { Plus, Filter, User, Wallet, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 
@@ -32,6 +33,7 @@ interface PaymentsClientProps {
 }
 
 export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers, accounts }) => {
+    const t = useTranslations("Payments")
     const columns = usePaymentColumns(accounts)
     const router = useRouter()
 
@@ -150,15 +152,15 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
             setCreateLoading(true)
             const amount = parseFloat(newPayment.amount)
             if (isNaN(amount) || amount <= 0) {
-                toast.error("Montant invalide")
+                toast.error(t("invalidAmount"))
                 return
             }
             if (!newPayment.customerId) {
-                toast.error("Veuillez sélectionner un client")
+                toast.error(t("selectClient"))
                 return
             }
             if (!newPayment.accountId) {
-                toast.error("Veuillez sélectionner une caisse/banque")
+                toast.error(t("selectAccount"))
                 return
             }
 
@@ -174,14 +176,14 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
             if ('error' in result) {
                 toast.error(result.error as string)
             } else {
-                toast.success("Paiement enregistré")
+                toast.success(t("paymentSaved"))
                 setCreateOpen(false)
                 setNewPayment({ customerId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10) })
                 setSelectedSalesOrderId("")
                 router.refresh()
             }
         } catch {
-            toast.error("Erreur lors de l'enregistrement")
+            toast.error(t("saveError"))
         } finally {
             setCreateLoading(false)
         }
@@ -191,16 +193,16 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
         <>
             <div className="flex items-center justify-between">
                 <Heading
-                    title={`Paiements Clients (${filteredData.length})`}
-                    description={"Suivez tous les encaissements clients — Ventes directes et Recouvrements"}
+                    title={`${t("title")} (${filteredData.length})`}
+                    description={t("description")}
                 />
                 <div className="flex items-center gap-3">
                     <div className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 font-bold px-4 py-2 rounded-md border border-emerald-200 shadow-sm">
-                        Total: {formattedTotal}
+                        {t("total")} {formattedTotal}
                     </div>
                     <Button onClick={() => setCreateOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nouveau Paiement
+                        {t("newPayment")}
                     </Button>
                 </div>
             </div>
@@ -208,7 +210,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
 
             {paymentId && (
                 <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-center justify-between mt-4 dark:bg-blue-950/20 dark:border-blue-900/50 dark:text-blue-300">
-                    <span className="text-sm font-medium">Affichage d'une seule opération (Paiement).</span>
+                    <span className="text-sm font-medium">{t("singleOpWarning")}</span>
                     <Button 
                         variant="ghost" 
                         size="sm" 
@@ -218,7 +220,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             setPaymentId(null)
                         }}
                     >
-                        Voir toutes les opérations
+                        {t("viewAll")}
                     </Button>
                 </div>
             )}
@@ -232,7 +234,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                         <div className="p-1.5 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
                             <Filter className="w-4 h-4 text-emerald-400" />
                         </div>
-                        <h3 className="text-sm font-bold text-slate-200">Filtres de recherche avancés</h3>
+                        <h3 className="text-sm font-bold text-slate-200">{t("advancedFilters")}</h3>
                     </div>
                     {(selectedCustomer !== "ALL" || selectedAccount !== "ALL" || dateRange !== undefined) && (
                         <Button 
@@ -246,7 +248,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
                         >
                             <RefreshCw className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Réinitialiser</span>
+                            <span className="hidden sm:inline">{t("reset")}</span>
                         </Button>
                     )}
                 </div>
@@ -255,41 +257,41 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                     {/* Filter by Client */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <User className="w-3 h-3" /> Client
+                            <User className="w-3 h-3" /> {t("client")}
                         </label>
                         <SearchableSelect
                             options={[
-                                { value: "ALL", label: "Tous les Clients" },
+                                { value: "ALL", label: t("allClients") },
                                 ...customers.map(c => ({ value: c.id, label: c.name }))
                             ]}
                             value={selectedCustomer}
                             onChange={setSelectedCustomer}
-                            placeholder="Filtrer par Client"
-                            searchPlaceholder="Rechercher un client..."
+                            placeholder={t("filterByClient")}
+                            searchPlaceholder={t("searchClient")}
                         />
                     </div>
 
                     {/* Filter by Modalité (Account) */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <Wallet className="w-3 h-3" /> Modalité de paiement
+                            <Wallet className="w-3 h-3" /> {t("paymentMethod")}
                         </label>
                         <SearchableSelect
                             options={[
-                                { value: "ALL", label: "Toutes les modalités" },
+                                { value: "ALL", label: t("allMethods") },
                                 ...uniqueAccounts.map(name => ({ value: name, label: name }))
                             ]}
                             value={selectedAccount}
                             onChange={setSelectedAccount}
-                            placeholder="Modalité de paiement"
-                            searchPlaceholder="Rechercher une modalité..."
+                            placeholder={t("paymentMethod")}
+                            searchPlaceholder={t("searchMethod")}
                         />
                     </div>
 
                     {/* Filter by Date */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <CalendarIcon className="w-3 h-3" /> Période
+                            <CalendarIcon className="w-3 h-3" /> {t("period")}
                         </label>
                         <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-emerald-500/50 transition-all shadow-inner w-full">
                             <DatePickerWithRange date={dateRange} setDate={setDateRange} />
@@ -304,25 +306,25 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
             <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if(!open) setSelectedSalesOrderId("") }}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                        <DialogTitle>Nouveau Paiement Client</DialogTitle>
+                        <DialogTitle>{t("dialog.newCustomerTitle")}</DialogTitle>
                         <DialogDescription>
-                            Enregistrer un recouvrement de dette client
+                            {t("dialog.newCustomerDesc")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label>Client</Label>
+                            <Label>{t("client")}</Label>
                             <SearchableSelect
                                 options={customers.map(c => ({ value: c.id, label: c.name }))}
                                 value={newPayment.customerId}
                                 onChange={(v) => setNewPayment(prev => ({ ...prev, customerId: v }))}
-                                placeholder="Sélectionner un client"
-                                searchPlaceholder="Rechercher un client..."
+                                placeholder={t("dialog.selectClientPlaceholder")}
+                                searchPlaceholder={t("searchClient")}
                             />
                         </div>
                         {newPayment.customerId && salesOrders.length > 0 && (
                             <div className="grid gap-2">
-                                <Label>Bon de Livraison (BL) - Optionnel</Label>
+                                <Label>{t("dialog.optionalInvoice")}</Label>
                                 <Select
                                     value={selectedSalesOrderId}
                                     onValueChange={(v) => {
@@ -336,10 +338,10 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                                     }}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Sélectionner un Bon de livraison (BL)" />
+                                        <SelectValue placeholder={t("dialog.selectInvoicePlaceholder")} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="none">Aucun (Règlement de dette global)</SelectItem>
+                                        <SelectItem value="none">{t("dialog.noneGlobalDebt")}</SelectItem>
                                         {salesOrders.map(so => {
                                             const remaining = Number(so.total) - Number(so.amountPaid)
                                             return (
@@ -353,7 +355,7 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             </div>
                         )}
                         <div className="grid gap-2">
-                            <Label>Montant (DA)</Label>
+                            <Label>{t("dialog.amount")}</Label>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -363,17 +365,17 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Caisse / Banque</Label>
+                            <Label>{t("dialog.registerBank")}</Label>
                             <SearchableSelect
                                 options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
                                 value={newPayment.accountId}
                                 onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
-                                placeholder="Sélectionner une caisse"
-                                searchPlaceholder="Rechercher une caisse..."
+                                placeholder={t("dialog.selectRegisterPlaceholder")}
+                                searchPlaceholder={t("dialog.searchRegisterPlaceholder")}
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Date</Label>
+                            <Label>{t("dialog.date")}</Label>
                             <Input
                                 type="date"
                                 value={newPayment.date}
@@ -381,20 +383,20 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Observation</Label>
+                            <Label>{t("dialog.notes")}</Label>
                             <Input
                                 value={newPayment.notes}
                                 onChange={(e) => setNewPayment(prev => ({ ...prev, notes: e.target.value }))}
-                                placeholder="Note optionnelle"
+                                placeholder={t("dialog.notesPlaceholder")}
                             />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={createLoading}>
-                            Annuler
+                            {t("dialog.cancel")}
                         </Button>
                         <Button onClick={handleCreate} disabled={createLoading}>
-                            {createLoading ? "Enregistrement..." : "Enregistrer"}
+                            {createLoading ? t("dialog.saving") : t("dialog.save")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

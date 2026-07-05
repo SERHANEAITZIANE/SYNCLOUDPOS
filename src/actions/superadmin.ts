@@ -315,11 +315,18 @@ export const assignUserToTenant = async (
         const session = await auth()
         if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
 
-        // Find user by email
-        const user = await db.user.findUnique({
-            where: { email: email.trim().toLowerCase() }
+        // Find user by email, username, or phone number
+        const identifier = email.trim().toLowerCase()
+        const user = await db.user.findFirst({
+            where: {
+                OR: [
+                    { email: { equals: identifier, mode: 'insensitive' } },
+                    { username: { equals: identifier, mode: 'insensitive' } },
+                    { phone: email.trim() }
+                ]
+            }
         })
-        if (!user) return { error: "User not found with this email" }
+        if (!user) return { error: "User not found with this identifier" }
 
         // Check if already in TenantUser
         const existing = await db.tenantUser.findUnique({

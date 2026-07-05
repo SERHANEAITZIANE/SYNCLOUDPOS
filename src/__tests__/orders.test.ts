@@ -11,7 +11,7 @@ import { createOrder } from '@/actions/orders'
 
 const mockedDb = db as any
 
-describe.skip('Orders', () => {
+describe('Orders', () => {
   beforeEach(() => {
     mockReset(mockedDb)
   })
@@ -38,6 +38,10 @@ describe.skip('Orders', () => {
     mockedDb.store.findFirst.mockResolvedValue({ id: 'store-1' })
     mockedDb.customer.findFirst.mockResolvedValue({ id: 'cust-1', name: 'DIVERS', balance: 0 })
     mockedDb.customer.create.mockResolvedValue({ id: 'cust-1', name: 'DIVERS' })
+    mockedDb.sequenceCounter.upsert.mockResolvedValue({ lastValue: 1 })
+    mockedDb.treasuryAccount.findFirst.mockResolvedValue({ id: 'acc-1', balance: 1000 })
+    mockedDb.treasuryAccount.update.mockResolvedValue({ id: 'acc-1', balance: 1200 })
+    mockedDb.tenant.findUnique.mockResolvedValue({ id: 'test-tenant-id', loyaltyPointsPerDa: 1 })
     mockedDb.product.findMany.mockResolvedValue([
       { id: 'prod-1', stock: 10, minStock: 2, storeProducts: [{ storeId: 'store-1', stock: 10, minStock: 2 }] }
     ])

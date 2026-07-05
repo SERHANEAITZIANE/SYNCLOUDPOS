@@ -68,7 +68,7 @@ export default async function RootLayout({
         <meta name="theme-color" content="#b3593b" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${inter.variable} ${sansFont.variable} ${serifFont.variable} ${monoFont.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${sansFont.variable} ${serifFont.variable} ${monoFont.variable} font-sans antialiased`} suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>
             <ThemeProvider

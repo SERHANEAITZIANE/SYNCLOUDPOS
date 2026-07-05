@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
-import { getAnalyticsData } from "@/actions/analytics";
-import { AnalyticsClient } from "../analytics/components/client";
+import { getDashboardData } from "@/actions/dashboard";
+import { DashboardClientV2 } from "./components/dashboard-client-v2";
 
 export default async function DashboardPage({
     searchParams
@@ -16,11 +16,11 @@ export default async function DashboardPage({
 
     const { from, to } = await searchParams;
 
-    let analyticsData = null;
+    let dashboardData = null;
     let hasError = false;
 
     try {
-        analyticsData = await getAnalyticsData(
+        dashboardData = await getDashboardData(
             from && to ? { from, to } : undefined
         );
     } catch (error) {
@@ -29,7 +29,7 @@ export default async function DashboardPage({
     }
 
     return (
-        <div className="flex-col animate-in fade-in duration-700 slide-in-from-bottom-4">
+        <div className="flex-col">
             <div className="flex-1 space-y-4 p-4 md:p-8 pt-4 md:pt-6">
                 {hasError ? (
                     <div className="p-8">
@@ -39,9 +39,9 @@ export default async function DashboardPage({
                             <p>{t("messages.errorMessage")}</p>
                         </div>
                     </div>
-                ) : analyticsData ? (
-                    <AnalyticsClient
-                        data={analyticsData}
+                ) : dashboardData ? (
+                    <DashboardClientV2
+                        data={dashboardData}
                         initialDateRange={from && to ? {
                             from: new Date(from),
                             to: new Date(to)

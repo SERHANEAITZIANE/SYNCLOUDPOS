@@ -104,6 +104,9 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
                     }
                 }
             }
+            if ((t.source === "MANUAL_IN" || t.source === "CUSTOMER_PAYMENT") && t.referenceId && !foundCustomerId) {
+                return null
+            }
 
             return {
                 id: t.id,
@@ -198,6 +201,9 @@ export async function getSupplierPayments() {
                     supplierName = po.supplier.name
                     foundSupplierId = po.supplier.id
                 }
+            }
+            if ((t.source === "MANUAL_OUT" || t.source === "SUPPLIER_PAYMENT") && t.referenceId && !foundSupplierId) {
+                return null
             }
 
             return {

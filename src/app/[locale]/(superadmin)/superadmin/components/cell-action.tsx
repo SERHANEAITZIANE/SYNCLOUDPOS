@@ -242,11 +242,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     </DialogHeader>
                     <div className="space-y-4 py-2">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email de l'utilisateur existant</Label>
+                            <Label htmlFor="email">Identifiant de l'utilisateur existant (Email, Nom d'utilisateur ou Téléphone)</Label>
                             <Input
                                 id="email"
-                                type="email"
-                                placeholder="nom@exemple.com"
+                                type="text"
+                                placeholder="email, nom d'utilisateur ou téléphone"
                                 value={assignEmail}
                                 onChange={e => setAssignEmail(e.target.value)}
                             />

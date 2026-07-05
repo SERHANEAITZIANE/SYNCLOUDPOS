@@ -3,6 +3,7 @@
 import * as React from "react"
 import { DateRange } from "react-day-picker"
 import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 import { toast } from "react-hot-toast"
 import { Plus, Filter, Truck, Wallet, Calendar as CalendarIcon, RefreshCw } from "lucide-react"
 
@@ -33,6 +34,7 @@ interface SupplierPaymentsClientProps {
 }
 
 export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ data, suppliers, accounts }) => {
+    const t = useTranslations("Payments")
     const columns = useSupplierPaymentColumns(accounts)
     const router = useRouter()
 
@@ -146,15 +148,15 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             setCreateLoading(true)
             const amount = parseFloat(newPayment.amount)
             if (isNaN(amount) || amount <= 0) {
-                toast.error("Montant invalide")
+                toast.error(t("invalidAmount"))
                 return
             }
             if (!newPayment.supplierId) {
-                toast.error("Veuillez sélectionner un fournisseur")
+                toast.error(t("selectSupplier"))
                 return
             }
             if (!newPayment.accountId) {
-                toast.error("Veuillez sélectionner une caisse/banque")
+                toast.error(t("selectAccount"))
                 return
             }
 
@@ -171,14 +173,14 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             if ('error' in result) {
                 toast.error(result.error as string)
             } else {
-                toast.success("Paiement fournisseur enregistré")
+                toast.success(t("paymentSaved"))
                 setCreateOpen(false)
                 setNewPayment({ supplierId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10), imageUrl: "" })
                 setSelectedPurchaseOrderId("")
                 router.refresh()
             }
         } catch {
-            toast.error("Erreur lors de l'enregistrement")
+            toast.error(t("saveError"))
         } finally {
             setCreateLoading(false)
         }
@@ -188,16 +190,16 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
         <>
             <div className="flex items-center justify-between">
                 <Heading
-                    title={`Paiements Fournisseurs (${filteredData.length})`}
-                    description={"Suivez tous les décaissements fournisseurs — Achats et Règlements"}
+                    title={`${t("supplierTitle")} (${filteredData.length})`}
+                    description={t("supplierDescription")}
                 />
                 <div className="flex items-center gap-3">
                     <div className="bg-red-50 text-red-700 dark:bg-red-955/30 font-bold px-4 py-2 rounded-md border border-red-200 shadow-sm">
-                        Total: {formattedTotal}
+                        {t("total")} {formattedTotal}
                     </div>
                     <Button onClick={() => setCreateOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Nouveau Paiement
+                        {t("newSupplierPayment")}
                     </Button>
                 </div>
             </div>
@@ -205,7 +207,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
 
             {paymentId && (
                 <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg flex items-center justify-between mt-4 dark:bg-blue-950/20 dark:border-blue-900/50 dark:text-blue-300">
-                    <span className="text-sm font-medium">Affichage d'une seule opération (Paiement).</span>
+                    <span className="text-sm font-medium">{t("singleOpWarning")}</span>
                     <Button 
                         variant="ghost" 
                         size="sm" 
@@ -215,7 +217,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                             setPaymentId(null)
                         }}
                     >
-                        Voir toutes les opérations
+                        {t("viewAll")}
                     </Button>
                 </div>
             )}
@@ -229,7 +231,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                         <div className="p-1.5 bg-rose-500/10 rounded-lg border border-rose-500/20">
                             <Filter className="w-4 h-4 text-rose-400" />
                         </div>
-                        <h3 className="text-sm font-bold text-slate-200">Filtres de recherche avancés</h3>
+                        <h3 className="text-sm font-bold text-slate-200">{t("advancedFilters")}</h3>
                     </div>
                     {(selectedSupplier !== "ALL" || selectedAccount !== "ALL" || dateRange !== undefined) && (
                         <Button 
@@ -243,7 +245,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                             className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
                         >
                             <RefreshCw className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Réinitialiser</span>
+                            <span className="hidden sm:inline">{t("reset")}</span>
                         </Button>
                     )}
                 </div>
@@ -252,41 +254,41 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                     {/* Filter by Supplier */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <Truck className="w-3 h-3" /> Fournisseur
+                            <Truck className="w-3 h-3" /> {t("supplier")}
                         </label>
                         <SearchableSelect
                             options={[
-                                { value: "ALL", label: "Tous les Fournisseurs" },
+                                { value: "ALL", label: t("allSuppliers") },
                                 ...suppliers.map(s => ({ value: s.id, label: s.name }))
                             ]}
                             value={selectedSupplier}
                             onChange={setSelectedSupplier}
-                            placeholder="Filtrer par Fournisseur"
-                            searchPlaceholder="Rechercher un fournisseur..."
+                            placeholder={t("filterBySupplier")}
+                            searchPlaceholder={t("searchSupplier")}
                         />
                     </div>
 
                     {/* Filter by Modalité (Account) */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <Wallet className="w-3 h-3" /> Modalité de paiement
+                            <Wallet className="w-3 h-3" /> {t("paymentMethod")}
                         </label>
                         <SearchableSelect
                             options={[
-                                { value: "ALL", label: "Toutes les modalités" },
+                                { value: "ALL", label: t("allMethods") },
                                 ...uniqueAccounts.map(name => ({ value: name, label: name }))
                             ]}
                             value={selectedAccount}
                             onChange={setSelectedAccount}
-                            placeholder="Modalité de paiement"
-                            searchPlaceholder="Rechercher une modalité..."
+                            placeholder={t("paymentMethod")}
+                            searchPlaceholder={t("searchMethod")}
                         />
                     </div>
 
                     {/* Filter by Date */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <CalendarIcon className="w-3 h-3" /> Période
+                            <CalendarIcon className="w-3 h-3" /> {t("period")}
                         </label>
                         <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-rose-500/50 transition-all shadow-inner w-full">
                             <DatePickerWithRange date={dateRange} setDate={setDateRange} />
@@ -301,25 +303,25 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
             <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if(!open) setSelectedPurchaseOrderId("") }}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                        <DialogTitle>Nouveau Paiement Fournisseur</DialogTitle>
+                        <DialogTitle>{t("dialog.newSupplierTitle")}</DialogTitle>
                         <DialogDescription>
-                            Enregistrer un règlement de dette fournisseur
+                            {t("dialog.newSupplierDesc")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label>Fournisseur</Label>
+                            <Label>{t("supplier")}</Label>
                             <SearchableSelect
                                 options={suppliers.map(s => ({ value: s.id, label: s.name }))}
                                 value={newPayment.supplierId}
                                 onChange={(v) => setNewPayment(prev => ({ ...prev, supplierId: v }))}
-                                placeholder="Sélectionner un fournisseur"
-                                searchPlaceholder="Rechercher un fournisseur..."
+                                placeholder={t("dialog.selectSupplierPlaceholder")}
+                                searchPlaceholder={t("searchSupplier")}
                             />
                         </div>
                         {newPayment.supplierId && purchaseOrders.length > 0 && (
                             <div className="grid gap-2">
-                                <Label>Bon d'Achat (Facture / BL) - Optionnel</Label>
+                                <Label>{t("dialog.optionalPurchase")}</Label>
                                 <Select
                                     value={selectedPurchaseOrderId}
                                     onValueChange={(v) => {
@@ -332,10 +334,10 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                                     }}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Sélectionner un Bon d'Achat" />
+                                        <SelectValue placeholder={t("dialog.selectPurchasePlaceholder")} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="none">Aucun (Règlement de dette global)</SelectItem>
+                                        <SelectItem value="none">{t("dialog.noneGlobalDebt")}</SelectItem>
                                         {purchaseOrders.map(po => (
                                             <SelectItem key={po.id} value={po.id}>
                                                 {po.purchaseNumber} (Total: {po.total.toLocaleString()} DA - Reste: {po.remaining.toLocaleString()} DA)
@@ -346,7 +348,7 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                             </div>
                         )}
                         <div className="grid gap-2">
-                            <Label>Montant (DA)</Label>
+                            <Label>{t("dialog.amount")}</Label>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -356,17 +358,17 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Caisse / Banque</Label>
+                            <Label>{t("dialog.registerBank")}</Label>
                             <SearchableSelect
                                 options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
                                 value={newPayment.accountId}
                                 onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
-                                placeholder="Sélectionner une caisse"
-                                searchPlaceholder="Rechercher une caisse..."
+                                placeholder={t("dialog.selectRegisterPlaceholder")}
+                                searchPlaceholder={t("dialog.searchRegisterPlaceholder")}
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Date</Label>
+                            <Label>{t("dialog.date")}</Label>
                             <Input
                                 type="date"
                                 value={newPayment.date}
@@ -374,15 +376,15 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>Observation</Label>
+                            <Label>{t("dialog.notes")}</Label>
                             <Input
                                 value={newPayment.notes}
                                 onChange={(e) => setNewPayment(prev => ({ ...prev, notes: e.target.value }))}
-                                placeholder="Note optionnelle"
+                                placeholder={t("dialog.notesPlaceholder")}
                             />
                         </div>
                         <div className="grid gap-2 items-center justify-center border-t pt-4">
-                            <Label className="w-full text-center">Justificatif de Paiement (Photo)</Label>
+                            <Label className="w-full text-center">{t("dialog.uploadProof")}</Label>
                             <ImageUpload
                                 value={newPayment.imageUrl ? [newPayment.imageUrl] : []}
                                 disabled={createLoading}
@@ -393,10 +395,10 @@ export const SupplierPaymentsClient: React.FC<SupplierPaymentsClientProps> = ({ 
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={createLoading}>
-                            Annuler
+                            {t("dialog.cancel")}
                         </Button>
                         <Button onClick={handleCreate} disabled={createLoading}>
-                            {createLoading ? "Enregistrement..." : "Enregistrer"}
+                            {createLoading ? t("dialog.saving") : t("dialog.save")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

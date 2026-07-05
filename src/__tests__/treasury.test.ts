@@ -1,35 +1,57 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mockDeep, mockReset } from 'vitest-mock-extended'
+import { PrismaClient } from '@prisma/client'
+
+vi.mock('@/lib/db', () => ({
+  db: mockDeep<PrismaClient>(),
+}))
+
 import { db } from '@/lib/db'
 import { createExpense } from '@/actions/expenses'
 
+const mockedDb = db as any
+
 describe('Treasury & Expenses', () => {
-  let tenantId: string
-  let accountId: string
-  let categoryId: string
-
-  beforeEach(async () => {
-    // Get existing data from staging db
-    const tenant = await db.tenant.findFirst()
-    if (!tenant) throw new Error("No tenant found in staging DB")
-    tenantId = tenant.id
-
-    const account = await db.treasuryAccount.findFirst({ where: { tenantId } })
-    if (!account) throw new Error("No account found")
-    accountId = account.id
-
-    const category = await db.expenseCategory.findFirst({ where: { tenantId } })
-    if (!category) throw new Error("No expense category found")
-    categoryId = category.id
-
-    // Give the account some money so tests pass
-    await db.treasuryAccount.update({
-      where: { id: accountId },
-      data: { balance: 1000000 }
-    })
+  beforeEach(() => {
+    mockReset(mockedDb)
   })
 
-  it.skip('createExpense creates a DEBIT transaction and updates balance', async () => {
-    // Auth is mocked in setup.ts to return { id: 'test-user-id', tenantId: 'test-tenant-id' }
-    // We should mock auth tenant to match staging DB tenant
+  it('createExpense creates a DEBIT transaction and updates balance', async () => {
+    mockedDb.expense.create.mockResolvedValue({
+      id: 'expense-1',
+      description: 'Test Expense',
+      amount: 100,
+    })
+
+    mockedDb.treasuryAccount.findFirst.mockResolvedValue({
+      id: 'acc-1',
+      balance: 1000,
+    })
+
+    mockedDb.treasuryAccount.update.mockResolvedValue({
+      id: 'acc-1',
+      balance: 900,
+    })
+
+    mockedDb.treasuryTransaction.create.mockResolvedValue({
+      id: 'tx-1',
+    })
+
+    mockedDb.$transaction.mockImplementation(async (callback: any) => {
+      return callback(mockedDb)
+    })
+
+    const result = await createExpense({
+      description: 'Test Expense',
+      amount: 100,
+      categoryId: 'cat-1',
+      accountId: 'acc-1',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.id).toBe('expense-1')
+    expect(mockedDb.expense.create).toHaveBeenCalled()
+    expect(mockedDb.treasuryAccount.update).toHaveBeenCalled()
+    expect(mockedDb.treasuryTransaction.create).toHaveBeenCalled()
   })
 })

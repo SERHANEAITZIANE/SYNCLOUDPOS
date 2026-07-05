@@ -11,7 +11,7 @@ import { getCustomerPayments, getSupplierPayments } from '@/actions/payments'
 
 const mockedDb = db as any
 
-describe.skip('Payments', () => {
+describe('Payments', () => {
   beforeEach(() => {
     mockReset(mockedDb)
   })
@@ -19,8 +19,8 @@ describe.skip('Payments', () => {
   it('getCustomerPayments does not return supplier loans', async () => {
     // Mock the DB returning mixed transactions (simulating a DB fetch)
     mockedDb.treasuryTransaction.findMany.mockResolvedValue([
-      { id: 'tx-1', source: 'CUSTOMER_PAYMENT', referenceId: 'cust-1' },
-      { id: 'tx-2', source: 'MANUAL_IN', referenceId: 'supp-1' }, // supplier loan disguised as MANUAL_IN
+      { id: 'tx-1', source: 'CUSTOMER_PAYMENT', referenceId: 'cust-1', date: new Date(), amount: 100, accountId: 'acc-1' },
+      { id: 'tx-2', source: 'MANUAL_IN', referenceId: 'supp-1', date: new Date(), amount: 100, accountId: 'acc-1' }, // supplier loan disguised as MANUAL_IN
     ])
 
     // Mock supplier check: supp-1 is a supplier
@@ -39,8 +39,8 @@ describe.skip('Payments', () => {
 
   it('getSupplierPayments does not return customer loans', async () => {
     mockedDb.treasuryTransaction.findMany.mockResolvedValue([
-      { id: 'tx-1', source: 'SUPPLIER_PAYMENT', referenceId: 'supp-1' },
-      { id: 'tx-2', source: 'MANUAL_OUT', referenceId: 'cust-1' }, // customer loan disguised as MANUAL_OUT
+      { id: 'tx-1', source: 'SUPPLIER_PAYMENT', referenceId: 'supp-1', date: new Date(), amount: 100, accountId: 'acc-1' },
+      { id: 'tx-2', source: 'MANUAL_OUT', referenceId: 'cust-1', date: new Date(), amount: 100, accountId: 'acc-1' }, // customer loan disguised as MANUAL_OUT
     ])
 
     mockedDb.customer.findMany.mockResolvedValue([{ id: 'cust-1' }])

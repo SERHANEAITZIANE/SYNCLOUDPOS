@@ -177,21 +177,21 @@ export const AnalyticsClient: React.FC<AnalyticsClientProps> = ({ data, initialD
                             <Smartphone className="w-5 h-5 animate-pulse" />
                         </div>
                         <div>
-                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">Application Mobile SynCloud</h4>
+                            <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">{tAnalytics("mobileApp.title")}</h4>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-md">
-                                Gagnez en fluidité et en réactivité en téléchargeant nos applications Android officielles.
+                                {tAnalytics("mobileApp.description")}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                         <Button size="sm" asChild variant="outline" className="border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-500 dark:hover:text-emerald-300 text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 py-1 cursor-pointer">
                             <a href="https://expo.dev/accounts/aitee/projects/syncloud-gerant/builds" target="_blank" rel="noopener noreferrer">
-                                App Gérant
+                                {tAnalytics("mobileApp.managerApp")}
                             </a>
                         </Button>
                         <Button size="sm" asChild variant="outline" className="border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 hover:text-blue-500 dark:hover:text-blue-300 text-[10px] font-bold uppercase tracking-wider rounded-lg px-3 py-1 cursor-pointer">
                             <a href="https://expo.dev/accounts/aitee/projects/syncloud-tournee/builds" target="_blank" rel="noopener noreferrer">
-                                App Tournée
+                                {tAnalytics("mobileApp.driverApp")}
                             </a>
                         </Button>
                     </div>
