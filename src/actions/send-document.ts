@@ -36,9 +36,9 @@ async function fetchSalesOrderForPDF(salesOrderId: string) {
     })
 
     const store = {
-        name: salesOrder.store?.name || tenant?.name,
+        name: tenant?.name || salesOrder.store?.name,
         activity: tenant?.activity,
-        address: salesOrder.store?.address || tenant?.address,
+        address: tenant?.address || salesOrder.store?.address,
         phone: tenant?.phone,
         fax: tenant?.fax,
         email: tenant?.email,

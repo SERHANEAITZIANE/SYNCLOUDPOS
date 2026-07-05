@@ -96,8 +96,8 @@ const PosPage = async () => {
     ])
 
     // Derive store info
-    const storeName = store?.name || tenant?.name || "Premium POS"
-    const storeAddress = store?.address || tenant?.address || ""
+    const storeName = tenant?.name || store?.name || "Premium POS"
+    const storeAddress = tenant?.address || store?.address || ""
     const storePhone = tenant?.phone || ""
 
     const formattedCustomers = rawCustomers.map(c => ({
