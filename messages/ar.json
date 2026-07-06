@@ -1462,6 +1462,19 @@
       "sameWifi": "2. تأكد من أنك متصل بنفس شبكة الواي فاي (Wi-Fi).",
       "scanCamera": "3. امسح رمز الاستجابة السريعة أدناه باستخدام الكاميرا أو عبر تطبيق Expo Go.",
       "manualUrl": "أو أدخل عنوان URL التالي في تطبيق Expo Go:"
-    }
+    },
+    "recentlyVisited": "تمت زيارتها مؤخراً",
+    "favorites": "المفضلة",
+    "customize": "تخصيص",
+    "customizeQuickAccess": "تخصيص الوصول السريع",
+    "customizeQuickAccessDesc": "إضافة أو إزالة اختصارات (الحد الأقصى 12)",
+    "manageTabs": "إدارة التبويبات",
+    "manageTabsDesc": "إظهار أو إخفاء التبويبات",
+    "keyboardShortcuts": "اختصارات لوحة المفاتيح",
+    "shortcutSearch": "فتح البحث",
+    "shortcutSearchAlt": "بحث سريع",
+    "shortcutEscape": "إغلاق / مسح",
+    "shortcutTabs": "تبديل التبويب",
+    "shortcutHelp": "عرض المساعدة"
   }
 }

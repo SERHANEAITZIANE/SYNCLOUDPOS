@@ -128,16 +128,17 @@ export const PrintBarcodeModal = ({
 
     const validBarcodes = (barcodes || []).filter(b => b && b.value && b.value.trim() !== "");
     const hasBarcodes = validBarcodes.length > 0;
-    const activeIndex = selectedBarcodeIndex < validBarcodes.length ? selectedBarcodeIndex : 0;
-    const activeBarcode = hasBarcodes ? validBarcodes[activeIndex].value : "";
+    const finalBarcodes = hasBarcodes ? validBarcodes : [{ value: `NO_BARCODE_${productName.replace(/\s+/g, '_')}` }];
+    const activeIndex = selectedBarcodeIndex < finalBarcodes.length ? selectedBarcodeIndex : 0;
+    const activeBarcode = finalBarcodes[activeIndex].value;
     
-    const totalCopiesToPrint = validBarcodes.reduce((sum, b) => sum + getCopies(b.value), 0)
+    const totalCopiesToPrint = finalBarcodes.reduce((sum, b) => sum + getCopies(b.value), 0)
 
     return (
         <Dialog>
             <DialogTrigger asChild>
                 {children || (
-                    <Button variant="outline" size="sm" disabled={!hasBarcodes} type="button" className="rounded-xl border-gray-200 hover:border-gray-300 dark:border-gray-800 transition-colors gap-2 font-semibold">
+                    <Button variant="outline" size="sm" type="button" className="rounded-xl border-gray-200 hover:border-gray-300 dark:border-gray-800 transition-colors gap-2 font-semibold">
                         <Printer className="h-4 w-4" />
                         Imprimer Code Barre
                     </Button>
@@ -162,7 +163,7 @@ export const PrintBarcodeModal = ({
                                 </DialogDescription>
                             </DialogHeader>
 
-                            {hasBarcodes && (
+                            {finalBarcodes.length > 0 && (
                                 <div className="space-y-5 py-2">
                                     {/* 1. Barcode Selection & Quantity */}
                                     <div className="space-y-2">
@@ -170,14 +171,16 @@ export const PrintBarcodeModal = ({
                                             Code-barres à imprimer
                                         </Label>
                                         <div className="flex flex-col gap-2">
-                                            {validBarcodes.map((b, i) => (
+                                            {finalBarcodes.map((b, i) => (
                                                 <div key={i} className={cn(
                                                     "flex items-center justify-between p-2 rounded-xl border transition-all duration-200 cursor-pointer",
                                                     activeIndex === i
                                                         ? "border-gray-900 bg-gray-50 dark:border-white dark:bg-gray-800 shadow-sm"
                                                         : "border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                                                 )} onClick={() => setSelectedBarcodeIndex(i)}>
-                                                    <span className="font-semibold text-sm px-2 text-gray-900 dark:text-gray-100">{b.value}</span>
+                                                    <span className="font-semibold text-sm px-2 text-gray-900 dark:text-gray-100">
+                                                        {b.value.startsWith("NO_BARCODE") ? "Sans code-barres" : b.value}
+                                                    </span>
                                                     <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                                                         <button
                                                             type="button"
@@ -259,23 +262,17 @@ export const PrintBarcodeModal = ({
 
                             {/* Label Wrapper (canvas style) */}
                             <div className="w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800/80 flex items-center justify-center p-4 relative overflow-hidden shadow-inner bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1f1f33_1px,transparent_1px)] [background-size:16px_16px]">
-                                {hasBarcodes ? (
-                                    <div className="shadow-2xl bg-white rounded-md overflow-hidden transform hover:scale-105 transition-transform duration-300 border border-gray-100">
-                                        <BarcodeLabel
-                                            productName={productName}
-                                            price={price}
-                                            barcodeValue={activeBarcode}
-                                            size={dim.labelSize}
-                                            model={barcodeModel}
-                                            tenantName={tenantName}
-                                            tenantPhone={tenantPhone}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="text-center text-xs text-gray-400">
-                                        Aucun code-barres disponible
-                                    </div>
-                                )}
+                                <div className="shadow-2xl bg-white rounded-md overflow-hidden transform hover:scale-105 transition-transform duration-300 border border-gray-100">
+                                    <BarcodeLabel
+                                        productName={productName}
+                                        price={price}
+                                        barcodeValue={activeBarcode}
+                                        size={dim.labelSize}
+                                        model={barcodeModel}
+                                        tenantName={tenantName}
+                                        tenantPhone={tenantPhone}
+                                    />
+                                </div>
                             </div>
 
                             <div className="mt-6 text-center max-w-[280px]">
@@ -286,14 +283,12 @@ export const PrintBarcodeModal = ({
                                     L'affichage est optimisé pour votre rouleau d'imprimante thermique sans marges ni débordements.
                                 </p>
                             </div>
-                        </div>
-
-                        {/* Print Button */}
+                                           {/* Print Button */}
                         <div className="w-full mt-8">
                             <Button
                                 type="button"
                                 onClick={onPrintClick}
-                                disabled={!hasBarcodes || totalCopiesToPrint === 0}
+                                disabled={totalCopiesToPrint === 0}
                                 className="w-full h-12 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold shadow-lg shadow-pink-500/20 hover:shadow-pink-500/30 transition-all duration-200 flex items-center justify-center gap-2 text-sm border-none"
                             >
                                 <Printer className="h-4 w-4" />
@@ -302,11 +297,11 @@ export const PrintBarcodeModal = ({
                         </div>
                     </div>
                 </div>
-
+ 
                 {/* Hidden container specifically for printing multiple copies */}
                 <div className="hidden">
                     <div ref={printRef} className="print-container" data-printer={printerBarcode} data-printer-name={printerBarcode} data-selected-printer={printerBarcode}>
-                        {isPrinting && validBarcodes.flatMap(b => 
+                        {isPrinting && finalBarcodes.flatMap(b => 
                             Array.from({ length: getCopies(b.value) }).map((_, i) => (
                                 <BarcodeLabel
                                     key={`${b.value}-${i}`}
@@ -321,7 +316,7 @@ export const PrintBarcodeModal = ({
                             ))
                         )}
                     </div>
-                </div>
+                </div>        </div>
             </DialogContent>
         </Dialog>
     )

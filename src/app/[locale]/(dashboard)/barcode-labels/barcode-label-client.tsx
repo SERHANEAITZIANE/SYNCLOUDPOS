@@ -69,8 +69,7 @@ export function BarcodeLabelClient({
     }, [products, search]);
 
     const addLabel = (product: Product) => {
-        const barcode = product.barcodes[0];
-        if (!barcode) return;
+        const barcode = product.barcodes[0] || `NO_BARCODE_${product.id}`;
 
         setLabels((prev) => {
             const existing = prev.find((l) => l.barcode === barcode);
@@ -234,7 +233,7 @@ export function BarcodeLabelClient({
                     <ScrollArea className="h-[calc(100vh-320px)]">
                         <div className="space-y-1.5 pr-4">
                             {filteredProducts.map((product) => {
-                                const isAdded = labels.some((l) => l.barcode === product.barcodes[0]);
+                                const isAdded = labels.some((l) => l.barcode === (product.barcodes[0] || `NO_BARCODE_${product.id}`));
                                 return (
                                     <div
                                         key={product.id}
@@ -372,7 +371,7 @@ export function BarcodeLabelClient({
                                                 {label.product.name}
                                             </p>
                                             <p className="text-[10px] text-muted-foreground font-mono">
-                                                {label.barcode}
+                                                {label.barcode.startsWith("NO_BARCODE") ? "Sans code-barres" : label.barcode}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">

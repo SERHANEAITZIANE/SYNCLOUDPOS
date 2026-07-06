@@ -184,17 +184,21 @@ export const BarcodeLabel = forwardRef<HTMLDivElement, BarcodeLabelProps>(
                                     }}
                                 >
                                     <div style={{ width: "30mm", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                                        <Barcode
-                                            value={barcodeValue}
-                                            format="CODE128"
-                                            width={1.05}
-                                            height={40}
-                                            fontSize={7}
-                                            margin={0}
-                                            displayValue={true}
-                                            background="transparent"
-                                            lineColor="#000000"
-                                        />
+                                        {barcodeValue && !barcodeValue.startsWith("NO_BARCODE") ? (
+                                            <Barcode
+                                                value={barcodeValue}
+                                                format="CODE128"
+                                                width={1.05}
+                                                height={40}
+                                                fontSize={7}
+                                                margin={0}
+                                                displayValue={true}
+                                                background="transparent"
+                                                lineColor="#000000"
+                                            />
+                                        ) : (
+                                            <span style={{ fontSize: "10px", color: "#888888", fontStyle: "italic" }}>Sans code-barres</span>
+                                        )}
                                     </div>
                                 </div>
                                 {/* Price (centered) */}
@@ -281,16 +285,20 @@ export const BarcodeLabel = forwardRef<HTMLDivElement, BarcodeLabelProps>(
                             </p>
                             {/* Barcode (displayValue=false) */}
                             <div style={{ width: "38mm", display: "flex", justifyContent: "center", alignItems: "center", height: "18px", overflow: "hidden" }}>
-                                <Barcode
-                                    value={barcodeValue}
-                                    format="CODE128"
-                                    width={1.1}
-                                    height={18}
-                                    margin={0}
-                                    displayValue={false}
-                                    background="transparent"
-                                    lineColor="#000000"
-                                />
+                                {barcodeValue && !barcodeValue.startsWith("NO_BARCODE") ? (
+                                    <Barcode
+                                        value={barcodeValue}
+                                        format="CODE128"
+                                        width={1.1}
+                                        height={18}
+                                        margin={0}
+                                        displayValue={false}
+                                        background="transparent"
+                                        lineColor="#000000"
+                                    />
+                                ) : (
+                                    <span style={{ fontSize: "9px", color: "#888888", fontStyle: "italic" }}>Sans code-barres</span>
+                                )}
                             </div>
                             {/* Price */}
                             <p 
@@ -392,16 +400,20 @@ export const BarcodeLabel = forwardRef<HTMLDivElement, BarcodeLabelProps>(
                             </p>
                             {/* Barcode (Wide and bigger, displayValue=false) */}
                             <div style={{ width: "38mm", display: "flex", justifyContent: "center", alignItems: "center", height: "28px", overflow: "hidden" }}>
-                                <Barcode
-                                    value={barcodeValue}
-                                    format="CODE128"
-                                    width={1.15}
-                                    height={28}
-                                    margin={0}
-                                    displayValue={false}
-                                    background="transparent"
-                                    lineColor="#000000"
-                                />
+                                {barcodeValue && !barcodeValue.startsWith("NO_BARCODE") ? (
+                                    <Barcode
+                                        value={barcodeValue}
+                                        format="CODE128"
+                                        width={1.15}
+                                        height={28}
+                                        margin={0}
+                                        displayValue={false}
+                                        background="transparent"
+                                        lineColor="#000000"
+                                    />
+                                ) : (
+                                    <span style={{ fontSize: "10px", color: "#888888", fontStyle: "italic" }}>Sans code-barres</span>
+                                )}
                             </div>
                             {/* Price */}
                             <p 

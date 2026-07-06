@@ -1462,6 +1462,19 @@
       "sameWifi": "2. Assurez-vous d'être connecté au même réseau Wi-Fi.",
       "scanCamera": "3. Scannez le code QR ci-dessous avec votre caméra ou via l'application Expo Go.",
       "manualUrl": "Ou entrez l'adresse URL suivante dans Expo Go :"
-    }
+    },
+    "recentlyVisited": "Récemment consultés",
+    "favorites": "Mes Favoris",
+    "customize": "Personnaliser",
+    "customizeQuickAccess": "Personnaliser l'accès rapide",
+    "customizeQuickAccessDesc": "Ajoutez ou retirez des raccourcis (max 12)",
+    "manageTabs": "Gérer les onglets",
+    "manageTabsDesc": "Afficher ou masquer des onglets",
+    "keyboardShortcuts": "Raccourcis Clavier",
+    "shortcutSearch": "Ouvrir la recherche",
+    "shortcutSearchAlt": "Recherche rapide",
+    "shortcutEscape": "Fermer / Effacer",
+    "shortcutTabs": "Changer d'onglet",
+    "shortcutHelp": "Afficher l'aide"
   }
 }
