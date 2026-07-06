@@ -489,7 +489,7 @@ export const HubClient: React.FC = () => {
                     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                     <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 p-3 sm:p-5 md:p-6">
-                        <div className="flex items-center gap-4 text-center sm:text-left">
+                        <div className="flex items-center gap-4 text-center sm:text-left hidden sm:flex">
                             <div className="relative shrink-0 hidden sm:block">
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-secondary/80 shadow-lg shadow-primary/20">
                                     <Store className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
@@ -581,7 +581,7 @@ export const HubClient: React.FC = () => {
                             <button
                                 onClick={resetSettings}
                                 title="Réinitialiser les préférences"
-                                className="p-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                className="p-2 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer hidden sm:flex"
                             >
                                 <RotateCcw className="w-3.5 h-3.5" />
                             </button>
@@ -667,51 +667,53 @@ export const HubClient: React.FC = () => {
                 )}
 
                 {/* ═══════════ QUICK ACCESS ═══════════ */}
-                <motion.section
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.08, duration: 0.5 }}
-                    className="relative p-2.5 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl bg-card/60 border border-border backdrop-blur-xl overflow-hidden"
-                >
-                    <div className="flex items-center justify-between mb-2.5 sm:mb-4 px-1">
-                        <div className="flex items-center gap-2">
-                            <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
-                            <h2 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-foreground">
-                                {t("quickAccess") || "Accès Rapide"}
-                            </h2>
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                {quickActions.length}
-                            </span>
-                        </div>
-                        <button
-                            onClick={() => setShowQuickAccessPicker(true)}
-                            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer text-[10px] font-bold"
-                        >
-                            <Settings className="w-3 h-3" />
-                            <span className="hidden sm:inline">{t("customize") || "Personnaliser"}</span>
-                        </button>
-                    </div>
-
-                    <Reorder.Group
-                        axis="x"
-                        values={quickActions}
-                        onReorder={handleQuickAccessReorder}
-                        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 md:gap-3"
-                        as="div"
+                {!isSearching && (
+                    <motion.section
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.08, duration: 0.5 }}
+                        className="relative p-2.5 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl bg-card/60 border border-border backdrop-blur-xl overflow-hidden"
                     >
-                        {quickActions.map((action, i) => (
-                            <Reorder.Item
-                                key={action.href}
-                                value={action}
-                                as="div"
-                                whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: `0 12px 40px -8px ${action.shadowColor}` }}
-                                className="cursor-grab active:cursor-grabbing"
+                        <div className="flex items-center justify-between mb-2.5 sm:mb-4 px-1">
+                            <div className="flex items-center gap-2">
+                                <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500" />
+                                <h2 className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-foreground">
+                                    {t("quickAccess") || "Accès Rapide"}
+                                </h2>
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                    {quickActions.length}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => setShowQuickAccessPicker(true)}
+                                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer text-[10px] font-bold"
                             >
-                                <QuickAccessButton action={action} index={i} />
-                            </Reorder.Item>
-                        ))}
-                    </Reorder.Group>
-                </motion.section>
+                                <Settings className="w-3 h-3" />
+                                <span className="hidden sm:inline">{t("customize") || "Personnaliser"}</span>
+                            </button>
+                        </div>
+
+                        <Reorder.Group
+                            axis="x"
+                            values={quickActions}
+                            onReorder={handleQuickAccessReorder}
+                            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5 sm:gap-2 md:gap-3"
+                            as="div"
+                        >
+                            {quickActions.map((action, i) => (
+                                <Reorder.Item
+                                    key={action.href}
+                                    value={action}
+                                    as="div"
+                                    whileDrag={{ scale: 1.05, zIndex: 50, boxShadow: `0 12px 40px -8px ${action.shadowColor}` }}
+                                    className="cursor-grab active:cursor-grabbing"
+                                >
+                                    <QuickAccessButton action={action} index={i} />
+                                </Reorder.Item>
+                            ))}
+                        </Reorder.Group>
+                    </motion.section>
+                )}
 
                 {/* ═══════════ TABS SECTION ═══════════ */}
                 <motion.section
