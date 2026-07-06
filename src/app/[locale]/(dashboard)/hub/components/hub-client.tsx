@@ -490,7 +490,7 @@ export const HubClient: React.FC = () => {
 
                     <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 p-3 sm:p-5 md:p-6">
                         <div className="flex items-center gap-4 text-center sm:text-left">
-                            <div className="relative shrink-0">
+                            <div className="relative shrink-0 hidden sm:block">
                                 <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-secondary/80 shadow-lg shadow-primary/20">
                                     <Store className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                                 </div>
