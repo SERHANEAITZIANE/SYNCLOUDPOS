@@ -1079,6 +1079,12 @@
     "sortedBy": "Sorted by",
     "copied": "Copied!",
     "help": "Shortcuts & Tips",
+    "helpTitle": "Table Shortcuts & Tips",
+    "shortcutDragScroll": "Drag the table to scroll from left to right.",
+    "shortcutSwipe": "Scroll horizontally with keyboard and mouse.",
+    "shortcutDragHeader": "Drag and drop column headers to reorder them.",
+    "shortcutRightClick": "Context menu: copy, sort, pin and hide.",
+    "shortcutArrows": "Arrow buttons on the sides of the table to scroll.",
     "noSortableColumns": "No sortable columns"
   },
   "PosPage": {

@@ -1079,6 +1079,12 @@
     "sortedBy": "Trié par",
     "copied": "Copié !",
     "help": "Raccourcis & Astuces",
+    "helpTitle": "Raccourcis & Astuces de Table",
+    "shortcutDragScroll": "Faire glisser le tableau pour défiler de gauche à droite.",
+    "shortcutSwipe": "Faire défiler horizontalement avec le clavier et la souris.",
+    "shortcutDragHeader": "Glisser-déposer les en-têtes de colonnes pour les réordonner.",
+    "shortcutRightClick": "Menu contextuel : copier, trier, épingler et masquer.",
+    "shortcutArrows": "Boutons fléchés sur les côtés du tableau pour défiler.",
     "noSortableColumns": "Aucune colonne triable"
   },
   "PosPage": {
