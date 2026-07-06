@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { randomUUID } from "crypto"
 
 export async function getStores() {
     const session = await auth()
@@ -74,6 +75,7 @@ export async function createStoreForTenantAdmin(name: string, address?: string) 
             if (products.length > 0) {
                 await tx.storeProduct.createMany({
                     data: products.map(p => ({
+                        id: randomUUID(),
                         storeId: newStore.id,
                         productId: p.id,
                         stock: 0,

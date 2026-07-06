@@ -2,6 +2,7 @@
 
 import { z } from "zod"
 import { db } from "@/lib/db"
+import { randomUUID } from "crypto"
 import { ProductSchema } from "@/schemas"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
@@ -104,14 +105,16 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             const currentStoreId = session?.user?.defaultStoreId || stores[0]?.id;
             
             if (stores.length > 0) {
-                await tx.storeProduct.createMany({
-                    data: stores.map(st => ({
-                        storeId: st.id,
-                        productId: product.id,
-                        stock: st.id === currentStoreId ? initialStock : 0,
-                        minStock: st.id === currentStoreId ? (minStock ?? 0) : 0
-                    }))
-                });
+                for (const st of stores) {
+                    await tx.storeProduct.create({
+                        data: {
+                            storeId: st.id,
+                            productId: product.id,
+                            stock: st.id === currentStoreId ? initialStock : 0,
+                            minStock: st.id === currentStoreId ? (minStock ?? 0) : 0
+                        }
+                    });
+                }
             }
 
             if (initialStock > 0) {
@@ -606,6 +609,7 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                 if (tenantStores.length > 0) {
                     await db.storeProduct.createMany({
                         data: tenantStores.map(st => ({
+                            id: randomUUID(),
                             storeId: st.id,
                             productId: product.id,
                             stock: st.id === defaultStoreId ? (stock || 0) : 0,
