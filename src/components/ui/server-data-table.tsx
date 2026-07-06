@@ -31,6 +31,11 @@ import {
     SheetDescription,
 } from "@/components/ui/sheet"
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -42,7 +47,7 @@ import {
     SlidersHorizontal, GripVertical, RefreshCw,
     ArrowDown, ArrowUp, ArrowUpDown,
     Pin, PinOff, Copy, EyeOff, Clipboard, Eye, EyeIcon,
-    Check,
+    Check, HelpCircle,
 } from "lucide-react"
 
 import { useSearchParams } from "next/navigation"
@@ -439,6 +444,80 @@ export function ServerDataTable<TData, TValue>({
                             {visibleCount}/{totalManageableCount}
                         </span>
                     </Button>
+
+                    {/* Shortcuts Info Button */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-9 w-9 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 shrink-0"
+                                title={tDataTable("help") || "Raccourcis & Astuces"}
+                            >
+                                <HelpCircle className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-[320px] p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl z-50">
+                            <div className="space-y-3">
+                                <h4 className="font-bold text-xs text-zinc-800 dark:text-zinc-150 flex items-center gap-1.5 border-b border-zinc-150 dark:border-zinc-800 pb-2">
+                                    <HelpCircle className="h-4 w-4 text-blue-500" />
+                                    {tDataTable("helpTitle") || "Raccourcis & Astuces de Table"}
+                                </h4>
+                                <div className="space-y-2.5 text-xs">
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="flex flex-col gap-1 shrink-0 w-24">
+                                            <kbd className="px-1.5 py-0.5 text-[9px] font-semibold text-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-xs text-zinc-600 dark:text-zinc-300">
+                                                Clic G. + Glisser
+                                            </kbd>
+                                        </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-tight">
+                                            {tDataTable("shortcutDragScroll") || "Faire glisser le tableau pour défiler de gauche à droite."}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="flex flex-col gap-1 shrink-0 w-24">
+                                            <kbd className="px-1.5 py-0.5 text-[9px] font-semibold text-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-xs text-zinc-600 dark:text-zinc-300">
+                                                Shift + Molette
+                                            </kbd>
+                                        </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-tight">
+                                            {tDataTable("shortcutSwipe") || "Faire défiler horizontalement avec le clavier et la souris."}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="flex flex-col gap-1 shrink-0 w-24">
+                                            <kbd className="px-1.5 py-0.5 text-[9px] font-semibold text-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-xs text-zinc-600 dark:text-zinc-300">
+                                                Glisser En-tête
+                                            </kbd>
+                                        </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-tight">
+                                            {tDataTable("shortcutDragHeader") || "Glisser-déposer les en-têtes de colonnes pour les réordonner."}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="flex flex-col gap-1 shrink-0 w-24">
+                                            <kbd className="px-1.5 py-0.5 text-[9px] font-semibold text-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-xs text-zinc-600 dark:text-zinc-300">
+                                                Clic Droit
+                                            </kbd>
+                                        </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-tight">
+                                            {tDataTable("shortcutRightClick") || "Menu contextuel : copier, trier, épingler et masquer."}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="flex flex-col gap-1 shrink-0 w-24">
+                                            <kbd className="px-1.5 py-0.5 text-[9px] font-semibold text-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md shadow-xs text-zinc-600 dark:text-zinc-300">
+                                                Boutons &lt; &gt;
+                                            </kbd>
+                                        </div>
+                                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-tight">
+                                            {tDataTable("shortcutArrows") || "Boutons fléchés sur les côtés du tableau pour défiler."}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </div>
 
