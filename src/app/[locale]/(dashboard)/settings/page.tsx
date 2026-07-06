@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { UnifiedSettingsClient } from "./components/unified-settings-client";
 import { getEnvDatabaseUrl } from "@/actions/system-settings";
+import { serializeData } from "@/lib/serialize";
 
 export default async function SettingsPage() {
     const session = await auth();
@@ -34,46 +35,50 @@ export default async function SettingsPage() {
         orderBy: { name: "asc" }
     });
 
+    const serializedStores = serializeData(stores);
+    const serializedAccounts = serializeData(accounts);
+    const serializedTenant = serializeData({
+        name: store.name,
+        ownerName: store.ownerName,
+        activity: store.activity,
+        address: store.address,
+        wilaya: store.wilaya,
+        commune: store.commune,
+        phone: store.phone,
+        fax: store.fax,
+        email: store.email,
+        nif: store.nif,
+        rc: store.rc,
+        artImposition: store.artImposition,
+        nis: store.nis,
+        bankAccount: store.bankAccount,
+        logo: store.logo,
+        headerText: store.headerText,
+        blTemplate: store.blTemplate || "standard",
+        aiProvider: store.aiProvider || "GEMINI",
+        aiModel: store.aiModel || null,
+        geminiApiKey: store.geminiApiKey,
+        openaiApiKey: store.openaiApiKey,
+        anthropicApiKey: store.anthropicApiKey,
+        loyaltyPointsPerDa: store.loyaltyPointsPerDa ?? 1,
+        loyaltyDaPerPoint: store.loyaltyDaPerPoint ?? 100,
+        isElectronics: store.isElectronics || false,
+        whatsappMode: store.whatsappMode || "NONE",
+        whatsappAutoReceipt: store.whatsappAutoReceipt || false,
+        whatsappAutoInvoice: store.whatsappAutoInvoice || false,
+        whatsappPaymentReminder: store.whatsappPaymentReminder || false,
+        whatsappInstanceId: store.whatsappInstanceId || null,
+        whatsappStatus: store.whatsappStatus || "DISCONNECTED",
+    });
+
     return (
         <div className="flex-col">
             <div className="flex-1 p-4 md:p-8 pt-6">
                 <UnifiedSettingsClient
-                    tenant={{
-                        name: store.name,
-                        ownerName: store.ownerName,
-                        activity: store.activity,
-                        address: store.address,
-                        wilaya: store.wilaya,
-                        commune: store.commune,
-                        phone: store.phone,
-                        fax: store.fax,
-                        email: store.email,
-                        nif: store.nif,
-                        rc: store.rc,
-                        artImposition: store.artImposition,
-                        nis: store.nis,
-                        bankAccount: store.bankAccount,
-                        logo: store.logo,
-                        headerText: store.headerText,
-                        blTemplate: store.blTemplate || "standard",
-                        aiProvider: store.aiProvider || "GEMINI",
-                        aiModel: store.aiModel || null,
-                        geminiApiKey: store.geminiApiKey,
-                        openaiApiKey: store.openaiApiKey,
-                        anthropicApiKey: store.anthropicApiKey,
-                        loyaltyPointsPerDa: store.loyaltyPointsPerDa ?? 1,
-                        loyaltyDaPerPoint: store.loyaltyDaPerPoint ?? 100,
-                        isElectronics: store.isElectronics || false,
-                        whatsappMode: store.whatsappMode || "NONE",
-                        whatsappAutoReceipt: store.whatsappAutoReceipt || false,
-                        whatsappAutoInvoice: store.whatsappAutoInvoice || false,
-                        whatsappPaymentReminder: store.whatsappPaymentReminder || false,
-                        whatsappInstanceId: store.whatsappInstanceId || null,
-                        whatsappStatus: store.whatsappStatus || "DISCONNECTED",
-                    }}
-                    accounts={accounts}
+                    tenant={serializedTenant}
+                    accounts={serializedAccounts}
                     databaseUrl={databaseUrl || ""}
-                    stores={stores}
+                    stores={serializedStores}
                 />
             </div>
         </div>
