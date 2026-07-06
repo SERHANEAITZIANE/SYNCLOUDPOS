@@ -29,6 +29,11 @@ export default async function SettingsPage() {
 
     const databaseUrl = await getEnvDatabaseUrl();
 
+    const stores = await db.store.findMany({
+        where: { tenantId },
+        orderBy: { name: "asc" }
+    });
+
     return (
         <div className="flex-col">
             <div className="flex-1 p-4 md:p-8 pt-6">
@@ -68,6 +73,7 @@ export default async function SettingsPage() {
                     }}
                     accounts={accounts}
                     databaseUrl={databaseUrl || ""}
+                    stores={stores}
                 />
             </div>
         </div>

@@ -14,6 +14,8 @@ import { EmailSettingsForm } from "./email-settings-form"
 import { AlgerianSettingsForm } from "./algerian-settings-form"
 import { ChangePasswordForm } from "@/components/auth/change-password-form"
 import { useTranslations } from "next-intl"
+import { MapPin } from "lucide-react"
+import { StoresSettingsForm } from "./stores-settings-form"
 
 interface TenantData {
     name: string
@@ -55,9 +57,10 @@ interface UnifiedSettingsClientProps {
     tenant: any // Allow dynamic mapper expansion safely
     accounts: Account[]
     databaseUrl: string
+    stores: any[]
 }
 
-export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: UnifiedSettingsClientProps) => {
+export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl, stores }: UnifiedSettingsClientProps) => {
     const t = useTranslations("Settings");
 
     return (
@@ -82,6 +85,10 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                     <TabsTrigger value="pos" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         <span className="hidden sm:inline">{t("Tabs.pos")}</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="stores" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">{t("Tabs.stores") || "Magasins"}</span>
                     </TabsTrigger>
                     <TabsTrigger value="ai" className="flex shrink-0 items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:shadow-sm">
                         <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -304,6 +311,22 @@ export const UnifiedSettingsClient = ({ tenant, accounts, databaseUrl }: Unified
                             </p>
                         </div>
                         <ChangePasswordForm />
+                    </div>
+                </TabsContent>
+
+                {/* Tab — Stores / Warehouses */}
+                <TabsContent value="stores" className="mt-0">
+                    <div className="bg-card border rounded-xl p-6 shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-indigo-500" />
+                                Magasins & Dépôts
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Créez et gérez les différents magasins, points de vente ou dépôts de votre entreprise.
+                            </p>
+                        </div>
+                        <StoresSettingsForm initialStores={stores} />
                     </div>
                 </TabsContent>
             </Tabs>

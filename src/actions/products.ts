@@ -98,18 +98,19 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
 
             createdProduct = product;
 
-            // Always create StoreProduct to ensure POS visibility
+            // Always create StoreProduct to ensure POS visibility across all stores of this tenant
             const initialStock = stock ?? 0;
-            const storeId = session?.user?.defaultStoreId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            const stores = await tx.store.findMany({ where: { tenantId } });
+            const currentStoreId = session?.user?.defaultStoreId || stores[0]?.id;
             
-            if (storeId) {
-                await tx.storeProduct.create({
-                    data: {
-                        storeId,
+            if (stores.length > 0) {
+                await tx.storeProduct.createMany({
+                    data: stores.map(st => ({
+                        storeId: st.id,
                         productId: product.id,
-                        stock: initialStock,
-                        minStock: minStock ?? 0
-                    }
+                        stock: st.id === currentStoreId ? initialStock : 0,
+                        minStock: st.id === currentStoreId ? (minStock ?? 0) : 0
+                    }))
                 });
             }
 
@@ -554,7 +555,8 @@ export const importProducts = async (rows: Record<string, string>[]) => {
             return ["1", "true", "yes", "oui", "vrai", "y", "o"].includes(str)
         }
 
-        const storeId = session?.user?.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
+        const tenantStores = await db.store.findMany({ where: { tenantId } })
+        const defaultStoreId = session?.user?.defaultStoreId || tenantStores[0]?.id;
 
         // Now batch create all products in parallel
         const createPromises = rows.map(async (row) => {
@@ -601,14 +603,14 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                     } as any
                 })
                 
-                if (storeId) {
-                    await db.storeProduct.create({
-                        data: {
-                            storeId,
+                if (tenantStores.length > 0) {
+                    await db.storeProduct.createMany({
+                        data: tenantStores.map(st => ({
+                            storeId: st.id,
                             productId: product.id,
-                            stock: stock || 0,
-                            minStock: minStock || 0
-                        }
+                            stock: st.id === defaultStoreId ? (stock || 0) : 0,
+                            minStock: st.id === defaultStoreId ? (minStock || 0) : 0
+                        }))
                     })
                 }
                 
@@ -624,7 +626,7 @@ export const importProducts = async (rows: Record<string, string>[]) => {
                             reason: "Stock initial à l'import",
                             userId: session?.user?.id || "SYSTEM",
                             tenantId,
-                            storeId
+                            storeId: defaultStoreId
                         }
                     })
                 }

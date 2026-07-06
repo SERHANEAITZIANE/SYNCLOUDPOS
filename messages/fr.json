@@ -703,7 +703,8 @@
       "advanced": "Avancé",
       "loyalty": "Fidélité",
       "backup": "Sauvegarde",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "stores": "Magasins"
     },
     "description": "Configurez votre application, vos préférences d'impression et vos paramètres POS.",
     "Company": {
