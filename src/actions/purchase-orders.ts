@@ -51,9 +51,19 @@ export const getPurchaseOrders = async (
         const whereClause: any = { tenantId }
 
         if (search) {
+            const numValue = parseFloat(search)
+            const isNumeric = !isNaN(numValue)
             whereClause.OR = [
                 { purchaseNumber: { contains: search, mode: 'insensitive' } },
-                { supplier: { name: { contains: search, mode: 'insensitive' } } }
+                { supplier: { name: { contains: search, mode: 'insensitive' } } },
+                { supplier: { contactPerson: { contains: search, mode: 'insensitive' } } },
+                { notes: { contains: search, mode: 'insensitive' } },
+                // Numeric field matches (totalAmount, paid, remaining)
+                ...(isNumeric ? [
+                    { totalAmount: { equals: numValue } },
+                    { paid: { equals: numValue } },
+                    { remaining: { equals: numValue } },
+                ] : []),
             ]
         }
 

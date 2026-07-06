@@ -158,10 +158,22 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         const safeSearch = typeof search === 'string' ? search : (Array.isArray(search) ? search[0] : '')
 
         if (safeSearch) {
+            const numValue = parseFloat(safeSearch)
+            const isNumeric = !isNaN(numValue)
             whereClause.OR = [
                 { name: { contains: safeSearch, mode: 'insensitive' } },
                 { description: { contains: safeSearch, mode: 'insensitive' } },
-                { barcodes: { some: { value: { contains: safeSearch, mode: 'insensitive' } } } }
+                { barcodes: { some: { value: { contains: safeSearch, mode: 'insensitive' } } } },
+                { category: { name: { contains: safeSearch, mode: 'insensitive' } } },
+                { brand: { name: { contains: safeSearch, mode: 'insensitive' } } },
+                // Numeric field matches (price, cost, stock, etc.)
+                ...(isNumeric ? [
+                    { price: { equals: numValue } },
+                    { cost: { equals: numValue } },
+                    { wholesalePrice: { equals: numValue } },
+                    { dealerPrice: { equals: numValue } },
+                    { stock: { equals: Math.floor(numValue) } },
+                ] : []),
             ]
         }
 

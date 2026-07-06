@@ -12,6 +12,8 @@ import {
     getFilteredRowModel,
     VisibilityState,
     ColumnPinningState,
+    FilterFn,
+    Row,
 } from "@tanstack/react-table"
 
 import {
@@ -52,7 +54,7 @@ import {
     ArrowUpDown, ArrowUp, ArrowDown,
     SlidersHorizontal, GripVertical, RefreshCw,
     Pin, PinOff, Copy, EyeOff, Clipboard, Eye,
-    Check, Search, HelpCircle,
+    Check, Search, HelpCircle, X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
@@ -96,6 +98,8 @@ export function DataTable<TData, TValue>({
 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = useState("")
+    const searchInputRef = useRef<HTMLInputElement>(null)
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [columnOrder, setColumnOrder] = useState<string[]>([])
     const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({ left: [], right: [] })
@@ -110,11 +114,47 @@ export function DataTable<TData, TValue>({
         setMounted(true)
     }, [])
 
+    // Keyboard shortcut: "/" focuses the search input
+    useEffect(() => {
+        if (hideSearch) return
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+                e.preventDefault()
+                searchInputRef.current?.focus()
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [hideSearch])
+
     // If pagination is disabled, we set the initial page size to a very large number
     // Default to 20 rows when pagination is enabled
     const initialState = useMemo(() => {
         return showPagination ? { pagination: { pageSize: 20, pageIndex: 0 } } : { pagination: { pageSize: 999999, pageIndex: 0 } };
     }, [showPagination]);
+
+    // Universal global filter: searches all visible columns (text + numbers)
+    const universalFilterFn: FilterFn<TData> = useCallback((row: Row<TData>, columnId: string, filterValue: string) => {
+        if (!filterValue || filterValue.length === 0) return true
+        const search = filterValue.toLowerCase().trim()
+        // Check all visible columns
+        for (const col of row.getAllCells()) {
+            if (col.column.getIsVisible()) {
+                const val = col.getValue()
+                if (val == null) continue
+                // String match: case-insensitive includes
+                if (typeof val === 'string' && val.toLowerCase().includes(search)) return true
+                // Number match: starts-with (50 matches 50, 500, 50.99)
+                if (typeof val === 'number' && String(val).startsWith(search)) return true
+                // Boolean match
+                if (typeof val === 'boolean') {
+                    const boolStr = val ? 'oui yes true' : 'non no false'
+                    if (boolStr.includes(search)) return true
+                }
+            }
+        }
+        return false
+    }, [])
 
     const table = useReactTable({
         data,
@@ -128,10 +168,13 @@ export function DataTable<TData, TValue>({
         onColumnVisibilityChange: setColumnVisibility,
         onColumnOrderChange: setColumnOrder,
         onColumnPinningChange: setColumnPinning,
+        globalFilterFn: universalFilterFn,
+        onGlobalFilterChange: setGlobalFilter,
         initialState,
         state: {
             sorting,
             columnFilters,
+            globalFilter,
             columnVisibility,
             columnOrder,
             columnPinning,
@@ -363,15 +406,25 @@ export function DataTable<TData, TValue>({
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-4 sm:space-y-0 no-print">
                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
                     {!hideSearch && (
-                        <Input
-                            id="global-search-input"
-                            placeholder={tDataTable("search")}
-                            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) =>
-                                table.getColumn(searchKey)?.setFilterValue(event.target.value)
-                            }
-                            className="max-w-sm w-full"
-                        />
+                        <div className="relative max-w-sm w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                            <Input
+                                ref={searchInputRef}
+                                id="global-search-input"
+                                placeholder={tDataTable("search")}
+                                value={globalFilter ?? ""}
+                                onChange={(event) => setGlobalFilter(event.target.value)}
+                                className="pl-9 pr-8 h-10 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-blue-500/30 focus-visible:border-blue-400 transition-all"
+                            />
+                            {globalFilter && (
+                                <button
+                                    onClick={() => setGlobalFilter("")}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
+                        </div>
                     )}
 
                     {/* Client Type Filter */}

@@ -38,6 +38,10 @@ export const getSuppliers = async (page: number = 1, pageSize: number = 20, sear
                 { contactPerson: { contains: search, mode: 'insensitive' } },
                 { phone: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
+                { address: { contains: search, mode: 'insensitive' } },
+                { nif: { contains: search, mode: 'insensitive' } },
+                { nis: { contains: search, mode: 'insensitive' } },
+                { nrc: { contains: search, mode: 'insensitive' } },
             ]
         }
 

@@ -282,9 +282,18 @@ export async function getSalesOrders(
         }
 
         if (search) {
+            const numValue = parseFloat(search)
+            const isNumeric = !isNaN(numValue)
             where.OR = [
                 { receiptNumber: { contains: search, mode: "insensitive" } },
-                { customer: { name: { contains: search, mode: "insensitive" } } }
+                { customer: { name: { contains: search, mode: "insensitive" } } },
+                { notes: { contains: search, mode: "insensitive" } },
+                // Numeric field matches (total, paid, remaining)
+                ...(isNumeric ? [
+                    { total: { equals: numValue } },
+                    { paid: { equals: numValue } },
+                    { remaining: { equals: numValue } },
+                ] : []),
             ]
         }
 

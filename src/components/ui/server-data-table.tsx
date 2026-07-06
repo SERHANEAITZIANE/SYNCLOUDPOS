@@ -47,7 +47,7 @@ import {
     SlidersHorizontal, GripVertical, RefreshCw,
     ArrowDown, ArrowUp, ArrowUpDown,
     Pin, PinOff, Copy, EyeOff, Clipboard, Eye, EyeIcon,
-    Check, HelpCircle,
+    Check, HelpCircle, X,
 } from "lucide-react"
 
 import { useSearchParams } from "next/navigation"
@@ -103,9 +103,22 @@ export function ServerDataTable<TData, TValue>({
     const [searchQuery, setSearchQuery] = useState(getSafeSearchParam(searchKey))
     const [debouncedSearch] = useDebounce(searchQuery, 500)
     const [mounted, setMounted] = useState(false)
+    const searchInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         setMounted(true)
+    }, [])
+
+    // Keyboard shortcut: "/" focuses the search input
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+                e.preventDefault()
+                searchInputRef.current?.focus()
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown)
+        return () => document.removeEventListener('keydown', handleKeyDown)
     }, [])
 
     const createQueryString = useCallback(
@@ -395,12 +408,21 @@ export function ServerDataTable<TData, TValue>({
                 <div className="relative w-full sm:w-auto sm:min-w-[320px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                     <Input
+                        ref={searchInputRef}
                         id="global-search-input"
                         placeholder={tDataTable("search")}
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
-                        className="pl-9 h-10 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-blue-500/30 focus-visible:border-blue-400 transition-all"
+                        className="pl-9 pr-8 h-10 bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus-visible:ring-blue-500/30 focus-visible:border-blue-400 transition-all"
                     />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
