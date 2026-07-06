@@ -12,6 +12,13 @@ export type TenantColumn = {
     subscriptionEndsAt: Date | null;
     isBlocked: boolean;
     createdAt: Date;
+    activity: string | null;
+    address: string | null;
+    wilaya: string | null;
+    commune: string | null;
+    nif: string | null;
+    rc: string | null;
+    nis: string | null;
     ownerDetails: {
         name: string | null;
         email: string;

@@ -27,8 +27,8 @@ const ProductsPage = async ({
         dealerPrice: item.dealerPrice ? Number(item.dealerPrice).toFixed(2) : "0.00",
         category: item.category?.name || "Uncategorized",
         brand: item.brand?.name || "N/A", // Handle optional brand
-        stock: item.stock || 0,
-        minStock: item.minStock || 0,
+        stock: item.storeProducts?.[0]?.stock !== undefined && item.storeProducts?.[0]?.stock !== null ? item.storeProducts[0].stock : 0,
+        minStock: item.storeProducts?.[0]?.minStock !== undefined && item.storeProducts?.[0]?.minStock !== null ? item.storeProducts[0].minStock : (item.minStock || 0),
         createdAt: item.createdAt ? format(new Date(item.createdAt), "MMMM do, yyyy") : "",
         images: item.images ? item.images.map((img: any) => ({ url: img.url })) : []
     }))
@@ -37,7 +37,7 @@ const ProductsPage = async ({
 
     return (
         <div className="flex-col">
-            <div className="flex-1 space-y-4 p-8 pt-6 max-w-7xl mx-auto w-full">
+            <div className="flex-1 space-y-4 p-8 pt-6 w-full">
                 <ProductClient
                     data={formattedProducts}
                     totalCount={totalCount}

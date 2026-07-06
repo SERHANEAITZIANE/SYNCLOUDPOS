@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { useTranslations } from "next-intl"
 import { CellAction } from "./cell-action"
+import { StockHistoryModal } from "./stock-history-modal"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { PackageIcon, Star, Archive, ImageIcon } from "lucide-react"
@@ -29,6 +31,53 @@ export type ProductColumn = {
     minStock: number
     createdAt: string
     images: { url: string }[]
+}
+
+interface StockCellProps {
+    row: any
+    stock: number
+    minStock: number
+}
+
+const StockCellWithHistory: React.FC<StockCellProps> = ({ row, stock, minStock }) => {
+    const [openHistory, setOpenHistory] = useState(false)
+    const isLow = stock <= minStock
+    const isOut = stock <= 0
+    
+    return (
+        <>
+            <StockHistoryModal
+                isOpen={openHistory}
+                onClose={() => setOpenHistory(false)}
+                productId={row.original.id}
+                productName={row.original.name}
+            />
+            <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div 
+                            onClick={() => setOpenHistory(true)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border cursor-pointer hover:opacity-80 active:scale-95 transition-all duration-150 shadow-sm hover:shadow",
+                                isOut
+                                    ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50"
+                                    : isLow
+                                        ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50"
+                                        : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50"
+                            )}
+                        >
+                            <PackageIcon className="h-3 w-3" />
+                            <span className="tabular-nums">{stock}</span>
+                            {isLow && <span className="text-[10px]">⚠</span>}
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                        Clic pour voir l'historique des mouvements de stock
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </>
+    )
 }
 
 export function useProductColumns(): ColumnDef<ProductColumn>[] {
@@ -210,30 +259,15 @@ export function useProductColumns(): ColumnDef<ProductColumn>[] {
                 )
             }
         },
-        // Stock with visual indicator
+        // Stock with visual indicator and history dialog trigger
         {
             accessorKey: "stock",
             header: t("fields.stock"),
             cell: ({ row }) => {
                 const stock = Number(row.getValue("stock"))
                 const minStock = row.original.minStock
-                const isLow = stock <= minStock
-                const isOut = stock <= 0
                 return (
-                    <div className="flex items-center gap-2">
-                        <div className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border",
-                            isOut
-                                ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50"
-                                : isLow
-                                    ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50"
-                                    : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50"
-                        )}>
-                            <PackageIcon className="h-3 w-3" />
-                            <span className="tabular-nums">{stock}</span>
-                            {isLow && <span className="text-[10px]">⚠</span>}
-                        </div>
-                    </div>
+                    <StockCellWithHistory row={row} stock={stock} minStock={minStock} />
                 )
             }
         },

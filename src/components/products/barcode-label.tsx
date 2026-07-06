@@ -4,7 +4,7 @@ import { forwardRef } from "react"
 import Barcode from "react-barcode"
 
 export type BarcodeLabelSize = "4x2" | "4.5x3.5"
-export type BarcodeLabelModel = "simple_40x20" | "side_store_45x35" | "store_40x20"
+export type BarcodeLabelModel = "simple_40x20" | "side_store_45x35" | "store_40x20" | "name_only_40x20"
 
 interface BarcodeLabelProps {
     productName: string
@@ -306,6 +306,47 @@ export const BarcodeLabel = forwardRef<HTMLDivElement, BarcodeLabelProps>(
                                 }}
                             >
                                 {priceFormatted}
+                            </p>
+                        </div>
+                    )
+                case "name_only_40x20":
+                    return (
+                        <div 
+                            style={{
+                                width: "40mm",
+                                height: "20mm",
+                                maxWidth: "40mm",
+                                maxHeight: "20mm",
+                                overflow: "hidden",
+                                boxSizing: "border-box",
+                                backgroundColor: "#ffffff",
+                                color: "#000000",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "4px 4px",
+                                margin: 0
+                            }}
+                        >
+                            {/* Product name only, centered, larger text wraps to multiple lines */}
+                            <p 
+                                style={{
+                                    fontSize: "14px",
+                                    fontWeight: 700,
+                                    textTransform: "uppercase",
+                                    letterSpacing: "-0.01em",
+                                    textAlign: "center",
+                                    width: "100%",
+                                    maxHeight: "100%",
+                                    overflow: "hidden",
+                                    margin: 0,
+                                    padding: 0,
+                                    lineHeight: "1.2",
+                                    wordBreak: "break-word"
+                                }}
+                            >
+                                {productName}
                             </p>
                         </div>
                     )

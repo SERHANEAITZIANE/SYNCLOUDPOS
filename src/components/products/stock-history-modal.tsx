@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { ArrowDownRight, ArrowUpRight, History, Loader2, RefreshCcw } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, History, Loader2, RefreshCcw, Link2 } from "lucide-react"
+import { useRouter } from "@/i18n/routing"
+import { cn } from "@/lib/utils"
 
 import {
     Dialog,
@@ -29,6 +31,7 @@ export const StockHistoryModal: React.FC<StockHistoryModalProps> = ({
     productId,
     productName
 }) => {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [movements, setMovements] = useState<any[]>([])
     const t = useTranslations("Products.stockHistory")
@@ -93,56 +96,83 @@ export const StockHistoryModal: React.FC<StockHistoryModalProps> = ({
                             <p>{t("noMovements")}</p>
                         </div>
                     ) : (
-                        <ScrollArea className="h-full pr-4">
-                            <div className="space-y-4">
-                                {movements.map((movement) => (
-                                    <div
-                                        key={movement.id}
-                                        className="flex items-start justify-between p-4 bg-white dark:bg-slate-950 rounded-xl border shadow-sm"
-                                    >
-                                        <div className="flex gap-4">
-                                            <div className={`mt-0.5 p-2 rounded-full ${movement.quantity > 0 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
-                                                {movement.quantity > 0 ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownRight className="h-5 w-5" />}
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-semibold text-slate-900 dark:text-slate-100">
-                                                        {getTypeLabel(movement.type)}
-                                                    </span>
-                                                    <Badge variant="secondary" className={getTypeColor(movement.type)}>
-                                                        {movement.type}
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-sm text-slate-500 max-w-md">
-                                                    {movement.reason || t("systemMovement")}
-                                                </p>
-                                                <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
-                                                    <span>{format(new Date(movement.createdAt), "dd MMM yyyy à HH:mm", { locale: fr })}</span>
-                                                    {movement.user?.name && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span>{t("by")} {movement.user.name}</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div className="overflow-y-auto max-h-[60vh] pr-2 space-y-4">
+                                {movements.map((movement) => {
+                                    const hasLink = !!movement.referenceId && (
+                                        movement.type === "SALE" || 
+                                        movement.type === "RETURN" || 
+                                        movement.type === "PURCHASE" || 
+                                        movement.type === "SUPPLIER_RETURN"
+                                    )
+                                    
+                                    const handleCardClick = () => {
+                                        if (!hasLink) return
+                                        onClose()
+                                        if (movement.type === "SALE" || movement.type === "RETURN") {
+                                            router.push(`/sales/${movement.referenceId}`)
+                                        } else if (movement.type === "PURCHASE" || movement.type === "SUPPLIER_RETURN") {
+                                            router.push(`/purchases/${movement.referenceId}`)
+                                        }
+                                    }
 
-                                        <div className="flex flex-col items-end gap-1">
-                                            <div className={`text-lg font-black ${movement.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                                                {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                                    return (
+                                        <div
+                                            key={movement.id}
+                                            onClick={handleCardClick}
+                                            className={cn(
+                                                "flex items-start justify-between p-4 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-200",
+                                                hasLink && "cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/60 hover:scale-[1.01] hover:border-indigo-250 dark:hover:border-indigo-900/50 active:scale-98"
+                                            )}
+                                            title={hasLink ? "Cliquez pour ouvrir le document de référence" : undefined}
+                                        >
+                                            <div className="flex gap-4">
+                                                <div className={`mt-0.5 p-2 rounded-full ${movement.quantity > 0 ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
+                                                    {movement.quantity > 0 ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownRight className="h-5 w-5" />}
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-semibold text-slate-900 dark:text-slate-100">
+                                                            {getTypeLabel(movement.type)}
+                                                        </span>
+                                                        <Badge variant="secondary" className={getTypeColor(movement.type)}>
+                                                            {movement.type}
+                                                        </Badge>
+                                                        {hasLink && (
+                                                            <Badge variant="outline" className="text-[10px] text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50 flex items-center gap-1 py-0 px-1.5 font-semibold bg-indigo-50/50 dark:bg-indigo-950/20">
+                                                                <Link2 className="h-2.5 w-2.5" /> Lié
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-slate-500 max-w-md">
+                                                        {movement.reason || t("systemMovement")}
+                                                    </p>
+                                                    <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
+                                                        <span>{format(new Date(movement.createdAt), "dd MMM yyyy à HH:mm", { locale: fr })}</span>
+                                                        {movement.user?.name && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span>{t("by")} {movement.user.name}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="text-xs text-slate-500 flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
-                                                <RefreshCcw className="h-3 w-3" />
-                                                <span>{movement.stockBefore}</span>
-                                                <span className="mx-1">→</span>
-                                                <span className="text-slate-900 dark:text-slate-100">{movement.stockAfter}</span>
+
+                                            <div className="flex flex-col items-end gap-1">
+                                                <div className={`text-lg font-black ${movement.quantity > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                                    {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                                                </div>
+                                                <div className="text-xs text-slate-500 flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                                                    <RefreshCcw className="h-3 w-3" />
+                                                    <span>{movement.stockBefore}</span>
+                                                    <span className="mx-1">→</span>
+                                                    <span className="text-slate-900 dark:text-slate-100">{movement.stockAfter}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
+                                    )
+                                })}
+                        </div>
                     )}
                 </div>
             </DialogContent>

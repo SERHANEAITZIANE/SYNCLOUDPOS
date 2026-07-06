@@ -21,6 +21,27 @@ export const createStore = async (name: string) => {
     }
 
     try {
+        // 0. Ensure user has a TenantUser record for their current tenant (to avoid eclipsing/losing it)
+        if (dbUser.tenantId) {
+            const currentTenantUser = await db.tenantUser.findUnique({
+                where: {
+                    userId_tenantId: {
+                        userId: session.user.id,
+                        tenantId: dbUser.tenantId
+                    }
+                }
+            })
+            if (!currentTenantUser) {
+                await db.tenantUser.create({
+                    data: {
+                        userId: session.user.id,
+                        tenantId: dbUser.tenantId,
+                        role: "ADMIN"
+                    }
+                })
+            }
+        }
+
         // 1. Create the new tenant — inherit subscription from current tenant
         const tenant = await db.tenant.create({
             data: {

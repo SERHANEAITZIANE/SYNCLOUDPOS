@@ -9,24 +9,15 @@ import { HeaderStoreSelector } from "./header-store-selector";
 import { getStores } from "@/actions/stores";
 import { Link } from "@/i18n/routing";
 import { Settings, Sparkles, MessageCircle } from "lucide-react";
+import { HeaderSearch } from "./header-search";
 
 export async function DashboardHeader({ user }: { user: any }) {
     const stores = await getStores();
     return (
         <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6 gap-2 md:gap-4">
             <MobileSidebar />
-            <div className="w-full flex-1">
-                {/* Search bar could go here */}
-                <form>
-                    <div className="relative">
-                        {/* <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                type="search"
-                placeholder="Search products..."
-                className="w-full appearance-none bg-[#020205] pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                /> */}
-                    </div>
-                </form>
+            <div className="flex-1 max-w-xs md:max-w-sm">
+                <HeaderSearch />
             </div>
             <div className="flex items-center gap-2 md:gap-4">
                 <HeaderStoreSelector stores={stores} currentStoreId={user.defaultStoreId} />

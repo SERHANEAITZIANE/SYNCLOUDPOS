@@ -81,17 +81,29 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
         let fromDate: Date
         let toDate: Date
 
-        if (dateRange?.to) {
-            const parts = dateRange.to.split(/[T -]/)
-            toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
-        } else {
+        const isValidDate = (d: Date) => d instanceof Date && !isNaN(d.getTime())
+
+        try {
+            if (dateRange?.to) {
+                const parts = dateRange.to.split(/[T -]/)
+                toDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999)
+                if (!isValidDate(toDate)) toDate = endOfDay(new Date())
+            } else {
+                toDate = endOfDay(new Date())
+            }
+        } catch {
             toDate = endOfDay(new Date())
         }
 
-        if (dateRange?.from) {
-            const parts = dateRange.from.split(/[T -]/)
-            fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
-        } else {
+        try {
+            if (dateRange?.from) {
+                const parts = dateRange.from.split(/[T -]/)
+                fromDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 0, 0, 0, 0)
+                if (!isValidDate(fromDate)) fromDate = startOfDay(new Date())
+            } else {
+                fromDate = startOfDay(new Date())
+            }
+        } catch {
             fromDate = startOfDay(new Date())
         }
 
@@ -105,7 +117,7 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
         const dateKey = `${format(fromDate, 'yyyyMMdd')}-${format(toDate, 'yyyyMMdd')}`
         const cacheKey = `dashboard-v2:${tenantId}:${storeIdToUse}:${dateKey}`
 
-        return withCache(cacheKey, async () => {
+        const result = await withCache(cacheKey, async () => {
 
             // ═══════════════════════════════════════════════════════════════════
             // WAVE 1: All independent queries in parallel
@@ -235,7 +247,7 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
                     take: 3
                 }),
                 db.treasuryTransaction.findMany({
-                    where: { tenantId, type: "CREDIT", source: { in: ["PAYMENT_IN", "CUSTOMER_PAYMENT"] } },
+                    where: { tenantId, type: "CREDIT", source: { in: ["PAYMENT", "CUSTOMER_PAYMENT"] } },
                     orderBy: { createdAt: 'desc' },
                     take: 3
                 }),
@@ -570,6 +582,8 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
                 storeName: storeInfo?.name || "",
             }))
         }, 30)
+
+        return result
 
     } catch (error) {
         console.error("[GET_DASHBOARD]", error)

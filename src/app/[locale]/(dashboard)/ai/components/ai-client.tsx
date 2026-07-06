@@ -13,6 +13,7 @@ import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DateRange } from "react-day-picker";
@@ -142,6 +143,12 @@ export function AiClient({ dbProvider, dbKeys, initialStats }: AiClientProps) {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [speakingId, setSpeakingId] = useState<string | null>(null);
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+    // AI configurations and options
+    const [aiTemperature, setAiTemperature] = useState<"creative" | "precise">("precise")
+    const [includeStockContext, setIncludeStockContext] = useState(true)
+    const [includeClientContext, setIncludeClientContext] = useState(true)
+    const [includeSalesContext, setIncludeSalesContext] = useState(true)
 
     // Sidebar sub-tab navigation
     const [cockpitSubTab, setCockpitSubTab] = useState<"performance" | "predictions">("performance");
@@ -1188,7 +1195,7 @@ Simule l'impact mathématique de cette décision sur ma trésorerie, projette me
     );
 
     return (
-        <div className="flex flex-col h-dvh bg-[#060609] text-white overflow-hidden relative font-sans">
+        <div className="flex flex-col h-dvh bg-[#060609] text-white overflow-hidden relative font-sans ai-page-root">
             
             {/* Inline floating orbs keyframe styles for outstanding ambient effect */}
             <style>{`
@@ -1208,6 +1215,148 @@ Simule l'impact mathématique de cette décision sur ma trésorerie, projette me
                 .animate-drift-slow-3 {
                     animation: drift 24s infinite ease-in-out;
                     animation-delay: 6s;
+                }
+
+                /* Premium Light Theme Overrides */
+                html:not(.dark) .ai-page-root {
+                    background-color: #f9fafb !important;
+                    color: #1f2937 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white {
+                    color: #111827 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/80 {
+                    color: #374151 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/85 {
+                    color: #374151 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/50 {
+                    color: #4b5563 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/40 {
+                    color: #6b7280 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/30 {
+                    color: #888888 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/20 {
+                    color: #cbd5e0 !important;
+                }
+                html:not(.dark) .ai-page-root .text-white\/10 {
+                    color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .border-white\/5 {
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .border-white\/10 {
+                    border-color: #cbd5e0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#08080d\]\/70 {
+                    background-color: rgba(255, 255, 255, 0.85) !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#08080d\]\/60 {
+                    background-color: rgba(255, 255, 255, 0.85) !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#0a0a0f\] {
+                    background-color: #f3f4f6 !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#08080c\]\/55 {
+                    background-color: rgba(243, 244, 246, 0.75) !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#050508\]\/90 {
+                    background-color: #0f172a !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white\/5 {
+                    background-color: #f3f4f6 !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white\/10 {
+                    background-color: #e2e8f0 !important;
+                    color: #111827 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white\/\[0\.02\] {
+                    background-color: #ffffff !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white\/\[0\.01\] {
+                    background-color: #ffffff !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .hover:bg-white\/\[0\.03\]:hover {
+                    background-color: #f3f4f6 !important;
+                }
+                html:not(.dark) .ai-page-root .hover:border-white\/10:hover {
+                    border-color: #cbd5e0 !important;
+                }
+                html:not(.dark) .ai-page-root .prose-invert {
+                    color: #374151 !important;
+                }
+                html:not(.dark) .ai-page-root .prose-invert h1,
+                html:not(.dark) .ai-page-root .prose-invert h2,
+                html:not(.dark) .ai-page-root .prose-invert h3,
+                html:not(.dark) .ai-page-root .prose-invert h4,
+                html:not(.dark) .ai-page-root .prose-invert strong {
+                    color: #111827 !important;
+                }
+                html:not(.dark) .ai-page-root .prose-invert code {
+                    color: #047857 !important;
+                    background-color: #f0fdf4 !important;
+                }
+                html:not(.dark) .ai-page-root .prose-invert p {
+                    color: #374151 !important;
+                }
+                html:not(.dark) .ai-page-root .prose-invert li {
+                    color: #374151 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-emerald-950\/20 {
+                    background-color: #f0fdf4 !important;
+                    border-color: #a7f3d0 !important;
+                }
+                html:not(.dark) .ai-page-root .text-emerald-400\/80 {
+                    color: #047857 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-indigo-950\/20 {
+                    background-color: #e0e7ff !important;
+                    border-color: #c7d2fe !important;
+                }
+                html:not(.dark) .ai-page-root .text-indigo-400\/80 {
+                    color: #4338ca !important;
+                }
+                html:not(.dark) .ai-page-root .bg-red-950\/20 {
+                    background-color: #fef2f2 !important;
+                    border-color: #fca5a5 !important;
+                }
+                html:not(.dark) .ai-page-root .text-red-400\/80 {
+                    color: #b91c1c !important;
+                }
+                html:not(.dark) .ai-page-root .bg-blue-600\/10,
+                html:not(.dark) .ai-page-root .bg-indigo-600\/10,
+                html:not(.dark) .ai-page-root .bg-emerald-500\/5 {
+                    opacity: 0.25 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-\[\#07070c\]\/90 {
+                    background-color: #f9fafb !important;
+                }
+                html:not(.dark) .ai-page-root input[type="text"],
+                html:not(.dark) .ai-page-root input[type="search"] {
+                    background-color: #ffffff !important;
+                    color: #1f2937 !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-[#08080d]/60 {
+                    background-color: rgba(255, 255, 255, 0.85) !important;
+                    border-color: #e2e8f0 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white/5 input {
+                    color: #1f2937 !important;
+                }
+                html:not(.dark) .ai-page-root .bg-white/5 input::placeholder {
+                    color: #9ca3af !important;
                 }
             `}</style>
 
@@ -1411,9 +1560,67 @@ Simule l'impact mathématique de cette décision sur ma trésorerie, projette me
                                     </div>
                                 )}
 
+                                <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-bold text-white/60">Créativité de l'assistant</Label>
+                                        <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/5 text-xs font-semibold">
+                                            <button
+                                                type="button"
+                                                onClick={() => setAiTemperature("precise")}
+                                                className={cn("flex-1 py-1 rounded-md text-center transition-all", aiTemperature === "precise" ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60")}
+                                            >
+                                                Précis
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAiTemperature("creative")}
+                                                className={cn("flex-1 py-1 rounded-md text-center transition-all", aiTemperature === "creative" ? "bg-white/10 text-white" : "text-white/40 hover:text-white/60")}
+                                            >
+                                                Créatif
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-white/80">Contexte Stock</span>
+                                            <span className="text-[10px] text-white/40">Stocks & alertes</span>
+                                        </div>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={includeStockContext} 
+                                            onChange={e => setIncludeStockContext(e.target.checked)}
+                                            className="h-4 w-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-white/80">Contexte Clients</span>
+                                            <span className="text-[10px] text-white/40">Dettes & top clients</span>
+                                        </div>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={includeClientContext} 
+                                            onChange={e => setIncludeClientContext(e.target.checked)}
+                                            className="h-4 w-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-bold text-white/80">Contexte Ventes</span>
+                                            <span className="text-[10px] text-white/40">Performance mensuelle</span>
+                                        </div>
+                                        <input 
+                                            type="checkbox" 
+                                            checked={includeSalesContext} 
+                                            onChange={e => setIncludeSalesContext(e.target.checked)}
+                                            className="h-4 w-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+
                                 <a
                                     href="/settings"
-                                    className="inline-flex items-center justify-center rounded-xl text-xs font-bold transition-all bg-indigo-600/95 text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-650 hover:shadow-indigo-600/20 h-9 px-4 py-2 mt-3 gap-2 border border-indigo-500/30"
+                                    className="inline-flex items-center justify-center rounded-xl text-xs font-bold transition-all bg-indigo-600/95 text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-650 hover:shadow-indigo-600/20 h-9 px-4 py-2 gap-2 border border-indigo-500/30"
                                 >
                                     <Settings2 className="h-3.5 w-3.5" />
                                     Aller aux paramètres généraux

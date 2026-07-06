@@ -58,7 +58,7 @@ export default async function DashboardLayout({
                     />
                 </div>
                 <GlobalShortcuts />
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col min-w-0">
                     {isImpersonating && <ImpersonationBanner tenantName={activeTenantName} />}
                     <DashboardHeader user={session!.user} />
                     {subStatus && (
@@ -68,7 +68,7 @@ export default async function DashboardLayout({
                             isBlocked={subStatus.isBlocked}
                         />
                     )}
-                    <main className="flex-1 p-2 sm:p-4 md:p-6">
+                    <main className="flex-1 p-2 sm:p-4 md:p-6 min-w-0">
                         <ExpirationAlert subscriptionEndsAt={session.user?.subscriptionEndsAt} />
                         {children}
                     </main>

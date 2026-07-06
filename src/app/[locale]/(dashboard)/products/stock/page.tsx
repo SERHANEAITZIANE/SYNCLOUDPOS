@@ -61,7 +61,7 @@ const StockDashboardPage = async () => {
 
     return (
         <div className="flex-col">
-            <div className="flex-1 space-y-4 p-8 pt-6 max-w-7xl mx-auto w-full">
+            <div className="flex-1 space-y-4 p-8 pt-6 w-full">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50">Contrôle du Stock</h2>

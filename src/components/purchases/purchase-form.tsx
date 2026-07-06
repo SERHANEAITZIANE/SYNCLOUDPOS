@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useReactToPrint } from "react-to-print"
-import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package, Sparkles, FileSpreadsheet, Percent, Info, ZoomIn, TrendingUp, Sliders, Clipboard, Eye, Wand2, Star, Archive, DollarSign, ShoppingCart, Store, Users as UsersIcon, Barcode, Tag, Wallet, CreditCard, Coins, MessageSquare } from "lucide-react"
+import { Trash, Plus, Printer, CheckCircle, TruckIcon, FileText, Package, Sparkles, FileSpreadsheet, Percent, Info, ZoomIn, TrendingUp, Sliders, Clipboard, Eye, Wand2, Star, Archive, DollarSign, ShoppingCart, Store, Users as UsersIcon, Barcode, Tag, Wallet, CreditCard, Coins, MessageSquare, AlertTriangle } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
@@ -223,6 +223,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     // Clipboard Paste Importer State
     const [clipboardOpen, setClipboardOpen] = useState(false)
     const [clipboardText, setClipboardText] = useState("")
+    const [failedImports, setFailedImports] = useState<{ line: number; content: string; reason: string }[]>([])
 
     // Lightbox State
     const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
@@ -502,16 +503,74 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         if (!clipboardText.trim()) return
         const rows = clipboardText.split("\n")
         const importedItems: any[] = []
-        let missingCount = 0
+        const missingItems: any[] = []
+        const failedRows: { line: number; content: string; reason: string }[] = []
         
-        for (const row of rows) {
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i]
             if (!row.trim()) continue
-            const cols = row.split("\t")
-            if (cols.length < 2) continue
             
-            const nameOrBarcode = cols[0].trim()
-            const qty = Number(cols[1]) || 1
-            const cost = Number(cols[2]) || 0
+            let nameOrBarcode = ""
+            let qty = 1
+            let cost = 0
+            let sellingPrice: number | undefined = undefined
+            let categoryName: string | undefined = undefined
+            let brandName: string | undefined = undefined
+            
+            const trimmed = row.trim()
+            if (trimmed.includes("\t")) {
+                const cols = trimmed.split("\t")
+                if (cols.length < 2) {
+                    failedRows.push({ line: i + 1, content: row, reason: "Format incorrect (Quantité et prix requis)" })
+                    continue
+                }
+                nameOrBarcode = cols[0]?.trim() || ""
+                qty = Number(cols[1])
+                cost = Number(cols[2])
+                sellingPrice = cols[3] && !isNaN(Number(cols[3])) ? Number(cols[3]) : undefined
+                categoryName = cols[4]?.trim() || undefined
+                brandName = cols[5]?.trim() || undefined
+            } else {
+                // Space-separated parsing
+                const cols = trimmed.split(/\s+/)
+                if (cols.length < 3) {
+                    failedRows.push({ line: i + 1, content: row, reason: "Format incorrect (Nom Qté Prix requis)" })
+                    continue
+                }
+                
+                const last = Number(cols[cols.length - 1])
+                const preLast = Number(cols[cols.length - 2])
+                const prePreLast = Number(cols[cols.length - 3])
+                
+                if (!isNaN(preLast) && !isNaN(last)) {
+                    if (!isNaN(prePreLast) && cols.length >= 4) {
+                        qty = prePreLast
+                        cost = preLast
+                        sellingPrice = last
+                        nameOrBarcode = cols.slice(0, cols.length - 3).join(" ")
+                    } else {
+                        qty = preLast
+                        cost = last
+                        nameOrBarcode = cols.slice(0, cols.length - 2).join(" ")
+                    }
+                } else {
+                    failedRows.push({ line: i + 1, content: row, reason: "La quantité ou le prix ne sont pas des nombres" })
+                    continue
+                }
+            }
+            
+            if (!nameOrBarcode) {
+                failedRows.push({ line: i + 1, content: row, reason: "Nom du produit ou code-barre manquant" })
+                continue
+            }
+            if (isNaN(qty) || qty <= 0) {
+                failedRows.push({ line: i + 1, content: row, reason: `Quantité invalide (${qty})` })
+                continue
+            }
+            if (isNaN(cost) || cost < 0) {
+                failedRows.push({ line: i + 1, content: row, reason: `Prix d'achat invalide (${cost})` })
+                continue
+            }
             
             const match = localProducts.find(p =>
                 p.name.toLowerCase() === nameOrBarcode.toLowerCase() ||
@@ -526,21 +585,37 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     tvaRate: 0
                 })
             } else {
-                missingCount++
+                missingItems.push({
+                    name: nameOrBarcode,
+                    price: cost, // In scannedItems structure, "price" field is the cost/purchase price
+                    quantity: qty,
+                    sellingPrice,
+                    categoryName,
+                    brandName
+                })
             }
         }
+        
+        setFailedImports(failedRows)
         
         if (importedItems.length > 0) {
             const currentItems = form.getValues("items")
             const cleanCurrent = (currentItems.length === 1 && !currentItems[0].productId) ? [] : currentItems
             form.setValue("items", [...importedItems, ...cleanCurrent])
             toast.success(`${importedItems.length} articles importés avec succès !`)
-            setClipboardText("")
-            setClipboardOpen(false)
         }
         
-        if (missingCount > 0) {
-            toast.error(`${missingCount} articles non trouvés dans votre catalogue.`)
+        if (missingItems.length > 0) {
+            toast.error(`${missingItems.length} articles non trouvés. Assistant de création ouvert en bas.`)
+            setOcrItems(missingItems)
+        }
+        
+        // If there are no failures, clear clipboard text and close importer
+        if (failedRows.length === 0) {
+            setClipboardText("")
+            setClipboardOpen(false)
+        } else {
+            toast.error(`${failedRows.length} lignes n'ont pas pu être analysées. Veuillez corriger le format ci-dessous.`)
         }
     }
 
@@ -1092,6 +1167,20 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                 value={clipboardText}
                                                 onChange={e => setClipboardText(e.target.value)}
                                             />
+                                            {failedImports.length > 0 && (
+                                                <div className="p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/50 rounded-xl space-y-2">
+                                                    <p className="text-xs font-bold text-rose-700 dark:text-rose-450 flex items-center gap-1.5">
+                                                        <AlertTriangle className="h-4 w-4 shrink-0" /> Certaines lignes n'ont pas pu être importées :
+                                                    </p>
+                                                    <ul className="text-[11px] text-rose-600 dark:text-rose-350 space-y-1 font-mono max-h-24 overflow-y-auto pl-4 list-disc">
+                                                        {failedImports.map((err, idx) => (
+                                                            <li key={idx}>
+                                                                Ligne {err.line} (&quot;{err.content.length > 35 ? err.content.slice(0, 35) + '...' : err.content}&quot;) : {err.reason}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
                                             <Button
                                                 type="button"
                                                 size="sm"

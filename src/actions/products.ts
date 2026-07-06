@@ -100,7 +100,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
 
             // Always create StoreProduct to ensure POS visibility
             const initialStock = stock ?? 0;
-            const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            const storeId = session?.user?.defaultStoreId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
             
             if (storeId) {
                 await tx.storeProduct.create({
@@ -143,6 +143,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
 export const getProducts = async (page: number = 1, pageSize: number = 20, search?: string, includeArchived: boolean = false) => {
     const session = await auth()
     const tenantId = session?.user?.tenantId
+    const storeIdToUse = session?.user?.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id
 
     if (!tenantId) {
         return { items: [], totalCount: 0 }
@@ -168,12 +169,18 @@ export const getProducts = async (page: number = 1, pageSize: number = 20, searc
         const safePageSize = isNaN(pageSize) ? 20 : pageSize;
 
         return cacheMonitor.withCache(
-            `products:${tenantId}:p${safePage}:s${safePageSize}:q${safeSearch || ""}:a${includeArchived}`,
+            `products:${tenantId}:${storeIdToUse || "global"}:p${safePage}:s${safePageSize}:q${safeSearch || ""}:a${includeArchived}`,
             async () => {
                 const [products, totalCount] = await Promise.all([
                     db.product.findMany({
                         where: whereClause,
-                        include: { category: true, brand: true, images: true, barcodes: true },
+                        include: { 
+                            category: true, 
+                            brand: true, 
+                            images: true, 
+                            barcodes: true,
+                            storeProducts: storeIdToUse ? { where: { storeId: storeIdToUse } } : undefined
+                        },
                         orderBy: { createdAt: 'desc' },
                         skip: (safePage - 1) * safePageSize,
                         take: safePageSize,
@@ -535,6 +542,8 @@ export const importProducts = async (rows: Record<string, string>[]) => {
             return ["1", "true", "yes", "oui", "vrai", "y", "o"].includes(str)
         }
 
+        const storeId = session?.user?.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
+
         // Now batch create all products in parallel
         const createPromises = rows.map(async (row) => {
             const name = row["name"] || row["nom"] || row["Nom"] || row["Name"] || ""
@@ -558,8 +567,6 @@ export const importProducts = async (rows: Record<string, string>[]) => {
 
                 const isFeatured = parseBoolean(row["isFeatured"] || row["isfeatured"] || row["favoris"] || row["Favoris"])
                 const isArchived = parseBoolean(row["isArchived"] || row["isarchived"] || row["archivé"] || row["archive"] || row["Archive"] || row["Archiv\u00e9"])
-
-                const storeId = (await db.store.findFirst({ where: { tenantId } }))?.id;
 
                 const product = await db.product.create({
                     data: {

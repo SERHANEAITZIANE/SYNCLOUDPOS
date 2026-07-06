@@ -1218,6 +1218,8 @@ enum UserRole {
   VENDEUR
   SUPERADMIN
   DELIVERY
+  PURCHASE_MANAGER
+  SALES_MANAGER
 }
 
 enum TenantUserRole {

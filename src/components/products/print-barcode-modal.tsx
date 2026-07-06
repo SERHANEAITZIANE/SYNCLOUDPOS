@@ -52,7 +52,7 @@ export const PrintBarcodeModal = ({
             const stored = localStorage.getItem("pos_printing_prefs")
             if (stored) {
                 const prefs = JSON.parse(stored)
-                if (prefs.barcodeModel && ["simple_40x20", "side_store_45x35", "store_40x20"].includes(prefs.barcodeModel)) {
+                if (prefs.barcodeModel && ["simple_40x20", "side_store_45x35", "store_40x20", "name_only_40x20"].includes(prefs.barcodeModel)) {
                     setBarcodeModel(prefs.barcodeModel)
                 }
                 if (prefs.printerBarcode) setPrinterBarcode(prefs.printerBarcode)
@@ -66,6 +66,7 @@ export const PrintBarcodeModal = ({
         simple_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" as const },
         side_store_45x35: { w: "45mm", h: "35mm", labelSize: "4.5x3.5" as const },
         store_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" as const },
+        name_only_40x20: { w: "40mm", h: "20mm", labelSize: "4x2" as const },
     }[barcodeModel] || { w: "40mm", h: "20mm", labelSize: "4x2" as const };
 
     const handlePrint = useReactToPrint({
@@ -211,7 +212,8 @@ export const PrintBarcodeModal = ({
                                             {([
                                                 { id: "simple_40x20", name: "Simple (40×20 mm)", desc: "Nom + Code-barres + Prix" },
                                                 { id: "side_store_45x35", name: "Bandeau Gauche (45×35 mm)", desc: "Infos magasin + Nom multiline + Grand Code-barres" },
-                                                { id: "store_40x20", name: "Bandeau Magasin (40×20 mm)", desc: "Magasin + Nom + Code-barres + Prix" }
+                                                { id: "store_40x20", name: "Bandeau Magasin (40×20 mm)", desc: "Magasin + Nom + Code-barres + Prix" },
+                                                { id: "name_only_40x20", name: "Nom Seulement (40×20 mm)", desc: "Nom de produit uniquement centré en gros sans prix ni code-barres" }
                                             ] as const).map((m) => (
                                                 <button
                                                     key={m.id}

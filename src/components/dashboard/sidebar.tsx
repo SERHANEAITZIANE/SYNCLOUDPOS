@@ -60,6 +60,8 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
     const isCASHIER = role === "CASHIER" || role === "VENDEUR";
     const isACCOUNTANT = role === "ACCOUNTANT";
     const isSTOCK_MANAGER = role === "STOCK_MANAGER";
+    const isPURCHASE_MANAGER = role === "PURCHASE_MANAGER";
+    const isSALES_MANAGER = role === "SALES_MANAGER";
 
     type Route = { label: string; icon: any; href: string; color: string; visible: boolean };
     type Group = { label: string; routes: Route[] };
@@ -70,43 +72,43 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
             routes: [
                 { label: t("hub"), icon: Home, href: "/hub", color: "text-blue-400", visible: !isCASHIER },
                 { label: t("dashboard"), icon: LayoutDashboard, href: "/dashboard", color: "text-sky-400", visible: !isCASHIER },
-                { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: isAdmin || isCASHIER || isMANAGER },
+                { label: t("pos"), icon: Store, href: "/pos", color: "text-emerald-400", visible: isAdmin || isCASHIER || isMANAGER || isSALES_MANAGER },
             ]
         },
         {
             label: t("transactionsGroup") || "Transactions",
             routes: [
-                { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
+                { label: t("sales"), icon: ShoppingCart, href: "/sales", color: "text-violet-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
                 { label: t("recurringInvoices"), icon: Repeat, href: "/recurring-invoices", color: "text-teal-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
-                { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER || isMANAGER },
+                { label: t("purchases"), icon: ShoppingBag, href: "/purchases", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
                 { label: t("expenses"), icon: FileText, href: "/expenses", color: "text-rose-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
-                { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
-                { label: t("returns") || "Retours", icon: ArrowRightLeft, href: "/retours", color: "text-purple-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
+                { label: t("payments") || "Paiements", icon: CreditCard, href: "/payments", color: "text-green-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
+                { label: t("returns") || "Retours", icon: ArrowRightLeft, href: "/retours", color: "text-purple-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
             ]
         },
         {
             label: t("catalogGroup") || "Catalogue",
             routes: [
                 { label: t("salesCatalog") || "Catalogue de Vente", icon: BookOpen, href: "/catalog", color: "text-amber-300", visible: true },
-                { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: isAdmin || isSTOCK_MANAGER || isCASHIER || isMANAGER },
-                { label: t("stockControl") || "Contrôle du Stock", icon: ClipboardList, href: "/products/stock", color: "text-emerald-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("transfers") || "Transferts Inter-Dépôts", icon: ArrowRightLeft, href: "/transfers", color: "text-teal-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("barcodeLabels"), icon: Tag, href: "/barcode-labels", color: "text-rose-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
+                { label: t("products"), icon: Package, href: "/products", color: "text-pink-400", visible: isAdmin || isSTOCK_MANAGER || isCASHIER || isMANAGER || isPURCHASE_MANAGER || isSALES_MANAGER },
+                { label: t("stockControl") || "Contrôle du Stock", icon: ClipboardList, href: "/products/stock", color: "text-emerald-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("categories"), icon: List, href: "/categories", color: "text-blue-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("brands"), icon: Tag, href: "/brands", color: "text-red-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("promotions") || "Promotions", icon: Gift, href: "/promotions", color: "text-purple-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("damages") || "Avaries", icon: Package, href: "/avaries", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("transfers") || "Transferts Inter-Dépôts", icon: ArrowRightLeft, href: "/transfers", color: "text-teal-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("barcodeLabels"), icon: Tag, href: "/barcode-labels", color: "text-rose-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
             ]
         },
         {
             label: t("partnersGroup") || "Partenaires",
             routes: [
-                { label: t("customers"), icon: Users, href: "/customers", color: "text-orange-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
-                { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT || isMANAGER },
-                { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
-                { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER || isMANAGER },
-                { label: t("reservations"), icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER || isMANAGER },
-                { label: t("delivery"), icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER || isMANAGER },
+                { label: t("customers"), icon: Users, href: "/customers", color: "text-orange-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
+                { label: t("suppliers"), icon: Truck, href: "/suppliers", color: "text-amber-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("customerLoan") || "Emprunt Client", icon: Landmark, href: "/emprunt", color: "text-red-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
+                { label: t("supplierLoan") || "Emprunt Fournisseur", icon: Building2, href: "/emprunt-fournisseur", color: "text-orange-400", visible: isAdmin || isACCOUNTANT || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("reservations"), icon: Package2, href: "/reservations", color: "text-pink-400", visible: isAdmin || isCASHIER || isMANAGER || isSALES_MANAGER },
+                { label: t("delivery"), icon: MapPin, href: "/delivery", color: "text-sky-400", visible: isAdmin || isCASHIER || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER || isSALES_MANAGER },
                 { label: t("driverTracking"), icon: Truck, href: "/driver-tracking", color: "text-green-400", visible: isAdmin },
                 { label: "Portail Livreur", icon: Truck, href: "/driver", color: "text-cyan-400", visible: isAdmin },
             ]
@@ -114,16 +116,16 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
         {
             label: t("analysisGroup") || "Analyses",
             routes: [
-                { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
-                { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
+                { label: t("reports"), icon: BarChart3, href: "/reports", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT || isMANAGER || isSALES_MANAGER || isPURCHASE_MANAGER },
+                { label: t("analytics"), icon: LineChart, href: "/analytics", color: "text-blue-400", visible: isAdmin || isACCOUNTANT || isMANAGER || isSALES_MANAGER || isPURCHASE_MANAGER },
                 { label: t("treasury"), icon: BarChart3, href: "/treasury", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
-                { label: t("cheques") || "Chèques", icon: Receipt, href: "/treasury/cheques", color: "text-emerald-300", visible: isAdmin || isACCOUNTANT || isMANAGER },
+                { label: t("cheques") || "Chèques", icon: Receipt, href: "/treasury/cheques", color: "text-emerald-300", visible: isAdmin || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
                 { label: t("reconciliation") || "Rapprochement", icon: RefreshCw, href: "/treasury/reconciliation", color: "text-emerald-200", visible: isAdmin || isACCOUNTANT || isMANAGER },
-                { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER },
-                { label: t("reorder"), icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("inventoryAudit"), icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER },
-                { label: t("annualInventory"), icon: Package, href: "/inventaire-annuel", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT || isMANAGER },
-                { label: t("commissions"), icon: Award, href: "/commissions", color: "text-yellow-400", visible: isAdmin || isACCOUNTANT || isMANAGER },
+                { label: t("dailyClose") || "Clôture de Caisse", icon: LockKeyhole, href: "/cloture", color: "text-amber-400", visible: isAdmin || isCASHIER || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
+                { label: t("reorder"), icon: RefreshCw, href: "/reorder", color: "text-cyan-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("inventoryAudit"), icon: ClipboardList, href: "/inventory-audit", color: "text-violet-400", visible: isAdmin || isSTOCK_MANAGER || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("annualInventory"), icon: Package, href: "/inventaire-annuel", color: "text-orange-400", visible: isAdmin || isSTOCK_MANAGER || isACCOUNTANT || isMANAGER || isPURCHASE_MANAGER },
+                { label: t("commissions"), icon: Award, href: "/commissions", color: "text-yellow-400", visible: isAdmin || isACCOUNTANT || isMANAGER || isSALES_MANAGER },
                 { label: t("fiscalG50G12"), icon: Receipt, href: "/fiscal", color: "text-emerald-400", visible: isAdmin || isACCOUNTANT },
                 { label: t("salesJournal") || "Journaux", icon: BookOpen, href: "/journals", color: "text-indigo-400", visible: isAdmin || isACCOUNTANT },
                 { label: "Rentabilité", icon: LineChart, href: "/reports/profit", color: "text-cyan-400", visible: isAdmin || isACCOUNTANT },

@@ -10,12 +10,23 @@ export async function createExpenseCategory(data: { name: string; type: "FIXED" 
     await checkSubscription();
     try {
         const session = await auth()
-        if (!session?.user?.id) throw new Error("Unauthorized")
+        if (!session?.user?.id) return { error: "Non autorisé" }
 
         const { hasPermission } = await import("@/lib/rbac")
-        if (!(await hasPermission("expenses:create"))) throw new Error("Accès refusé")
+        if (!(await hasPermission("expenses:create"))) return { error: "Accès refusé" }
 
         const tenantId = session.user.tenantId
+
+        // Check if category already exists for this tenant
+        const existing = await db.expenseCategory.findFirst({
+            where: {
+                tenantId,
+                name: { equals: data.name, mode: "insensitive" }
+            }
+        })
+        if (existing) {
+            return { error: "Une catégorie avec ce nom existe déjà." }
+        }
 
         const category = await db.expenseCategory.create({
             data: {
@@ -33,11 +44,11 @@ export async function createExpenseCategory(data: { name: string; type: "FIXED" 
             entityId: category.id,
             description: `Catégorie de dépense créée : ${data.name} (${data.type})`,
             after: { name: data.name, type: data.type }
-        })
-        return category
-    } catch (error) {
+        }).catch(() => null)
+        return { success: true, category }
+    } catch (error: any) {
         console.error("[CREATE_EXPENSE_CATEGORY]", error)
-        throw new Error("Internal Error")
+        return { error: error.message || "Une erreur est survenue lors de la création." }
     }
 }
 

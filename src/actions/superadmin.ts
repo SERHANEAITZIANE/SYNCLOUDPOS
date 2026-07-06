@@ -32,20 +32,27 @@ export const getTenantsForSuperadmin = async () => {
             orderBy: { createdAt: 'desc' }
         });
 
-        const revenueAggregates = await Promise.all(tenants.map(async (tenant) => {
-            const revenue = await db.order.aggregate({
-                where: { tenantId: tenant.id, status: "COMPLETED" },
+        // Use groupBy to aggregate all tenant revenues in 2 queries instead of 2×N
+        const [orderRevenues, salesRevenues] = await Promise.all([
+            db.order.groupBy({
+                by: ['tenantId'],
+                where: { status: "COMPLETED" },
+                _sum: { total: true }
+            }),
+            db.salesOrder.groupBy({
+                by: ['tenantId'],
+                where: { status: "PAID" },
                 _sum: { total: true }
             })
-            const salesInvoiceRevenue = await db.salesOrder.aggregate({
-                where: { tenantId: tenant.id, status: "PAID" },
-                _sum: { total: true }
-            })
-            return {
-                id: tenant.id,
-                totalRevenue: Number(revenue._sum.total || 0) + Number(salesInvoiceRevenue._sum.total || 0)
-            }
-        }))
+        ])
+
+        const revenueMap = new Map<string, number>()
+        for (const r of orderRevenues) {
+            revenueMap.set(r.tenantId, Number(r._sum.total || 0))
+        }
+        for (const r of salesRevenues) {
+            revenueMap.set(r.tenantId, (revenueMap.get(r.tenantId) || 0) + Number(r._sum.total || 0))
+        }
 
         return tenants.map(tenant => ({
             ...tenant,
@@ -54,7 +61,7 @@ export const getTenantsForSuperadmin = async () => {
                 users: tenant._count.users,
                 products: tenant._count.products,
                 orders: tenant._count.orders,
-                totalRevenue: revenueAggregates.find(r => r.id === tenant.id)?.totalRevenue || 0
+                totalRevenue: revenueMap.get(tenant.id) || 0
             }
         }));
     } catch (error) {
@@ -75,7 +82,7 @@ export const updateTenantSubscription = async (tenantId: string, additionalMonth
         currentEndDate.setMonth(currentEndDate.getMonth() + additionalMonths);
 
         await db.tenant.update({ where: { id: tenantId }, data: { subscriptionEndsAt: currentEndDate } });
-        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
+        revalidatePath("/superadmin")
         return { success: "Subscription extended successfully!" };
     } catch {
         return { error: "Failed to update subscription" };
@@ -87,7 +94,7 @@ export const toggleTenantBlock = async (tenantId: string, isBlocked: boolean) =>
         const session = await auth()
         if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
         await db.tenant.update({ where: { id: tenantId }, data: { isBlocked } });
-        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
+        revalidatePath("/superadmin")
         return { success: `Tenant ${isBlocked ? 'blocked' : 'unblocked'} successfully.` };
     } catch {
         return { error: "Failed to update tenant status" };
@@ -123,41 +130,33 @@ export const changeMyPassword = async (currentPassword: string, newPassword: str
 
 import { cookies } from "next/headers"
 
-// Impersonate a tenant
+// Impersonate a tenant (cookie-based — never mutates the DB)
 export const impersonateTenant = async (tenantId: string) => {
     try {
         const session = await auth()
         if (!session?.user?.isSuperadmin) return { error: "Unauthorized" }
 
-        // Find the first store of target tenant
+        // Verify tenant exists
+        const tenant = await db.tenant.findUnique({
+            where: { id: tenantId },
+            select: { id: true, name: true }
+        })
+        if (!tenant) return { error: "Tenant not found" }
+
+        // Find first store of the target tenant (for defaultStoreId override)
         const firstStore = await db.store.findFirst({
             where: { tenantId },
             select: { id: true }
         })
 
-        // Fetch user from DB to get their current real tenantId
-        const user = await db.user.findUnique({
-            where: { id: session.user.id }
-        })
-        if (!user) return { error: "User not found" }
-
-        // Store the original tenantId in a cookie if not already impersonating
+        // Set impersonation cookies (no DB changes)
         const cookieStore = await cookies()
-        const alreadyImpersonating = cookieStore.get("original_tenant_id")
-        if (!alreadyImpersonating) {
-            cookieStore.set("original_tenant_id", user.tenantId, { path: "/" })
-        }
+        cookieStore.set("impersonated_tenant_id", tenantId, { path: "/", httpOnly: true, sameSite: "lax" })
+        cookieStore.set("impersonated_store_id", firstStore?.id || "", { path: "/", httpOnly: true, sameSite: "lax" })
+        // Keep original_tenant_id for the banner detection in layout.tsx
+        cookieStore.set("original_tenant_id", session.user.tenantId || "", { path: "/", httpOnly: true, sameSite: "lax" })
 
-        // Switch user's active tenant and store
-        await db.user.update({
-            where: { id: session.user.id },
-            data: {
-                tenantId,
-                defaultStoreId: firstStore?.id ?? null
-            }
-        })
-
-        revalidatePath("/dashboard")
+        revalidatePath("/")
         return { success: "Impersonation started" }
     } catch (error) {
         console.error("Impersonation failed:", error)
@@ -165,37 +164,24 @@ export const impersonateTenant = async (tenantId: string) => {
     }
 }
 
-// Stop impersonating and restore original tenant
+// Stop impersonating (cookie-based — never mutates the DB)
 export const stopImpersonation = async () => {
     try {
         const session = await auth()
         if (!session?.user?.id) return { error: "Unauthorized" }
 
         const cookieStore = await cookies()
-        const originalTenantId = cookieStore.get("original_tenant_id")?.value
-        if (!originalTenantId) {
+        const isImpersonating = cookieStore.has("impersonated_tenant_id") || cookieStore.has("original_tenant_id")
+        if (!isImpersonating) {
             return { error: "Not currently impersonating" }
         }
 
-        // Find first store of original tenant
-        const firstStore = await db.store.findFirst({
-            where: { tenantId: originalTenantId },
-            select: { id: true }
-        })
-
-        // Switch user's active tenant and store back
-        await db.user.update({
-            where: { id: session.user.id },
-            data: {
-                tenantId: originalTenantId,
-                defaultStoreId: firstStore?.id ?? null
-            }
-        })
-
-        // Clear cookie
+        // Clear all impersonation cookies
+        cookieStore.delete("impersonated_tenant_id")
+        cookieStore.delete("impersonated_store_id")
         cookieStore.delete("original_tenant_id")
 
-        revalidatePath("/dashboard")
+        revalidatePath("/")
         return { success: "Restored original session" }
     } catch (error) {
         console.error("Failed to stop impersonation:", error)
@@ -297,7 +283,7 @@ export const createTenantDirect = async (values: {
             })
         ])
 
-        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
+        revalidatePath("/superadmin")
         return { success: `Client space '${name}' created successfully.` }
     } catch (error: any) {
         console.error("Failed to create tenant:", error)
@@ -309,7 +295,7 @@ export const createTenantDirect = async (values: {
 export const assignUserToTenant = async (
     email: string, 
     tenantId: string, 
-    role: "ADMIN" | "CASHIER" | "MANAGER" | "STOCK_MANAGER" | "ACCOUNTANT" | "VENDEUR"
+    role: "ADMIN" | "CASHIER" | "MANAGER" | "STOCK_MANAGER" | "ACCOUNTANT" | "VENDEUR" | "PURCHASE_MANAGER" | "SALES_MANAGER"
 ) => {
     try {
         const session = await auth()
@@ -348,7 +334,28 @@ export const assignUserToTenant = async (
             select: { id: true }
         })
 
-        // Add user to TenantUser
+        // Ensure user has a TenantUser record for their current tenant (prevent eclipse)
+        if (user.tenantId) {
+            const currentLink = await db.tenantUser.findUnique({
+                where: {
+                    userId_tenantId: {
+                        userId: user.id,
+                        tenantId: user.tenantId
+                    }
+                }
+            })
+            if (!currentLink) {
+                await db.tenantUser.create({
+                    data: {
+                        userId: user.id,
+                        tenantId: user.tenantId,
+                        role: user.role === "ADMIN" ? "ADMIN" : "USER"
+                    }
+                })
+            }
+        }
+
+        // Add user to the target TenantUser (link only — don't overwrite their active tenant/role)
         const tenantRole = role === "ADMIN" ? "ADMIN" : "USER"
         await db.tenantUser.create({
             data: {
@@ -358,19 +365,155 @@ export const assignUserToTenant = async (
             }
         })
 
-        // Update active tenant and store for that user
-        await db.user.update({
-            where: { id: user.id },
-            data: {
-                tenantId,
-                defaultStoreId: firstStore?.id ?? user.defaultStoreId
-            }
-        })
-
-        revalidatePath("/[locale]/(dashboard)/superadmin", "page")
-        return { success: `Successfully linked ${email} to the store.` }
+        revalidatePath("/superadmin")
+        return { success: `Successfully linked ${email} to the store. The user can switch to it from their store selector.` }
     } catch (error: any) {
         console.error("Failed to link user:", error)
         return { error: "Failed to link user: " + error.message }
     }
 }
+
+export async function getStoresForTenant(tenantId: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Non autorisé" }
+
+        const stores = await db.store.findMany({
+            where: { tenantId },
+            orderBy: { createdAt: "desc" }
+        })
+        return { success: true, stores }
+    } catch (error: any) {
+        console.error("getStoresForTenant error:", error)
+        return { error: error.message || "Erreur interne" }
+    }
+}
+
+export async function createStoreForTenant(tenantId: string, name: string, address?: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Non autorisé" }
+
+        if (!name.trim()) return { error: "Le nom du magasin est requis" }
+
+        const store = await db.store.create({
+            data: {
+                name: name.trim(),
+                address: address?.trim() || null,
+                tenantId
+            }
+        })
+        return { success: true, store }
+    } catch (error: any) {
+        console.error("createStoreForTenant error:", error)
+        return { error: error.message || "Erreur lors de la création" }
+    }
+}
+
+export async function updateStoreForTenant(storeId: string, name: string, address?: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Non autorisé" }
+
+        if (!name.trim()) return { error: "Le nom du magasin est requis" }
+
+        const store = await db.store.update({
+            where: { id: storeId },
+            data: {
+                name: name.trim(),
+                address: address?.trim() || null
+            }
+        })
+        return { success: true, store }
+    } catch (error: any) {
+        console.error("updateStoreForTenant error:", error)
+        return { error: error.message || "Erreur lors de la modification" }
+    }
+}
+
+export async function deleteStoreForTenant(storeId: string, tenantId?: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Non autorisé" }
+
+        // Prevent deleting if it's the last store of the tenant
+        const store = await db.store.findUnique({
+            where: { id: storeId },
+            select: { tenantId: true }
+        })
+
+        if (!store) {
+            return { error: "Magasin introuvable" }
+        }
+
+        // Verify the store belongs to the expected tenant (prevent cross-tenant deletion)
+        if (tenantId && store.tenantId !== tenantId) {
+            return { error: "Ce magasin n'appartient pas au tenant spécifié." }
+        }
+
+        if (store) {
+            const count = await db.store.count({
+                where: { tenantId: store.tenantId }
+            })
+            if (count <= 1) {
+                return { error: "Impossible de supprimer le seul magasin d'un tenant. Il doit en rester au moins un." }
+            }
+        }
+
+        await db.store.delete({
+            where: { id: storeId }
+        })
+        return { success: true }
+    } catch (error: any) {
+        console.error("deleteStoreForTenant error:", error)
+        return { error: error.message || "Erreur lors de la suppression (le magasin contient peut-être des données liées)" }
+    }
+}
+
+export async function updateTenantDirect(
+    tenantId: string,
+    values: {
+        name: string
+        ownerName?: string
+        activity?: string
+        phone?: string
+        email?: string
+        address?: string
+        wilaya?: string
+        commune?: string
+        nif?: string
+        rc?: string
+        nis?: string
+    }
+) {
+    try {
+        const session = await auth()
+        if (!session?.user?.isSuperadmin) return { error: "Non autorisé" }
+
+        if (!values.name.trim()) return { error: "Le nom de l'espace est requis" }
+
+        const updated = await db.tenant.update({
+            where: { id: tenantId },
+            data: {
+                name: values.name.trim(),
+                ownerName: values.ownerName?.trim() || null,
+                activity: values.activity?.trim() || null,
+                phone: values.phone?.trim() || null,
+                email: values.email?.trim() || null,
+                address: values.address?.trim() || null,
+                wilaya: values.wilaya?.trim() || null,
+                commune: values.commune?.trim() || null,
+                nif: values.nif?.trim() || null,
+                rc: values.rc?.trim() || null,
+                nis: values.nis?.trim() || null,
+            }
+        })
+
+        revalidatePath("/superadmin")
+        return { success: "Espace mis à jour avec succès !", tenant: updated }
+    } catch (error: any) {
+        console.error("updateTenantDirect error:", error)
+        return { error: error.message || "Erreur lors de la mise à jour" }
+    }
+}
+

@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 import { createTenantDirect } from "@/actions/superadmin"
+import { useMemo } from "react"
 
 interface SuperAdminClientProps {
     data: TenantColumn[]
@@ -27,6 +28,13 @@ interface SuperAdminClientProps {
 
 export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
     const router = useRouter()
+    const parsedData = useMemo(() => {
+        return data.map(t => ({
+            ...t,
+            createdAt: new Date(t.createdAt),
+            subscriptionEndsAt: t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt) : null
+        }));
+    }, [data]);
     const [searchQuery, setSearchQuery] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
 
@@ -43,7 +51,7 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
     const now = new Date()
 
     // Filter logic
-    const filteredData = data.filter(tenant => {
+    const filteredData = parsedData.filter(tenant => {
         // 1. Text Search Filter (Name, Phone, Email)
         const query = searchQuery.toLowerCase()
         const matchesSearch =
@@ -67,10 +75,10 @@ export const SuperAdminClient: React.FC<SuperAdminClientProps> = ({ data }) => {
     })
 
     // Stats calculations (always show overall stats, not filtered stats)
-    const active = data.filter(t => !t.isBlocked && t.subscriptionEndsAt && new Date(t.subscriptionEndsAt) > now).length
-    const expired = data.filter(t => !t.isBlocked && (!t.subscriptionEndsAt || new Date(t.subscriptionEndsAt) <= now)).length
-    const blocked = data.filter(t => t.isBlocked).length
-    const totalRevenue = data.reduce((acc, t) => acc + (t.usageStats?.totalRevenue || 0), 0)
+    const active = parsedData.filter(t => !t.isBlocked && t.subscriptionEndsAt && new Date(t.subscriptionEndsAt) > now).length
+    const expired = parsedData.filter(t => !t.isBlocked && (!t.subscriptionEndsAt || new Date(t.subscriptionEndsAt) <= now)).length
+    const blocked = parsedData.filter(t => t.isBlocked).length
+    const totalRevenue = parsedData.reduce((acc, t) => acc + (t.usageStats?.totalRevenue || 0), 0)
 
     const onCreateTenant = async () => {
         if (!name.trim() || !ownerName.trim() || !email.trim()) {

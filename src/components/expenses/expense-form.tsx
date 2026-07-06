@@ -52,6 +52,11 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
     const [loading, setLoading] = useState(false)
     const [openCategoryModal, setOpenCategoryModal] = useState(false)
     const [newCategoryName, setNewCategoryName] = useState("")
+    const [localCategories, setLocalCategories] = useState(categories)
+
+    useEffect(() => {
+        setLocalCategories(categories)
+    }, [categories])
 
     const { date: defaultDate, time: defaultTime } = now()
 
@@ -137,13 +142,24 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
     const onCreateCategory = async () => {
         try {
             setLoading(true)
-            await createExpenseCategory({ name: newCategoryName, type: "VARIABLE" })
-            toast.success("Catégorie créée.")
+            const res = await createExpenseCategory({ name: newCategoryName, type: "VARIABLE" })
+            if (res?.error) {
+                toast.error(res.error)
+                return
+            }
+            toast.success("Catégorie créée avec succès.")
+            if (res?.category) {
+                setLocalCategories(prev => [...prev, res.category])
+                form.setValue("categoryId", res.category.id)
+            }
             setNewCategoryName("")
             setOpenCategoryModal(false)
             router.refresh()
-        } catch { toast.error("Erreur lors de la création.") }
-        finally { setLoading(false) }
+        } catch { 
+            toast.error("Erreur lors de la création.") 
+        } finally { 
+            setLoading(false) 
+        }
     }
 
     return (
@@ -244,7 +260,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ initialData, categorie
                                                 </Button>
                                             </div>
                                             <SearchableSelect
-                                                options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                                options={localCategories.map(c => ({ value: c.id, label: c.name }))}
                                                 value={field.value}
                                                 onChange={field.onChange}
                                                 disabled={loading}

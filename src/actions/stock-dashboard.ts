@@ -9,6 +9,7 @@ export async function getStockDashboardData() {
         return { error: "Non autorisé" }
     }
     const tenantId = session.user.tenantId
+    const storeIdToUse = session.user.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id
 
     try {
         // Fetch all active products
@@ -19,19 +20,24 @@ export async function getStockDashboardData() {
                 brand: { select: { id: true, name: true } },
                 barcodes: { select: { value: true } },
                 spoilages: {
+                    where: storeIdToUse ? { storeId: storeIdToUse } : {},
                     select: { quantity: true }
                 },
                 reservations: {
-                    where: { status: "PENDING" },
+                    where: { status: "PENDING", ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
                     select: { quantity: true }
-                }
+                },
+                storeProducts: storeIdToUse ? {
+                    where: { storeId: storeIdToUse },
+                    select: { stock: true, minStock: true }
+                } : undefined
             },
             orderBy: { name: "asc" }
         })
 
         // Fetch all stock movements to aggregate
         const movements = await db.stockMovement.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
             select: {
                 productId: true,
                 type: true,
@@ -45,7 +51,7 @@ export async function getStockDashboardData() {
 
         // Fetch all cancelled sales orders to filter them out
         const cancelledSalesOrders = await db.salesOrder.findMany({
-            where: { tenantId, status: "CANCELLED" },
+            where: { tenantId, status: "CANCELLED", ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
             select: { id: true, receiptNumber: true, createdAt: true, total: true }
         })
         const cancelledIds = new Set<string>()
@@ -139,9 +145,10 @@ export async function getStockDashboardData() {
             const activeReservations = p.reservations.reduce((sum, r) => sum + Number(r.quantity), 0)
             const avaries = p.spoilages.reduce((sum, s) => sum + s.quantity, 0)
             
-            // Use the actual product stock — it's the source of truth,
-            // kept in sync by atomic increments/decrements in every operation.
-            const stock = p.stock
+            // Use the store-specific stock and minStock from storeProducts relation
+            const sp = p.storeProducts?.[0]
+            const stock = sp?.stock !== undefined && sp?.stock !== null ? sp.stock : 0
+            const minStock = sp?.minStock !== undefined && sp?.minStock !== null ? sp.minStock : (p.minStock || 0)
 
             const cost = Number(p.cost || 0)
             const price = Number(p.price || 0)
@@ -160,7 +167,7 @@ export async function getStockDashboardData() {
                 categoryName: p.category?.name || "Sans catégorie",
                 brandName: p.brand?.name || "Sans marque",
                 stock,
-                minStock: p.minStock || 0,
+                minStock,
                 entries: summary.entries,
                 exits: summary.exits,
                 returns: summary.returns,
@@ -213,10 +220,11 @@ export async function getStockEntriesAndExitsLogs() {
         return { error: "Non autorisé", entries: [], exits: [] }
     }
     const tenantId = session.user.tenantId
+    const storeIdToUse = session.user.defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id
 
     try {
         const movements = await db.stockMovement.findMany({
-            where: { tenantId },
+            where: { tenantId, ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
             include: {
                 product: {
                     select: { name: true, cost: true, price: true, categoryId: true, brandId: true }
@@ -230,7 +238,7 @@ export async function getStockEntriesAndExitsLogs() {
 
         // Fetch all cancelled sales orders to filter them out
         const cancelledSalesOrders = await db.salesOrder.findMany({
-            where: { tenantId, status: "CANCELLED" },
+            where: { tenantId, status: "CANCELLED", ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
             select: { id: true, receiptNumber: true, createdAt: true, total: true }
         })
         const cancelledIds = new Set<string>()
@@ -256,6 +264,7 @@ export async function getStockEntriesAndExitsLogs() {
                 const linkedOrders = await db.order.findMany({
                     where: {
                         tenantId,
+                        ...(storeIdToUse ? { storeId: storeIdToUse } : {}),
                         total: so.total,
                         createdAt: { gte: timeMin, lte: timeMax }
                     },

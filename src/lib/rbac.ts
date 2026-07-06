@@ -129,6 +129,29 @@ const ROLE_PERMISSIONS: Record<string, Permission[]> = {
         "emprunt_fournisseur:read", "emprunt_fournisseur:create",
         "transfers:*",
     ],
+    PURCHASE_MANAGER: [
+        "purchases:*",
+        "products:read", "products:create", "products:update",
+        "categories:*", "brands:*",
+        "suppliers:*",
+        "inventory:*",
+        "transfers:*",
+        "spoilage:*",
+        "emprunt_fournisseur:*",
+    ],
+    SALES_MANAGER: [
+        "pos:*",
+        "sales:*",
+        "products:read",
+        "customers:*",
+        "payments:*",
+        "daily_close:*",
+        "reservations:*",
+        "delivery:*",
+        "commissions:*",
+        "emprunt:*",
+        "cheques:*",
+    ],
 }
 
 // ─── Permission Matching Logic ────────────────────────────────
@@ -223,6 +246,8 @@ export async function getAvailableRoles(): Promise<{ value: string; label: strin
     return [
         { value: "ADMIN", label: "Administrateur", description: "Accès complet à toutes les fonctionnalités" },
         { value: "MANAGER", label: "Gérant", description: "Gestion complète sauf suppression de produits et transactions" },
+        { value: "PURCHASE_MANAGER", label: "Gestionnaire Achat", description: "Gestion exclusive des achats, fournisseurs et stock" },
+        { value: "SALES_MANAGER", label: "Gestionnaire Vente", description: "Gestion exclusive des ventes, POS, clients et commissions" },
         { value: "CASHIER", label: "Caissier", description: "POS, ventes, clients et clôture de caisse" },
         { value: "VENDEUR", label: "Vendeur", description: "Comme caissier avec accès commissions" },
         { value: "ACCOUNTANT", label: "Comptable", description: "Finances, rapports, fiscal et trésorerie" },

@@ -5,6 +5,7 @@ import { LoginSchema } from "./schemas"
 import { db } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import authConfig from "./auth.config"
+import { cookies } from "next/headers"
 
 
 const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
@@ -163,6 +164,33 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     session.user.defaultStoreId = existingUser.defaultStoreId;
                     // @ts-expect-error custom fields
                     session.user.username = existingUser.username;
+                }
+            }
+            // Superadmin impersonation override (cookie-based, never touches DB)
+            if (session.user?.isSuperadmin) {
+                try {
+                    const cookieStore = await cookies()
+                    const impersonatedTenantId = cookieStore.get("impersonated_tenant_id")?.value
+                    if (impersonatedTenantId) {
+                        session.user.tenantId = impersonatedTenantId
+                        const impersonatedStoreId = cookieStore.get("impersonated_store_id")?.value
+                        if (impersonatedStoreId) {
+                            session.user.defaultStoreId = impersonatedStoreId
+                        }
+                        // Override subscription/block status to match the impersonated tenant
+                        const impersonatedTenant = await db.tenant.findUnique({
+                            where: { id: impersonatedTenantId },
+                            select: { subscriptionEndsAt: true, isBlocked: true }
+                        })
+                        if (impersonatedTenant) {
+                            session.user.subscriptionEndsAt = impersonatedTenant.subscriptionEndsAt
+                            session.user.isBlocked = impersonatedTenant.isBlocked
+                        }
+                        // @ts-expect-error custom fields
+                        session.user.isImpersonating = true
+                    }
+                } catch {
+                    // Cookies may not be available in some contexts (e.g. API routes), silently ignore
                 }
             }
             return session

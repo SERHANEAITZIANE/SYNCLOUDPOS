@@ -1,30 +1,148 @@
 "use client"
 
 import * as React from "react"
-
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function Table({ className, containerClassName, ...props }: React.ComponentProps<"table"> & { containerClassName?: string }) {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const [showLeftArrow, setShowLeftArrow] = React.useState(false)
+  const [showRightArrow, setShowRightArrow] = React.useState(false)
+
+  const updateArrows = React.useCallback(() => {
+    const container = containerRef.current
+    if (!container) return
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setShowLeftArrow(scrollLeft > 5)
+    setShowRightArrow(scrollWidth - clientWidth - scrollLeft > 5)
+  }, [])
+
+  React.useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    updateArrows()
+    
+    // Set up ResizeObserver to handle dynamically loading/changing data sizes
+    const resizeObserver = new ResizeObserver(() => {
+      updateArrows()
+    })
+    resizeObserver.observe(container)
+    
+    const tableEl = container.querySelector("table")
+    if (tableEl) {
+      resizeObserver.observe(tableEl)
+    }
+
+    container.addEventListener("scroll", updateArrows, { passive: true })
+    window.addEventListener("resize", updateArrows, { passive: true })
+
+    return () => {
+      resizeObserver.disconnect()
+      container.removeEventListener("scroll", updateArrows)
+      window.removeEventListener("resize", updateArrows)
+    }
+  }, [updateArrows])
+
+  const handleScrollClick = (direction: "left" | "right") => {
+    const container = containerRef.current
+    if (!container) return
+    const scrollAmount = Math.min(container.clientWidth * 0.6, 400)
+    container.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth"
+    })
+  }
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return
+    const container = containerRef.current
+    if (!container) return
+
+    const target = e.target as HTMLElement
+    const isSelf = target === container
+    if (
+      target.closest("button") || 
+      target.closest("input") || 
+      target.closest("select") || 
+      target.closest("a") || 
+      target.closest("[role=checkbox]") ||
+      (!isSelf && target.closest(".cursor-grab"))
+    ) {
+      return
+    }
+
+    container.classList.remove("cursor-grab")
+    container.classList.add("cursor-grabbing")
+
+    const startX = e.pageX - container.offsetLeft
+    const scrollLeft = container.scrollLeft
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const x = moveEvent.pageX - container.offsetLeft
+      const walk = (x - startX) * 1.5
+      container.scrollLeft = scrollLeft - walk
+    }
+
+    const handleMouseUp = () => {
+      container.classList.remove("cursor-grabbing")
+      container.classList.add("cursor-grab")
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+  }
+
   return (
-    <div
-      data-slot="table-container"
-      className={cn(
-        "relative w-full overflow-auto cursor-grab active:cursor-grabbing",
-        // Custom scrollbar styling
-        "[&::-webkit-scrollbar]:h-3 [&::-webkit-scrollbar]:w-3",
-        "[&::-webkit-scrollbar-track]:bg-muted/30 [&::-webkit-scrollbar-track]:rounded-full",
-        "[&::-webkit-scrollbar-thumb]:bg-primary/30 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding",
-        "[&::-webkit-scrollbar-thumb:hover]:bg-primary/50",
-        // Scroll shadow indicators
-        "[background:linear-gradient(to_right,transparent_calc(100%-40px),rgba(0,0,0,0.08))_no-repeat_right/40px_100%]",
-        containerClassName
+    <div className="relative group/table-wrapper w-full">
+      {/* Scroll Left Button */}
+      {showLeftArrow && (
+        <button
+          type="button"
+          onClick={() => handleScrollClick("left")}
+          className="absolute left-3 top-[50px] z-30 h-9 w-9 rounded-full bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 shadow-xl flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:scale-105 active:scale-95 transition-all cursor-pointer no-print focus:outline-hidden focus:ring-2 focus:ring-blue-500/50"
+          title="Faire défiler à gauche"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
       )}
-    >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+
+      {/* Scroll Right Button */}
+      {showRightArrow && (
+        <button
+          type="button"
+          onClick={() => handleScrollClick("right")}
+          className="absolute right-3 top-[50px] z-30 h-9 w-9 rounded-full bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 shadow-xl flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:scale-105 active:scale-95 transition-all cursor-pointer no-print focus:outline-hidden focus:ring-2 focus:ring-blue-500/50"
+          title="Faire défiler à droite"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
+
+      <div
+        ref={containerRef}
+        onMouseDown={handleMouseDown}
+        data-slot="table-container"
+        className={cn(
+          "relative w-full overflow-auto cursor-grab active:cursor-grabbing",
+          // Firefox styling
+          "[scrollbar-width:thin] [scrollbar-color:theme(colors.zinc.400)_transparent] dark:[scrollbar-color:theme(colors.zinc.600)_transparent]",
+          // Custom thick & high contrast scrollbar styling for webkit browsers
+          "[&::-webkit-scrollbar]:h-2.5 [&::-webkit-scrollbar]:w-2.5",
+          "[&::-webkit-scrollbar-track]:bg-zinc-100/50 dark:[&::-webkit-scrollbar-track]:bg-zinc-900/20 [&::-webkit-scrollbar-track]:rounded-full",
+          "[&::-webkit-scrollbar-thumb]:bg-zinc-450 dark:[&::-webkit-scrollbar-thumb]:bg-zinc-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-clip-padding",
+          "[&::-webkit-scrollbar-thumb:hover]:bg-zinc-650 dark:[&::-webkit-scrollbar-thumb:hover]:bg-zinc-500",
+          containerClassName
+        )}
+      >
+        <table
+          data-slot="table"
+          className={cn("w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </div>
     </div>
   )
 }

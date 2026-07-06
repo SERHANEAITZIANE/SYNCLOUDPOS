@@ -23,7 +23,7 @@ const PosPage = async () => {
     ])
     if (!session?.user?.id) return <div>{t("unauthorized")}</div>
 
-    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "CASHIER" && !session?.user?.isSuperadmin) {
+    if (session?.user?.role !== "ADMIN" && session?.user?.role !== "MANAGER" && session?.user?.role !== "CASHIER" && session?.user?.role !== "VENDEUR" && !session?.user?.isSuperadmin) {
         redirect("/dashboard")
     }
 

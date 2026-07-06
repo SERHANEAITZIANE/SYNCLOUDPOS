@@ -16,6 +16,7 @@ import {
     Bookmark, 
     Percent,
     Eye,
+    EyeOff,
     Calculator,
     Package,
     RefreshCw,
@@ -53,6 +54,13 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { getStockMovements } from "@/actions/stock-movements"
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
 interface StockItem {
     id: string
@@ -148,6 +156,89 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
 
     const [entriesPage, setEntriesPage] = useState(1)
     const [exitsPage, setExitsPage] = useState(1)
+
+    // Sort states
+    const [sortKey, setSortKey] = useState<string>("name")
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+
+    // Column visibility states
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+        name: true,
+        stock: true,
+        daysSinceLastSale: true,
+        entries: true,
+        exits: true,
+        returns: true,
+        supplierReturns: true,
+        reservations: true,
+        avaries: true,
+        montantAchat: true,
+        montantVente: true,
+    })
+
+    // Load preferences from localStorage on mount
+    useEffect(() => {
+        try {
+            const cols = localStorage.getItem("stock_dashboard_columns")
+            if (cols) setVisibleColumns(JSON.parse(cols))
+            
+            const savedSortKey = localStorage.getItem("stock_dashboard_sort_key")
+            const savedSortDir = localStorage.getItem("stock_dashboard_sort_dir")
+            if (savedSortKey) setSortKey(savedSortKey)
+            if (savedSortDir) setSortDirection(savedSortDir as "asc" | "desc")
+        } catch (e) {
+            console.error(e)
+        }
+    }, [])
+
+    const toggleColumn = (key: string, visible: boolean) => {
+        const next = { ...visibleColumns, [key]: visible }
+        setVisibleColumns(next)
+        localStorage.setItem("stock_dashboard_columns", JSON.stringify(next))
+    }
+
+    const handleSort = (key: string) => {
+        let nextDir: "asc" | "desc" = "asc"
+        if (sortKey === key) {
+            nextDir = sortDirection === "asc" ? "desc" : "asc"
+            setSortDirection(nextDir)
+        } else {
+            setSortKey(key)
+            setSortDirection("asc")
+        }
+        localStorage.setItem("stock_dashboard_sort_key", key)
+        localStorage.setItem("stock_dashboard_sort_dir", nextDir)
+    }
+
+    const renderSortableHeader = (label: string, key: string, align: "left" | "center" | "right" = "center") => {
+        const isActive = sortKey === key
+        return (
+            <th 
+                className={cn(
+                    "p-4 cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group text-xs font-semibold uppercase text-slate-500",
+                    align === "center" && "text-center",
+                    align === "right" && "text-right",
+                    align === "left" && "pl-6 text-left"
+                )}
+                onClick={() => handleSort(key)}
+            >
+                <div className={cn(
+                    "flex items-center gap-1.5",
+                    align === "center" && "justify-center",
+                    align === "right" && "justify-end",
+                    align === "left" && "justify-start"
+                )}>
+                    <span>{label}</span>
+                    <span className={cn(
+                        "text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors",
+                        isActive && "text-emerald-600 dark:text-emerald-400 font-bold"
+                    )}>
+                        {isActive ? (sortDirection === "asc" ? "▲" : "▼") : "↕"}
+                    </span>
+                </div>
+            </th>
+        )
+    }
 
     // Synchronize selected product stock movements when open
     useEffect(() => {
@@ -262,11 +353,31 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
         setExitsPage(1)
     }, [searchQuery, startDate, endDate, movementCategoryFilter, movementBrandFilter, movementUserFilter])
 
+    const sortedStockItems = [...filteredStockItems].sort((a: any, b: any) => {
+        let valA = a[sortKey]
+        let valB = b[sortKey]
+
+        // Handle string comparison (case insensitive)
+        if (typeof valA === "string" && typeof valB === "string") {
+            return sortDirection === "asc" 
+                ? valA.localeCompare(valB, "fr", { sensitivity: "base" })
+                : valB.localeCompare(valA, "fr", { sensitivity: "base" })
+        }
+
+        // Handle null / undefined values (place at the bottom/top depending on direction)
+        if (valA === null || valA === undefined) valA = sortDirection === "asc" ? Infinity : -Infinity
+        if (valB === null || valB === undefined) valB = sortDirection === "asc" ? Infinity : -Infinity
+
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1
+        return 0
+    })
+
     // Paginated Slices
     const indexOfLastItem = currentPage * itemsPerPage
     const indexOfFirstItem = indexOfLastItem - itemsPerPage
-    const currentStockItems = filteredStockItems.slice(indexOfFirstItem, indexOfLastItem)
-    const totalStockPages = Math.ceil(filteredStockItems.length / itemsPerPage)
+    const currentStockItems = sortedStockItems.slice(indexOfFirstItem, indexOfLastItem)
+    const totalStockPages = Math.ceil(sortedStockItems.length / itemsPerPage)
 
     const currentEntries = filteredEntries.slice((entriesPage - 1) * itemsPerPage, entriesPage * itemsPerPage)
     const totalEntriesPages = Math.ceil(filteredEntries.length / itemsPerPage)
@@ -435,6 +546,51 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                         <SelectItem value="never">Jamais vendu</SelectItem>
                                     </SelectContent>
                                 </Select>
+
+                                {/* Column Visibility Dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="bg-zinc-50 dark:bg-zinc-900 border-border/80 gap-2">
+                                            <SlidersHorizontal className="h-4 w-4 opacity-70 text-indigo-600" />
+                                            <span>Colonnes</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-zinc-950 border border-border/60 rounded-xl shadow-lg">
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.name} onCheckedChange={(val) => toggleColumn("name", val)}>
+                                            Produit
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.stock} onCheckedChange={(val) => toggleColumn("stock", val)}>
+                                            Niveau Stock
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.daysSinceLastSale} onCheckedChange={(val) => toggleColumn("daysSinceLastSale", val)}>
+                                            Dernière Vente
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.entries} onCheckedChange={(val) => toggleColumn("entries", val)}>
+                                            Entrées
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.exits} onCheckedChange={(val) => toggleColumn("exits", val)}>
+                                            Sorties
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.returns} onCheckedChange={(val) => toggleColumn("returns", val)}>
+                                            Retours Client
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.supplierReturns} onCheckedChange={(val) => toggleColumn("supplierReturns", val)}>
+                                            Retours Fourn.
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.reservations} onCheckedChange={(val) => toggleColumn("reservations", val)}>
+                                            Réservations
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.avaries} onCheckedChange={(val) => toggleColumn("avaries", val)}>
+                                            Avaries
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.montantAchat} onCheckedChange={(val) => toggleColumn("montantAchat", val)}>
+                                            Montant Achat
+                                        </DropdownMenuCheckboxItem>
+                                        <DropdownMenuCheckboxItem checked={visibleColumns.montantVente} onCheckedChange={(val) => toggleColumn("montantVente", val)}>
+                                            Montant Vente
+                                        </DropdownMenuCheckboxItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         )}
 
@@ -541,24 +697,24 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-zinc-50 dark:bg-zinc-900/60 border-b border-border/80 text-xs font-semibold uppercase text-slate-500">
-                                        <th className="p-4 pl-6">Produit / Caractéristiques</th>
-                                        <th className="p-4 text-center">Niveau de Stock</th>
-                                        <th className="p-4 text-center">Dernière Vente</th>
-                                        <th className="p-4 text-center">Entrées</th>
-                                        <th className="p-4 text-center">Sorties</th>
-                                        <th className="p-4 text-center">Retour Client</th>
-                                        <th className="p-4 text-center">Retour Fournisseur</th>
-                                        <th className="p-4 text-center">Réservé</th>
-                                        <th className="p-4 text-center">Avarié</th>
-                                        <th className="p-4 text-right">Montant Achat</th>
-                                        <th className="p-4 text-right">Montant Approx Vente</th>
-                                        <th className="p-4 pr-6 text-center">Détail</th>
+                                        {visibleColumns.name && renderSortableHeader("Produit / Caractéristiques", "name", "left")}
+                                        {visibleColumns.stock && renderSortableHeader("Niveau de Stock", "stock")}
+                                        {visibleColumns.daysSinceLastSale && renderSortableHeader("Dernière Vente", "daysSinceLastSale")}
+                                        {visibleColumns.entries && renderSortableHeader("Entrées", "entries")}
+                                        {visibleColumns.exits && renderSortableHeader("Sorties", "exits")}
+                                        {visibleColumns.returns && renderSortableHeader("Retour Client", "returns")}
+                                        {visibleColumns.supplierReturns && renderSortableHeader("Retour Fournisseur", "supplierReturns")}
+                                        {visibleColumns.reservations && renderSortableHeader("Réservé", "reservations")}
+                                        {visibleColumns.avaries && renderSortableHeader("Avarié", "avaries")}
+                                        {visibleColumns.montantAchat && renderSortableHeader("Montant Achat", "montantAchat", "right")}
+                                        {visibleColumns.montantVente && renderSortableHeader("Montant Approx Vente", "montantVente", "right")}
+                                        <th className="p-4 pr-6 text-center text-xs font-semibold uppercase text-slate-500">Détail</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/60 text-sm">
                                     {currentStockItems.length === 0 ? (
                                         <tr>
-                                            <td colSpan={12} className="p-8 text-center text-muted-foreground font-medium">
+                                            <td colSpan={Object.values(visibleColumns).filter(Boolean).length + 1} className="p-8 text-center text-muted-foreground font-medium">
                                                 Aucun produit ne correspond à ces critères.
                                             </td>
                                         </tr>
@@ -572,86 +728,108 @@ export const StockDashboardClient: React.FC<StockDashboardClientProps> = ({
                                                     setIsDrawerOpen(true)
                                                 }}
                                             >
-                                                <td className="p-4 pl-6">
-                                                    <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                                        {item.name}
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1.5 mt-1 text-[11px] text-slate-400">
-                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/80 bg-zinc-50 dark:bg-zinc-900">
-                                                            {item.categoryName}
-                                                        </Badge>
-                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/80 bg-zinc-50 dark:bg-zinc-900">
-                                                            {item.brandName}
-                                                        </Badge>
-                                                        {item.barcodes.slice(0, 1).map(b => (
-                                                            <span key={b} className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1 py-0 rounded">
-                                                                {b}
+                                                {visibleColumns.name && (
+                                                    <td className="p-4 pl-6">
+                                                        <div className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                                            {item.name}
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-1.5 mt-1 text-[11px] text-slate-400">
+                                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/80 bg-zinc-50 dark:bg-zinc-900">
+                                                                {item.categoryName}
+                                                            </Badge>
+                                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-border/80 bg-zinc-50 dark:bg-zinc-900">
+                                                                {item.brandName}
+                                                            </Badge>
+                                                            {item.barcodes.slice(0, 1).map(b => (
+                                                                <span key={b} className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1 py-0 rounded">
+                                                                    {b}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.stock && (
+                                                    <td className="p-4 text-center">
+                                                        {getStockStatusBadge(item.stock, item.minStock)}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.daysSinceLastSale && (
+                                                    <td className="p-4 text-center">
+                                                        {item.daysSinceLastSale === null || item.daysSinceLastSale === undefined ? (
+                                                            <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400 border border-slate-200/60 font-semibold px-2 py-0.5">
+                                                                Aucune vente
+                                                            </Badge>
+                                                        ) : item.daysSinceLastSale === 0 ? (
+                                                            <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 font-semibold px-2 py-0.5 animate-pulse">
+                                                                Aujourd'hui
+                                                            </Badge>
+                                                        ) : item.daysSinceLastSale === 1 ? (
+                                                            <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200/60 font-semibold px-2 py-0.5">
+                                                                Hier
+                                                            </Badge>
+                                                        ) : item.daysSinceLastSale > 90 ? (
+                                                            <Badge className="bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 font-semibold px-2 py-0.5">
+                                                                &gt; 90 j ({item.daysSinceLastSale} j)
+                                                            </Badge>
+                                                        ) : item.daysSinceLastSale > 30 ? (
+                                                            <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 font-semibold px-2 py-0.5">
+                                                                &gt; 30 j ({item.daysSinceLastSale} j)
+                                                            </Badge>
+                                                        ) : (
+                                                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                                {item.daysSinceLastSale} {item.daysSinceLastSale > 1 ? "jours" : "jour"}
                                                             </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    {getStockStatusBadge(item.stock, item.minStock)}
-                                                </td>
-                                                <td className="p-4 text-center">
-                                                    {item.daysSinceLastSale === null || item.daysSinceLastSale === undefined ? (
-                                                        <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400 border border-slate-200/60 font-semibold px-2 py-0.5">
-                                                            Aucune vente
-                                                        </Badge>
-                                                    ) : item.daysSinceLastSale === 0 ? (
-                                                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 font-semibold px-2 py-0.5 animate-pulse">
-                                                            Aujourd'hui
-                                                        </Badge>
-                                                    ) : item.daysSinceLastSale === 1 ? (
-                                                        <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200/60 font-semibold px-2 py-0.5">
-                                                            Hier
-                                                        </Badge>
-                                                    ) : item.daysSinceLastSale > 90 ? (
-                                                        <Badge className="bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 font-semibold px-2 py-0.5">
-                                                            &gt; 90 j ({item.daysSinceLastSale} j)
-                                                        </Badge>
-                                                    ) : item.daysSinceLastSale > 30 ? (
-                                                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 font-semibold px-2 py-0.5">
-                                                            &gt; 30 j ({item.daysSinceLastSale} j)
-                                                        </Badge>
-                                                    ) : (
-                                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                                            {item.daysSinceLastSale} {item.daysSinceLastSale > 1 ? "jours" : "jour"}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
-                                                    {item.entries}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
-                                                    {item.exits}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-teal-600 dark:text-teal-400">
-                                                    {item.returns}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-orange-600 dark:text-orange-400">
-                                                    {item.supplierReturns}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-amber-600 dark:text-amber-400">
-                                                    {item.reservations > 0 ? (
-                                                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200">
-                                                            {item.reservations}
-                                                        </Badge>
-                                                    ) : "0"}
-                                                </td>
-                                                <td className="p-4 text-center font-semibold text-red-600 dark:text-red-400">
-                                                    {item.avaries > 0 ? (
-                                                        <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200">
-                                                            {item.avaries}
-                                                        </Badge>
-                                                    ) : "0"}
-                                                </td>
-                                                <td className="p-4 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
-                                                    {formatCurrency(item.montantAchat)}
-                                                </td>
-                                                <td className="p-4 text-right font-mono font-bold text-slate-800 dark:text-slate-200">
-                                                    {formatCurrency(item.montantVente)}
-                                                </td>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.entries && (
+                                                    <td className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                                                        {item.entries}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.exits && (
+                                                    <td className="p-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                                                        {item.exits}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.returns && (
+                                                    <td className="p-4 text-center font-semibold text-teal-600 dark:text-teal-400">
+                                                        {item.returns}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.supplierReturns && (
+                                                    <td className="p-4 text-center font-semibold text-orange-600 dark:text-orange-400">
+                                                        {item.supplierReturns}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.reservations && (
+                                                    <td className="p-4 text-center font-semibold text-amber-600 dark:text-amber-400">
+                                                        {item.reservations > 0 ? (
+                                                            <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200">
+                                                                {item.reservations}
+                                                            </Badge>
+                                                        ) : "0"}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.avaries && (
+                                                    <td className="p-4 text-center font-semibold text-red-600 dark:text-red-400">
+                                                        {item.avaries > 0 ? (
+                                                            <Badge variant="destructive" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200">
+                                                                {item.avaries}
+                                                            </Badge>
+                                                        ) : "0"}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.montantAchat && (
+                                                    <td className="p-4 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                                                        {formatCurrency(item.montantAchat)}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.montantVente && (
+                                                    <td className="p-4 text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                                                        {formatCurrency(item.montantVente)}
+                                                    </td>
+                                                )}
                                                 <td className="p-4 pr-6 text-center">
                                                     <Button 
                                                         variant="ghost" 
