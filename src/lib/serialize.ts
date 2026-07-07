@@ -20,10 +20,11 @@ export function serializeData<T>(obj: T): any {
             return obj.toISOString();
         }
 
-        // Prisma Decimal handling (dynamic duck-typing check to avoid strict path imports)
-        const constructorName = obj.constructor?.name;
+        // Prisma Decimal handling (dynamic duck-typing check to avoid strict path imports, robust against minification/renaming)
         if (
-            (constructorName === "Decimal" || constructorName === "d") &&
+            typeof (obj as any).s === "number" &&
+            typeof (obj as any).e === "number" &&
+            Array.isArray((obj as any).d) &&
             typeof (obj as any).toNumber === "function"
         ) {
             return (obj as any).toNumber();
