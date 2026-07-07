@@ -41,51 +41,52 @@ async function registerCore(values: RegisterInput) {
         const sanitizedName = sanitizeString(name)
         const sanitizedPhone = phone ? sanitizePhone(phone) : undefined
 
-        const tenant = await db.tenant.create({
-            data: {
-                name: `${sanitizedName}'s Shop`,
-                phone: sanitizedPhone,
-                subscriptionEndsAt: trialEndDate,
-            }
-        })
+        await db.$transaction(async (tx) => {
+            const tenant = await tx.tenant.create({
+                data: {
+                    name: `${sanitizedName}'s Shop`,
+                    phone: sanitizedPhone,
+                    subscriptionEndsAt: trialEndDate,
+                }
+            })
 
-        // Create default store for the new tenant
-        const defaultStore = await db.store.create({
-            data: {
-                name: "Boutique Principale",
-                tenantId: tenant.id,
-            }
-        })
+            // Create default store for the new tenant
+            const defaultStore = await tx.store.create({
+                data: {
+                    name: "Boutique Principale",
+                    tenantId: tenant.id,
+                }
+            })
 
-        await db.user.create({
-            data: {
-                name,
-                email,
-                phone,
-                password: hashedPassword,
-                tenantId: tenant.id,
-                role: "ADMIN",
-                defaultStoreId: defaultStore.id,
-            },
-        })
+            await tx.user.create({
+                data: {
+                    name,
+                    email,
+                    phone,
+                    password: hashedPassword,
+                    tenantId: tenant.id,
+                    role: "ADMIN",
+                    defaultStoreId: defaultStore.id,
+                },
+            })
 
-        // Seed default accounts and customer
-        await Promise.all([
-            db.treasuryAccount.createMany({
+            // Seed default accounts and customer
+            await tx.treasuryAccount.createMany({
                 data: [
                     { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
                     { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
                     { name: "TPE", type: "BANK", tenantId: tenant.id }
                 ]
-            }),
-            db.customer.create({
+            })
+
+            await tx.customer.create({
                 data: {
                     name: "DIVERS",
                     clientType: "RETAIL",
                     tenantId: tenant.id
                 }
             })
-        ])
+        })
 
         return { success: "User created!" }
     } catch (error: any) {

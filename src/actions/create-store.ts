@@ -21,82 +21,85 @@ export const createStore = async (name: string) => {
     }
 
     try {
-        // 0. Ensure user has a TenantUser record for their current tenant (to avoid eclipsing/losing it)
-        if (dbUser.tenantId) {
-            const currentTenantUser = await db.tenantUser.findUnique({
-                where: {
-                    userId_tenantId: {
-                        userId: session.user.id,
-                        tenantId: dbUser.tenantId
-                    }
-                }
-            })
-            if (!currentTenantUser) {
-                await db.tenantUser.create({
-                    data: {
-                        userId: session.user.id,
-                        tenantId: dbUser.tenantId,
-                        role: "ADMIN"
+        const result = await db.$transaction(async (tx) => {
+            // 0. Ensure user has a TenantUser record for their current tenant (to avoid eclipsing/losing it)
+            if (dbUser.tenantId) {
+                const currentTenantUser = await tx.tenantUser.findUnique({
+                    where: {
+                        userId_tenantId: {
+                            userId: session.user.id,
+                            tenantId: dbUser.tenantId
+                        }
                     }
                 })
+                if (!currentTenantUser) {
+                    await tx.tenantUser.create({
+                        data: {
+                            userId: session.user.id,
+                            tenantId: dbUser.tenantId,
+                            role: "ADMIN"
+                        }
+                    })
+                }
             }
-        }
 
-        // 1. Create the new tenant — inherit subscription from current tenant
-        const tenant = await db.tenant.create({
-            data: {
-                name,
-                subscriptionEndsAt: dbUser.tenant?.subscriptionEndsAt ?? null
-            }
-        })
+            // 1. Create the new tenant — inherit subscription from current tenant
+            const tenant = await tx.tenant.create({
+                data: {
+                    name,
+                    subscriptionEndsAt: dbUser.tenant?.subscriptionEndsAt ?? null
+                }
+            })
 
-        // 2. Create default store for the new tenant
-        const defaultStore = await db.store.create({
-            data: {
-                name: "Boutique Principale",
-                tenantId: tenant.id,
-            }
-        })
+            // 2. Create default store for the new tenant
+            const defaultStore = await tx.store.create({
+                data: {
+                    name: "Boutique Principale",
+                    tenantId: tenant.id,
+                }
+            })
 
-        // 3. Create the TenantUser join record (user belongs to this tenant)
-        await db.tenantUser.create({
-            data: {
-                userId: session.user.id,
-                tenantId: tenant.id,
-                role: "ADMIN"
-            }
-        })
+            // 3. Create the TenantUser join record (user belongs to this tenant)
+            await tx.tenantUser.create({
+                data: {
+                    userId: session.user.id,
+                    tenantId: tenant.id,
+                    role: "ADMIN"
+                }
+            })
 
-        // 4. Switch the user's active store to the new one
-        await db.user.update({
-            where: { id: session.user.id },
-            data: {
-                tenantId: tenant.id,
-                defaultStoreId: defaultStore.id
-            }
-        })
+            // 4. Switch the user's active store to the new one
+            await tx.user.update({
+                where: { id: session.user.id },
+                data: {
+                    tenantId: tenant.id,
+                    defaultStoreId: defaultStore.id
+                }
+            })
 
-        // 5. Seed default accounts and customer
-        await Promise.all([
-            db.treasuryAccount.createMany({
+            // 5. Seed default accounts and customer
+            await tx.treasuryAccount.createMany({
                 data: [
                     { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
                     { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
                     { name: "TPE", type: "BANK", tenantId: tenant.id }
                 ]
-            }),
-            db.customer.create({
+            })
+
+            await tx.customer.create({
                 data: {
                     name: "DIVERS",
                     clientType: "RETAIL",
                     tenantId: tenant.id
                 }
             })
-        ])
+
+            return tenant
+        })
 
         revalidatePath("/dashboard")
 
-        return { success: "Store created", tenant }
+        return { success: "Store created", tenant: result }
     } catch (error: any) {
         console.error("Failed to create store", error)
         require('fs').writeFileSync('store_error.txt', JSON.stringify({ message: error.message, stack: error.stack }), 'utf8')

@@ -1,14 +1,31 @@
 "use client"
 
 import { Link } from "@/i18n/routing"
-import { Home, Users, Package, CreditCard, Landmark } from "lucide-react"
+import { Home, Users, Package, CreditCard, Landmark, Bluetooth } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
+import { useBluetoothPrinter } from "@/hooks/use-bluetooth-printer"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { toast } from "react-hot-toast"
 
 export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string }) => {
     const t = useTranslations("PosHeader")
     const navT = useTranslations("Navigation")
+    const bluetooth = useBluetoothPrinter()
+
+    const handleBluetoothToggle = async () => {
+        if (bluetooth.isConnected) {
+            bluetooth.disconnect()
+            toast.success("Imprimante Bluetooth déconnectée")
+        } else {
+            const success = await bluetooth.connect()
+            if (success) {
+                toast.success(`Connecté à ${bluetooth.deviceName || "imprimante BT"}`)
+            }
+        }
+    }
+
     return (
         <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-3 bg-card border-b border-border text-foreground shadow-sm h-11 sm:h-12 lg:h-14">
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 min-w-0">
@@ -22,6 +39,78 @@ export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string })
             
             {/* Quick Actions for Cashier / POS user */}
             <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 overflow-x-auto scrollbar-none flex-1 justify-end px-1 sm:px-2">
+                {bluetooth.isSupported && (
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={`h-7 sm:h-8 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider rounded-lg sm:rounded-xl gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 transition-all duration-200 shrink-0 ${
+                                    bluetooth.isConnected
+                                        ? "border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-300"
+                                        : "border-gray-500/20 bg-gray-500/5 hover:bg-gray-500/10 text-gray-500 dark:text-gray-400"
+                                }`}
+                            >
+                                <div className="relative">
+                                    <Bluetooth className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                    {bluetooth.isConnected && (
+                                        <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
+                                    )}
+                                </div>
+                                <span className="hidden lg:inline">BT</span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-3" align="end">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Bluetooth className="h-4 w-4 text-blue-500" />
+                                    <span className="text-sm font-semibold">Imprimante Bluetooth</span>
+                                </div>
+                                {bluetooth.isConnected ? (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="h-2 w-2 bg-green-500 rounded-full" />
+                                            <span className="text-xs text-muted-foreground">{bluetooth.deviceName || "Connecté"}</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="flex-1 text-xs h-7"
+                                                onClick={() => bluetooth.printTest()}
+                                                disabled={bluetooth.printing}
+                                            >
+                                                {bluetooth.printing ? "..." : "Test"}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                className="flex-1 text-xs h-7"
+                                                onClick={handleBluetoothToggle}
+                                            >
+                                                Déconnecter
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-muted-foreground">Aucune imprimante connectée</p>
+                                        <Button
+                                            size="sm"
+                                            className="w-full text-xs h-7 bg-blue-600 hover:bg-blue-700"
+                                            onClick={handleBluetoothToggle}
+                                            disabled={bluetooth.connecting}
+                                        >
+                                            {bluetooth.connecting ? "Recherche..." : "Connecter"}
+                                        </Button>
+                                    </div>
+                                )}
+                                {bluetooth.error && (
+                                    <p className="text-xs text-red-500">{bluetooth.error}</p>
+                                )}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                )}
                 <Link href="/customers">
                     <Button variant="outline" className="h-7 sm:h-8 border-orange-500/20 bg-orange-500/5 hover:bg-orange-500/15 text-orange-600 dark:text-orange-300 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider rounded-lg sm:rounded-xl gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 transition-all duration-200 shrink-0">
                         <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />

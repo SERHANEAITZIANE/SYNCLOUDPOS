@@ -24,7 +24,7 @@ export async function getStockDashboardData() {
                     select: { quantity: true }
                 },
                 reservations: {
-                    where: { status: "PENDING", ...(storeIdToUse ? { storeId: storeIdToUse } : {}) },
+                    where: { status: "PENDING" },
                     select: { quantity: true }
                 },
                 storeProducts: storeIdToUse ? {

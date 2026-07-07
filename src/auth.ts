@@ -69,47 +69,50 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
 
                         const name = user.name || user.email.split("@")[0]
 
-                        const tenant = await db.tenant.create({
-                            data: {
-                                name: `${name}'s Shop`,
-                                subscriptionEndsAt: trialEndDate,
-                            }
-                        })
+                        const newUser = await db.$transaction(async (tx) => {
+                            const tenant = await tx.tenant.create({
+                                data: {
+                                    name: `${name}'s Shop`,
+                                    subscriptionEndsAt: trialEndDate,
+                                }
+                            })
 
-                        const defaultStore = await db.store.create({
-                            data: {
-                                name: "Boutique Principale",
-                                tenantId: tenant.id,
-                            }
-                        })
+                            const defaultStore = await tx.store.create({
+                                data: {
+                                    name: "Boutique Principale",
+                                    tenantId: tenant.id,
+                                }
+                            })
 
-                        const randomPassword = "OAUTH_NO_PASSWORD_" + Math.random().toString(36).substring(2) + Date.now()
-                        const hashedPassword = await bcrypt.hash(randomPassword, 10)
+                            const randomPassword = "OAUTH_NO_PASSWORD_" + Math.random().toString(36).substring(2) + Date.now()
+                            const hashedPassword = await bcrypt.hash(randomPassword, 10)
 
-                        const newUser = await db.user.create({
-                            data: {
-                                name,
-                                email: user.email,
-                                password: hashedPassword, // Secure random hashed password for OAuth users
-                                tenantId: tenant.id,
-                                role: "ADMIN",
-                                defaultStoreId: defaultStore.id,
-                            }
-                        })
+                            const createdUser = await tx.user.create({
+                                data: {
+                                    name,
+                                    email: user.email,
+                                    password: hashedPassword,
+                                    tenantId: tenant.id,
+                                    role: "ADMIN",
+                                    defaultStoreId: defaultStore.id,
+                                }
+                            })
 
-                        // Seed defaults
-                        await Promise.all([
-                            db.treasuryAccount.createMany({
+                            // Seed defaults
+                            await tx.treasuryAccount.createMany({
                                 data: [
                                     { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
                                     { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
                                     { name: "TPE", type: "BANK", tenantId: tenant.id }
                                 ]
-                            }),
-                            db.customer.create({
+                            })
+
+                            await tx.customer.create({
                                 data: { name: "DIVERS", clientType: "RETAIL", tenantId: tenant.id }
                             })
-                        ])
+
+                            return createdUser
+                        })
 
                         user.id = newUser.id
                     } else {

@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import bcrypt from "bcryptjs"
+import { randomUUID } from "crypto"
 
 export const getTenantsForSuperadmin = async () => {
     try {
@@ -224,64 +225,65 @@ export const createTenantDirect = async (values: {
         const subEndDate = new Date()
         subEndDate.setMonth(subEndDate.getMonth() + subscriptionMonths)
 
-        // Create Tenant
-        const tenant = await db.tenant.create({
-            data: {
-                name,
-                ownerName,
-                phone,
-                email,
-                subscriptionEndsAt: subEndDate
-            }
-        })
+        const result = await db.$transaction(async (tx) => {
+            // Create Tenant
+            const tenant = await tx.tenant.create({
+                data: {
+                    name,
+                    ownerName,
+                    phone,
+                    email,
+                    subscriptionEndsAt: subEndDate
+                }
+            })
 
-        // Create Default Store
-        const defaultStore = await db.store.create({
-            data: {
-                name: "Boutique Principale",
-                tenantId: tenant.id
-            }
-        })
+            // Create Default Store
+            const defaultStore = await tx.store.create({
+                data: {
+                    name: "Boutique Principale",
+                    tenantId: tenant.id
+                }
+            })
 
-        // Create Admin User
-        const newUser = await db.user.create({
-            data: {
-                name: ownerName,
-                email: email.trim().toLowerCase(),
-                phone,
-                password: hashedPassword,
-                tenantId: tenant.id,
-                role: "ADMIN",
-                defaultStoreId: defaultStore.id
-            }
-        })
+            // Create Admin User
+            const newUser = await tx.user.create({
+                data: {
+                    name: ownerName,
+                    email: email.trim().toLowerCase(),
+                    phone,
+                    password: hashedPassword,
+                    tenantId: tenant.id,
+                    role: "ADMIN",
+                    defaultStoreId: defaultStore.id
+                }
+            })
 
-        // Create TenantUser relation
-        await db.tenantUser.create({
-            data: {
-                userId: newUser.id,
-                tenantId: tenant.id,
-                role: "ADMIN"
-            }
-        })
+            // Create TenantUser relation
+            await tx.tenantUser.create({
+                data: {
+                    userId: newUser.id,
+                    tenantId: tenant.id,
+                    role: "ADMIN"
+                }
+            })
 
-        // Seed Treasury and Customer
-        await Promise.all([
-            db.treasuryAccount.createMany({
+            // Seed Treasury and Customer
+            await tx.treasuryAccount.createMany({
                 data: [
                     { name: "CAISSE PRINCIPALE", type: "CAISSE", tenantId: tenant.id },
                     { name: "CAISSE SECONDAIRE", type: "CAISSE", tenantId: tenant.id },
                     { name: "TPE", type: "BANK", tenantId: tenant.id }
                 ]
-            }),
-            db.customer.create({
+            })
+            await tx.customer.create({
                 data: {
                     name: "DIVERS",
                     clientType: "RETAIL",
                     tenantId: tenant.id
                 }
             })
-        ])
+            return tenant
+        })
 
         revalidatePath("/superadmin")
         return { success: `Client space '${name}' created successfully.` }
@@ -396,13 +398,36 @@ export async function createStoreForTenant(tenantId: string, name: string, addre
 
         if (!name.trim()) return { error: "Le nom du magasin est requis" }
 
-        const store = await db.store.create({
-            data: {
-                name: name.trim(),
-                address: address?.trim() || null,
-                tenantId
+        const store = await db.$transaction(async (tx) => {
+            const newStore = await tx.store.create({
+                data: {
+                    name: name.trim(),
+                    address: address?.trim() || null,
+                    tenantId
+                }
+            })
+
+            // For all existing products of this tenant, create a StoreProduct entry with 0 stock
+            const products = await tx.product.findMany({
+                where: { tenantId },
+                select: { id: true }
+            })
+
+            if (products.length > 0) {
+                await tx.storeProduct.createMany({
+                    data: products.map(p => ({
+                        id: randomUUID(),
+                        storeId: newStore.id,
+                        productId: p.id,
+                        stock: 0,
+                        minStock: 0
+                    }))
+                })
             }
+
+            return newStore
         })
+
         return { success: true, store }
     } catch (error: any) {
         console.error("createStoreForTenant error:", error)

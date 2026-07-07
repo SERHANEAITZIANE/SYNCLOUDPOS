@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, Suspense, useRef } from "react"
-import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag, History, Clock, Printer } from "lucide-react"
+import { Trash, Plus, Minus, ShoppingCart, X, PlusCircle, Edit2, Check, ChevronsUpDown, Star, Gift, Tag, History, Clock, Printer, Bluetooth } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
@@ -20,6 +20,8 @@ import { useReactToPrint } from "react-to-print"
 import { printWithDefaultPrinter } from "@/lib/print-helper"
 import { Receipt } from "./receipt"
 import { BonLivraisonPrintTemplate, BonGarantiePrintTemplate } from "@/components/print/print-templates"
+import { useBluetoothPrinter } from "@/hooks/use-bluetooth-printer"
+import type { ReceiptData, BLData, WarrantyData } from "@/lib/receipt-encoder"
 
 const PaymentModal = dynamic(() => import("./payment-modal").then(m => m.PaymentModal), { ssr: false })
 import { cn } from "@/lib/utils"
@@ -292,6 +294,9 @@ export const CartSidebar = ({
 
     const [printMode, setPrintMode] = useState<"preview" | "direct">("preview")
 
+    // Bluetooth printer hook
+    const bluetooth = useBluetoothPrinter()
+
     // Load printer preferences on mount
     useEffect(() => {
         try {
@@ -333,7 +338,8 @@ export const CartSidebar = ({
         }, 100) // 100ms delay to let the previous print dialog fully close
     }
 
-    const blPrinterToUse = storeData?.posBlFormat === "80mm" ? printerReceipt : printerA4;
+    const is80mmMode = !!activePrintOrder?.printTicket || storeData?.posBlFormat === "80mm";
+    const blPrinterToUse = is80mmMode ? printerReceipt : printerA4;
 
     const handlePrintReceipt = useReactToPrint({
         contentRef: receiptRef,
@@ -383,8 +389,7 @@ export const CartSidebar = ({
 
     const onPrintWarranty = () => {
         if (!handlePrintWarranty) return
-        const isWarranty80mm = activePrintOrder?.printTicket;
-        const targetPrinter = isWarranty80mm ? printerReceipt : blPrinterToUse;
+        const targetPrinter = is80mmMode ? printerReceipt : blPrinterToUse;
         const originalTitle = document.title
         if (targetPrinter !== "default") document.title = targetPrinter
         printWithDefaultPrinter(targetPrinter, () => {
@@ -437,19 +442,22 @@ export const CartSidebar = ({
                 queue.push("TICKET")
             }
             if (pending.printBL && blRef.current && pending.printWarranty && storeData?.warrantyEnabled && warrantyRef.current) {
-                if (pending.printTicket) {
-                    // If printing a ticket, warranty goes to receipt printer. So don't combine with BL.
-                    queue.push("BL")
-                    queue.push("WARRANTY")
-                } else {
-                    queue.push("COMBINED")
-                }
+                // Since both BL and Warranty will go to the same printer (either both printerReceipt or both printerA4),
+                // we can always combine them to save a print action/dialog.
+                queue.push("COMBINED")
             } else {
                 if (pending.printBL && blRef.current) queue.push("BL")
                 if (pending.printWarranty && storeData?.warrantyEnabled && warrantyRef.current) queue.push("WARRANTY")
             }
 
             if (queue.length > 0) {
+                // Check if Bluetooth is the target printer — if so, handle all jobs via BLE
+                const usesBluetooth = (printerReceipt === "bluetooth" || printerA4 === "bluetooth") && bluetooth.isConnected
+                if (usesBluetooth && activePrintOrder) {
+                    handleBluetoothPrintQueue(queue, activePrintOrder)
+                    return
+                }
+
                 setPrintQueue(queue)
                 queueRef.current = queue // sync immediately
 
@@ -459,6 +467,94 @@ export const CartSidebar = ({
 
         return () => clearTimeout(timer)
     }, [activePrintOrder])
+
+    /** Handle all print jobs via Bluetooth sequentially */
+    const handleBluetoothPrintQueue = async (queue: string[], order: any) => {
+        const paperWidth = bluetooth.paperWidth
+        const receiptData: ReceiptData = {
+            storeName: storeName || "SYNCLOUDPOS",
+            storeAddress: storeAddress,
+            storePhone: storePhone,
+            orderId: order.orderId || "",
+            date: new Date(),
+            items: (order.items || []).map((it: any) => ({
+                name: it.name || it.productName || "",
+                quantity: it.quantity || 1,
+                price: it.price || 0,
+                serialNumber: it.serialNumber,
+                discountAmount: it.discountAmount,
+                discountLabel: it.discountLabel,
+            })),
+            total: order.total || 0,
+            stampTax: order.stampTax,
+            rounding: order.rounding,
+            customerName: order.customerName,
+            paidAmount: order.paidAmount,
+            previousBalance: order.previousBalance,
+            newBalance: order.newBalance,
+            paperWidth,
+        }
+
+        try {
+            for (const job of queue) {
+                if (job === "TICKET") {
+                    await bluetooth.printReceipt(receiptData)
+                } else if (job === "BL" || job === "COMBINED") {
+                    await bluetooth.printBL({
+                        storeName: receiptData.storeName,
+                        storeAddress: receiptData.storeAddress,
+                        storePhone: receiptData.storePhone,
+                        orderId: receiptData.orderId,
+                        date: receiptData.date,
+                        items: receiptData.items,
+                        total: receiptData.total,
+                        customerName: receiptData.customerName,
+                        paperWidth,
+                    })
+                    // If COMBINED, also print warranty after BL
+                    if (job === "COMBINED") {
+                        await bluetooth.printWarranty({
+                            storeName: receiptData.storeName,
+                            storePhone: receiptData.storePhone,
+                            orderId: receiptData.orderId,
+                            date: receiptData.date,
+                            items: (order.items || []).filter((it: any) => it.serialNumber).map((it: any) => ({
+                                name: it.name || it.productName || "",
+                                serialNumber: it.serialNumber,
+                                warrantyDuration: storeData?.warrantyDuration || "6 mois",
+                            })),
+                            customerName: receiptData.customerName,
+                            paperWidth,
+                        })
+                    }
+                } else if (job === "WARRANTY") {
+                    await bluetooth.printWarranty({
+                        storeName: receiptData.storeName,
+                        storePhone: receiptData.storePhone,
+                        orderId: receiptData.orderId,
+                        date: receiptData.date,
+                        items: (order.items || []).filter((it: any) => it.serialNumber).map((it: any) => ({
+                            name: it.name || it.productName || "",
+                            serialNumber: it.serialNumber,
+                            warrantyDuration: storeData?.warrantyDuration || "6 mois",
+                        })),
+                        customerName: receiptData.customerName,
+                        paperWidth,
+                    })
+                }
+            }
+            toast.success("Impression Bluetooth terminée")
+        } catch (err) {
+            console.error("Bluetooth print failed, falling back to window.print:", err)
+            toast.error("Bluetooth échoué, impression classique...")
+            // Fallback to standard print
+            setPrintQueue(queue)
+            queueRef.current = queue
+            triggerPrintQueue(queue)
+        } finally {
+            setActivePrintOrder(null)
+        }
+    }
 
     const triggerPrintQueue = (queue: string[]) => {
         const firstJob = queue[0]
@@ -1295,6 +1391,7 @@ export const CartSidebar = ({
                         previousBalance={activePrintOrder?.previousBalance || 0}
                         paymentAmount={activePrintOrder?.paidAmount || 0}
                         newBalance={activePrintOrder?.newBalance || 0}
+                        force80mm={is80mmMode}
                     />
                 </div>
                 <div ref={warrantyRef}>
@@ -1323,7 +1420,7 @@ export const CartSidebar = ({
                         stampTax={activePrintOrder?.stampTax || 0}
                         totalTTC={activePrintOrder?.totalTTC || 0}
                         paymentMethod={activePrintOrder?.method || "CASH"}
-                        force80mm={!!activePrintOrder?.printTicket}
+                        force80mm={is80mmMode}
                     />
                 </div>
                 <div ref={combinedBlWarrantyRef}>
@@ -1356,6 +1453,7 @@ export const CartSidebar = ({
                             previousBalance={activePrintOrder?.previousBalance || 0}
                             paymentAmount={activePrintOrder?.paidAmount || 0}
                             newBalance={activePrintOrder?.newBalance || 0}
+                            force80mm={is80mmMode}
                         />
                     </div>
                     <div>
@@ -1384,6 +1482,7 @@ export const CartSidebar = ({
                             stampTax={activePrintOrder?.stampTax || 0}
                             totalTTC={activePrintOrder?.totalTTC || 0}
                             paymentMethod={activePrintOrder?.method || "CASH"}
+                            force80mm={is80mmMode}
                         />
                     </div>
                 </div>

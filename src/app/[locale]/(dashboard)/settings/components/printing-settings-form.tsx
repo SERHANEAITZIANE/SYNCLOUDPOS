@@ -12,10 +12,11 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
-import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info, Star, RefreshCcw } from "lucide-react"
+import { Printer, FileText, Barcode, ImageIcon, MonitorDot, CheckCircle2, Info, Star, RefreshCcw, Bluetooth } from "lucide-react"
 import Bcode from "react-barcode"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { useBluetoothPrinter } from "@/hooks/use-bluetooth-printer"
 
 const STORAGE_KEY = "pos_printing_prefs"
 
@@ -258,13 +259,20 @@ export const PrintingSettingsForm = ({
         loadPrintersList(false)
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+    const btPrinter = useBluetoothPrinter()
+
     const getOptions = (currentValue: string) => {
         const base = [
             { value: "default", label: t("printersOptions.default") }
         ]
+
+        // Add Bluetooth option if supported
+        if (btPrinter.isSupported) {
+            base.push({ value: "bluetooth", label: "🔵 Bluetooth" })
+        }
         
         const uniquePrinters = new Set(localPrinters)
-        if (currentValue && currentValue !== "default" && currentValue !== "custom") {
+        if (currentValue && currentValue !== "default" && currentValue !== "custom" && currentValue !== "bluetooth") {
             uniquePrinters.add(currentValue)
         }
         
@@ -554,6 +562,109 @@ export const PrintingSettingsForm = ({
                     </div>
                 </div>
             </div>
+
+            {/* ── Bluetooth Printer Section ── */}
+            {btPrinter.isSupported && (
+                <div>
+                    <div className="flex items-center gap-2 mb-4">
+                        <Bluetooth className="w-5 h-5 text-blue-500" />
+                        <h3 className="text-base font-semibold">Imprimante Bluetooth</h3>
+                        {btPrinter.isConnected && (
+                            <span className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-bold">
+                                Connectée
+                            </span>
+                        )}
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 p-5 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
+                        <div className="space-y-4">
+                            {/* Connection Status */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={cn(
+                                        "h-3 w-3 rounded-full",
+                                        btPrinter.isConnected ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                                    )} />
+                                    <div>
+                                        <p className="text-sm font-semibold">
+                                            {btPrinter.isConnected ? (btPrinter.deviceName || "Imprimante connectée") : "Non connectée"}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {btPrinter.isConnected
+                                                ? "Prête à imprimer via Bluetooth"
+                                                : "Appuyez sur Connecter pour rechercher une imprimante BLE"
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant={btPrinter.isConnected ? "destructive" : "default"}
+                                    size="sm"
+                                    onClick={async () => {
+                                        if (btPrinter.isConnected) {
+                                            btPrinter.disconnect()
+                                            toast.success("Déconnecté")
+                                        } else {
+                                            const ok = await btPrinter.connect()
+                                            if (ok) toast.success(`Connecté à ${btPrinter.deviceName}`)
+                                        }
+                                    }}
+                                    disabled={btPrinter.connecting}
+                                    className="min-w-[120px]"
+                                >
+                                    {btPrinter.connecting ? "Recherche..." : btPrinter.isConnected ? "Déconnecter" : "🔵 Connecter"}
+                                </Button>
+                            </div>
+
+                            {btPrinter.error && (
+                                <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/50 px-3 py-2 rounded-lg">{btPrinter.error}</p>
+                            )}
+
+                            {/* Paper Width + Test Print */}
+                            {btPrinter.isConnected && (
+                                <div className="flex items-center gap-4 pt-2 border-t border-blue-200/30">
+                                    <div className="flex-1">
+                                        <Label className="text-xs font-semibold mb-1.5 block">Largeur papier</Label>
+                                        <Select
+                                            value={btPrinter.paperWidth}
+                                            onValueChange={(v) => btPrinter.setPaperWidth(v as "58mm" | "80mm")}
+                                        >
+                                            <SelectTrigger className="w-full h-9">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="58mm">58mm (32 car.)</SelectItem>
+                                                <SelectItem value="80mm">80mm (48 car.)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <Label className="text-xs font-semibold mb-1.5 block">Test</Label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="w-full h-9"
+                                            onClick={async () => {
+                                                const ok = await btPrinter.printTest()
+                                                if (ok) toast.success("Test envoyé !")
+                                            }}
+                                            disabled={btPrinter.printing}
+                                        >
+                                            {btPrinter.printing ? "Impression..." : "🖨️ Imprimer test"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                Pour utiliser Bluetooth, sélectionnez "🔵 Bluetooth" comme imprimante dans les champs ci-dessus.
+                                Compatible avec Chrome sur Android. Non supporté sur Safari/iOS.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="flex justify-end pt-2">
                 <Button onClick={handleSave} disabled={loading} className="min-w-36">
