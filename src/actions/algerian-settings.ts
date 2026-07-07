@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { logAudit } from "./audit-log"
+import { serializeData } from "@/lib/serialize"
 
 /** Get Algerian business settings for the current tenant */
 export async function getAlgerianSettings() {
@@ -11,7 +12,7 @@ export async function getAlgerianSettings() {
     const tenantId = session?.user?.tenantId
     if (!tenantId) return null
 
-    return db.tenant.findUnique({
+    const result = await db.tenant.findUnique({
         where: { id: tenantId },
         select: {
             ramadanMode: true,
@@ -33,6 +34,8 @@ export async function getAlgerianSettings() {
             tvaEnabled: true,
         }
     })
+
+    return serializeData(result)
 }
 
 /** Update Algerian business settings */
