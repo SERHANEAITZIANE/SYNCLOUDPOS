@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { login as apiLogin, clearTokens, getCachedUser, loadTokens } from "./api";
+import { login as apiLogin, clearTokens, getCachedUser, loadTokens, apiFetch, saveTokens } from "./api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface User {
     id: string;
@@ -23,6 +24,7 @@ interface AuthState {
     login: (email: string, password: string, deviceName?: string) => Promise<void>;
     logout: () => Promise<void>;
     loadSession: () => Promise<void>;
+    switchTenant: (tenantId: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -38,6 +40,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     logout: async () => {
         await clearTokens();
         set({ user: null, isAuthenticated: false });
+    },
+
+    switchTenant: async (tenantId: string) => {
+        const data = await apiFetch("/auth/switch", {
+            method: "POST",
+            body: JSON.stringify({ tenantId }),
+        });
+        await saveTokens(data.accessToken, data.refreshToken);
+        await AsyncStorage.setItem("user_data", JSON.stringify(data.user));
+        set({ user: data.user });
     },
 
     loadSession: async () => {

@@ -170,7 +170,14 @@ export function UserNav({ user }: { user: any }) {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="my-1" />
                     <DropdownMenuItem 
-                        onClick={() => signOut()}
+                        onClick={async () => {
+                            try {
+                                await signOut({ callbackUrl: "/login", redirect: false });
+                            } catch (e) {
+                                console.error("SignOut error:", e);
+                            }
+                            window.location.href = "/login";
+                        }}
                         className="flex items-center justify-between cursor-pointer text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 py-2 px-2.5 m-1 transition-colors font-semibold"
                     >
                         <span className="flex items-center gap-2 text-xs">

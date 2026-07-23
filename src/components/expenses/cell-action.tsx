@@ -25,8 +25,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const tCommon = useTranslations("Common")
     const { data: session } = useSession()
 
-    const canEdit = session?.user?.canEdit || session?.user?.isSuperadmin || session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER"
-    const canDelete = session?.user?.canDelete || session?.user?.isSuperadmin || session?.user?.role === "ADMIN" || session?.user?.role === "MANAGER"
+    const user = session?.user
+    const canEdit = !user || user.role === "ADMIN" || user.role === "MANAGER" || user.isSuperadmin || user.canEdit !== false
+    const canDelete = !user || user.role === "ADMIN" || user.role === "MANAGER" || user.isSuperadmin || user.canDelete !== false
 
     const onDelete = async () => {
         try {

@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
                 select: {
                     id: true, name: true, price: true, cost: true,
                     wholesalePrice: true, dealerPrice: true,
-                    tvaRate: true, stock: true, minStock: true,
+                    tvaRate: true, stock: true, minStock: true, isService: true,
                     categoryId: true,
                     category: { select: { id: true, name: true } },
                     brand: { select: { id: true, name: true, imageUrl: true } },

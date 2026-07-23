@@ -34,6 +34,7 @@ files = [
     ('src/components/payments/columns.tsx', '/var/www/syncloudpos/src/components/payments/columns.tsx'),
     ('src/components/payments/client.tsx', '/var/www/syncloudpos/src/components/payments/client.tsx'),
     ('src/components/payments/cell-action.tsx', '/var/www/syncloudpos/src/components/payments/cell-action.tsx'),
+    ('src/components/payments/fiche-modal.tsx', '/var/www/syncloudpos/src/components/payments/fiche-modal.tsx'),
     ('src/components/payments/supplier-columns.tsx', '/var/www/syncloudpos/src/components/payments/supplier-columns.tsx'),
     ('src/components/payments/supplier-client.tsx', '/var/www/syncloudpos/src/components/payments/supplier-client.tsx'),
 ]

@@ -1,8 +1,9 @@
 "use client"
 
 import { Link } from "@/i18n/routing"
-import { Home, Users, Package, CreditCard, Landmark, Bluetooth } from "lucide-react"
+import { Home, Users, Package, CreditCard, Landmark, Bluetooth, LogOut } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { signOut } from "next-auth/react"
 
 import { Button } from "@/components/ui/button"
 import { useBluetoothPrinter } from "@/hooks/use-bluetooth-printer"
@@ -141,6 +142,22 @@ export const PosHeader = ({ storeName = "SYNCLOUDPOS" }: { storeName?: string })
                 <div className="hidden sm:block text-[10px] sm:text-[11px] font-bold text-green-600 dark:text-green-400 bg-green-500/10 px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0">
                     {t("online")}
                 </div>
+                <Button
+                    variant="outline"
+                    onClick={async () => {
+                        try {
+                            await signOut({ callbackUrl: "/login", redirect: false })
+                        } catch {
+                            // ignore
+                        }
+                        window.location.href = "/login"
+                    }}
+                    className="h-7 sm:h-8 border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-[10px] sm:text-[11px] font-black uppercase tracking-wider rounded-lg sm:rounded-xl gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 transition-all duration-200 shrink-0 cursor-pointer shadow-sm"
+                    title="Déconnexion"
+                >
+                    <LogOut className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                </Button>
             </div>
         </div>
     )

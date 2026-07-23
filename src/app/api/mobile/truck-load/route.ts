@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
         // Check if truck load already exists
         const existing = await db.truckLoad.findFirst({
-            where: { tourId },
+            where: { tourId, tenantId: user.tenantId },
         });
         if (existing) {
             return NextResponse.json({ error: "Chargement déjà effectué pour cette tournée" }, { status: 409 });

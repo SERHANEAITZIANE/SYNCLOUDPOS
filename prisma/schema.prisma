@@ -289,6 +289,7 @@ model Product {
   tvaRate         Decimal                @default(0)
   isFeatured      Boolean                @default(false)
   isArchived      Boolean                @default(false)
+  isService       Boolean                @default(false)
   stock           Int                    @default(0)
   minStock        Int                    @default(0)
   categoryId      String?

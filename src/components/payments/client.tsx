@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { registerCustomerPayment } from "@/actions/customers"
 import { getUnpaidSalesOrders } from "@/actions/sales-orders"
+import { FichePaiementModal, PaymentFicheData } from "./fiche-modal"
 
 interface PaymentsClientProps {
     data: PaymentColumn[]
@@ -56,6 +57,8 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
     })
     const [salesOrders, setSalesOrders] = React.useState<any[]>([])
     const [selectedSalesOrderId, setSelectedSalesOrderId] = React.useState<string>("")
+    const [createdFicheData, setCreatedFicheData] = React.useState<PaymentFicheData | null>(null)
+    const [ficheOpen, setFicheOpen] = React.useState(false)
 
     React.useEffect(() => {
         if (!newPayment.customerId) {
@@ -177,7 +180,19 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                 toast.error(result.error as string)
             } else {
                 toast.success(t("paymentSaved"))
+                const cust = customers.find(c => c.id === newPayment.customerId)
+                const acc = accounts.find(a => a.id === newPayment.accountId)
+
+                setCreatedFicheData({
+                    date: newPayment.date,
+                    amount,
+                    customerName: cust?.name || "Client",
+                    accountName: acc?.name || "Caisse",
+                    description: newPayment.notes,
+                    source: "CUSTOMER_PAYMENT",
+                })
                 setCreateOpen(false)
+                setFicheOpen(true)
                 setNewPayment({ customerId: "", amount: "", accountId: "", notes: "", date: new Date().toISOString().slice(0, 10) })
                 setSelectedSalesOrderId("")
                 router.refresh()
@@ -401,6 +416,13 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Fiche de Paiement Modal */}
+            <FichePaiementModal
+                open={ficheOpen}
+                onClose={() => setFicheOpen(false)}
+                data={createdFicheData}
+            />
         </>
     )
 }

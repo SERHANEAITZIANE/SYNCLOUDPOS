@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         const accessToken = jwt.sign(
             {
                 userId: user.id,
-                tenantId: user.tenantId,
+                tenantId: storedToken.tenantId,
                 email: user.email,
                 name: user.name,
                 role: user.role,

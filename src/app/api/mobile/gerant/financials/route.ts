@@ -215,7 +215,7 @@ export async function GET(req: NextRequest) {
 
         const productsCost = productIds.length > 0
             ? await db.product.findMany({
-                where: { id: { in: productIds } },
+                where: { id: { in: productIds }, tenantId },
                 select: { id: true, cost: true },
             })
             : [];
@@ -234,7 +234,7 @@ export async function GET(req: NextRequest) {
         const topProductIds = topProductsData.map(tp => tp.productId);
         const topProductNames = topProductIds.length > 0
             ? await db.product.findMany({
-                where: { id: { in: topProductIds } },
+                where: { id: { in: topProductIds }, tenantId },
                 select: { id: true, name: true, cost: true },
             })
             : [];

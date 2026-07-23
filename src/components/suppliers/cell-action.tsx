@@ -47,7 +47,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 <ScrollText className="h-4 w-4" />
             </Button>
 
-            {session?.user?.canEdit && (
+            {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canEdit !== false) && (
                 <Button
                     variant="ghost"
                     size="icon"
@@ -59,7 +59,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 </Button>
             )}
 
-            {session?.user?.canDelete && (
+            {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete !== false) && (
                 <Button
                     variant="ghost"
                     size="icon"

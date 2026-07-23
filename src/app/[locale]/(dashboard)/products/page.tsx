@@ -21,6 +21,7 @@ const ProductsPage = async ({
         name: item.name,
         isFeatured: item.isFeatured || false,
         isArchived: item.isArchived || false,
+        isService: item.isService || false,
         price: Number(item.price || 0).toFixed(2),
         cost: item.cost ? Number(item.cost).toFixed(2) : "0.00",
         wholesalePrice: item.wholesalePrice ? Number(item.wholesalePrice).toFixed(2) : "0.00",

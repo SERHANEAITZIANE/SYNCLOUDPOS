@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
         const locations = await Promise.all(
             drivers.map(async (driver) => {
                 const latest = await db.driverLocation.findFirst({
-                    where: { driverId: driver.id },
+                    where: { driverId: driver.id, tenantId: user.tenantId },
                     orderBy: { createdAt: "desc" },
                 });
                 return {

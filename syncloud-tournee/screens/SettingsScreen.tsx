@@ -1,16 +1,57 @@
 import React, { useState, useEffect } from "react";
 import {
     View, Text, ScrollView, TouchableOpacity, StyleSheet,
-    Switch, Alert, Linking,
+    Switch, Alert, Linking, Modal, ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "../lib/store";
 import { useLangStore } from "../lib/i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { apiFetch } from "../lib/api";
 
 export default function SettingsScreen() {
     const { user, logout } = useAuthStore();
     const { t, lang, setLang } = useLangStore();
+
+    // Tenant Switcher States & Handlers
+    const [availableTenants, setAvailableTenants] = useState<{ id: string; name: string }[]>([]);
+    const [loadingTenants, setLoadingTenants] = useState(false);
+    const [showTenantModal, setShowTenantModal] = useState(false);
+
+    const handleSwitchTenantPress = async () => {
+        try {
+            setLoadingTenants(true);
+            setShowTenantModal(true);
+            const data = await apiFetch("/auth/tenants");
+            if (data && Array.isArray(data.tenants)) {
+                setAvailableTenants(data.tenants);
+            }
+        } catch (err: any) {
+            Alert.alert(t("error") || "Erreur", "Impossible de récupérer la liste des boutiques");
+        } finally {
+            setLoadingTenants(false);
+        }
+    };
+
+    const handleSelectTenant = async (tenantId: string) => {
+        try {
+            setLoadingTenants(true);
+            await useAuthStore.getState().switchTenant(tenantId);
+            setShowTenantModal(false);
+            Alert.alert(
+                lang === "ar" ? "نجاح" : "Succès",
+                lang === "ar" ? "تم تغيير المتجر بنجاح" : "Boutique changée avec succès !"
+            );
+        } catch (err: any) {
+            Alert.alert(
+                lang === "ar" ? "خطأ" : "Erreur",
+                err.message || (lang === "ar" ? "فشل تغيير المتجر" : "Impossible de changer de boutique")
+            );
+        } finally {
+            setLoadingTenants(false);
+        }
+    };
+
     const [mapsProvider, setMapsProvider] = useState("google");
     const [gpsSource, setGpsSource] = useState("phone");
     const [gpsTracking, setGpsTracking] = useState(true);
@@ -190,7 +231,13 @@ export default function SettingsScreen() {
             <View style={styles.settingCard}>
                 <View style={styles.infoRow}><Text style={styles.infoLabel}>{t("server")}</Text><Text style={styles.infoValue}>SynCloudPOS</Text></View>
                 <View style={styles.infoRow}><Text style={styles.infoLabel}>{t("version")}</Text><Text style={styles.infoValue}>1.0.0</Text></View>
-                <View style={styles.infoRow}><Text style={styles.infoLabel}>{t("tenant")}</Text><Text style={styles.infoValue}>{user?.tenantId?.slice(-8)}</Text></View>
+                <TouchableOpacity style={styles.infoRow} onPress={handleSwitchTenantPress}>
+                    <Text style={styles.infoLabel}>{t("tenant")}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Text style={styles.infoValue}>{user?.tenant?.name || user?.tenantId?.slice(-8).toUpperCase()}</Text>
+                        <Ionicons name="chevron-forward" size={14} color="#64748b" />
+                    </View>
+                </TouchableOpacity>
             </View>
 
             {/* Logout */}
@@ -198,6 +245,57 @@ export default function SettingsScreen() {
                 <Ionicons name="log-out-outline" size={20} color="#ef4444" />
                 <Text style={styles.logoutText}>{t("logout")}</Text>
             </TouchableOpacity>
+
+            {/* Tenant Switcher Modal */}
+            <Modal
+                visible={showTenantModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowTenantModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                {lang === "ar" ? "تغيير المتجر" : "Changer de boutique"}
+                            </Text>
+                            <TouchableOpacity onPress={() => setShowTenantModal(false)}>
+                                <Ionicons name="close" size={24} color="#f8fafc" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {loadingTenants ? (
+                            <ActivityIndicator size="large" color="#2563eb" style={{ marginVertical: 30 }} />
+                        ) : (
+                            <ScrollView style={{ maxHeight: 300 }}>
+                                {availableTenants.map((item) => {
+                                    const isActive = item.id === user?.tenantId;
+                                    return (
+                                        <TouchableOpacity
+                                            key={item.id}
+                                            style={[styles.tenantItem, isActive && styles.tenantItemActive]}
+                                            onPress={() => handleSelectTenant(item.id)}
+                                            disabled={isActive}
+                                        >
+                                            <Ionicons 
+                                                name="storefront-outline" 
+                                                size={20} 
+                                                color={isActive ? "#2563eb" : "#64748b"} 
+                                            />
+                                            <Text style={[styles.tenantNameText, isActive && styles.tenantNameTextActive]}>
+                                                {item.name}
+                                            </Text>
+                                            {isActive && (
+                                                <Ionicons name="checkmark-circle" size={18} color="#2563eb" style={{ marginLeft: "auto" }} />
+                                            )}
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </ScrollView>
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -259,4 +357,64 @@ const styles = StyleSheet.create({
         backgroundColor: "#1e293b", borderWidth: 1, borderColor: "#7f1d1d",
     },
     logoutText: { color: "#ef4444", fontSize: 16, fontWeight: "700" },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        padding: 20,
+    },
+    modalContent: {
+        width: "100%",
+        backgroundColor: "#1e293b",
+        borderRadius: 20,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: "#334155",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: "#334155",
+        paddingBottom: 10,
+    },
+    modalTitle: {
+        color: "#f8fafc",
+        fontSize: 18,
+        fontWeight: "800",
+    },
+    tenantItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        marginBottom: 8,
+        backgroundColor: "#0f172a",
+        borderWidth: 1,
+        borderColor: "#334155",
+    },
+    tenantItemActive: {
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.05)",
+    },
+    tenantNameText: {
+        color: "#94a3b8",
+        fontSize: 15,
+        fontWeight: "600",
+    },
+    tenantNameTextActive: {
+        color: "#2563eb",
+        fontWeight: "700",
+    },
 });

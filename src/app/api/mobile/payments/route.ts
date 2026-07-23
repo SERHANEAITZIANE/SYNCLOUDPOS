@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
         }
 
         if (finalAccountId) {
-            const account = await db.treasuryAccount.findUnique({
-                where: { id: finalAccountId }
+            const account = await db.treasuryAccount.findFirst({
+                where: { id: finalAccountId, tenantId: user.tenantId }
             });
 
             if (account) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
                 // Update caisse balance
                 await db.treasuryAccount.update({
-                    where: { id: finalAccountId },
+                    where: { id: account.id },
                     data: { balance: { increment: amount } }
                 });
 

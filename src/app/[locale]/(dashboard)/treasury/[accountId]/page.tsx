@@ -1,4 +1,4 @@
-import { getTreasuryAccount, getTreasuryTransactions } from "@/actions/treasury"
+import { getTreasuryAccount, getTreasuryTransactions, getTreasuryAccounts } from "@/actions/treasury"
 import { formatter } from "@/lib/utils"
 import { format } from "date-fns"
 import { TransactionsClient } from "./components/client"
@@ -17,6 +17,7 @@ const TransactionLogPage = async ({
     }
 
     const transactions = await getTreasuryTransactions(accountId)
+    const accounts = await getTreasuryAccounts()
 
     const formattedTransactions: TreasuryTransactionColumn[] = transactions.map((item: any) => ({
         id: item.id,
@@ -33,13 +34,14 @@ const TransactionLogPage = async ({
         description: item.description || "-",
         accountName: account.name,
         referenceId: item.referenceId,
-        referenceNumber: (item as any).referenceNumber || null
+        referenceNumber: (item as any).referenceNumber || null,
+        accountId: item.accountId
     }))
 
     return (
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
-                <TransactionsClient data={formattedTransactions} account={account as any} locale={locale} />
+                <TransactionsClient data={formattedTransactions} account={account as any} accounts={accounts as any} locale={locale} />
             </div>
         </div>
     )

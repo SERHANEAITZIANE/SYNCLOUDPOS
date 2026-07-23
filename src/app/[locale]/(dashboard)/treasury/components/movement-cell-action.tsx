@@ -62,9 +62,9 @@ export const MovementCellAction: React.FC<MovementCellActionProps> = ({ data, ac
                 accounts={accounts}
                 initialData={{
                     id: data.id,
-                    accountId: data.accountId || data.accountName, // Might need to pass actual accountId from server
+                    accountId: data.accountId,
                     type: data.type,
-                    amount: data.amount,
+                    amount: data.rawAmount !== undefined ? data.rawAmount : parseFloat(String(data.amount).replace(/[^\d.-]/g, '')),
                     description: data.description,
                     createdAt: data.rawDate || data.date
                 }}

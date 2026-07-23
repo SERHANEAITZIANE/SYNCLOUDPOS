@@ -27,6 +27,7 @@ interface ProductCardProps {
         category: string
         stock: number
         barcodes: string[]
+        isService?: boolean
     }
     blockNegativeStock?: boolean
     isFocused?: boolean
@@ -101,8 +102,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             scrollIntoViewSafe(ref.current);
         }
     }, [isFocused, ref]);
-    const outOfStock = blockNegativeStock && (data.stock - quantityInCart) <= 0;
-    const isLowStock = (data.stock - quantityInCart) > 0 && (data.stock - quantityInCart) <= data.minStock;
+    const isService = (data as any).isService;
+    const outOfStock = !isService && blockNegativeStock && (data.stock - quantityInCart) <= 0;
+    const isLowStock = !isService && (data.stock - quantityInCart) > 0 && (data.stock - quantityInCart) <= data.minStock;
 
     return (
         <>

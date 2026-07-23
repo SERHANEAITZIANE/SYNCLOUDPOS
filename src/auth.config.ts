@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
+import { cookies } from "next/headers"
 
 /**
  * Edge-compatible auth configuration.
@@ -37,14 +38,34 @@ export default {
                 session.user.role = token.role
                 // @ts-expect-error custom fields from JWT
                 session.user.isBlocked = token.isBlocked
-                // @ts-expect-error custom fields from JWT
-                session.user.canEdit = token.canEdit
-                // @ts-expect-error custom fields from JWT
-                session.user.canDelete = token.canDelete
+                const isAdminOrSuper = token.role === "ADMIN" || Boolean(token.isSuperadmin);
+                session.user.canEdit = isAdminOrSuper ? true : Boolean(token.canEdit)
+                session.user.canDelete = isAdminOrSuper ? true : Boolean(token.canDelete)
                 // @ts-expect-error custom fields from JWT
                 session.user.defaultStoreId = token.defaultStoreId
                 // @ts-expect-error custom fields from JWT
                 session.user.subscriptionEndsAt = token.subscriptionEndsAt
+
+                try {
+                    const cookieStore = await cookies()
+                    const selectedTenantId = cookieStore.get("selected_tenant_id")?.value
+                    const allowedTenants = (token.allowedTenantIds as string[]) || [token.tenantId as string];
+                    
+                    let activeTenantId = (token.tenantId as string) || session.user.tenantId;
+                    if (selectedTenantId && (allowedTenants.includes(selectedTenantId) || token.isSuperadmin)) {
+                        activeTenantId = selectedTenantId;
+                    }
+                    session.user.tenantId = activeTenantId;
+
+                    const selectedStoreId = cookieStore.get("selected_store_id")?.value
+                    if (selectedStoreId && activeTenantId === selectedTenantId) {
+                        session.user.defaultStoreId = selectedStoreId
+                    } else {
+                        session.user.defaultStoreId = token.defaultStoreId as string
+                    }
+                } catch {
+                    // ignore
+                }
             }
             return session
         },

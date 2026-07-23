@@ -140,10 +140,9 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 session.user.isBlocked = token.isBlocked
                 // @ts-expect-error custom fields
                 session.user.role = token.role
-                // @ts-expect-error custom fields
-                session.user.canEdit = token.role === "ADMIN" ? true : token.canEdit
-                // @ts-expect-error custom fields
-                session.user.canDelete = token.role === "ADMIN" ? true : token.canDelete
+                const isAdmin = token.role === "ADMIN" || Boolean(token.isSuperadmin);
+                session.user.canEdit = isAdmin ? true : Boolean(token.canEdit)
+                session.user.canDelete = isAdmin ? true : Boolean(token.canDelete)
                 // @ts-expect-error custom fields
                 session.user.defaultStoreId = token.defaultStoreId
                 // @ts-expect-error custom fields
@@ -160,8 +159,9 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     session.user.isSuperadmin = existingUser.isSuperadmin;
                     // @ts-expect-error custom fields
                     session.user.role = existingUser.role;
-                    session.user.canEdit = existingUser.role === "ADMIN" ? true : existingUser.canEdit;
-                    session.user.canDelete = existingUser.role === "ADMIN" ? true : existingUser.canDelete;
+                    const isAdmin = existingUser.role === "ADMIN" || existingUser.isSuperadmin;
+                    session.user.canEdit = isAdmin ? true : Boolean(existingUser.canEdit);
+                    session.user.canDelete = isAdmin ? true : Boolean(existingUser.canDelete);
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
                     session.user.isBlocked = existingUser.tenant?.isBlocked;
                     session.user.defaultStoreId = existingUser.defaultStoreId;
@@ -169,6 +169,30 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     session.user.username = existingUser.username;
                 }
             }
+            // Store and tenant selection override (cookie-based, browser-session specific)
+            if (session.user) {
+                try {
+                    const cookieStore = await cookies()
+                    const selectedTenantId = cookieStore.get("selected_tenant_id")?.value
+                    const allowedTenants = (token.allowedTenantIds as string[]) || [token.tenantId as string];
+                    
+                    let activeTenantId = (token.tenantId as string) || session.user.tenantId;
+                    if (selectedTenantId && (allowedTenants.includes(selectedTenantId) || token.isSuperadmin)) {
+                        activeTenantId = selectedTenantId;
+                    }
+                    session.user.tenantId = activeTenantId;
+
+                    const selectedStoreId = cookieStore.get("selected_store_id")?.value
+                    if (selectedStoreId && activeTenantId === selectedTenantId) {
+                        session.user.defaultStoreId = selectedStoreId
+                    } else {
+                        session.user.defaultStoreId = token.defaultStoreId as string
+                    }
+                } catch {
+                    // ignore
+                }
+            }
+
             // Superadmin impersonation override (cookie-based, never touches DB)
             if (session.user?.isSuperadmin) {
                 try {
@@ -224,12 +248,28 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 token.tenantId = dbUser.tenantId;
                 token.isSuperadmin = dbUser.isSuperadmin;
                 token.role = dbUser.role;
-                token.canEdit = dbUser.role === "ADMIN" ? true : dbUser.canEdit;
-                token.canDelete = dbUser.role === "ADMIN" ? true : dbUser.canDelete;
+                const isAdmin = dbUser.role === "ADMIN" || Boolean(dbUser.isSuperadmin);
+                token.canEdit = isAdmin ? true : Boolean(dbUser.canEdit);
+                token.canDelete = isAdmin ? true : Boolean(dbUser.canDelete);
                 token.subscriptionEndsAt = tenant?.subscriptionEndsAt;
                 token.isBlocked = tenant?.isBlocked;
                 token.defaultStoreId = dbUser.defaultStoreId;
                 token.username = dbUser.username;
+
+                // Load all allowed tenant IDs for this user
+                const allowedTenantIds = [dbUser.tenantId];
+                if (dbUser.id) {
+                    const memberships = await db.tenantUser.findMany({
+                        where: { userId: dbUser.id },
+                        select: { tenantId: true }
+                    });
+                    memberships.forEach((m: { tenantId: string }) => {
+                        if (!allowedTenantIds.includes(m.tenantId)) {
+                            allowedTenantIds.push(m.tenantId);
+                        }
+                    });
+                }
+                token.allowedTenantIds = allowedTenantIds;
             }
 
             // 2. Dynamic updates
@@ -248,22 +288,31 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 }
             }
 
-            // 2.5 Periodic tenant sync: if user's DB tenantId differs from token, refresh
-            if (token.sub && token.tenantId) {
+            // 2.5 Periodic user & tenant sync: refresh role, permissions, subscription, and block status from DB
+            if (token.sub) {
                 const currentUser = await db.user.findUnique({
                     where: { id: token.sub },
-                    select: { tenantId: true, defaultStoreId: true, tenant: { select: { subscriptionEndsAt: true, isBlocked: true } } }
+                    select: {
+                        role: true,
+                        isSuperadmin: true,
+                        canEdit: true,
+                        canDelete: true,
+                        tenant: { select: { subscriptionEndsAt: true, isBlocked: true } }
+                    }
                 });
-                if (currentUser && currentUser.tenantId !== token.tenantId) {
-                    token.tenantId = currentUser.tenantId;
+                if (currentUser) {
+                    token.role = currentUser.role;
+                    token.isSuperadmin = currentUser.isSuperadmin;
+                    const isAdmin = currentUser.role === "ADMIN" || Boolean(currentUser.isSuperadmin);
+                    token.canEdit = isAdmin ? true : Boolean(currentUser.canEdit);
+                    token.canDelete = isAdmin ? true : Boolean(currentUser.canDelete);
                     token.subscriptionEndsAt = currentUser.tenant?.subscriptionEndsAt;
                     token.isBlocked = currentUser.tenant?.isBlocked;
-                    token.defaultStoreId = currentUser.defaultStoreId;
                 }
             }
 
             // 3. Fallback for legacy tokens if they lack tenantId
-            if (!token.tenantId && token.sub) {
+            if ((!token.tenantId || !token.allowedTenantIds) && token.sub) {
                 const foundUser = await db.user.findUnique({
                     where: { id: token.sub },
                     include: { tenant: true }
@@ -278,6 +327,18 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     token.isBlocked = foundUser.tenant?.isBlocked;
                     token.defaultStoreId = foundUser.defaultStoreId;
                     token.username = foundUser.username;
+
+                    const allowedTenantIds = [foundUser.tenantId];
+                    const memberships = await db.tenantUser.findMany({
+                        where: { userId: foundUser.id },
+                        select: { tenantId: true }
+                    });
+                    memberships.forEach((m: { tenantId: string }) => {
+                        if (!allowedTenantIds.includes(m.tenantId)) {
+                            allowedTenantIds.push(m.tenantId);
+                        }
+                    });
+                    token.allowedTenantIds = allowedTenantIds;
                 }
             }
 

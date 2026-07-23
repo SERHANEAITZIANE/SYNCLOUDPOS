@@ -49,6 +49,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         }
     }
 
+    const user = session?.user
+    const canEdit = !user || user.role === "ADMIN" || user.isSuperadmin || user.canEdit !== false
+    const canDelete = !user || user.role === "ADMIN" || user.isSuperadmin || user.canDelete !== false
+
     return (
         <>
             <AlertModal
@@ -97,7 +101,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         </TooltipContent>
                     </Tooltip>
 
-                    {session?.user?.canEdit && (
+                    {canEdit && (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -115,7 +119,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         </Tooltip>
                     )}
 
-                    {session?.user?.canDelete && (
+                    {canDelete && (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button

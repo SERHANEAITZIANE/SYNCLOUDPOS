@@ -195,7 +195,7 @@ function permissionMatches(granted: Permission, requested: string): boolean {
 export async function hasPermission(permission: Permission): Promise<boolean> {
     const session = await auth()
     if (!session?.user) return false
-    if (session.user.isSuperadmin) return true
+    if (session.user.isSuperadmin || session.user.role === "ADMIN") return true
 
     const role = session.user.role || "CASHIER"
     const permissions = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["CASHIER"]

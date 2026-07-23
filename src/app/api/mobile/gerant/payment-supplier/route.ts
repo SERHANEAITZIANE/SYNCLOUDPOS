@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
 
         // Create treasury outflow
         if (finalAccountId) {
-            const account = await db.treasuryAccount.findUnique({
-                where: { id: finalAccountId },
+            const account = await db.treasuryAccount.findFirst({
+                where: { id: finalAccountId, tenantId },
             });
 
             if (account) {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
                 const balanceAfter = balanceBefore - amount;
 
                 await db.treasuryAccount.update({
-                    where: { id: finalAccountId },
+                    where: { id: account.id },
                     data: { balance: { decrement: amount } },
                 });
 
@@ -80,8 +80,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Get updated supplier
-        const updatedSupplier = await db.supplier.findUnique({
-            where: { id: supplierId },
+        const updatedSupplier = await db.supplier.findFirst({
+            where: { id: supplierId, tenantId },
             select: { id: true, name: true, balance: true },
         });
 

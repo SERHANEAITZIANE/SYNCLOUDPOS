@@ -98,19 +98,26 @@ export const getColumns = (accounts: any[] = []): ColumnDef<TreasuryMovementColu
             const refId = row.original.referenceId
             const source = row.original.source
             const type = row.original.type
-            if (!refId) return <span className="text-muted-foreground">-</span>
+            const isCaisseDirect = ["INITIAL_BALANCE", "MANUAL_IN", "MANUAL_OUT"].includes(source)
+            if (!refId && !isCaisseDirect) return <span className="text-muted-foreground">-</span>
 
             let href = ""
             let label = ""
 
             const txId = row.original.id
             const desc = (row.original.description || "").toLowerCase()
+            const accId = row.original.accountId
             
             const isRetour = source === "RETURN" || desc.includes("retour client") || desc.includes("retour fournisseur")
-            const isEmprunt = source === "LOAN" || desc.includes("emprunt") || desc.includes("prêt")
+            const isEmprunt = source === "LOAN" || source === "CUSTOMER_LOAN" || source === "SUPPLIER_LOAN" || desc.includes("emprunt") || desc.includes("prêt")
             const refNumber = row.original.referenceNumber
 
-            if (isRetour) {
+            if (isCaisseDirect) {
+                href = accId ? `/treasury/${accId}` : ""
+                if (source === "INITIAL_BALANCE") label = "Solde Initial"
+                else if (source === "MANUAL_IN") label = "Entrée Caisse"
+                else if (source === "MANUAL_OUT") label = "Sortie Caisse"
+            } else if (isRetour) {
                 href = `/retours?returnId=${refId}`
                 label = type === "DEBIT" ? "Retour Client" : "Retour Fournisseur"
                 if (refNumber) label += ` (${refNumber})`
@@ -127,28 +134,23 @@ export const getColumns = (accounts: any[] = []): ColumnDef<TreasuryMovementColu
                 label = "Vente POS"
                 if (refNumber) label += ` (${refNumber})`
             } else if (source === "CUSTOMER_PAYMENT") {
-                href = `/sales/${refId}`
+                href = `/payments?paymentId=${txId}`
                 label = "Paiement Client"
+                if (refNumber) label += ` (${refNumber})`
+            } else if (source === "SUPPLIER_PAYMENT") {
+                href = `/payments/suppliers?paymentId=${txId}`
+                label = "Paiement Fournisseur"
                 if (refNumber) label += ` (${refNumber})`
             } else if (source === "PURCHASE") {
                 href = `/purchases/${refId}`
                 label = "Achat / BL"
                 if (refNumber) label += ` (${refNumber})`
-            } else if (source === "MANUAL_IN") {
-                href = `/payments?paymentId=${txId}`
-                label = "Entrée Manuelle"
-            } else if (source === "MANUAL_OUT" || source === "SUPPLIER_PAYMENT") {
-                href = `/payments/suppliers?paymentId=${txId}`
-                label = "Sortie Manuelle"
             } else if (source === "EXPENSE") {
                 href = `/expenses/${refId}`
                 label = "Dépense"
             } else if (source === "TRANSFER") {
                 href = `/transfers`
                 label = type === "DEBIT" ? "Virement Sortant" : "Virement Entrant"
-            } else if (source === "INITIAL_BALANCE") {
-                href = ""
-                label = "Solde Initial"
             } else if (source === "PAYMENT") {
                 const desc = (row.original.description || "").toLowerCase()
                 if (desc.includes("fournisseur") || desc.includes("supplier")) {
@@ -160,7 +162,7 @@ export const getColumns = (accounts: any[] = []): ColumnDef<TreasuryMovementColu
                 }
             }
 
-            if (!href) return <span className="text-xs text-muted-foreground">Autre</span>
+            if (!href) return <span className="text-xs text-muted-foreground">{label || "Autre"}</span>
 
             return (
                 <Link

@@ -27,6 +27,7 @@ export type ProductColumn = {
     brand: string
     isFeatured: boolean
     isArchived: boolean
+    isService?: boolean
     stock: number
     minStock: number
     createdAt: string
@@ -41,9 +42,18 @@ interface StockCellProps {
 
 const StockCellWithHistory: React.FC<StockCellProps> = ({ row, stock, minStock }) => {
     const [openHistory, setOpenHistory] = useState(false)
+    const isService = (row.original as any).isService
     const isLow = stock <= minStock
     const isOut = stock <= 0
     
+    if (isService) {
+        return (
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+                ♾ Service
+            </span>
+        )
+    }
+
     return (
         <>
             <StockHistoryModal
@@ -122,6 +132,11 @@ export function useProductColumns(): ColumnDef<ProductColumn>[] {
                                 <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate leading-tight">
                                     {row.original.name}
                                 </span>
+                                {row.original.isService && (
+                                    <Badge variant="outline" className="text-[9px] font-extrabold bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800 px-1.5 py-0 uppercase shrink-0">
+                                        Service
+                                    </Badge>
+                                )}
                                 {row.original.isFeatured && (
                                     <span title="Mis en avant" className="flex shrink-0">
                                         <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />

@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
 
 export const createStore = async (name: string) => {
     const session = await auth()
@@ -94,12 +95,26 @@ export const createStore = async (name: string) => {
                 }
             })
 
-            return tenant
+            return { tenant, store: defaultStore }
+        })
+
+        const cookieStore = await cookies()
+        cookieStore.set("selected_tenant_id", result.tenant.id, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 365, // 1 year
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        })
+        cookieStore.set("selected_store_id", result.store.id, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 365, // 1 year
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
         })
 
         revalidatePath("/dashboard")
 
-        return { success: "Store created", tenant: result }
+        return { success: "Store created", tenant: result.tenant }
     } catch (error: any) {
         console.error("Failed to create store", error)
         require('fs').writeFileSync('store_error.txt', JSON.stringify({ message: error.message, stack: error.stack }), 'utf8')

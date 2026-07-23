@@ -1,27 +1,23 @@
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { getActiveTenantId } from "@/actions/get-active-tenant";
 
 export const getSubscriptionStatus = async () => {
     const session = await auth();
     if (!session?.user?.id) return null;
 
-    // Single query instead of two sequential lookups
-    const user = await db.user.findUnique({
-        where: { id: session.user.id },
+    const tenantId = await getActiveTenantId();
+    if (!tenantId) return null;
+
+    const tenant = await db.tenant.findUnique({
+        where: { id: tenantId },
         select: {
-            tenantId: true,
-            tenant: {
-                select: {
-                    subscriptionEndsAt: true,
-                    isBlocked: true,
-                }
-            }
+            subscriptionEndsAt: true,
+            isBlocked: true,
         }
     });
 
-    if (!user?.tenantId || !user.tenant) return null;
-
-    const tenant = user.tenant;
+    if (!tenant) return null;
     const now = new Date();
     const isExpired = tenant.subscriptionEndsAt ? tenant.subscriptionEndsAt < now : true;
 

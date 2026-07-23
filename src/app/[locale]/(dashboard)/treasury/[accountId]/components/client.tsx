@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 import { DataTable } from "@/components/ui/data-table"
-import { columns } from "./columns"
+import { getColumns } from "./columns"
 import { TreasuryTransactionColumn } from "./types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
@@ -49,6 +49,7 @@ import {
 interface TransactionsClientProps {
     data: TreasuryTransactionColumn[]
     account: TreasuryAccount
+    accounts: any[]
     locale: string
 }
 
@@ -138,11 +139,14 @@ const T: Record<string, Record<string, string>> = {
 export const TransactionsClient: React.FC<TransactionsClientProps> = ({
     data,
     account,
+    accounts,
     locale
 }) => {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState<"visual" | "journal">("visual")
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+
+    const columns = useMemo(() => getColumns(accounts), [accounts])
 
     const lang = T[locale] ? locale : "fr"
     const t = (key: string) => T[lang][key] || key

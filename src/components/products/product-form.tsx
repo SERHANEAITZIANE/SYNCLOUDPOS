@@ -4,13 +4,13 @@ import * as z from "zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Trash, Plus, Wand2, Package, Tag, Barcode, Star, Archive, DollarSign, ShoppingCart, Users, Store } from "lucide-react"
+import { Trash, Plus, Wand2, Package, Tag, Barcode, Star, Archive, DollarSign, ShoppingCart, Users, Store, Wrench } from "lucide-react"
 
 // Local interfaces
 interface ProductImage { url: string; id?: string; productId?: string }
 interface Product {
     id: string; name: string; price: number | any; categoryId: string; brandId: string
-    images: ProductImage[]; isFeatured: boolean; isArchived: boolean
+    images: ProductImage[]; isFeatured: boolean; isArchived: boolean; isService?: boolean
     wholesalePrice?: number | null; dealerPrice?: number | null; cost?: number | null
     stock: number; minStock: number; barcodes?: { id?: string; value: string; label?: string | null }[]
     description?: string | null; colorId?: string | null; sizeId?: string | null
@@ -80,8 +80,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         resolver: zodResolver(ProductSchema),
         defaultValues: initialData ? {
             ...initialData,
-            price: parseFloat(String(initialData.price)),
-            cost: initialData.cost ? parseFloat(String(initialData.cost)) : 0,
+            price: initialData.price !== undefined && initialData.price !== null ? parseFloat(String(initialData.price)) : 0,
+            cost: initialData.cost !== undefined && initialData.cost !== null ? parseFloat(String(initialData.cost)) : 0,
             wholesalePrice: initialData.wholesalePrice ? parseFloat(String(initialData.wholesalePrice)) : 0,
             dealerPrice: initialData.dealerPrice ? parseFloat(String(initialData.dealerPrice)) : 0,
             stock: initialData.stock,
@@ -93,62 +93,45 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             brandId: initialData.brandId || "",
             isFeatured: initialData.isFeatured || false,
             isArchived: initialData.isArchived || false,
+            isService: (initialData as any).isService || false,
             images: initialData.images || []
         } : {
             name: "", images: [], price: 0, cost: 0, wholesalePrice: 0, dealerPrice: 0,
             stock: 0, minStock: 0, categoryId: "", brandId: "", description: "", barcodes: [],
-            isFeatured: false, isArchived: false, tvaRate: 0,
+            isFeatured: false, isArchived: false, isService: false, tvaRate: 0,
         }
     } as any)
 
     const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
         try {
             setLoading(true)
-            const result = initialData
-                ? await updateProduct(initialData.id, values)
-                : await createProduct(values)
-            if (!result.error) {
-                toast.success(t("messages.saved"))
-                router.refresh()
-                router.push(`/products`)
+            let res
+            if (initialData) {
+                res = await updateProduct(initialData.id, values)
             } else {
-                toast.error(result.error || tCommon("error"))
-                console.error(result.error)
+                res = await createProduct(values)
+            }
+
+            if (res.error) {
+                toast.error(res.error)
+            } else {
+                toast.success(initialData ? t("toast.updated") : t("toast.created"))
+                router.push(`/products`)
+                router.refresh()
             }
         } catch (error) {
-            toast.error(tCommon("error"))
-            console.error("Something went wrong", error)
+            toast.error(tCommon("somethingWentWrong"))
         } finally {
             setLoading(false)
         }
     }
 
     const onInvalid = (errors: any) => {
-        const fieldLabels: Record<string, string> = {
-            name: "Nom/Désignation",
-            price: "Prix de vente",
-            cost: "Coût d'achat",
-            categoryId: "Catégorie (Famille)",
-            brandId: "Marque",
-            stock: "Quantité en stock",
-            minStock: "Seuil de stock",
-            barcodes: "Codes à barres",
-            tvaRate: "Taux TVA",
-            description: "Description"
-        }
+        console.error("Form validation errors:", errors)
         const errorMessages = Object.entries(errors)
-            .map(([field, err]: [string, any]) => {
-                const label = fieldLabels[field] || field
-                const msg = err.message || "requis ou invalide"
-                return `${label} (${msg})`
-            })
-            .filter(Boolean)
-
-        if (errorMessages.length > 0) {
-            toast.error(`Champs invalides : ${errorMessages.slice(0, 3).join(", ")}`, {
-                duration: 5000
-            })
-        }
+            .map(([field, err]: [string, any]) => `${field}: ${err.message || "Invalid"}`)
+            .join(", ")
+        toast.error(`Veuillez vérifier les champs du formulaire : ${errorMessages}`)
     }
 
     const onDelete = async () => {
@@ -172,7 +155,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     }
 
     const renderPriceInput = ({
-        name, label, description, icon: Icon, color = "default"
+        name,
+        label,
+        description,
+        icon: Icon,
+        color = "default"
     }: {
         name: keyof z.infer<typeof ProductSchema>
         label: string
@@ -209,7 +196,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                     placeholder="0.00"
                                     className="pr-12"
                                     {...field}
-                                    value={field.value as string | number || ""}
+                                    value={field.value !== undefined && field.value !== null && field.value !== "" ? field.value : 0}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
                                     DA
@@ -627,10 +614,30 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
                             {/* STATUS */}
                             <Card>
-                                <CardHeader className="pb-3">
+                                    <CardHeader className="pb-3">
                                     <CardTitle className="text-base">{t("form.productStatus")}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
+                                    <FormField
+                                        control={form.control}
+                                        name="isService"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center gap-3 rounded-lg border p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900">
+                                                <FormControl>
+                                                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                                </FormControl>
+                                                <div className="space-y-0.5">
+                                                    <FormLabel className="flex items-center gap-1.5 cursor-pointer text-indigo-700 dark:text-indigo-300 font-bold text-xs">
+                                                        <Wrench className="h-4 w-4 text-indigo-500" />
+                                                        Service / Prestation (ex: Main d&apos;œuvre)
+                                                    </FormLabel>
+                                                    <FormDescription className="text-[11px] text-indigo-600/80 dark:text-indigo-400/80">
+                                                        Service non physique sans suivi de stock obligatoire.
+                                                    </FormDescription>
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="isFeatured"

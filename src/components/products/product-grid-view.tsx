@@ -164,7 +164,7 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                                         <History className="h-4 w-4" />
                                     </Button>
 
-                                    {session?.user?.canEdit && (
+                                    {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canEdit !== false) && (
                                         <Button
                                             size="icon"
                                             variant="ghost"
@@ -179,7 +179,7 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
                                         </Button>
                                     )}
 
-                                    {session?.user?.canDelete && (
+                                    {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete !== false) && (
                                         <Button
                                             size="icon"
                                             variant="ghost"

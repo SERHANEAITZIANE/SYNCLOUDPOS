@@ -79,6 +79,7 @@ const PosPage = async () => {
                         where: { storeId: storeIdToUse }
                     },
                     isFeatured: true,
+                    isService: true,
                     barcodes: { select: { value: true } },
                     images: { select: { url: true }, take: 1 }
                 }
@@ -126,6 +127,7 @@ const PosPage = async () => {
             tvaRate: tenant?.tvaEnabled ? Number(item.tvaRate ?? 0) : 0,
             imageUrl: item.images?.[0]?.url || "",
             isFeatured: item.isFeatured || false,
+            isService: item.isService || false,
             barcodes: item.barcodes?.map((b: any) => b.value) || []
         }
     })

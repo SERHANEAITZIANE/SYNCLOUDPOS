@@ -67,7 +67,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     <Send className="h-4 w-4" />
                 </Button>
 
-                {session?.user?.canDelete && (
+                {(session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete) && (
                     <Button
                         variant="ghost"
                         size="icon"

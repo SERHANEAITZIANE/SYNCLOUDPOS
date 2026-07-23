@@ -47,7 +47,7 @@ export const CategorySchema = z.object({
 export const ProductSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     images: z.object({ url: z.string() }).array(),
-    price: z.coerce.number().min(1),
+    price: z.coerce.number().min(0, { message: "Le prix doit être supérieur ou égal à 0" }),
     tvaRate: z.coerce.number().min(0).max(100).default(0).optional(),
     categoryId: z.string().optional().nullable(),
     brandId: z.string().optional().nullable(),
@@ -55,6 +55,7 @@ export const ProductSchema = z.object({
     sizeId: z.string().optional().nullable(),
     isFeatured: z.boolean().default(false).optional(),
     isArchived: z.boolean().default(false).optional(),
+    isService: z.boolean().default(false).optional(),
     wholesalePrice: z.coerce.number().optional().nullable(),
     dealerPrice: z.coerce.number().optional().nullable(),
     cost: z.coerce.number().optional().nullable(),

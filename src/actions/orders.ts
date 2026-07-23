@@ -235,7 +235,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     tenantId,
                     storeId: storeIdToUse,
                     userId: selectedUserId || userId,
-                    customerId: customerId || undefined,
+                    customerId: finalCustomerId,
                     accountId: accountId || undefined,
                     total,
                     subtotal,
@@ -317,7 +317,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             // Step 1: Fetch all product stock in a single query (instead of N individual queries)
             const productIds = items.map((i: any) => i.productId);
             const productsWithStock = await tx.product.findMany({
-                where: { id: { in: productIds } },
+                where: { id: { in: productIds }, tenantId },
                 include: { storeProducts: { where: { storeId: storeIdToUse } } }
             });
             const stockMap = new Map(productsWithStock.map(p => {
@@ -327,13 +327,16 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     { 
                         stock: sp?.stock !== undefined && sp?.stock !== null ? sp.stock : 0, 
                         minStock: sp?.minStock !== undefined && sp?.minStock !== null ? sp.minStock : (p.minStock || 10), 
-                        hasStoreProduct: p.storeProducts.length > 0 
+                        hasStoreProduct: p.storeProducts.length > 0,
+                        isService: p.isService || false
                     }
                 ];
             }));
 
-            // Step 2: Ensure StoreProduct records exist for all items (upsert only missing ones)
-            const missingStoreProducts = items.filter((item: any) => !stockMap.get(item.productId)?.hasStoreProduct);
+            const physicalItems = items.filter((item: any) => !stockMap.get(item.productId)?.isService);
+
+            // Step 2: Ensure StoreProduct records exist for physical items
+            const missingStoreProducts = physicalItems.filter((item: any) => !stockMap.get(item.productId)?.hasStoreProduct);
             if (missingStoreProducts.length > 0) {
                 for (const item of missingStoreProducts) {
                     const existing = stockMap.get(item.productId);
@@ -347,15 +350,13 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 }
             }
 
-            // Step 3: Atomic stock decrements (race-safe — no read-compute-write gap)
+            // Step 3: Atomic stock decrements for physical items
             await Promise.all(
-                items.map(async (item: any) => {
-                    // Atomic decrement on StoreProduct — safe under concurrent transactions
+                physicalItems.map(async (item: any) => {
                     await tx.storeProduct.update({
                         where: { storeId_productId: { storeId: storeIdToUse, productId: item.productId } },
                         data: { stock: { decrement: item.quantity } }
                     });
-                    // Atomic decrement on Product global stock
                     await tx.product.update({
                         where: { id: item.productId },
                         data: { stock: { decrement: item.quantity } }
@@ -363,35 +364,36 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                 })
             );
 
-            // Step 4: Batch create stock movements (single query instead of N)
-            // Track running stock per product to handle duplicate products in same order
-            const runningStockMap = new Map<string, number>();
-            items.forEach((item: any) => {
-                if (!runningStockMap.has(item.productId)) {
-                    const existing = stockMap.get(item.productId);
-                    runningStockMap.set(item.productId, existing?.stock || 0);
-                }
-            });
+            // Step 4: Batch create stock movements for physical items
+            if (physicalItems.length > 0) {
+                const runningStockMap = new Map<string, number>();
+                physicalItems.forEach((item: any) => {
+                    if (!runningStockMap.has(item.productId)) {
+                        const existing = stockMap.get(item.productId);
+                        runningStockMap.set(item.productId, existing?.stock || 0);
+                    }
+                });
 
-            await tx.stockMovement.createMany({
-                data: items.map((item: any) => {
-                    const stockBefore = runningStockMap.get(item.productId) || 0;
-                    const stockAfter = stockBefore - item.quantity;
-                    runningStockMap.set(item.productId, stockAfter);
-                    return {
-                        productId: item.productId,
-                        type: "SALE",
-                        quantity: -item.quantity,
-                        stockBefore,
-                        stockAfter,
-                        referenceId: salesOrderId,
-                        reason: `Vente N° ${receiptNumber}`,
-                        userId,
-                        tenantId,
-                        createdAt: oldSalesOrder ? oldSalesOrder.createdAt : undefined
-                    };
-                })
-            });
+                await tx.stockMovement.createMany({
+                    data: physicalItems.map((item: any) => {
+                        const stockBefore = runningStockMap.get(item.productId) || 0;
+                        const stockAfter = stockBefore - item.quantity;
+                        runningStockMap.set(item.productId, stockAfter);
+                        return {
+                            productId: item.productId,
+                            type: "SALE",
+                            quantity: -item.quantity,
+                            stockBefore,
+                            stockAfter,
+                            referenceId: salesOrderId,
+                            reason: `Vente N° ${receiptNumber}`,
+                            userId,
+                            tenantId,
+                            createdAt: oldSalesOrder ? oldSalesOrder.createdAt : undefined
+                        };
+                    })
+                });
+            }
             // Note: We deliberately allow negative stock for POS to prevent blocking checkouts
             // when physical inventory differs from system inventory.
 

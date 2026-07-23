@@ -47,6 +47,25 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Rôle non autorisé pour l'app mobile" }, { status: 403 });
         }
 
+        // Ensure user has a TenantUser membership record for their default tenant
+        const membership = await db.tenantUser.findUnique({
+            where: {
+                userId_tenantId: {
+                    userId: user.id,
+                    tenantId: user.tenantId,
+                },
+            },
+        });
+        if (!membership) {
+            await db.tenantUser.create({
+                data: {
+                    userId: user.id,
+                    tenantId: user.tenantId,
+                    role: user.role === "ADMIN" ? "ADMIN" : "USER",
+                },
+            });
+        }
+
         // Generate JWT access token
         const accessToken = jwt.sign(
             {

@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit, Trash } from "lucide-react"
+import { Edit, Trash, FileText } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
@@ -12,6 +12,20 @@ import { Label } from "@/components/ui/label"
 import { deletePayment, updatePayment } from "@/actions/payments"
 import { PaymentColumn } from "./columns"
 import { SearchableSelect } from "@/components/ui/searchable-select"
+import { FichePaiementModal } from "./fiche-modal"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface CellActionProps {
     data: PaymentColumn
@@ -23,11 +37,12 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
     const [loading, setLoading] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
     const [editOpen, setEditOpen] = useState(false)
+    const [ficheOpen, setFicheOpen] = useState(false)
     const { data: session } = useSession()
 
     // Edit form state
     const [editAmount, setEditAmount] = useState(String(data.amount))
-    const [editDescription, setEditDescription] = useState(data.description)
+    const [editDescription, setEditDescription] = useState(data.description || "")
     const [editDate, setEditDate] = useState(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
     const [editAccountId, setEditAccountId] = useState(data.accountId || "")
 
@@ -74,6 +89,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
             } else {
                 toast.success("Paiement modifié")
                 setEditOpen(false)
+                setFicheOpen(true)
                 router.refresh()
             }
         } catch {
@@ -83,127 +99,203 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
         }
     }
 
-    const canEdit = session?.user?.canEdit || session?.user?.isSuperadmin || session?.user?.role === "ADMIN"
-    const canDelete = session?.user?.canDelete || session?.user?.isSuperadmin || session?.user?.role === "ADMIN"
+    const user = session?.user
+    const canEdit = !user || user.role === "ADMIN" || user.isSuperadmin || user.canEdit !== false
+    const canDelete = !user || user.role === "ADMIN" || user.isSuperadmin || user.canDelete !== false
 
     return (
         <>
             {/* Delete Confirmation Modal */}
-            {deleteOpen && (
-                <div className="fixed inset-0 z-[250] flex items-center justify-center" onClick={(e) => { if (e.target === e.currentTarget) setDeleteOpen(false) }}>
-                    <div className="fixed inset-0 bg-black/50" />
-                    <div className="relative z-[251] bg-background rounded-lg border shadow-lg p-6 w-full max-w-[400px] mx-4">
-                        <h3 className="text-lg font-semibold">Êtes-vous sûr ?</h3>
-                        <p className="text-sm text-muted-foreground mt-2">
+            <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                            Êtes-vous sûr ?
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">
                             Cette action est irréversible. Le paiement sera supprimé et les soldes seront recalculés.
-                        </p>
-                        <div className="flex justify-end gap-2 mt-6">
-                            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={loading}>
-                                Annuler
-                            </Button>
-                            <Button variant="destructive" onClick={onDelete} disabled={loading}>
-                                {loading ? "Suppression..." : "Supprimer"}
-                            </Button>
-                        </div>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2 mt-6">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setDeleteOpen(false)} 
+                            disabled={loading}
+                            className="border-zinc-300 dark:border-zinc-700"
+                        >
+                            Annuler
+                        </Button>
+                        <Button 
+                            variant="destructive" 
+                            onClick={onDelete} 
+                            disabled={loading}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {loading ? "Suppression..." : "Supprimer"}
+                        </Button>
                     </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
 
             {/* Edit Modal */}
-            {editOpen && (
-                <div className="fixed inset-0 z-[250] flex items-center justify-center" onClick={(e) => { if (e.target === e.currentTarget) setEditOpen(false) }}>
-                    <div className="fixed inset-0 bg-black/50" />
-                    <div className="relative z-[251] bg-background rounded-lg border shadow-lg p-6 w-full max-w-[425px] mx-4">
-                        <div className="flex flex-col gap-2 mb-4">
-                            <h3 className="text-lg font-semibold">Modifier le paiement</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Modifiez le montant, la description ou la date.
-                            </p>
-                        </div>
-                        <div className="grid gap-4 py-2">
-                            <div className="grid gap-2">
-                                <Label htmlFor={`edit-amount-${data.id}`}>Montant (DA)</Label>
-                                <Input
-                                    id={`edit-amount-${data.id}`}
-                                    type="number"
-                                    step="0.01"
-                                    value={editAmount}
-                                    onChange={(e) => setEditAmount(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label>Caisse / Banque</Label>
-                                <SearchableSelect
-                                    options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
-                                    value={editAccountId}
-                                    onChange={setEditAccountId}
-                                    placeholder="Sélectionner une caisse"
-                                    searchPlaceholder="Rechercher une caisse..."
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`edit-desc-${data.id}`}>Observation</Label>
-                                <Input
-                                    id={`edit-desc-${data.id}`}
-                                    value={editDescription}
-                                    onChange={(e) => setEditDescription(e.target.value)}
-                                    placeholder="Description du paiement"
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor={`edit-date-${data.id}`}>Date</Label>
-                                <Input
-                                    id={`edit-date-${data.id}`}
-                                    type="date"
-                                    value={editDate}
-                                    onChange={(e) => setEditDate(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex justify-end gap-2 mt-4">
-                            <Button variant="outline" onClick={() => setEditOpen(false)} disabled={loading}>
-                                Annuler
-                            </Button>
-                            <Button onClick={onEdit} disabled={loading}>
-                                {loading ? "Enregistrement..." : "Enregistrer"}
-                            </Button>
-                        </div>
-                        <button
-                            onClick={() => setEditOpen(false)}
-                            className="absolute top-4 right-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                </div>
-            )}
+            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                            Modifier le paiement
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                            Modifiez le montant, la caisse, la description ou la date.
+                        </DialogDescription>
+                    </DialogHeader>
 
-            <div className="flex items-center gap-1.5">
-                {canEdit && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2.5 gap-1.5 text-amber-700 bg-amber-50 border-amber-200 hover:text-amber-800 hover:bg-amber-100 hover:border-amber-300 dark:text-amber-400 dark:bg-amber-950/40 dark:border-amber-800/50 dark:hover:bg-amber-950/60 dark:hover:border-amber-700 transition-all duration-200 shadow-sm hover:shadow"
-                        onClick={() => setEditOpen(true)}
-                        title="Modifier"
-                    >
-                        <Edit className="h-3.5 w-3.5" />
-                        <span className="hidden lg:inline text-xs font-medium">Modifier</span>
-                    </Button>
-                )}
-                {canDelete && (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2.5 gap-1.5 text-red-700 bg-red-50 border-red-200 hover:text-red-800 hover:bg-red-100 hover:border-red-300 dark:text-red-400 dark:bg-red-950/40 dark:border-red-800/50 dark:hover:bg-red-950/60 dark:hover:border-red-700 transition-all duration-200 shadow-sm hover:shadow"
-                        onClick={() => setDeleteOpen(true)}
-                        title="Supprimer"
-                    >
-                        <Trash className="h-3.5 w-3.5" />
-                        <span className="hidden lg:inline text-xs font-medium">Supprimer</span>
-                    </Button>
-                )}
-            </div>
+                    <div className="grid gap-4 py-2">
+                        <div className="grid gap-1.5">
+                            <Label htmlFor={`edit-amount-${data.id}`} className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                                Montant (DA)
+                            </Label>
+                            <Input
+                                id={`edit-amount-${data.id}`}
+                                type="number"
+                                step="0.01"
+                                value={editAmount}
+                                onChange={(e) => setEditAmount(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 font-semibold text-zinc-900 dark:text-zinc-100"
+                            />
+                        </div>
+
+                        <div className="grid gap-1.5">
+                            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                                Caisse / Banque
+                            </Label>
+                            <SearchableSelect
+                                options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type === 'BANK' ? 'Banque' : 'Caisse'})` }))}
+                                value={editAccountId}
+                                onChange={setEditAccountId}
+                                placeholder="Sélectionner une caisse"
+                                searchPlaceholder="Rechercher une caisse..."
+                                className="bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                            />
+                        </div>
+
+                        <div className="grid gap-1.5">
+                            <Label htmlFor={`edit-desc-${data.id}`} className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                                Observation / Description
+                            </Label>
+                            <Input
+                                id={`edit-desc-${data.id}`}
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                placeholder="Description du paiement"
+                                className="bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                            />
+                        </div>
+
+                        <div className="grid gap-1.5">
+                            <Label htmlFor={`edit-date-${data.id}`} className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                                Date
+                            </Label>
+                            <Input
+                                id={`edit-date-${data.id}`}
+                                type="date"
+                                value={editDate}
+                                onChange={(e) => setEditDate(e.target.value)}
+                                className="bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2.5 mt-6 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setEditOpen(false)} 
+                            disabled={loading}
+                            className="border-zinc-300 dark:border-zinc-700"
+                        >
+                            Annuler
+                        </Button>
+                        <Button 
+                            onClick={onEdit} 
+                            disabled={loading}
+                            className="bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-500 dark:hover:bg-amber-600"
+                        >
+                            {loading ? "Enregistrement..." : "Enregistrer"}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Fiche / Reçu de Paiement Modal */}
+            <FichePaiementModal
+                open={ficheOpen}
+                onClose={() => setFicheOpen(false)}
+                data={{
+                    id: data.id,
+                    date: editDate || data.date,
+                    amount: parseFloat(editAmount) || data.amount,
+                    customerName: data.customerName,
+                    accountName: accounts.find(a => a.id === editAccountId)?.name || data.accountName,
+                    description: editDescription || data.description,
+                    source: data.source,
+                }}
+            />
+
+            <TooltipProvider delayDuration={200}>
+                <div className="flex items-center gap-1">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-all"
+                                onClick={() => setFicheOpen(true)}
+                            >
+                                <FileText className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-xs">
+                            Fiche / Reçu de paiement
+                        </TooltipContent>
+                    </Tooltip>
+
+                    {canEdit && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-all"
+                                    onClick={() => setEditOpen(true)}
+                                >
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">
+                                Modifier le paiement
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+
+                    {canDelete && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
+                                    onClick={() => setDeleteOpen(true)}
+                                    disabled={loading}
+                                >
+                                    <Trash className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="text-xs">
+                                Supprimer le paiement
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                </div>
+            </TooltipProvider>
         </>
     )
 }

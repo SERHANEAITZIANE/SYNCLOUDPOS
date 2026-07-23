@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { randomUUID } from "crypto"
+import { cookies } from "next/headers"
 
 export async function getStores() {
     const session = await auth()
@@ -37,6 +38,15 @@ export async function setDefaultStore(storeId: string) {
             where: { id: userId },
             data: { defaultStoreId: storeId }
         })
+
+        const cookieStore = await cookies()
+        cookieStore.set("selected_store_id", storeId, {
+            path: "/",
+            maxAge: 60 * 60 * 24 * 365, // 1 year
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production"
+        })
+
         revalidatePath("/")
         return { success: true }
     } catch (e) {

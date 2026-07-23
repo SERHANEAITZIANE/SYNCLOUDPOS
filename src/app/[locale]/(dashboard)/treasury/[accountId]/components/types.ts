@@ -12,4 +12,5 @@ export type TreasuryTransactionColumn = {
     source: string
     description: string
     referenceId: string | null
+    accountId?: string
 }

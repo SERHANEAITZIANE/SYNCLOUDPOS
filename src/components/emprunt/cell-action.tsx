@@ -78,8 +78,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
         }
     }
 
-    const canEdit = session?.user?.canEdit || session?.user?.isSuperadmin || session?.user?.role === "ADMIN"
-    const canDelete = session?.user?.canDelete || session?.user?.isSuperadmin || session?.user?.role === "ADMIN"
+    const user = session?.user
+    const canEdit = !user || user.role === "ADMIN" || user.isSuperadmin || user.canEdit !== false
+    const canDelete = !user || user.role === "ADMIN" || user.isSuperadmin || user.canDelete !== false
 
     return (
         <>

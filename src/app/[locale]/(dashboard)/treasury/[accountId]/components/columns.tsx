@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge"
 
 import { Link } from "@/i18n/routing"
 import { Eye } from "lucide-react"
+import { MovementCellAction } from "../../components/movement-cell-action"
 
-export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
+export const getColumns = (accounts: any[] = []): ColumnDef<TreasuryTransactionColumn>[] => [
     {
         accessorKey: "date",
         header: "Date",
@@ -47,12 +48,22 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
         cell: ({ row }) => {
             const refId = row.original.referenceId
             const source = row.original.source
-            if (!refId) return <span className="text-muted-foreground">-</span>
+            const isCaisseDirect = ["INITIAL_BALANCE", "MANUAL_IN", "MANUAL_OUT"].includes(source)
+            if (!refId && !isCaisseDirect) return <span className="text-muted-foreground">-</span>
 
             let href = ""
-            let label = "Détail"
+            let label = "Autre"
 
-            if (source === "SALE") {
+            const txId = row.original.id
+            const desc = (row.original.description || "").toLowerCase()
+            const accId = row.original.accountId
+
+            if (isCaisseDirect) {
+                href = accId ? `/treasury/${accId}` : ""
+                if (source === "INITIAL_BALANCE") label = "Solde Initial"
+                else if (source === "MANUAL_IN") label = "Entrée Caisse"
+                else if (source === "MANUAL_OUT") label = "Sortie Caisse"
+            } else if (source === "SALE") {
                 href = `/sales/${refId}`
                 label = "Vente"
             } else if (source === "PURCHASE") {
@@ -64,9 +75,8 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
             } else if (source === "TRANSFER") {
                 href = `/transfers`
                 label = "Transfert"
-            } else if (source === "LOAN") {
-                const desc = (row.original.description || "").toLowerCase()
-                if (desc.includes("fournisseur") || desc.includes("supplier")) {
+            } else if (source === "LOAN" || source === "CUSTOMER_LOAN" || source === "SUPPLIER_LOAN") {
+                if (source === "SUPPLIER_LOAN" || desc.includes("fournisseur") || desc.includes("supplier")) {
                     href = `/emprunt-fournisseur`
                 } else {
                     href = `/emprunt`
@@ -75,10 +85,8 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
             } else if (source === "RETURN") {
                 href = `/retours`
                 label = "Retour"
-            } else if (source === "PAYMENT" || source === "MANUAL_IN" || source === "MANUAL_OUT") {
-                const txId = row.original.id
-                const desc = (row.original.description || "").toLowerCase()
-                if (desc.includes("fournisseur") || desc.includes("supplier")) {
+            } else if (source === "PAYMENT" || source === "CUSTOMER_PAYMENT" || source === "SUPPLIER_PAYMENT") {
+                if (source === "SUPPLIER_PAYMENT" || desc.includes("fournisseur") || desc.includes("supplier")) {
                     href = `/payments/suppliers?paymentId=${txId}`
                 } else {
                     href = `/payments?paymentId=${txId}`
@@ -86,7 +94,7 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
                 label = "Paiement"
             }
 
-            if (!href) return <span className="text-xs text-muted-foreground">Autre</span>
+            if (!href) return <span className="text-xs text-muted-foreground">{label}</span>
 
             return (
                 <Link
@@ -99,5 +107,9 @@ export const columns: ColumnDef<TreasuryTransactionColumn>[] = [
                 </Link>
             )
         }
+    },
+    {
+        id: "actions",
+        cell: ({ row }) => <MovementCellAction data={row.original} accounts={accounts} />
     }
 ]

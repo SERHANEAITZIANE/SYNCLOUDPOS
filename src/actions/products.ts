@@ -40,6 +40,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         images,
         isFeatured,
         isArchived,
+        isService,
         stock,
         minStock,
         barcodes,
@@ -69,11 +70,12 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
                     price,
                     tvaRate,
                     description,
-                    cost: cost ?? undefined,
+                    cost: cost !== undefined && cost !== null ? cost : 0,
                     wholesalePrice: wholesalePrice ?? undefined,
                     dealerPrice: dealerPrice ?? undefined,
                     isFeatured: isFeatured || false,
                     isArchived: isArchived || false,
+                    isService: isService || false,
                     stock: stock ?? 0,
                     minStock: minStock ?? 0,
                     categoryId,
@@ -292,28 +294,29 @@ export const deleteProduct = async (id: string) => {
     }
 
     try {
+        const isSuper = session?.user?.isSuperadmin || session?.user?.role === "ADMIN";
         const productToDelete = await db.product.findFirst({
-            where: { id, tenantId },
-            select: { name: true, price: true, cost: true, stock: true }
+            where: {
+                id,
+                ...(isSuper ? {} : { tenantId })
+            },
+            select: { id: true, tenantId: true, name: true, price: true, cost: true, stock: true }
         });
 
         if (!productToDelete) {
             return { error: "Product not found or unauthorized" }
         }
 
-        await db.product.updateMany({
-            where: {
-                id,
-                tenantId
-            },
-            data: {
-                isArchived: true
-            }
+        const targetTenantId = productToDelete.tenantId;
+
+        await db.product.update({
+            where: { id },
+            data: { isArchived: true }
         })
 
         revalidatePath("/[locale]/(dashboard)/products", "page")
-        await cacheMonitor.invalidateCache(`products:${tenantId}`)
-        await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
+        await cacheMonitor.invalidateCache(`products:${targetTenantId}`)
+        await cacheMonitor.invalidateCache(`pos-products:${targetTenantId}`)
         logAudit({ 
             action: "DELETE", 
             entity: "PRODUCT", 
@@ -340,7 +343,6 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
     if (!tenantId) {
         return { error: "Unauthorized" }
     }
-
     const validatedFields = ProductSchema.safeParse(values)
 
     if (!validatedFields.success) {
@@ -356,6 +358,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
         images,
         isFeatured,
         isArchived,
+        isService,
         stock,
         minStock,
         barcodes,
@@ -367,8 +370,12 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
     } = validatedFields.data
 
     try {
+        const isSuper = session?.user?.isSuperadmin || session?.user?.role === "ADMIN";
         const previousProduct = await db.product.findFirst({
-            where: { id, tenantId },
+            where: {
+                id,
+                ...(isSuper ? {} : { tenantId })
+            },
             include: { storeProducts: true }
         });
 
@@ -398,6 +405,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
                     dealerPrice: dealerPrice ?? undefined,
                     isFeatured,
                     isArchived,
+                    isService: isService || false,
                     images: {
                         deleteMany: {},
                         createMany: {
