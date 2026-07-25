@@ -55,9 +55,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data, products = [] }) =
                     <Edit className="h-4 w-4" />
                 </Button>
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    variant="ghost-danger"
+                    size="icon-sm"
                     onClick={() => setOpen(true)}
                     title="Supprimer"
                 >

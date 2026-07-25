@@ -53,9 +53,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <div className="flex items-center gap-1">
                 {canEdit && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        variant="ghost-warning"
+                        size="icon-sm"
                         onClick={() => router.push(`/expenses/${data.id}`)}
                         title={tCommon("edit")}
                     >
@@ -64,9 +63,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 )}
                 {canDelete && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        variant="ghost-danger"
+                        size="icon-sm"
                         onClick={() => setOpen(true)}
                         title={tCommon("delete")}
                     >

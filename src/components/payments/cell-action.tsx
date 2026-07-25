@@ -245,9 +245,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-all"
+                                variant="ghost-success"
+                                size="icon-sm"
+                                className="rounded-lg transition-all"
                                 onClick={() => setFicheOpen(true)}
                             >
                                 <FileText className="h-4 w-4" />
@@ -262,9 +262,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-all"
+                                    variant="ghost-warning"
+                                    size="icon-sm"
+                                    className="rounded-lg transition-all"
                                     onClick={() => setEditOpen(true)}
                                 >
                                     <Edit className="h-4 w-4" />
@@ -280,9 +280,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
+                                    variant="ghost-danger"
+                                    size="icon-sm"
+                                    className="rounded-lg transition-all"
                                     onClick={() => setDeleteOpen(true)}
                                     disabled={loading}
                                 >

@@ -19,6 +19,18 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Semantic ghost variants for table/row action icons (view, edit,
+        // delete, confirm). These replace the hand-rolled colour strings that
+        // were copy-pasted across ~40 call sites — the utilities are identical,
+        // so migrating a call site produces no visual change.
+        "ghost-info":
+          "text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30",
+        "ghost-warning":
+          "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30",
+        "ghost-danger":
+          "text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30",
+        "ghost-success":
+          "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

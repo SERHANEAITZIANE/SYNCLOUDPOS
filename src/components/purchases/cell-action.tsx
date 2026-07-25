@@ -49,9 +49,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     return (
         <div className="flex items-center gap-1">
             <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                variant="ghost-info"
+                size="icon-sm"
                 onClick={() => router.push(`/purchases/${data.id}`)}
                 title={tCommon("view")}
             >

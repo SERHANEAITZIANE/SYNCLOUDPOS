@@ -48,9 +48,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
             <div className="flex items-center gap-1">
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                    variant="ghost-info"
+                    size="icon-sm"
                     onClick={() => router.push(`/sales/${data.id}`)}
                     title={tCommon("view")}
                 >
@@ -58,9 +57,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 </Button>
 
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                    variant="ghost-success"
+                    size="icon-sm"
                     onClick={() => setSendDialogOpen(true)}
                     title="Envoyer"
                 >
@@ -69,9 +67,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
                 {(session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete) && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        variant="ghost-danger"
+                        size="icon-sm"
                         onClick={() => setOpen(true)}
                         title={tCommon("delete")}
                     >
