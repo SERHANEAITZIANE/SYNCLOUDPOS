@@ -25,7 +25,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const onConfirm = async () => {
         try {
             setLoading(true)
-            await deleteSupplier(data.id)
+            const result = await deleteSupplier(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Fournisseur supprimé.")
             router.refresh()
         } catch {

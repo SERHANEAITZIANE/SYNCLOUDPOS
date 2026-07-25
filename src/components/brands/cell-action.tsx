@@ -24,7 +24,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
     const onDelete = async () => {
         try {
-            await deleteBrand(data.id)
+            const result = await deleteBrand(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Marque supprimée.")
             router.refresh()
         } catch {

@@ -1,8 +1,51 @@
 # Error Visibility Across Forms & Actions — Implementation Plan
 
-**Status:** Planning  
-**Priority:** High  
+**Status:** Implemented (full audit complete)
+**Priority:** High
 **Scope:** Make ALL errors visible to users in forms (products, purchases, expenses, payments, etc.)
+
+---
+
+## Audit Results
+
+A scripted audit cross-referenced **176 error-returning server actions** (out of 245 total)
+against every call site in `src/components` and `src/app`.
+
+**19 genuine silent failures were found and fixed.** All were the same shape: a bare
+`await someAction(...)` whose returned `{ error }` was never inspected, so a permission
+denial or validation failure produced *no feedback at all* — and in the modal cases, the
+dialog closed as if the save had succeeded.
+
+| # | File | Action |
+|---|------|--------|
+| 1 | `components/brands/brand-modal.tsx` | `createBrand` / `updateBrand` |
+| 2 | `components/brands/cell-action.tsx` | `deleteBrand` |
+| 3 | `components/categories/category-modal.tsx` | `createCategory` / `updateCategory` |
+| 4 | `components/categories/cell-action.tsx` | `deleteCategory` |
+| 5 | `components/customers/cell-action.tsx` | `deleteCustomer` |
+| 6 | `components/customers/client.tsx` | `deleteCustomer` |
+| 7 | `components/suppliers/cell-action.tsx` | `deleteSupplier` |
+| 8 | `components/suppliers/client.tsx` | `deleteSupplier` |
+| 9 | `components/products/cell-action.tsx` | `deleteProduct` |
+| 10 | `components/products/product-grid-view.tsx` | `deleteProduct` |
+| 11 | `components/purchases/missing-products-form.tsx` | `createProduct` (OCR flow — `if` with no `else`) |
+| 12 | `components/sales/sales-form.tsx` | `createSalesOrder`, `updateSalesOrderStatus` |
+| 13 | `components/dashboard/header-store-selector.tsx` | `setDefaultStore` |
+| 14 | `app/.../treasury/components/cell-action.tsx` | `deleteTreasuryAccount` |
+| 15 | `app/.../reservations/page.tsx` | `updateReservationStatus`, `deleteReservation` |
+| 16 | `app/.../delivery/page.tsx` | `updateShipmentStatus` |
+| 17 | `app/.../inventory-audit/.../session-detail-client.tsx` | `updateStockCountItem` |
+| 18 | `app/.../settings/whatsapp/.../whatsapp-settings-client.tsx` | `updateWhatsappSettings` |
+
+**Worst offenders:** `brand-modal.tsx` and `category-modal.tsx` had no `toast` import at
+all — their `catch` only did `console.error`, and on a returned error they called
+`onConfirm()` + `onClose()`, so the user saw the modal close and assumed success.
+
+Sites reported by the audit but verified as **false positives** (error *is* handled, just
+outside the script's 12-line lookahead, or the result is forwarded to a caller that
+handles it): `returns-client.tsx`, `proformas/new/page.tsx`, `superadmin/client.tsx`,
+`ai-client.tsx`, `customers/client.tsx` (import path), and the read-path
+`getCustomers`/`getSuppliers` server-component fetches.
 
 ---
 

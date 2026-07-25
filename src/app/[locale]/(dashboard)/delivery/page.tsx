@@ -202,7 +202,14 @@ export default function DeliveryPage() {
                                             </td>
                                             <td className="px-5 py-3 text-xs text-muted-foreground">{format(new Date(s.createdAt), "dd/MM/yy HH:mm")}</td>
                                             <td className="px-5 py-3">
-                                                <Select value={s.status} onValueChange={async v => { await updateShipmentStatus(s.id, v); load() }}>
+                                                <Select value={s.status} onValueChange={async v => {
+                                                    const result = await updateShipmentStatus(s.id, v)
+                                                    if (result && "error" in result && result.error) {
+                                                        toast.error(result.error)
+                                                        return
+                                                    }
+                                                    load()
+                                                }}>
                                                     <SelectTrigger className="h-8 w-32 text-xs rounded-lg">
                                                         <SelectValue />
                                                     </SelectTrigger>

@@ -28,7 +28,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const onConfirm = async () => {
         try {
             setLoading(true)
-            await deleteCustomer(data.id)
+            const result = await deleteCustomer(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success(t("messages.deleted"))
             router.refresh()
         } catch {

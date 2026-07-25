@@ -66,7 +66,11 @@ export const CustomerClient: React.FC<CustomerClientProps> = ({ data, accounts, 
 
             const onConfirmDelete = async () => {
                 try {
-                    await deleteCustomer(customer.id)
+                    const result = await deleteCustomer(customer.id)
+                    if (result?.error) {
+                        toast.error(result.error)
+                        return
+                    }
                     toast.success("Client supprimé.")
                     router.refresh()
                 } catch {

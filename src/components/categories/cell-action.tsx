@@ -24,7 +24,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
     const onDelete = async () => {
         try {
-            await deleteCategory(data.id)
+            const result = await deleteCategory(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Catégorie supprimée.")
             router.refresh()
         } catch {

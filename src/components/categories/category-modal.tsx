@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { toast } from "react-hot-toast"
 import Image from "next/image"
 
 import { Modal } from "@/components/ui/modal"
@@ -66,16 +67,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     const onSubmit = async (values: z.infer<typeof CategorySchema>) => {
         try {
             setLoading(true)
-            if (initialData) {
-                await updateCategory(initialData.id, values)
-            } else {
-                await createCategory(values)
+            const result = initialData
+                ? await updateCategory(initialData.id, values)
+                : await createCategory(values)
+            if (result?.error) {
+                toast.error(result.error)
+                return
             }
+            toast.success(initialData ? "Catégorie modifiée." : "Catégorie créée.")
             router.refresh()
             onConfirm()
             onClose()
         } catch (error) {
             console.error(error)
+            toast.error("Une erreur est survenue.")
         } finally {
             setLoading(false)
         }

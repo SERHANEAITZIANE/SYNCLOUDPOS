@@ -36,7 +36,11 @@ export const ProductGridView: React.FC<ProductGridViewProps> = ({ data }) => {
         if (!deleteProductData) return
         try {
             setLoading(true)
-            await deleteProduct(deleteProductData.id)
+            const result = await deleteProduct(deleteProductData.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success(tProducts("messages.deleted"))
             router.refresh()
         } catch (error) {

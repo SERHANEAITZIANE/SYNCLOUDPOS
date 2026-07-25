@@ -47,12 +47,16 @@ export const WhatsappSettingsClient = ({ initialData }: { initialData: any }) =>
     const onSave = async () => {
         try {
             setLoading(true)
-            await updateWhatsappSettings({
+            const result = await updateWhatsappSettings({
                 whatsappMode: mode,
                 whatsappAutoReceipt: autoReceipt,
                 whatsappAutoInvoice: autoInvoice,
                 whatsappPaymentReminder: paymentReminder
             })
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Paramètres enregistrés")
             router.refresh()
         } catch (error) {

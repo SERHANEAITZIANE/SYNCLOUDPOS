@@ -79,7 +79,11 @@ export const SupplierClient: React.FC<SupplierClientProps> = ({ data, accounts, 
 
             const onConfirmDelete = async () => {
                 try {
-                    await deleteSupplier(supplier.id)
+                    const result = await deleteSupplier(supplier.id)
+                    if (result?.error) {
+                        toast.error(result.error)
+                        return
+                    }
                     toast.success("Fournisseur supprimé.")
                     router.refresh()
                 } catch {

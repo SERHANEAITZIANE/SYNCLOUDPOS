@@ -36,7 +36,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const onDelete = async () => {
         try {
             setLoading(true)
-            await deleteTreasuryAccount(data.id)
+            const result = await deleteTreasuryAccount(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             router.refresh()
             toast.success("Compte supprimé.")
         } catch (_error) {
