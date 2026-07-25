@@ -8,6 +8,8 @@ export type ExtendedUser = DefaultSession["user"] & {
     subscriptionEndsAt: Date | null
     canEdit: boolean
     canDelete: boolean
+    extraPermissions: string[]
+    deniedPermissions: string[]
     defaultStoreId: string | null
 }
 

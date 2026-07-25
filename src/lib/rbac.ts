@@ -1,196 +1,46 @@
 "use server"
 
 import { auth } from "@/auth"
+import {
+    resolvePermission,
+    getEffectiveCatalogPermissions,
+    getAllCatalogPermissions,
+    type Module,
+    type Action,
+    type Permission,
+} from "@/lib/permissions"
 
 /**
  * Role-Based Access Control (RBAC) — Granular Permission System.
- * 
+ *
  * Permissions follow the format: "module:action"
  * - module: pos, sales, products, customers, etc.
  * - action: read, create, update, delete, export
- * 
+ *
  * Wildcards: "module:*" = all actions on a module, "*:*" = full access
- * 
+ *
  * ADMIN has full access. Superadmin bypasses all checks.
+ *
+ * Per-user overrides (managed by admins via the Users → Permissions UI) layer
+ * on top of the role: `extraPermissions` grant beyond the role, and
+ * `deniedPermissions` revoke from it. Deny always wins. The pure resolution
+ * logic and the permission catalog live in `@/lib/permissions` (no "use server"),
+ * so they can be shared with client components.
+ *
+ * NOTE: this file carries the "use server" directive, so every export MUST be
+ * an async function. The shared types/catalog live in `@/lib/permissions`;
+ * import them from there (a "use server" file cannot re-export types).
  */
-
-// ─── Permission Types ─────────────────────────────────────────
-
-export type Module =
-    | "pos"
-    | "sales"
-    | "purchases"
-    | "expenses"
-    | "products"
-    | "categories"
-    | "brands"
-    | "promotions"
-    | "customers"
-    | "suppliers"
-    | "treasury"
-    | "analytics"
-    | "reports"
-    | "settings"
-    | "users"
-    | "fiscal"
-    | "audit_log"
-    | "delivery"
-    | "commissions"
-    | "reservations"
-    | "daily_close"
-    | "inventory"
-    | "recurring_invoices"
-    | "payments"
-    | "emprunt"
-    | "emprunt_fournisseur"
-    | "ai"
-    | "spoilage"
-    | "transfers"
-    | "cheques"
-
-export type Action = "read" | "create" | "update" | "delete" | "export"
-
-// Legacy Permission type kept for backwards compatibility
-export type Permission = Module | `${Module}:${Action}` | `${Module}:*` | "*:*"
-
-// ─── Role Permission Map ──────────────────────────────────────
-
-const ROLE_PERMISSIONS: Record<string, Permission[]> = {
-    ADMIN: [
-        "*:*" // Full access to everything
-    ],
-    MANAGER: [
-        "pos:*", "sales:*", "purchases:*", "expenses:*",
-        "products:read", "products:create", "products:update", "products:export",
-        // Note: no "products:delete" — managers can't delete products
-        "categories:*", "brands:*",
-        "promotions:*", "customers:*", "suppliers:*",
-        "treasury:read", "treasury:create", "treasury:export",
-        // Note: no "treasury:delete" — can't delete transactions
-        "analytics:read", "analytics:export",
-        "reports:read", "reports:export",
-        "delivery:*", "commissions:*",
-        "reservations:*", "daily_close:*",
-        "inventory:*", "recurring_invoices:*",
-        "payments:*",
-        "emprunt:*", "emprunt_fournisseur:*",
-        "spoilage:*", "transfers:*", "cheques:*",
-    ],
-    CASHIER: [
-        "pos:read", "pos:create",
-        "sales:read", "sales:create",
-        "products:read",
-        "customers:read", "customers:create",
-        "payments:read", "payments:create",
-        "daily_close:read", "daily_close:create",
-        "reservations:read", "reservations:create",
-        "emprunt:read", "emprunt:create",
-    ],
-    VENDEUR: [
-        "pos:read", "pos:create",
-        "sales:read", "sales:create",
-        "products:read",
-        "customers:read", "customers:create",
-        "payments:read", "payments:create",
-        "daily_close:read", "daily_close:create",
-        "reservations:read", "reservations:create",
-        "emprunt:read", "emprunt:create",
-        "commissions:read",
-    ],
-    ACCOUNTANT: [
-        "sales:read", "sales:export",
-        "purchases:read", "purchases:export",
-        "expenses:read", "expenses:create", "expenses:update", "expenses:export",
-        "customers:read", "customers:export",
-        "suppliers:read", "suppliers:export",
-        "treasury:read", "treasury:create", "treasury:export",
-        "analytics:read", "analytics:export",
-        "reports:read", "reports:export",
-        "fiscal:read", "fiscal:create", "fiscal:export",
-        "commissions:read", "commissions:export",
-        "recurring_invoices:read", "recurring_invoices:create", "recurring_invoices:update",
-        "payments:read", "payments:create", "payments:export",
-        "emprunt:read", "emprunt:create", "emprunt:export",
-        "emprunt_fournisseur:read", "emprunt_fournisseur:create", "emprunt_fournisseur:export",
-        "inventory:read", "inventory:export",
-        "daily_close:read", "daily_close:create", "daily_close:export",
-        "cheques:read", "cheques:create", "cheques:update", "cheques:export",
-    ],
-    STOCK_MANAGER: [
-        "purchases:read", "purchases:create", "purchases:update",
-        "products:read", "products:create", "products:update",
-        "categories:read", "categories:create", "categories:update",
-        "brands:read", "brands:create", "brands:update",
-        "promotions:read", "promotions:create", "promotions:update",
-        "suppliers:read", "suppliers:create", "suppliers:update",
-        "delivery:read", "delivery:create", "delivery:update",
-        "inventory:*",
-        "spoilage:*",
-        "emprunt_fournisseur:read", "emprunt_fournisseur:create",
-        "transfers:*",
-    ],
-    PURCHASE_MANAGER: [
-        "purchases:*",
-        "products:read", "products:create", "products:update",
-        "categories:*", "brands:*",
-        "suppliers:*",
-        "inventory:*",
-        "transfers:*",
-        "spoilage:*",
-        "emprunt_fournisseur:*",
-    ],
-    SALES_MANAGER: [
-        "pos:*",
-        "sales:*",
-        "products:read",
-        "customers:*",
-        "payments:*",
-        "daily_close:*",
-        "reservations:*",
-        "delivery:*",
-        "commissions:*",
-        "emprunt:*",
-        "cheques:*",
-    ],
-}
-
-// ─── Permission Matching Logic ────────────────────────────────
-
-/**
- * Check if a granted permission matches a requested permission.
- * Supports wildcards: "*:*" matches everything, "module:*" matches any action on that module.
- */
-function permissionMatches(granted: Permission, requested: string): boolean {
-    // Full wildcard
-    if (granted === "*:*") return true
-
-    // Parse granted permission
-    const [grantedModule, grantedAction] = granted.includes(":")
-        ? granted.split(":")
-        : [granted, "*"] // Legacy format "products" → "products:*"
-
-    // Parse requested permission
-    const [requestedModule, requestedAction] = requested.includes(":")
-        ? requested.split(":")
-        : [requested, "read"] // Legacy format "products" → "products:read"
-
-    // Module must match
-    if (grantedModule !== "*" && grantedModule !== requestedModule) return false
-
-    // Action must match (or granted is wildcard)
-    if (grantedAction !== "*" && grantedAction !== requestedAction) return false
-
-    return true
-}
 
 // ─── Public API ───────────────────────────────────────────────
 
 /**
  * Check if the current user has a specific permission.
- * Returns true for superadmins regardless of role.
- * 
- * Accepts both legacy format ("products") and new format ("products:delete").
- * Legacy "products" is treated as "products:read" for backwards compatibility.
+ * Returns true for superadmins and ADMINs regardless of role.
+ *
+ * Applies per-user overrides: denied permissions win, then role grants, then
+ * extra (granted) permissions. Accepts both legacy format ("products") and new
+ * format ("products:delete").
  */
 export async function hasPermission(permission: Permission): Promise<boolean> {
     const session = await auth()
@@ -198,9 +48,10 @@ export async function hasPermission(permission: Permission): Promise<boolean> {
     if (session.user.isSuperadmin || session.user.role === "ADMIN") return true
 
     const role = session.user.role || "CASHIER"
-    const permissions = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["CASHIER"]
+    const extra = (session.user as { extraPermissions?: string[] }).extraPermissions ?? []
+    const denied = (session.user as { deniedPermissions?: string[] }).deniedPermissions ?? []
 
-    return permissions.some(p => permissionMatches(p, permission))
+    return resolvePermission(role, extra, denied, permission)
 }
 
 /**
@@ -216,22 +67,26 @@ export async function requirePermission(permission: Permission): Promise<void> {
 }
 
 /**
- * Get all permissions for the current user's role.
- * Returns the raw permission strings for the role.
+ * Get all effective granular permissions for the current user.
+ * Superadmins/ADMINs get the full catalog; others get role + overrides.
  */
-export async function getUserPermissions(): Promise<Permission[]> {
+export async function getUserPermissions(): Promise<string[]> {
     const session = await auth()
     if (!session?.user) return []
-    if (session.user.isSuperadmin) return ROLE_PERMISSIONS["ADMIN"]
+    if (session.user.isSuperadmin || session.user.role === "ADMIN") {
+        return getAllCatalogPermissions()
+    }
 
     const role = session.user.role || "CASHIER"
-    return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["CASHIER"]
+    const extra = (session.user as { extraPermissions?: string[] }).extraPermissions ?? []
+    const denied = (session.user as { deniedPermissions?: string[] }).deniedPermissions ?? []
+    return getEffectiveCatalogPermissions(role, extra, denied)
 }
 
 /**
  * Check if user can perform a specific action on a module.
  * More explicit than hasPermission for new code.
- * 
+ *
  * Usage: if (await canDo("products", "delete")) { ... }
  */
 export async function canDo(module: Module, action: Action): Promise<boolean> {
