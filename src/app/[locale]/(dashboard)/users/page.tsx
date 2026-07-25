@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { AddUserModal } from "@/components/users/add-user-modal";
 import { EditUserModal } from "@/components/users/edit-user-modal";
+import { ManagePermissionsModal } from "@/components/users/manage-permissions-modal";
 import { format } from "date-fns";
 
 export default async function UsersPage() {
@@ -61,15 +62,25 @@ export default async function UsersPage() {
                                     {format(new Date(user.createdAt), "MMM d, yyyy")}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <EditUserModal user={{
-                                        id: user.id,
-                                        name: user.name,
-                                        email: user.email,
-                                        username: user.username || "",
-                                        role: user.role,
-                                        canEdit: user.canEdit,
-                                        canDelete: user.canDelete
-                                    }} />
+                                    <div className="flex items-center justify-end gap-1">
+                                        {user.role !== "ADMIN" && !user.isSuperadmin && (
+                                            <ManagePermissionsModal user={{
+                                                id: user.id,
+                                                name: user.name,
+                                                email: user.email,
+                                                role: user.role,
+                                            }} />
+                                        )}
+                                        <EditUserModal user={{
+                                            id: user.id,
+                                            name: user.name,
+                                            email: user.email,
+                                            username: user.username || "",
+                                            role: user.role,
+                                            canEdit: user.canEdit,
+                                            canDelete: user.canDelete
+                                        }} />
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

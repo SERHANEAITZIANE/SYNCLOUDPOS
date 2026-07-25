@@ -6,6 +6,7 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
+import { toast } from "react-hot-toast"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -150,6 +151,11 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                 isArchived: false
             })
 
+            if (result && "error" in result && result.error) {
+                toast.error(result.error as string)
+                return
+            }
+
             if (result && "success" in result && result.success) {
                 // The backend returns { product: ... }
                 const newProduct = (result as any).product || (result as any).data;
@@ -158,10 +164,14 @@ export const MissingProductsForm: React.FC<MissingProductsFormProps> = ({
                     router.refresh()
                 } else {
                     console.error("No product returned", result);
+                    toast.error("Produit créé mais introuvable. Veuillez rafraîchir.")
                 }
+            } else {
+                toast.error("La création du produit a échoué.")
             }
         } catch (error) {
             console.error("Failed to create product", error)
+            toast.error("Une erreur est survenue lors de la création du produit.")
         } finally {
             setIsCreating(false)
         }

@@ -42,7 +42,8 @@ export function SessionDetailClient({ sessionId, sessionName, status, items: ini
     const handleBlur = (item: Item) => {
         if (!isOpen) return
         startTransition(async () => {
-            await updateStockCountItem(item.id, item.actualQty)
+            const result = await updateStockCountItem(item.id, item.actualQty)
+            if (result?.error) toast.error(result.error)
         })
     }
 

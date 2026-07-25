@@ -24,7 +24,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
     const onDelete = async () => {
         try {
-            await deleteCategory(data.id)
+            const result = await deleteCategory(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Catégorie supprimée.")
             router.refresh()
         } catch {
@@ -43,9 +47,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <div className="flex items-center gap-1">
                 {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canEdit !== false) && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        variant="ghost-warning"
+                        size="icon-sm"
                         onClick={() => setEditOpen(true)}
                         title={tCommon("edit")}
                     >
@@ -55,9 +58,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
                 {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete !== false) && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        variant="ghost-danger"
+                        size="icon-sm"
                         onClick={onDelete}
                         title={tCommon("delete")}
                     >

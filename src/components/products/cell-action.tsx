@@ -37,7 +37,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const onConfirm = async () => {
         try {
             setLoading(true)
-            await deleteProduct(data.id)
+            const result = await deleteProduct(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success(t("messages.deleted"))
             router.refresh()
         } catch (error) {
@@ -72,9 +76,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-all"
+                                variant="ghost-info"
+                                size="icon-sm"
+                                className="rounded-lg transition-all"
                                 onClick={() => setOpenHistory(true)}
                             >
                                 <History className="h-4 w-4" />
@@ -105,9 +109,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-all"
+                                    variant="ghost-warning"
+                                    size="icon-sm"
+                                    className="rounded-lg transition-all"
                                     onClick={() => router.push(`/products/${data.id}`)}
                                 >
                                     <Edit className="h-4 w-4" />
@@ -123,9 +127,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
+                                    variant="ghost-danger"
+                                    size="icon-sm"
+                                    className="rounded-lg transition-all"
                                     onClick={() => setOpen(true)}
                                     disabled={loading}
                                 >

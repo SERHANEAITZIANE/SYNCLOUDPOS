@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { toast } from "react-hot-toast"
 
 import { Modal } from "@/components/ui/modal"
 import {
@@ -65,16 +66,20 @@ export const BrandModal: React.FC<BrandModalProps> = ({
     const onSubmit = async (values: z.infer<typeof BrandSchema>) => {
         try {
             setLoading(true)
-            if (initialData) {
-                await updateBrand(initialData.id, values)
-            } else {
-                await createBrand(values)
+            const result = initialData
+                ? await updateBrand(initialData.id, values)
+                : await createBrand(values)
+            if (result?.error) {
+                toast.error(result.error)
+                return
             }
+            toast.success(initialData ? "Marque modifiée." : "Marque créée.")
             router.refresh()
             onConfirm()
             onClose()
         } catch (error) {
             console.error(error)
+            toast.error("Une erreur est survenue.")
         } finally {
             setLoading(false)
         }

@@ -1,7 +1,8 @@
 "use server"
 
 import { auth } from "@/auth"
-import { hasPermission, type Permission } from "@/lib/rbac"
+import { hasPermission } from "@/lib/rbac"
+import { type Permission } from "@/lib/permissions"
 import { logAudit } from "@/actions/audit-log"
 import * as z from "zod"
 

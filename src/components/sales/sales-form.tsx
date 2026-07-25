@@ -263,10 +263,14 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
             }
 
             if (!isEditMode) {
-                await createSalesOrder({
+                const result = await createSalesOrder({
                     ...submissionData,
                     relatedSalesOrderId: relatedSalesOrderId || undefined,
                 })
+                if (result?.error) {
+                    toast.error(result.error)
+                    return
+                }
                 toast.success("Bon créé avec succès.")
                 router.push("/sales")
                 router.refresh()
@@ -312,11 +316,15 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         if (!initialData) return
         try {
             setLoading(true)
-            await updateSalesOrderStatus(initialData.id, newStatus)
+            const result = await updateSalesOrderStatus(initialData.id, newStatus)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Statut mis à jour.")
             router.refresh()
             window.location.reload()
-        } catch { toast.error("Erreur lors de la mise à jour.") }
+        } catch (error) { toast.error("Erreur lors de la mise à jour.") }
         finally { setLoading(false) }
     }
 

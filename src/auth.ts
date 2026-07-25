@@ -143,6 +143,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 const isAdmin = token.role === "ADMIN" || Boolean(token.isSuperadmin);
                 session.user.canEdit = isAdmin ? true : Boolean(token.canEdit)
                 session.user.canDelete = isAdmin ? true : Boolean(token.canDelete)
+                session.user.extraPermissions = (token.extraPermissions as string[]) ?? []
+                session.user.deniedPermissions = (token.deniedPermissions as string[]) ?? []
                 // @ts-expect-error custom fields
                 session.user.defaultStoreId = token.defaultStoreId
                 // @ts-expect-error custom fields
@@ -162,6 +164,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     const isAdmin = existingUser.role === "ADMIN" || existingUser.isSuperadmin;
                     session.user.canEdit = isAdmin ? true : Boolean(existingUser.canEdit);
                     session.user.canDelete = isAdmin ? true : Boolean(existingUser.canDelete);
+                    session.user.extraPermissions = existingUser.extraPermissions ?? [];
+                    session.user.deniedPermissions = existingUser.deniedPermissions ?? [];
                     session.user.subscriptionEndsAt = existingUser.tenant?.subscriptionEndsAt;
                     session.user.isBlocked = existingUser.tenant?.isBlocked;
                     session.user.defaultStoreId = existingUser.defaultStoreId;
@@ -251,6 +255,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 const isAdmin = dbUser.role === "ADMIN" || Boolean(dbUser.isSuperadmin);
                 token.canEdit = isAdmin ? true : Boolean(dbUser.canEdit);
                 token.canDelete = isAdmin ? true : Boolean(dbUser.canDelete);
+                token.extraPermissions = dbUser.extraPermissions ?? [];
+                token.deniedPermissions = dbUser.deniedPermissions ?? [];
                 token.subscriptionEndsAt = tenant?.subscriptionEndsAt;
                 token.isBlocked = tenant?.isBlocked;
                 token.defaultStoreId = dbUser.defaultStoreId;
@@ -297,6 +303,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                         isSuperadmin: true,
                         canEdit: true,
                         canDelete: true,
+                        extraPermissions: true,
+                        deniedPermissions: true,
                         tenant: { select: { subscriptionEndsAt: true, isBlocked: true } }
                     }
                 });
@@ -306,6 +314,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     const isAdmin = currentUser.role === "ADMIN" || Boolean(currentUser.isSuperadmin);
                     token.canEdit = isAdmin ? true : Boolean(currentUser.canEdit);
                     token.canDelete = isAdmin ? true : Boolean(currentUser.canDelete);
+                    token.extraPermissions = currentUser.extraPermissions ?? [];
+                    token.deniedPermissions = currentUser.deniedPermissions ?? [];
                     token.subscriptionEndsAt = currentUser.tenant?.subscriptionEndsAt;
                     token.isBlocked = currentUser.tenant?.isBlocked;
                 }

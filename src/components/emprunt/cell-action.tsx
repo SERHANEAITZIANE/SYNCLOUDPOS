@@ -182,9 +182,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
             <div className="flex items-center gap-1">
                 {data.customerId && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        variant="ghost-info"
+                        size="icon-sm"
                         onClick={() => router.push(`/customers/${data.customerId}/ledger`)}
                         title="Voir Historique / Log"
                     >
@@ -193,9 +192,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
                 )}
                 {canEdit && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                        variant="ghost-warning"
+                        size="icon-sm"
                         onClick={() => setEditOpen(true)}
                         title="Modifier"
                     >
@@ -204,9 +202,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
                 )}
                 {canDelete && (
                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        variant="ghost-danger"
+                        size="icon-sm"
                         onClick={() => setDeleteOpen(true)}
                         title="Supprimer"
                     >

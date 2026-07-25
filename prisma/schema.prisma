@@ -240,6 +240,8 @@ model User {
   isSuperadmin       Boolean                   @default(false)
   canEdit            Boolean                   @default(false)
   canDelete          Boolean                   @default(false)
+  extraPermissions   String[]                  @default([])
+  deniedPermissions  String[]                  @default([])
   role               UserRole                  @default(CASHIER)
   tenantId           String
   defaultStoreId     String?

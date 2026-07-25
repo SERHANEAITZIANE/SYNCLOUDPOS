@@ -25,7 +25,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const onConfirm = async () => {
         try {
             setLoading(true)
-            await deleteSupplier(data.id)
+            const result = await deleteSupplier(data.id)
+            if (result?.error) {
+                toast.error(result.error)
+                return
+            }
             toast.success("Fournisseur supprimé.")
             router.refresh()
         } catch {
@@ -38,9 +42,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     return (
         <div className="flex items-center gap-1">
             <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                variant="ghost-info"
+                size="icon-sm"
                 onClick={() => router.push(`/suppliers/${data.id}/ledger`)}
                 title="Historique"
             >
@@ -49,9 +52,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
             {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canEdit !== false) && (
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                    variant="ghost-warning"
+                    size="icon-sm"
                     onClick={() => router.push(`/suppliers/${data.id}`)}
                     title={tCommon("edit")}
                 >
@@ -61,9 +63,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
             {(!session?.user || session?.user?.role === "ADMIN" || session?.user?.isSuperadmin || session?.user?.canDelete !== false) && (
                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    variant="ghost-danger"
+                    size="icon-sm"
                     onClick={onConfirm}
                     disabled={loading}
                     title={tCommon("delete")}

@@ -50,14 +50,22 @@ export default function ReservationsPage() {
     }
 
     const handleStatus = async (id: string, status: string) => {
-        await updateReservationStatus(id, status)
+        const result = await updateReservationStatus(id, status)
+        if (result && "error" in result && result.error) {
+            toast.error(result.error)
+            return
+        }
         toast.success("Statut mis à jour")
         load()
     }
 
     const handleDelete = async (id: string) => {
         if (!confirm("Supprimer cette réservation ?")) return
-        await deleteReservation(id)
+        const result = await deleteReservation(id)
+        if (result && "error" in result && result.error) {
+            toast.error(result.error)
+            return
+        }
         toast.success("Réservation supprimée")
         load()
     }
