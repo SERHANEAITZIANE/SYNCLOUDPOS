@@ -75,7 +75,7 @@ export async function getCustomerPayments(dateRange?: { from: Date; to: Date }, 
             let customerName = "Client de passage"
             let foundCustomerId = undefined
             // Determine payment method from the account name or source
-            let paymentMethod = t.account?.name || "Inconnu"
+            const paymentMethod = t.account?.name || "Inconnu"
 
             if (t.source === "SALE") {
                 const order = orders.find(o => o.id === t.referenceId)
@@ -309,11 +309,31 @@ export async function updatePayment(id: string, data: {
                 }
             }
 
+            // Calculate balanceAfter to satisfy PostgreSQL chk_treasury_balance_coherence constraint
+            let updatedBalanceBefore = Number(existing.balanceBefore || 0)
+            if (hasAccountChanged) {
+                const targetAccount = await tx.treasuryAccount.findFirst({
+                    where: { id: data.accountId, tenantId }
+                })
+                if (targetAccount) {
+                    const currentBal = Number(targetAccount.balance)
+                    updatedBalanceBefore = existing.type === "CREDIT"
+                        ? currentBal - data.amount
+                        : currentBal + data.amount
+                }
+            }
+
+            const updatedBalanceAfter = existing.type === "CREDIT"
+                ? updatedBalanceBefore + data.amount
+                : updatedBalanceBefore - data.amount
+
             // Update the transaction itself
             await tx.treasuryTransaction.update({
                 where: { id },
                 data: {
                     amount: data.amount,
+                    balanceBefore: updatedBalanceBefore,
+                    balanceAfter: updatedBalanceAfter,
                     accountId: data.accountId || undefined,
                     description: data.description,
                     date: data.date ? new Date(data.date) : undefined,
@@ -349,10 +369,10 @@ export async function updatePayment(id: string, data: {
             return { success: "Paiement modifié avec succès" }
         })
 
-        revalidatePath("/(dashboard)/payments")
-        revalidatePath("/(dashboard)/treasury")
-        revalidatePath("/(dashboard)/emprunt")
-        revalidatePath("/(dashboard)/emprunt-fournisseur")
+        revalidatePath("/[locale]/(dashboard)/payments", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/emprunt", "page")
+        revalidatePath("/[locale]/(dashboard)/emprunt-fournisseur", "page")
         await logAudit({
             action: "UPDATE",
             entity: "PAYMENT",
@@ -426,12 +446,12 @@ export async function deletePayment(id: string) {
             return { success: "Paiement supprimé avec succès" }
         })
 
-        revalidatePath("/(dashboard)/payments")
-        revalidatePath("/(dashboard)/treasury")
-        revalidatePath("/(dashboard)/customers")
-        revalidatePath("/(dashboard)/suppliers")
-        revalidatePath("/(dashboard)/emprunt")
-        revalidatePath("/(dashboard)/emprunt-fournisseur")
+        revalidatePath("/[locale]/(dashboard)/payments", "page")
+        revalidatePath("/[locale]/(dashboard)/treasury", "page")
+        revalidatePath("/[locale]/(dashboard)/customers", "page")
+        revalidatePath("/[locale]/(dashboard)/suppliers", "page")
+        revalidatePath("/[locale]/(dashboard)/emprunt", "page")
+        revalidatePath("/[locale]/(dashboard)/emprunt-fournisseur", "page")
         await logAudit({
             action: "DELETE",
             entity: "PAYMENT",

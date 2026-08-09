@@ -3,7 +3,7 @@ import { createClient } from "redis"
 // Singleton Redis client — reused across requests in the same Node.js process
 const globalForRedis = globalThis as unknown as { _redis?: ReturnType<typeof createClient> }
 
-let client: ReturnType<typeof createClient> | null = null
+const client: ReturnType<typeof createClient> | null = null
 
 async function getClient() {
     if (globalForRedis._redis?.isReady) return globalForRedis._redis

@@ -21,7 +21,7 @@ export const rules = {
    * Required field validation
    */
   required: <T>(message = "This field is required"): ValidationRule<T> => ({
-    validate: (value) => value !== null && value !== undefined && value !== '',
+    validate: (value) => value !== null && value !== undefined && (typeof value !== 'string' || value.trim() !== ''),
     message
   }),
 
@@ -29,12 +29,12 @@ export const rules = {
    * String length validation
    */
   minLength: (min: number, message?: string): ValidationRule<string> => ({
-    validate: (value) => value.length >= min,
+    validate: (value) => !value || (typeof value === 'string' && value.length >= min),
     message: message || `Must be at least ${min} characters long`
   }),
 
   maxLength: (max: number, message?: string): ValidationRule<string> => ({
-    validate: (value) => value.length <= max,
+    validate: (value) => !value || (typeof value === 'string' && value.length <= max),
     message: message || `Must be at most ${max} characters long`
   }),
 
@@ -42,12 +42,12 @@ export const rules = {
    * Numeric validation
    */
   min: (min: number, message?: string): ValidationRule<number> => ({
-    validate: (value) => value >= min,
+    validate: (value) => value === undefined || value === null || value >= min,
     message: message || `Must be at least ${min}`
   }),
 
   max: (max: number, message?: string): ValidationRule<number> => ({
-    validate: (value) => value <= max,
+    validate: (value) => value === undefined || value === null || value <= max,
     message: message || `Must be at most ${max}`
   }),
 
@@ -55,15 +55,19 @@ export const rules = {
    * Email validation
    */
   email: (message = "Must be a valid email address"): ValidationRule<string> => ({
-    validate: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+    validate: (value) => !value || (typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())),
     message
   }),
 
   /**
-   * Phone number validation
+   * Phone number validation (supports local format e.g. 0555123456 & international e.g. +213555123456)
    */
   phone: (message = "Must be a valid phone number"): ValidationRule<string> => ({
-    validate: (value) => /^\+?[1-9]\d{1,14}$/.test(value.replace(/\D/g, '')),
+    validate: (value) => {
+      if (!value || typeof value !== 'string' || value.trim() === '') return true
+      const clean = value.replace(/\D/g, '')
+      return clean.length >= 8 && clean.length <= 15
+    },
     message
   }),
 
@@ -71,12 +75,12 @@ export const rules = {
    * Array validation
    */
   minItems: <T>(min: number, message?: string): ValidationRule<T[]> => ({
-    validate: (value) => value.length >= min,
+    validate: (value) => !value || (Array.isArray(value) && value.length >= min),
     message: message || `Must contain at least ${min} items`
   }),
 
   maxItems: <T>(max: number, message?: string): ValidationRule<T[]> => ({
-    validate: (value) => value.length <= max,
+    validate: (value) => !value || (Array.isArray(value) && value.length <= max),
     message: message || `Must contain at most ${max} items`
   }),
 

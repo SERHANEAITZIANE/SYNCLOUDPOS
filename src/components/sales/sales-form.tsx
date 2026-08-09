@@ -36,13 +36,23 @@ const formSchema = z.object({
     createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
-        quantity: z.number().min(1),
+        // "" is allowed only as a transient value while the field is being retyped
+        // (a number input reports "" for a lone "-", so this is what makes negative
+        // entry possible); it is coerced to 0 by toQty() before submit.
+        // Input and output types are deliberately identical here — z.preprocess or
+        // z.transform would make Zod's input type diverge from z.infer, which breaks
+        // the useForm/zodResolver generics and every form.control site in this file.
+        quantity: z.union([z.number().finite("Quantité invalide"), z.literal("")]),
         unitPrice: z.number().min(0),
         serialNumber: z.string().optional()
     })).min(1, "Ajoutez au moins un article")
 })
 
 type SalesOrderFormValues = z.infer<typeof formSchema>
+
+/** Normalise a line quantity to a number. "" (field mid-edit) becomes 0. */
+const toQty = (v: number | "" | undefined | null): number =>
+    typeof v === "number" && Number.isFinite(v) ? v : 0
 
 interface SalesOrderFormProps {
     initialData: any | null
@@ -184,13 +194,15 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
         const product = products.find(p => p.id === item.productId);
         const tvaRate = tvaEnabled ? (product?.tvaRate ? Number(product.tvaRate) : 0) : 0;
         const priceHt = item.unitPrice / (1 + (tvaRate / 100));
+        const quantity = toQty(item.quantity);
         return {
             ...item,
+            quantity,
             product,
             tvaRate,
             priceHt,
-            lineTotalTTC: item.quantity * item.unitPrice,
-            lineTotalHT: item.quantity * priceHt,
+            lineTotalTTC: quantity * item.unitPrice,
+            lineTotalHT: quantity * priceHt,
         };
     });
 
@@ -254,6 +266,7 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                 total: finalTotalTTC,
                 items: enrichedItems.map(i => ({
                     productId: i.productId,
+                    // Already normalised by toQty() in enrichedItems — never "" here.
                     quantity: i.quantity,
                     unitPrice: i.unitPrice,
                     tvaRate: i.tvaRate,
@@ -740,8 +753,26 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                                 <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
                                                     <FormItem>
                                                         <FormControl>
-                                                            <Input type="number" min={1} disabled={loading || !canEdit} className="text-center font-bold"
-                                                                {...f} onChange={e => f.onChange(e.target.valueAsNumber || 1)} />
+                                                            <Input type="number" disabled={loading || !canEdit} className="text-center font-bold"
+                                                                ref={f.ref}
+                                                                name={f.name}
+                                                                value={f.value}
+                                                                onBlur={(e) => {
+                                                                    if (e.target.value === "") {
+                                                                        f.onChange(0);
+                                                                    }
+                                                                    f.onBlur();
+                                                                }}
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    if (val === "") {
+                                                                        // Allow empty field while typing — commit 0 on blur
+                                                                        f.onChange("");
+                                                                        return;
+                                                                    }
+                                                                    const num = e.target.valueAsNumber;
+                                                                    f.onChange(isNaN(num) ? 0 : num);
+                                                                }} />
                                                         </FormControl>
                                                     </FormItem>
                                                 )} />

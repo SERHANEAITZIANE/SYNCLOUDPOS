@@ -234,7 +234,9 @@ async function getPeriodData(
             cost: 0
         }
 
-        const cost = r.costAtSale != null ? Number(r.costAtSale) : Number(r.product?.cost || 0)
+        // ProductReturn does not record a historical cost-at-sale, so the current
+        // product cost is the only basis available here.
+        const cost = Number(r.product?.cost || 0)
         existing.qtySold -= r.quantity
         existing.revenue -= Number(r.totalAmount || (r.unitPrice * r.quantity))
         existing.cost -= cost * r.quantity

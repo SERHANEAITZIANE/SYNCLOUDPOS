@@ -53,10 +53,9 @@ export function checkRateLimit(key: string, config: RateLimitConfig): RateLimitR
     }
     rateLimitStore.set(limiterKey, limiter)
   } else {
-    // Increment the counter if under the limit
-    if (limiter.count < config.limit) {
-      limiter.count++
-    }
+    // Always increment within the active window. Capping the counter at the
+    // limit made every request appear allowed forever once the limit was hit.
+    limiter.count++
     // Don't update resetTime - it stays fixed for the window
     rateLimitStore.set(limiterKey, limiter)
   }

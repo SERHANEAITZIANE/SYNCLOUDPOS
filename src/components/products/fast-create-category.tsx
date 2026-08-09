@@ -32,7 +32,7 @@ import { createCategory } from "@/actions/categories"
 import { useRouter } from "@/i18n/routing"
 
 interface FastCreateCategoryProps {
-    onSuccess?: (id: string) => void
+    onSuccess?: (category: { id: string; name: string }) => void
 }
 
 export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
@@ -58,8 +58,9 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
                 toast.success(tCategory("success"))
                 form.reset()
                 setOpen(false)
-                router.refresh()
-                if (onSuccess && result.data) onSuccess(result.data.id)
+                if (onSuccess && result.data) {
+                    onSuccess({ id: result.data.id, name: result.data.name })
+                }
             }
         } catch (error) {
             toast.error("Something went wrong")
@@ -83,7 +84,14 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form 
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            form.handleSubmit(onSubmit)(e)
+                        }} 
+                        className="space-y-4"
+                    >
                         <FormField
                             control={form.control}
                             name="name"
@@ -98,7 +106,16 @@ export const FastCreateCategory = ({ onSuccess }: FastCreateCategoryProps) => {
                             )}
                         />
                         <DialogFooter>
-                            <Button disabled={loading} type="submit" className="w-full">
+                            <Button 
+                                disabled={loading} 
+                                type="button" 
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    form.handleSubmit(onSubmit)(e)
+                                }} 
+                                className="w-full"
+                            >
                                 {tCommon("save")}
                             </Button>
                         </DialogFooter>

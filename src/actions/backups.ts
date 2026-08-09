@@ -13,7 +13,7 @@ export interface BackupFile {
 export async function getLocalBackups(): Promise<{ data?: BackupFile[], error?: string }> {
     const session = await auth()
     // Restrict this to SUPERADMIN or at least ADMIN
-    if (!session?.user || ((session.user as any).role !== "SUPERADMIN" && (session.user as any).role !== "ADMIN")) {
+    if (!session?.user?.isSuperadmin) {
         return { error: "Non autorisé." }
     }
 
@@ -61,7 +61,7 @@ const execAsync = promisify(exec)
 export async function createLocalBackup(): Promise<{ success?: boolean, error?: string }> {
     const session = await auth()
     // Restrict this to SUPERADMIN or at least ADMIN
-    if (!session?.user || ((session.user as any).role !== "SUPERADMIN" && (session.user as any).role !== "ADMIN")) {
+    if (!session?.user?.isSuperadmin) {
         return { error: "Non autorisé." }
     }
 

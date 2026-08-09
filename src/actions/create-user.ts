@@ -14,6 +14,7 @@ const CreateUserSchema = z.object({
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean().optional(),
     canDelete: z.boolean().optional(),
+    defaultStoreId: z.string().optional().nullable(),
 })
 
 export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
@@ -33,7 +34,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
         return { error: "Invalid fields" }
     }
 
-    const { name, email, username, password, role, canEdit, canDelete } = validatedFields.data
+    const { name, email, username, password, role, canEdit, canDelete, defaultStoreId } = validatedFields.data
 
     // Get current user's tenant
     const currentUser = await db.user.findUnique({
@@ -81,6 +82,7 @@ export const createUser = async (values: z.infer<typeof CreateUserSchema>) => {
                 role,
                 canEdit: finalCanEdit,
                 canDelete: finalCanDelete,
+                defaultStoreId: defaultStoreId || currentUser.defaultStoreId || null,
                 tenantId: currentUser.tenantId
             }
         })

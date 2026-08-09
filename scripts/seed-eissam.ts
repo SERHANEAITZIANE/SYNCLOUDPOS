@@ -14,7 +14,7 @@ async function main() {
     }
 
     // Get admin user just to link orders to a user
-    let user = await db.user.findFirst({ where: { role: 'SUPERADMIN' } });
+    const user = await db.user.findFirst({ where: { role: 'SUPERADMIN' } });
     if (!user) throw new Error("No superadmin found");
 
     const tenantId = tenant.id;

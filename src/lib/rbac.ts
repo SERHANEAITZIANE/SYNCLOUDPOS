@@ -197,9 +197,7 @@ export async function hasPermission(permission: Permission): Promise<boolean> {
     if (!session?.user) return false
     if (session.user.isSuperadmin || session.user.role === "ADMIN") return true
 
-    const role = session.user.role || "CASHIER"
-    const permissions = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["CASHIER"]
-
+    const permissions = await getUserPermissions()
     return permissions.some(p => permissionMatches(p, permission))
 }
 
@@ -225,6 +223,24 @@ export async function getUserPermissions(): Promise<Permission[]> {
     if (session.user.isSuperadmin) return ROLE_PERMISSIONS["ADMIN"]
 
     const role = session.user.role || "CASHIER"
+    const tenantId = session.user.tenantId
+
+    if (tenantId) {
+        try {
+            const { db } = await import("@/lib/db")
+            const tenant = await db.tenant.findUnique({
+                where: { id: tenantId },
+                select: { customRolePermissions: true }
+            })
+            const customMap = tenant?.customRolePermissions as Record<string, Permission[]> | null
+            if (customMap && Array.isArray(customMap[role])) {
+                return customMap[role]
+            }
+        } catch (e) {
+            console.error("Error loading custom tenant permissions:", e)
+        }
+    }
+
     return ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS["CASHIER"]
 }
 

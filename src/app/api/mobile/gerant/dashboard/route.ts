@@ -118,11 +118,11 @@ export async function GET(req: NextRequest) {
             }),
             // 4. Client debt total (negative balance means client owes us)
             db.customer.aggregate({
-                where: { tenantId, balance: { lt: 0 } },
+                where: { tenantId, balance: { gt: 0 } },
                 _sum: { balance: true },
             }),
             db.customer.count({
-                where: { tenantId, balance: { lt: 0 } },
+                where: { tenantId, balance: { gt: 0 } },
             }),
             // 5. Supplier debt total (positive balance means we owe supplier)
             db.supplier.aggregate({

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Eye, Trash } from "lucide-react"
+import { Eye, Trash, Pencil } from "lucide-react"
 import { useRouter } from "@/i18n/routing"
 import { useTranslations } from "next-intl"
 import { toast } from "react-hot-toast"
@@ -56,6 +56,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                 title={tCommon("view")}
             >
                 <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                onClick={() => router.push(`/purchases/${data.id}`)}
+                title={tCommon("edit") || "Modifier"}
+            >
+                <Pencil className="h-4 w-4" />
             </Button>
             <Button
                 variant="ghost"

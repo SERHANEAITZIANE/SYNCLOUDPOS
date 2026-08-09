@@ -1,7 +1,7 @@
 "use client"
 
 import { Edit, Trash, FileText } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
 import { useSession } from "next-auth/react"
@@ -45,6 +45,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data, accounts }) => {
     const [editDescription, setEditDescription] = useState(data.description || "")
     const [editDate, setEditDate] = useState(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
     const [editAccountId, setEditAccountId] = useState(data.accountId || "")
+
+    useEffect(() => {
+        if (editOpen) {
+            setEditAmount(String(data.amount))
+            setEditDescription(data.description || "")
+            setEditDate(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
+            setEditAccountId(data.accountId || "")
+        }
+    }, [editOpen, data])
 
     const onDelete = async () => {
         try {

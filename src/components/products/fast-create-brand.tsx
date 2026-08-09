@@ -32,7 +32,7 @@ import { createBrand } from "@/actions/brands"
 import { useRouter } from "@/i18n/routing"
 
 interface FastCreateBrandProps {
-    onSuccess?: (id: string) => void
+    onSuccess?: (brand: { id: string; name: string }) => void
 }
 
 export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
@@ -58,8 +58,9 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
                 toast.success(tBrand("success"))
                 form.reset()
                 setOpen(false)
-                router.refresh()
-                if (onSuccess && result.data) onSuccess(result.data.id)
+                if (onSuccess && result.data) {
+                    onSuccess({ id: result.data.id, name: result.data.name })
+                }
             }
         } catch (error) {
             toast.error("Something went wrong")
@@ -83,7 +84,14 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form 
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            form.handleSubmit(onSubmit)(e)
+                        }} 
+                        className="space-y-4"
+                    >
                         <FormField
                             control={form.control}
                             name="name"
@@ -98,7 +106,16 @@ export const FastCreateBrand = ({ onSuccess }: FastCreateBrandProps) => {
                             )}
                         />
                         <DialogFooter>
-                            <Button disabled={loading} type="submit" className="w-full">
+                            <Button 
+                                disabled={loading} 
+                                type="button" 
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    form.handleSubmit(onSubmit)(e)
+                                }} 
+                                className="w-full"
+                            >
                                 {tCommon("save")}
                             </Button>
                         </DialogFooter>

@@ -29,8 +29,8 @@ import { FichePaiementModal, PaymentFicheData } from "./fiche-modal"
 
 interface PaymentsClientProps {
     data: PaymentColumn[]
-    customers: { id: string; name: string }[]
-    accounts: { id: string; name: string; type: string }[]
+    customers: { id: string; name: string; balance?: number }[]
+    accounts: { id: string; name: string; type: string; balance?: number }[]
 }
 
 export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers, accounts }) => {
@@ -326,86 +326,119 @@ export const PaymentsClient: React.FC<PaymentsClientProps> = ({ data, customers,
                             {t("dialog.newCustomerDesc")}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label>{t("client")}</Label>
-                            <SearchableSelect
-                                options={customers.map(c => ({ value: c.id, label: c.name }))}
-                                value={newPayment.customerId}
-                                onChange={(v) => setNewPayment(prev => ({ ...prev, customerId: v }))}
-                                placeholder={t("dialog.selectClientPlaceholder")}
-                                searchPlaceholder={t("searchClient")}
-                            />
-                        </div>
-                        {newPayment.customerId && salesOrders.length > 0 && (
-                            <div className="grid gap-2">
-                                <Label>{t("dialog.optionalInvoice")}</Label>
-                                <Select
-                                    value={selectedSalesOrderId}
-                                    onValueChange={(v) => {
-                                        const actualValue = v === "none" ? "" : v
-                                        setSelectedSalesOrderId(actualValue)
-                                        const selectedOrder = salesOrders.find(so => so.id === actualValue)
-                                        if (selectedOrder) {
-                                            const remaining = Number(selectedOrder.total) - Number(selectedOrder.amountPaid)
-                                            setNewPayment(prev => ({ ...prev, amount: remaining.toFixed(2) }))
-                                        }
-                                    }}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={t("dialog.selectInvoicePlaceholder")} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">{t("dialog.noneGlobalDebt")}</SelectItem>
-                                        {salesOrders.map(so => {
-                                            const remaining = Number(so.total) - Number(so.amountPaid)
-                                            return (
-                                                <SelectItem key={so.id} value={so.id}>
-                                                    {so.receiptNumber} (Total: {Number(so.total).toLocaleString()} DA - Reste: {remaining.toLocaleString()} DA)
-                                                </SelectItem>
-                                            )
-                                        })}
-                                    </SelectContent>
-                                </Select>
+                    {(() => {
+                        const selectedCustomerObj = customers.find(c => c.id === newPayment.customerId)
+                        const selectedAccountObj = accounts.find(a => a.id === newPayment.accountId)
+
+                        return (
+                            <div className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label>{t("client")}</Label>
+                                        {selectedCustomerObj && (
+                                            <span className="text-xs font-semibold">
+                                                Solde client :{" "}
+                                                <span className={`tabular-nums font-bold ${Number(selectedCustomerObj.balance ?? 0) > 0 ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                                                    {Number(selectedCustomerObj.balance ?? 0).toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
+                                                </span>
+                                            </span>
+                                        )}
+                                    </div>
+                                    <SearchableSelect
+                                        options={customers.map(c => ({ 
+                                            value: c.id, 
+                                            label: `${c.name} ${c.balance !== undefined ? `— Solde: ${Number(c.balance).toLocaleString("fr-DZ")} DA` : ""}` 
+                                        }))}
+                                        value={newPayment.customerId}
+                                        onChange={(v) => setNewPayment(prev => ({ ...prev, customerId: v }))}
+                                        placeholder={t("dialog.selectClientPlaceholder")}
+                                        searchPlaceholder={t("searchClient")}
+                                    />
+                                </div>
+                                {newPayment.customerId && salesOrders.length > 0 && (
+                                    <div className="grid gap-2">
+                                        <Label>{t("dialog.optionalInvoice")}</Label>
+                                        <Select
+                                            value={selectedSalesOrderId}
+                                            onValueChange={(v) => {
+                                                const actualValue = v === "none" ? "" : v
+                                                setSelectedSalesOrderId(actualValue)
+                                                const selectedOrder = salesOrders.find(so => so.id === actualValue)
+                                                if (selectedOrder) {
+                                                    const remaining = Number(selectedOrder.total) - Number(selectedOrder.amountPaid)
+                                                    setNewPayment(prev => ({ ...prev, amount: remaining.toFixed(2) }))
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder={t("dialog.selectInvoicePlaceholder")} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none">{t("dialog.noneGlobalDebt")}</SelectItem>
+                                                {salesOrders.map(so => {
+                                                    const remaining = Number(so.total) - Number(so.amountPaid)
+                                                    return (
+                                                        <SelectItem key={so.id} value={so.id}>
+                                                            {so.receiptNumber} (Total: {Number(so.total).toLocaleString()} DA - Reste: {remaining.toLocaleString()} DA)
+                                                        </SelectItem>
+                                                    )
+                                                })}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
+                                <div className="grid gap-2">
+                                    <Label>{t("dialog.amount")}</Label>
+                                    <Input
+                                        type="number"
+                                        step="0.01"
+                                        value={newPayment.amount}
+                                        onChange={(e) => setNewPayment(prev => ({ ...prev, amount: e.target.value }))}
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label>{t("dialog.registerBank")}</Label>
+                                        {selectedAccountObj && (
+                                            <span className="text-xs font-semibold">
+                                                Solde caisse :{" "}
+                                                <span className="tabular-nums font-bold text-indigo-600 dark:text-indigo-400">
+                                                    {Number(selectedAccountObj.balance ?? 0).toLocaleString("fr-DZ", { minimumFractionDigits: 2 })} DA
+                                                </span>
+                                            </span>
+                                        )}
+                                    </div>
+                                    <SearchableSelect
+                                        options={accounts.map(a => ({ 
+                                            value: a.id, 
+                                            label: `${a.name} (${a.type === "CAISSE" ? "Caisse" : "Banque"})${a.balance !== undefined ? ` — Solde: ${Number(a.balance).toLocaleString("fr-DZ")} DA` : ""}` 
+                                        }))}
+                                        value={newPayment.accountId}
+                                        onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
+                                        placeholder={t("dialog.selectRegisterPlaceholder")}
+                                        searchPlaceholder={t("dialog.searchRegisterPlaceholder")}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>{t("dialog.date")}</Label>
+                                    <Input
+                                        type="date"
+                                        value={newPayment.date}
+                                        onChange={(e) => setNewPayment(prev => ({ ...prev, date: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>{t("dialog.notes")}</Label>
+                                    <Input
+                                        value={newPayment.notes}
+                                        onChange={(e) => setNewPayment(prev => ({ ...prev, notes: e.target.value }))}
+                                        placeholder={t("dialog.notesPlaceholder")}
+                                    />
+                                </div>
                             </div>
-                        )}
-                        <div className="grid gap-2">
-                            <Label>{t("dialog.amount")}</Label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={newPayment.amount}
-                                onChange={(e) => setNewPayment(prev => ({ ...prev, amount: e.target.value }))}
-                                placeholder="0.00"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label>{t("dialog.registerBank")}</Label>
-                            <SearchableSelect
-                                options={accounts.map(a => ({ value: a.id, label: `${a.name} (${a.type})` }))}
-                                value={newPayment.accountId}
-                                onChange={(v) => setNewPayment(prev => ({ ...prev, accountId: v }))}
-                                placeholder={t("dialog.selectRegisterPlaceholder")}
-                                searchPlaceholder={t("dialog.searchRegisterPlaceholder")}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label>{t("dialog.date")}</Label>
-                            <Input
-                                type="date"
-                                value={newPayment.date}
-                                onChange={(e) => setNewPayment(prev => ({ ...prev, date: e.target.value }))}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label>{t("dialog.notes")}</Label>
-                            <Input
-                                value={newPayment.notes}
-                                onChange={(e) => setNewPayment(prev => ({ ...prev, notes: e.target.value }))}
-                                placeholder={t("dialog.notesPlaceholder")}
-                            />
-                        </div>
-                    </div>
+                        )
+                    })()}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={createLoading}>
                             {t("dialog.cancel")}

@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import authConfig from "@/auth.config"
 import createMiddleware from "next-intl/middleware"
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 import { routing } from "@/i18n/routing"
 
 const intlMiddleware = createMiddleware(routing)
@@ -16,7 +16,7 @@ const PUBLIC_PATHS = [
     "/auth",
     "/api/auth",
     "/api/webhooks",
-    "/api/migrate-transactions",
+    "/api/health",
     "/api/mobile",
     "/api/ping",
     "/landing.html",
@@ -35,7 +35,7 @@ function isPublicPath(pathname: string): boolean {
     // Strip locale prefix for matching
     const clean = pathname.replace(/^\/(fr|en|ar)/, "") || "/"
     if (clean === "/") return true
-    return PUBLIC_PATHS.some(p => clean.startsWith(p))
+    return PUBLIC_PATHS.some(p => clean === p || clean.startsWith(`${p}/`))
 }
 
 // Simple in-memory login rate limiter (per IP, resets on restart)
@@ -54,11 +54,37 @@ function isRateLimited(ip: string): boolean {
     return entry.count > MAX_LOGIN_ATTEMPTS
 }
 
+function getAllowedCorsOrigins(): string[] {
+    const configured = process.env.MOBILE_ALLOWED_ORIGINS
+        ?.split(",")
+        .map(origin => origin.trim())
+        .filter(Boolean) || []
+
+    for (const appUrl of [process.env.AUTH_URL, process.env.NEXTAUTH_URL]) {
+        if (appUrl) {
+            try {
+                configured.push(new URL(appUrl).origin)
+            } catch {
+                // Ignore malformed deployment URLs.
+            }
+        }
+    }
+
+    return [...new Set(configured)]
+}
+
+function isAllowedCorsOrigin(origin: string | null): boolean {
+    // Native mobile requests normally do not send an Origin header.
+    return !origin || getAllowedCorsOrigins().includes(origin)
+}
+
 function addCorsHeaders(response: NextResponse, origin: string | null) {
-    response.headers.set("Access-Control-Allow-Origin", origin || "*")
+    if (origin && isAllowedCorsOrigin(origin)) {
+        response.headers.set("Access-Control-Allow-Origin", origin)
+        response.headers.set("Vary", "Origin")
+    }
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
     response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    response.headers.set("Access-Control-Allow-Credentials", "true")
     response.headers.set("Access-Control-Max-Age", "86400")
     return response
 }
@@ -67,6 +93,10 @@ export default auth(async function middleware(request) {
     const { pathname } = request.nextUrl
     const clean = pathname.replace(/^\/(fr|en|ar)/, "") || "/"
     const origin = request.headers.get("origin")
+
+    if (clean.startsWith("/api/mobile") && !isAllowedCorsOrigin(origin)) {
+        return NextResponse.json({ error: "Origin not allowed" }, { status: 403 })
+    }
 
     // Handle CORS preflight options
     if (clean.startsWith("/api/mobile") && request.method === "OPTIONS") {
@@ -78,7 +108,6 @@ export default auth(async function middleware(request) {
     if (
         pathname.startsWith("/_next") ||
         pathname.startsWith("/uploads") ||
-        pathname.includes(".") ||
         pathname === "/sw.js" ||
         pathname === "/favicon.ico" ||
         clean === "/manifest.json" ||
@@ -91,7 +120,7 @@ export default auth(async function middleware(request) {
     // API routes bypass intlMiddleware
     if (clean.startsWith("/api")) {
         // Rate limit login/register endpoints
-        if (clean === "/api/auth/callback/credentials" || clean === "/api/register") {
+        if (clean === "/api/auth/callback/credentials" || clean === "/api/register" || clean === "/api/mobile/auth") {
             if (request.method === "POST") {
                 const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
                            request.headers.get("x-real-ip") || 
@@ -166,11 +195,6 @@ export default auth(async function middleware(request) {
         const dashUrl = request.nextUrl.clone()
         dashUrl.pathname = "/dashboard"
         return NextResponse.redirect(dashUrl)
-    }
-
-    // Static assets, public uploads, _next files
-    if (pathname.startsWith("/_next") || pathname.startsWith("/uploads") || pathname.includes(".")) {
-        return NextResponse.next()
     }
 
     // For everything else, rely on next-intl middleware

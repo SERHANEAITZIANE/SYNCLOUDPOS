@@ -79,6 +79,7 @@ export const createSalesOrder = async (data: {
                     type: data.type as SalesOrderType,
                     status: data.status as SalesOrderStatus,
                     paymentMethod: data.paymentMethod as PaymentMethod,
+                    source: "B2B",
                     subtotal: data.subtotal,
                     tvaAmount: data.tvaAmount,
                     stampTax: data.stampTax,
@@ -662,7 +663,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                 );
 
                 // Also delete related stock movements
-                let linkedOrderIds = [id];
+                const linkedOrderIds = [id];
                 if (salesOrder.receiptNumber) {
                     const timeMin = new Date(salesOrder.createdAt.getTime() - 60000);
                     const timeMax = new Date(salesOrder.createdAt.getTime() + 60000);

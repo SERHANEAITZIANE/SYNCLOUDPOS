@@ -13,7 +13,6 @@ export default {
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            checks: ["none"],
         }),
         Credentials({
             async authorize() {
@@ -57,12 +56,23 @@ export default {
                     }
                     session.user.tenantId = activeTenantId;
 
-                    const selectedStoreId = cookieStore.get("selected_store_id")?.value
-                    if (selectedStoreId && activeTenantId === selectedTenantId) {
-                        session.user.defaultStoreId = selectedStoreId
-                    } else {
-                        session.user.defaultStoreId = token.defaultStoreId as string
+                    const tenantRoles = (token.tenantRoles as Record<string, string> | undefined) || {}
+                    if (!token.isSuperadmin && activeTenantId !== token.tenantId) {
+                        const membershipRole = tenantRoles[activeTenantId]
+                        session.user.role = membershipRole === "ADMIN"
+                            ? "ADMIN"
+                            : membershipRole === "MANAGER"
+                                ? "MANAGER"
+                                : "CASHIER"
+                        session.user.canEdit = membershipRole === "ADMIN" || membershipRole === "MANAGER"
+                        session.user.canDelete = membershipRole === "ADMIN"
                     }
+
+                    // Edge middleware cannot validate store ownership against the
+                    // database. The full auth callback validates cookie selections.
+                    session.user.defaultStoreId = activeTenantId === token.tenantId
+                        ? token.defaultStoreId as string
+                        : null
                 } catch {
                     // ignore
                 }

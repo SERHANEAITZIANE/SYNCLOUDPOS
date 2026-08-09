@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
         });
 
         // Enrich products
-        let enriched = products.map(p => {
+        const enriched = products.map(p => {
             const sale = productSales[p.id] || { revenue: 0, qtySold: 0 };
             const stockRecord = p.storeProducts[0];
             const stock = stockRecord?.stock || 0;

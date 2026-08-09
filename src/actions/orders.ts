@@ -9,8 +9,13 @@ import { generateReceiptNumber } from "./sales-orders"
 import { checkSubscription } from "@/lib/subscription"
 import { logAudit } from "./audit-log"
 import cacheMonitor from "@/lib/cache-monitor"
+import { hasPermission } from "@/lib/rbac"
+import { applyPromotionsToCart } from "@/lib/promotions-engine"
 
-export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
+// z.input, not z.infer: callers pass pre-validation input, where fields carrying a
+// .default() (subtotal, tvaAmount, stampTax, paymentMethod, status, …) are optional.
+// `values` is only ever handed to safeParse below, which applies those defaults.
+export const createOrder = async (values: z.input<typeof OrderSchema>) => {
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
@@ -18,6 +23,9 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
 
     if (!userId || !tenantId) {
         return { error: "Unauthorized" }
+    }
+    if (!(await hasPermission("pos:create"))) {
+        return { error: "Access denied" }
     }
 
     const validatedFields = OrderSchema.safeParse(values)
@@ -27,7 +35,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
         return { error: "Invalid fields!" }
     }
 
-    const { items, subtotal, tvaAmount, stampTax, total, paymentMethod, paidAmount, customerId, accountId, status, originalOrderId, discountAmount, loyaltyPointsUsed, userId: selectedUserId, idempotencyKey } = validatedFields.data
+    const { items: submittedItems, paymentMethod, paidAmount: submittedPaidAmount, customerId, accountId: submittedAccountId, status, originalOrderId, loyaltyPointsUsed, userId: selectedUserId, idempotencyKey } = validatedFields.data
 
     try {
         // Check subscription INSIDE try/catch so errors are returned properly
@@ -61,8 +69,190 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
             }
         }
 
+        if (status === "CANCELLED") {
+            return { error: "A new sale cannot be created as cancelled." }
+        }
+
+        const tenant = await db.tenant.findUnique({
+            where: { id: tenantId },
+            select: {
+                tvaEnabled: true,
+                posTimbreEnabled: true,
+                stampTaxEnabled: true,
+                posCashRounding: true,
+                posVendorRequired: true,
+                loyaltyDaPerPoint: true,
+            }
+        })
+        if (!tenant) return { error: "Tenant not found." }
+
+        const productIds = [...new Set(submittedItems.map(item => item.productId))]
+        const now = new Date()
+        const [customer, products, activePromotions, selectedUser] = await Promise.all([
+            customerId
+                ? db.customer.findFirst({
+                    where: { id: customerId, tenantId },
+                    select: { id: true, clientType: true, loyaltyPoints: true }
+                })
+                : Promise.resolve(null),
+            db.product.findMany({
+                where: { id: { in: productIds }, tenantId, isArchived: false },
+                select: {
+                    id: true,
+                    price: true,
+                    dealerPrice: true,
+                    wholesalePrice: true,
+                    cost: true,
+                    tvaRate: true,
+                    categoryId: true,
+                }
+            }),
+            db.promotion.findMany({
+                where: {
+                    tenantId,
+                    isActive: true,
+                    OR: [
+                        { startsAt: null, endsAt: null },
+                        { startsAt: { lte: now }, endsAt: { gte: now } },
+                        { startsAt: { lte: now }, endsAt: null },
+                        { startsAt: null, endsAt: { gte: now } }
+                    ]
+                }
+            }),
+            selectedUserId
+                ? db.user.findFirst({
+                    where: {
+                        id: selectedUserId,
+                        OR: [
+                            { tenantId },
+                            { tenantUsers: { some: { tenantId } } }
+                        ]
+                    },
+                    select: { id: true }
+                })
+                : Promise.resolve(null)
+        ])
+
+        if (customerId && !customer) return { error: "Customer not found or not authorized." }
+        if (products.length !== productIds.length) {
+            return { error: "One or more products are missing or not authorized." }
+        }
+        if (selectedUserId && !selectedUser) {
+            return { error: "Seller not found or not authorized." }
+        }
+        if (tenant.posVendorRequired && !selectedUserId) {
+            return { error: "A seller must be selected." }
+        }
+        if (loyaltyPointsUsed > 0 && (!customer || loyaltyPointsUsed > customer.loyaltyPoints)) {
+            return { error: "Insufficient loyalty points." }
+        }
+
+        const canOverridePrice = await hasPermission("pos:update")
+        const productMap = new Map(products.map(product => [product.id, product]))
+        const clientType = customer?.clientType || "RETAIL"
+        const promotionInput = submittedItems.map((item, index) => {
+            const product = productMap.get(item.productId)!
+            let tierPrice = Number(product.price)
+            if (clientType === "RESELLER" && product.dealerPrice != null) {
+                tierPrice = Number(product.dealerPrice)
+            } else if (clientType === "WHOLESALE" && product.wholesalePrice != null) {
+                tierPrice = Number(product.wholesalePrice)
+            }
+
+            return {
+                id: item.productId + ":" + index,
+                productId: item.productId,
+                name: item.productId,
+                quantity: item.quantity,
+                price: canOverridePrice ? item.price : tierPrice,
+                categoryId: product.categoryId || undefined,
+                tvaRate: Number(product.tvaRate),
+                serialNumber: item.serialNumber,
+            }
+        })
+        const promotionResult = applyPromotionsToCart(
+            promotionInput,
+            activePromotions.map(promotion => ({
+                id: promotion.id,
+                type: promotion.type,
+                targetScope: promotion.targetScope,
+                scopeId: promotion.scopeId,
+                discountType: promotion.discountType,
+                discountValue: Number(promotion.discountValue),
+                triggerQty: promotion.triggerQty,
+            }))
+        )
+
+        const items = promotionResult.items.map((promotedItem, index) => {
+            const submittedItem = submittedItems[index]
+            const product = productMap.get(promotedItem.productId)!
+            const itemDiscount = promotedItem.discountAmount || 0
+            const price = promotedItem.quantity > 0
+                ? promotedItem.price - (itemDiscount / promotedItem.quantity)
+                : promotedItem.price
+            const tvaRate = tenant.tvaEnabled ? Number(product.tvaRate) : 0
+            const priceHt = tvaRate > 0 ? price / (1 + tvaRate / 100) : price
+            return {
+                ...submittedItem,
+                price,
+                priceHt,
+                tvaRate,
+                costAtSale: product.cost == null ? undefined : Number(product.cost),
+            }
+        })
+
+        const itemsTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        const pointsDiscount = loyaltyPointsUsed > 0
+            ? loyaltyPointsUsed / Math.max(1, tenant.loyaltyDaPerPoint)
+            : 0
+        const discountedItemsTotal = Math.max(0, itemsTotal - pointsDiscount)
+        const subtotalBeforePoints = tenant.tvaEnabled
+            ? items.reduce((sum, item) => sum + (item.priceHt || item.price) * item.quantity, 0)
+            : itemsTotal
+        const discountRatio = itemsTotal > 0 ? discountedItemsTotal / itemsTotal : 1
+        const subtotal = subtotalBeforePoints * discountRatio
+        const tvaAmount = tenant.tvaEnabled ? Math.max(0, discountedItemsTotal - subtotal) : 0
+
+        const getStampTaxAmount = (amount: number) => {
+            if (amount <= 300) return 0
+            if (amount <= 30000) return Math.max(5, Math.ceil(amount / 100))
+            if (amount <= 100000) return Math.max(5, Math.ceil(amount / 100) * 1.5)
+            return Math.min(10000, Math.ceil(amount / 100) * 2)
+        }
+        const stampTax = tenant.stampTaxEnabled && tenant.posTimbreEnabled && paymentMethod === "CASH"
+            ? getStampTaxAmount(discountedItemsTotal)
+            : 0
+        const unroundedTotal = discountedItemsTotal + stampTax
+        const total = paymentMethod === "CASH" && tenant.posCashRounding
+            ? Math.round(unroundedTotal / 5) * 5
+            : unroundedTotal
+        const paidAmount = submittedPaidAmount ?? (paymentMethod === "TERM" ? 0 : total)
+
+        let accountId = submittedAccountId
+        if (paidAmount > 0) {
+            const account = accountId
+                ? await db.treasuryAccount.findFirst({ where: { id: accountId, tenantId }, select: { id: true } })
+                : await db.treasuryAccount.findFirst({
+                    where: { tenantId, type: { in: ["CAISSE", "CASH", "BANK"] } },
+                    select: { id: true },
+                    orderBy: { createdAt: "asc" }
+                })
+            if (!account) {
+                return { error: "No valid treasury account is configured." }
+            }
+            accountId = account.id
+        }
+
+        const selectedStore = defaultStoreId
+            ? await db.store.findFirst({ where: { id: defaultStoreId, tenantId }, select: { id: true } })
+            : null
+        const fallbackStore = selectedStore || await db.store.findFirst({
+            where: { tenantId },
+            select: { id: true },
+            orderBy: { createdAt: "asc" }
+        })
+        const storeIdToUse = fallbackStore?.id
         let receiptNumber = await generateReceiptNumber("ORDER", tenantId);
-        const storeIdToUse = defaultStoreId || (await db.store.findFirst({ where: { tenantId } }))?.id;
 
         if (!storeIdToUse) {
             return { error: "Aucun magasin trouvé. Veuillez configurer un magasin d'abord." }
@@ -172,7 +362,7 @@ export const createOrder = async (values: z.infer<typeof OrderSchema>) => {
                     // 3. Find and Revert Old Order
                     let oldOrder = null;
                     const oldTx = await tx.treasuryTransaction.findFirst({
-                        where: { description: { contains: receiptNumber }, source: "SALE" }
+                        where: { tenantId, description: { contains: receiptNumber }, source: "SALE" }
                     });
 
                     if (oldTx && oldTx.referenceId) {

@@ -42,12 +42,23 @@ const formSchema = z.object({
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean(),
     canDelete: z.boolean(),
+    defaultStoreId: z.string().optional().nullable(),
 })
 
-export function AddUserModal() {
+interface AddUserModalProps {
+    stores?: { id: string; name: string }[]
+    currentStoreId?: string | null
+}
+
+export function AddUserModal({ stores = [], currentStoreId }: AddUserModalProps) {
     const [open, setOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState<string | undefined>("")
+
+    const initialStores = stores.length > 0
+        ? (currentStoreId && stores.some(s => s.id === currentStoreId) ? [currentStoreId] : [stores[0].id])
+        : []
+    const [selectedStoreIds, setSelectedStoreIds] = useState<string[]>(initialStores)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -59,10 +70,19 @@ export function AddUserModal() {
             role: "CASHIER",
             canEdit: false,
             canDelete: false,
+            defaultStoreId: initialStores.join(","),
         },
     })
 
     const selectedRole = form.watch("role")
+
+    const toggleStore = (storeId: string) => {
+        setSelectedStoreIds(prev =>
+            prev.includes(storeId)
+                ? (prev.length > 1 ? prev.filter(id => id !== storeId) : prev)
+                : [...prev, storeId]
+        )
+    }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         setError("")
@@ -75,8 +95,8 @@ export function AddUserModal() {
                 role: values.role,
                 canEdit: values.canEdit ?? false,
                 canDelete: values.canDelete ?? false,
+                defaultStoreId: selectedStoreIds.join(",") || undefined,
             }
-            // @ts-ignore
             createUser(payload).then((data) => {
                 if (data.error) {
                     setError(data.error)
@@ -180,6 +200,63 @@ export function AddUserModal() {
                                 </FormItem>
                             )}
                         />
+                        {stores.length > 0 && (
+                            <div className="space-y-2 border-t pt-3">
+                                <FormLabel className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    Magasin(s) autorisés (1 ou plusieurs)
+                                </FormLabel>
+                                <p className="text-[11px] text-muted-foreground">
+                                    Le magasin actuel est coché par défaut. Cochez les magasins autorisés pour cet utilisateur.
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 max-h-44 overflow-y-auto p-2 border rounded-xl bg-slate-50 dark:bg-slate-900">
+                                    {stores.length > 1 && (
+                                        <label
+                                            className={`flex items-center space-x-2 p-2 rounded-lg border text-xs font-bold cursor-pointer transition-colors col-span-1 sm:col-span-2 ${
+                                                selectedStoreIds.length === stores.length
+                                                    ? "bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/50 dark:border-emerald-700 dark:text-emerald-200"
+                                                    : "bg-white border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300"
+                                            }`}
+                                        >
+                                            <Checkbox
+                                                checked={selectedStoreIds.length === stores.length}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setSelectedStoreIds(stores.map(s => s.id))
+                                                    } else {
+                                                        setSelectedStoreIds(currentStoreId && stores.some(s => s.id === currentStoreId) ? [currentStoreId] : [stores[0].id])
+                                                    }
+                                                }}
+                                            />
+                                            <span className="truncate">
+                                                Tous les magasins (Accès global)
+                                            </span>
+                                        </label>
+                                    )}
+                                    {stores.map(store => {
+                                        const isChecked = selectedStoreIds.includes(store.id)
+                                        const isCurrent = store.id === currentStoreId
+                                        return (
+                                            <label
+                                                key={store.id}
+                                                className={`flex items-center space-x-2 p-2 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
+                                                    isChecked
+                                                        ? "bg-indigo-50 border-indigo-300 text-indigo-900 dark:bg-indigo-950/50 dark:border-indigo-700 dark:text-indigo-200"
+                                                        : "bg-white border-slate-200 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300"
+                                                }`}
+                                            >
+                                                <Checkbox
+                                                    checked={isChecked}
+                                                    onCheckedChange={() => toggleStore(store.id)}
+                                                />
+                                                <span className="truncate">
+                                                    {store.name} {isCurrent ? " (Actuel)" : ""}
+                                                </span>
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         {!(selectedRole === "ADMIN" || selectedRole === "MANAGER") && (
                             <div className="flex flex-col gap-3 py-2 border-t pt-4">
                                 <span className="text-sm font-medium text-muted-foreground mb-1">Permissions du Vendeur</span>

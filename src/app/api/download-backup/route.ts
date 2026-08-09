@@ -6,7 +6,7 @@ import { auth } from "@/auth"
 export async function GET(req: Request) {
     const session = await auth()
     // Restrict this to SUPERADMIN or at least ADMIN
-    if (!session?.user || ((session.user as any).role !== "SUPERADMIN" && (session.user as any).role !== "ADMIN")) {
+    if (!session?.user?.isSuperadmin) {
         return new NextResponse("Non autorisé.", { status: 401 })
     }
 

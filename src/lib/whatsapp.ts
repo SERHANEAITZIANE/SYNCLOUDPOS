@@ -40,7 +40,8 @@ export async function getEvolutionInstanceStatus(tenantId: string) {
     try {
         // 1. Check if instance exists in Evolution API
         const checkRes = await fetch(`${EVOLUTION_API_URL}/instance/connectionState/${instanceName}`, {
-            headers: { "apikey": EVOLUTION_API_KEY }
+            headers: { "apikey": EVOLUTION_API_KEY },
+            signal: AbortSignal.timeout(5000)
         });
 
         if (checkRes.status === 404 || !checkRes.ok) {
@@ -48,6 +49,7 @@ export async function getEvolutionInstanceStatus(tenantId: string) {
             const createRes = await fetch(`${EVOLUTION_API_URL}/instance/create`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "apikey": EVOLUTION_API_KEY },
+                signal: AbortSignal.timeout(5000),
                 body: JSON.stringify({
                     instanceName,
                     qrcode: true,
@@ -75,7 +77,8 @@ export async function getEvolutionInstanceStatus(tenantId: string) {
         } else if (state === "connecting") {
             // Might be waiting for QR
             const qrRes = await fetch(`${EVOLUTION_API_URL}/instance/connect/${instanceName}`, {
-                headers: { "apikey": EVOLUTION_API_KEY }
+                headers: { "apikey": EVOLUTION_API_KEY },
+                signal: AbortSignal.timeout(5000)
             });
             const qrData = await qrRes.json();
             if (qrData.base64) {
@@ -85,7 +88,8 @@ export async function getEvolutionInstanceStatus(tenantId: string) {
         } else {
             // Disconnected, trigger connect to get QR
             const qrRes = await fetch(`${EVOLUTION_API_URL}/instance/connect/${instanceName}`, {
-                headers: { "apikey": EVOLUTION_API_KEY }
+                headers: { "apikey": EVOLUTION_API_KEY },
+                signal: AbortSignal.timeout(5000)
             });
             const qrData = await qrRes.json();
             if (qrData.base64) {
@@ -104,7 +108,7 @@ export async function getEvolutionInstanceStatus(tenantId: string) {
                 mocked: true
             };
         }
-        return { status: "ERROR", message: "Impossible de se connecter au service WhatsApp" };
+        return { status: "ERROR", message: "Le serveur d'envoi automatique (Evolution API) n'est pas accessible. Utilisez le Mode Lien Direct (Gratuit)." };
     }
 }
 

@@ -64,3 +64,8 @@ scratch/
 deploy_*.py
 backups/
 
+# Release tarballs — 122MB each, above GitHub's 100MB per-file limit
+syncloudpos_clean.tar.gz
+syncloudpos_update.tar.gz
+*.tar.gz
+

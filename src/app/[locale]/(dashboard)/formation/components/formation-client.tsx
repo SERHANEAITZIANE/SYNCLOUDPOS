@@ -414,8 +414,8 @@ export const FormationClient = () => {
     )
 }
 
-// Stub interface to bypass compilation issue on custom browser text inputs
-interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+// Stub type to bypass compilation issue on custom browser text inputs
+type TextInputProps = React.InputHTMLAttributes<HTMLInputElement>
 const TextInput = (props: TextInputProps) => {
     return <input {...props} />
 }

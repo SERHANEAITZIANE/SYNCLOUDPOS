@@ -1,7 +1,7 @@
 "use client"
 
 import * as z from "zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Trash, Plus, Wand2, Package, Tag, Barcode, Star, Archive, DollarSign, ShoppingCart, Users, Store, Wrench } from "lucide-react"
@@ -70,6 +70,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     const [suggestions, setSuggestions] = useState<string[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1)
+    const [localCategories, setLocalCategories] = useState<Category[]>(categories)
+    const [localBrands, setLocalBrands] = useState<Brand[]>(brands)
+
+    useEffect(() => { setLocalCategories(categories) }, [categories])
+    useEffect(() => { setLocalBrands(brands) }, [brands])
     const t = useTranslations("Products")
     const tCommon = useTranslations("Common")
 
@@ -115,7 +120,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             if (res.error) {
                 toast.error(res.error)
             } else {
-                toast.success(initialData ? t("toast.updated") : t("toast.created"))
+                toast.success((res as any)?.success || (initialData ? t("toast.updated") : t("toast.created")))
                 router.push(`/products`)
                 router.refresh()
             }
@@ -128,10 +133,28 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
     const onInvalid = (errors: any) => {
         console.error("Form validation errors:", errors)
+        const fieldNamesMap: Record<string, string> = {
+            name: "Nom du produit",
+            categoryId: "Catégorie",
+            brandId: "Marque",
+            price: "Prix de vente",
+            cost: "Prix d'achat",
+            wholesalePrice: "Prix de gros",
+            dealerPrice: "Prix revendeur",
+            stock: "Stock initial",
+            minStock: "Stock minimum",
+            images: "Images",
+            barcodes: "Codes-barres"
+        }
+
         const errorMessages = Object.entries(errors)
-            .map(([field, err]: [string, any]) => `${field}: ${err.message || "Invalid"}`)
+            .map(([field, err]: [string, any]) => {
+                const label = fieldNamesMap[field] || field
+                return `${label} (${err.message || "Champ obligatoire / invalide"})`
+            })
             .join(", ")
-        toast.error(`Veuillez vérifier les champs du formulaire : ${errorMessages}`)
+
+        toast.error(`Veuillez vérifier les champs suivants : ${errorMessages}`, { duration: 6000 })
     }
 
     const onDelete = async () => {
@@ -196,7 +219,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                     placeholder="0.00"
                                     className="pr-12"
                                     {...field}
-                                    value={field.value !== undefined && field.value !== null && field.value !== "" ? field.value : 0}
+                                    value={
+                                        (typeof field.value === "number" || typeof field.value === "string") && field.value !== ""
+                                            ? field.value
+                                            : 0
+                                    }
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
                                     DA
@@ -371,10 +398,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                                 <FormItem>
                                                     <div className="flex items-center justify-between">
                                                         <FormLabel>{t("fields.category")}</FormLabel>
-                                                        <FastCreateCategory onSuccess={(id) => field.onChange(id)} />
+                                                        <FastCreateCategory onSuccess={(newCat) => {
+                                                            setLocalCategories(prev => [...prev.filter(c => c.id !== newCat.id), newCat])
+                                                            field.onChange(newCat.id)
+                                                        }} />
                                                     </div>
                                                     <SearchableSelect
-                                                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                                        options={localCategories.map(c => ({ value: c.id, label: c.name }))}
                                                         value={field.value}
                                                         onChange={field.onChange}
                                                         disabled={loading}
@@ -392,10 +422,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                                 <FormItem>
                                                     <div className="flex items-center justify-between">
                                                         <FormLabel>{t("fields.brand")}</FormLabel>
-                                                        <FastCreateBrand onSuccess={(id) => field.onChange(id)} />
+                                                        <FastCreateBrand onSuccess={(newBrand) => {
+                                                            setLocalBrands(prev => [...prev.filter(b => b.id !== newBrand.id), newBrand])
+                                                            field.onChange(newBrand.id)
+                                                        }} />
                                                     </div>
                                                     <SearchableSelect
-                                                        options={brands.map(b => ({ value: b.id, label: b.name }))}
+                                                        options={localBrands.map(b => ({ value: b.id, label: b.name }))}
                                                         value={field.value}
                                                         onChange={field.onChange}
                                                         disabled={loading}

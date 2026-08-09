@@ -23,7 +23,7 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     const t = useTranslations("AlertModal")
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+         
         setIsMounted(true)
     }, [])
 

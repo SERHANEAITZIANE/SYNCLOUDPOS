@@ -44,7 +44,7 @@ export function applyPromotionsToCart(
     }
 
     // Work on a copy of items with discounts reset
-    let result: CartItem[] = items.map(item => ({
+    const result: CartItem[] = items.map(item => ({
         ...item,
         discountedPrice: undefined,
         discountLabel: undefined,

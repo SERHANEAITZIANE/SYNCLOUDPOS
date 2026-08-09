@@ -52,8 +52,17 @@ const formSchema = z.object({
     createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
-        quantity: z.number().min(0),
-        costPrice: z.number().min(0),
+        // "" is allowed only as a transient value while a field is being retyped
+        // (a number input reports "" for a lone "-", which is what makes negative
+        // entry possible); toNum() coerces it to 0 before submit.
+        // Input and output types are deliberately identical here — z.preprocess made
+        // Zod's input type `unknown`, which diverged from z.infer and broke the
+        // useForm/zodResolver generics at every form.control site in this file.
+        quantity: z.union([z.number().finite("Quantité invalide"), z.literal("")]),
+        costPrice: z.union([
+            z.number().min(0, "Le prix d'achat ne peut pas être négatif"),
+            z.literal(""),
+        ]),
         tvaRate: z.number().optional(),
         serialNumber: z.string().optional()
     })).min(1, "Ajoutez au moins un article"),
@@ -61,6 +70,10 @@ const formSchema = z.object({
 })
 
 type FormValues = z.infer<typeof formSchema>
+
+/** Normalise a numeric line field to a number. "" (field mid-edit) becomes 0. */
+const toNum = (v: number | "" | undefined | null): number =>
+    typeof v === "number" && Number.isFinite(v) ? v : 0
 
 interface PurchaseOrderFormProps {
     initialData: any | null
@@ -302,20 +315,6 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             toast.error("Une erreur est survenue lors de la suppression.")
         } finally {
             setLoading(false)
-        }
-    }
-
-    // Quick margin/cost calculations
-    const handleQuickCostChange = (val: number) => {
-        setQuickCost(val)
-        if (val > 0) {
-            setQuickPrice(Number((val * 1.30).toFixed(2)))
-            setQuickWholesalePrice(Number((val * 1.15).toFixed(2)))
-            setQuickDealerPrice(Number((val * 1.20).toFixed(2)))
-        } else {
-            setQuickPrice(0)
-            setQuickWholesalePrice(0)
-            setQuickDealerPrice(0)
         }
     }
 
@@ -563,7 +562,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 failedRows.push({ line: i + 1, content: row, reason: "Nom du produit ou code-barre manquant" })
                 continue
             }
-            if (isNaN(qty) || qty <= 0) {
+            if (isNaN(qty) || qty < 0) {
                 failedRows.push({ line: i + 1, content: row, reason: `Quantité invalide (${qty})` })
                 continue
             }
@@ -699,7 +698,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const watchSupplierId = form.watch("supplierId")
     const selectedSupplier = localSuppliers.find(s => s.id === watchSupplierId)
 
-    const total = watchItems.reduce((acc, item) => acc + (item.quantity * item.costPrice), 0)
+    const total = watchItems.reduce((acc, item) => acc + (toNum(item.quantity) * toNum(item.costPrice)), 0)
 
     const combineDateWithCurrentTime = (dateStr: string) => {
         const d = new Date(dateStr)
@@ -711,9 +710,16 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
     const onSubmit = async (values: FormValues) => {
         try {
             setLoading(true)
+            // Sanitize items: ensure quantity & costPrice are always numbers (not empty strings from cleared inputs)
+            const sanitizedItems = values.items.map(item => ({
+                ...item,
+                quantity: toNum(item.quantity),
+                costPrice: toNum(item.costPrice),
+            }))
             if (!isEditMode) {
                 const payload = {
                     ...values,
+                    items: sanitizedItems,
                     total,
                     createdAt: values.createdAt ? combineDateWithCurrentTime(values.createdAt) : undefined,
                     paymentAmount: payImmediately ? initialPayAmount : 0,
@@ -729,6 +735,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             } else {
                 const payload = {
                     ...values,
+                    items: sanitizedItems,
                     total,
                     createdAt: values.createdAt ? combineDateWithCurrentTime(values.createdAt) : undefined,
                     paymentAmount: payImmediately ? initialPayAmount : 0,
@@ -1148,7 +1155,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                         Importateur depuis le Presse-papiers Excel
                                                     </h4>
                                                     <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-                                                        Copiez vos lignes depuis Excel (Colonnes dans l'ordre : <span className="font-semibold text-emerald-600 dark:text-emerald-400">Nom du produit ou Code-barre</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Quantité</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Prix d'achat unitaire</span>) puis collez-les ci-dessous.
+                                                        Copiez vos lignes depuis Excel (Colonnes dans l&apos;ordre : <span className="font-semibold text-emerald-600 dark:text-emerald-400">Nom du produit ou Code-barre</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Quantité</span>, <span className="font-semibold text-emerald-600 dark:text-emerald-400">Prix d&apos;achat unitaire</span>) puis collez-les ci-dessous.
                                                     </p>
                                                 </div>
                                                 <Button
@@ -1170,7 +1177,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                             {failedImports.length > 0 && (
                                                 <div className="p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800/50 rounded-xl space-y-2">
                                                     <p className="text-xs font-bold text-rose-700 dark:text-rose-450 flex items-center gap-1.5">
-                                                        <AlertTriangle className="h-4 w-4 shrink-0" /> Certaines lignes n'ont pas pu être importées :
+                                                        <AlertTriangle className="h-4 w-4 shrink-0" /> Certaines lignes n&apos;ont pas pu être importées :
                                                     </p>
                                                     <ul className="text-[11px] text-rose-600 dark:text-rose-350 space-y-1 font-mono max-h-24 overflow-y-auto pl-4 list-disc">
                                                         {failedImports.map((err, idx) => (
@@ -1238,11 +1245,11 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                     type="button"
                                                                                     variant="outline"
                                                                                     size="icon"
-                                                                                    className="h-9 w-9 shrink-0 border-dashed border-slate-300 hover:border-slate-400 bg-slate-50 hover:bg-slate-100 rounded-xl"
+                                                                                    className="h-9 w-9 shrink-0 border-dashed border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
                                                                                     onClick={() => handleOpenQuickProductModal(index)}
                                                                                     title="Créer rapidement un nouveau produit"
                                                                                 >
-                                                                                    <Plus className="h-4 w-4 text-slate-500" />
+                                                                                    <Plus className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                                                                                 </Button>
                                                                             )}
                                                                         </div>
@@ -1281,11 +1288,27 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                         <FormControl>
                                                                             <Input 
                                                                                 type="number" 
-                                                                                min={0} 
                                                                                 disabled={loading || !canEdit} 
                                                                                 className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
-                                                                                {...f} 
-                                                                                onChange={e => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} 
+                                                                                ref={f.ref}
+                                                                                name={f.name}
+                                                                                value={f.value}
+                                                                                onBlur={(e) => {
+                                                                                    if (e.target.value === "") {
+                                                                                        f.onChange(0);
+                                                                                    }
+                                                                                    f.onBlur();
+                                                                                }}
+                                                                                onChange={e => {
+                                                                                    const val = e.target.value;
+                                                                                    if (val === "") {
+                                                                                        // Allow empty field while typing (also covers a lone "-") — commit 0 on blur
+                                                                                        f.onChange("");
+                                                                                        return;
+                                                                                    }
+                                                                                    const num = e.target.valueAsNumber;
+                                                                                    f.onChange(isNaN(num) ? 0 : num);
+                                                                                }}
                                                                             />
                                                                         </FormControl>
                                                                     </FormItem>
@@ -1307,8 +1330,25 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                     min={0} 
                                                                                     disabled={loading || !canEdit}
                                                                                     className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
-                                                                                    {...f} 
-                                                                                    onChange={e => f.onChange(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)} 
+                                                                                    ref={f.ref}
+                                                                                    name={f.name}
+                                                                                    value={f.value}
+                                                                                    onBlur={(e) => {
+                                                                                        if (e.target.value === "") {
+                                                                                            f.onChange(0);
+                                                                                        }
+                                                                                        f.onBlur();
+                                                                                    }}
+                                                                                    onChange={e => {
+                                                                                        const val = e.target.value;
+                                                                                        if (val === "") {
+                                                                                            // Allow empty field while typing — commit 0 on blur
+                                                                                            f.onChange("");
+                                                                                            return;
+                                                                                        }
+                                                                                        const num = e.target.valueAsNumber;
+                                                                                        f.onChange(isNaN(num) ? 0 : num);
+                                                                                    }}
                                                                                 />
                                                                                 {watchItems[index]?.productId && (
                                                                                     <button
@@ -1428,169 +1468,169 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     </div>
                                 </div>
 
-                                  {/* ── integrated payment panel ────────────────── */}
-                                  <Card className={cn(
-                                      "shadow-xl border rounded-2xl overflow-hidden my-8 transition-all duration-300",
-                                      payImmediately 
-                                          ? "border-emerald-500/30 dark:border-emerald-500/20 bg-gradient-to-br from-slate-50/90 to-emerald-50/5 dark:from-slate-950/90 dark:to-emerald-950/5 shadow-emerald-500/5"
-                                          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
-                                  )}>
-                                      <CardHeader className={cn(
-                                          "pb-4 pt-4 flex flex-row items-center justify-between border-b transition-colors duration-300",
-                                          payImmediately
-                                              ? "bg-emerald-500/10 border-emerald-500/10 dark:bg-emerald-500/5 dark:border-emerald-500/5"
-                                              : "bg-slate-50/50 border-slate-100 dark:bg-slate-900/20 dark:border-slate-900/50"
-                                      )}>
-                                          <CardTitle className="text-base font-bold flex items-center gap-2">
-                                              <div className={cn(
-                                                  "p-2 rounded-xl transition-all duration-300",
-                                                  payImmediately 
-                                                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20 scale-105" 
-                                                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                                              )}>
-                                                  <DollarSign className="h-4.5 w-4.5 font-bold" />
-                                              </div>
-                                              <div>
-                                                  <span className="text-slate-900 dark:text-slate-100 font-extrabold tracking-tight">Règlement Initial</span>
-                                                  <span className="text-[10px] text-muted-foreground block font-medium mt-0.5">Enregistrer un versement immédiat</span>
-                                              </div>
-                                          </CardTitle>
-                                          <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2 rounded-2xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer">
-                                              <Checkbox
-                                                  id="pay-immediately-checkbox"
-                                                  checked={payImmediately}
-                                                  onCheckedChange={(checked) => {
-                                                      setPayImmediately(!!checked);
-                                                      if (checked) {
-                                                          setInitialPayAmount(total);
-                                                      }
-                                                  }}
-                                                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                                              />
-                                              <label
-                                                  htmlFor="pay-immediately-checkbox"
-                                                  className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none"
-                                              >
-                                                  Enregistrer un règlement
-                                              </label>
-                                          </div>
-                                      </CardHeader>
-                                      {payImmediately && (
-                                          <CardContent className="p-6 space-y-6 animate-in slide-in-from-top-4 duration-300 ease-out">
-                                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                                                  {/* 1. Caisse / Banque */}
-                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
-                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                                          <Wallet className="h-3.5 w-3.5 text-indigo-500" />
-                                                          <span>Caisse / Banque</span>
-                                                      </div>
-                                                      <Select
-                                                          value={initialPayAccountId}
-                                                          onValueChange={setInitialPayAccountId}
-                                                      >
-                                                          <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
-                                                              <SelectValue placeholder="Choisir la caisse/banque..." />
-                                                          </SelectTrigger>
-                                                          <SelectContent className="rounded-xl">
-                                                              {accounts.map(acc => (
-                                                                  <SelectItem key={acc.id} value={acc.id} className="font-semibold rounded-lg my-0.5">
-                                                                      <span className="flex items-center gap-1.5">
-                                                                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                                                                          {acc.name} <strong className="text-emerald-600 dark:text-emerald-450 ml-1">({Number(acc.balance).toLocaleString()} DA)</strong>
-                                                                      </span>
-                                                                  </SelectItem>
-                                                              ))}
-                                                          </SelectContent>
-                                                      </Select>
-                                                  </div>
+                                {/* ── integrated payment panel ────────────────── */}
+                                <Card className={cn(
+                                    "shadow-xl border rounded-2xl overflow-hidden my-8 transition-all duration-300",
+                                    payImmediately 
+                                        ? "border-emerald-500/30 dark:border-emerald-500/20 bg-gradient-to-br from-slate-50/90 to-emerald-50/5 dark:from-slate-950/90 dark:to-emerald-950/5 shadow-emerald-500/5"
+                                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
+                                )}>
+                                    <CardHeader className={cn(
+                                        "pb-4 pt-4 flex flex-row items-center justify-between border-b transition-colors duration-300",
+                                        payImmediately
+                                            ? "bg-emerald-500/10 border-emerald-500/10 dark:bg-emerald-500/5 dark:border-emerald-500/5"
+                                            : "bg-slate-50/50 border-slate-100 dark:bg-slate-900/20 dark:border-slate-900/50"
+                                    )}>
+                                        <CardTitle className="text-base font-bold flex items-center gap-2">
+                                            <div className={cn(
+                                                "p-2 rounded-xl transition-all duration-300",
+                                                payImmediately 
+                                                    ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20 scale-105" 
+                                                    : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                            )}>
+                                                <DollarSign className="h-4.5 w-4.5 font-bold" />
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-900 dark:text-slate-100 font-extrabold tracking-tight">Règlement Initial</span>
+                                                <span className="text-[10px] text-muted-foreground block font-medium mt-0.5">Enregistrer un versement immédiat</span>
+                                            </div>
+                                        </CardTitle>
+                                        <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2 rounded-2xl shadow-sm hover:shadow transition-all duration-200 cursor-pointer">
+                                            <Checkbox
+                                                id="pay-immediately-checkbox"
+                                                checked={payImmediately}
+                                                onCheckedChange={(checked) => {
+                                                    setPayImmediately(!!checked);
+                                                    if (checked) {
+                                                        setInitialPayAmount(total);
+                                                    }
+                                                }}
+                                                className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+                                            />
+                                            <label
+                                                htmlFor="pay-immediately-checkbox"
+                                                className="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer select-none"
+                                            >
+                                                Enregistrer un règlement
+                                            </label>
+                                        </div>
+                                    </CardHeader>
+                                    {payImmediately && (
+                                        <CardContent className="p-6 space-y-6 animate-in slide-in-from-top-4 duration-300 ease-out">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                                                {/* 1. Caisse / Banque */}
+                                                <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                        <Wallet className="h-3.5 w-3.5 text-indigo-500" />
+                                                        <span>Caisse / Banque</span>
+                                                    </div>
+                                                    <Select
+                                                        value={initialPayAccountId}
+                                                        onValueChange={setInitialPayAccountId}
+                                                    >
+                                                        <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
+                                                            <SelectValue placeholder="Choisir la caisse/banque..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="rounded-xl">
+                                                            {accounts.map(acc => (
+                                                                <SelectItem key={acc.id} value={acc.id} className="font-semibold rounded-lg my-0.5">
+                                                                    <span className="flex items-center gap-1.5">
+                                                                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                                                        {acc.name} <strong className="text-emerald-600 dark:text-emerald-450 ml-1">({Number(acc.balance).toLocaleString()} DA)</strong>
+                                                                    </span>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
 
-                                                  {/* 2. Montant */}
-                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
-                                                      <div className="flex items-center justify-between">
-                                                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                                              <Coins className="h-3.5 w-3.5 text-amber-500" />
-                                                              <span>Montant à régler</span>
-                                                          </div>
-                                                      </div>
-                                                      <div className="relative">
-                                                          <Input
-                                                              type="number"
-                                                              placeholder="0.00"
-                                                              value={initialPayAmount}
-                                                              onChange={e => setInitialPayAmount(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)}
-                                                              className="font-extrabold text-base pr-10 border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 transition-all text-emerald-600 dark:text-emerald-400"
-                                                          />
-                                                          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">DA</span>
-                                                      </div>
-                                                      
-                                                      {/* Quick Actions buttons */}
-                                                      <div className="flex gap-1.5 pt-1">
-                                                          <button 
-                                                              type="button"
-                                                              onClick={() => setInitialPayAmount(total)}
-                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/40 transition-colors uppercase tracking-wider"
-                                                          >
-                                                              100% (Total)
-                                                          </button>
-                                                          <button 
-                                                              type="button"
-                                                              onClick={() => setInitialPayAmount(Number((total / 2).toFixed(2)))}
-                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-400 border border-amber-200/40 transition-colors uppercase tracking-wider"
-                                                          >
-                                                              50% (Acompte)
-                                                          </button>
-                                                          <button 
-                                                              type="button"
-                                                              onClick={() => setInitialPayAmount(0)}
-                                                              className="text-[9px] font-extrabold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 border border-slate-200/30 transition-colors uppercase tracking-wider"
-                                                          >
-                                                              Vider
-                                                          </button>
-                                                      </div>
-                                                  </div>
+                                                {/* 2. Montant */}
+                                                <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                            <Coins className="h-3.5 w-3.5 text-amber-500" />
+                                                            <span>Montant à régler</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="0.00"
+                                                            value={initialPayAmount}
+                                                            onChange={e => setInitialPayAmount(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)}
+                                                            className="font-extrabold text-base pr-10 border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 transition-all text-emerald-600 dark:text-emerald-400"
+                                                        />
+                                                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">DA</span>
+                                                    </div>
+                                                    
+                                                    {/* Quick Actions buttons */}
+                                                    <div className="flex gap-1.5 pt-1">
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setInitialPayAmount(total)}
+                                                            className="text-[9px] font-extrabold px-2 py-1 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/40 transition-colors uppercase tracking-wider"
+                                                        >
+                                                            100% (Total)
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setInitialPayAmount(Number((total / 2).toFixed(2)))}
+                                                            className="text-[9px] font-extrabold px-2 py-1 rounded bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 dark:text-amber-400 border border-amber-200/40 transition-colors uppercase tracking-wider"
+                                                        >
+                                                            50% (Acompte)
+                                                        </button>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setInitialPayAmount(0)}
+                                                            className="text-[9px] font-extrabold px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 border border-slate-200/30 transition-colors uppercase tracking-wider"
+                                                        >
+                                                            Vider
+                                                        </button>
+                                                    </div>
+                                                </div>
 
-                                                  {/* 3. Mode de Règlement */}
-                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
-                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                                          <CreditCard className="h-3.5 w-3.5 text-emerald-500" />
-                                                          <span>Mode de règlement</span>
-                                                      </div>
-                                                      <Select
-                                                          value={initialPayMethod}
-                                                          onValueChange={setInitialPayMethod}
-                                                      >
-                                                          <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
-                                                              <SelectValue placeholder="Choisir le mode..." />
-                                                          </SelectTrigger>
-                                                          <SelectContent className="rounded-xl">
-                                                              <SelectItem value="CASH" className="font-semibold rounded-lg my-0.5">💵 Espèce</SelectItem>
-                                                              <SelectItem value="VERSEMENT" className="font-semibold rounded-lg my-0.5">🏦 Versement</SelectItem>
-                                                              <SelectItem value="VIREMENT" className="font-semibold rounded-lg my-0.5">⚡ Virement</SelectItem>
-                                                              <SelectItem value="CHEQUE" className="font-semibold rounded-lg my-0.5">✍️ Chèque</SelectItem>
-                                                              <SelectItem value="CARTE" className="font-semibold rounded-lg my-0.5">💳 Carte Bancaire</SelectItem>
-                                                          </SelectContent>
-                                                      </Select>
-                                                  </div>
+                                                {/* 3. Mode de Règlement */}
+                                                <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                        <CreditCard className="h-3.5 w-3.5 text-emerald-500" />
+                                                        <span>Mode de règlement</span>
+                                                    </div>
+                                                    <Select
+                                                        value={initialPayMethod}
+                                                        onValueChange={setInitialPayMethod}
+                                                    >
+                                                        <SelectTrigger className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 font-bold focus:ring-emerald-500 rounded-xl h-10">
+                                                            <SelectValue placeholder="Choisir le mode..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="rounded-xl">
+                                                            <SelectItem value="CASH" className="font-semibold rounded-lg my-0.5">💵 Espèce</SelectItem>
+                                                            <SelectItem value="VERSEMENT" className="font-semibold rounded-lg my-0.5">🏦 Versement</SelectItem>
+                                                            <SelectItem value="VIREMENT" className="font-semibold rounded-lg my-0.5">⚡ Virement</SelectItem>
+                                                            <SelectItem value="CHEQUE" className="font-semibold rounded-lg my-0.5">✍️ Chèque</SelectItem>
+                                                            <SelectItem value="CARTE" className="font-semibold rounded-lg my-0.5">💳 Carte Bancaire</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
 
-                                                  {/* 4. Observation */}
-                                                  <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
-                                                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                                          <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
-                                                          <span>Observation / Notes</span>
-                                                      </div>
-                                                      <Input
-                                                          placeholder="Acompte, paiement solde..."
-                                                          value={initialPayNotes}
-                                                          onChange={e => setInitialPayNotes(e.target.value)}
-                                                          className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 font-semibold"
-                                                      />
-                                                  </div>
-                                              </div>
-                                          </CardContent>
-                                      )}
-                                  </Card>
+                                                {/* 4. Observation */}
+                                                <div className="space-y-2 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
+                                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                        <MessageSquare className="h-3.5 w-3.5 text-purple-500" />
+                                                        <span>Observation / Notes</span>
+                                                    </div>
+                                                    <Input
+                                                        placeholder="Acompte, paiement solde..."
+                                                        value={initialPayNotes}
+                                                        onChange={e => setInitialPayNotes(e.target.value)}
+                                                        className="border-slate-250 dark:border-slate-800 bg-white dark:bg-slate-950 focus-visible:ring-emerald-500 rounded-xl h-10 font-semibold"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    )}
+                                </Card>
 
-                                 {/* Notes & Visual Proof (Photos) */}
+                                {/* Notes & Visual Proof (Photos) */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
                                     <Card className="md:col-span-1 shadow-sm">
                                         <CardHeader className="pb-3">
@@ -1622,7 +1662,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                     <Card className="md:col-span-2 shadow-sm">
                                         <CardHeader className="pb-3">
                                             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                                                <Package className="h-4 w-4 text-muted-foreground" /> Preuves d'achat (Max 3 photos)
+                                                <Package className="h-4 w-4 text-muted-foreground" /> Preuves d&apos;achat (Max 3 photos)
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -1987,7 +2027,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                     disabled={loading}
                                                     placeholder="0.00"
                                                     value={quickCost || ""}
-                                                    onChange={e => handleQuickCostChange(e.target.valueAsNumber || 0)}
+                                                    onChange={e => setQuickCost(isNaN(e.target.valueAsNumber) ? 0 : e.target.valueAsNumber)}
                                                     className="font-bold border-indigo-200 dark:border-indigo-900/50 pr-12 focus-visible:ring-indigo-500"
                                                 />
                                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DA</span>
@@ -2488,7 +2528,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                 <span className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400">
                                     <Trash className="h-5 w-5 animate-pulse" />
                                 </span>
-                                Supprimer ce bon d'achat
+                                Supprimer ce bon d&apos;achat
                             </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-3">

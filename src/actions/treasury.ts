@@ -14,8 +14,19 @@ export async function getFinancialSummary() {
 
         const tenantId = session.user.tenantId
 
-        // 1. Total Sales (Paid)
-        // POS Orders
+        // 1. Total Sales / Revenue (Paid)
+        // Check Treasury Transactions first (Financial Source of Truth)
+        const treasurySalesAgg = await db.treasuryTransaction.aggregate({
+            where: {
+                tenantId,
+                type: "CREDIT",
+                source: { in: ["SALE", "MANUAL_IN", "CUSTOMER_PAYMENT"] }
+            },
+            _sum: { amount: true }
+        })
+        const totalSalesFromTreasury = Number(treasurySalesAgg._sum.amount) || 0
+
+        // Fallback calculation directly from POS orders + B2B SalesOrders (excluding duplicate POS SalesOrders)
         const posOrders = await db.order.findMany({
             where: {
                 tenantId,
@@ -25,27 +36,39 @@ export async function getFinancialSummary() {
         })
         const posSalesTotal = posOrders.reduce((acc, order) => acc + Number(order.paidAmount), 0)
 
-        // Sales Orders (BL / Invoice)
         const salesOrders = await db.salesOrder.findMany({
             where: {
                 tenantId,
-                status: { in: ["PAID", "VALIDATED", "PARTIAL"] }
+                status: { in: ["PAID", "VALIDATED", "PARTIAL"] },
+                type: { not: "ORDER" } // Crucial: exclude duplicate POS SalesOrders to prevent double counting
             },
             select: { amountPaid: true }
         })
         const salesOrdersTotal = salesOrders.reduce((acc, order) => acc + Number(order.amountPaid), 0)
+        const totalSalesFromOrders = posSalesTotal + salesOrdersTotal
 
-        const totalSales = posSalesTotal + salesOrdersTotal
+        const totalSales = totalSalesFromTreasury > 0 ? totalSalesFromTreasury : totalSalesFromOrders
 
-        // 2. Total Purchases (Completed, Facture, Bon de Livraison)
+        // 2. Total Purchases
+        const treasuryPurchasesAgg = await db.treasuryTransaction.aggregate({
+            where: {
+                tenantId,
+                type: "DEBIT",
+                source: { in: ["PURCHASE", "SUPPLIER_PAYMENT"] }
+            },
+            _sum: { amount: true }
+        })
+        const totalPurchasesFromTreasury = Number(treasuryPurchasesAgg._sum.amount) || 0
+
         const purchases = await db.purchaseOrder.findMany({
             where: {
                 tenantId,
-                status: { in: ["COMPLETED", "FACTURE", "BON_LIVRAISON"] }
+                status: { in: ["COMPLETED", "FACTURE", "BON_LIVRAISON", "PAID"] }
             },
             select: { total: true }
         })
-        const totalPurchases = purchases.reduce((acc, order) => acc + Number(order.total), 0)
+        const totalPurchasesFromOrders = purchases.reduce((acc, order) => acc + Number(order.total), 0)
+        const totalPurchases = totalPurchasesFromTreasury > 0 ? totalPurchasesFromTreasury : totalPurchasesFromOrders
 
         // 3. Total Expenses
         const expenses = await db.expense.aggregate({

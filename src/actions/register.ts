@@ -26,26 +26,21 @@ async function registerCore(values: RegisterInput) {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const existingUser = await getUserByEmail(email)
+    const existingUser = await getUserByEmail(emailToUse)
 
     if (existingUser) {
-        return { error: "Email already in use!" }
+        return { error: "Cet e-mail est déjà utilisé !" }
     }
 
     try {
         const trialEndDate = new Date()
         trialEndDate.setDate(trialEndDate.getDate() + 7)
 
-        // Use sanitized inputs in database operations
-        const sanitizedEmail = sanitizeEmail(email)
-        const sanitizedName = sanitizeString(name)
-        const sanitizedPhone = phone ? sanitizePhone(phone) : undefined
-
         await db.$transaction(async (tx) => {
             const tenant = await tx.tenant.create({
                 data: {
-                    name: `${sanitizedName}'s Shop`,
-                    phone: sanitizedPhone,
+                    name: `${nameToUse}'s Shop`,
+                    phone: phoneToUse,
                     subscriptionEndsAt: trialEndDate,
                 }
             })
@@ -60,9 +55,9 @@ async function registerCore(values: RegisterInput) {
 
             await tx.user.create({
                 data: {
-                    name,
-                    email,
-                    phone,
+                    name: nameToUse,
+                    email: emailToUse,
+                    phone: phoneToUse,
                     password: hashedPassword,
                     tenantId: tenant.id,
                     role: "ADMIN",

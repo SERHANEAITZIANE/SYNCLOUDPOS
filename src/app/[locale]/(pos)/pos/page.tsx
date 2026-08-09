@@ -39,7 +39,25 @@ const PosPage = async () => {
 
     // ── Run ALL independent queries in parallel ──────────────────────
     const [tenant, store, categories, brands, accounts, rawCustomers, rawProducts, salespeople] = await Promise.all([
-        db.tenant.findUnique({ where: { id: tenantId } }),
+        db.tenant.findUnique({
+            where: { id: tenantId },
+            select: {
+                id: true,
+                name: true,
+                address: true,
+                phone: true,
+                logo: true,
+                tvaEnabled: true,
+                posTimbreEnabled: true,
+                posCashRounding: true,
+                posVendorRequired: true,
+                posBlFormat: true,
+                warrantyEnabled: true,
+                isElectronics: true,
+                loyaltyDaPerPoint: true,
+                blockNegativeStock: true,
+            }
+        }),
         db.store.findUnique({ where: { id: storeIdToUse } }),
         getCategories(false),
         getBrands(false),

@@ -270,6 +270,7 @@ export async function createBLFromProforma(data: {
           receiptNumber,
           paymentMethod: (data.paymentMethod as PaymentMethod) ?? PaymentMethod.TERM,
           paymentStatus: "PENDING",
+          source: "B2B",
           subtotal,
           tvaAmount,
           stampTax: 0,

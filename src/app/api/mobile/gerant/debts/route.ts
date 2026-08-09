@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         // ── Get all clients with debt ───
         const customerFilter: any = {
             tenantId,
-            balance: { lt: 0 },
+            balance: { gt: 0 },
             isArchived: false,
         };
 

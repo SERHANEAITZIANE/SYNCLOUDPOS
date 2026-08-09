@@ -1402,7 +1402,9 @@ html.ghardaia-dark .animate-ping {
    that appears on the hub header and key containers.
    ═══════════════════════════════════════════════════════════════ */
 
-@keyframes ghardaia-shimmer {
+/* NOTE: distinct name from the `ghardaia-shimmer` aurora keyframes above —
+   a duplicate @keyframes name silently replaces the earlier definition. */
+@keyframes ghardaia-line-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
@@ -1428,7 +1430,7 @@ html.ghardaia .rounded-\[24px\]::after {
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: ghardaia-shimmer 6s ease-in-out infinite;
+  animation: ghardaia-line-shimmer 6s ease-in-out infinite;
   border-radius: 24px 24px 0 0;
   pointer-events: none;
   z-index: 1;
@@ -1450,7 +1452,7 @@ html.ghardaia-dark .rounded-\[24px\]::after {
     transparent 100%
   );
   background-size: 200% 100%;
-  animation: ghardaia-shimmer 6s ease-in-out infinite;
+  animation: ghardaia-line-shimmer 6s ease-in-out infinite;
   border-radius: 24px 24px 0 0;
   pointer-events: none;
   z-index: 1;
@@ -1718,8 +1720,10 @@ html.ghardaia-dark hr:not([data-slot]):not([role]) {
   border: none !important;
 }
 
-/* 9. Campfire Warm Bottom Glow for Desert Night */
-html.ghardaia-dark body::before {
+/* 9. Campfire Warm Bottom Glow for Desert Night
+   Uses ::after — ::before already carries the ambient aurora, and redeclaring
+   it here would override the aurora's background and its z-index: -1. */
+html.ghardaia-dark body::after {
   content: '';
   position: fixed;
   bottom: -150px;
@@ -1729,7 +1733,7 @@ html.ghardaia-dark body::before {
   height: 350px;
   background: radial-gradient(circle, rgba(232, 114, 74, 0.045) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* 10. Mozabite Stone-Carved Small-Caps Labels — only for explicit section headings */
@@ -2145,8 +2149,11 @@ html.riviera-dark [data-sonner-toast], html.atlas-dark [data-sonner-toast], html
   background: var(--card) !important;
 }
 
-/* ─── Theme-Specific Ambient Body Glows ─── */
-html.riviera-dark body::before {
+/* ─── Theme-Specific Ambient Body Glows ───
+   These use ::after. ::before already carries each theme's aurora backdrop
+   (position: fixed; inset: -10%; z-index: -1), so redeclaring ::before here
+   would override its background and lift it from behind the page to on top. */
+html.riviera-dark body::after {
   content: '';
   position: fixed;
   top: -100px;
@@ -2155,9 +2162,9 @@ html.riviera-dark body::before {
   height: 500px;
   background: radial-gradient(circle, rgba(90, 190, 214, 0.04) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
-html.atlas-dark body::before {
+html.atlas-dark body::after {
   content: '';
   position: fixed;
   top: 30%;
@@ -2166,9 +2173,9 @@ html.atlas-dark body::before {
   height: 500px;
   background: radial-gradient(circle, rgba(74, 175, 117, 0.035) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
-html.horizon-dark body::before {
+html.horizon-dark body::after {
   content: '';
   position: fixed;
   bottom: -200px;
@@ -2178,7 +2185,7 @@ html.horizon-dark body::before {
   height: 400px;
   background: radial-gradient(circle, rgba(155, 143, 204, 0.045) 0%, transparent 70%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 

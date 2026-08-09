@@ -207,13 +207,13 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
 
                 // 11-12: Debtors (not date-filtered)
                 db.customer.aggregate({
-                    where: { tenantId, balance: { lt: 0 } },
+                    where: { tenantId, balance: { gt: 0 } },
                     _sum: { balance: true }
                 }),
                 db.customer.findMany({
-                    where: { tenantId, balance: { lt: 0 } },
+                    where: { tenantId, balance: { gt: 0 } },
                     select: { id: true, name: true, balance: true },
-                    orderBy: { balance: 'asc' },
+                    orderBy: { balance: 'desc' },
                     take: 5
                 }),
 

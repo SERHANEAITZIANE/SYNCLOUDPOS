@@ -14,7 +14,6 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            checks: ["none"],
         }),
         Credentials({
             async authorize(credentials) {
@@ -182,12 +181,49 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     }
                     session.user.tenantId = activeTenantId;
 
-                    const selectedStoreId = cookieStore.get("selected_store_id")?.value
-                    if (selectedStoreId && activeTenantId === selectedTenantId) {
-                        session.user.defaultStoreId = selectedStoreId
-                    } else {
-                        session.user.defaultStoreId = token.defaultStoreId as string
+                    const tenantRoles = (token.tenantRoles as Record<string, string> | undefined) || {}
+                    if (!token.isSuperadmin && activeTenantId !== token.tenantId) {
+                        const membershipRole = tenantRoles[activeTenantId]
+                        session.user.role = membershipRole === "ADMIN"
+                            ? "ADMIN"
+                            : membershipRole === "MANAGER"
+                                ? "MANAGER"
+                                : "CASHIER"
+                        session.user.canEdit = membershipRole === "ADMIN" || membershipRole === "MANAGER"
+                        session.user.canDelete = membershipRole === "ADMIN"
                     }
+
+                    // Never trust a store-selection cookie without checking that
+                    // the store belongs to the active tenant.
+                    const selectedStoreId = cookieStore.get("selected_store_id")?.value
+                    const preferredStoreIds = [
+                        selectedStoreId,
+                        activeTenantId === token.tenantId ? token.defaultStoreId as string | undefined : undefined,
+                    ].filter((id): id is string => Boolean(id))
+
+                    const activeTenant = await db.tenant.findUnique({
+                        where: { id: activeTenantId },
+                        select: { subscriptionEndsAt: true, isBlocked: true }
+                    })
+                    if (!activeTenant) return session
+
+                    session.user.subscriptionEndsAt = activeTenant.subscriptionEndsAt
+                    session.user.isBlocked = activeTenant.isBlocked
+
+                    let activeStore = preferredStoreIds.length > 0
+                        ? await db.store.findFirst({
+                            where: { id: { in: preferredStoreIds }, tenantId: activeTenantId },
+                            select: { id: true }
+                        })
+                        : null
+                    if (!activeStore) {
+                        activeStore = await db.store.findFirst({
+                            where: { tenantId: activeTenantId },
+                            select: { id: true },
+                            orderBy: { createdAt: "asc" }
+                        })
+                    }
+                    session.user.defaultStoreId = activeStore?.id || null
                 } catch {
                     // ignore
                 }
@@ -261,13 +297,16 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                 if (dbUser.id) {
                     const memberships = await db.tenantUser.findMany({
                         where: { userId: dbUser.id },
-                        select: { tenantId: true }
+                        select: { tenantId: true, role: true }
                     });
-                    memberships.forEach((m: { tenantId: string }) => {
+                    const tenantRoles: Record<string, string> = {};
+                    memberships.forEach((m: { tenantId: string, role: string }) => {
                         if (!allowedTenantIds.includes(m.tenantId)) {
                             allowedTenantIds.push(m.tenantId);
                         }
+                        tenantRoles[m.tenantId] = m.role;
                     });
+                    token.tenantRoles = tenantRoles;
                 }
                 token.allowedTenantIds = allowedTenantIds;
             }
@@ -297,7 +336,8 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                         isSuperadmin: true,
                         canEdit: true,
                         canDelete: true,
-                        tenant: { select: { subscriptionEndsAt: true, isBlocked: true } }
+                        tenant: { select: { subscriptionEndsAt: true, isBlocked: true } },
+                        tenantUsers: { select: { tenantId: true, role: true } }
                     }
                 });
                 if (currentUser) {
@@ -308,6 +348,13 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     token.canDelete = isAdmin ? true : Boolean(currentUser.canDelete);
                     token.subscriptionEndsAt = currentUser.tenant?.subscriptionEndsAt;
                     token.isBlocked = currentUser.tenant?.isBlocked;
+                    token.allowedTenantIds = [
+                        token.tenantId as string,
+                        ...currentUser.tenantUsers.map(m => m.tenantId)
+                    ].filter((id, index, ids) => Boolean(id) && ids.indexOf(id) === index);
+                    token.tenantRoles = Object.fromEntries(
+                        currentUser.tenantUsers.map(m => [m.tenantId, m.role])
+                    );
                 }
             }
 
@@ -331,14 +378,18 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
                     const allowedTenantIds = [foundUser.tenantId];
                     const memberships = await db.tenantUser.findMany({
                         where: { userId: foundUser.id },
-                        select: { tenantId: true }
+                        select: { tenantId: true, role: true }
                     });
-                    memberships.forEach((m: { tenantId: string }) => {
+                    const tenantRoles: Record<string, string> = {};
+                    memberships.forEach((m: { tenantId: string, role: string }) => {
                         if (!allowedTenantIds.includes(m.tenantId)) {
                             allowedTenantIds.push(m.tenantId);
                         }
+                        tenantRoles[m.tenantId] = m.role;
                     });
+                    token.tenantRoles = tenantRoles;
                     token.allowedTenantIds = allowedTenantIds;
+                    token.tenantRoles = tenantRoles;
                 }
             }
 
@@ -350,7 +401,7 @@ const { handlers, auth: nextAuth, signIn, signOut } = NextAuth({
 export { handlers, signIn, signOut }
 
 export const auth = async (...args: any[]) => {
-    if (process.env.AUDIT_TENANT_ID) {
+    if (process.env.NODE_ENV === "test" && process.env.AUDIT_TENANT_ID) {
         return {
             user: {
                 id: process.env.AUDIT_USER_ID || "mock-user-id",

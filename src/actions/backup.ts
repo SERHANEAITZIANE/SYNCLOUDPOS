@@ -2,11 +2,16 @@
 
 import { db } from "@/lib/db"
 import { getActiveTenantId } from "./get-active-tenant"
+import { hasPermission } from "@/lib/rbac"
 
 export async function exportTenantData() {
     try {
         const tenantId = await getActiveTenantId()
         if (!tenantId) return { error: "Non autorisé." }
+
+        if (!(await hasPermission("settings:export"))) {
+            return { error: "Access denied." }
+        }
 
         const [
             tenant,
@@ -34,11 +39,23 @@ export async function exportTenantData() {
             db.treasuryAccount.findMany({ where: { tenantId } }),
         ])
 
+        const sensitiveTenantFields = new Set([
+            "geminiApiKey", "openaiApiKey", "anthropicApiKey",
+            "whatsappToken", "whatsappPhoneId", "whatsappInstanceId",
+            "yalidineApiId", "yalidineApiToken", "dhdApiToken", "hddApiToken",
+            "smtpPass"
+        ])
+        const safeTenant = tenant
+            ? Object.fromEntries(
+                Object.entries(tenant).filter(([key]) => !sensitiveTenantFields.has(key))
+            )
+            : null
+
         const exportData = {
             exportDate: new Date().toISOString(),
             version: "1.0",
             tenantId,
-            tenant,
+            tenant: safeTenant,
             products,
             categories,
             brands,
@@ -62,6 +79,8 @@ export async function getDataSummary() {
     try {
         const tenantId = await getActiveTenantId()
         if (!tenantId) return { error: "Non autorisé." }
+
+        if (!(await hasPermission("reports:read"))) return { error: "Access denied." }
 
         const [products, customers, suppliers, orders, salesOrders, purchaseOrders, expenses] = await Promise.all([
             db.product.count({ where: { tenantId } }),

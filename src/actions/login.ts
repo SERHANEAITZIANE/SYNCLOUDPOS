@@ -23,14 +23,13 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
         return { error: "Trop de tentatives. Veuillez réessayer dans une minute." }
     }
 
-    // Sanitize inputs to prevent injection attacks
-    const sanitizedIdentifier = identifier.includes('@')
+    const sanitizedIdentifier = (identifier.includes('@')
       ? sanitizeEmail(identifier)
-      : sanitizeString(identifier)
+      : sanitizeString(identifier)).trim()
 
     try {
         await signIn("credentials", {
-            identifier,
+            identifier: sanitizedIdentifier,
             password,
             redirectTo: "/hub",
         })

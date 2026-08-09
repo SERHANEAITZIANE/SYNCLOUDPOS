@@ -85,8 +85,8 @@ export async function getBusinessContextForTenant(tenantId: string, startDate?: 
     }),
     // Top debtors
     db.customer.findMany({
-      where: { tenantId, balance: { lt: 0 } },
-      orderBy: { balance: "asc" },
+      where: { tenantId, balance: { gt: 0 } },
+      orderBy: { balance: "desc" },
       take: 5,
       select: { name: true, balance: true },
     }),
@@ -126,7 +126,7 @@ export async function getBusinessContextForTenant(tenantId: string, startDate?: 
   });
   const productMap = new Map(products.map(p => [p.id, p]));
 
-  let totalRevenue = Number(posOrders._sum.total ?? 0) + Number(salesOrders._sum.total ?? 0);
+  const totalRevenue = Number(posOrders._sum.total ?? 0) + Number(salesOrders._sum.total ?? 0);
   let totalCogsItems = 0;
 
   const topProductLines = topOrderItems.map(p => {

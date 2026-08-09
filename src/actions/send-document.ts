@@ -26,7 +26,7 @@ async function fetchSalesOrderForPDF(salesOrderId: string) {
     const tenant = await db.tenant.findUnique({
         where: { id: tenantId },
         select: {
-            name: true, activity: true, address: true, phone: true, fax: true,
+            id: true,
             name: true, activity: true, address: true, phone: true, fax: true,
             email: true, nif: true, rc: true, nis: true, artImposition: true,
             bankAccount: true, logo: true, headerText: true,

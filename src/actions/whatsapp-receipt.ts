@@ -65,7 +65,9 @@ export async function sendWhatsAppReceipt(orderId: string) {
         const body = [
             `🧾 *Reçu — ${tenant.name}*`,
             `📅 ${format(order.createdAt, "dd/MM/yyyy HH:mm")}`,
-            `N° ${order.receiptNumber}`,
+            // Order (POS) carries no receiptNumber column — derive it from the id,
+            // matching the convention used in send-document.ts / pdf-generator.ts.
+            `N° ${order.id.slice(-8).toUpperCase()}`,
             ``,
             itemLines,
             ``,

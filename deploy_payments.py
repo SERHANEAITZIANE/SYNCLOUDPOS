@@ -25,51 +25,50 @@ def run(cmd, timeout=600):
     print(f"Exit: {exit_status}")
     return out, err, exit_status
 
+# Create remote directories
+run("mkdir -p /var/www/syncloudpos/src/components/settings")
+run("mkdir -p /var/www/syncloudpos/src/app/\\[locale\\]/\\(dashboard\\)/settings/roles")
+
 # Step 1: Upload modified files
 print("\n=== STEP 1: Upload files ===")
 sftp = client.open_sftp()
 
 files = [
+    ('prisma/schema.prisma', '/var/www/syncloudpos/prisma/schema.prisma'),
     ('src/actions/payments.ts', '/var/www/syncloudpos/src/actions/payments.ts'),
-    ('src/components/payments/columns.tsx', '/var/www/syncloudpos/src/components/payments/columns.tsx'),
-    ('src/components/payments/client.tsx', '/var/www/syncloudpos/src/components/payments/client.tsx'),
-    ('src/components/payments/cell-action.tsx', '/var/www/syncloudpos/src/components/payments/cell-action.tsx'),
-    ('src/components/payments/fiche-modal.tsx', '/var/www/syncloudpos/src/components/payments/fiche-modal.tsx'),
-    ('src/components/payments/supplier-columns.tsx', '/var/www/syncloudpos/src/components/payments/supplier-columns.tsx'),
-    ('src/components/payments/supplier-client.tsx', '/var/www/syncloudpos/src/components/payments/supplier-client.tsx'),
+    ('src/actions/products.ts', '/var/www/syncloudpos/src/actions/products.ts'),
+    ('src/actions/register.ts', '/var/www/syncloudpos/src/actions/register.ts'),
+    ('src/actions/roles.ts', '/var/www/syncloudpos/src/actions/roles.ts'),
+    ('src/actions/treasury.ts', '/var/www/syncloudpos/src/actions/treasury.ts'),
+    ('src/lib/validation.ts', '/var/www/syncloudpos/src/lib/validation.ts'),
+    ('src/lib/rbac.ts', '/var/www/syncloudpos/src/lib/rbac.ts'),
+    ('src/lib/whatsapp.ts', '/var/www/syncloudpos/src/lib/whatsapp.ts'),
+    ('src/schemas/index.ts', '/var/www/syncloudpos/src/schemas/index.ts'),
+    ('src/components/dashboard/header.tsx', '/var/www/syncloudpos/src/components/dashboard/header.tsx'),
+    ('src/components/dashboard/sidebar.tsx', '/var/www/syncloudpos/src/components/dashboard/sidebar.tsx'),
+    ('src/components/pos/product-card.tsx', '/var/www/syncloudpos/src/components/pos/product-card.tsx'),
+    ('src/components/pos/pos-client.tsx', '/var/www/syncloudpos/src/components/pos/pos-client.tsx'),
+    ('src/components/products/product-form.tsx', '/var/www/syncloudpos/src/components/products/product-form.tsx'),
+    ('src/components/products/price-list-modal.tsx', '/var/www/syncloudpos/src/components/products/price-list-modal.tsx'),
+    ('src/components/settings/roles-matrix-client.tsx', '/var/www/syncloudpos/src/components/settings/roles-matrix-client.tsx'),
+    ('src/components/users/users-client.tsx', '/var/www/syncloudpos/src/components/users/users-client.tsx'),
+    ('src/app/[locale]/(dashboard)/users/page.tsx', '/var/www/syncloudpos/src/app/[locale]/(dashboard)/users/page.tsx'),
+    ('src/app/[locale]/(dashboard)/settings/roles/page.tsx', '/var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/roles/page.tsx'),
+    ('src/app/[locale]/(dashboard)/settings/whatsapp/components/whatsapp-settings-client.tsx', '/var/www/syncloudpos/src/app/[locale]/(dashboard)/settings/whatsapp/components/whatsapp-settings-client.tsx'),
 ]
 
 for local, remote in files:
     sftp.put(local, remote)
     print(f"  Uploaded {local}")
 
-# Create directories for new pages
-run("mkdir -p /var/www/syncloudpos/src/app/\\[locale\\]/\\(dashboard\\)/payments/suppliers")
-
-sftp.put(
-    'src/app/[locale]/(dashboard)/payments/page.tsx',
-    '/var/www/syncloudpos/src/app/[locale]/(dashboard)/payments/page.tsx'
-)
-print("  Uploaded payments/page.tsx")
-
-sftp.put(
-    'src/app/[locale]/(dashboard)/payments/suppliers/page.tsx',
-    '/var/www/syncloudpos/src/app/[locale]/(dashboard)/payments/suppliers/page.tsx'
-)
-print("  Uploaded payments/suppliers/page.tsx")
-
-sftp.put(
-    'src/app/[locale]/(dashboard)/payments/layout.tsx',
-    '/var/www/syncloudpos/src/app/[locale]/(dashboard)/payments/layout.tsx'
-)
-print("  Uploaded payments/layout.tsx")
-
 sftp.close()
 print("All files uploaded!")
 
-# Step 2: Stop PM2
-print("\n=== STEP 2: Stop PM2 ===")
+# Step 2: Stop PM2 & Sync DB Schema
+print("\n=== STEP 2: Stop PM2 & Sync DB ===")
 run("pm2 stop syncloudpos")
+run("cd /var/www/syncloudpos && npx prisma db push --skip-generate")
+run("cd /var/www/syncloudpos && npx prisma generate")
 
 # Step 3: Rebuild
 print("\n=== STEP 3: Rebuild ===")
@@ -77,7 +76,6 @@ out, err, status = run("cd /var/www/syncloudpos && NODE_OPTIONS='--max-old-space
 
 if "Build error" in out or status != 0:
     print("\n!!! BUILD FAILED !!!")
-    # Show more context
     run("cd /var/www/syncloudpos && NODE_OPTIONS='--max-old-space-size=1024' npx next build 2>&1 | grep -A5 'Error'")
 else:
     print("\n=== BUILD OK ===")

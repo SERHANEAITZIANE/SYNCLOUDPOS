@@ -381,6 +381,24 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
                 }
             }
 
+            const parsePaymentDateTime = (dateVal?: string | Date) => {
+                if (!dateVal) return new Date()
+                if (dateVal instanceof Date) return dateVal
+                if (typeof dateVal === 'string' && (dateVal.includes('T') || dateVal.includes(' '))) {
+                    const parsed = new Date(dateVal)
+                    if (!isNaN(parsed.getTime())) return parsed
+                }
+                const parsed = new Date(dateVal)
+                if (!isNaN(parsed.getTime())) {
+                    const now = new Date()
+                    parsed.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+                    return parsed
+                }
+                return new Date()
+            }
+
+            const paymentDate = parsePaymentDateTime(data.date)
+
             // 3. Log transaction
             await tx.treasuryTransaction.create({
                 data: {
@@ -393,7 +411,8 @@ export const registerCustomerPayment = async (data: { customerId: string; amount
                     source: "CUSTOMER_PAYMENT",
                     referenceId: data.customerId, // Link to customer
                     description: `Paiement Client: ${finalDescription}`,
-                    date: data.date ? new Date(data.date) : new Date(),
+                    date: paymentDate,
+                    createdAt: paymentDate,
                 }
             });
         });

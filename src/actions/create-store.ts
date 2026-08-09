@@ -117,7 +117,6 @@ export const createStore = async (name: string) => {
         return { success: "Store created", tenant: result.tenant }
     } catch (error: any) {
         console.error("Failed to create store", error)
-        require('fs').writeFileSync('store_error.txt', JSON.stringify({ message: error.message, stack: error.stack }), 'utf8')
         return { error: "Failed to create store: " + error.message }
     }
 }

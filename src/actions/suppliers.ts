@@ -316,6 +316,24 @@ export const registerSupplierPayment = async (data: {
                 }
             }
 
+            const parsePaymentDateTime = (dateVal?: string | Date) => {
+                if (!dateVal) return new Date()
+                if (dateVal instanceof Date) return dateVal
+                if (typeof dateVal === 'string' && (dateVal.includes('T') || dateVal.includes(' '))) {
+                    const parsed = new Date(dateVal)
+                    if (!isNaN(parsed.getTime())) return parsed
+                }
+                const parsed = new Date(dateVal)
+                if (!isNaN(parsed.getTime())) {
+                    const now = new Date()
+                    parsed.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+                    return parsed
+                }
+                return new Date()
+            }
+
+            const paymentDate = parsePaymentDateTime(data.date)
+
             // 3. Create Treasury Transaction OUT
             await tx.treasuryTransaction.create({
                 data: {
@@ -329,7 +347,8 @@ export const registerSupplierPayment = async (data: {
                     referenceId: transactionRefId,
                     description: transactionDesc,
                     imageUrl: data.imageUrl || undefined,
-                    date: data.date ? new Date(data.date) : new Date(),
+                    date: paymentDate,
+                    createdAt: paymentDate,
                 }
             })
 
@@ -483,6 +502,65 @@ export const getSupplierLoans = async (supplierId?: string) => {
     } catch (error) {
         console.error("[GET_SUPPLIER_LOANS] error:", error)
         return []
+    }
+}
+
+export const recalculateSupplierBalance = async (supplierId: string) => {
+    const session = await auth()
+    if (!session?.user?.id) return { error: "Unauthorized" }
+    const tenantId = session.user.tenantId
+    if (!tenantId) return { error: "Tenant ID missing" }
+
+    try {
+        // 1. Sum of purchases (BON_LIVRAISON or FACTURE)
+        const purchases = await db.purchaseOrder.findMany({
+            where: { supplierId, tenantId, status: { in: ["BON_LIVRAISON", "FACTURE"] } },
+            select: { id: true, total: true }
+        })
+        const purchasesTotal = purchases.reduce((sum, p) => sum + Number(p.total), 0)
+        const purchaseIds = purchases.map(p => p.id)
+
+        // 2. Sum of payments on those purchases
+        const purchasePayments = await db.treasuryTransaction.findMany({
+            where: { referenceId: { in: purchaseIds }, source: "PURCHASE", tenantId, type: "DEBIT" },
+            select: { amount: true }
+        })
+        const purchasePaymentsTotal = purchasePayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+        // 3. Standalone payments to supplier (SUPPLIER_PAYMENT)
+        const supplierPayments = await db.treasuryTransaction.findMany({
+            where: { referenceId: supplierId, source: "SUPPLIER_PAYMENT", tenantId, type: "DEBIT" },
+            select: { amount: true }
+        })
+        const supplierPaymentsTotal = supplierPayments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+        // 4. Loans received from supplier (SUPPLIER_LOAN)
+        const supplierLoans = await db.treasuryTransaction.findMany({
+            where: { referenceId: supplierId, source: "SUPPLIER_LOAN", tenantId, type: "CREDIT" },
+            select: { amount: true }
+        })
+        const supplierLoansTotal = supplierLoans.reduce((sum, p) => sum + Number(p.amount), 0)
+
+        // 5. Supplier Returns credited (not cash)
+        const supplierReturns = await db.supplierReturn.findMany({
+            where: { supplierId, tenantId, returnType: { not: "CASH" } },
+            select: { totalAmount: true }
+        })
+        const returnsTotal = supplierReturns.reduce((sum, r) => sum + Number(r.totalAmount), 0)
+
+        // Calculated Balance = Purchases + Loans - Payments - Returns
+        const calculatedBalance = purchasesTotal + supplierLoansTotal - purchasePaymentsTotal - supplierPaymentsTotal - returnsTotal
+
+        await db.supplier.update({
+            where: { id: supplierId, tenantId },
+            data: { balance: calculatedBalance }
+        })
+
+        revalidatePath("/(dashboard)/suppliers")
+        return { success: true, balance: calculatedBalance }
+    } catch (err: any) {
+        console.error("recalculateSupplierBalance error:", err)
+        return { error: err?.message || "Failed to recalculate balance" }
     }
 }
 

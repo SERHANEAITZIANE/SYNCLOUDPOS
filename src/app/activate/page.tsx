@@ -106,6 +106,10 @@ export default function ActivatePage() {
                     <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto" />
                     <h1 className="text-2xl font-bold text-white">Already Activated</h1>
                     <p className="text-zinc-400">Plan: {status.license.plan} {status.license.plan === "lifetime" ? "♾️" : `· ${status.license.daysLeft} days remaining`}</p>
+                    {/* Deliberate full reload, not client nav: activation changes server-side
+                        license state, so the app must be re-fetched rather than served from
+                        the RSC payload cached before activation. */}
+                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                     <a href="/" className="inline-block mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition">Open App →</a>
                 </div>
             </div>

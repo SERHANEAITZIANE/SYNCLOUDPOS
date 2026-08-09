@@ -88,7 +88,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 const stored = localStorage.getItem("pos_auto_print_prefs")
                 if (stored) {
                     const prefs = JSON.parse(stored)
-                    let ticket = prefs.printTicket !== undefined ? prefs.printTicket : true
+                    const ticket = prefs.printTicket !== undefined ? prefs.printTicket : true
                     let bl = prefs.printBL !== undefined ? prefs.printBL : false
                     if (ticket && bl) {
                         bl = false // Resolve mutual exclusivity conflict
@@ -284,7 +284,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     const handleNumpad = React.useCallback((val: string) => {
         setTenderedStr(prev => {
-            let current = isPristineRef.current ? "" : prev
+            const current = isPristineRef.current ? "" : prev
             isPristineRef.current = false
 
             if (val === "C") return ""

@@ -16,6 +16,7 @@ const UpdateUserSchema = z.object({
     role: z.enum(["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT", "STOCK_MANAGER"]),
     canEdit: z.boolean().optional(),
     canDelete: z.boolean().optional(),
+    defaultStoreId: z.string().optional().nullable(),
 })
 
 export const updateUser = async (values: z.infer<typeof UpdateUserSchema>) => {
@@ -35,7 +36,7 @@ export const updateUser = async (values: z.infer<typeof UpdateUserSchema>) => {
         return { error: "Invalid fields" }
     }
 
-    const { id, name, email, username, password, role, canEdit, canDelete } = validatedFields.data
+    const { id, name, email, username, password, role, canEdit, canDelete, defaultStoreId } = validatedFields.data
 
     const currentUser = await db.user.findUnique({
         where: { id: session.user.id }
@@ -87,6 +88,7 @@ export const updateUser = async (values: z.infer<typeof UpdateUserSchema>) => {
 
     if (name) dataToUpdate.name = name
     if (email) dataToUpdate.email = email
+    if (defaultStoreId !== undefined) dataToUpdate.defaultStoreId = defaultStoreId || null
     
     // Explicitly update username to lowerUsername or null if cleared
     dataToUpdate.username = lowerUsername || null

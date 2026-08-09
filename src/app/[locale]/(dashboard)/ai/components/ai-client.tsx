@@ -10,6 +10,7 @@ import {
     Briefcase, Landmark
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1618,13 +1619,13 @@ Simule l'impact mathématique de cette décision sur ma trésorerie, projette me
                                     </div>
                                 </div>
 
-                                <a
+                                <Link
                                     href="/settings"
                                     className="inline-flex items-center justify-center rounded-xl text-xs font-bold transition-all bg-indigo-600/95 text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-650 hover:shadow-indigo-600/20 h-9 px-4 py-2 gap-2 border border-indigo-500/30"
                                 >
                                     <Settings2 className="h-3.5 w-3.5" />
                                     Aller aux paramètres généraux
-                                </a>
+                                </Link>
                             </div>
                             <button onClick={() => setShowSettings(false)} className="shrink-0 text-white/30 hover:text-white/70 transition-colors p-1">
                                 <X className="h-4 w-4" />

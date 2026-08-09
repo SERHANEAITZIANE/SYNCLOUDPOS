@@ -83,14 +83,14 @@ export async function getAnalyticsData(dateRange?: { from: string; to: string })
                 }),
                 // 7. Debtors aggregate
                 db.customer.aggregate({
-                    where: { tenantId, balance: { lt: 0 } },
+                    where: { tenantId, balance: { gt: 0 } },
                     _sum: { balance: true }
                 }),
                 // 8. Top debtors
                 db.customer.findMany({
-                    where: { tenantId, balance: { lt: 0 } },
+                    where: { tenantId, balance: { gt: 0 } },
                     select: { id: true, name: true, balance: true },
-                    orderBy: { balance: 'asc' },
+                    orderBy: { balance: 'desc' },
                     take: 5
                 }),
                 // 9. Low stock products

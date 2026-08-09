@@ -26,7 +26,9 @@ export async function createStockCountSession(name: string, notes?: string) {
                 status: "OPEN",
                 items: {
                     create: products.map(p => {
-                        const stock = p.storeProducts.reduce((sum, sp) => sum + sp.stock, 0);
+                        const storeStockSum = p.storeProducts.reduce((sum, sp) => sum + sp.stock, 0);
+                        // If storeProducts exist use storeStockSum, otherwise use main product stock
+                        const stock = p.storeProducts.length > 0 ? storeStockSum : p.stock;
                         return {
                             productId: p.id,
                             productName: p.name,
@@ -83,13 +85,13 @@ export async function getStockCountSessions() {
     })
 }
 
-/** Get a single session with all items */
+/** Get a single session with all items enriched with Category, Brand and Barcodes */
 export async function getStockCountSession(id: string) {
     const authSession = await auth()
     const tenantId = authSession?.user?.tenantId
     if (!tenantId) return null
 
-    return db.stockCountSession.findFirst({
+    const sessionData = await db.stockCountSession.findFirst({
         where: { id, tenantId },
         include: {
             items: {
@@ -97,9 +99,50 @@ export async function getStockCountSession(id: string) {
             }
         }
     })
+
+    if (!sessionData) return null
+
+    const productIds = sessionData.items.map(i => i.productId)
+    const products = await db.product.findMany({
+        where: { id: { in: productIds }, tenantId },
+        select: {
+            id: true,
+            categoryId: true,
+            brandId: true,
+            category: { select: { id: true, name: true } },
+            brand: { select: { id: true, name: true } },
+            barcodes: { select: { value: true } }
+        }
+    })
+
+    const productMap = new Map(products.map(p => [p.id, p]))
+
+    const enrichedItems = sessionData.items.map(i => {
+        const prod = productMap.get(i.productId)
+        return {
+            ...i,
+            categoryId: prod?.categoryId || null,
+            categoryName: prod?.category?.name || null,
+            brandId: prod?.brandId || null,
+            brandName: prod?.brand?.name || null,
+            barcodes: prod?.barcodes?.map(b => b.value) || []
+        }
+    })
+
+    const [categories, brands] = await Promise.all([
+        db.category.findMany({ where: { tenantId, isArchived: false }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+        db.brand.findMany({ where: { tenantId, isArchived: false }, select: { id: true, name: true }, orderBy: { name: "asc" } })
+    ])
+
+    return {
+        ...sessionData,
+        items: enrichedItems,
+        categories,
+        brands
+    }
 }
 
-/** Approve session: apply all adjustments to product stock */
+/** Approve session: apply all adjustments to product stock and create StockMovement history records */
 export async function approveStockCountSession(sessionId: string) {
     const session = await auth()
     const tenantId = session?.user?.tenantId
@@ -110,44 +153,67 @@ export async function approveStockCountSession(sessionId: string) {
         include: { items: true }
     })
 
-    if (!countSession) return { error: "Session not found or already processed." }
+    if (!countSession) return { error: "Session non trouvée ou déjà traitée." }
 
     try {
-        // Find a storeId to apply adjustments. Let's use the first store for simplicity.
         const store = await db.store.findFirst({ where: { tenantId } });
-        if (!store) throw new Error("No store found to apply adjustments");
 
-        // Apply each adjustment
-        await db.$transaction([
-            ...countSession.items
-                .filter(i => i.difference !== 0)
-                .map(i =>
-                    db.storeProduct.updateMany({
-                        where: { productId: i.productId, storeId: store.id },
-                        data: { stock: { increment: i.difference } }
-                    })
-                ),
-            ...countSession.items
-                .filter(i => i.difference !== 0)
-                .map(i =>
-                    db.product.updateMany({
-                        where: { id: i.productId, tenantId },
-                        data: { stock: { increment: i.difference } }
-                    })
-                ),
-            db.stockCountSession.update({
+        await db.$transaction(async (tx) => {
+            const itemsWithDiff = countSession.items.filter(i => i.difference !== 0);
+
+            for (const item of itemsWithDiff) {
+                const productBefore = await tx.product.findUnique({
+                    where: { id: item.productId }
+                });
+                const stockBefore = productBefore?.stock ?? item.expectedQty;
+                const stockAfter = stockBefore + item.difference;
+
+                // 1. Update Product main stock
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { increment: item.difference } }
+                });
+
+                // 2. Upsert StoreProduct
+                if (store) {
+                    await tx.storeProduct.upsert({
+                        where: { storeId_productId: { storeId: store.id, productId: item.productId } },
+                        update: { stock: { increment: item.difference } },
+                        create: { storeId: store.id, productId: item.productId, stock: Math.max(0, stockAfter), minStock: productBefore?.minStock ?? 0 }
+                    });
+                }
+
+                // 3. Create StockMovement entry
+                await tx.stockMovement.create({
+                    data: {
+                        productId: item.productId,
+                        type: "MANUAL_ADJUSTMENT",
+                        quantity: item.difference,
+                        stockBefore,
+                        stockAfter,
+                        reason: `Audit d'inventaire: ${countSession.name}`,
+                        referenceId: countSession.id,
+                        userId: session.user.id,
+                        tenantId
+                    }
+                });
+            }
+
+            // 4. Update session status
+            await tx.stockCountSession.update({
                 where: { id: sessionId },
                 data: { status: "APPROVED", approvedAt: new Date() }
-            })
-        ])
+            });
+        });
+
         revalidatePath("/[locale]/(dashboard)/inventory-audit")
         revalidatePath("/[locale]/(dashboard)/products")
         await cacheMonitor.invalidateCache(`products:${tenantId}`)
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
-        return { success: "Inventaire approuvé. Stock mis à jour." }
+        return { success: "Inventaire approuvé. Stock mis à jour et mouvements de stock enregistrés." }
     } catch (e) {
         console.error("approveStockCountSession error:", e)
-        return { error: "Failed to approve session." }
+        return { error: "Erreur lors de l'approbation de la session." }
     }
 }
 

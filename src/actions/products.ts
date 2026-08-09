@@ -29,7 +29,8 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
     const validatedFields = ProductSchema.safeParse(values)
 
     if (!validatedFields.success) {
-        return { error: "Invalid fields!" }
+        const errorDetails = validatedFields.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+        return { error: `Champs invalides : ${errorDetails}` }
     }
 
     const {
@@ -67,19 +68,19 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             const product = await tx.product.create({
                 data: {
                     name,
-                    price,
+                    price: price !== undefined && price !== null ? price : 0,
                     tvaRate,
                     description,
                     cost: cost !== undefined && cost !== null ? cost : 0,
-                    wholesalePrice: wholesalePrice ?? undefined,
-                    dealerPrice: dealerPrice ?? undefined,
+                    wholesalePrice: wholesalePrice !== undefined && wholesalePrice !== null ? wholesalePrice : 0,
+                    dealerPrice: dealerPrice !== undefined && dealerPrice !== null ? dealerPrice : 0,
                     isFeatured: isFeatured || false,
                     isArchived: isArchived || false,
                     isService: isService || false,
-                    stock: stock ?? 0,
-                    minStock: minStock ?? 0,
-                    categoryId,
-                    brandId,
+                    stock: isService ? 0 : (stock ?? 0),
+                    minStock: isService ? 0 : (minStock ?? 0),
+                    categoryId: categoryId && categoryId.trim() !== "" ? categoryId : null,
+                    brandId: brandId && brandId.trim() !== "" ? brandId : null,
                     tenantId,
                     images: {
                         createMany: {
@@ -102,7 +103,7 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
             createdProduct = product;
 
             // Always create StoreProduct to ensure POS visibility across all stores of this tenant
-            const initialStock = stock ?? 0;
+            const initialStock = isService ? 0 : (stock ?? 0);
             const stores = await tx.store.findMany({ where: { tenantId } });
             const currentStoreId = session?.user?.defaultStoreId || stores[0]?.id;
             
@@ -140,9 +141,9 @@ export const createProduct = async (values: z.infer<typeof ProductSchema>) => {
         await cacheMonitor.invalidateCache(`pos-products:${tenantId}`)
         logAudit({ action: "CREATE", entity: "PRODUCT", description: `Produit créé: ${name} (${price} DA)`, after: { name, price } }).catch(() => null)
         return { success: "Product created!", product: serializeData(createdProduct) }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating product:", error)
-        return { error: "Something went wrong!" }
+        return { error: error?.message || "Erreur lors de la création du produit" }
     }
 }
 
@@ -347,7 +348,8 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
 
     if (!validatedFields.success) {
         console.error("Validation failed in updateProduct:", validatedFields.error)
-        return { error: `Invalid fields: ${validatedFields.error.message}` }
+        const errorDetails = validatedFields.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+        return { error: `Champs invalides : ${errorDetails}` }
     }
 
     const {
@@ -393,16 +395,16 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
                 },
                 data: {
                     name,
-                    price,
+                    price: price !== undefined && price !== null ? price : 0,
                     tvaRate,
-                    categoryId,
-                    brandId,
+                    categoryId: categoryId && categoryId.trim() !== "" ? categoryId : null,
+                    brandId: brandId && brandId.trim() !== "" ? brandId : null,
                     description,
-                    stock: stock ?? 0,
-                    minStock: minStock ?? 0,
-                    cost: cost ?? undefined,
-                    wholesalePrice: wholesalePrice ?? undefined,
-                    dealerPrice: dealerPrice ?? undefined,
+                    stock: isService ? 0 : (stock ?? 0),
+                    minStock: isService ? 0 : (minStock ?? 0),
+                    cost: cost !== undefined && cost !== null ? cost : 0,
+                    wholesalePrice: wholesalePrice !== undefined && wholesalePrice !== null ? wholesalePrice : 0,
+                    dealerPrice: dealerPrice !== undefined && dealerPrice !== null ? dealerPrice : 0,
                     isFeatured,
                     isArchived,
                     isService: isService || false,
@@ -429,7 +431,7 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
             });
 
             // Adjust StoreProduct and record movement if stock was manually changed
-            const newStock = stock ?? 0;
+            const newStock = isService ? 0 : (stock ?? 0);
             const oldStock = previousProduct?.stock ?? 0;
             const stockDiff = newStock - oldStock;
 
@@ -485,9 +487,9 @@ export const updateProduct = async (id: string, values: z.infer<typeof ProductSc
             } 
         }).catch(() => null)
         return { success: "Product updated!" }
-    } catch (error) {
+    } catch (error: any) {
         console.error("PRISMA ERROR in updateProduct:", error)
-        return { error: "Failed to update product!" }
+        return { error: error?.message || "Failed to update product!" }
     }
 }
 

@@ -71,7 +71,9 @@ export function useBluetoothPrinter(): UseBluetoothPrinterReturn {
     const [paperWidth, setPaperWidthState] = useState<"58mm" | "80mm">("80mm")
 
     // Poll connection status periodically
-    const pollRef = useRef<NodeJS.Timeout | null>(null)
+    // setInterval resolves to the DOM overload (number) in this browser-only hook,
+    // not NodeJS.Timeout — derive the type from the call instead of hardcoding it.
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
     useEffect(() => {
         // Initialize from stored values

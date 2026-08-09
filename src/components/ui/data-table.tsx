@@ -367,7 +367,9 @@ export function DataTable<TData, TValue>({
     }
 
     // Get column label for display
-    const getColumnLabel = (column: { id: string; columnDef: { header: unknown } }) => {
+    // `header` is optional on TanStack's ColumnDef, so it must be optional here too —
+    // otherwise Column<TData, unknown> is not structurally assignable.
+    const getColumnLabel = (column: { id: string; columnDef: { header?: unknown } }) => {
         if (column.id === "select") return tDataTable("selection")
         if (column.id === "actions") return "Actions"
         return typeof column.columnDef.header === "string" ? column.columnDef.header : column.id

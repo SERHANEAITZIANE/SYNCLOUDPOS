@@ -135,7 +135,7 @@ export function DashboardSidebar({ isSuperadmin, role, tenants = [], activeTenan
             label: t("systemGroup") || "Système",
             routes: [
                 { label: t("company") || "Mon Entreprise", icon: Store, href: "/company", color: "text-orange-400", visible: isAdmin },
-                { label: t("users") || "Utilisateurs", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
+                { label: t("users") || "Utilisateurs & Rôles", icon: Users, href: "/users", color: "text-gray-300", visible: isAdmin },
                 { label: t("systemSettings") || t("settings") || "Paramètres", icon: Settings, href: "/settings", color: "text-gray-400", visible: isAdmin },
                 { label: t("auditLog"), icon: History, href: "/audit-log", color: "text-violet-400", visible: isAdmin },
                 { label: t("erpTraining") || "Formation ERP", icon: BookOpen, href: "/formation", color: "text-pink-400", visible: !isCASHIER }

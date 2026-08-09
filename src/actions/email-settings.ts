@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import nodemailer from "nodemailer"
+import { hasPermission } from "@/lib/rbac"
 
 /**
  * Get email/SMTP settings for a tenant
@@ -10,9 +11,9 @@ import nodemailer from "nodemailer"
 export async function getEmailSettings() {
     const session = await auth()
     const tenantId = session?.user?.tenantId
-    if (!tenantId) return null
+    if (!tenantId || !(await hasPermission("settings:read"))) return null
 
-    return db.tenant.findUnique({
+    const settings = await db.tenant.findUnique({
         where: { id: tenantId },
         select: {
             smtpHost: true,
@@ -22,6 +23,13 @@ export async function getEmailSettings() {
             smtpFrom: true,
         },
     })
+    if (!settings) return null
+
+    return {
+        ...settings,
+        smtpPass: "",
+        hasSmtpPassword: Boolean(settings.smtpPass)
+    }
 }
 
 /**
@@ -38,6 +46,9 @@ export async function saveEmailSettings(data: {
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Non autorisé" }
 
+    if (!(await hasPermission("settings:update"))) {
+        return { error: "Access denied" }
+    }
     try {
         await db.tenant.update({
             where: { id: tenantId },
@@ -64,6 +75,9 @@ export async function testEmailConnection(): Promise<{ success?: string; error?:
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Non autorisé" }
 
+    if (!(await hasPermission("settings:update"))) {
+        return { error: "Access denied" }
+    }
     try {
         const tenant = await db.tenant.findUnique({
             where: { id: tenantId },

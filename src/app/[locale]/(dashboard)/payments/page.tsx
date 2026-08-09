@@ -7,16 +7,22 @@ export default async function PaymentsPage() {
     const payments = await getCustomerPayments()
 
     const customersResponse = await getCustomers(1, 10000)
-    let customersList: { id: string; name: string }[] = []
+    let customersList: { id: string; name: string; balance: number }[] = []
     if (customersResponse && 'customers' in customersResponse) {
         customersList = (customersResponse.customers as any[]).map(c => ({
             id: c.id,
-            name: c.name
+            name: c.name,
+            balance: Number(c.balance ?? 0)
         }))
     }
 
     const accounts = await getTreasuryAccounts()
-    const mappedAccounts = accounts.map(a => ({ id: a.id, name: a.name, type: a.type }))
+    const mappedAccounts = accounts.map(a => ({ 
+        id: a.id, 
+        name: a.name, 
+        type: a.type,
+        balance: Number(a.balance ?? 0)
+    }))
 
     return (
         <div className="flex-col">

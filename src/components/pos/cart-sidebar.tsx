@@ -93,10 +93,10 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
     }
 
     const handleQtyChange = (val: string) => {
-        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+        if (val === "" || val === "-" || /^-?\d*\.?\d*$/.test(val)) {
             setQtyValue(val)
             const parsed = parseFloat(val)
-            if (!isNaN(parsed) && parsed >= 0) {
+            if (!isNaN(parsed)) {
                 cart.updateQuantity(item.id, parsed)
             }
         }
@@ -104,7 +104,7 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
 
     const handleQtyBlur = () => {
         const parsed = parseFloat(qtyValue)
-        if (isNaN(parsed) || parsed <= 0) {
+        if (isNaN(parsed) || parsed === 0) {
             setQtyValue(item.quantity.toString())
         }
     }
@@ -208,7 +208,7 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
                         <button
                             type="button"
                             className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors w-7 h-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800"
-                            onClick={() => cart.updateQuantity(item.id, Math.max(0.01, item.quantity - 1))}
+                            onClick={() => cart.updateQuantity(item.id, item.quantity - 1)}
                         >
                             <Minus size={10} />
                         </button>
@@ -749,7 +749,7 @@ export const CartSidebar = ({
     const totalAfterPromo = baseTotal - totalDiscount
 
     // Loyalty points: 100 pts = 10 DA => 1 DA = 10 pts
-    const POINTS_TO_DA_RATIO = 0.10
+    const POINTS_TO_DA_RATIO = 1 / Math.max(1, Number(storeData?.loyaltyDaPerPoint || 100))
 
     // Calculate the maximum amount of points needed to fully cover the cart
     const pointsNeededToCoverTotal = Math.ceil(totalAfterPromo / POINTS_TO_DA_RATIO)

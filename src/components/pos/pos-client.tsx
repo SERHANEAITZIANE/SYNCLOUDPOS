@@ -149,14 +149,14 @@ export const PosClient: FC<PosClientProps> = ({
     const [posUiSize, setPosUiSize] = useState<"sm" | "md" | "lg">("md")
     const [page, setPage] = useState(1)
     const pageSize = 60
-    
+
     // Product details state for list view
     const [selectedProductForInfo, setSelectedProductForInfo] = useState<any | null>(null)
 
     // Keyboard navigation and image preview states
     const [focusedProductIndex, setFocusedProductIndex] = useState<number>(-1)
     const itemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
-    
+
     // Category bar scrolling ref and function
     const categoryScrollRef = useRef<HTMLDivElement>(null)
     const scrollCategories = (direction: "left" | "right") => {
@@ -168,7 +168,7 @@ export const PosClient: FC<PosClientProps> = ({
             })
         }
     }
-    
+
     // Premium POS - Full Fiche Produit Express states
     const [quickProductOpen, setQuickProductOpen] = useState(false)
     const [quickTab, setQuickTab] = useState<"general" | "pricing" | "barcodes" | "stock">("general")
@@ -190,7 +190,7 @@ export const PosClient: FC<PosClientProps> = ({
     const [quickMinStock, setQuickMinStock] = useState(0)
     const [quickIsFeatured, setQuickIsFeatured] = useState(false)
     const [quickIsArchived, setQuickIsArchived] = useState(false)
-    
+
     // Inline creation states
     const [localCategories, setLocalCategories] = useState(categories)
     const [localBrands, setLocalBrands] = useState(brands)
@@ -289,7 +289,7 @@ export const PosClient: FC<PosClientProps> = ({
 
     // Local products state inside PosClient so newly created products are instantly added and rendered!
     const [localProducts, setLocalProducts] = useState(products)
-    
+
     // Sync local products with props changes
     useEffect(() => {
         setLocalProducts(products)
@@ -410,7 +410,8 @@ export const PosClient: FC<PosClientProps> = ({
     const activeSessionId = cart.activeSessionId
     const activeSession = cart.sessions.find(s => s.id === activeSessionId)
     const clientType = activeSession?.clientType || 'RETAIL'
-    const blockNegativeStock = storeData?.blockNegativeStock ?? false
+    // Always allow selling even when stock is 0 — no blocking in POS
+    const blockNegativeStock = false
     const items = activeSession?.items || []
     const cartTotal = items.reduce((total, item) => total + (item.price * item.quantity), 0)
     const totalItemsCount = items.reduce((total, item) => total + item.quantity, 0)
@@ -674,10 +675,10 @@ export const PosClient: FC<PosClientProps> = ({
             if (searchQuery) {
                 const matchesText = searchQuery.length <= 2
                     ? fuzzyMatch(item.name.toLowerCase(), searchQuery) ||
-                      fuzzyMatch(item.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''), searchQuery) ||
-                      item.barcodes.some(b => b.startsWith(searchQuery))
+                    fuzzyMatch(item.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''), searchQuery) ||
+                    item.barcodes.some(b => b.startsWith(searchQuery))
                     : item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      item.barcodes.some(b => b.includes(searchQuery));
+                    item.barcodes.some(b => b.includes(searchQuery));
                 if (!matchesText) return false;
             }
 
@@ -820,8 +821,8 @@ export const PosClient: FC<PosClientProps> = ({
             const activeEl = document.activeElement;
             const isSearchInput = activeEl && activeEl.classList.contains("pos-search-input");
             const isOtherInputFocused = activeEl && !isSearchInput && (
-                activeEl.tagName === "INPUT" || 
-                activeEl.tagName === "TEXTAREA" || 
+                activeEl.tagName === "INPUT" ||
+                activeEl.tagName === "TEXTAREA" ||
                 activeEl.getAttribute("contenteditable") === "true"
             );
 
@@ -918,7 +919,7 @@ export const PosClient: FC<PosClientProps> = ({
     return (
         <div className="flex h-[100dvh] flex-col bg-[#f8f9fa] dark:bg-[#0f1115] overflow-hidden">
             <PosHeader storeName={storeName} />
-            
+
             {/* Multi-Session Hold Carts Bar */}
             <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1 sm:py-1.5 lg:py-2 bg-[#1b1c21] dark:bg-[#131418] border-b border-gray-800 shrink-0 select-none overflow-x-auto scrollbar-none h-9 sm:h-10 lg:h-11">
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
@@ -926,7 +927,7 @@ export const PosClient: FC<PosClientProps> = ({
                         const isActive = session.id === cart.activeSessionId;
                         const sessionItemsCount = session.items.reduce((total, item) => total + item.quantity, 0);
                         const sessionTotal = session.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-                        
+
                         return (
                             <div
                                 key={session.id}
@@ -941,7 +942,7 @@ export const PosClient: FC<PosClientProps> = ({
                                 <span className="font-mono text-[8px] sm:text-[10px] text-gray-500">#{index + 1}</span>
                                 <span className="hidden sm:inline">{session.name || `Panier ${index + 1}`}</span>
                                 <span className="sm:hidden">P{index + 1}</span>
-                                
+
                                 {sessionItemsCount > 0 && (
                                     <span className={cn(
                                         "px-1.5 py-0.2 rounded-full text-[9px] font-black tracking-tight",
@@ -950,7 +951,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         {sessionItemsCount}
                                     </span>
                                 )}
-                                
+
                                 <span className="font-extrabold text-[9px] sm:text-[10px] tracking-tight pl-1 border-l border-gray-700/50 hidden sm:inline">
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(sessionTotal)} DA
                                 </span>
@@ -1091,7 +1092,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     <LanguageSwitcher />
                                     <ModeToggle />
                                     <div className="w-px bg-gray-200 dark:bg-slate-700 h-6 mx-0.5 rounded-full shrink-0"></div>
-                                    
+
                                     {/* Keyboard shortcuts */}
                                     <Button
                                         variant="ghost"
@@ -1104,7 +1105,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     </Button>
 
                                     <div className="w-px bg-gray-200 dark:bg-slate-700 h-6 mx-0.5 rounded-full shrink-0"></div>
-                                    
+
                                     {/* Grid View */}
                                     <Button
                                         variant="ghost"
@@ -1165,8 +1166,8 @@ export const PosClient: FC<PosClientProps> = ({
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
 
-                        <div 
-                            ref={categoryScrollRef} 
+                        <div
+                            ref={categoryScrollRef}
                             onWheel={handleCategoryWheel}
                             className="w-full overflow-x-auto scrollbar-none whitespace-nowrap py-1 scroll-smooth"
                         >
@@ -1176,8 +1177,8 @@ export const PosClient: FC<PosClientProps> = ({
                                     onClick={() => setSelectedCategory(null)}
                                     className={cn(
                                         "group rounded-full px-2 sm:px-2.5 lg:px-4 h-6 sm:h-7 lg:h-8 text-[9px] sm:text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1 sm:gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
-                                        selectedCategory === null 
-                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.2)]" 
+                                        selectedCategory === null
+                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent shadow-[0_4px_12px_rgba(99,102,241,0.2)]"
                                             : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
                                     )}
                                 >
@@ -1198,7 +1199,7 @@ export const PosClient: FC<PosClientProps> = ({
                                             onClick={() => setSelectedCategory(category.id)}
                                             className={cn(
                                                 "group rounded-full px-2 sm:px-2.5 lg:px-4 h-6 sm:h-7 lg:h-8 text-[9px] sm:text-[10px] lg:text-xs font-bold transition-all border flex items-center gap-1 sm:gap-1.5 select-none hover:scale-[1.02] duration-200 shrink-0",
-                                                isActive 
+                                                isActive
                                                     ? getCategoryActiveStyle(index + 1)
                                                     : "bg-white hover:bg-slate-50 text-slate-500 border-slate-200/60 dark:bg-[#1e293b] dark:text-slate-400 dark:border-slate-800 dark:hover:bg-[#2e3b4e] dark:hover:text-white"
                                             )}
@@ -1228,7 +1229,7 @@ export const PosClient: FC<PosClientProps> = ({
                     </div>
 
                     {/* Content Area (Grid or List) */}
-                    <div 
+                    <div
                         className="flex-1 min-h-0 px-1.5 sm:px-3 lg:px-6 pt-1.5 sm:pt-2 pb-24 sm:pb-20 lg:pb-6 overflow-y-auto overscroll-contain"
                         style={{ WebkitOverflowScrolling: 'touch' }}
                         onWheel={handleProductsWheel}
@@ -1240,27 +1241,27 @@ export const PosClient: FC<PosClientProps> = ({
                                     sidebarWidth === 'wide'
                                         ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
                                         : sidebarWidth === 'narrow'
-                                        ? "grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 min-[1800px]:grid-cols-10"
-                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                            ? "grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 min-[1800px]:grid-cols-10"
+                                            : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
                                 ) : posUiSize === "lg" ? (
                                     sidebarWidth === 'wide'
                                         ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1800px]:grid-cols-6"
                                         : sidebarWidth === 'narrow'
-                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
-                                        : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
+                                            ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                            : "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
                                 ) : (
-                                    sidebarWidth === 'wide' 
+                                    sidebarWidth === 'wide'
                                         ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 min-[1800px]:grid-cols-7"
                                         : sidebarWidth === 'narrow'
-                                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
-                                        : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
+                                            ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 min-[1800px]:grid-cols-9"
+                                            : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 min-[1800px]:grid-cols-8"
                                 )
                             )}>
                                 {renderedProducts.map((product, index) => (
-                                    <ProductCard 
-                                        key={product.id} 
-                                        data={product} 
-                                        blockNegativeStock={storeData?.blockNegativeStock ?? false} 
+                                    <ProductCard
+                                        key={product.id}
+                                        data={product}
+                                        blockNegativeStock={storeData?.blockNegativeStock ?? false}
                                         isFocused={focusedProductIndex === index}
                                         posUiSize={posUiSize}
                                     />
@@ -1307,8 +1308,8 @@ export const PosClient: FC<PosClientProps> = ({
                                                 posUiSize === "sm"
                                                     ? "p-1.5 lg:p-2 gap-2 lg:gap-2.5 rounded-[12px] lg:rounded-[14px]"
                                                     : posUiSize === "lg"
-                                                    ? "p-3.5 lg:p-4 gap-4 lg:gap-5 rounded-[20px] lg:rounded-[24px]"
-                                                    : "p-2 lg:p-3 gap-3 lg:gap-4 rounded-[16px] lg:rounded-[20px]",
+                                                        ? "p-3.5 lg:p-4 gap-4 lg:gap-5 rounded-[20px] lg:rounded-[24px]"
+                                                        : "p-2 lg:p-3 gap-3 lg:gap-4 rounded-[16px] lg:rounded-[20px]",
                                                 outOfStock ? "opacity-50 cursor-not-allowed select-none bg-gray-50/20 dark:bg-slate-900/20" : "",
                                                 focusedProductIndex === index
                                                     ? "ring-2 ring-indigo-600 dark:ring-indigo-400 scale-[1.01] z-10 border-transparent shadow-[0_0_12px_rgba(99,102,241,0.4)]"
@@ -1320,22 +1321,22 @@ export const PosClient: FC<PosClientProps> = ({
                                                     Épuisé
                                                 </div>
                                             )}
-                                            <div 
+                                            <div
                                                 className={cn(
                                                     "overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0 relative border border-gray-200/50 dark:border-gray-700/50",
                                                     posUiSize === "sm"
                                                         ? "h-9 w-9 rounded-lg"
                                                         : posUiSize === "lg"
-                                                        ? "h-16 w-16 rounded-2xl"
-                                                        : "h-12 w-12 lg:h-14 lg:w-14 rounded-xl"
+                                                            ? "h-16 w-16 rounded-2xl"
+                                                            : "h-12 w-12 lg:h-14 lg:w-14 rounded-xl"
                                                 )}
                                             >
                                                 {product.imageUrl ? (
-                                                    <Image 
-                                                        src={product.imageUrl} 
-                                                        alt={product.name} 
-                                                        fill 
-                                                        className="object-cover" 
+                                                    <Image
+                                                        src={product.imageUrl}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover"
                                                         unoptimized={product.imageUrl.startsWith("/uploads/")}
                                                         onError={(e) => {
                                                             const target = e.currentTarget as HTMLImageElement;
@@ -1405,7 +1406,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                             let currentPrice = product.price;
                                                             if (cType === 'RESELLER' && product.dealerPrice != null) currentPrice = product.dealerPrice;
                                                             if (cType === 'WHOLESALE' && product.wholesalePrice != null) currentPrice = product.wholesalePrice;
-                                                            
+
                                                             cart.addItem({
                                                                 id: product.id,
                                                                 productId: product.id,
@@ -1451,7 +1452,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         >
                                             <ChevronLeft size={16} />
                                         </Button>
-                                        
+
                                         {Array.from({ length: totalPages }, (_, i) => i + 1)
                                             .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
                                             .map((p, index, array) => {
@@ -1527,7 +1528,7 @@ export const PosClient: FC<PosClientProps> = ({
                 </div>
 
                 {/* Cart Sidebar - Hidden on mobile, Right on Desktop */}
-                <div 
+                <div
                     className="hidden lg:flex h-full shrink-0 z-20 transition-all duration-200 bg-white dark:bg-[#18181b] shadow-[-4px_0_24px_rgba(0,0,0,0.08)] dark:shadow-[-4px_0_24px_rgba(0,0,0,0.3)] border-l border-gray-200 dark:border-gray-800 flex-col"
                     style={{ width: sidebarWidth === 'narrow' ? '30%' : sidebarWidth === 'wide' ? '50%' : '40%' }}
                 >
@@ -1648,12 +1649,12 @@ export const PosClient: FC<PosClientProps> = ({
 
                                                 if (e.key === "ArrowDown") {
                                                     e.preventDefault()
-                                                    setFocusedQuickSuggestionIndex(prev => 
+                                                    setFocusedQuickSuggestionIndex(prev =>
                                                         prev < quickSuggestions.length - 1 ? prev + 1 : 0
                                                     )
                                                 } else if (e.key === "ArrowUp") {
                                                     e.preventDefault()
-                                                    setFocusedQuickSuggestionIndex(prev => 
+                                                    setFocusedQuickSuggestionIndex(prev =>
                                                         prev > 0 ? prev - 1 : quickSuggestions.length - 1
                                                     )
                                                 } else if (e.key === "Enter") {
@@ -1681,7 +1682,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                         }}
                                                         className={cn(
                                                             "px-4 py-2.5 text-sm cursor-pointer select-none transition-colors text-left font-medium",
-                                                            idx === focusedQuickSuggestionIndex 
+                                                            idx === focusedQuickSuggestionIndex
                                                                 ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-semibold"
                                                                 : "text-slate-700 dark:text-slate-350 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-indigo-600 dark:hover:text-indigo-400"
                                                         )}
@@ -1960,7 +1961,7 @@ export const PosClient: FC<PosClientProps> = ({
                                             </Button>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="space-y-2 max-h-36 overflow-y-auto border border-dashed border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50/50">
                                         {quickBarcodes.length === 0 ? (
                                             <p className="text-xs text-muted-foreground text-center py-4 italic">Aucun code-barre. Cliquez sur Générer ou Ajouter.</p>
@@ -2053,7 +2054,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                     : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
                                             )}
                                         >
-                                            <Checkbox checked={quickIsFeatured} onCheckedChange={() => {}} className="pointer-events-none" />
+                                            <Checkbox checked={quickIsFeatured} onCheckedChange={() => { }} className="pointer-events-none" />
                                             <div className="space-y-0.5">
                                                 <p className="text-xs font-bold flex items-center gap-1.5">
                                                     <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" /> Produit Vedette
@@ -2071,7 +2072,7 @@ export const PosClient: FC<PosClientProps> = ({
                                                     : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
                                             )}
                                         >
-                                            <Checkbox checked={quickIsArchived} onCheckedChange={() => {}} className="pointer-events-none" />
+                                            <Checkbox checked={quickIsArchived} onCheckedChange={() => { }} className="pointer-events-none" />
                                             <div className="space-y-0.5">
                                                 <p className="text-xs font-bold flex items-center gap-1.5">
                                                     <Archive className="h-3.5 w-3.5 text-slate-500" /> Archiver le Produit
@@ -2196,7 +2197,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     <span className={cn(
                                         "text-lg font-black tracking-tight",
                                         selectedProductForInfo.stock > selectedProductForInfo.minStock ? "text-emerald-600 dark:text-emerald-400" :
-                                        selectedProductForInfo.stock > 0 ? "text-amber-500" : "text-rose-500"
+                                            selectedProductForInfo.stock > 0 ? "text-amber-500" : "text-rose-500"
                                     )}>
                                         {selectedProductForInfo.stock}
                                     </span>
@@ -2218,13 +2219,15 @@ export const PosClient: FC<PosClientProps> = ({
                         <div className="bg-slate-50 dark:bg-slate-900/30 rounded-lg border border-slate-100 dark:border-slate-800/50 overflow-hidden">
                             <div className="px-2.5 py-1.5 bg-slate-100/50 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800/40 flex justify-between items-center">
                                 <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grille Tarifaire (DZD)</span>
-                                {selectedProductForInfo.cost > 0 && (
-                                    <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500">
-                                        P.A: {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(selectedProductForInfo.cost)}
-                                    </span>
-                                )}
                             </div>
                             <div className="p-2 space-y-1.5 text-[11px]">
+                                {/* Prix d'Achat Row */}
+                                <div className="flex justify-between items-center py-1 px-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 font-black">
+                                    <span className="flex items-center gap-1">💰 Prix d'Achat (P.A / Coût PUMP)</span>
+                                    <span className="font-mono text-xs">
+                                        {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(selectedProductForInfo.cost || 0)} DA
+                                    </span>
+                                </div>
                                 <div className={cn(
                                     "flex justify-between items-center py-0.5 px-1.5 rounded",
                                     clientType === 'RETAIL' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-600 dark:text-slate-400"
@@ -2279,17 +2282,17 @@ export const PosClient: FC<PosClientProps> = ({
 
                         {/* Actions */}
                         <div className="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
+                            <Button
+                                variant="outline"
+                                size="sm"
                                 className="flex-1 h-8 text-[11px] rounded-lg border-slate-200 dark:border-slate-800"
                                 onClick={() => setSelectedProductForInfo(null)}
                             >
                                 {tCommon("close")}
                             </Button>
-                            <Button 
-                                variant="default" 
-                                size="sm" 
+                            <Button
+                                variant="default"
+                                size="sm"
                                 className="flex-1 h-8 text-[11px] rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold"
                                 disabled={blockNegativeStock && (selectedProductForInfo.stock - (activeSession?.items.find(item => item.productId === selectedProductForInfo.id)?.quantity || 0)) <= 0}
                                 onClick={() => {
@@ -2303,7 +2306,7 @@ export const PosClient: FC<PosClientProps> = ({
                                     let currentPrice = selectedProductForInfo.price;
                                     if (cType === 'RESELLER' && selectedProductForInfo.dealerPrice != null) currentPrice = selectedProductForInfo.dealerPrice;
                                     if (cType === 'WHOLESALE' && selectedProductForInfo.wholesalePrice != null) currentPrice = selectedProductForInfo.wholesalePrice;
-                                    
+
                                     cart.addItem({
                                         id: selectedProductForInfo.id,
                                         productId: selectedProductForInfo.id,

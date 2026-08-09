@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Landmark, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { Wallet, Landmark, ArrowDownToLine, ArrowUpFromLine, Eye } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";

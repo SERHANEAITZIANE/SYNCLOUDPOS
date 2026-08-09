@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getActiveTenantId } from "./get-active-tenant"
 import { revalidatePath } from "next/cache"
 import { logAudit } from "./audit-log"
+import { hasPermission } from "@/lib/rbac"
 
 export async function updateTenantSettings(data: {
     name: string; ownerName?: string; activity?: string; address?: string;
@@ -13,6 +14,9 @@ export async function updateTenantSettings(data: {
     blTemplate?: string;
     isElectronics?: boolean;
 }) {
+    if (!(await hasPermission("settings:update"))) {
+        return { error: "Access denied." }
+    }
     try {
         const tenantId = await getActiveTenantId();
 
@@ -47,7 +51,8 @@ export async function updateTenantSettings(data: {
                 headerText: data.headerText || null,
                 blTemplate: data.blTemplate || "standard",
                 isElectronics: data.isElectronics ?? false
-            }
+            },
+            select: { id: true, name: true }
         });
 
         revalidatePath("/dashboard")
@@ -72,6 +77,9 @@ export async function updateSystemSettings(data: {
     openaiApiKey?: string;
     anthropicApiKey?: string;
 }) {
+    if (!(await hasPermission("settings:update"))) {
+        return { error: "Access denied." }
+    }
     try {
         const tenantId = await getActiveTenantId();
 
@@ -93,8 +101,20 @@ export async function updateSystemSettings(data: {
             where: {
                 id: tenantId
             },
-            data: updateData
+            data: updateData,
+            select: {
+                id: true,
+                blTemplate: true,
+                posBlFormat: true,
+                posBlColumns: true,
+                aiProvider: true,
+                aiModel: true
+            }
         });
+
+        for (const secretKey of ["geminiApiKey", "openaiApiKey", "anthropicApiKey"]) {
+            if (secretKey in updateData) updateData[secretKey] = "[REDACTED]"
+        }
 
         revalidatePath("/dashboard")
         revalidatePath("/settings")
@@ -112,6 +132,9 @@ export async function updateLoyaltySettings(data: {
     loyaltyPointsPerDa: number
     loyaltyDaPerPoint: number
 }) {
+    if (!(await hasPermission("settings:update"))) {
+        return { error: "Access denied." }
+    }
     try {
         const tenantId = await getActiveTenantId()
         if (!tenantId) return { error: "Unauthorized or no active tenant selected." }

@@ -41,9 +41,32 @@ describe('Orders', () => {
     mockedDb.sequenceCounter.upsert.mockResolvedValue({ lastValue: 1 })
     mockedDb.treasuryAccount.findFirst.mockResolvedValue({ id: 'acc-1', balance: 1000 })
     mockedDb.treasuryAccount.update.mockResolvedValue({ id: 'acc-1', balance: 1200 })
-    mockedDb.tenant.findUnique.mockResolvedValue({ id: 'test-tenant-id', loyaltyPointsPerDa: 1 })
+    mockedDb.tenant.findUnique.mockResolvedValue({
+      id: 'test-tenant-id',
+      loyaltyPointsPerDa: 1,
+      loyaltyDaPerPoint: 100,
+      tvaEnabled: false,
+      posTimbreEnabled: false,
+      stampTaxEnabled: true,
+      posCashRounding: false,
+      posVendorRequired: false,
+    })
+    mockedDb.promotion.findMany.mockResolvedValue([])
     mockedDb.product.findMany.mockResolvedValue([
-      { id: 'prod-1', stock: 10, minStock: 2, storeProducts: [{ storeId: 'store-1', stock: 10, minStock: 2 }] }
+      {
+        id: 'prod-1',
+        price: 100,
+        dealerPrice: null,
+        wholesalePrice: null,
+        cost: 60,
+        tvaRate: 0,
+        categoryId: null,
+        isArchived: false,
+        isService: false,
+        stock: 10,
+        minStock: 2,
+        storeProducts: [{ storeId: 'store-1', stock: 10, minStock: 2 }]
+      }
     ])
 
     mockedDb.$transaction.mockImplementation(async (callback: any) => {

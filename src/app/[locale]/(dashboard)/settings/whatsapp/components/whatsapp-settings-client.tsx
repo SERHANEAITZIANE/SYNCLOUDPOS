@@ -22,13 +22,16 @@ export const WhatsappSettingsClient = ({ initialData }: { initialData: any }) =>
 
     const [qrCode, setQrCode] = useState<string | null>(null)
     const [status, setStatus] = useState<string>(initialData.whatsappStatus || "DISCONNECTED")
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
     useEffect(() => {
         if (mode === "AUTOMATIC") {
             fetchConnectionStatus()
-            // Poll every 5 seconds if waiting for QR or connecting
+            // Poll every 5 seconds if connecting or DISCONNECTED, but stop on ERROR or CONNECTED
             const interval = setInterval(() => {
-                if (status !== "CONNECTED") fetchConnectionStatus()
+                if (status !== "CONNECTED" && status !== "ERROR") {
+                    fetchConnectionStatus()
+                }
             }, 5000)
             return () => clearInterval(interval)
         }
@@ -39,8 +42,12 @@ export const WhatsappSettingsClient = ({ initialData }: { initialData: any }) =>
             const res = await checkWhatsappConnection()
             setStatus(res.status)
             if (res.qrcode) setQrCode(res.qrcode)
-        } catch (error) {
-            console.error(error)
+            if (res.message) setErrorMessage(res.message)
+            else setErrorMessage(null)
+        } catch (error: any) {
+            console.error("WhatsApp Connection Error:", error)
+            setStatus("ERROR")
+            setErrorMessage("Erreur de connexion au serveur WhatsApp. Vérifiez votre connexion internet.")
         }
     }
 
@@ -163,22 +170,34 @@ export const WhatsappSettingsClient = ({ initialData }: { initialData: any }) =>
                                     Déconnecter
                                 </Button>
                             </div>
-                        ) : status === "QR_READY" && qrCode ? (
-                            <div className="flex flex-col items-center justify-center space-y-4 py-6">
-                                <h3 className="text-lg font-medium">Scannez ce QR Code</h3>
-                                <p className="text-sm text-muted-foreground">Ouvrez WhatsApp sur votre téléphone {">"} Appareils Liés {">"} Connecter un appareil.</p>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border">
-                                    {qrCode.startsWith('data:image') ? (
-                                        <img src={qrCode} alt="WhatsApp QR Code" className="h-64 w-64" />
-                                    ) : (
-                                        <img src={`data:image/png;base64,${qrCode}`} alt="WhatsApp QR Code" className="h-64 w-64" />
-                                    )}
+                        ) : status === "ERROR" ? (
+                            <div className="flex flex-col items-center justify-center space-y-4 py-6 text-center">
+                                <div className="h-14 w-14 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+                                    <AlertCircle className="h-7 w-7 text-red-600 dark:text-red-400" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Serveur WhatsApp non disponible</h3>
+                                <p className="text-sm text-muted-foreground max-w-md">
+                                    {errorMessage || "Le serveur WhatsApp (Evolution API) n'est pas accessible. Vous pouvez utiliser le Mode Lien Direct (Gratuit) ci-dessus pour envoyer vos reçus sans serveur."}
+                                </p>
+                                <div className="flex flex-wrap gap-2 justify-center pt-2">
+                                    <Button variant="outline" size="sm" onClick={fetchConnectionStatus}>
+                                        Réessayer la connexion
+                                    </Button>
+                                    <Button size="sm" onClick={() => setMode("FREE")}>
+                                        Basculer sur Mode Lien Direct (Gratuit)
+                                    </Button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center space-y-4 py-6">
-                                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                                <p className="text-muted-foreground">Initialisation de la connexion WhatsApp...</p>
+                            <div className="flex flex-col items-center justify-center space-y-4 py-6 text-center">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <p className="text-muted-foreground font-medium">Initialisation de la connexion WhatsApp...</p>
+                                <p className="text-xs text-muted-foreground max-w-xs">
+                                    Si le serveur WhatsApp automatique ne répond pas, passez en mode lien direct pour envoyer sans attente.
+                                </p>
+                                <Button variant="outline" size="sm" onClick={() => setMode("FREE")}>
+                                    Utiliser le Mode Lien Direct (Gratuit)
+                                </Button>
                             </div>
                         )}
                     </CardContent>

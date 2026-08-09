@@ -21,7 +21,7 @@ async function main() {
         // Find if this is a customer loan explicitly
         const match = tx.description.match(/Prêt accordé au client:\s*(.+)/);
         if (match && match[1]) {
-            let customerName = match[1].trim();
+            const customerName = match[1].trim();
             if (customerName === "Inconnu") continue;
 
             const customer = await db.customer.findFirst({
@@ -56,7 +56,7 @@ async function main() {
         // Find if this is a supplier advance explicitly
         const match = tx.description.match(/Avance reçue du fournisseur:\s*(.+)/);
         if (match && match[1]) {
-            let supplierName = match[1].trim();
+            const supplierName = match[1].trim();
             if (supplierName === "Inconnu") continue;
 
             const supplier = await db.supplier.findFirst({

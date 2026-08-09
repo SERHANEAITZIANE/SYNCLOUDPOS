@@ -9,7 +9,31 @@ import { cookies } from "next/headers"
 export async function getStores() {
     const session = await auth()
     const tenantId = session?.user?.tenantId
+    const role = session?.user?.role
+    const isSuperadmin = session?.user?.isSuperadmin
+    const defaultStoreId = session?.user?.defaultStoreId
+
     if (!tenantId) return []
+
+    // Non-admin users (CASHIER, VENDEUR, MANAGER, STOCK_MANAGER, ACCOUNTANT)
+    // are strictly restricted to their assigned store(s)!
+    if (role !== "ADMIN" && !isSuperadmin) {
+        if (defaultStoreId) {
+            const allowedStoreIds = defaultStoreId.split(",").map(s => s.trim()).filter(Boolean)
+            if (allowedStoreIds.length > 0) {
+                const userStores = await db.store.findMany({
+                    where: { id: { in: allowedStoreIds }, tenantId },
+                    orderBy: { name: "asc" }
+                })
+                if (userStores.length > 0) return userStores
+            }
+        }
+        const firstStore = await db.store.findFirst({
+            where: { tenantId },
+            orderBy: { name: "asc" }
+        })
+        return firstStore ? [firstStore] : []
+    }
 
     return await db.store.findMany({
         where: { tenantId },
@@ -21,8 +45,24 @@ export async function setDefaultStore(storeId: string) {
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
+    const role = session?.user?.role
+    const isSuperadmin = session?.user?.isSuperadmin
 
     if (!userId || !tenantId) return { error: "Unauthorized" }
+
+    // Non-admin users can only switch to one of their assigned stores
+    if (role !== "ADMIN" && !isSuperadmin) {
+        const user = await db.user.findUnique({
+            where: { id: userId },
+            select: { defaultStoreId: true }
+        })
+        if (user?.defaultStoreId) {
+            const allowedStoreIds = user.defaultStoreId.split(",").map(s => s.trim()).filter(Boolean)
+            if (allowedStoreIds.length > 0 && !allowedStoreIds.includes(storeId)) {
+                return { error: "Accès refusé. Vous n'avez pas accès à ce magasin." }
+            }
+        }
+    }
 
     // verify store belongs to tenant
     const store = await db.store.findUnique({

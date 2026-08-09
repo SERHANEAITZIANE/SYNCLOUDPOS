@@ -324,6 +324,11 @@
     }
   },
   "Products": {
+    "toast": {
+      "created": "Product created successfully",
+      "updated": "Product updated successfully",
+      "deleted": "Product deleted successfully"
+    },
     "title": "Products",
     "subtitle": "Manage products for your store",
     "newProduct": "New Product",

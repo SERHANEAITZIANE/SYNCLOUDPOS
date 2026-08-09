@@ -459,7 +459,7 @@ export function AuditLogClient({ logs }: { logs: AuditLog[] }) {
                                 }
 
                                 // Structured View
-                                let changedFields: { key: string; beforeVal: any; afterVal: any }[] = [];
+                                const changedFields: { key: string; beforeVal: any; afterVal: any }[] = [];
                                 if (isUpdate && beforeObj && afterObj) {
                                     const allKeys = Array.from(new Set([...Object.keys(beforeObj), ...Object.keys(afterObj)]));
                                     allKeys.forEach((key) => {

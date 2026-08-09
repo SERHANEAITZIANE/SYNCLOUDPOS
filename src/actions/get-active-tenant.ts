@@ -2,10 +2,9 @@
 
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
-import { cookies } from "next/headers"
 
 export const getActiveTenantId = async (): Promise<string | null> => {
-    if (process.env.AUDIT_TENANT_ID) {
+    if (process.env.NODE_ENV === "test" && process.env.AUDIT_TENANT_ID) {
         return process.env.AUDIT_TENANT_ID
     }
 

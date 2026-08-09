@@ -1,88 +1,39 @@
-import { getTenantUsers } from "@/actions/get-tenant-users";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { AddUserModal } from "@/components/users/add-user-modal";
-import { EditUserModal } from "@/components/users/edit-user-modal";
-import { format } from "date-fns";
+import { getTenantUsers } from "@/actions/get-tenant-users"
+import { getStores } from "@/actions/stores"
+import { auth } from "@/auth"
+import { db } from "@/lib/db"
+import { redirect } from "next/navigation"
+import { UsersClient } from "@/components/users/users-client"
 
 export default async function UsersPage() {
-    const session = await auth();
-    if (session?.user?.role !== "ADMIN" && !session?.user?.isSuperadmin) {
-        redirect("/dashboard");
+    const session = await auth()
+    if (!session?.user?.id) redirect("/login")
+
+    if (session.user.role !== "ADMIN" && !session.user.isSuperadmin) {
+        redirect("/dashboard")
     }
 
-    const users = await getTenantUsers();
+    const [users, stores, tenant] = await Promise.all([
+        getTenantUsers(),
+        getStores(),
+        db.tenant.findUnique({
+            where: { id: session.user.tenantId },
+            select: { customRolePermissions: true }
+        })
+    ])
+
+    const initialPermissions = (tenant?.customRolePermissions as Record<string, any>) || {}
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Users</h2>
-                    <p className="text-muted-foreground">Manage your team and their roles.</p>
-                </div>
-                <AddUserModal />
-            </div>
-
-            <div className="border rounded-md">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Username (Identifiant)</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Joined</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.name}</TableCell>
-                                <TableCell className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
-                                    {user.username ? `@${user.username}` : "—"}
-                                </TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>
-                                    <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-                                        {user.role}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    {format(new Date(user.createdAt), "MMM d, yyyy")}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <EditUserModal user={{
-                                        id: user.id,
-                                        name: user.name,
-                                        email: user.email,
-                                        username: user.username || "",
-                                        role: user.role,
-                                        canEdit: user.canEdit,
-                                        canDelete: user.canDelete
-                                    }} />
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                        {users.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    No users found.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+        <div className="w-full flex-col">
+            <div className="flex-1 space-y-4 p-4 sm:p-8 pt-6 w-full">
+                <UsersClient
+                    users={users as any}
+                    stores={stores as any}
+                    currentStoreId={session.user.defaultStoreId}
+                    initialPermissions={initialPermissions}
+                />
             </div>
         </div>
-    );
+    )
 }

@@ -28,11 +28,19 @@ export default async function SessionDetailPage({ params }: Props) {
                 status={session.status}
                 items={session.items.map(i => ({
                     id: i.id,
+                    productId: i.productId,
                     productName: i.productName,
                     expectedQty: i.expectedQty,
                     actualQty: i.actualQty,
-                    difference: i.difference
+                    difference: i.difference,
+                    categoryId: (i as any).categoryId,
+                    categoryName: (i as any).categoryName,
+                    brandId: (i as any).brandId,
+                    brandName: (i as any).brandName,
+                    barcodes: (i as any).barcodes || []
                 }))}
+                categories={(session as any).categories || []}
+                brands={(session as any).brands || []}
             />
         </div>
     )

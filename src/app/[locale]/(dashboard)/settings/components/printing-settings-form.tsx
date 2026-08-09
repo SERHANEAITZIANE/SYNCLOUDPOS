@@ -257,7 +257,7 @@ export const PrintingSettingsForm = ({
         } catch { /* noop */ }
 
         loadPrintersList(false)
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [])  
 
     const btPrinter = useBluetoothPrinter()
 

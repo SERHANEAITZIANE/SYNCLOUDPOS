@@ -66,30 +66,30 @@ export const ProductSchema = z.object({
 })
 
 export const OrderSchema = z.object({
-    storeId: z.string(),
+    storeId: z.string().min(1),
     items: z.array(z.object({
-        productId: z.string(),
-        quantity: z.coerce.number(),
-        price: z.coerce.number(),
-        tvaRate: z.coerce.number().optional().default(0),
-        priceHt: z.coerce.number().optional(),
-        costAtSale: z.coerce.number().optional(),
-        serialNumber: z.string().optional(),
-    })),
-    subtotal: z.coerce.number().optional().default(0),
-    tvaAmount: z.coerce.number().optional().default(0),
-    stampTax: z.coerce.number().optional().default(0),
-    total: z.coerce.number(),
+        productId: z.string().min(1),
+        quantity: z.coerce.number().finite(),
+        price: z.coerce.number().nonnegative().finite(),
+        tvaRate: z.coerce.number().min(0).max(100).optional(),
+        priceHt: z.coerce.number().nonnegative().finite().optional(),
+        costAtSale: z.coerce.number().nonnegative().finite().optional(),
+        serialNumber: z.string().max(200).optional(),
+    })).min(1),
+    subtotal: z.coerce.number().nonnegative().finite().optional().default(0),
+    tvaAmount: z.coerce.number().nonnegative().finite().optional().default(0),
+    stampTax: z.coerce.number().nonnegative().finite().optional().default(0),
+    total: z.coerce.number().nonnegative().finite(),
     paymentMethod: z.enum(["CASH", "CARD", "TRANSFER", "CHECK", "TERM"]).optional().default("CASH"),
-    paidAmount: z.coerce.number().optional(),
-    customerId: z.string().optional().nullable(),
-    accountId: z.string().optional().nullable(),
-    userId: z.string().optional().nullable(),
+    paidAmount: z.coerce.number().nonnegative().finite().optional(),
+    customerId: z.string().min(1).optional().nullable(),
+    accountId: z.string().min(1).optional().nullable(),
+    userId: z.string().min(1).optional().nullable(),
     status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]).default("COMPLETED"),
-    originalOrderId: z.string().optional().nullable(),
-    discountAmount: z.coerce.number().optional().default(0),
-    loyaltyPointsUsed: z.coerce.number().optional().default(0),
-    idempotencyKey: z.string().optional().nullable()
+    originalOrderId: z.string().min(1).optional().nullable(),
+    discountAmount: z.coerce.number().nonnegative().finite().optional().default(0),
+    loyaltyPointsUsed: z.coerce.number().int().nonnegative().optional().default(0),
+    idempotencyKey: z.string().min(1).max(128).optional().nullable()
 })
 
 export const CustomerSchema = z.object({

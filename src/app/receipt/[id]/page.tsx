@@ -39,7 +39,6 @@ export default async function ReceiptPage({ params }: Props) {
     const customer = doc.customer
     const tenant = doc.tenant
     const total = Number(doc.total)
-    // @ts-ignore
     const paid = Number(doc.paidAmount ?? doc.total)
     const remaining = total - paid
 

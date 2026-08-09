@@ -160,15 +160,15 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
             <Separator />
 
             {/* Premium Filter Area */}
-            <div className="bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-800/60 shadow-xl space-y-5 mt-6 mb-4 relative overflow-hidden group">
+            <div className="bg-slate-50/80 dark:bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/60 shadow-sm dark:shadow-xl space-y-5 mt-6 mb-4 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                 
                 <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                            <Filter className="w-4 h-4 text-purple-400" />
+                            <Filter className="w-4 h-4 text-purple-500 dark:text-purple-400" />
                         </div>
-                        <h3 className="text-sm font-bold text-slate-200">
+                        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">
                             {appLocale === 'fr' ? 'Filtres de recherche avancés' : appLocale === 'ar' ? 'فلاتر البحث المتقدمة' : 'Advanced Search Filters'}
                         </h3>
                     </div>
@@ -177,7 +177,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
                             variant="outline" 
                             size="sm" 
                             onClick={handleReset}
-                            className="rounded-xl border-slate-800 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all gap-2 h-8"
+                            className="rounded-xl border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-700 transition-all gap-2 h-8"
                         >
                             <RefreshCw className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">{dict.resetFilters}</span>
@@ -187,14 +187,14 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 relative z-10">
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                             <Activity className="w-3 h-3" /> {dict.statusLabel}
                         </label>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-full bg-slate-950/50 border-slate-800 focus:border-purple-500/50 rounded-xl shadow-inner">
+                            <SelectTrigger className="w-full bg-white dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:border-purple-500/50 rounded-xl shadow-sm dark:shadow-inner">
                                 <SelectValue placeholder={dict.allStatuses} />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl border-slate-800 bg-slate-900">
+                            <SelectContent className="rounded-xl">
                                 <SelectItem value="ALL">{dict.allStatuses}</SelectItem>
                                 <SelectItem value="PENDING">PENDING</SelectItem>
                                 <SelectItem value="COMPLETED">COMPLETED</SelectItem>
@@ -204,7 +204,7 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                             <Users className="w-3 h-3" /> {dict.supplierLabel}
                         </label>
                         <SearchableSelect
@@ -213,15 +213,15 @@ export const PurchasesClient: React.FC<PurchasesClientProps> = ({ data, totalCou
                             onChange={setSupplierFilter}
                             placeholder={dict.allSuppliers}
                             searchPlaceholder="Rechercher un fournisseur..."
-                            className="bg-slate-950/50 border-slate-800 focus:border-purple-500/50 rounded-xl shadow-inner"
+                            className="bg-white dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:border-purple-500/50 rounded-xl shadow-sm dark:shadow-inner"
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                             <CalendarIcon className="w-3 h-3" /> {dict.dateLabel}
                         </label>
-                        <div className="bg-slate-950/50 rounded-xl border border-slate-800 focus-within:border-purple-500/50 transition-all shadow-inner w-full">
+                        <div className="bg-white dark:bg-slate-950/50 rounded-xl border border-slate-200 dark:border-slate-800 focus-within:border-purple-500/50 transition-all shadow-sm dark:shadow-inner w-full">
                             <DatePickerWithRange
                                 date={dateRange}
                                 setDate={setDateRange}

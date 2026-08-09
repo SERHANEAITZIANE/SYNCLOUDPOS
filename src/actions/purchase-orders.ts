@@ -201,8 +201,8 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
-                            quantity: item.quantity,
-                            costPrice: item.costPrice,
+                            quantity: Number(item.quantity) || 0,
+                            costPrice: Number(item.costPrice) || 0,
                             tvaRate: item.tvaRate ?? 19,
                             serialNumber: item.serialNumber ?? null
                         }))
@@ -427,8 +427,8 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
-                            quantity: item.quantity,
-                            costPrice: item.costPrice,
+                            quantity: Number(item.quantity) || 0,
+                            costPrice: Number(item.costPrice) || 0,
                             tvaRate: item.tvaRate ?? 19,
                             serialNumber: item.serialNumber ?? null
                         }))
@@ -834,7 +834,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                     where: { referenceId: id, source: "PURCHASE", tenantId }
                 })
                 const alreadyPaid = prevPayments.reduce((sum, p) => sum + Number(p.amount), 0)
-                const balanceDecrement = total
+                const balanceDecrement = total - alreadyPaid
 
                 await (tx as any).supplier.update({
                     where: { id: order.supplierId },
