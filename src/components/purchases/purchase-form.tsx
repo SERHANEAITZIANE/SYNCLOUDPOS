@@ -52,17 +52,17 @@ const formSchema = z.object({
     createdAt: z.string().optional(),
     items: z.array(z.object({
         productId: z.string().min(1, "Produit requis"),
-        // "" is allowed only as a transient value while a field is being retyped
-        // (a number input reports "" for a lone "-", which is what makes negative
-        // entry possible); toNum() coerces it to 0 before submit.
-        // Input and output types are deliberately identical here — z.preprocess made
-        // Zod's input type `unknown`, which diverged from z.infer and broke the
-        // useForm/zodResolver generics at every form.control site in this file.
-        quantity: z.union([z.number().finite("Quantité invalide"), z.literal("")]),
-        costPrice: z.union([
-            z.number().min(0, "Le prix d'achat ne peut pas être négatif"),
-            z.literal(""),
+        // 0 and negative quantities are deliberately allowed; "" is the transient value while retyping.
+        quantity: z.union([
+            z.number({ error: "Quantité invalide" }).finite("Quantité invalide"),
+            z.literal("")
         ]),
+        costPrice: z.union([
+            z.number({ error: "Prix d'achat invalide" }),
+            z.literal("")
+        ]).refine(val => val !== "" && typeof val === "number" && !isNaN(val) && val >= 0, {
+            message: "Le prix d'achat ne peut pas être négatif"
+        }),
         tvaRate: z.number().optional(),
         serialNumber: z.string().optional()
     })).min(1, "Ajoutez au moins un article"),
@@ -562,7 +562,8 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                 failedRows.push({ line: i + 1, content: row, reason: "Nom du produit ou code-barre manquant" })
                 continue
             }
-            if (isNaN(qty) || qty < 0) {
+            // 0 and negative quantities are legal (stock-neutral line / purchase correction) — only reject non-numbers.
+            if (!Number.isFinite(qty)) {
                 failedRows.push({ line: i + 1, content: row, reason: `Quantité invalide (${qty})` })
                 continue
             }
@@ -761,20 +762,32 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             items: "Articles",
             status: "Statut"
         }
-        const errorMessages = Object.entries(errors)
-            .map(([field, err]: [string, any]) => {
-                const label = fieldLabels[field] || field
-                if (Array.isArray(err)) {
-                    return "un ou plusieurs articles invalides"
-                }
-                const msg = err.message || "requis ou invalide"
-                return `${label} (${msg})`
-            })
-            .filter(Boolean)
+
+        const errorMessages: string[] = []
+
+        if (errors.items) {
+            if (Array.isArray(errors.items)) {
+                errors.items.forEach((itemErr: any, idx: number) => {
+                    if (!itemErr) return
+                    if (itemErr.productId) errorMessages.push(`Ligne ${idx + 1} : Produit requis`)
+                    if (itemErr.quantity) errorMessages.push(`Ligne ${idx + 1} : ${itemErr.quantity.message || "Quantité invalide"}`)
+                    if (itemErr.costPrice) errorMessages.push(`Ligne ${idx + 1} : ${itemErr.costPrice.message || "Prix d'achat invalide"}`)
+                })
+            } else if (errors.items.message) {
+                errorMessages.push(`Articles : ${errors.items.message}`)
+            }
+        }
+
+        Object.entries(errors).forEach(([field, err]: [string, any]) => {
+            if (field === "items") return
+            const label = fieldLabels[field] || field
+            const msg = err?.message || "requis ou invalide"
+            errorMessages.push(`${label} (${msg})`)
+        })
 
         if (errorMessages.length > 0) {
-            toast.error(`Champs invalides : ${errorMessages.slice(0, 3).join(", ")}`, {
-                duration: 5000
+            toast.error(`Validation échouée : ${errorMessages.slice(0, 3).join(" • ")}`, {
+                duration: 6000
             })
         }
     }
@@ -1233,7 +1246,13 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                 <ProductSearchCombobox
                                                                                     products={localProducts}
                                                                                     value={f.value}
-                                                                                    onChange={f.onChange}
+                                                                                    onChange={val => {
+                                                                                        f.onChange(val);
+                                                                                        const currQty = form.getValues(`items.${index}.quantity`);
+                                                                                        if (currQty === "" || currQty === undefined || currQty === null) {
+                                                                                            form.setValue(`items.${index}.quantity`, 1);
+                                                                                        }
+                                                                                    }}
                                                                                     disabled={loading || !canEdit}
                                                                                     placeholder="Rechercher par nom, code, code-barre..."
                                                                                     priceField="cost"
@@ -1288,29 +1307,26 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                         <FormControl>
                                                                             <Input 
                                                                                 type="number" 
+                                                                                step="any"
                                                                                 disabled={loading || !canEdit} 
                                                                                 className="font-bold text-sm h-9 text-center text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl"
                                                                                 ref={f.ref}
                                                                                 name={f.name}
                                                                                 value={f.value}
-                                                                                onBlur={(e) => {
-                                                                                    if (e.target.value === "") {
-                                                                                        f.onChange(0);
-                                                                                    }
-                                                                                    f.onBlur();
-                                                                                }}
+                                                                                onBlur={f.onBlur}
                                                                                 onChange={e => {
                                                                                     const val = e.target.value;
                                                                                     if (val === "") {
-                                                                                        // Allow empty field while typing (also covers a lone "-") — commit 0 on blur
                                                                                         f.onChange("");
                                                                                         return;
                                                                                     }
-                                                                                    const num = e.target.valueAsNumber;
-                                                                                    f.onChange(isNaN(num) ? 0 : num);
+                                                                                    const cleanVal = val.replace(',', '.');
+                                                                                    const num = parseFloat(cleanVal);
+                                                                                    f.onChange(isNaN(num) ? "" : num);
                                                                                 }}
                                                                             />
                                                                         </FormControl>
+                                                                        <FormMessage />
                                                                     </FormItem>
                                                                 )} />
                                                             </div>
@@ -1326,28 +1342,23 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                             <div className="relative flex items-center w-full">
                                                                                 <Input 
                                                                                     type="number" 
-                                                                                    step="0.01" 
+                                                                                    step="any" 
                                                                                     min={0} 
                                                                                     disabled={loading || !canEdit}
                                                                                     className="font-bold text-sm h-9 pr-9 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-800 focus-visible:ring-emerald-500 rounded-xl" 
                                                                                     ref={f.ref}
                                                                                     name={f.name}
                                                                                     value={f.value}
-                                                                                    onBlur={(e) => {
-                                                                                        if (e.target.value === "") {
-                                                                                            f.onChange(0);
-                                                                                        }
-                                                                                        f.onBlur();
-                                                                                    }}
+                                                                                    onBlur={f.onBlur}
                                                                                     onChange={e => {
                                                                                         const val = e.target.value;
                                                                                         if (val === "") {
-                                                                                            // Allow empty field while typing — commit 0 on blur
                                                                                             f.onChange("");
                                                                                             return;
                                                                                         }
-                                                                                        const num = e.target.valueAsNumber;
-                                                                                        f.onChange(isNaN(num) ? 0 : num);
+                                                                                        const cleanVal = val.replace(',', '.');
+                                                                                        const num = parseFloat(cleanVal);
+                                                                                        f.onChange(isNaN(num) ? "" : num);
                                                                                     }}
                                                                                 />
                                                                                 {watchItems[index]?.productId && (
@@ -1362,6 +1373,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                                                                                 )}
                                                                             </div>
                                                                         </FormControl>
+                                                                        <FormMessage />
                                                                     </FormItem>
                                                                 )} />
                                                             </div>

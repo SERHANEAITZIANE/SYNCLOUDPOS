@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { checkSubscription } from "@/lib/subscription"
 import { logAudit } from "./audit-log"
 import cacheMonitor from "@/lib/cache-monitor"
+import { toQty } from "@/lib/utils"
 import { SalesOrderType, SalesOrderStatus, PaymentMethod } from "@prisma/client"
 
 // Helper: generate receipt number
@@ -90,7 +91,7 @@ export const createSalesOrder = async (data: {
                     items: {
                         create: data.items.map(item => ({
                             productId: item.productId,
-                            quantity: item.quantity,
+                            quantity: toQty(item.quantity),
                             unitPrice: item.unitPrice,
                             tvaRate: item.tvaRate,
                             priceHt: item.priceHt,
@@ -103,6 +104,10 @@ export const createSalesOrder = async (data: {
 
             const isCreditNote = data.type === "CREDIT_NOTE"
             const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+            // Zero-quantity lines are stored but stay stock-neutral: no stock change, no movement.
+            const stockItems = data.items
+                .map(item => ({ ...item, quantity: toQty(item.quantity) }))
+                .filter(item => item.quantity !== 0);
 
             // Fetch stocks before updates to record stockBefore and stockAfter
             const productIds = data.items.map(i => i.productId);
@@ -122,7 +127,7 @@ export const createSalesOrder = async (data: {
             if (isCreditNote && STOCK_STATUSES.includes(data.status)) {
                 if (storeId) {
                     await Promise.all(
-                        data.items.map(item =>
+                        stockItems.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
                                 data: { stock: { increment: item.quantity } }
@@ -132,7 +137,7 @@ export const createSalesOrder = async (data: {
                 }
 
                 await Promise.all(
-                    data.items.map(item =>
+                    stockItems.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
                             data: { stock: { increment: item.quantity } }
@@ -142,14 +147,14 @@ export const createSalesOrder = async (data: {
 
                 // Track running stock per product to handle duplicates
                 const runningStockMapCN = new Map<string, number>();
-                data.items.forEach(item => {
+                stockItems.forEach(item => {
                     if (!runningStockMapCN.has(item.productId)) {
                         runningStockMapCN.set(item.productId, stockMap.get(item.productId) || 0);
                     }
                 });
 
                 await tx.stockMovement.createMany({
-                    data: data.items.map(item => {
+                    data: stockItems.map(item => {
                         const stockBefore = runningStockMapCN.get(item.productId) || 0;
                         const stockAfter = stockBefore + item.quantity;
                         runningStockMapCN.set(item.productId, stockAfter);
@@ -179,7 +184,7 @@ export const createSalesOrder = async (data: {
             if (shouldDeductStock) {
                 if (storeId) {
                     await Promise.all(
-                        data.items.map(item =>
+                        stockItems.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
                                 data: { stock: { decrement: item.quantity } }
@@ -189,7 +194,7 @@ export const createSalesOrder = async (data: {
                 }
 
                 await Promise.all(
-                    data.items.map(item =>
+                    stockItems.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
                             data: { stock: { decrement: item.quantity } }
@@ -199,14 +204,14 @@ export const createSalesOrder = async (data: {
 
                 // Track running stock per product to handle duplicates
                 const runningStockMapSale = new Map<string, number>();
-                data.items.forEach(item => {
+                stockItems.forEach(item => {
                     if (!runningStockMapSale.has(item.productId)) {
                         runningStockMapSale.set(item.productId, stockMap.get(item.productId) || 0);
                     }
                 });
 
                 await tx.stockMovement.createMany({
-                    data: data.items.map(item => {
+                    data: stockItems.map(item => {
                         const stockBefore = runningStockMapSale.get(item.productId) || 0;
                         const stockAfter = stockBefore - item.quantity;
                         runningStockMapSale.set(item.productId, stockAfter);
@@ -502,7 +507,7 @@ export const updateSalesOrder = async (id: string, data: {
                 items: {
                     create: data.items.map(item => ({
                         productId: item.productId,
-                        quantity: item.quantity,
+                        quantity: toQty(item.quantity),
                         unitPrice: item.unitPrice,
                         tvaRate: item.tvaRate,
                         priceHt: item.priceHt,
@@ -589,9 +594,12 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                     ];
                 }));
 
+                // Zero-quantity lines never touch stock.
+                const stockItems = salesOrder.items.filter(item => item.quantity !== 0);
+
                 if (storeId) {
                     await Promise.all(
-                        salesOrder.items.map(item =>
+                        stockItems.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
                                 data: { stock: isCreditNote ? { increment: item.quantity } : { decrement: item.quantity } }
@@ -601,7 +609,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                 }
 
                 await Promise.all(
-                    salesOrder.items.map(item =>
+                    stockItems.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
                             data: { stock: isCreditNote ? { increment: item.quantity } : { decrement: item.quantity } }
@@ -611,14 +619,14 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
 
                 // Track running stock per product to handle duplicates
                 const runningStockMapStatus = new Map<string, number>();
-                salesOrder.items.forEach(item => {
+                stockItems.forEach(item => {
                     if (!runningStockMapStatus.has(item.productId)) {
                         runningStockMapStatus.set(item.productId, stockMap.get(item.productId) || 0);
                     }
                 });
 
                 await tx.stockMovement.createMany({
-                    data: salesOrder.items.map(item => {
+                    data: stockItems.map(item => {
                         const stockBefore = runningStockMapStatus.get(item.productId) || 0;
                         const change = isCreditNote ? item.quantity : -item.quantity;
                         const stockAfter = stockBefore + change;
@@ -642,9 +650,12 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
             // Restore stock if cancelling
             if (hadStock && newStatus === "CANCELLED" && (isStockType || isCreditNote)) {
                 const storeId = (await tx.store.findFirst({ where: { tenantId } }))?.id;
+                // Zero-quantity lines never touched stock, so there is nothing to restore.
+                const stockItems = salesOrder.items.filter(item => item.quantity !== 0);
+
                 if (storeId) {
                     await Promise.all(
-                        salesOrder.items.map(item =>
+                        stockItems.map(item =>
                             tx.storeProduct.updateMany({
                                 where: { storeId, productId: item.productId },
                                 data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
@@ -654,7 +665,7 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
                 }
 
                 await Promise.all(
-                    salesOrder.items.map(item =>
+                    stockItems.map(item =>
                         tx.product.updateMany({
                             where: { id: item.productId },
                             data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
@@ -863,17 +874,20 @@ export const deleteSalesOrder = async (id: string) => {
                 
                 await Promise.all(
                     order.items.map(async (item) => {
-                        if (storeId) {
-                            await tx.storeProduct.updateMany({
-                                where: { storeId, productId: item.productId },
+                        // Zero-quantity lines never touched stock, so there is nothing to restore.
+                        if (item.quantity !== 0) {
+                            if (storeId) {
+                                await tx.storeProduct.updateMany({
+                                    where: { storeId, productId: item.productId },
+                                    data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
+                                });
+                            }
+                            await tx.product.updateMany({
+                                where: { id: item.productId },
                                 data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
                             });
                         }
-                        await tx.product.updateMany({
-                            where: { id: item.productId },
-                            data: { stock: isCreditNote ? { decrement: item.quantity } : { increment: item.quantity } }
-                        });
-                        
+
                         // Delete related stock movements
                         await tx.stockMovement.deleteMany({
                             where: { referenceId: { in: linkedOrderIds }, productId: item.productId }

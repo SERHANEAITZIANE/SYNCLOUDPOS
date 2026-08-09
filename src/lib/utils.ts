@@ -10,6 +10,19 @@ export const formatter = new Intl.NumberFormat("en-US", {
   currency: "DZD",
 })
 
+/**
+ * Normalise a line quantity for persistence.
+ *
+ * Quantity columns (`PurchaseOrderItem`, `SalesOrderItem`, `OrderItem`, `StockMovement`) are `Int`,
+ * so a fractional value would abort the whole Prisma transaction. Zero and negative quantities are
+ * deliberately allowed through untouched — a 0 line is kept as a stock-neutral placeholder and a
+ * negative line is a genuine correction that moves stock the other way.
+ */
+export const toQty = (value: unknown): number => {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.round(n) : 0
+}
+
 export const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("fr-FR", {
     minimumFractionDigits: 2,

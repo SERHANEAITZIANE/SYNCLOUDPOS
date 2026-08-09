@@ -753,27 +753,24 @@ export const SalesOrderForm: React.FC<SalesOrderFormProps> = ({ initialData, cus
                                                 <FormField control={form.control} name={`items.${index}.quantity`} render={({ field: f }) => (
                                                     <FormItem>
                                                         <FormControl>
-                                                            <Input type="number" disabled={loading || !canEdit} className="text-center font-bold"
+                                                            <Input type="number" step="any" disabled={loading || !canEdit} className="text-center font-bold"
                                                                 ref={f.ref}
                                                                 name={f.name}
                                                                 value={f.value}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value === "") {
-                                                                        f.onChange(0);
-                                                                    }
-                                                                    f.onBlur();
-                                                                }}
+                                                                onBlur={f.onBlur}
                                                                 onChange={e => {
                                                                     const val = e.target.value;
                                                                     if (val === "") {
-                                                                        // Allow empty field while typing — commit 0 on blur
+                                                                        // Allow empty field while typing — normalised to 0 on submit
                                                                         f.onChange("");
                                                                         return;
                                                                     }
-                                                                    const num = e.target.valueAsNumber;
-                                                                    f.onChange(isNaN(num) ? 0 : num);
+                                                                    const cleanVal = val.replace(',', '.');
+                                                                    const num = parseFloat(cleanVal);
+                                                                    f.onChange(isNaN(num) ? "" : num);
                                                                 }} />
                                                         </FormControl>
+                                                        <FormMessage />
                                                     </FormItem>
                                                 )} />
                                             </div>

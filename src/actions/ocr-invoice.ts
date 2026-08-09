@@ -208,7 +208,8 @@ Rules:
 
         const items: OcrInvoiceItem[] = (parsed.items || []).map((item: any) => ({
             name: String(item.name || ""),
-            quantity: Math.max(1, Math.round(Number(item.quantity) || 1)),
+            // Falls back to 1 when the OCR read nothing, but a genuinely read 0 or negative is kept as-is.
+            quantity: Math.round(Number(item.quantity) || 1),
             unitPrice: Number(item.unitPrice) || 0,
             totalLine: Number(item.totalLine) || 0,
         })).filter((i: OcrInvoiceItem) => i.name.length > 0)

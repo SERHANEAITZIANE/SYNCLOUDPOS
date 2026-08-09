@@ -104,7 +104,7 @@ const CartItemRow = ({ item, index, isNewest, isElectronics, activeSession, hand
 
     const handleQtyBlur = () => {
         const parsed = parseFloat(qtyValue)
-        if (isNaN(parsed) || parsed === 0) {
+        if (isNaN(parsed)) {
             setQtyValue(item.quantity.toString())
         }
     }

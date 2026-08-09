@@ -11,6 +11,7 @@ import { logAudit } from "./audit-log"
 import cacheMonitor from "@/lib/cache-monitor"
 import { hasPermission } from "@/lib/rbac"
 import { applyPromotionsToCart } from "@/lib/promotions-engine"
+import { toQty } from "@/lib/utils"
 
 // z.input, not z.infer: callers pass pre-validation input, where fields carrying a
 // .default() (subtotal, tvaAmount, stampTax, paymentMethod, status, …) are optional.
@@ -290,6 +291,9 @@ export const createOrder = async (values: z.input<typeof OrderSchema>) => {
                     // 1. Revert Old Stock (Parallelized)
                     await Promise.all(
                         oldSalesOrder.items.map(async (item: any) => {
+                            // A zero-quantity line never touched stock, so there is nothing to revert.
+                            if (item.quantity === 0) return;
+
                             const stockStoreId = oldSalesOrder.storeId || (await tx.store.findFirst({ where: { tenantId } }))?.id;
                             const pBefore = await tx.product.findFirst({ where: { id: item.productId, tenantId }, include: { storeProducts: true } });
                             const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
@@ -439,7 +443,7 @@ export const createOrder = async (values: z.input<typeof OrderSchema>) => {
                     items: {
                         create: items.map((item) => ({
                             productId: item.productId,
-                            quantity: item.quantity,
+                            quantity: toQty(item.quantity),
                             price: item.price,
                             priceHt: item.priceHt ?? item.price,
                             costAtSale: item.costAtSale ?? null,
@@ -463,7 +467,7 @@ export const createOrder = async (values: z.input<typeof OrderSchema>) => {
                         items: {
                             create: items.map(item => ({
                                 productId: item.productId,
-                                quantity: item.quantity,
+                                quantity: toQty(item.quantity),
                                 unitPrice: item.price,
                                 priceHt: item.priceHt ?? item.price,
                                 tvaRate: item.tvaRate ?? 19,
@@ -490,7 +494,7 @@ export const createOrder = async (values: z.input<typeof OrderSchema>) => {
                         items: {
                             create: items.map(item => ({
                                 productId: item.productId,
-                                quantity: item.quantity,
+                                quantity: toQty(item.quantity),
                                 unitPrice: item.price,
                                 priceHt: item.priceHt ?? item.price,
                                 tvaRate: item.tvaRate ?? 19,
@@ -523,7 +527,10 @@ export const createOrder = async (values: z.input<typeof OrderSchema>) => {
                 ];
             }));
 
-            const physicalItems = items.filter((item: any) => !stockMap.get(item.productId)?.isService);
+            // Services never move stock, and a zero-quantity line is a stock-neutral placeholder.
+            const physicalItems = items
+                .map((item: any) => ({ ...item, quantity: toQty(item.quantity) }))
+                .filter((item: any) => !stockMap.get(item.productId)?.isService && item.quantity !== 0);
 
             // Step 2: Ensure StoreProduct records exist for physical items
             const missingStoreProducts = physicalItems.filter((item: any) => !stockMap.get(item.productId)?.hasStoreProduct);

@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
+import { toQty } from "@/lib/utils"
 import { PurchaseOrderStatus } from "@prisma/client"
 
 interface PurchaseOrderItemData {
@@ -199,13 +200,15 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                     imageUrl3: data.imageUrl3 || undefined,
                     createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
                     items: {
-                        create: data.items.map(item => ({
-                            productId: item.productId,
-                            quantity: Number(item.quantity) || 0,
-                            costPrice: Number(item.costPrice) || 0,
-                            tvaRate: item.tvaRate ?? 19,
-                            serialNumber: item.serialNumber ?? null
-                        }))
+                        create: data.items
+                            .filter(item => Boolean(item.productId))
+                            .map(item => ({
+                                productId: item.productId,
+                                quantity: toQty(item.quantity),
+                                costPrice: Number(item.costPrice) || 0,
+                                tvaRate: item.tvaRate ?? 19,
+                                serialNumber: item.serialNumber ?? null
+                            }))
                     }
                 },
                 include: { items: true }
@@ -217,35 +220,41 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
                 await Promise.all(
                     data.items.map(async (item: any) => {
+                        const itemQty = toQty(item.quantity);
+                        const itemCost = Number(item.costPrice) || 0;
+                        // A zero-quantity line is stored but stays stock-neutral: no movement, no CUMP change.
+                        if (itemQty === 0) return;
+
                         const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
-                        const spBefore = pBefore?.storeProducts.find(sp => sp.storeId === stockStoreId);
-                        
-                        const globalStockBefore = pBefore?.stock || 0;
-                        const globalStockAfter = globalStockBefore + item.quantity;
+                        if (!pBefore) return;
+                        const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId);
+
+                        const globalStockBefore = pBefore.stock || 0;
+                        const globalStockAfter = globalStockBefore + itemQty;
 
                         // CUMP calculation (Weighted Average Cost / PMP)
-                        const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore?.cost || 0) : 0;
-                        const newPurchaseValue = item.quantity * Number(item.costPrice);
-                        const newCump = globalStockAfter > 0 
-                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
-                            : Number(item.costPrice);
+                        const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost || 0) : 0;
+                        const newPurchaseValue = itemQty * itemCost;
+                        const newCump = globalStockAfter > 0
+                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter
+                            : (Number(pBefore.cost) || itemCost);
 
                         const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore;
-                        const stockAfter = stockBefore + item.quantity;
+                        const stockAfter = stockBefore + itemQty;
 
                         await tx.product.update({
                             where: { id: item.productId },
                             data: { 
                                 cost: newCump,
-                                stock: { increment: item.quantity }
+                                stock: { increment: itemQty }
                             }
                         });
 
                         if (stockStoreId) {
                             await tx.storeProduct.upsert({
                                 where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                                update: { stock: { increment: item.quantity } },
-                                create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
+                                update: { stock: { increment: itemQty } },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: itemQty, minStock: spBefore?.minStock || 10 }
                             });
                         }
 
@@ -253,11 +262,11 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                             data: {
                                 productId: item.productId,
                                 type: "PURCHASE",
-                                quantity: item.quantity,
+                                quantity: itemQty,
                                 stockBefore,
                                 stockAfter,
                                 referenceId: purchaseOrder.id,
-                                reason: `Achat Fournisseur N° ${purchaseOrder.purchaseNumber || purchaseOrder.id.slice(-6)}: CUMP=${newCump.toFixed(2)}`,
+                                reason: `Achat N° ${purchaseNumber}: CUMP=${newCump.toFixed(2)}`,
                                 tenantId,
                                 createdAt: data.createdAt ? new Date(data.createdAt) : undefined
                             }
@@ -387,6 +396,9 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                 })
 
                 for (const oldItem of oldItems) {
+                    // A zero line never touched stock, so there is nothing to revert.
+                    if (oldItem.quantity === 0) continue
+
                     await tx.product.update({
                         where: { id: oldItem.productId },
                         data: { stock: { decrement: oldItem.quantity } }
@@ -403,7 +415,7 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 
             // Delete existing old items and their stock movements to prevent history duplication
             await tx.purchaseOrderItem.deleteMany({ where: { purchaseOrderId: id } })
-            await tx.stockMovement.deleteMany({ where: { referenceId: id } })
+            await tx.stockMovement.deleteMany({ where: { referenceId: id, tenantId } })
 
             let purchaseNumber = existing.purchaseNumber
             if (!purchaseNumber) {
@@ -425,13 +437,15 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     imageUrl3: data.imageUrl3 || undefined,
                     createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
                     items: {
-                        create: data.items.map(item => ({
-                            productId: item.productId,
-                            quantity: Number(item.quantity) || 0,
-                            costPrice: Number(item.costPrice) || 0,
-                            tvaRate: item.tvaRate ?? 19,
-                            serialNumber: item.serialNumber ?? null
-                        }))
+                        create: data.items
+                            .filter(item => Boolean(item.productId))
+                            .map(item => ({
+                                productId: item.productId,
+                                quantity: toQty(item.quantity),
+                                costPrice: Number(item.costPrice) || 0,
+                                tvaRate: item.tvaRate ?? 19,
+                                serialNumber: item.serialNumber ?? null
+                            }))
                     }
                 }
             })
@@ -454,43 +468,48 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
             if (isStockStatus) {
                 // Apply new stock additions and recalculate CUMP/PMP
                 for (const item of data.items) {
+                    const itemQty = toQty(item.quantity);
+                    const itemCost = Number(item.costPrice) || 0;
+                    // A zero-quantity line is stored but stays stock-neutral: no movement, no CUMP change.
+                    if (itemQty === 0) continue
+
                     const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } })
                     if (!pBefore) continue
 
                     const globalStockBefore = pBefore.stock || 0
-                    const globalStockAfter = globalStockBefore + item.quantity
+                    const globalStockAfter = globalStockBefore + itemQty
 
                     // CUMP calculation (Weighted Average Cost)
                     const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0
-                    const newPurchaseValue = item.quantity * Number(item.costPrice)
-                    const newCump = globalStockAfter > 0 
-                        ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
-                        : Number(item.costPrice)
+                    const newPurchaseValue = itemQty * itemCost
+                    const newCump = globalStockAfter > 0
+                        ? (oldTotalValue + newPurchaseValue) / globalStockAfter
+                        : (Number(pBefore.cost) || itemCost)
 
                     await tx.product.update({
                         where: { id: item.productId },
                         data: {
                             cost: newCump,
-                            stock: { increment: item.quantity }
+                            stock: { increment: itemQty }
                         }
                     })
 
                     if (stockStoreId) {
                         const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId)
                         const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore
-                        const stockAfter = stockBefore + item.quantity
+                        const stockAfter = stockBefore + itemQty
 
                         await tx.storeProduct.upsert({
                             where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                            update: { stock: { increment: item.quantity } },
-                            create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
+                            update: { stock: { increment: itemQty } },
+                            create: { storeId: stockStoreId, productId: item.productId, stock: itemQty, minStock: spBefore?.minStock || 10 }
                         })
 
                         await tx.stockMovement.create({
                             data: {
                                 productId: item.productId,
                                 type: "PURCHASE",
-                                quantity: item.quantity,
+                                quantity: itemQty,
                                 stockBefore,
                                 stockAfter,
                                 referenceId: id,
@@ -726,36 +745,40 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
                 await Promise.all(
                     order.items.map(async (item) => {
+                        const itemQty = toQty(item.quantity);
+                        // A zero-quantity line is stored but stays stock-neutral: no movement, no CUMP change.
+                        if (itemQty === 0) return;
+
                         const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
                         if (!pBefore) return;
 
                         const spBefore = pBefore.storeProducts.find(sp => sp.storeId === stockStoreId);
                         const globalStockBefore = pBefore.stock || 0;
-                        const globalStockAfter = globalStockBefore + item.quantity;
+                        const globalStockAfter = globalStockBefore + itemQty;
 
                         const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore;
-                        const stockAfter = stockBefore + item.quantity;
+                        const stockAfter = stockBefore + itemQty;
 
                         // CUMP calculation (Weighted Average Cost)
                         const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0;
-                        const newPurchaseValue = item.quantity * Number(item.costPrice);
-                        const newCump = globalStockAfter > 0 
-                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter 
-                            : Number(item.costPrice);
+                        const newPurchaseValue = itemQty * Number(item.costPrice);
+                        const newCump = globalStockAfter > 0
+                            ? (oldTotalValue + newPurchaseValue) / globalStockAfter
+                            : (Number(pBefore.cost) || Number(item.costPrice));
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { 
+                            data: {
                                 cost: newCump,
-                                stock: { increment: item.quantity }
+                                stock: { increment: itemQty }
                             }
                         });
 
                         if (stockStoreId) {
                             await tx.storeProduct.upsert({
                                 where: { storeId_productId: { storeId: stockStoreId, productId: item.productId } },
-                                update: { stock: { increment: item.quantity } },
-                                create: { storeId: stockStoreId, productId: item.productId, stock: item.quantity, minStock: spBefore?.minStock || 10 }
+                                update: { stock: { increment: itemQty } },
+                                create: { storeId: stockStoreId, productId: item.productId, stock: itemQty, minStock: spBefore?.minStock || 10 }
                             });
                         }
 
@@ -763,7 +786,7 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                             data: {
                                 productId: item.productId,
                                 type: "PURCHASE",
-                                quantity: item.quantity,
+                                quantity: itemQty,
                                 stockBefore,
                                 stockAfter,
                                 referenceId: order.id,
@@ -781,10 +804,14 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
                 await Promise.all(
                     order.items.map(async (item: any) => {
+                        const itemQty = toQty(item.quantity);
+                        // Nothing was ever added to stock for a zero line, so nothing to reverse.
+                        if (itemQty === 0) return;
+
                         const pBefore = await tx.product.findUnique({ where: { id: item.productId }, include: { storeProducts: true } });
                         const spBefore = pBefore?.storeProducts?.find(sp => sp.storeId === stockStoreId);
                         const stockBefore = spBefore?.stock || 0;
-                        const stockAfter = stockBefore - item.quantity;
+                        const stockAfter = stockBefore - itemQty;
 
                         if (stockStoreId) {
                             await tx.storeProduct.update({
@@ -795,14 +822,14 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 
                         await tx.product.update({
                             where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
+                            data: { stock: { decrement: itemQty } }
                         });
 
                         await tx.stockMovement.create({
                             data: {
                                 productId: item.productId,
                                 type: "RETURN",
-                                quantity: -item.quantity,
+                                quantity: -itemQty,
                                 stockBefore,
                                 stockAfter,
                                 referenceId: order.id,
@@ -922,20 +949,24 @@ export const deletePurchaseOrder = async (id: string) => {
                 
                 await Promise.all(
                     order.items.map(async (item) => {
-                        if (storeId) {
-                            await tx.storeProduct.updateMany({
-                                where: { storeId, productId: item.productId },
-                                data: { stock: { decrement: item.quantity } }
+                        const itemQty = toQty(item.quantity);
+                        // Nothing was ever added to stock for a zero line, so nothing to reverse.
+                        if (itemQty !== 0) {
+                            if (storeId) {
+                                await tx.storeProduct.updateMany({
+                                    where: { storeId, productId: item.productId },
+                                    data: { stock: { decrement: itemQty } }
+                                });
+                            }
+                            await tx.product.updateMany({
+                                where: { id: item.productId },
+                                data: { stock: { decrement: itemQty } }
                             });
                         }
-                        await tx.product.updateMany({
-                            where: { id: item.productId },
-                            data: { stock: { decrement: item.quantity } }
-                        });
-                        
+
                         // Delete related stock movements
                         await tx.stockMovement.deleteMany({
-                            where: { referenceId: id, productId: item.productId }
+                            where: { referenceId: id, productId: item.productId, tenantId }
                         });
                     })
                 );
