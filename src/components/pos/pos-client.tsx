@@ -695,7 +695,6 @@ export const PosClient: FC<PosClientProps> = ({
             return true;
         });
 
-        console.log(`[POS Category Filter] Selected Category ID: "${selectedCategory}". Filtered products count: ${result.length}/${localProducts.length}`);
 
         return result.sort((a, b) => {
             // 1. Beginning matches first

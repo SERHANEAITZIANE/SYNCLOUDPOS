@@ -46,6 +46,10 @@ export function requireMobileAuth(req: NextRequest): MobileUser {
 export class UnauthorizedError extends Error {
     constructor() {
         super("Non authentifié");
+        // Subclassing Error does not set `name` automatically; set it so that
+        // callers can identify this error by name as well as by instanceof
+        // (instanceof can fail across bundler/module-instance boundaries).
+        this.name = "UnauthorizedError";
     }
 }
 

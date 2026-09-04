@@ -1,15 +1,21 @@
 name: CI/CD Pipeline
 
+# The working branch is `master`. This previously triggered only on `main`,
+# which does not exist, so CI never ran on any push — leaving `deploy.bat`'s
+# vitest call as the only gate in front of production
+# (PROJECT_AUDIT.md, finding H-3).
 on:
   push:
     branches:
+      - master
       - main
   pull_request:
     branches:
+      - master
       - main
 
 jobs:
-  build-and-lint:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Required for Next.js 14+
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -28,8 +34,37 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      # next.config.ts sets typescript.ignoreBuildErrors, so `npm run build`
+      # will happily ship type errors. tsc is the only real type gate.
+      - name: Type check
+        run: npm run typecheck
+
       - name: Run Linter
         run: npm run lint
 
+      - name: Run tests
+        run: npm test
+
       - name: Build Next.js
         run: npm run build
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails on a new high/critical advisory in *runtime* dependencies. Dev-only
+      # advisories (currently brace-expansion, reached via eslint's minimatch@3)
+      # are build-time and deliberately not treated as release blockers.
+      - name: Dependency audit (production deps)
+        run: npm audit --omit=dev --audit-level=high

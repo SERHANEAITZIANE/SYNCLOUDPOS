@@ -39,6 +39,10 @@ export async function createProforma(data: {
     priceHt: number
   }[]
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
   await checkSubscription()
   try {
     const session = await auth()
@@ -171,6 +175,10 @@ export async function getProformaById(id: string) {
 // UPDATE proforma status
 // ────────────────────────────────────────────────────────────────────────────
 export async function updateProformaStatus(id: string, status: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:update"))) return { error: "Accès refusé" }
+
   try {
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
@@ -209,6 +217,10 @@ export async function createBLFromProforma(data: {
     priceHt: number
   }[]
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
   await checkSubscription()
   try {
     const session = await auth()
@@ -342,6 +354,10 @@ export async function createBLFromProforma(data: {
 // DELETE proforma (DRAFT only)
 // ────────────────────────────────────────────────────────────────────────────
 export async function deleteProforma(id: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:delete"))) return { error: "Accès refusé" }
+
   try {
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }

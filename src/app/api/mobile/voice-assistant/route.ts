@@ -170,7 +170,7 @@ async function callGeminiTranscription(audioFile: Blob, language: string, apiKey
 
     const data = await response.json();
     const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-    console.log("[Voice] Gemini transcription success:", transcription);
+    console.log("[Voice] Gemini transcription succeeded");
     return transcription;
 }
 
@@ -201,7 +201,7 @@ async function transcribeAudio(audioFile: Blob, language: string, tenant: any): 
 
             if (res.ok) {
                 const data = await res.json();
-                console.log("[Voice] Whisper transcription success:", data.text);
+                console.log("[Voice] Whisper transcription succeeded");
                 return data.text || "";
             } else {
                 const err = await res.text();

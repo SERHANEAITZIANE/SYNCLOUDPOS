@@ -7,6 +7,7 @@ import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
 import { toQty } from "@/lib/utils"
 import { PurchaseOrderStatus } from "@prisma/client"
+import { serializeData } from "@/lib/serialize"
 
 interface PurchaseOrderItemData {
     productId: string
@@ -105,7 +106,7 @@ export const getPurchaseOrders = async (
             }),
             db.purchaseOrder.count({ where: whereClause })
         ])
-        return { purchaseOrders: JSON.parse(JSON.stringify(purchaseOrders)), totalCount }
+        return { purchaseOrders: serializeData(purchaseOrders), totalCount }
     } catch (error) {
         console.error("getPurchaseOrders error:", error)
         return { error: "Failed to fetch purchase orders", purchaseOrders: [], totalCount: 0 }
@@ -134,8 +135,8 @@ export const getPurchaseOrder = async (id: string) => {
         })
 
         return { 
-            purchaseOrder: JSON.parse(JSON.stringify(purchaseOrder)),
-            payments: JSON.parse(JSON.stringify(payments))
+            purchaseOrder: serializeData(purchaseOrder),
+            payments: serializeData(payments)
         }
     } catch { return { error: "Failed to fetch purchase order" } }
 }
@@ -170,6 +171,10 @@ export async function generatePurchaseNumber(tx: any, tenantId: string, date?: D
 }
 
 export const createPurchaseOrder = async (data: PurchaseOrderData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("purchases:create"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
@@ -373,6 +378,10 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
 
 // Update items of a PENDING purchase order
 export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("purchases:update"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
@@ -706,6 +715,10 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
 
 // Transition a purchase order status with side effects
 export const updatePurchaseOrderStatus = async (id: string, newStatus: string, accountId?: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("purchases:update"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
@@ -928,6 +941,10 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
 }
 
 export const deletePurchaseOrder = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("purchases:delete"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
@@ -1025,6 +1042,10 @@ export const createSupplierPayment = async (data: {
     paymentMethod: string
     notes?: string
 }) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("purchases:create"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
@@ -1079,7 +1100,7 @@ export const createSupplierPayment = async (data: {
         })
 
         revalidatePath("/(dashboard)/purchases")
-        return { success: "Règlement enregistré avec succès", transaction: JSON.parse(JSON.stringify(result)) }
+        return { success: "Règlement enregistré avec succès", transaction: serializeData(result) }
     } catch (error) {
         console.error("Create Supplier Payment Error:", error)
         const msg = error instanceof Error ? error.message : "Erreur lors de l'enregistrement du règlement"

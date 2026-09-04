@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { startOfDay, endOfDay, differenceInDays, eachDayOfInterval, format, subDays } from "date-fns"
 import { ClientType } from "@prisma/client"
+import { serializeData } from "@/lib/serialize"
 
 interface ProfitFilters {
     from?: string
@@ -483,6 +484,10 @@ async function getPeriodData(
 }
 
 export async function getProfitReport(options?: ProfitFilters) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reports:read"))) throw new Error("Accès refusé")
+
     const session = await auth()
     if (!session?.user?.id) throw new Error("Unauthorized")
 
@@ -522,7 +527,7 @@ export async function getProfitReport(options?: ProfitFilters) {
         getPeriodData(tenantId, prevFromDate, prevToDate, filters)
     ])
 
-    return JSON.parse(JSON.stringify({
+    return serializeData(({
         currentPeriod,
         previousPeriod,
         dateRange: {

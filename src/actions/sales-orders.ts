@@ -8,6 +8,7 @@ import { logAudit } from "./audit-log"
 import cacheMonitor from "@/lib/cache-monitor"
 import { toQty } from "@/lib/utils"
 import { SalesOrderType, SalesOrderStatus, PaymentMethod } from "@prisma/client"
+import { serializeData } from "@/lib/serialize"
 
 // Helper: generate receipt number
 export async function generateReceiptNumber(type: string, tenantId: string) {
@@ -351,7 +352,7 @@ export async function getSalesOrders(
         const totalItemsSold = Number(itemsStats._sum.quantity) || 0
 
         return {
-            salesOrders: JSON.parse(JSON.stringify(salesOrders)),
+            salesOrders: serializeData(salesOrders),
             totalCount,
             summary: {
                 totalSalesAmount,
@@ -380,7 +381,7 @@ export async function getSalesOrder(id: string) {
             }
         })
 
-        return JSON.parse(JSON.stringify(salesOrder))
+        return serializeData(salesOrder)
     } catch (error) {
         console.error("[GET_SALES_ORDER]", error)
         return null
@@ -401,7 +402,7 @@ export async function getSalesOrderByReceipt(receiptNumber: string) {
             }
         })
 
-        return salesOrder ? JSON.parse(JSON.stringify(salesOrder)) : null
+        return salesOrder ? serializeData(salesOrder) : null
     } catch (error) {
         console.error("[GET_SALES_ORDER_BY_RECEIPT]", error)
         return null
@@ -432,7 +433,7 @@ export async function searchRecentSalesOrders(query: string, type: string = "ORD
             take: 100
         })
 
-        return JSON.parse(JSON.stringify(salesOrders))
+        return serializeData(salesOrders)
     } catch (error) {
         console.error("[SEARCH_RECENT_SALES_ORDERS]", error)
         return []
@@ -451,6 +452,10 @@ export const updateSalesOrder = async (id: string, data: {
     total: number
     createdAt?: Date
 }) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:update"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     try {
         const session = await auth()
@@ -811,6 +816,10 @@ export const updateSalesOrderStatus = async (id: string, newStatus: string) => {
 }
 
 export const deleteSalesOrder = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:delete"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     try {
         const session = await auth()
@@ -1003,7 +1012,7 @@ export const getUnpaidSalesOrders = async (customerId: string) => {
             },
             orderBy: { createdAt: "desc" }
         })
-        return { salesOrders: JSON.parse(JSON.stringify(salesOrders)) }
+        return { salesOrders: serializeData(salesOrders) }
     } catch (error) {
         console.error("getUnpaidSalesOrders error:", error)
         return { error: "Failed to fetch sales orders", salesOrders: [] }

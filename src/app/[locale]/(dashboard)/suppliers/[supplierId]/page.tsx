@@ -2,6 +2,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { SupplierForm } from "@/components/suppliers/supplier-form"
+import { serializeData } from "@/lib/serialize"
 
 export default async function SupplierPage({
     params
@@ -26,7 +27,7 @@ export default async function SupplierPage({
 
     let formattedSupplier = null
     if (supplier) {
-        const safeSupplier = JSON.parse(JSON.stringify(supplier))
+        const safeSupplier = serializeData(supplier)
         formattedSupplier = {
             ...safeSupplier,
             balance: safeSupplier.balance ? Number(safeSupplier.balance) : 0

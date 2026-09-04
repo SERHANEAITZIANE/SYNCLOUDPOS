@@ -45,6 +45,10 @@ export async function getAuditLogs(options?: {
     limit?: number
     offset?: number
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("audit_log:read"))) return []
+
     const session = await auth()
     if (!session?.user?.tenantId) return []
     if (session.user.role !== "ADMIN" && !session.user.isSuperadmin) return []

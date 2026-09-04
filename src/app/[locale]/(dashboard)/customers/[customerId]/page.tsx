@@ -2,6 +2,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { CustomerForm } from "@/components/customers/customer-form"
+import { serializeData } from "@/lib/serialize"
 
 export default async function CustomerPage({
     params
@@ -29,7 +30,7 @@ export default async function CustomerPage({
 
     let formattedCustomer = null
     if (customer) {
-        const safeCustomer = JSON.parse(JSON.stringify(customer))
+        const safeCustomer = serializeData(customer)
         formattedCustomer = {
             ...safeCustomer,
             balance: safeCustomer.balance ? Number(safeCustomer.balance) : 0,

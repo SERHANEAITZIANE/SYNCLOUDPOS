@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 
 export const createStore = async (name: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
 
     if (!session?.user?.id) {

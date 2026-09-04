@@ -42,6 +42,10 @@ export async function getStores() {
 }
 
 export async function setDefaultStore(storeId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const userId = session?.user?.id
     const tenantId = session?.user?.tenantId
@@ -96,6 +100,10 @@ export async function setDefaultStore(storeId: string) {
 }
 
 export async function createStoreForTenantAdmin(name: string, address?: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     const userId = session?.user?.id
@@ -146,6 +154,10 @@ export async function createStoreForTenantAdmin(name: string, address?: string) 
 }
 
 export async function updateStoreForTenantAdmin(storeId: string, name: string, address?: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     const userId = session?.user?.id
@@ -183,6 +195,10 @@ export async function updateStoreForTenantAdmin(storeId: string, name: string, a
 }
 
 export async function deleteStoreForTenantAdmin(storeId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:delete"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     const userId = session?.user?.id

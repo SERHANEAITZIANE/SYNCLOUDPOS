@@ -246,6 +246,10 @@ export async function getReorderSuggestions(storeId?: string) {
 export async function applyReorderSuggestions(
     suggestions: { productId: string; minStock: number }[]
 ) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
 

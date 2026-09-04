@@ -5,6 +5,10 @@ import { auth } from "@/auth"
 
 /** Annual inventory valuation report — all products with stock × cost/price */
 export async function getInventoryAnnualReport(year: number) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

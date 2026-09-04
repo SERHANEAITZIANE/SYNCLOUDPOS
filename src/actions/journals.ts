@@ -53,6 +53,10 @@ export async function getSalesJournal(
     month: number,
     type?: string // "ALL", "INVOICE", "ORDER", "CREDIT_NOTE"
 ): Promise<SalesJournalResult | { error: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reports:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -168,6 +172,10 @@ export async function getPurchaseJournal(
     year: number,
     month: number
 ): Promise<{ entries: any[]; totals: any; period: string; tenant: any } | { error: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reports:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

@@ -32,6 +32,10 @@ export async function createTransfer(data: {
     notes?: string,
     items: { productId: string, quantity: number }[]
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("transfers:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -67,6 +71,10 @@ export async function createTransfer(data: {
 }
 
 export async function updateTransferStatus(id: string, status: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("transfers:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

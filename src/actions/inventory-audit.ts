@@ -7,6 +7,10 @@ import cacheMonitor from "@/lib/cache-monitor"
 
 /** Create a new stock count session and snapshot current product stock */
 export async function createStockCountSession(name: string, notes?: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -51,6 +55,10 @@ export async function createStockCountSession(name: string, notes?: string) {
 
 /** Update actual count for one item */
 export async function updateStockCountItem(itemId: string, actualQty: number) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -144,6 +152,10 @@ export async function getStockCountSession(id: string) {
 
 /** Approve session: apply all adjustments to product stock and create StockMovement history records */
 export async function approveStockCountSession(sessionId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -219,6 +231,10 @@ export async function approveStockCountSession(sessionId: string) {
 
 /** Cancel a session without applying changes */
 export async function cancelStockCountSession(sessionId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:delete"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

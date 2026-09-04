@@ -207,6 +207,17 @@ export default auth(async function middleware(request) {
     response.headers.set("Permissions-Policy", "camera=(), microphone=(self), geolocation=(self)")
 
     // Content Security Policy
+    //
+    // script-src still carries 'unsafe-inline', which is what removes CSP's main
+    // XSS protection (PROJECT_AUDIT.md, finding L-2). Replacing it requires
+    // nonce plumbing through next/script and Next's own inline bootstrap, which
+    // must be verified against a running app — getting it wrong yields a blank
+    // page with no server-side error. It is deliberately left as-is here rather
+    // than changed blind.
+    //
+    // form-action and frame-ancestors are added: both are safe (all forms post
+    // to same-origin routes or server actions, and frame-ancestors simply
+    // restates the existing X-Frame-Options: SAMEORIGIN in modern form).
     response.headers.set("Content-Security-Policy",
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline'; " +
@@ -214,6 +225,8 @@ export default auth(async function middleware(request) {
       "img-src 'self' data: https: blob:; " +
       "connect-src 'self' https://graph.facebook.com https://*.googleapis.com https://*.tile.openstreetmap.org; " +
       "frame-src 'self'; " +
+      "frame-ancestors 'self'; " +
+      "form-action 'self'; " +
       "object-src 'none'; " +
       "base-uri 'self';"
     )

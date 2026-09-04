@@ -58,6 +58,10 @@ export async function updateAlgerianSettings(data: {
     blockNegativeStock?: boolean
     tvaEnabled?: boolean
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

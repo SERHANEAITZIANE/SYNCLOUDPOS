@@ -69,6 +69,10 @@ export async function computeDailyClose(periodStart?: Date, periodEnd?: Date): P
 
 /** Save the closing report to the database */
 export async function saveDailyClose(data: DailyCloseData, notes?: string): Promise<{ success?: string; error?: string; id?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("daily_close:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     const userId = session?.user?.id

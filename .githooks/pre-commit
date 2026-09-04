@@ -1,0 +1,5 @@
+#!/bin/sh
+# Blocks commits that stage plaintext credentials.
+# Enable once per clone:  git config core.hooksPath .githooks
+# Bypass a false positive: SKIP_SECRET_SCAN=1 git commit ...
+node scripts/check-secrets.js || exit 1

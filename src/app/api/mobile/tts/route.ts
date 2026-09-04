@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { requireMobileAuth, mobileErrorResponse, UnauthorizedError } from "@/lib/mobile-auth";
 
 // Voice mapping for supported languages/dialects
 const VOICE_MAP: Record<string, string> = {
@@ -35,6 +36,13 @@ async function generateAudio(text: string, voiceName: string): Promise<Buffer> {
 
 export async function POST(req: NextRequest) {
     try {
+        // /api/mobile/* is in the middleware's PUBLIC_PATHS, so this handler is
+        // responsible for its own authorization. Without it this endpoint is a
+        // free, internet-reachable speech-synthesis service — a CPU/bandwidth
+        // amplifier and a way to burn the upstream TTS quota
+        // (PROJECT_AUDIT.md, finding L-1).
+        requireMobileAuth(req);
+
         const body = await req.json().catch(() => ({}));
         const { text, language = "french", responseFormat } = body;
 
@@ -83,6 +91,9 @@ export async function POST(req: NextRequest) {
             },
         });
     } catch (error: any) {
+        if (error instanceof UnauthorizedError) {
+            return mobileErrorResponse(error);
+        }
         console.error("[TTS] Error generating speech:", error);
         return NextResponse.json(
             { error: "TTS generation failed", details: error?.message },

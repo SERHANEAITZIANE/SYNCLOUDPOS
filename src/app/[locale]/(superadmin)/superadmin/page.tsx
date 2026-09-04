@@ -1,10 +1,11 @@
 import { getTenantsForSuperadmin } from "@/actions/superadmin";
 import { SuperAdminClient } from "./components/client";
+import { serializeData } from "@/lib/serialize"
 
 export default async function SuperadminPage() {
     const tenants = await getTenantsForSuperadmin();
 
-    const formattedTenants = JSON.parse(JSON.stringify(tenants.map(t => ({
+    const formattedTenants = serializeData((tenants.map(t => ({
         id: t.id,
         name: t.name,
         phone: t.phone,

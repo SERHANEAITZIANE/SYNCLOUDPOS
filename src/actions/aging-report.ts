@@ -2,6 +2,10 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 
 export async function getPaymentAgingReport() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reports:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

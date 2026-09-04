@@ -68,6 +68,10 @@ const TYPE_LABELS: Record<string, string> = {
 export async function sendDocumentViaWhatsApp(
     salesOrderId: string
 ): Promise<{ success?: string; error?: string; waUrl?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     try {
         const { salesOrder, store, tenant } = await fetchSalesOrderForPDF(salesOrderId)
         const mode = tenant?.whatsappMode || "FREE"
@@ -152,6 +156,10 @@ export async function sendDocumentViaWhatsApp(
 export async function sendDocumentViaEmail(
     salesOrderId: string
 ): Promise<{ success?: string; error?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     try {
         const { salesOrder, store, tenant } = await fetchSalesOrderForPDF(salesOrderId)
 

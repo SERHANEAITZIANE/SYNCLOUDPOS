@@ -66,6 +66,10 @@ export const getSuppliers = async (page: number = 1, pageSize: number = 20, sear
 }
 
 export const createSupplier = async (data: SupplierData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("suppliers:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -108,6 +112,10 @@ export const createSupplier = async (data: SupplierData) => {
 }
 
 export const updateSupplier = async (id: string, data: SupplierData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("suppliers:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -153,6 +161,10 @@ export const updateSupplier = async (id: string, data: SupplierData) => {
 }
 
 export const deleteSupplier = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("suppliers:delete"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -182,6 +194,10 @@ export const deleteSupplier = async (id: string) => {
 }
 
 export const importSuppliers = async (rows: SupplierData[]) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("suppliers:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

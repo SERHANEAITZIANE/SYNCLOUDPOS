@@ -16,6 +16,10 @@ interface SpoilageData {
 }
 
 export async function createSpoilage(data: SpoilageData) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("spoilage:create"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     try {
         const tenantId = await getActiveTenantId()
@@ -141,6 +145,10 @@ export async function getSpoilages() {
 }
 
 export async function deleteSpoilage(id: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("spoilage:delete"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     try {
         const tenantId = await getActiveTenantId()
@@ -234,6 +242,10 @@ export async function deleteSpoilage(id: string) {
 }
 
 export async function updateSpoilage(id: string, data: SpoilageData) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("spoilage:update"))) return { error: "Accès refusé" }
+
     await checkSubscription();
     try {
         const tenantId = await getActiveTenantId()

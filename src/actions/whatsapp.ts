@@ -32,6 +32,10 @@ export async function sendDebtReminder({
     balance: number;
     currency?: string;
 }): Promise<{ success?: string; error?: string; waUrl?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("customers:update"))) return { error: "Accès refusé" }
+
     const session = await auth();
     if (!session?.user?.id) throw new Error("Unauthorized");
     const tenantId = session.user.tenantId;

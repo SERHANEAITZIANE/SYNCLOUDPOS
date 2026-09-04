@@ -4,6 +4,7 @@ import { getBrands } from "@/actions/brands"
 import { ProductForm } from "@/components/products/product-form"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { db } from "@/lib/db"
+import { serializeData } from "@/lib/serialize"
 
 const ProductPage = async ({
     params
@@ -30,7 +31,7 @@ const ProductPage = async ({
     ])
 
     // Serialize Prisma objects (like Decimal) into plain JSON so Next.js Client Components can receive them
-    const safeProduct = product ? JSON.parse(JSON.stringify(product)) : null;
+    const safeProduct = product ? serializeData(product) : null;
 
     return (
         <div className="flex-col">

@@ -88,6 +88,10 @@ export async function getAiLogs(filters?: {
 }
 
 export async function deleteAiLog(logId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("ai:delete"))) return { error: "Accès refusé" }
+
     try {
         const tenantId = await getActiveTenantId()
         if (!tenantId) return { error: "No active tenant" }
@@ -104,6 +108,10 @@ export async function deleteAiLog(logId: string) {
 }
 
 export async function clearAiLogs() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("ai:delete"))) return { error: "Accès refusé" }
+
     try {
         const tenantId = await getActiveTenantId()
         if (!tenantId) return { error: "No active tenant" }

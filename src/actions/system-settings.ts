@@ -31,6 +31,10 @@ export async function getEnvDatabaseUrl(): Promise<string> {
 }
 
 export async function updateEnvDatabaseUrl(newUrl: string): Promise<{ success?: string, error?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:update"))) return { error: "Accès refusé" }
+
     try {
         const session = await auth()
         if (!session?.user?.id) return { error: "Unauthorized" };

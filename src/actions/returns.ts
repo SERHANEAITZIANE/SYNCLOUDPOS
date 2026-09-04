@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { checkSubscription } from "@/lib/subscription"
 import cacheMonitor from "@/lib/cache-monitor"
+import { serializeData } from "@/lib/serialize"
 
 export interface ClientReturnParams {
     customerId: string
@@ -47,7 +48,7 @@ export const getClientReturns = async () => {
             },
             orderBy: { createdAt: "desc" }
         })
-        return { returns: JSON.parse(JSON.stringify(returns)) }
+        return { returns: serializeData(returns) }
     } catch (error) {
         console.error("getClientReturns error:", error)
         return { error: "Erreur lors de la récupération des retours clients", returns: [] }
@@ -55,6 +56,10 @@ export const getClientReturns = async () => {
 }
 
 export const processClientReturn = async (params: ClientReturnParams) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }
@@ -231,7 +236,7 @@ export const getSupplierReturns = async () => {
             productName: r.product?.name || "Inconnu",
             userName: r.user?.name || "Inconnu"
         }))
-        return { returns: JSON.parse(JSON.stringify(mapped)) }
+        return { returns: serializeData(mapped) }
     } catch (error) {
         console.error("getSupplierReturns error:", error)
         return { error: "Erreur lors de la récupération des retours fournisseurs", returns: [] }
@@ -239,6 +244,10 @@ export const getSupplierReturns = async () => {
 }
 
 export const processSupplierReturn = async (params: SupplierReturnParams) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }
@@ -444,7 +453,7 @@ export async function getCustomerSalesOrders(customerId: string) {
             },
             orderBy: { createdAt: "desc" }
         })
-        return JSON.parse(JSON.stringify(orders))
+        return serializeData(orders)
     } catch (error) {
         console.error("getCustomerSalesOrders error:", error)
         return []
@@ -452,6 +461,10 @@ export async function getCustomerSalesOrders(customerId: string) {
 }
 
 export async function processBulkClientReturn(params: BulkClientReturnParams) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }
@@ -708,7 +721,7 @@ export async function getSupplierPurchaseOrders(supplierId: string) {
             }
         })
 
-        return JSON.parse(JSON.stringify(ordersWithPaid))
+        return serializeData(ordersWithPaid)
     } catch (error) {
         console.error("getSupplierPurchaseOrders error:", error)
         return []
@@ -716,6 +729,10 @@ export async function getSupplierPurchaseOrders(supplierId: string) {
 }
 
 export async function processBulkSupplierReturn(params: BulkSupplierReturnParams) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }
@@ -909,6 +926,10 @@ export async function processBulkSupplierReturn(params: BulkSupplierReturnParams
 // ── NEW DELETE & EDIT ACTIONS FOR RETURNS ────────────────────────────────────
 
 export const deleteClientReturn = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:delete"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }
@@ -1037,6 +1058,10 @@ export const deleteClientReturn = async (id: string) => {
 }
 
 export const deleteSupplierReturn = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:delete"))) return { error: "Accès refusé" }
+
     await checkSubscription()
     const session = await auth()
     if (!session?.user?.id) return { error: "Non autorisé" }

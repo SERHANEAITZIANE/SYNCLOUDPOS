@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "@/i18n/routing";
 import { getAuditLogs } from "@/actions/audit-log";
 import { AuditLogClient } from "./audit-log-client";
+import { serializeData } from "@/lib/serialize"
 
 export const metadata = {
     title: "Journal d'Audit | SYNCLOUDPOS",
@@ -27,5 +28,5 @@ export default async function AuditLogPage({
 
     const logs = await getAuditLogs({ limit: 200 });
 
-    return <AuditLogClient logs={JSON.parse(JSON.stringify(logs))} />;
+    return <AuditLogClient logs={serializeData(logs)} />;
 }

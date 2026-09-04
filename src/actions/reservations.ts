@@ -14,6 +14,10 @@ export async function createReservation(data: {
     dueDate?: string
     notes?: string
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reservations:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -48,6 +52,10 @@ export async function getReservations() {
 
 /** Update reservation status */
 export async function updateReservationStatus(id: string, status: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reservations:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -63,6 +71,10 @@ export async function updateReservationStatus(id: string, status: string) {
 
 /** Delete a reservation */
 export async function deleteReservation(id: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("reservations:delete"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

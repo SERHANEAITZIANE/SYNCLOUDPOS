@@ -79,8 +79,11 @@ export const sendWhatsAppOTP = async (phone: string) => {
             return { error: "Erreur réseau lors de l'envoi du code." }
         }
     } else {
-        // Dev mode: log to console
-        console.log(`[DEV] OTP for ${normalizedPhone}: ${code}`)
+        // Dev mode: surface that a code was issued, but never the code itself —
+        // logs get shipped and an OTP in a log is a bypassable second factor.
+        if (process.env.NODE_ENV !== "production") {
+            console.log(`[DEV] OTP issued for ${normalizedPhone} (code withheld from logs)`)
+        }
     }
 
     return { success: true, phone: normalizedPhone }

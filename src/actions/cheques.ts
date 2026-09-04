@@ -29,6 +29,10 @@ export async function getCheques() {
 }
 
 export async function createCheque(data: any) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("cheques:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -58,6 +62,10 @@ export async function createCheque(data: any) {
 }
 
 export async function updateChequeStatus(id: string, status: ChequeStatus, accountId?: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("cheques:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId

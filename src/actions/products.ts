@@ -764,7 +764,7 @@ export const updateProductPrices = async (
             after: prices
         }).catch(() => null)
         
-        return { success: "Prix mis à jour avec succès !", product: JSON.parse(JSON.stringify(product)) }
+        return { success: "Prix mis à jour avec succès !", product: serializeData(product) }
     } catch (error) {
         console.error("updateProductPrices error:", error)
         return { error: "Erreur lors de la mise à jour des prix." }

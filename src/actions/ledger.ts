@@ -16,6 +16,10 @@ export type LedgerLine = {
 }
 
 export async function getCustomerLedger(customerId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("treasury:read"))) throw new Error("Accès refusé")
+
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -237,6 +241,10 @@ export async function getCustomerLedger(customerId: string) {
 }
 
 export async function getSupplierLedger(supplierId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("treasury:read"))) throw new Error("Accès refusé")
+
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")

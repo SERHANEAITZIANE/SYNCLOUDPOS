@@ -31,6 +31,10 @@ export async function createInvoiceFromBLs(data: {
   notes?: string
   paymentMethod?: string
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
   await checkSubscription()
   try {
     const session = await auth()
@@ -247,6 +251,10 @@ export async function recordInvoicePayment(data: {
   paymentMethod: string
   accountId?: string
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:create"))) return { error: "Accès refusé" }
+
   try {
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
@@ -322,6 +330,10 @@ export async function recordInvoicePayment(data: {
 // UPDATE invoice status
 // ────────────────────────────────────────────────────────────────────────────
 export async function updateInvoiceStatus(id: string, status: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("sales:update"))) return { error: "Accès refusé" }
+
   try {
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }

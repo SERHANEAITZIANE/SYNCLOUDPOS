@@ -59,6 +59,10 @@ import { promisify } from "util"
 const execAsync = promisify(exec)
 
 export async function createLocalBackup(): Promise<{ success?: boolean, error?: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("settings:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     // Restrict this to SUPERADMIN or at least ADMIN
     if (!session?.user?.isSuperadmin) {

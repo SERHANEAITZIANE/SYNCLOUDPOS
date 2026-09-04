@@ -49,10 +49,12 @@ npx vitest run src/__tests__/treasury.test.ts        # single file
 npx vitest run -t "createExpense creates a DEBIT"    # single test by name
 npx vitest run --coverage
 ```
-Tests live in `src/__tests__/` (orders, payments, treasury, ledger). They unit-test **server actions** with a deep-mocked Prisma client (`vitest-mock-extended`), never a real DB. `src/__tests__/setup.ts` globally mocks `next/cache`, `@/auth`, `@/lib/subscription`, and `@/lib/rbac` — so a new test file gets an authenticated `test-tenant-id` session and all permissions granted for free. Mock `@/lib/db` per-file with `mockDeep<PrismaClient>()`, and stub `db.$transaction` to invoke its callback.
+Tests live in `src/__tests__/` (orders, payments, treasury, ledger, plus `serialize`, `rbac-guards` and `rate-limit` which pin down security/serialization invariants). They unit-test **server actions** with a deep-mocked Prisma client (`vitest-mock-extended`), never a real DB. `src/__tests__/setup.ts` globally mocks `next/cache`, `@/auth`, `@/lib/subscription`, and `@/lib/rbac` — so a new test file gets an authenticated `test-tenant-id` session and all permissions granted for free. Mock `@/lib/db` per-file with `mockDeep<PrismaClient>()`, and stub `db.$transaction` to invoke its callback.
 
 ### Type checking
-`next.config.ts` sets `typescript.ignoreBuildErrors: true` — **`npm run build` will not catch type errors.** Run `npx tsc --noEmit` explicitly.
+`next.config.ts` sets `typescript.ignoreBuildErrors: true` — **`npm run build` will not catch type errors.** Run `npm run typecheck` (`tsc --noEmit`) explicitly.
+
+The root `tsconfig.json` **excludes `syncloud-gerant/` and `syncloud-tournee/`**. They are separate Expo projects with their own `tsconfig.json` and their own dependency trees; when the root config globbed `**/*.ts` it swept them in and reported ~168 phantom `TS2307: Cannot find module 'react-native'` errors, which made the type gate permanently red and therefore ignored. Type-check the mobile apps from inside their own directory (`npm run check`).
 
 ### Database
 ```bash
@@ -76,21 +78,34 @@ Helper scripts in `scripts/`: `seed-admin.ts`, `promote-superadmin.ts`, `reconci
 2. **Mobile — bare JWT.** `src/lib/mobile-auth.ts` signs/verifies `Bearer` tokens with `AUTH_SECRET`/`NEXTAUTH_SECRET`. Route handlers call `requireMobileAuth(req)` (throws `UnauthorizedError`) and wrap in `try/catch` with `mobileErrorResponse(error)`. `hasPermission()` does **not** apply here — mobile routes check `user.role` inline. `/api/mobile/*` is in the middleware's public-path list, so each route is responsible for its own authorization.
 
 ### `src/middleware.ts` is the gate
-Composes NextAuth (Edge) + `next-intl`, and additionally handles: public-path allowlist, in-memory per-IP login rate limiting (10 / 15 min, resets on restart), CORS for `/api/mobile/*` (origins from `MOBILE_ALLOWED_ORIGINS` + `AUTH_URL`), blocked-tenant redirect to `/settings`, superadmin gating of `/superadmin`, and the security headers + CSP. Adding a new public page or API namespace means editing `PUBLIC_PATHS` here.
+Composes NextAuth (Edge) + `next-intl`, and additionally handles: public-path allowlist, in-memory per-IP login rate limiting (10 / 15 min; per-process and resets on restart — middleware runs on Edge so it cannot reach Redis), CORS for `/api/mobile/*` (origins from `MOBILE_ALLOWED_ORIGINS` + `AUTH_URL`), blocked-tenant redirect to `/settings`, superadmin gating of `/superadmin`, and the security headers + CSP. Adding a new public page or API namespace means editing `PUBLIC_PATHS` here.
 
 ### Server actions (`src/actions/`, ~70 files)
 All `"use server"`, return `{ success, data }` / `{ error }` — never throw to the client. Three permission patterns coexist:
-- **Preferred for new code:** `safeAction(schema, "module:action", "AUDIT_ACTION", "ENTITY", handler)` from `src/lib/safe-action.ts` — bundles session check, blocked-tenant check, permission check, Zod validation, deep XSS sanitization of strings, audit logging, and Prisma error → French message mapping (P2002/P2025).
+- **Preferred for new code:** `safeAction(schema, "module:action", "AUDIT_ACTION", "ENTITY", handler)` from `src/lib/safe-action.ts` — bundles session check, blocked-tenant check, permission check, Zod validation, deep XSS sanitization of strings, audit logging, and Prisma error → French message mapping (P2002/P2025). It currently has **no call sites**: every existing action uses the inline `hasPermission` pattern below, so migrating them is open work.
 - `const { hasPermission } = await import("@/lib/rbac")` then `if (!(await hasPermission("module:action"))) return { error: "Accès refusé" }`
 - `requirePermission("module:action")` (throws)
 
 Both RBAC helpers take a permission *string* and resolve the session internally via `auth()`. Prisma is `import { db } from "@/lib/db"`. Call `revalidatePath()` after mutations.
 
 ### RBAC (`src/lib/rbac.ts`)
+
+**Every mutating server action must carry a permission guard.** The RBAC matrix is enforced only by these guards — the UI is not a security boundary, and server actions are reachable as POST endpoints by any authenticated user regardless of what the UI renders. Put the guard **first in the function body**, before any database work, so a denied call cannot read or write anything:
+
+```ts
+// RBAC Check
+const { hasPermission } = await import("@/lib/rbac")
+if (!(await hasPermission("purchases:create"))) return { error: "Accès refusé" }
+```
+
+Match the failure shape to whatever the function already returns (`{ error }`, `[]`, or `throw`) so the guard does not break the caller's type. `src/__tests__/rbac-guards.test.ts` asserts both that a denied permission refuses and that it refuses *before* touching the database.
+
 Permissions are `"module:action"` with wildcards (`"module:*"`, `"*:*"`). `ADMIN` = `*:*`; superadmin bypasses everything. Roles: ADMIN, MANAGER, CASHIER, VENDEUR, ACCOUNTANT, STOCK_MANAGER. The `Module` and `Action` union types are the authoritative list — extend them when adding a feature area.
 
 ### Decimal / Date serialization
 Prisma `Decimal` and `Date` do not cross the RSC boundary. Wrap anything returned from a server component or action with `serializeData()` from `src/lib/serialize.ts` (recursive; duck-types Decimal so it survives minification). Several past production bugs were exactly this — check it before returning query results containing money fields.
+
+**`serializeData()` is the only permitted approach — do not use `JSON.parse(JSON.stringify(...))`.** They are not equivalent: `serializeData` calls `Decimal.toNumber()` and yields a **number**, while the JSON round-trip goes through `Decimal.toJSON()` and yields a **string**. The codebase used to do both, so the same money field arrived as a number on some paths and a string on others — which is how `"12.50" + "3.00"` becomes `"12.503.00"`. All 21 round-trip sites were converted; `src/__tests__/serialize.test.ts` pins the behaviour and will fail if the divergence returns.
 
 ### Treasury is the financial source of truth
 - Every financial flow (sale, purchase, expense, payment) creates a `TreasuryTransaction`. There is **no** Payment model.
@@ -100,6 +115,8 @@ Prisma `Decimal` and `Date` do not cross the RSC boundary. Wrap anything returne
 
 ### Redis (`src/lib/redis.ts`)
 Singleton with graceful fallback — **the app must work with Redis down**. `withCache(key, fn, ttl)`, `invalidateCache(prefix)`. 5s connect timeout, 3 retries. Used for products, categories, analytics.
+
+`rateLimit(identifier, limit, windowMs)` is the exception to "degrade to pass-through": it falls back to an **in-process limiter** rather than returning success when Redis is unavailable, because failing open on a rate limiter means anyone who can make Redis unreachable gets unlimited login attempts. It sets `degraded: true` when running on the fallback. The real login gate lives in `src/actions/login.ts` (Node runtime, 5 attempts/min per identifier); the middleware limiter is a second, weaker layer.
 
 ### i18n (next-intl)
 Locales `en` / `fr` (default) / `ar`, prefix `always` (`/fr/dashboard`). Config in `src/i18n/routing.ts`; use `createNavigation()` for locale-aware `Link`, `redirect`, `useRouter`. Message catalogs in `messages/{en,fr,ar}.json` — all three must be updated together. Arabic implies RTL.
@@ -156,9 +173,10 @@ Sentry is wired in via `withSentryConfig` in `next.config.ts` with `tunnelRoute:
 Health check: `/api/health`.
 
 ### Before committing
-1. `npx tsc --noEmit` — **must be zero.** `next.config.ts` sets `ignoreBuildErrors: true`, so `npm run build` will happily ship type errors; tsc is the only gate. The tree was cleaned from 41 errors to 0, so any error you see is one you introduced.
+1. `npm run typecheck` — **must be zero.** `next.config.ts` sets `ignoreBuildErrors: true`, so `npm run build` will happily ship type errors; tsc is the only gate. The tree is at 0, so any error you see is one you introduced.
 2. `npm test`
 3. `npm run lint` — must be zero *errors* (warnings are expected; see above)
+3b. `npm run check:secrets` — scans staged changes for plaintext credentials. Enable it as a hook once per clone with `git config core.hooksPath .githooks`.
 4. `npx prisma validate` if the schema changed
 
 ## Common Gotchas
@@ -167,7 +185,7 @@ Health check: `/api/health`.
 2. **No Payment model** — payments are `TreasuryTransaction` rows.
 3. **Redis is optional** — code must degrade gracefully without it.
 4. `auth.config.ts` is Edge — it **cannot** import Prisma or anything Node-only.
-5. **`serializeData()` Decimals/Dates** before returning them across the RSC boundary.
+5. **`serializeData()` Decimals/Dates** before returning them across the RSC boundary — never `JSON.parse(JSON.stringify(...))`, which yields strings instead of numbers for money.
 6. **Never touch `Product.stock` directly** — use `StockMovement`.
 7. Invoice numbers come from `SequenceCounter`, never from a count.
 8. Withholding tax is computed at PO creation, not at payment.

@@ -1,3 +1,0 @@
-Creating test user xm@live.fr...
-Tenant ensured: Default Tenant
-User created: xm@live.fr

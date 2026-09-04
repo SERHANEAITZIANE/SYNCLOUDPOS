@@ -2,6 +2,7 @@ import { getExpenseCategories, getExpense } from "@/actions/expenses"
 import { getTreasuryAccounts } from "@/actions/treasury"
 import { ExpenseForm } from "@/components/expenses/expense-form"
 import { redirect } from "next/navigation"
+import { serializeData } from "@/lib/serialize"
 
 const ExpensePage = async ({
     params
@@ -19,7 +20,7 @@ const ExpensePage = async ({
     }
 
     // Serialize Prisma objects (like Decimal) into plain JSON
-    const safeExpense = JSON.parse(JSON.stringify(expense))
+    const safeExpense = serializeData(expense)
 
     return (
         <div className="flex-col">

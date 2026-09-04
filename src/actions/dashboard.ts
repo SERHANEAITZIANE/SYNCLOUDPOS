@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { withCache } from "@/lib/redis"
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval, differenceInDays } from "date-fns"
+import { serializeData } from "@/lib/serialize"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -561,7 +562,7 @@ export async function getDashboardData(dateRange?: { from: string; to: string })
             feed.sort((a, b) => b.time.localeCompare(a.time))
             const activityFeed = feed.slice(0, 10)
 
-            return JSON.parse(JSON.stringify({
+            return serializeData(({
                 totalRevenue, posRevenue, invoiceRevenue,
                 totalExpenses, totalPurchases, cashCollected,
                 totalCOGS, netProfit, ordersCount, salesCount,

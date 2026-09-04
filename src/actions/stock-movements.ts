@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { serializeData } from "@/lib/serialize"
 
 export const getStockMovements = async (productId: string) => {
     const session = await auth()
@@ -92,7 +93,7 @@ export const getStockMovements = async (productId: string) => {
             recalculatedMovements.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }
 
-        return { movements: JSON.parse(JSON.stringify(recalculatedMovements)) }
+        return { movements: serializeData(recalculatedMovements) }
     } catch (error) {
         console.error("Error fetching stock movements:", error)
         return { error: "Failed to fetch stock movements" }

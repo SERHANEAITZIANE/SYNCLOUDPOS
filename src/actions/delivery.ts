@@ -25,6 +25,10 @@ export async function createDeliveryShipment(data: {
     salesOrderId?: string
     notes?: string
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("delivery:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -179,6 +183,10 @@ export async function getDeliveryShipments(page = 1, pageSize = 50) {
 
 /** Update shipment status (e.g., DELIVERED, RETURNED) */
 export async function updateShipmentStatus(id: string, status: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("delivery:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }
@@ -194,6 +202,10 @@ export async function updateShipmentStatus(id: string, status: string) {
 
 /** Sync shipment statuses by polling delivery provider APIs */
 export async function syncShipmentStatuses() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("delivery:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

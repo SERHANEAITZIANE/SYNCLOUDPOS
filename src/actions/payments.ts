@@ -235,6 +235,10 @@ export async function updatePayment(id: string, data: {
     date?: string
     accountId?: string
 }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("payments:update"))) return { error: "Accès refusé" }
+
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")
@@ -391,6 +395,10 @@ export async function updatePayment(id: string, data: {
 // ─── Delete Payment (Treasury Transaction) ──────────────────────────────────
 
 export async function deletePayment(id: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("payments:delete"))) return { error: "Accès refusé" }
+
     try {
         const session = await auth()
         if (!session?.user?.id) throw new Error("Unauthorized")

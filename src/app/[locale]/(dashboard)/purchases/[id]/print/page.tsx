@@ -3,6 +3,7 @@ import { redirect } from "@/i18n/routing";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { PurchaseOrderPrintClient } from "./print-client";
+import { serializeData } from "@/lib/serialize"
 
 export default async function PurchaseOrderPrintPage({
     params,
@@ -36,8 +37,8 @@ export default async function PurchaseOrderPrintPage({
 
     return (
         <PurchaseOrderPrintClient
-            po={JSON.parse(JSON.stringify(po))}
-            tenant={JSON.parse(JSON.stringify(tenant))}
+            po={serializeData(po)}
+            tenant={serializeData(tenant)}
         />
     );
 }

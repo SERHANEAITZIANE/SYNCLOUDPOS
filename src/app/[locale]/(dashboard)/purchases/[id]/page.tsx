@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { PurchaseOrderForm } from "@/components/purchases/purchase-form"
 import { getPurchaseOrder } from "@/actions/purchase-orders"
 import { getTreasuryAccounts } from "@/actions/treasury"
+import { serializeData } from "@/lib/serialize"
 
 export default async function PurchaseOrderPage({
     params
@@ -50,14 +51,14 @@ export default async function PurchaseOrderPage({
         <div className="flex-col">
             <div className="flex-1 space-y-4 p-8 pt-6">
                 <PurchaseOrderForm
-                    initialData={purchaseOrder ? JSON.parse(JSON.stringify(purchaseOrder)) : null}
+                    initialData={purchaseOrder ? serializeData(purchaseOrder) : null}
                     payments={payments}
-                    suppliers={JSON.parse(JSON.stringify(suppliers))}
-                    products={JSON.parse(JSON.stringify(products))}
+                    suppliers={serializeData(suppliers)}
+                    products={serializeData(products)}
                     accounts={accounts}
-                    categories={JSON.parse(JSON.stringify(categories))}
-                    brands={JSON.parse(JSON.stringify(brands))}
-                    storeData={store ? { ...JSON.parse(JSON.stringify(store)), tvaEnabled: tenant?.tvaEnabled ?? false } : null}
+                    categories={serializeData(categories)}
+                    brands={serializeData(brands)}
+                    storeData={store ? { ...serializeData(store), tvaEnabled: tenant?.tvaEnabled ?? false } : null}
                 />
             </div>
         </div>

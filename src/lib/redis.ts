@@ -62,8 +62,7 @@ export async function withCache<T>(
             // This is a fire-and-forget call to maintain loose coupling
             // In a real implementation, this might be an event or a separate tracking mechanism
             if (process.env.NODE_ENV !== "production") {
-                console.log(`Cache event: Set key=${key} ttl=${ttl}`);
-            }
+                    }
         } catch (e) {
             // Ignore monitoring errors
         }
@@ -97,8 +96,7 @@ export async function invalidateCache(prefix: string) {
         } while (cursor !== "0")
 
         if (totalDeleted > 0 && process.env.NODE_ENV !== 'production') {
-            console.log(`InvalidateCache: prefix=${prefix}, deleted=${totalDeleted}`)
-        }
+            }
     } catch {
         // Non-critical — ignore
     }
@@ -158,21 +156,76 @@ export async function invalidateByTag(tag: string) {
 }
 
 /**
- * Basic Token Bucket Rate Limiter using Redis.
- * Useful for protecting auth endpoints from brute force attacks.
+ * Local, per-process fallback counter used when Redis is unavailable.
+ *
+ * Redis is optional in this codebase and the rest of the module deliberately
+ * degrades to a pass-through when it is down. For a *rate limiter* that is the
+ * wrong default: passing through means an attacker who can make Redis
+ * unavailable (or who simply arrives at a freshly started process) gets
+ * unlimited attempts. Instead we fall back to an in-process limiter — weaker
+ * than Redis across a PM2 cluster, but never unlimited
+ * (PROJECT_AUDIT.md, finding M-4).
  */
-export async function rateLimit(identifier: string, limit: number = 5, windowMs: number = 60000): Promise<{ success: boolean; remaining: number }> {
+const localHits = new Map<string, { count: number; resetAt: number }>()
+const LOCAL_LIMITER_MAX_KEYS = 10_000
+
+function pruneLocalHits(now: number) {
+    for (const [key, entry] of localHits) {
+        if (now > entry.resetAt) localHits.delete(key)
+    }
+    // Hard cap so a spray of distinct identifiers cannot grow this without bound.
+    if (localHits.size > LOCAL_LIMITER_MAX_KEYS) {
+        const excess = localHits.size - LOCAL_LIMITER_MAX_KEYS
+        let removed = 0
+        for (const key of localHits.keys()) {
+            localHits.delete(key)
+            if (++removed >= excess) break
+        }
+    }
+}
+
+function localRateLimit(identifier: string, limit: number, windowMs: number) {
+    const now = Date.now()
+    pruneLocalHits(now)
+
+    const entry = localHits.get(identifier)
+    if (!entry || now > entry.resetAt) {
+        localHits.set(identifier, { count: 1, resetAt: now + windowMs })
+        return { success: true, remaining: Math.max(0, limit - 1), degraded: true }
+    }
+
+    entry.count++
+    return {
+        success: entry.count <= limit,
+        remaining: Math.max(0, limit - entry.count),
+        degraded: true,
+    }
+}
+
+/**
+ * Token-bucket rate limiter, Redis-backed with a local fallback.
+ *
+ * `degraded` is true when the answer came from the in-process fallback rather
+ * than Redis, so callers can log or alert on it.
+ */
+export async function rateLimit(
+    identifier: string,
+    limit: number = 5,
+    windowMs: number = 60000
+): Promise<{ success: boolean; remaining: number; degraded?: boolean }> {
     try {
         const redis = await getClient();
-        if (!redis?.isReady) return { success: true, remaining: 1 }; // Fallback pass-through if Redis is down
+        if (!redis?.isReady) {
+            return localRateLimit(identifier, limit, windowMs);
+        }
 
         const key = `ratelimit:${identifier}`;
-        
+
         // Use a transaction/pipeline to increment and set expiry
         const multi = redis.multi();
         multi.incr(key);
         multi.pTTL(key);
-        
+
         const [count, ttl] = await multi.exec() as unknown as [number, number];
 
         if (count === 1 || ttl < 0) {
@@ -185,7 +238,7 @@ export async function rateLimit(identifier: string, limit: number = 5, windowMs:
             remaining: Math.max(0, limit - count)
         };
     } catch (error) {
-        console.error("Rate limit error:", error);
-        return { success: true, remaining: 1 }; // Fail open
+        console.error("Rate limit error, falling back to in-process limiter:", error);
+        return localRateLimit(identifier, limit, windowMs);
     }
 }

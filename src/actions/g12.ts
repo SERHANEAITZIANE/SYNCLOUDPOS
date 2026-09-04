@@ -60,6 +60,10 @@ export async function getG12Data(
     ifuRate: IFURate,
     mode: "previsionnel" | "definitif"
 ): Promise<G12Result | { error: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("fiscal:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

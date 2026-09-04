@@ -61,7 +61,6 @@ license.key
 .agents/
 graphify-out/
 scratch/
-deploy_*.py
 backups/
 
 # Release tarballs — 122MB each, above GitHub's 100MB per-file limit
@@ -69,3 +68,43 @@ syncloudpos_clean.tar.gz
 syncloudpos_update.tar.gz
 *.tar.gz
 
+
+# ─── Ad-hoc operational scripts and scratch output ───────────────────────
+# These are one-off diagnostics written during incidents. They historically
+# carried plaintext VPS/SSH/Postgres passwords and NEXTAUTH_SECRET literals
+# straight into git (see PROJECT_AUDIT.md, finding C-1). Keep them local.
+# Anything meant to be reused belongs in scripts/ and must read credentials
+# from the environment, never from a literal.
+/*.py
+/*.log
+/*.txt
+/*.png
+/*.sql
+/*.html
+/*.zip
+/*.list
+/*.vbs
+/*.traineddata
+/*.csv
+/*.mjs
+
+# Root-level one-off JS/TS scripts. Real config is re-allowed below.
+/*.js
+/*.ts
+/*.tsx
+!/ecosystem.config.js
+!/eslint.config.mjs
+!/postcss.config.mjs
+!/next.config.ts
+!/vitest.config.ts
+!/sentry.client.config.ts
+!/sentry.edge.config.ts
+!/sentry.server.config.ts
+
+# Secrets — belt and braces on top of the .env* rule above
+*.key
+!license.key.example
+*.pem
+id_rsa*
+credentials.json
+service-account*.json

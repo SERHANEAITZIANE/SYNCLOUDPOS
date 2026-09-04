@@ -2,8 +2,13 @@
 
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { serializeData } from "@/lib/serialize"
 
 export async function getStockDashboardData() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) {
         return { error: "Non autorisé" }
@@ -199,7 +204,7 @@ export async function getStockDashboardData() {
         })
 
         return {
-            items: JSON.parse(JSON.stringify(stockItems)),
+            items: serializeData(stockItems),
             kpi: {
                 totalStockCount,
                 totalCostValuation,
@@ -215,6 +220,10 @@ export async function getStockDashboardData() {
 }
 
 export async function getStockEntriesAndExitsLogs() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("inventory:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) {
         return { error: "Non autorisé", entries: [], exits: [] }
@@ -356,8 +365,8 @@ export async function getStockEntriesAndExitsLogs() {
         })
 
         return {
-            entries: JSON.parse(JSON.stringify(entries)),
-            exits: JSON.parse(JSON.stringify(exits))
+            entries: serializeData(entries),
+            exits: serializeData(exits)
         }
     } catch (error) {
         console.error("getStockEntriesAndExitsLogs error:", error)

@@ -62,6 +62,10 @@ export interface G50Result {
  * Also includes TAP, TVA déductible from purchases, withholding tax, and stamp tax.
  */
 export async function getG50Data(year: number, month: number): Promise<G50Result | { error: string }> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("fiscal:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

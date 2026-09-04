@@ -1,274 +1,195 @@
 # AGENTS.md
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file provides guidance to coding agents (Codex and others) when working with code in this repository.
 
 ## Project Overview
 
-SYNCLOUDPOS is a multi-tenant Point of Sale system for Algerian businesses. Built with Next.js 16, TypeScript, Prisma, PostgreSQL, and Redis. Supports multi-store operations, invoicing, tax compliance (G50/G12), analytics, and subscriptions.
+SYNCLOUDPOS is a multi-tenant Point of Sale system for Algerian businesses. Next.js 16 (App Router) + TypeScript + Prisma + PostgreSQL + Redis. Multi-store operations, invoicing, Algerian tax compliance (G50/G12), analytics, subscriptions.
+
+The repo also contains **two Expo / React Native companion apps** that talk to the web app over `/api/mobile/*`:
+- `syncloud-gerant/` — manager dashboard (financials, alerts, AI briefs)
+- `syncloud-tournee/` — delivery driver app (tours, stops, truck loads, GPS)
+
+`AGENTS.md` at the repo root is a near-verbatim copy of this file for Codex. **When you change CLAUDE.md, mirror the change into AGENTS.md** or the two drift apart.
 
 ## Development Commands
 
-### Docker (Primary Development Method)
+### Docker (primary method)
 ```bash
-# Start all services (app, PostgreSQL, Redis)
-docker compose up -d
-
-# Stop services
-docker compose down
-
-# View app logs
+docker compose up -d              # app + PostgreSQL + Redis
 docker compose logs -f app
-
-# Rebuild after code changes
-docker compose up -d --build
-
-# Database backup
+docker compose up -d --build      # rebuild after code changes
 docker compose exec db pg_dump -U syncloud syncloudpos > backup.sql
 ```
 
-### Local Development (Without Docker)
+### Local (without Docker)
 ```bash
-# Install dependencies
 npm install
-
-# Generate Prisma client
 npx prisma generate
-
-# Run database migrations
-npx prisma migrate dev
-
-# Start dev server (http://localhost:3000)
-npm run dev
-
-# Build for production
+npm run dev                       # http://localhost:3000
 npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
+npm run lint                      # eslint . (flat config)
 ```
 
-### Database Operations
+**Lint config.** Next 16 removed `next lint`, which used to supply the ESLint config implicitly. The project now has an explicit flat config in `eslint.config.mjs` (`eslint-config-next@16` exports flat-config arrays, so no `FlatCompat` shim) and `npm run lint` runs `eslint .`.
+
+It currently exits clean with **0 errors and ~1120 warnings**. The warnings are deliberate, not neglect:
+- `@typescript-eslint/no-explicit-any` is a **warning**, because `tsconfig.json` sets `strict: false` / `noImplicitAny: false` — erroring on `any` would contradict the project's own strictness setting.
+- `react/no-unescaped-entities` is **off**: the UI copy is French, so apostrophes in `l'article` are correct content.
+- The React Compiler rules from `eslint-plugin-react-hooks@7` (`set-state-in-effect`, `preserve-manual-memoization`, `static-components`, `purity`, `immutability`) are **warnings** — this codebase predates them and each hit needs a considered per-component refactor.
+- `require()` is allowed in `scripts/`, `scratch/`, `prisma/`, and root-level `*.js` (ad-hoc Node diagnostics).
+
+Keep it at zero errors; treat the warning count as debt to burn down.
+
+### Tests (Vitest + jsdom)
 ```bash
-# Create new migration
-npx prisma migrate dev --name migration_name
+npm test                          # vitest run — all tests
+npm run test:watch
+npx vitest run src/__tests__/treasury.test.ts        # single file
+npx vitest run -t "createExpense creates a DEBIT"    # single test by name
+npx vitest run --coverage
+```
+Tests live in `src/__tests__/` (orders, payments, treasury, ledger, plus `serialize`, `rbac-guards` and `rate-limit` which pin down security/serialization invariants). They unit-test **server actions** with a deep-mocked Prisma client (`vitest-mock-extended`), never a real DB. `src/__tests__/setup.ts` globally mocks `next/cache`, `@/auth`, `@/lib/subscription`, and `@/lib/rbac` — so a new test file gets an authenticated `test-tenant-id` session and all permissions granted for free. Mock `@/lib/db` per-file with `mockDeep<PrismaClient>()`, and stub `db.$transaction` to invoke its callback.
 
-# Reset database (WARNING: deletes all data)
-npx prisma migrate reset
+### Type checking
+`next.config.ts` sets `typescript.ignoreBuildErrors: true` — **`npm run build` will not catch type errors.** Run `npm run typecheck` (`tsc --noEmit`) explicitly.
 
-# Open Prisma Studio (database GUI)
+The root `tsconfig.json` **excludes `syncloud-gerant/` and `syncloud-tournee/`**. They are separate Expo projects with their own `tsconfig.json` and their own dependency trees; when the root config globbed `**/*.ts` it swept them in and reported ~168 phantom `TS2307: Cannot find module 'react-native'` errors, which made the type gate permanently red and therefore ignored. Type-check the mobile apps from inside their own directory (`npm run check`).
+
+### Database
+```bash
+npx prisma db push                # what deployment actually uses
 npx prisma studio
+npx prisma validate
+npx prisma migrate dev --name x   # rarely used — see note below
+```
+`prisma/migrations/` exists but holds only a handful of migrations; `docker-entrypoint.sh` runs `npx prisma db push --skip-generate` on container start. **`schema.prisma` is the source of truth, not the migration history.** Don't assume a migration file exists for a given column.
 
-# Push schema changes without migration (dev only)
-npx prisma db push
+Helper scripts in `scripts/`: `seed-admin.ts`, `promote-superadmin.ts`, `reconcile-stock.ts`, `reconcile-balances.js`, `backup.js`/`restore.js`, `generate-license.js`.
+
+## Architecture
+
+### Multi-tenancy
+- Every query MUST filter by `tenantId` from the session. No row-level security — isolation is application-layer only.
+- Session fields: `tenantId`, `role`, `defaultStoreId`, `isSuperadmin`, `isBlocked`, `subscriptionEndsAt`.
+
+### Two independent auth systems
+1. **Web — NextAuth v5.** Dual config: `src/auth.config.ts` (Edge-safe, no Prisma, used by middleware) + `src/auth.ts` (full server config). Providers: Credentials (email/phone + password) and Google OAuth, which auto-creates tenant → default store → treasury accounts. JWT strategy; custom claims injected via callbacks.
+2. **Mobile — bare JWT.** `src/lib/mobile-auth.ts` signs/verifies `Bearer` tokens with `AUTH_SECRET`/`NEXTAUTH_SECRET`. Route handlers call `requireMobileAuth(req)` (throws `UnauthorizedError`) and wrap in `try/catch` with `mobileErrorResponse(error)`. `hasPermission()` does **not** apply here — mobile routes check `user.role` inline. `/api/mobile/*` is in the middleware's public-path list, so each route is responsible for its own authorization.
+
+### `src/middleware.ts` is the gate
+Composes NextAuth (Edge) + `next-intl`, and additionally handles: public-path allowlist, in-memory per-IP login rate limiting (10 / 15 min; per-process and resets on restart — middleware runs on Edge so it cannot reach Redis), CORS for `/api/mobile/*` (origins from `MOBILE_ALLOWED_ORIGINS` + `AUTH_URL`), blocked-tenant redirect to `/settings`, superadmin gating of `/superadmin`, and the security headers + CSP. Adding a new public page or API namespace means editing `PUBLIC_PATHS` here.
+
+### Server actions (`src/actions/`, ~70 files)
+All `"use server"`, return `{ success, data }` / `{ error }` — never throw to the client. Three permission patterns coexist:
+- **Preferred for new code:** `safeAction(schema, "module:action", "AUDIT_ACTION", "ENTITY", handler)` from `src/lib/safe-action.ts` — bundles session check, blocked-tenant check, permission check, Zod validation, deep XSS sanitization of strings, audit logging, and Prisma error → French message mapping (P2002/P2025). It currently has **no call sites**: every existing action uses the inline `hasPermission` pattern below, so migrating them is open work.
+- `const { hasPermission } = await import("@/lib/rbac")` then `if (!(await hasPermission("module:action"))) return { error: "Accès refusé" }`
+- `requirePermission("module:action")` (throws)
+
+Both RBAC helpers take a permission *string* and resolve the session internally via `auth()`. Prisma is `import { db } from "@/lib/db"`. Call `revalidatePath()` after mutations.
+
+### RBAC (`src/lib/rbac.ts`)
+
+**Every mutating server action must carry a permission guard.** The RBAC matrix is enforced only by these guards — the UI is not a security boundary, and server actions are reachable as POST endpoints by any authenticated user regardless of what the UI renders. Put the guard **first in the function body**, before any database work, so a denied call cannot read or write anything:
+
+```ts
+// RBAC Check
+const { hasPermission } = await import("@/lib/rbac")
+if (!(await hasPermission("purchases:create"))) return { error: "Accès refusé" }
 ```
 
-## Architecture Overview
+Match the failure shape to whatever the function already returns (`{ error }`, `[]`, or `throw`) so the guard does not break the caller's type. `src/__tests__/rbac-guards.test.ts` asserts both that a denied permission refuses and that it refuses *before* touching the database.
 
-### Multi-Tenancy Model
-- Every database query MUST filter by `tenantId` from session JWT
-- No row-level security in database - tenant isolation enforced in application layer
-- Session contains: `tenantId`, `role`, `defaultStoreId`, `subscriptionEndsAt`, `isBlocked`
+Permissions are `"module:action"` with wildcards (`"module:*"`, `"*:*"`). `ADMIN` = `*:*`; superadmin bypasses everything. Roles: ADMIN, MANAGER, CASHIER, VENDEUR, ACCOUNTANT, STOCK_MANAGER. The `Module` and `Action` union types are the authoritative list — extend them when adding a feature area.
 
-### Authentication (NextAuth v5)
-- **Dual config pattern**: `src/auth.config.ts` (Edge-compatible, no Prisma) + `src/auth.ts` (full server config)
-- **Providers**: Google OAuth (auto-registers tenant), Credentials (email/phone + password)
-- **Google sign-in flow**: Auto-creates tenant → default store → treasury accounts
-- **JWT strategy**: Custom fields injected via callbacks, backward-compatible with old sessions
+### Decimal / Date serialization
+Prisma `Decimal` and `Date` do not cross the RSC boundary. Wrap anything returned from a server component or action with `serializeData()` from `src/lib/serialize.ts` (recursive; duck-types Decimal so it survives minification). Several past production bugs were exactly this — check it before returning query results containing money fields.
 
-### Server Actions Pattern (`src/actions/`)
-- All marked with `"use server"` directive
-- Fetch session via `auth()`, extract `tenantId` for multi-tenancy
-- Return `{ success/error, data }` objects (never throw to client)
-- Use `revalidatePath()` for ISR cache invalidation
-- Permission checks via `src/lib/rbac.ts`. Two patterns in use:
-  - Most actions: `const { hasPermission } = await import("@/lib/rbac")` then `if (!(await hasPermission("module:action"))) return { error: "Accès refusé" }`
-  - Some actions: `requirePermission("module:action")` (throws on denial)
-  - Both take a `"module:action"` permission string (NOT a session arg) and resolve the session internally via `auth()`
-  - Prisma client is imported as `import { db } from "@/lib/db"`
+**`serializeData()` is the only permitted approach — do not use `JSON.parse(JSON.stringify(...))`.** They are not equivalent: `serializeData` calls `Decimal.toNumber()` and yields a **number**, while the JSON round-trip goes through `Decimal.toJSON()` and yields a **string**. The codebase used to do both, so the same money field arrived as a number on some paths and a string on others — which is how `"12.50" + "3.00"` becomes `"12.503.00"`. All 21 round-trip sites were converted; `src/__tests__/serialize.test.ts` pins the behaviour and will fail if the divergence returns.
 
-### Treasury as Financial Source of Truth
-- **Critical**: All financial flows (sales, purchases, expenses) create `TreasuryTransaction` entries
-- No separate Payment model - payments are treasury transactions with `source` field
-- Account types: `CAISSE` (cash register), `BANK` (bank account)
-- Transaction types: `CREDIT` (money in), `DEBIT` (money out)
-- Each transaction stores balance snapshot for audit trail
+### Treasury is the financial source of truth
+- Every financial flow (sale, purchase, expense, payment) creates a `TreasuryTransaction`. There is **no** Payment model.
+- Account types: `CAISSE`, `BANK`. Transaction types: `CREDIT` (in), `DEBIT` (out).
+- `source`: `SALE` | `PURCHASE` | `EXPENSE` | `MANUAL_IN` | `MANUAL_OUT`; link via `orderId` / `salesOrderId` / `purchaseOrderId` / `expenseId`.
+- Each row stores a balance snapshot for audit. Do balance updates + transaction creation inside `db.$transaction`.
 
-### Redis Caching (`src/lib/redis.ts`)
-- Singleton pattern with graceful fallback (app works without Redis)
-- `withCache(key, fn, ttl)` - get cached or compute & cache
-- `invalidateCache(prefix)` - bulk delete by key prefix
-- 5-second connection timeout, 3 retry limit
-- Used for expensive queries (products, categories, analytics)
+### Redis (`src/lib/redis.ts`)
+Singleton with graceful fallback — **the app must work with Redis down**. `withCache(key, fn, ttl)`, `invalidateCache(prefix)`. 5s connect timeout, 3 retries. Used for products, categories, analytics.
 
-### Internationalization (next-intl)
-- Locales: `en`, `fr` (default), `ar`
-- Prefix: `always` (URLs like `/fr/dashboard`, `/en/dashboard`)
-- Config: `src/i18n/routing.ts`
-- Use `createNavigation()` for locale-aware `Link`, `redirect`, `useRouter`
+`rateLimit(identifier, limit, windowMs)` is the exception to "degrade to pass-through": it falls back to an **in-process limiter** rather than returning success when Redis is unavailable, because failing open on a rate limiter means anyone who can make Redis unreachable gets unlimited login attempts. It sets `degraded: true` when running on the fallback. The real login gate lives in `src/actions/login.ts` (Node runtime, 5 attempts/min per identifier); the middleware limiter is a second, weaker layer.
 
-### State Management
-- **Zustand** for POS cart only (`src/hooks/use-pos-store.ts`)
-- Multi-session support (multiple orders in parallel)
-- Persisted to localStorage with `createJSONStorage`
-- Auto-recalculates prices on client type change (RETAIL/RESELLER/WHOLESALE)
-- No Redux or Context API - most data fetched server-side
+### i18n (next-intl)
+Locales `en` / `fr` (default) / `ar`, prefix `always` (`/fr/dashboard`). Config in `src/i18n/routing.ts`; use `createNavigation()` for locale-aware `Link`, `redirect`, `useRouter`. Message catalogs in `messages/{en,fr,ar}.json` — all three must be updated together. Arabic implies RTL.
 
-### Algerian Tax Compliance
-- Tax regimes: `G50` (TVA/VAT) or `G12` (IFU)
-- Supplier withholding tax: 0%, 10%, 15%, 24% (retenue à la source)
-- Withholding calculated at purchase order creation, stored in `PurchaseOrder.withholdingAmount`
-- Stamp tax (`stampTaxEnabled`), TAP (`tapRate`) configurable per tenant
-- Tax reports: `src/actions/g50.ts`, `src/actions/g12.ts`
+### Client state
+Zustand only, and effectively only for the POS cart (`src/hooks/use-pos-store.ts`): multiple parallel order sessions, persisted to localStorage, auto-recalculates prices on client-type change. No Redux/Context — everything else is fetched server-side.
 
-## Key Database Models
+Offline POS: `src/lib/offline-queue.ts` queues orders in IndexedDB (`idb-keyval`) with `OFFLINE-####` receipt numbers and syncs on reconnect. Anything touching order creation must keep the offline payload shape in sync.
 
-### Core Multi-Tenant
-- `Tenant` - Business entity with subscription, tax config, API keys
-- `User` - Team members with roles (ADMIN, MANAGER, CASHIER, VENDEUR, ACCOUNTANT, STOCK_MANAGER)
-- `Store` - Multiple locations per tenant
+### Route groups (`src/app/[locale]/`)
+`(auth)` login/register · `(dashboard)` the ~60 business modules · `(pos)` POS + customer-facing `display` · `(superadmin)` cross-tenant admin. Non-localized: `src/app/api/`, `src/app/receipt/[id]`, `src/app/activate`.
 
-### Inventory
-- `Product` - SKU with 3 pricing tiers (retail/dealer/wholesale), cost, images, barcode
-- `Category`, `Brand` - Hierarchical organization
-- `StockMovement` - Audit trail of all stock changes
-- `Spoilage` - Waste tracking
+### Algerian tax compliance
+Regimes `G50` (TVA) or `G12` (IFU) per tenant — reports in `src/actions/g50.ts` / `g12.ts`. Supplier withholding (retenue à la source) 0/10/15/24%, computed **at purchase-order creation** and stored in `PurchaseOrder.withholdingAmount`. Stamp tax (`stampTaxEnabled`) and TAP (`tapRate`) are per-tenant settings. TVA rates are per-product.
 
-### Sales & Orders
-- `Order` - POS transactions (cash register sales)
-- `SalesOrder` - B2B invoices (Bon de Livraison)
-- Both have `OrderItem`/`SalesOrderItem` with price/TVA snapshots
+## Key Domain Models
 
-### Purchasing
-- `Supplier` - Vendor info (NIF, NIS, RIB, withholding tax rate)
-- `PurchaseOrder` - Supplier orders with withholding tax calculation
-- `PurchaseOrderItem` - Line items with cost & TVA
+Three separate order concepts — don't conflate them:
+- `Order` — POS / cash register sale
+- `SalesOrder` — B2B invoice (Bon de Livraison)
+- `PurchaseOrder` — supplier order
 
-### Financial
-- `TreasuryAccount` - Cash registers, bank accounts
-- `TreasuryTransaction` - Ledger entries with balance snapshots
-- `Expense`, `ExpenseCategory` - Operating costs
-- `DailyClose` - End-of-day reconciliation
+All follow PENDING → CONFIRMED → DELIVERED/COMPLETED → CANCELLED, and take their numbers from `SequenceCounter` (per tenant, per document type).
 
-### Other
-- `Customer` - Clients with loyalty points, client type (RETAIL/RESELLER/WHOLESALE)
-- `Promotion` - Discounts & campaigns
-- `RecurringInvoice` - Subscription billing
-- `DeliveryShipment`, `DeliveryTour`, `TruckLoad` - Logistics
-- `AuditLog` - Compliance trail
-- `SequenceCounter` - Invoice numbering per tenant
+`Product` carries three price tiers — `retailPrice`, `dealerPrice`, `wholesalePrice` — selected by the customer's client type (RETAIL / RESELLER / WHOLESALE); `cost` is separate for margin. **Never write `Product.stock` directly** — go through `StockMovement`.
+
+Everything else (`Tenant`, `Store`, `User`, `Customer`, `Supplier`, `TreasuryAccount`, `Expense`, `DailyClose`, `Promotion`, `RecurringInvoice`, `DeliveryTour`/`TruckLoad`, `AuditLog`, …) is discoverable in `prisma/schema.prisma`.
 
 ## Environment Variables
 
-### Required
+Required: `NEXTAUTH_SECRET`, `DATABASE_URL`.
+
+Optional: `REDIS_URL`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `WHATSAPP_TOKEN`/`WHATSAPP_PHONE_ID`, `GEMINI_API_KEY`, `SUPERADMIN_WHATSAPP`, `MOBILE_ALLOWED_ORIGINS`, `SENTRY_ORG`/`SENTRY_PROJECT`.
+
+Docker-injected: `NEXTAUTH_URL`, `AUTH_URL`, `AUTH_TRUST_HOST`, `SYNCLOUDPOS_MODE` (`local` | `cloud`), `MACHINE_ID`, `LICENSE_FILE`.
+
+### Licensing (`src/lib/license.ts`)
+On-prem installs are gated by an Ed25519-signed `license.key` bound to `MACHINE_ID` (set by `install.bat`/`install.sh`) and mounted into the container. `SYNCLOUDPOS_MODE=cloud` disables all license checks — that's how the hosted VPS runs. Related surfaces: `/api/license/*`, `/activate`, `/superadmin/licenses`.
+
+## Deployment
+
+Production is a VPS at `https://chirpedbeo.online`, deployed by **pushing to a bare git remote**, not through GitHub:
+
 ```bash
-NEXTAUTH_SECRET=<jwt-signing-key>
-DATABASE_URL=postgresql://user:pass@host:5432/syncloudpos
+git push vps master
 ```
 
-### Optional
-```bash
-REDIS_URL=redis://localhost:6379
-GOOGLE_CLIENT_ID=<oauth-client-id>
-GOOGLE_CLIENT_SECRET=<oauth-secret>
-WHATSAPP_TOKEN=<whatsapp-api-token>
-WHATSAPP_PHONE_ID=<whatsapp-phone-id>
-GEMINI_API_KEY=<google-ai-key>
-SUPERADMIN_WHATSAPP=<admin-phone>
-```
+`deploy.bat` wraps this: `git add .` → commit → `npx vitest run` (aborts the deploy on failure) → `git push vps master`. The `deploy_*.py` scripts at the repo root are one-off paramiko/SFTP hotfix scripts that upload individual files to `/var/www/syncloudpos` and rebuild — they are historical artifacts, not a maintained pipeline.
 
-### Docker-Injected
-```bash
-NEXTAUTH_URL=http://localhost:3000
-AUTH_URL=http://localhost:3000
-SYNCLOUDPOS_MODE=local  # or "cloud"
-MACHINE_ID=<license-machine-id>
-LICENSE_FILE=<license-path>
-```
+`.github/workflows/main.yml` (lint + build) triggers only on `main`, but the working branch is `master`, **so CI does not currently run on pushes.** Don't rely on it as a gate.
 
-## Important Patterns & Conventions
+Sentry is wired in via `withSentryConfig` in `next.config.ts` with `tunnelRoute: "/monitoring"`.
 
-### When Writing Server Actions
-1. Always fetch session: `const session = await auth()`
-2. Extract tenantId: `const tenantId = session?.user?.tenantId`
-3. Filter all queries by tenantId
-4. Check permissions: `await requirePermission("module:action")` or `await hasPermission("module:action")` (takes a permission string, not the session — resolves session internally)
-5. Use `revalidatePath()` after mutations
-6. Return `{ success: true, data }` or `{ error: 'message' }`
+Health check: `/api/health`.
 
-### When Working with Treasury
-- Never create standalone payment records
-- Always create `TreasuryTransaction` for financial flows
-- Set `source` field: `SALE`, `PURCHASE`, `EXPENSE`, `MANUAL_IN`, `MANUAL_OUT`
-- Store balance snapshot in transaction for audit trail
-- Link to related entity via `orderId`, `salesOrderId`, `purchaseOrderId`, `expenseId`
-
-### When Working with Products
-- Three pricing tiers: `retailPrice`, `dealerPrice`, `wholesalePrice`
-- Client type determines which price to use
-- Cost stored separately for margin calculation
-- Stock tracked via `StockMovement` (never modify `Product.stock` directly)
-
-### When Working with Orders
-- `Order` = POS sales (cash register)
-- `SalesOrder` = B2B invoices (Bon de Livraison)
-- `PurchaseOrder` = Supplier orders
-- All have status workflow: PENDING → CONFIRMED → DELIVERED/COMPLETED → CANCELLED
-- Invoice numbers from `SequenceCounter` (per tenant, per type)
-
-### When Working with Taxes
-- TVA (VAT) rates stored per product
-- Withholding tax calculated at purchase order level
-- G50 reports for TVA regime tenants
-- G12 reports for IFU regime tenants
-- Stamp tax and TAP configurable per tenant
-
-## File Structure
-
-```
-src/
-├── actions/           # Server actions (50+ files)
-├── app/
-│   ├── [locale]/     # Locale-based routing
-│   │   ├── (auth)/   # Login/register
-│   │   └── (dashboard)/  # Main app modules
-│   └── api/          # API routes (NextAuth, mobile, webhooks)
-├── components/       # React components (organized by feature)
-├── hooks/           # Custom hooks (use-pos-store.ts)
-├── lib/             # Utilities (redis.ts, rbac.ts, utils.ts)
-├── i18n/            # Internationalization config
-└── auth.ts          # NextAuth config
-
-prisma/
-└── schema.prisma    # Database schema
-
-docker-compose.yml   # PostgreSQL + Redis + App
-Dockerfile          # Multi-stage build
-```
-
-## Testing & Deployment
-
-### Before Committing
-1. Run linter: `npm run lint`
-2. Test build: `npm run build`
-3. Check Prisma schema: `npx prisma validate`
-
-### Deployment
-- Docker-based deployment (see docker-compose.yml)
-- On container start, `docker-entrypoint.sh` waits for the DB then runs `npx prisma db push --skip-generate` (schema sync, NOT migration files), then `node server.js`
-- No `npm test` script exists — there is no test runner configured in this project
-- Health check endpoint: `/api/health`
-- Production URL: https://chirpedbeo.online
+### Before committing
+1. `npm run typecheck` — **must be zero.** `next.config.ts` sets `ignoreBuildErrors: true`, so `npm run build` will happily ship type errors; tsc is the only gate. The tree is at 0, so any error you see is one you introduced.
+2. `npm test`
+3. `npm run lint` — must be zero *errors* (warnings are expected; see above)
+3b. `npm run check:secrets` — scans staged changes for plaintext credentials. Enable it as a hook once per clone with `git config core.hooksPath .githooks`.
+4. `npx prisma validate` if the schema changed
 
 ## Common Gotchas
 
-1. **Always filter by tenantId** - Forgetting this leaks data across tenants
-2. **Use treasury transactions for payments** - Don't create separate payment models
-3. **Redis is optional** - Code must work without Redis (graceful fallback)
-4. **Edge-compatible auth config** - `auth.config.ts` cannot import Prisma
-5. **Locale prefix required** - No automatic locale detection, users must choose
-6. **Withholding tax at order creation** - Not at payment time
-7. **Stock via StockMovement** - Never modify `Product.stock` directly
-8. **Invoice numbers from SequenceCounter** - Ensures uniqueness per tenant
+1. **Always filter by `tenantId`** — omitting it leaks data across tenants.
+2. **No Payment model** — payments are `TreasuryTransaction` rows.
+3. **Redis is optional** — code must degrade gracefully without it.
+4. `auth.config.ts` is Edge — it **cannot** import Prisma or anything Node-only.
+5. **`serializeData()` Decimals/Dates** before returning them across the RSC boundary — never `JSON.parse(JSON.stringify(...))`, which yields strings instead of numbers for money.
+6. **Never touch `Product.stock` directly** — use `StockMovement`.
+7. Invoice numbers come from `SequenceCounter`, never from a count.
+8. Withholding tax is computed at PO creation, not at payment.
+9. `/api/mobile/*` bypasses the middleware's auth check — each handler must call `requireMobileAuth` itself.
+10. Locale prefix is mandatory; there is no automatic locale detection.
+11. `npm run build` succeeds despite type errors.
+12. New i18n strings need entries in all three of `messages/en.json`, `fr.json`, `ar.json`.

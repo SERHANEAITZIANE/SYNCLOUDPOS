@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { ClientType } from "@prisma/client"
 import { logAudit } from "./audit-log"
+import { serializeData } from "@/lib/serialize"
 
 interface CustomerData {
     name: string
@@ -67,6 +68,10 @@ export const getCustomers = async (page: number = 1, pageSize: number = 20, sear
 }
 
 export const createCustomer = async (data: CustomerData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("customers:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -111,6 +116,10 @@ export const createCustomer = async (data: CustomerData) => {
 }
 
 export const updateCustomer = async (id: string, data: CustomerData) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("customers:update"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -181,6 +190,10 @@ export const updateCustomer = async (id: string, data: CustomerData) => {
 }
 
 export const deleteCustomer = async (id: string) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("customers:delete"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
 
@@ -215,6 +228,10 @@ export const deleteCustomer = async (id: string) => {
 }
 
 export const importCustomers = async (rows: Record<string, string>[]) => {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("customers:create"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.id) return { error: "Unauthorized" }
     const tenantId = session.user.tenantId
@@ -335,7 +352,7 @@ export const getUnpaidCustomers = async () => {
             where: { tenantId, balance: { gt: 0 } },
             orderBy: { balance: "desc" }
         })
-        return { customers: JSON.parse(JSON.stringify(customers)) }
+        return { customers: serializeData(customers) }
     } catch (_error) {
         return { error: "Failed to fetch unpaid customers" }
     }

@@ -5,6 +5,7 @@ import { getProducts } from "@/actions/products"
 import { SalesOrderForm } from "@/components/sales/sales-form"
 import { getActiveTenantId } from "@/actions/get-active-tenant"
 import { db } from "@/lib/db"
+import { serializeData } from "@/lib/serialize"
 
 const SalesOrderPage = async ({
     params
@@ -37,7 +38,7 @@ const SalesOrderPage = async ({
                     }
                 })
                 if (foundByReceipt) {
-                    salesOrder = JSON.parse(JSON.stringify(foundByReceipt))
+                    salesOrder = serializeData(foundByReceipt)
                 }
             }
         }
@@ -61,7 +62,7 @@ const SalesOrderPage = async ({
                     }
                 })
                 if (fallbackSo) {
-                    salesOrder = JSON.parse(JSON.stringify(fallbackSo))
+                    salesOrder = serializeData(fallbackSo)
                 }
             }
         }
@@ -69,7 +70,7 @@ const SalesOrderPage = async ({
 
     // Helper to ensure data is safe for client components
     const plainify = (obj: any): any => {
-        return JSON.parse(JSON.stringify(obj))
+        return serializeData(obj)
     }
 
     const customersData = await getCustomers(1, 10000)
@@ -128,7 +129,6 @@ const SalesOrderPage = async ({
         }))
     }) : null
 
-    console.log("Sanitized Customers Sample:", customers[0]) // Debug log
 
     return (
         <div className="flex-col">

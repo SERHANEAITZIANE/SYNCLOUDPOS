@@ -11,6 +11,10 @@ import { sendEvolutionMessage } from "@/lib/whatsapp"
  * Fire-and-forget — called after order is saved.
  */
 export async function sendWhatsAppReceipt(orderId: string) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("pos:create"))) return { error: "Accès refusé" }
+
     try {
         const session = await auth()
         if (!session?.user?.tenantId) return { error: "Unauthorized" }

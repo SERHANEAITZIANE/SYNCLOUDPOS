@@ -30,6 +30,10 @@ interface CashierMetrics {
  * Get per-cashier performance metrics for a date range.
  */
 export async function getCashierPerformance(dateRange?: { from: Date; to: Date }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
 
@@ -122,6 +126,10 @@ interface CustomerSegment {
  * RFM Analysis — Segment customers by Recency, Frequency, Monetary value.
  */
 export async function getCustomerSegmentation() {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
 
@@ -226,6 +234,10 @@ interface ProductMargin {
  * Product-level profit margin analysis for a date range.
  */
 export async function getMarginAnalysis(dateRange?: { from: Date; to: Date }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
 
@@ -320,6 +332,10 @@ export async function getMarginAnalysis(dateRange?: { from: Date; to: Date }) {
  * Hourly sales pattern — identifies peak selling hours.
  */
 export async function getHourlySalesPattern(dateRange?: { from: Date; to: Date }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     if (!session?.user?.tenantId) return { error: "Non autorisé" }
 

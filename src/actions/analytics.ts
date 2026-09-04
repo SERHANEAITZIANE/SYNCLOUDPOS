@@ -4,8 +4,13 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { withCache } from "@/lib/redis"
 import { startOfDay, endOfDay, subDays, format, eachDayOfInterval } from "date-fns"
+import { serializeData } from "@/lib/serialize"
 
 export async function getAnalyticsData(dateRange?: { from: string; to: string }) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) throw new Error("Accès refusé")
+
     try {
         const session = await auth();
         if (!session?.user?.id) throw new Error("Unauthorized");
@@ -284,7 +289,7 @@ export async function getAnalyticsData(dateRange?: { from: string; to: string })
                 products: cp._count.id,
             }));
 
-            return JSON.parse(JSON.stringify({
+            return serializeData(({
                 totalRevenue, posRevenue, invoiceRevenue,
                 totalExpenses, totalPurchases, cashCollected,
                 totalCOGS, netProfit, ordersCount, salesCount,
@@ -309,6 +314,10 @@ export async function getAnalyticsData(dateRange?: { from: string; to: string })
 }
 
 export async function getSalesData(tenantId: string, days: number = 60): Promise<{ date: string; sales: number }[]> {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("analytics:read"))) return []
+
     try {
         const toDate = new Date();
         const fromDate = subDays(toDate, days);

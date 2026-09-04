@@ -4,6 +4,10 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 
 export async function getCommissionReport(year: number, month?: number) {
+    // RBAC Check
+    const { hasPermission } = await import("@/lib/rbac")
+    if (!(await hasPermission("commissions:read"))) return { error: "Accès refusé" }
+
     const session = await auth()
     const tenantId = session?.user?.tenantId
     if (!tenantId) return { error: "Unauthorized" }

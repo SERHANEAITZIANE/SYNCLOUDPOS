@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
+import { serializeData } from "@/lib/serialize"
 
 export async function getCatalogData() {
     const session = await auth()
@@ -65,7 +66,7 @@ export async function getCatalogData() {
 
         return {
             brands: formattedBrands,
-            products: JSON.parse(JSON.stringify(products))
+            products: serializeData(products)
         }
     } catch (error) {
         console.error("[GET_CATALOG_DATA_ERROR]", error)

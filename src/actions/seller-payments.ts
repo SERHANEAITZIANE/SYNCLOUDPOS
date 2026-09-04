@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { serializeData } from "@/lib/serialize"
 
 export async function createSellerPayment(data: {
     userId: string
@@ -29,7 +30,7 @@ export async function createSellerPayment(data: {
         })
 
         revalidatePath("/commissions")
-        return { success: "Règlement enregistré avec succès !", data: JSON.parse(JSON.stringify(payment)) }
+        return { success: "Règlement enregistré avec succès !", data: serializeData(payment) }
     } catch (error) {
         console.error("[CREATE_SELLER_PAYMENT_ERROR]", error)
         return { error: "Impossible d'enregistrer le règlement." }
@@ -54,7 +55,7 @@ export async function getSellerPayments(userId?: string) {
                 date: "desc"
             }
         })
-        return JSON.parse(JSON.stringify(payments))
+        return serializeData(payments)
     } catch (error) {
         console.error("[GET_SELLER_PAYMENTS_ERROR]", error)
         return []
