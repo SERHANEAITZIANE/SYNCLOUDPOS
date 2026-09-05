@@ -125,6 +125,90 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ANT DESIGN — OFFICIAL ANT DESIGN TOKEN THEME
+   Daybreak Blue primary, Ant Design Pro's signature navy sider,
+   and the neutral grays from Ant Design's default seed tokens.
+   ═══════════════════════════════════════════════════════════════ */
+
+.antd {
+  --radius: 0.375rem;
+  --background: #F5F5F5;
+  --foreground: #1F1F1F;
+  --card: #FFFFFF;
+  --card-foreground: #1F1F1F;
+  --popover: #FFFFFF;
+  --popover-foreground: #1F1F1F;
+  --primary: #1677FF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0F0F0;
+  --secondary-foreground: #1F1F1F;
+  --muted: #FAFAFA;
+  --muted-foreground: #8C8C8C;
+  --accent: #E6F4FF;
+  --accent-foreground: #1F1F1F;
+  --destructive: #FF4D4F;
+  --destructive-foreground: #FFFFFF;
+  --border: #D9D9D9;
+  --input: #D9D9D9;
+  --ring: #1677FF;
+  --chart-1: #5B8FF9;
+  --chart-2: #5AD8A6;
+  --chart-3: #F6BD16;
+  --chart-4: #E8684A;
+  --chart-5: #9270CA;
+  --sidebar: #001529;
+  --sidebar-foreground: #A6ADB4;
+  --sidebar-primary: #1677FF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #0C2135;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #002140;
+  --sidebar-ring: #1677FF;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+.antd-dark {
+  --radius: 0.375rem;
+  --background: #000000;
+  --foreground: #E6E6E6;
+  --card: #141414;
+  --card-foreground: #E6E6E6;
+  --popover: #1F1F1F;
+  --popover-foreground: #E6E6E6;
+  --primary: #1668DC;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1F1F1F;
+  --secondary-foreground: #E6E6E6;
+  --muted: #1A1A1A;
+  --muted-foreground: #A6A6A6;
+  --accent: #111A2C;
+  --accent-foreground: #E6E6E6;
+  --destructive: #DC4446;
+  --destructive-foreground: #FFFFFF;
+  --border: #424242;
+  --input: #424242;
+  --ring: #1668DC;
+  --chart-1: #3C7EFF;
+  --chart-2: #49C79C;
+  --chart-3: #E0A800;
+  --chart-4: #D8593E;
+  --chart-5: #7C5CC4;
+  --sidebar: #000000;
+  --sidebar-foreground: #A6A6A6;
+  --sidebar-primary: #1668DC;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #141414;
+  --sidebar-accent-foreground: #E6E6E6;
+  --sidebar-border: #1F1F1F;
+  --sidebar-ring: #1668DC;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-inter);
+  --font-mono: monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    GHARDAÏA CLAY — M'ZAB VALLEY PREMIUM THEME
    Inspired by the UNESCO World Heritage architecture of Ghardaïa,
    the pentapolis of the M'zab Valley: terracotta walls, 
@@ -980,14 +1064,14 @@ html.ghardaia-dark [data-active="true"]::before {
    PREMIUM EFFECTS — DEFAULT THEME (Light & Dark)
    ═══════════════════════════════════════════════════════════════ */
 
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.dark) body {
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark):not(.dark) body {
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -5%, rgba(51, 96, 169, 0.05) 0%, transparent 60%),
     radial-gradient(ellipse 50% 35% at 90% 100%, rgba(107, 138, 255, 0.03) 0%, transparent 55%);
   background-size: 100% 100%, 100% 100%;
   background-attachment: fixed, fixed;
 }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) body {
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) body {
   background-image:
     radial-gradient(ellipse 70% 40% at 50% -5%, rgba(107, 138, 255, 0.08) 0%, transparent 55%),
     radial-gradient(ellipse 50% 35% at 85% 95%, rgba(167, 139, 250, 0.05) 0%, transparent 55%);
@@ -995,33 +1079,33 @@ html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-d
   background-attachment: fixed, fixed;
 }
 
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark) ::-webkit-scrollbar { width: 6px; height: 6px; }
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark) ::-webkit-scrollbar-track { background: transparent; }
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.dark) ::-webkit-scrollbar-thumb { background: rgba(51, 96, 169, 0.18); border-radius: 9999px; }
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.dark) ::-webkit-scrollbar-thumb:hover { background: rgba(51, 96, 169, 0.35); }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) ::-webkit-scrollbar-thumb { background: rgba(107, 138, 255, 0.2); border-radius: 9999px; }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) ::-webkit-scrollbar-thumb:hover { background: rgba(107, 138, 255, 0.4); }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark) ::-webkit-scrollbar { width: 6px; height: 6px; }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark) ::-webkit-scrollbar-track { background: transparent; }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark):not(.dark) ::-webkit-scrollbar-thumb { background: rgba(51, 96, 169, 0.18); border-radius: 9999px; }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark):not(.dark) ::-webkit-scrollbar-thumb:hover { background: rgba(51, 96, 169, 0.35); }
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) ::-webkit-scrollbar-thumb { background: rgba(107, 138, 255, 0.2); border-radius: 9999px; }
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) ::-webkit-scrollbar-thumb:hover { background: rgba(107, 138, 255, 0.4); }
 
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.dark) ::selection { background: rgba(51, 96, 169, 0.18); color: #1A1D23; }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) ::selection { background: rgba(107, 138, 255, 0.25); color: #E8ECF2; }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark):not(.dark) ::selection { background: rgba(51, 96, 169, 0.18); color: #1A1D23; }
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) ::selection { background: rgba(107, 138, 255, 0.25); color: #E8ECF2; }
 
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.dark) *:focus-visible { outline-color: rgba(51, 96, 169, 0.5) !important; }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) *:focus-visible { outline-color: rgba(107, 138, 255, 0.5) !important; }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark):not(.dark) *:focus-visible { outline-color: rgba(51, 96, 169, 0.5) !important; }
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) *:focus-visible { outline-color: rgba(107, 138, 255, 0.5) !important; }
 
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark) button:active:not(:disabled),
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark) a:active { transform: scale(0.985); }
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark) button:active:not(:disabled),
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark) a:active { transform: scale(0.985); }
 
 @keyframes default-shimmer {
   0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
   50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.05); opacity: 1; }
   100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
 }
-html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark) body::before {
+html:not(.ghardaia):not(.ghardaia-dark):not(.riviera):not(.riviera-dark):not(.atlas):not(.atlas-dark):not(.horizon):not(.horizon-dark):not(.antd):not(.antd-dark) body::before {
   content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 45% 35% at 20% 10%, rgba(51, 96, 169, 0.06) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 80% 90%, rgba(107, 138, 255, 0.04) 0%, transparent 55%);
   filter: blur(40px); animation: default-shimmer 28s ease-in-out infinite; will-change: transform, opacity;
 }
-html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark) body::before {
+html.dark:not(.ghardaia-dark):not(.riviera-dark):not(.atlas-dark):not(.horizon-dark):not(.antd-dark) body::before {
   background: radial-gradient(ellipse 45% 35% at 20% 10%, rgba(107, 138, 255, 0.08) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 80% 90%, rgba(167, 139, 250, 0.06) 0%, transparent 55%);
   opacity: 0.08;
 }
@@ -1110,11 +1194,40 @@ html.horizon button:active:not(:disabled), html.horizon a:active, html.horizon-d
 html.horizon body::before { content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 45% 35% at 18% 12%, rgba(45, 107, 168, 0.06) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 82% 88%, rgba(106, 93, 150, 0.04) 0%, transparent 55%); filter: blur(40px); animation: horizon-shimmer 28s ease-in-out infinite; will-change: transform, opacity; }
 html.horizon-dark body::before { content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 45% 35% at 18% 12%, rgba(91, 163, 224, 0.08) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 82% 88%, rgba(155, 143, 204, 0.06) 0%, transparent 55%); filter: blur(40px); animation: horizon-shimmer 28s ease-in-out infinite; will-change: transform, opacity; opacity: 0.08; }
 
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM EFFECTS — ANT DESIGN THEME
+   ═══════════════════════════════════════════════════════════════ */
+
+html.antd body { background-color: var(--background); background-image: radial-gradient(ellipse 80% 50% at 50% -5%, rgba(22, 119, 255, 0.05) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 90% 100%, rgba(22, 119, 255, 0.03) 0%, transparent 60%); background-size: 100% 100%, 100% 100%; background-attachment: fixed, fixed; }
+html.antd-dark body { background-color: var(--background); background-image: radial-gradient(ellipse 70% 40% at 50% -5%, rgba(22, 104, 220, 0.08) 0%, transparent 55%), radial-gradient(ellipse 50% 35% at 85% 95%, rgba(22, 104, 220, 0.05) 0%, transparent 55%); background-size: 100% 100%, 100% 100%; background-attachment: fixed, fixed; }
+
+html.antd ::-webkit-scrollbar, html.antd-dark ::-webkit-scrollbar { width: 6px; height: 6px; }
+html.antd ::-webkit-scrollbar-track, html.antd-dark ::-webkit-scrollbar-track { background: transparent; }
+html.antd ::-webkit-scrollbar-thumb { background: rgba(22, 119, 255, 0.2); border-radius: 9999px; }
+html.antd ::-webkit-scrollbar-thumb:hover { background: rgba(22, 119, 255, 0.4); }
+html.antd-dark ::-webkit-scrollbar-thumb { background: rgba(22, 104, 220, 0.25); border-radius: 9999px; }
+html.antd-dark ::-webkit-scrollbar-thumb:hover { background: rgba(22, 104, 220, 0.45); }
+
+html.antd ::selection { background: rgba(22, 119, 255, 0.18); color: #1F1F1F; }
+html.antd-dark ::selection { background: rgba(22, 104, 220, 0.28); color: #E6E6E6; }
+html.antd *:focus-visible { outline-color: rgba(22, 119, 255, 0.5) !important; }
+html.antd-dark *:focus-visible { outline-color: rgba(22, 104, 220, 0.5) !important; }
+html.antd button:active:not(:disabled), html.antd a:active, html.antd-dark button:active:not(:disabled), html.antd-dark a:active { transform: scale(0.985); }
+
+@keyframes antd-shimmer {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+  50%  { transform: translate3d(-1.5%, 1%, 0) scale(1.04); opacity: 1; }
+  100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.8; }
+}
+html.antd body::before { content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 45% 35% at 18% 12%, rgba(22, 119, 255, 0.05) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 82% 88%, rgba(22, 119, 255, 0.03) 0%, transparent 55%); filter: blur(40px); animation: antd-shimmer 30s ease-in-out infinite; will-change: transform, opacity; }
+html.antd-dark body::before { content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 45% 35% at 18% 12%, rgba(22, 104, 220, 0.08) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 82% 88%, rgba(22, 104, 220, 0.06) 0%, transparent 55%); filter: blur(40px); animation: antd-shimmer 30s ease-in-out infinite; will-change: transform, opacity; opacity: 0.08; }
+
 @media (prefers-reduced-motion: reduce) {
   html:not(.ghardaia):not(.ghardaia-dark) body::before,
   html.riviera body::before, html.riviera-dark body::before,
   html.atlas body::before, html.atlas-dark body::before,
-  html.horizon body::before, html.horizon-dark body::before { animation: none; }
+  html.horizon body::before, html.horizon-dark body::before,
+  html.antd body::before, html.antd-dark body::before { animation: none; }
 }
 
 /* Auth page blob animation */

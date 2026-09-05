@@ -11,8 +11,8 @@ function ThemeSyncHelper() {
             const list = document.documentElement.classList
             const storedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null
             
-            const darkThemes = ["dark", "ghardaia-dark", "riviera-dark", "atlas-dark", "horizon-dark"]
-            const lightThemes = ["light", "ghardaia", "riviera", "atlas", "horizon"]
+            const darkThemes = ["dark", "ghardaia-dark", "riviera-dark", "atlas-dark", "horizon-dark", "antd-dark"]
+            const lightThemes = ["light", "ghardaia", "riviera", "atlas", "horizon", "antd"]
             
             const isDarkActive = darkThemes.some(t => list.contains(t) || storedTheme === t)
 

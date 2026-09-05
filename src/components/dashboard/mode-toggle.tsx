@@ -49,6 +49,13 @@ const themeOptions = [
             { id: "ghardaia", icon: "🏜️", colors: ["#FBF7F0", "#C4593A", "#1B5E7B"] },
             { id: "ghardaia-dark", icon: "🏜️", colors: ["#0F0D0B", "#E8724A", "#5BA4C0"] },
         ]
+    },
+    {
+        group: "Ant Design",
+        themes: [
+            { id: "antd", icon: "🐜", colors: ["#F5F5F5", "#1677FF", "#001529"] },
+            { id: "antd-dark", icon: "🐜", colors: ["#000000", "#1668DC", "#141414"] },
+        ]
     }
 ]
 
@@ -56,8 +63,8 @@ export function ModeToggle() {
     const { setTheme, theme } = useTheme()
     const t = useTranslations("ModeToggle")
 
-    const darkThemes = ["dark", "ghardaia-dark", "riviera-dark", "atlas-dark", "horizon-dark"]
-    const lightThemes = ["light", "ghardaia", "riviera", "atlas", "horizon"]
+    const darkThemes = ["dark", "ghardaia-dark", "riviera-dark", "atlas-dark", "horizon-dark", "antd-dark"]
+    const lightThemes = ["light", "ghardaia", "riviera", "atlas", "horizon", "antd"]
 
     React.useEffect(() => {
         if (typeof window === "undefined") return
@@ -81,6 +88,8 @@ export function ModeToggle() {
         "horizon-dark": "Horizon 🌙",
         ghardaia: t("ghardaia"),
         "ghardaia-dark": t("ghardaiaDark"),
+        antd: "Ant Design ☀️",
+        "antd-dark": "Ant Design 🌙",
     }
 
     return (

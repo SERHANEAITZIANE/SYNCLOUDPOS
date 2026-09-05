@@ -76,7 +76,7 @@ export default async function RootLayout({
               defaultTheme="system"
               enableSystem
               disableTransitionOnChange
-              themes={["light", "dark", "ghardaia", "ghardaia-dark", "riviera", "riviera-dark", "atlas", "atlas-dark", "horizon", "horizon-dark"]}
+              themes={["light", "dark", "ghardaia", "ghardaia-dark", "riviera", "riviera-dark", "atlas", "atlas-dark", "horizon", "horizon-dark", "antd", "antd-dark"]}
             >
               {children}
             </ThemeProvider>
