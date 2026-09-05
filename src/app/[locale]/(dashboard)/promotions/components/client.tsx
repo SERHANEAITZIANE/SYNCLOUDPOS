@@ -72,12 +72,15 @@ export const PromotionsClient: React.FC<PromotionsClientProps> = ({
     }
 
     const getPromoTypeLabel = (type: string) => {
+        if (type === "DIRECT_DISCOUNT") return "Remise directe produit"
+        if (type === "CART_THRESHOLD") return "Remise Panier (Seuil d'achat)"
         if (type === "NTH_ITEM_DISCOUNT") return "Nième article"
         if (type === "BUY_X_GET_Y_FREE") return "1 acheté = 1 offert"
         return type
     }
 
     const getScopeLabel = (promo: PromotionsClientProps["promotions"][0]) => {
+        if (promo.type === "CART_THRESHOLD") return "Sur le montant total du panier"
         if (promo.targetScope === "ALL") return "Tous les produits"
         if (promo.targetScope === "CATEGORY") {
             const cat = categories.find(c => c.id === promo.scopeId)
@@ -152,7 +155,13 @@ export const PromotionsClient: React.FC<PromotionsClientProps> = ({
                                         <span className="font-bold text-orange-600">
                                             {promo.discountType === "PERCENT" ? `-${promo.discountValue}%` : `-${promo.discountValue} DA`}
                                         </span>
-                                        <span className="text-muted-foreground">sur le {promo.triggerQty}ème article</span>
+                                        <span className="text-muted-foreground">
+                                            {promo.type === "CART_THRESHOLD"
+                                                ? `dès ${promo.triggerQty.toLocaleString("fr-FR")} DA d'achat`
+                                                : promo.type === "DIRECT_DISCOUNT" || promo.triggerQty <= 1
+                                                ? "dès le 1er article"
+                                                : `sur le ${promo.triggerQty}ème article`}
+                                        </span>
                                     </div>
                                     {(promo.startsAt || promo.endsAt) && (
                                         <div className="text-xs text-muted-foreground">

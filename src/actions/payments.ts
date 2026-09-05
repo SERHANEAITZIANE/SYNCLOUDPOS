@@ -234,6 +234,7 @@ export async function updatePayment(id: string, data: {
     description?: string
     date?: string
     accountId?: string
+    referenceId?: string
 }) {
     // RBAC Check
     const { hasPermission } = await import("@/lib/rbac")
@@ -257,6 +258,8 @@ export async function updatePayment(id: string, data: {
             const newAmount = data.amount
             const diff = newAmount - oldAmount
             const hasAccountChanged = data.accountId && data.accountId !== existing.accountId
+            const hasReferenceChanged = Boolean(data.referenceId && data.referenceId !== existing.referenceId)
+            const targetReferenceId = data.referenceId !== undefined ? data.referenceId : existing.referenceId
 
             if (hasAccountChanged) {
                 // 1. Revert old amount from old account
@@ -339,12 +342,53 @@ export async function updatePayment(id: string, data: {
                     balanceBefore: updatedBalanceBefore,
                     balanceAfter: updatedBalanceAfter,
                     accountId: data.accountId || undefined,
+                    referenceId: targetReferenceId || undefined,
                     description: data.description,
                     date: data.date ? new Date(data.date) : undefined,
                 }
             })
 
-            if (diff !== 0) {
+            if (hasReferenceChanged) {
+                // 1. Revert effect from old entity
+                if (existing.referenceId) {
+                    const oldCustomer = await tx.customer.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+                    const oldSupplier = await tx.supplier.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
+
+                    if (oldCustomer) {
+                        if (existing.source === "MANUAL_IN" || existing.source === "CUSTOMER_PAYMENT") {
+                            await tx.customer.update({ where: { id: oldCustomer.id }, data: { balance: { increment: oldAmount } } });
+                        } else if (existing.source === "MANUAL_OUT" || existing.source === "CUSTOMER_LOAN") {
+                            await tx.customer.update({ where: { id: oldCustomer.id }, data: { balance: { decrement: oldAmount } } });
+                        }
+                    } else if (oldSupplier) {
+                        if (existing.source === "MANUAL_OUT" || existing.source === "SUPPLIER_PAYMENT") {
+                            await tx.supplier.update({ where: { id: oldSupplier.id }, data: { balance: { increment: oldAmount } } });
+                        } else if (existing.source === "MANUAL_IN" || existing.source === "SUPPLIER_LOAN") {
+                            await tx.supplier.update({ where: { id: oldSupplier.id }, data: { balance: { decrement: oldAmount } } });
+                        }
+                    }
+                }
+
+                // 2. Apply effect to new entity
+                if (data.referenceId) {
+                    const newCustomer = await tx.customer.findFirst({ where: { id: data.referenceId, tenantId: existing.tenantId } });
+                    const newSupplier = await tx.supplier.findFirst({ where: { id: data.referenceId, tenantId: existing.tenantId } });
+
+                    if (newCustomer) {
+                        if (existing.source === "MANUAL_IN" || existing.source === "CUSTOMER_PAYMENT") {
+                            await tx.customer.update({ where: { id: newCustomer.id }, data: { balance: { decrement: newAmount } } });
+                        } else if (existing.source === "MANUAL_OUT" || existing.source === "CUSTOMER_LOAN") {
+                            await tx.customer.update({ where: { id: newCustomer.id }, data: { balance: { increment: newAmount } } });
+                        }
+                    } else if (newSupplier) {
+                        if (existing.source === "MANUAL_OUT" || existing.source === "SUPPLIER_PAYMENT") {
+                            await tx.supplier.update({ where: { id: newSupplier.id }, data: { balance: { decrement: newAmount } } });
+                        } else if (existing.source === "MANUAL_IN" || existing.source === "SUPPLIER_LOAN") {
+                            await tx.supplier.update({ where: { id: newSupplier.id }, data: { balance: { increment: newAmount } } });
+                        }
+                    }
+                }
+            } else if (diff !== 0) {
                 // Adjust customer/supplier balance if this is a MANUAL transaction
                 if (existing.referenceId) {
                     const isCustomer = await tx.customer.findFirst({ where: { id: existing.referenceId, tenantId: existing.tenantId } });
@@ -377,13 +421,15 @@ export async function updatePayment(id: string, data: {
         revalidatePath("/[locale]/(dashboard)/treasury", "page")
         revalidatePath("/[locale]/(dashboard)/emprunt", "page")
         revalidatePath("/[locale]/(dashboard)/emprunt-fournisseur", "page")
+        revalidatePath("/[locale]/(dashboard)/customers", "page")
+        revalidatePath("/[locale]/(dashboard)/suppliers", "page")
         await logAudit({
             action: "UPDATE",
             entity: "PAYMENT",
             entityId: id,
             description: `Paiement mis à jour : ${data.description || id} (Montant: ${data.amount} DA)`,
-            before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId } : undefined,
-            after: { amount: data.amount, description: data.description, accountId: data.accountId }
+            before: oldPaymentCopy ? { amount: Number(oldPaymentCopy.amount), description: oldPaymentCopy.description, accountId: oldPaymentCopy.accountId, referenceId: oldPaymentCopy.referenceId } : undefined,
+            after: { amount: data.amount, description: data.description, accountId: data.accountId, referenceId: data.referenceId !== undefined ? data.referenceId : oldPaymentCopy?.referenceId }
         })
         return result
     } catch (error) {

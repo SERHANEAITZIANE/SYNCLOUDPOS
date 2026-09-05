@@ -431,8 +431,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         const newQty = Number(watchItems[index]?.quantity || 0)
         const newCost = Number(watchItems[index]?.costPrice || 0)
         
-        const totalStock = oldStock + newQty
-        const totalValue = (oldStock * oldCost) + (newQty * newCost)
+        const effectiveOldStock = oldStock > 0 ? oldStock : 0
+        const totalStock = effectiveOldStock + newQty
+        const totalValue = (effectiveOldStock * oldCost) + (newQty * newCost)
         const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
         
         setPmpRowIndex(index)
@@ -455,8 +456,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         const oldCost = Number(activeProduct.cost || 0)
         const newQty = Number(watchItems[pmpRowIndex]?.quantity || 0)
         const newCost = Number(watchItems[pmpRowIndex]?.costPrice || 0)
-        const totalStock = oldStock + newQty
-        const totalValue = (oldStock * oldCost) + (newQty * newCost)
+        const effectiveOldStock = oldStock > 0 ? oldStock : 0
+        const totalStock = effectiveOldStock + newQty
+        const totalValue = (effectiveOldStock * oldCost) + (newQty * newCost)
         const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
 
         try {
@@ -2339,8 +2341,9 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                             const newQty = Number(watchItems[pmpRowIndex]?.quantity || 0)
                             const newCost = Number(watchItems[pmpRowIndex]?.costPrice || 0)
                             
-                            const totalStock = oldStock + newQty
-                            const totalValue = (oldStock * oldCost) + (newQty * newCost)
+                            const effectiveOldStock = oldStock > 0 ? oldStock : 0
+                            const totalStock = effectiveOldStock + newQty
+                            const totalValue = (effectiveOldStock * oldCost) + (newQty * newCost)
                             const calculatedPmp = totalStock > 0 ? (totalValue / totalStock) : newCost
 
                             return (

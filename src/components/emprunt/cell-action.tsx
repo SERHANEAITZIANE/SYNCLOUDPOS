@@ -1,7 +1,7 @@
 "use client"
 
 import { Edit, Trash, ScrollText } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "@/i18n/routing"
 import { toast } from "react-hot-toast"
 import { useSession } from "next-auth/react"
@@ -12,13 +12,15 @@ import { Label } from "@/components/ui/label"
 import { deletePayment, updatePayment } from "@/actions/payments"
 import { LoanColumn } from "./columns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 
 interface CellActionProps {
     data: LoanColumn
     treasuryAccounts: { id: string; name: string }[]
+    customers?: { id: string; name: string }[]
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }) => {
+export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts, customers }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false)
@@ -26,10 +28,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
     const { data: session } = useSession()
 
     // Edit form state
+    const [editCustomerId, setEditCustomerId] = useState(data.customerId || "")
     const [editAmount, setEditAmount] = useState(String(data.amount))
     const [editDescription, setEditDescription] = useState(data.description)
     const [editDate, setEditDate] = useState(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
     const [editAccountId, setEditAccountId] = useState(data.accountId || "")
+
+    useEffect(() => {
+        if (editOpen) {
+            setEditCustomerId(data.customerId || "")
+            setEditAmount(String(data.amount))
+            setEditDescription(data.description || "")
+            setEditDate(data.date ? new Date(data.date).toISOString().slice(0, 10) : "")
+            setEditAccountId(data.accountId || "")
+        }
+    }, [editOpen, data])
 
     const onDelete = async () => {
         try {
@@ -51,6 +64,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
 
     const onEdit = async () => {
         try {
+            if (customers && customers.length > 0 && !editCustomerId) {
+                toast.error("Veuillez sélectionner un client")
+                return
+            }
             setLoading(true)
             const amount = parseFloat(editAmount)
             if (isNaN(amount) || amount <= 0) {
@@ -62,7 +79,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
                 amount,
                 description: editDescription,
                 date: editDate || undefined,
-                accountId: editAccountId || undefined
+                accountId: editAccountId || undefined,
+                referenceId: editCustomerId || undefined
             })
             if (result && 'error' in result) {
                 toast.error(result.error as string)
@@ -113,10 +131,26 @@ export const CellAction: React.FC<CellActionProps> = ({ data, treasuryAccounts }
                         <div className="flex flex-col gap-2 mb-4">
                             <h3 className="text-lg font-semibold">Modifier l'emprunt</h3>
                             <p className="text-sm text-muted-foreground">
-                                Modifiez le montant, le compte, l'observation ou la date.
+                                Modifiez le client, le montant, le compte, l'observation ou la date.
                             </p>
                         </div>
                         <div className="grid gap-4 py-2">
+                            {customers && customers.length > 0 && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor={`edit-customer-${data.id}`}>Client</Label>
+                                    <SearchableSelect
+                                        options={customers.map(c => ({
+                                            label: c.name,
+                                            value: c.id
+                                        }))}
+                                        value={editCustomerId}
+                                        onChange={setEditCustomerId}
+                                        placeholder="Sélectionner un client..."
+                                        searchPlaceholder="Rechercher un client..."
+                                        emptyMessage="Aucun client trouvé."
+                                    />
+                                </div>
+                            )}
                             <div className="grid gap-2">
                                 <Label htmlFor={`edit-amount-${data.id}`}>Montant (DA)</Label>
                                 <Input

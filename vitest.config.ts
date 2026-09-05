@@ -7,9 +7,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    exclude: ['**/node_modules/**', '**/.claude/**', '**/syncloud-gerant/**', '**/syncloud-tournee/**'],
     setupFiles: ['./src/__tests__/setup.ts'],
     env: {
-      DATABASE_URL: 'postgresql://syncloud:syncloud123@localhost:5432/syncloudpos_staging?schema=public'
+      DATABASE_URL: process.env.DATABASE_URL || 'postgresql://test_user:test_secret@localhost:5432/syncloudpos_test?schema=public'
     },
     alias: {
       '@': path.resolve(__dirname, './src'),

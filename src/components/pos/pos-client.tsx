@@ -32,6 +32,7 @@ import { LanguageSwitcher } from "@/components/dashboard/language-switcher"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { toast } from "react-hot-toast"
 import { useTranslations } from "next-intl"
+import { ActivePromotion, getProductDirectDiscount } from "@/lib/promotions-engine"
 
 interface PosClientProps {
     storeName?: string
@@ -149,6 +150,27 @@ export const PosClient: FC<PosClientProps> = ({
     const [posUiSize, setPosUiSize] = useState<"sm" | "md" | "lg">("md")
     const [page, setPage] = useState(1)
     const pageSize = 60
+    const [activePromotions, setActivePromotions] = useState<ActivePromotion[]>([])
+
+    useEffect(() => {
+        let isMounted = true
+        const fetchPromos = async () => {
+            try {
+                const promos = await actionGetActivePromotions()
+                if (isMounted && promos) {
+                    setActivePromotions(promos.map((p: any) => ({
+                        ...p,
+                        discountValue: Number(p.discountValue),
+                        scopeId: p.scopeId ?? null
+                    })))
+                }
+            } catch (err) {
+                console.error("Failed to load active promotions in PosClient:", err)
+            }
+        }
+        fetchPromos()
+        return () => { isMounted = false }
+    }, [actionGetActivePromotions])
 
     // Product details state for list view
     const [selectedProductForInfo, setSelectedProductForInfo] = useState<any | null>(null)
@@ -1263,6 +1285,7 @@ export const PosClient: FC<PosClientProps> = ({
                                         blockNegativeStock={storeData?.blockNegativeStock ?? false}
                                         isFocused={focusedProductIndex === index}
                                         posUiSize={posUiSize}
+                                        promotions={activePromotions}
                                     />
                                 ))}
                             </div>
@@ -1377,10 +1400,33 @@ export const PosClient: FC<PosClientProps> = ({
                                                 </div>
                                             </div>
                                             <div className="text-right flex flex-col items-end gap-1">
-                                                <div className="font-black text-base lg:text-lg text-gray-900 dark:text-white flex items-center">
-                                                    {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}
-                                                </div>
-                                                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                                {(() => {
+                                                const cType = activeSession?.clientType || 'RETAIL';
+                                                let currentPrice = product.price;
+                                                if (cType === 'RESELLER' && product.dealerPrice != null) currentPrice = product.dealerPrice;
+                                                if (cType === 'WHOLESALE' && product.wholesalePrice != null) currentPrice = product.wholesalePrice;
+                                                const listDiscount = getProductDirectDiscount({ id: product.id, categoryId: product.categoryId, price: currentPrice }, activePromotions);
+
+                                                return (
+                                                    <div className="text-right flex flex-col items-end gap-0.5">
+                                                        {listDiscount?.hasDiscount && (
+                                                            <span className="line-through text-xs font-bold text-slate-400 tabular-nums">
+                                                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(listDiscount.originalPrice)} DA
+                                                            </span>
+                                                        )}
+                                                        <div className={cn(
+                                                            "font-black text-base lg:text-lg flex items-center gap-1.5",
+                                                            listDiscount?.hasDiscount ? "text-emerald-600 dark:text-emerald-400" : "text-gray-900 dark:text-white"
+                                                        )}>
+                                                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(listDiscount?.hasDiscount ? listDiscount.discountedPrice : currentPrice)} DA
+                                                            {listDiscount?.hasDiscount && (
+                                                                <span className="text-[10px] bg-rose-600 text-white font-bold px-1.5 py-0.5 rounded-full">{listDiscount.label}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"

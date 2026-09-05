@@ -70,17 +70,57 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Type de promotion</Label>
-                            <Select value={form.type} onValueChange={v => handleChange("type", v)}>
+                            <Select
+                                value={form.type}
+                                onValueChange={v => {
+                                    if (v === "CART_THRESHOLD") {
+                                        setForm(prev => ({
+                                            ...prev,
+                                            type: v,
+                                            targetScope: "ALL",
+                                            triggerQty: "12000",
+                                            discountValue: "20"
+                                        }))
+                                    } else if (v === "DIRECT_DISCOUNT") {
+                                        setForm(prev => ({
+                                            ...prev,
+                                            type: v,
+                                            triggerQty: "1",
+                                            discountValue: "20"
+                                        }))
+                                    } else {
+                                        setForm(prev => ({
+                                            ...prev,
+                                            type: v,
+                                            triggerQty: prev.triggerQty === "12000" || prev.triggerQty === "1" ? "2" : prev.triggerQty
+                                        }))
+                                    }
+                                }}
+                            >
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="DIRECT_DISCOUNT">Remise directe produit / تخفيض مباشر</SelectItem>
+                                    <SelectItem value="CART_THRESHOLD">Remise Panier (Seuil DA) / تخفيض السلة</SelectItem>
                                     <SelectItem value="NTH_ITEM_DISCOUNT">Nième article remisé</SelectItem>
                                     <SelectItem value="BUY_X_GET_Y_FREE">1 acheté = 1 offert</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label>À partir du {form.triggerQty}ème article</Label>
-                            <Input type="number" min="2" value={form.triggerQty} onChange={e => handleChange("triggerQty", e.target.value)} />
+                            <Label>
+                                {form.type === "CART_THRESHOLD"
+                                    ? "Montant minimum panier (DA)"
+                                    : form.type === "DIRECT_DISCOUNT"
+                                    ? "Quantité min par article"
+                                    : `À partir du ${form.triggerQty}ème article`}
+                            </Label>
+                            <Input
+                                type="number"
+                                min="1"
+                                placeholder={form.type === "CART_THRESHOLD" ? "12000" : "1"}
+                                value={form.triggerQty}
+                                onChange={e => handleChange("triggerQty", e.target.value)}
+                            />
                         </div>
                     </div>
 
@@ -101,19 +141,21 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label>Appliquer sur</Label>
-                        <Select value={form.targetScope} onValueChange={v => handleChange("targetScope", v)}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Tous les produits</SelectItem>
-                                <SelectItem value="CATEGORY">Une catégorie</SelectItem>
-                                <SelectItem value="PRODUCT">Un produit spécifique</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {form.type !== "CART_THRESHOLD" && (
+                        <div className="space-y-2">
+                            <Label>Appliquer sur</Label>
+                            <Select value={form.targetScope} onValueChange={v => handleChange("targetScope", v)}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ALL">Tous les produits</SelectItem>
+                                    <SelectItem value="CATEGORY">Une catégorie</SelectItem>
+                                    <SelectItem value="PRODUCT">Un produit spécifique</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
 
-                    {form.targetScope === "CATEGORY" && (
+                    {form.type !== "CART_THRESHOLD" && form.targetScope === "CATEGORY" && (
                         <div className="space-y-2">
                             <Label>Catégorie cible</Label>
                             <Select value={form.scopeId} onValueChange={v => handleChange("scopeId", v)}>
@@ -125,7 +167,7 @@ export const PromotionModal: React.FC<PromotionModalProps> = ({
                         </div>
                     )}
 
-                    {form.targetScope === "PRODUCT" && (
+                    {form.type !== "CART_THRESHOLD" && form.targetScope === "PRODUCT" && (
                         <div className="space-y-2">
                             <Label>Produit cible</Label>
                             <SearchableSelect

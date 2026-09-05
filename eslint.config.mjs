@@ -13,6 +13,7 @@ export default [
             // The Expo apps carry their own toolchains and tsconfigs.
             "syncloud-gerant/**",
             "syncloud-tournee/**",
+            ".claude/**",
         ],
     },
     ...nextCoreWebVitals,

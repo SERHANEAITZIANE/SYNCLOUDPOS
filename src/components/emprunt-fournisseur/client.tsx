@@ -27,7 +27,7 @@ interface EmpruntFournisseurClientProps {
 }
 
 export const EmpruntFournisseurClient: React.FC<EmpruntFournisseurClientProps> = ({ data, suppliers, treasuryAccounts }) => {
-    const columns = useSupplierLoanColumns(treasuryAccounts)
+    const columns = useSupplierLoanColumns(treasuryAccounts, suppliers)
     const [filteredData, setFilteredData] = React.useState(data)
     
     // Filter states

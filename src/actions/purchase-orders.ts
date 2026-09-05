@@ -240,9 +240,9 @@ export const createPurchaseOrder = async (data: PurchaseOrderData) => {
                         // CUMP calculation (Weighted Average Cost / PMP)
                         const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost || 0) : 0;
                         const newPurchaseValue = itemQty * itemCost;
-                        const newCump = globalStockAfter > 0
+                        const newCump = globalStockBefore > 0 && globalStockAfter > 0
                             ? (oldTotalValue + newPurchaseValue) / globalStockAfter
-                            : (Number(pBefore.cost) || itemCost);
+                            : (itemCost > 0 ? itemCost : (Number(pBefore.cost) || itemCost));
 
                         const stockBefore = spBefore?.stock !== undefined && spBefore?.stock !== null ? spBefore.stock : globalStockBefore;
                         const stockAfter = stockBefore + itemQty;
@@ -491,9 +491,9 @@ export const updatePurchaseOrder = async (id: string, data: PurchaseOrderData) =
                     // CUMP calculation (Weighted Average Cost)
                     const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0
                     const newPurchaseValue = itemQty * itemCost
-                    const newCump = globalStockAfter > 0
+                    const newCump = globalStockBefore > 0 && globalStockAfter > 0
                         ? (oldTotalValue + newPurchaseValue) / globalStockAfter
-                        : (Number(pBefore.cost) || itemCost)
+                        : (itemCost > 0 ? itemCost : (Number(pBefore.cost) || itemCost))
 
                     await tx.product.update({
                         where: { id: item.productId },
@@ -775,9 +775,9 @@ export const updatePurchaseOrderStatus = async (id: string, newStatus: string, a
                         // CUMP calculation (Weighted Average Cost)
                         const oldTotalValue = globalStockBefore > 0 ? globalStockBefore * Number(pBefore.cost) : 0;
                         const newPurchaseValue = itemQty * Number(item.costPrice);
-                        const newCump = globalStockAfter > 0
+                        const newCump = globalStockBefore > 0 && globalStockAfter > 0
                             ? (oldTotalValue + newPurchaseValue) / globalStockAfter
-                            : (Number(pBefore.cost) || Number(item.costPrice));
+                            : (Number(item.costPrice) > 0 ? Number(item.costPrice) : (Number(pBefore.cost) || Number(item.costPrice)));
 
                         await tx.product.update({
                             where: { id: item.productId },

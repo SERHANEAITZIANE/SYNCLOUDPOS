@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import Image from "next/image"
 import { ShoppingCart, Tag, Check } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -13,6 +13,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { usePosStore } from "@/hooks/use-pos-store"
 import { useSwipe } from "@/hooks/use-swipe"
 import { Badge } from "@/components/ui/badge"
+import { getProductDirectDiscount, ActivePromotion } from "@/lib/promotions-engine"
 
 interface ProductCardProps {
     data: {
@@ -26,6 +27,7 @@ interface ProductCardProps {
         minStock: number
         imageUrl: string
         category: string
+        categoryId?: string
         stock: number
         barcodes: string[]
         isService?: boolean
@@ -33,13 +35,15 @@ interface ProductCardProps {
     blockNegativeStock?: boolean
     isFocused?: boolean
     posUiSize?: "sm" | "md" | "lg"
+    promotions?: ActivePromotion[]
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
     data,
     blockNegativeStock = false,
     isFocused = false,
-    posUiSize = "md"
+    posUiSize = "md",
+    promotions = []
 }) => {
     const cart = usePosStore()
     const tCommon = useTranslations("Common")
@@ -61,6 +65,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         chosenPriceName = "Prix Gros";
     }
 
+    // Calculate active direct product discount if available
+    const discountInfo = useMemo(() => {
+        return getProductDirectDiscount(
+            { id: data.id, categoryId: data.categoryId, price: displayPrice },
+            promotions
+        )
+    }, [data.id, data.categoryId, displayPrice, promotions]);
+
     // Cart state
     const cartItem = activeSession?.items.find(item => item.productId === data.id);
     const quantityInCart = cartItem?.quantity || 0;
@@ -77,7 +89,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             dealerPrice: data.dealerPrice,
             cost: data.cost,
             quantity: 1,
-            image: data.imageUrl
+            image: data.imageUrl,
+            categoryId: data.categoryId
         })
     }
 
@@ -149,6 +162,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     </div>
                 )}
 
+                {/* Active Promotion Badge (e.g. -20%) */}
+                {discountInfo?.hasDiscount && !outOfStock && (
+                    <div className="absolute top-1.5 left-1.5 z-20 px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[9px] font-black shadow-md flex items-center gap-1">
+                        <Tag size={9} />
+                        <span>{discountInfo.label}</span>
+                    </div>
+                )}
+
                 {/* Quantity Badge — clean pill overlay on top-right */}
                 {inCart && (
                     <div className={cn(
@@ -205,15 +226,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         {data.name}
                     </h3>
 
-                    {/* Price */}
+                    {/* Price & Discount Display */}
                     <div className="flex items-end justify-between mt-auto">
-                        <span className={cn(
-                            "font-black tabular-nums tracking-tight text-slate-900 dark:text-white",
-                            posUiSize === "sm" ? "text-[11px]" : posUiSize === "lg" ? "text-sm" : "text-xs"
-                        )}>
-                            {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)}
-                            <span className="text-[8px] font-semibold text-slate-400 ml-0.5">DA</span>
-                        </span>
+                        <div className="flex flex-col items-start leading-none">
+                            {discountInfo?.hasDiscount && (
+                                <span className="text-[10px] line-through font-bold text-slate-400 dark:text-slate-500 tabular-nums">
+                                    {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discountInfo.originalPrice)} DA
+                                </span>
+                            )}
+                            <span className={cn(
+                                "font-black tabular-nums tracking-tight",
+                                discountInfo?.hasDiscount ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white",
+                                posUiSize === "sm" ? "text-[11px]" : posUiSize === "lg" ? "text-sm" : "text-xs"
+                            )}>
+                                {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discountInfo?.hasDiscount ? discountInfo.discountedPrice : displayPrice)}
+                                <span className="text-[8px] font-semibold text-slate-400 ml-0.5">DA</span>
+                            </span>
+                        </div>
 
                         {/* Stock indicator — very subtle */}
                         {!isService && (
@@ -265,17 +294,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         </div>
                     </div>
 
-                    {/* Prices Grid: Selling Price & Purchase Cost */}
+                    {/* Prices Grid: Selling Price, Promo Price & Purchase Cost */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between">
                             <div>
                                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">{chosenPriceName}</span>
-                                <span className="text-xl font-black text-slate-900 dark:text-white tabular-nums tracking-tight">
+                                <span className={cn("text-xl font-black tabular-nums tracking-tight", discountInfo?.hasDiscount ? "line-through text-slate-400" : "text-slate-900 dark:text-white")}>
                                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(displayPrice)} <span className="text-xs font-bold text-slate-400">DA</span>
                                 </span>
                             </div>
                             <Badge className="bg-emerald-500 text-white font-black text-[10px]">Prix Vente</Badge>
                         </div>
+
+                        {discountInfo?.hasDiscount && (
+                            <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 flex items-center justify-between">
+                                <div>
+                                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">Prix Promo ({discountInfo.label})</span>
+                                    <span className="text-xl font-black text-rose-700 dark:text-rose-300 tabular-nums tracking-tight">
+                                        {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(discountInfo.discountedPrice)} <span className="text-xs font-bold text-slate-400">DA</span>
+                                    </span>
+                                </div>
+                                <Badge className="bg-rose-600 text-white font-black text-[10px]">Promo {discountInfo.label}</Badge>
+                            </div>
+                        )}
 
                         <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between">
                             <div>
@@ -299,7 +340,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         <Button variant="outline" onClick={() => setShowInfo(false)} className="font-bold text-xs">Fermer</Button>
                         {!outOfStock && (
                             <Button onClick={() => { onAddToCart(); setShowInfo(false); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-2">
-                                <ShoppingCart className="h-4 w-4" /> Ajouter ({new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(displayPrice)} DA)
+                                <ShoppingCart className="h-4 w-4" /> Ajouter ({new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2 }).format(discountInfo?.hasDiscount ? discountInfo.discountedPrice : displayPrice)} DA)
                             </Button>
                         )}
                     </div>

@@ -17,7 +17,10 @@ export type LoanColumn = {
     accountName?: string
 }
 
-export const useLoanColumns = (treasuryAccounts: { id: string; name: string; type: string }[]) => {
+export const useLoanColumns = (
+    treasuryAccounts: { id: string; name: string; type: string }[],
+    customers?: { id: string; name: string }[]
+) => {
     const columns: ColumnDef<LoanColumn>[] = [
         {
             accessorKey: "date",
@@ -34,14 +37,30 @@ export const useLoanColumns = (treasuryAccounts: { id: string; name: string; typ
         },
         {
             accessorKey: "customerName",
-            header: "Client",
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Client
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
             cell: ({ row }) => (
                 <div className="font-medium">{row.original.customerName}</div>
             )
         },
         {
             accessorKey: "accountName",
-            header: "Banque / Caisse",
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Banque / Caisse
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
             cell: ({ row }) => (
                 <div className="text-sm font-medium text-muted-foreground">{row.original.accountName || "-"}</div>
             )
@@ -61,7 +80,15 @@ export const useLoanColumns = (treasuryAccounts: { id: string; name: string; typ
         },
         {
             accessorKey: "amount",
-            header: "Montant",
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Montant
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
             cell: ({ row }) => (
                 <div className="font-semibold text-red-600">
                     {new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -71,14 +98,27 @@ export const useLoanColumns = (treasuryAccounts: { id: string; name: string; typ
         },
         {
             accessorKey: "description",
-            header: "Observation",
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Observation
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
             cell: ({ row }) => (
-                <span className="text-sm text-muted-foreground">{row.original.description || "-"}</span>
+                <div 
+                    className="text-sm text-foreground whitespace-normal break-words min-w-[200px] max-w-[450px]"
+                    title={row.original.description || ""}
+                >
+                    {row.original.description || <span className="text-muted-foreground">-</span>}
+                </div>
             )
         },
         {
             id: "actions",
-            cell: ({ row }) => <CellAction data={row.original} treasuryAccounts={treasuryAccounts} />
+            cell: ({ row }) => <CellAction data={row.original} treasuryAccounts={treasuryAccounts} customers={customers} />
         }
     ]
     return columns
